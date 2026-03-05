@@ -21,7 +21,7 @@ def build_workflow(
     tutor_llm, tester_llm, evaluator_llm = build_llms(settings)
 
     workflow = StateGraph(AgentState)
-    workflow.add_node("tutor", build_tutor_node(tutor_llm, runtime.event_sink))
+    workflow.add_node("tutor", build_tutor_node(tutor_llm, runtime))
     workflow.add_node(
         "tester",
         build_tester_node(tester_llm, runtime.event_sink, runtime.answer_provider),

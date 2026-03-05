@@ -23,6 +23,11 @@ class AnswerProvider(Protocol):
         """Get one answer from the external interaction channel."""
 
 
+class KnowledgeProvider(Protocol):
+    def query(self, query: str) -> str:
+        """Query external knowledge source."""
+
+
 class NoopEventSink:
     def emit(self, event: AgentEvent) -> None:
         del event
@@ -39,6 +44,11 @@ class MissingAnswerProvider:
         raise RuntimeError(
             "No AnswerProvider configured. Inject one from CLI, API, or tests."
         )
+
+
+class NoopKnowledgeProvider:
+    def query(self, query: str) -> str:
+        return ""
 
 
 class BufferedEventSink:
@@ -61,3 +71,4 @@ class CallbackEventSink:
 class RuntimeContext:
     event_sink: EventSink = field(default_factory=NoopEventSink)
     answer_provider: AnswerProvider = field(default_factory=MissingAnswerProvider)
+    knowledge_provider: KnowledgeProvider = field(default_factory=NoopKnowledgeProvider)

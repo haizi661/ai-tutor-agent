@@ -22,3 +22,6 @@ venv/
 # OS artifacts
 .DS_Store
 Thumbs.db
+
+# AI Agent Context
+GEMINI.md

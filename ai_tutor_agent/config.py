@@ -34,6 +34,7 @@ class Settings:
     evaluator_temperature: float
     pass_score: int
     memory_db_path: str
+    knowledge_dir: str
     default_thread_id: str
 
 
@@ -53,5 +54,6 @@ def get_settings() -> Settings:
         evaluator_temperature=_read_env_float("EVALUATOR_TEMPERATURE", 0.0),
         pass_score=_read_env_int("PASS_SCORE", 80),
         memory_db_path=os.getenv("MEMORY_DB_PATH", "data/tutor_memory.db").strip() or "data/tutor_memory.db",
+        knowledge_dir=os.getenv("KNOWLEDGE_DIR", "data/knowledge").strip() or "data/knowledge",
         default_thread_id=os.getenv("DEFAULT_THREAD_ID", "haizi_master_01").strip() or "haizi_master_01",
     )

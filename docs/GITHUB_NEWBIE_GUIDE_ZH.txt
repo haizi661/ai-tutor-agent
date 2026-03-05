@@ -1,0 +1,82 @@
+ai-tutor-agent 新人 GitHub 操作指南
+
+0. 前提（私有仓库）
+1) 你必须先被仓库管理员邀请并接受邀请。
+2) 确认你能打开仓库页面：
+   https://github.com/haizi661/ai-tutor-agent
+
+1. 第一次拉取代码
+git clone https://github.com/haizi661/ai-tutor-agent.git
+cd ai-tutor-agent
+git branch -vv
+git remote -v
+
+看到 main 后面有 [origin/main] 说明跟踪关系正常。
+如果没有，执行：
+git branch --set-upstream-to=origin/main main
+
+2. 配置本机 Git 身份（只需一次）
+git config --global user.name "你的名字"
+git config --global user.email "你的GitHub邮箱"
+
+3. 项目启动（本项目专用）
+pip install -e .
+# 或 pip install -r requirements.txt
+
+cp .env.example .env
+# 在 .env 中填 GOOGLE_API_KEY，对模型的调用
+
+pytest -q
+python main.py
+
+4. 日常开发（推荐流程：功能分支 + PR）
+git checkout main
+git pull --rebase origin main
+git checkout -b feat/你的功能名
+
+# 开发代码后
+pytest -q
+git add .
+git commit -m "feat: 你的改动说明"
+git push -u origin feat/你的功能名
+
+然后在 GitHub 发 PR 合并到 main。
+
+5. 如果必须直接提交 main（不推荐，但可用）
+注意：先看 git status，确保流程正确。
+
+情况A：你有本地改动
+git add .
+git commit -m "你的提交说明"
+git pull --rebase origin main
+pytest -q
+git push origin main
+
+情况B：你没有本地改动
+git checkout main
+git pull --rebase origin main
+
+6. 常见报错
+报错：cannot pull with rebase: You have unstaged changes
+原因：你有未提交改动。
+处理（任选其一）：
+
+# 方案1：提交
+git add .
+git commit -m "wip"
+
+# 方案2：临时收起
+git stash
+git pull --rebase
+git stash pop
+
+报错：push rejected (non-fast-forward)
+原因：远端比你新。
+处理：
+git pull --rebase origin main
+git push origin main
+
+7. 提交前快速自检
+git status -sb
+git diff
+pytest -q
