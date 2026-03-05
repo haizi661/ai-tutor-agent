@@ -1,0 +1,24 @@
+# Byte-compiled / cache
+__pycache__/
+*.py[cod]
+
+# Virtual environments
+.venv/
+venv/
+
+# Env / secrets
+.env
+
+# Local runtime data
+*.db
+*.sqlite
+*.sqlite3
+
+# Tool caches
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+
+# OS artifacts
+.DS_Store
+Thumbs.db
