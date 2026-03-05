@@ -22,6 +22,7 @@ pip install -e .
 ```bash
 cp .env.example .env
 # 编辑 .env，填入真实 GOOGLE_API_KEY
+# 默认学习存档数据库路径：data/tutor_memory.db
 ```
 
 3. 启动 CLI
@@ -76,8 +77,13 @@ ai-tutor-agent/
 │   ├── state.py             # 兼容层
 │   ├── text.py              # 兼容层
 │   └── workflow.py          # 兼容层
+├── data/
+│   └── .gitkeep
 ├── docs/
-│   └── ARCHITECTURE.md
+│   ├── ARCHITECTURE.md
+│   ├── PROJECT_GUIDE_ZH.md
+│   └── TEAM_PLAN_ZH.md
+├── CONTRIBUTING.md
 ├── .env.example
 ├── .gitignore
 ├── main.py
@@ -94,6 +100,7 @@ ai-tutor-agent/
 - API 层复用 `interfaces/sse.py` 把 `AgentEvent` 转成 SSE 数据帧返回前端。
 - `core/ports.py` 提供 `CallbackEventSink`，可直接把事件推入 FastAPI 流式响应。
 - 如需历史分支兼容，继续可用 `ai_tutor_agent.<旧路径>` 导入；新代码请不要再依赖兼容层。
+- 运行态数据库建议统一放在 `data/` 目录，不要把业务状态文件散落在根目录。
 
 ## 标准事件接口（SSE 预留）
 
@@ -113,6 +120,13 @@ ai-tutor-agent/
 - `application`：跨节点会话流程。
 - `interfaces`：CLI/API/SSE 适配层。
 - `infrastructure`：LLM 与持久化等外部依赖。
+
+## 必读文档
+
+- 架构设计：`docs/ARCHITECTURE.md`
+- 功能与目录说明（中文）：`docs/PROJECT_GUIDE_ZH.md`
+- 团队分工与里程碑（中文）：`docs/TEAM_PLAN_ZH.md`
+- 协作流程：`CONTRIBUTING.md`
 
 ## 下一步建议
 
