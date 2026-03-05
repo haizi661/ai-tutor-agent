@@ -10,7 +10,11 @@
 
 ```bash
 cd /home/haizi/ai-tutor-agent
+# 方式 A（推荐，按 pyproject 安装）
 pip install -e .
+
+# 方式 B（requirements）
+# pip install -r requirements.txt
 ```
 
 2. 配置环境变量
@@ -24,6 +28,12 @@ cp .env.example .env
 
 ```bash
 python main.py
+```
+
+4. 运行测试
+
+```bash
+pytest -q
 ```
 
 ## 当前目录结构
