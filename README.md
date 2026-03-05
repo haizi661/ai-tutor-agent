@@ -126,6 +126,7 @@ ai-tutor-agent/
 - 架构设计：`docs/ARCHITECTURE.md`
 - 功能与目录说明（中文）：`docs/PROJECT_GUIDE_ZH.md`
 - 团队分工与里程碑（中文）：`docs/TEAM_PLAN_ZH.md`
+- 角色上手清单（中文）：`docs/ROLE_ONBOARDING_ZH.md`
 - 协作流程：`CONTRIBUTING.md`
 
 ## 下一步建议
