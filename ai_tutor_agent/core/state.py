@@ -10,6 +10,11 @@ class AgentState(TypedDict):
     logic_score: int
     concept_score: int
     feedback: str
+    # New fields for assessment
+    assessment_questions: list[dict]
+    assessment_answers: dict[int, str]
+    assessment_result: str
+    is_assessed: bool
 
 
 def build_initial_state(topic: str) -> AgentState:
@@ -22,4 +27,8 @@ def build_initial_state(topic: str) -> AgentState:
         "logic_score": 0,
         "concept_score": 0,
         "feedback": "",
+        "assessment_questions": [],
+        "assessment_answers": {},
+        "assessment_result": "",
+        "is_assessed": False,
     }

@@ -21,8 +21,9 @@ pip install -e .
 
 ```bash
 cp .env.example .env
-# 编辑 .env，填入真实 GOOGLE_API_KEY
+# 编辑 .env，填入真实 DASHSCOPE_API_KEY
 # 默认学习存档数据库路径：data/tutor_memory.db
+
 ```
 
 3. 启动 CLI

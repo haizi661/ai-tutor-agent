@@ -31,6 +31,30 @@ class CliEventSink(EventSink):
             print("\n")
             return
 
+        # New Assessment Feature Events
+        if event.type == "node.start" and event.source == "assessment_generator":
+            print("-" * 50)
+            print("🧠 [评估智能体]: 正在根据您的主题生成专属测评量表...\n")
+            return
+
+        if event.type == "assessment.question":
+            if event.message:
+                print("\n" + event.message)
+            return
+
+        if event.type == "node.start" and event.source == "user_profiler":
+            print("-" * 50)
+            print("📊 [分析智能体]: ", end="", flush=True)
+            return
+
+        if event.type == "node.stream" and event.source == "user_profiler":
+            print(event.data.get("text", ""), end="", flush=True)
+            return
+            
+        if event.type == "node.complete" and event.source == "user_profiler":
+            print("\n")
+            return
+
         if event.type == "node.start" and event.source == "evaluator":
             print("-" * 50)
             print("🧐 [评价智能体]: 正在进行多维度严格阅卷...\n")

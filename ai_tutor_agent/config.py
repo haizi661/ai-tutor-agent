@@ -27,7 +27,7 @@ def _read_env_float(name: str, default: float) -> float:
 
 @dataclass(frozen=True)
 class Settings:
-    google_api_key: str
+    dashscope_api_key: str
     model_name: str
     tutor_temperature: float
     tester_temperature: float
@@ -41,13 +41,13 @@ class Settings:
 def get_settings() -> Settings:
     load_dotenv()
 
-    google_api_key = os.getenv("GOOGLE_API_KEY", "").strip()
-    if not google_api_key:
-        raise RuntimeError("GOOGLE_API_KEY is required. Please set it in .env.")
+    dashscope_api_key = os.getenv("DASHSCOPE_API_KEY", "").strip()
+    if not dashscope_api_key:
+        raise RuntimeError("DASHSCOPE_API_KEY is required. Please set it in .env.")
 
     return Settings(
-        google_api_key=google_api_key,
-        model_name=os.getenv("GOOGLE_MODEL_NAME", "gemini-2.5-pro").strip() or "gemini-2.5-pro",
+        dashscope_api_key=dashscope_api_key,
+        model_name=os.getenv("DASHSCOPE_MODEL_NAME", "qwen-max").strip() or "qwen-max",
         tutor_temperature=_read_env_float("TUTOR_TEMPERATURE", 0.7),
         tester_temperature=_read_env_float("TESTER_TEMPERATURE", 0.4),
         evaluator_temperature=_read_env_float("EVALUATOR_TEMPERATURE", 0.0),
