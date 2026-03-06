@@ -1,8 +1,34 @@
 # AI Tutor Agent
 
-动态自适应伴学多智能体系统（MVP）。当前版本基于 LangGraph 构建 `Tutor -> Tester -> Evaluator` 闭环，支持打分路由、重修干预和 SQLite 断点续传。
+动态自适应伴学多智能体系统。当前主干版本已经从早期 CLI MVP 演进为一个可协作的 `Web UI + FastAPI + SSE + 前测画像 + RAG-Lite + SQLite 断点续传` 项目。
 
-详细分层设计见 [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)。
+## 当前真实能力
+
+当前系统已实现以下能力：
+
+- 入口意图分流：区分 `学习主题`、`系统问题`、`轻闲聊`。
+- 学习主题确认：不会把 `你好`、`额`、`在吗` 这类输入直接误判成知识主题。
+- 学前测评：生成量表、暂停等待提交、恢复继续执行。
+- 规则化画像：固定维度雷达图，不再由 LLM 自由打分。
+- 教学闭环：`Tutor -> Tester -> Evaluator -> pass/fail 路由`。
+- 历史恢复：按 `thread_id` 存入 SQLite，支持读取摘要、删除、恢复。
+- RAG-Lite：本地知识文件切块、向量化、检索增强 Tutor。
+- Web 本地配置：选择厂商、模型、API Key，写入本机 `.env`。
+- 多厂商聊天档案：`gemini / qwen / deepseek / openai / minimax / glm / custom`。
+
+当前学习流大致如下：
+
+```text
+intake_router
+  -> meta_qa | smalltalk | greeting
+  -> topic_confirmer
+  -> assessment_generator
+  -> user_profiler
+  -> tutor
+  -> tester
+  -> evaluator
+  -> pass | fail -> tutor
+```
 
 ## Quick Start
 
@@ -10,127 +36,243 @@
 
 ```bash
 cd /home/haizi/ai-tutor-agent
-# 方式 A（推荐，按 pyproject 安装）
 pip install -e .
-
-# 方式 B（requirements）
-# pip install -r requirements.txt
+# 或者：pip install -r requirements.txt
 ```
 
 2. 配置环境变量
 
 ```bash
 cp .env.example .env
-# 编辑 .env，填入真实 GOOGLE_API_KEY
-# 默认学习存档数据库路径：data/tutor_memory.db
 ```
 
-3. 启动 CLI
+然后编辑 `.env`，至少填入你准备使用的一个厂商 API Key，例如：
+
+- `GEMINI_API_KEY=...`
+- `QWEN_API_KEY=...`
+- `DEEPSEEK_API_KEY=...`
+- `OPENAI_API_KEY=...`
+- `MINIMAX_API_KEY=...`
+- `GLM_API_KEY=...`
+
+如果你不确定，最稳的起步配置是：
+
+```env
+CHAT_PROFILE=gemini
+GEMINI_API_KEY=your_gemini_api_key_here
+EMBEDDING_PROVIDER=local
+EMBEDDING_MODEL_NAME=sentence-transformers/all-MiniLM-L6-v2
+LOCAL_CONFIG_ENABLED=true
+```
+
+如果你的网络不能直接访问模型 API 或 HuggingFace，再补：
+
+```env
+HTTP_PROXY=http://127.0.0.1:7897
+HTTPS_PROXY=http://127.0.0.1:7897
+```
+
+注意：
+
+1. 代理不是项目硬依赖
+2. 但如果你所在网络无法直连模型厂商 API，或本地 embedding 第一次下载失败，就必须配置代理
+3. 详细说明见 [docs/RUNBOOK_ZH.md](docs/RUNBOOK_ZH.md)
+
+3. 启动 Web 端（默认入口）
 
 ```bash
 python main.py
 ```
 
-4. 运行测试
+打开：`http://127.0.0.1:8000/`
+
+4. 如需 CLI 调试
 
 ```bash
-pytest -q
+python main.py --cli
 ```
 
-## 当前目录结构
+5. 运行测试
+
+```bash
+PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 python -m pytest -q
+```
+
+## 运行与代理说明
+
+推荐启动方式：
+
+```bash
+python main.py
+```
+
+如果你需要自定义端口，请使用当前环境的 Python 启动：
+
+```bash
+python -m uvicorn ai_tutor_agent.interfaces.api.app:app --host 127.0.0.1 --port 8000
+```
+
+不要优先使用系统裸命令 `uvicorn ...`，否则可能走错解释器环境。
+
+如果你使用 `EMBEDDING_PROVIDER=local`：
+
+1. 第一次启动可能会下载本地 embedding 模型
+2. 第一次启动会比后续更慢
+3. 如果网络受限，可能需要配置代理
+4. 如果加载失败，当前版本会回退到无 RAG 模式
+
+完整运行说明见：
+
+- [docs/RUNBOOK_ZH.md](docs/RUNBOOK_ZH.md)
+
+## Web API 概览
+
+- `GET /api/health`：健康检查。
+- `GET /api/config` / `POST /api/config`：读取与快速切换当前聊天档案。
+- `GET /api/config/local` / `POST /api/config/local`：读取与写入本机 `.env`。
+- `GET /api/history`：列出最近会话。
+- `GET /api/history/{thread_id}`：读取状态摘要与可恢复信息。
+- `DELETE /api/history/{thread_id}`：删除会话历史。
+- `POST /api/start`：启动新会话。
+- `POST /api/sessions/{thread_id}/resume`：恢复暂停会话。
+- `GET /api/stream?thread_id=...`：SSE 事件流。
+- `POST /api/answer`：提交普通输入。
+- `POST /api/submit_assessment`：提交学前测评答案。
+- `POST /api/confirm_topic`：确认或改写候选学习主题。
+- `POST /api/upload`：上传知识库文件。
+- `GET /api/knowledge`：查看知识库状态。
+
+## 目录结构
 
 ```text
 ai-tutor-agent/
 ├── ai_tutor_agent/
 │   ├── application/
-│   │   └── session.py
-│   ├── config.py
 │   ├── core/
-│   │   ├── events.py
-│   │   ├── ports.py
-│   │   ├── state.py
-│   │   └── text.py
 │   ├── infrastructure/
-│   │   ├── checkpoint.py
-│   │   └── llm.py
 │   ├── interfaces/
 │   │   ├── api/
-│   │   │   └── README.md
-│   │   ├── cli/
-│   │   │   ├── adapter.py
-│   │   │   └── app.py
-│   │   └── sse.py
+│   │   └── cli/
 │   ├── nodes/
-│   │   ├── evaluator.py
-│   │   ├── tester.py
-│   │   └── tutor.py
-│   ├── orchestration/
-│   │   ├── routing.py
-│   │   └── workflow.py
-│   ├── adapters/            # 兼容层
-│   ├── agents/              # 兼容层
-│   ├── cli.py               # 兼容层
-│   ├── events.py            # 兼容层
-│   ├── ports.py             # 兼容层
-│   ├── routing.py           # 兼容层
-│   ├── sse.py               # 兼容层
-│   ├── state.py             # 兼容层
-│   ├── text.py              # 兼容层
-│   └── workflow.py          # 兼容层
+│   └── orchestration/
 ├── data/
-│   └── .gitkeep
+│   ├── .gitkeep
+│   └── knowledge/
+│       └── .gitkeep
 ├── docs/
-│   ├── ARCHITECTURE.md
-│   ├── PROJECT_GUIDE_ZH.md
-│   └── TEAM_PLAN_ZH.md
-├── CONTRIBUTING.md
+├── frontend/
+├── tests/
 ├── .env.example
 ├── .gitignore
-├── main.py
-└── pyproject.toml
+├── CONTRIBUTING.md
+├── AI_DEVELOPER_GUIDE.md
+├── pyproject.toml
+└── requirements.txt
 ```
 
-## 协作约定
+## 上传与仓库卫生
 
-- 机密信息只放 `.env`，不要写入代码或明文文本文件。
-- 所有新功能优先落在 `ai_tutor_agent/` 包内，`main.py` 只保留启动入口。
-- 新开发默认使用分层路径：`core -> nodes -> orchestration -> application -> interfaces`。
-- 节点职责保持单一：`nodes/tutor.py` 负责讲解，`nodes/tester.py` 负责出题与收答，`nodes/evaluator.py` 负责结构化评分。
-- 节点禁止直接 `print/input`，统一通过 `RuntimeContext` 注入的 `EventSink/AnswerProvider` 与外部交互。
-- API 层复用 `interfaces/sse.py` 把 `AgentEvent` 转成 SSE 数据帧返回前端。
-- `core/ports.py` 提供 `CallbackEventSink`，可直接把事件推入 FastAPI 流式响应。
-- 如需历史分支兼容，继续可用 `ai_tutor_agent.<旧路径>` 导入；新代码请不要再依赖兼容层。
-- 运行态数据库建议统一放在 `data/` 目录，不要把业务状态文件散落在根目录。
+以下内容不要提交到远端仓库：
 
-## 标准事件接口（SSE 预留）
+- `.env`
+- `data/*.db`
+- `data/*.db-wal`
+- `data/*.db-shm`
+- `data/knowledge/*` 中的本地知识文件
+- `*.log`
+- `.pytest_cache/`、`__pycache__/`、`.coverage` 等缓存
 
-- `node.start`：节点开始执行。
-- `node.stream`：流式分片（Tutor/Tester）。
-- `node.complete`：节点执行完成。
-- `answer.received`：用户回答已接收。
-- `assessment.result`：结构化评分输出。
-- `route.decision`：路由决策（`pass/fail`）。
-- `session.info/session.warning`：会话级提示。
+提交前建议执行：
 
-## 分层说明
+```bash
+git status -sb
+git diff
+PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 python -m pytest -q
+```
 
-- `core`：契约与状态模型，必须无 I/O 副作用。
-- `nodes`：单节点推理逻辑。
-- `orchestration`：图拓扑和路由规则。
-- `application`：跨节点会话流程。
-- `interfaces`：CLI/API/SSE 适配层。
-- `infrastructure`：LLM 与持久化等外部依赖。
+如果你在本地运行过服务，SQLite 可能生成 `tutor_memory.db-wal` / `tutor_memory.db-shm`，它们属于临时文件，不需要提交。
+
+## 配置说明
+
+### 1. 聊天模型档案
+
+`CHAT_PROFILE` 控制当前启用的聊天档案，支持：
+
+- `gemini`
+- `qwen`
+- `deepseek`
+- `openai`
+- `minimax`
+- `glm`
+- `custom`
+
+普通使用建议通过网页“本地配置”页选择：
+
+1. 厂商
+2. 模型
+3. 对应 API Key
+
+然后让系统自动匹配 `provider` 与 `base_url`。
+
+### 2. Custom 模式
+
+`custom` 只用于手动模式。只有在你明确知道自己要接哪个兼容接口时，才需要自行填写：
+
+- `LLM_PROVIDER`
+- `OPENAI_API_BASE`
+- `MODEL_NAME`
+- 对应 API Key
+
+### 3. RAG 配置
+
+- `EMBEDDING_PROVIDER`：`local / google / openai`
+- `EMBEDDING_MODEL_NAME`
+- `KNOWLEDGE_CHUNK_SIZE`
+- `KNOWLEDGE_CHUNK_OVERLAP`
+- `KNOWLEDGE_TOP_K`
+
+小团队默认推荐：
+
+```env
+EMBEDDING_PROVIDER=local
+EMBEDDING_MODEL_NAME=sentence-transformers/all-MiniLM-L6-v2
+```
+
+### 4. 本地配置页
+
+网页里的“本地配置”页，本质上是把配置写回本机 `.env`。这适合：
+
+- 个人本地开发
+- 自己单机试验不同模型
+
+不适合：
+
+- 共享部署
+- 多人共用一台服务端
+
+如果你不想让网页修改 `.env`，可以设置：
+
+```env
+LOCAL_CONFIG_ENABLED=false
+```
+
+## 当前验证状态
+
+本仓库当前应满足：
+
+```bash
+python -m py_compile $(rg --files -g '*.py')
+PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 python -m pytest -q
+```
 
 ## 必读文档
 
-- 架构设计：`docs/ARCHITECTURE.md`
-- 功能与目录说明（中文）：`docs/PROJECT_GUIDE_ZH.md`
-- 团队分工与里程碑（中文）：`docs/TEAM_PLAN_ZH.md`
-- 角色上手清单（中文）：`docs/ROLE_ONBOARDING_ZH.md`
-- 协作流程：`CONTRIBUTING.md`
-
-## 下一步建议
-
-- 接入 RAG 检索层：在 `infrastructure/` 新增检索客户端，并在 `nodes/tutor.py` 注入召回结果。
-- 引入 API 层：在 `interfaces/api/` 新增 FastAPI，复用 `application/session.py + interfaces/sse.py`。
-- 拆分存储层：将学习画像与题目历史落到独立表，降低 checkpoint 二进制调试成本。
+- [docs/RUNBOOK_ZH.md](docs/RUNBOOK_ZH.md)
+- [docs/PROJECT_MEMORY_ZH.md](docs/PROJECT_MEMORY_ZH.md)
+- [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)
+- [docs/PROJECT_GUIDE_ZH.md](docs/PROJECT_GUIDE_ZH.md)
+- [docs/TEAM_PLAN_ZH.md](docs/TEAM_PLAN_ZH.md)
+- [docs/ROLE_ONBOARDING_ZH.md](docs/ROLE_ONBOARDING_ZH.md)
+- [docs/GITHUB_NEWBIE_GUIDE_ZH.txt](docs/GITHUB_NEWBIE_GUIDE_ZH.txt)
+- [docs/REPO_HYGIENE_ZH.md](docs/REPO_HYGIENE_ZH.md)
+- [CONTRIBUTING.md](CONTRIBUTING.md)

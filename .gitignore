@@ -11,13 +11,23 @@ venv/
 
 # Local runtime data
 *.db
+*.db-shm
+*.db-wal
 *.sqlite
 *.sqlite3
+*.sqlite-shm
+*.sqlite-wal
+*.log
+*.pid
+data/knowledge/*
+!data/knowledge/.gitkeep
 
 # Tool caches
 .pytest_cache/
 .ruff_cache/
 .mypy_cache/
+.coverage
+htmlcov/
 
 # OS artifacts
 .DS_Store

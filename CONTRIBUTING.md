@@ -3,7 +3,7 @@
 ## Branching
 
 1. Keep `main` stable and releasable.
-2. Create feature branches from `main`:
+2. Create focused branches from `main`:
    - `feat/<topic>`
    - `fix/<topic>`
    - `refactor/<topic>`
@@ -17,25 +17,52 @@ pip install -e .
 cp .env.example .env
 ```
 
+Fill only the vendor keys you actually need.
+
+## Repository Hygiene
+
+Do not commit:
+
+- `.env`
+- `data/*.db`
+- `data/*.db-wal`
+- `data/*.db-shm`
+- `data/knowledge/*`
+- `*.log`
+- caches such as `.pytest_cache/`, `__pycache__/`, `.coverage`
+
+Before opening a PR, always inspect:
+
+```bash
+git status -sb
+git diff
+```
+
 ## Before Opening a PR
 
 1. Run tests:
 
 ```bash
-pytest -q
+PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 python -m pytest -q
 ```
 
-2. Ensure no secrets are committed (`.env`, API keys, tokens).
-3. Update docs when changing architecture, state schema, or public interfaces.
+2. Update docs when changing:
+   - architecture
+   - graph state
+   - public API routes
+   - event schema
+   - model/config behavior
 
 ## PR Rules
 
-1. Keep PR scope focused (one concern per PR).
+1. Keep PR scope focused.
 2. Include:
-   - What changed
-   - Why it changed
-   - Risk and rollback notes
+   - what changed
+   - why it changed
+   - validation performed
+   - rollback notes if the change is risky
 3. If changing graph state or event schema, update:
+   - `README.md`
    - `docs/ARCHITECTURE.md`
    - `docs/PROJECT_GUIDE_ZH.md`
 
