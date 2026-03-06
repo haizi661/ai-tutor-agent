@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>伴学智能体 Web UI</title>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <style>
+        :root {
+            --bg-main: #343541;
+            --bg-sidebar: #202123;
+            --bg-input: #40414f;
+            --text-main: #ececf1;
+            --text-muted: #c5c5d2;
+            --border-color: #4d4d4f;
+            --btn-primary: #19c37d;
+            --btn-hover: #1a8859;
+        }
+
+        body, html {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg-main);
+            color: var(--text-main);
+            display: flex;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            width: 260px;
+            background-color: var(--bg-sidebar);
+            display: flex;
+            flex-direction: column;
+            padding: 10px;
+            box-sizing: border-box;
+        }
+
+        .new-chat-btn {
+            background-color: transparent;
+            border: 1px solid var(--border-color);
+            color: var(--text-main);
+            padding: 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            text-align: left;
+            margin-bottom: 20px;
+            font-size: 14px;
+            transition: background-color 0.2s;
+        }
+        .new-chat-btn:hover { background-color: var(--bg-input); }
+
+        .upload-section { margin-top: auto; border-top: 1px solid var(--border-color); padding-top: 15px; }
+        
+        .upload-btn {
+            background-color: var(--btn-primary);
+            color: white;
+            border: none;
+            padding: 10px;
+            border-radius: 6px;
+            cursor: pointer;
+            width: 100%;
+            font-size: 14px;
+            transition: background-color 0.2s;
+        }
+        .upload-btn:hover { background-color: var(--btn-hover); }
+        
+        #file-input { display: none; }
+        .upload-status { font-size: 12px; color: var(--text-muted); margin-top: 5px; text-align: center; }
+
+        /* Main Chat Area */
+        .main-chat {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+        }
+
+        .chat-container {
+            flex-grow: 1;
+            overflow-y: auto;
+            padding: 20px 0;
+        }
+
+        .message {
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+        }
+        .message.agent { background-color: #444654; }
+        .message-content {
+            max-width: 800px;
+            width: 100%;
+            line-height: 1.6;
+        }
+        
+        /* Markdown styles */
+        .message-content pre { background: black; padding: 10px; border-radius: 5px; overflow-x: auto;}
+        .message-content code { font-family: monospace; }
+        .message-content p { margin-top: 0; }
+
+        .input-area {
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            background-color: var(--bg-main);
+            border-top: 1px solid var(--border-color);
+        }
+
+        .input-box {
+            max-width: 800px;
+            width: 100%;
+            position: relative;
+            display: flex;
+        }
+
+        .chat-input {
+            width: 100%;
+            background-color: var(--bg-input);
+            color: var(--text-main);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 14px;
+            font-size: 16px;
+            resize: none;
+            outline: none;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+
+        .send-btn {
+            position: absolute;
+            right: 10px;
+            bottom: 10px;
+            background-color: var(--btn-primary);
+            color: white;
+            border: none;
+            border-radius: 4px;
+            padding: 8px 12px;
+            cursor: pointer;
+        }
+        .send-btn:disabled { background-color: var(--border-color); cursor: not-allowed; }
+
+        /* Status Banner */
+        .status-banner {
+            background-color: #3e3f4b;
+            color: var(--text-muted);
+            text-align: center;
+            padding: 8px;
+            font-size: 13px;
+        }
+
+    </style>
+</head>
+<body>
+
+    <div class="sidebar">
+        <button class="new-chat-btn" onclick="startNewSession()">+ 新的伴学会话</button>
+        
+        <div style="color: var(--text-muted); font-size: 12px; margin-bottom: 10px;">当前 Thread ID:</div>
+        <div id="thread-id-display" style="font-size: 14px; margin-bottom: 20px; word-break: break-all;">haizi_master_01</div>
+
+        <div class="upload-section">
+            <input type="file" id="file-input" accept=".pdf,.md,.txt">
+            <button class="upload-btn" onclick="document.getElementById('file-input').click()">上传知识库文件 (PDF/MD)</button>
+            <div id="upload-status" class="upload-status"></div>
+        </div>
+    </div>
+
+    <div class="main-chat">
+        <div id="status-banner" class="status-banner">系统就绪，请在下方输入你想学习的知识点开始。</div>
+        
+        <div class="chat-container" id="chat-container">
+            <!-- Messages will appear here -->
+        </div>
+
+        <div class="input-area">
+            <div class="input-box">
+                <textarea id="chat-input" class="chat-input" rows="1" placeholder="输入知识点或回答问题..."></textarea>
+                <button id="send-btn" class="send-btn" onclick="sendMessage()">发送</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentThreadId = 'haizi_master_01';
+        let eventSource = null;
+        let isAwaitingInput = false;
+        let currentAgentMessageDiv = null;
+        let fullAgentText = "";
+
+        const chatContainer = document.getElementById('chat-container');
+        const chatInput = document.getElementById('chat-input');
+        const sendBtn = document.getElementById('send-btn');
+        const statusBanner = document.getElementById('status-banner');
+        const fileInput = document.getElementById('file-input');
+
+        function generateId() {
+            return Math.random().toString(36).substring(2, 9);
+        }
+
+        function startNewSession() {
+            currentThreadId = "web_" + generateId();
+            document.getElementById('thread-id-display').innerText = currentThreadId;
+            chatContainer.innerHTML = '';
+            statusBanner.innerText = '已开启新会话，请输入你想学习的知识点。';
+            if (eventSource) {
+                eventSource.close();
+            }
+        }
+
+        function appendMessage(role, text) {
+            const msgDiv = document.createElement('div');
+            msgDiv.className = `message ${role}`;
+            
+            const contentDiv = document.createElement('div');
+            contentDiv.className = 'message-content';
+            if (role === 'agent') {
+                contentDiv.innerHTML = marked.parse(text);
+                currentAgentMessageDiv = contentDiv;
+                fullAgentText = text;
+            } else {
+                contentDiv.innerText = text;
+            }
+
+            msgDiv.appendChild(contentDiv);
+            chatContainer.appendChild(msgDiv);
+            chatContainer.scrollTop = chatContainer.scrollHeight;
+        }
+
+        function updateAgentMessage(chunk) {
+            if (!currentAgentMessageDiv) {
+                appendMessage('agent', chunk);
+            } else {
+                fullAgentText += chunk;
+                currentAgentMessageDiv.innerHTML = marked.parse(fullAgentText);
+                chatContainer.scrollTop = chatContainer.scrollHeight;
+            }
+        }
+
+        async function sendMessage() {
+            const text = chatInput.value.trim();
+            if (!text) return;
+
+            chatInput.value = '';
+            appendMessage('user', text);
+            sendBtn.disabled = true;
+
+            if (isAwaitingInput) {
+                // Submit answer to running session
+                isAwaitingInput = false;
+                statusBanner.innerText = '正在思考...';
+                await fetch('/api/answer', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({thread_id: currentThreadId, answer: text})
+                });
+            } else {
+                // Start a new session or run step
+                statusBanner.innerText = '正在启动节点...';
+                currentAgentMessageDiv = null;
+                
+                // 1. Tell backend to start graph
+                await fetch('/api/start', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({thread_id: currentThreadId, topic: text})
+                });
+
+                // 2. Connect SSE
+                if (eventSource) eventSource.close();
+                eventSource = new EventSource(`/api/stream?thread_id=${currentThreadId}`);
+                
+                eventSource.addEventListener('node.start', e => {
+                    let data = JSON.parse(e.data);
+                    statusBanner.innerText = `执行中: [${data.source}]`;
+                    currentAgentMessageDiv = null; // Next stream chunks will create a new bubble
+                });
+
+                eventSource.addEventListener('node.stream', e => {
+                    let data = JSON.parse(e.data);
+                    if (data.data && data.data.text) {
+                        updateAgentMessage(data.data.text);
+                    }
+                });
+
+                eventSource.addEventListener('session.info', e => {
+                    let data = JSON.parse(e.data);
+                    statusBanner.innerText = data.message || "Session Info";
+                });
+
+                eventSource.addEventListener('session.awaiting_input', e => {
+                    isAwaitingInput = true;
+                    sendBtn.disabled = false;
+                    let data = JSON.parse(e.data);
+                    statusBanner.innerText = "等待用户输入...";
+                    // Show prompt as agent message if needed
+                    appendMessage('agent', data.message);
+                });
+
+                eventSource.addEventListener('session.end', e => {
+                    statusBanner.innerText = '已完成当前执行环节。';
+                    sendBtn.disabled = false;
+                    eventSource.close();
+                });
+                
+                eventSource.addEventListener('session.error', e => {
+                    let data = JSON.parse(e.data);
+                    statusBanner.innerText = `错误: ${data.message}`;
+                    sendBtn.disabled = false;
+                    eventSource.close();
+                });
+            }
+        }
+
+        // Handle Enter key
+        chatInput.addEventListener('keypress', function (e) {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                sendMessage();
+            }
+        });
+
+        // File upload
+        fileInput.addEventListener('change', async function() {
+            if (!this.files || this.files.length === 0) return;
+            const file = this.files[0];
+            const formData = new FormData();
+            formData.append("file", file);
+
+            const statusEl = document.getElementById('upload-status');
+            statusEl.innerText = "上传中...";
+            statusEl.style.color = "var(--text-main)";
+
+            try {
+                const res = await fetch('/api/upload', {
+                    method: 'POST',
+                    body: formData
+                });
+                const data = await res.json();
+                if (data.status === 'success') {
+                    statusEl.innerText = `✅ ${data.filename} 解析成功！`;
+                    statusEl.style.color = "var(--btn-primary)";
+                } else {
+                    statusEl.innerText = `❌ 上传失败: ${data.message}`;
+                    statusEl.style.color = "red";
+                }
+            } catch (err) {
+                statusEl.innerText = `❌ 网络错误`;
+                statusEl.style.color = "red";
+            }
+            this.value = ''; // reset
+        });
+
+    </script>
+</body>
+</html>

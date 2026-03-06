@@ -1,10 +1,9 @@
 import os
 import glob
 import shutil
-from typing import List
+from typing import List, Optional
 from langchain_core.documents import Document
 from langchain_core.vectorstores import InMemoryVectorStore
-from langchain_google_genai import GoogleGenerativeAIEmbeddings
 from pypdf import PdfReader
 
 from ..core.ports import KnowledgeProvider
@@ -13,12 +12,23 @@ from ..config import Settings
 class LocalFileKnowledgeProvider(KnowledgeProvider):
     def __init__(self, settings: Settings):
         self.settings = settings
-        self.embeddings = GoogleGenerativeAIEmbeddings(
-            model="models/text-embedding-004",
-            google_api_key=settings.google_api_key
-        )
-        self.vector_store = InMemoryVectorStore(self.embeddings)
-        self._load_documents()
+        self.vector_store = None
+        
+        try:
+            # 采用【混合架构】：对话用云端，Embedding 向量化强制走本地模型，规避一切网络和接口限制
+            from langchain_huggingface import HuggingFaceEmbeddings
+            
+            print("🚀 正在加载本地知识检索引擎 (Sentence-Transformers)...")
+            self.embeddings = HuggingFaceEmbeddings(
+                model_name="sentence-transformers/all-MiniLM-L6-v2"
+            )
+                
+            self.vector_store = InMemoryVectorStore(self.embeddings)
+            self._load_documents()
+            
+        except Exception as e:
+            print(f"⚠️ 本地知识库引擎加载失败: {e}")
+            print("   系统将回退到无 RAG 模式运行。")
 
     def _parse_file(self, file_path: str) -> List[Document]:
         documents = []
@@ -44,6 +54,9 @@ class LocalFileKnowledgeProvider(KnowledgeProvider):
         return documents
 
     def _load_documents(self):
+        if not self.vector_store:
+            return
+
         knowledge_dir = self.settings.knowledge_dir
         if not os.path.exists(knowledge_dir):
             os.makedirs(knowledge_dir, exist_ok=True)
@@ -59,13 +72,23 @@ class LocalFileKnowledgeProvider(KnowledgeProvider):
             docs = self._parse_file(file_path)
             if docs:
                 documents.extend(docs)
-                print(f"✅ 已加载: {os.path.basename(file_path)}")
+                print(f"✅ 已提取文件内容: {os.path.basename(file_path)}")
 
         if documents:
-            self.vector_store.add_documents(documents)
+            try:
+                print(f"⏳ 正在为 {len(documents)} 个文档建立本地向量索引，请稍候...")
+                self.vector_store.add_documents(documents)
+                print(f"✨ 成功建立本地向量索引，知识库就绪！")
+            except Exception as e:
+                print(f"⚠️ 无法为文档建立索引: {e}")
+                print("   RAG 功能暂时不可用，但你依然可以进行普通对话。")
 
     def add_document(self, source_path: str) -> bool:
         """动态复制并加载外部文件到知识库"""
+        if not self.vector_store:
+            print("⚠️ 向量引擎未就绪，无法上传文档。")
+            return False
+
         if not os.path.exists(source_path):
             print(f"❌ 找不到文件: {source_path}")
             return False
@@ -80,11 +103,12 @@ class LocalFileKnowledgeProvider(KnowledgeProvider):
             shutil.copy2(source_path, dest_path)
             docs = self._parse_file(dest_path)
             if docs:
+                print(f"⏳ 正在处理新文档并建立索引...")
                 self.vector_store.add_documents(docs)
-                print(f"🎉 成功上传并解析: {filename} (已保存至 {dest_path})")
+                print(f"🎉 成功导入知识库: {filename}")
                 return True
             else:
-                print(f"⚠️ 文件内容为空或无法解析: {filename}")
+                print(f"⚠️ 文件内容为空: {filename}")
                 return False
         except Exception as e:
             print(f"❌ 上传失败: {e}")
@@ -94,10 +118,12 @@ class LocalFileKnowledgeProvider(KnowledgeProvider):
         if not self.vector_store:
             return ""
         
-        results = self.vector_store.similarity_search(query, k=3)
-        if not results:
+        try:
+            results = self.vector_store.similarity_search(query, k=3)
+            if not results:
+                return ""
+            context = "\n---\n".join([doc.page_content for doc in results])
+            return context
+        except Exception as e:
+            print(f"⚠️ 知识检索失败: {e}")
             return ""
-        
-        context = "\n---\n".join([doc.page_content for doc in results])
-        return context
-
