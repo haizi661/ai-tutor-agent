@@ -3,6 +3,7 @@ import threading
 import tempfile
 import os
 from contextlib import asynccontextmanager
+from typing import Dict
 from fastapi import FastAPI, Request, File, UploadFile, BackgroundTasks
 from fastapi.responses import StreamingResponse, HTMLResponse
 from fastapi.staticfiles import StaticFiles
@@ -136,6 +137,89 @@ async def provide_answer(req: AnswerRequest):
     sess = session_manager.get_or_create(req.thread_id)
     sess["input_q"].put(req.answer)
     return {"status": "ok"}
+
+
+# ──────────── 学前测评提交 Endpoint ────────────
+
+class AssessmentSubmitRequest(BaseModel):
+    thread_id: str
+    answers: Dict[str, str]   # {"1": "A", "2": "C", ...}
+
+def _resume_graph_worker(
+    thread_id: str,
+    answers: dict,
+    event_q: queue.Queue,
+    input_q: queue.Queue,
+):
+    """
+    后台线程：
+    1. 用 update_state 将答案写入 LangGraph 状态
+    2. 重新 invoke 图 → 条件边发现 flow_status != 'awaiting_assessment'
+       → 路由到 user_profiler → tutor → 教学闭环
+    """
+    settings = app_state["settings"]
+    knowledge_provider = app_state["knowledge_provider"]
+
+    event_sink = WebEventSink(event_q)
+    answer_provider = WebAnswerProvider(input_q, event_sink)
+
+    runtime = RuntimeContext(
+        event_sink=event_sink,
+        answer_provider=answer_provider,
+        knowledge_provider=knowledge_provider,
+    )
+
+    graph_app, conn = create_app_with_sqlite_checkpointer(settings, runtime=runtime)
+    thread_config = {"configurable": {"thread_id": thread_id}}
+
+    try:
+        # 将答案注入 LangGraph state 并切换 flow_status
+        graph_app.update_state(
+            thread_config,
+            {
+                "assessment_answers": answers,
+                "flow_status": "profiling",
+            },
+        )
+
+        event_sink.emit(
+            make_event(
+                "session.info",
+                "api",
+                message="📝 已收到学前测评答案，正在生成能力画像…",
+            )
+        )
+
+        # 重新 invoke → 从当前 checkpoint 恢复
+        graph_app.invoke(None, config=thread_config)
+    except Exception as e:
+        event_sink.emit(make_event("session.error", "api", message=str(e)))
+    finally:
+        event_sink.emit(make_event("session.end", "api", message="Session ended."))
+        conn.close()
+        session_manager.sessions[thread_id]["is_running"] = False
+
+
+@app.post("/api/submit_assessment")
+async def submit_assessment(req: AssessmentSubmitRequest):
+    """
+    前端提交 20 道学前测评答案。
+    后端更新 LangGraph 状态并唤醒图在后台继续执行。
+    """
+    sess = session_manager.get_or_create(req.thread_id)
+
+    if not sess["is_running"]:
+        sess["is_running"] = True
+        worker = threading.Thread(
+            target=_resume_graph_worker,
+            args=(req.thread_id, req.answers, sess["event_q"], sess["input_q"]),
+        )
+        worker.daemon = True
+        worker.start()
+        sess["worker"] = worker
+
+    return {"status": "ok", "message": "Assessment answers received, profiling started."}
+
 
 @app.post("/api/upload")
 async def upload_file(file: UploadFile = File(...)):

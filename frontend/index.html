@@ -5,189 +5,263 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>伴学智能体 Web UI</title>
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
     <style>
         :root {
             --bg-main: #343541;
             --bg-sidebar: #202123;
             --bg-input: #40414f;
+            --bg-card: #444654;
             --text-main: #ececf1;
             --text-muted: #c5c5d2;
             --border-color: #4d4d4f;
             --btn-primary: #19c37d;
             --btn-hover: #1a8859;
+            --accent-blue: #5b9bd5;
+            --accent-purple: #9b59b6;
+            --accent-orange: #e67e22;
+            --accent-red: #e74c3c;
         }
 
+        *, *::before, *::after { box-sizing: border-box; }
+
         body, html {
-            margin: 0;
-            padding: 0;
-            height: 100%;
+            margin: 0; padding: 0; height: 100%;
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
             background-color: var(--bg-main);
             color: var(--text-main);
             display: flex;
         }
 
-        /* Sidebar */
+        /* ============ Sidebar ============ */
         .sidebar {
-            width: 260px;
+            width: 280px; min-width: 280px;
             background-color: var(--bg-sidebar);
-            display: flex;
-            flex-direction: column;
-            padding: 10px;
-            box-sizing: border-box;
+            display: flex; flex-direction: column;
+            padding: 12px; overflow-y: auto;
         }
 
         .new-chat-btn {
-            background-color: transparent;
+            background: transparent;
             border: 1px solid var(--border-color);
             color: var(--text-main);
-            padding: 12px;
-            border-radius: 6px;
-            cursor: pointer;
-            text-align: left;
-            margin-bottom: 20px;
-            font-size: 14px;
-            transition: background-color 0.2s;
+            padding: 12px; border-radius: 8px;
+            cursor: pointer; text-align: left;
+            margin-bottom: 16px; font-size: 14px;
+            transition: all 0.2s;
         }
-        .new-chat-btn:hover { background-color: var(--bg-input); }
+        .new-chat-btn:hover { background: var(--bg-input); border-color: var(--btn-primary); }
 
-        .upload-section { margin-top: auto; border-top: 1px solid var(--border-color); padding-top: 15px; }
-        
+        .sidebar-label { color: var(--text-muted); font-size: 12px; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.5px; }
+        #thread-id-display { font-size: 13px; margin-bottom: 20px; word-break: break-all; font-family: monospace; color: var(--accent-blue); }
+
+        /* Radar Chart Area */
+        .radar-section {
+            background: rgba(255,255,255,0.03);
+            border-radius: 12px; padding: 12px;
+            margin-bottom: 16px; display: none;
+        }
+        .radar-section.visible { display: block; }
+        .radar-title { font-size: 13px; font-weight: 600; text-align: center; margin-bottom: 8px; color: var(--text-muted); }
+        #radarChartCanvas { width: 100% !important; height: 220px !important; }
+
+        .upload-section { margin-top: auto; border-top: 1px solid var(--border-color); padding-top: 12px; }
         .upload-btn {
-            background-color: var(--btn-primary);
-            color: white;
-            border: none;
-            padding: 10px;
-            border-radius: 6px;
-            cursor: pointer;
-            width: 100%;
-            font-size: 14px;
-            transition: background-color 0.2s;
+            background: var(--btn-primary); color: white;
+            border: none; padding: 10px; border-radius: 8px;
+            cursor: pointer; width: 100%; font-size: 13px;
+            transition: background 0.2s;
         }
-        .upload-btn:hover { background-color: var(--btn-hover); }
-        
+        .upload-btn:hover { background: var(--btn-hover); }
         #file-input { display: none; }
-        .upload-status { font-size: 12px; color: var(--text-muted); margin-top: 5px; text-align: center; }
+        .upload-status { font-size: 11px; color: var(--text-muted); margin-top: 5px; text-align: center; }
 
-        /* Main Chat Area */
-        .main-chat {
-            flex-grow: 1;
-            display: flex;
-            flex-direction: column;
-            position: relative;
-        }
+        /* ============ Main Chat ============ */
+        .main-chat { flex-grow: 1; display: flex; flex-direction: column; position: relative; min-width: 0; }
 
-        .chat-container {
-            flex-grow: 1;
-            overflow-y: auto;
-            padding: 20px 0;
-        }
+        .chat-container { flex-grow: 1; overflow-y: auto; padding: 20px 0; scroll-behavior: smooth; }
 
-        .message {
-            padding: 20px;
-            display: flex;
-            justify-content: center;
-        }
-        .message.agent { background-color: #444654; }
+        .message { padding: 16px 20px; display: flex; justify-content: center; }
+        .message.agent { background-color: var(--bg-card); }
         .message-content {
-            max-width: 800px;
-            width: 100%;
-            line-height: 1.6;
+            max-width: 800px; width: 100%; line-height: 1.7; font-size: 15px;
         }
-        
-        /* Markdown styles */
-        .message-content pre { background: black; padding: 10px; border-radius: 5px; overflow-x: auto;}
-        .message-content code { font-family: monospace; }
+        .message-content pre { background: #1a1a2e; padding: 12px; border-radius: 8px; overflow-x: auto; }
+        .message-content code { font-family: 'Menlo', monospace; font-size: 13px; }
         .message-content p { margin-top: 0; }
+        .message-content ul, .message-content ol { padding-left: 20px; }
 
+        /* ============ Assessment Card ============ */
+        .assessment-card {
+            max-width: 800px; width: 100%; margin: 0 auto;
+            background: linear-gradient(135deg, #1e1e2e 0%, #2d2d44 100%);
+            border: 1px solid rgba(91, 155, 213, 0.3);
+            border-radius: 16px; padding: 28px; position: relative;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+        }
+        .assessment-card h2 {
+            margin: 0 0 6px 0; font-size: 20px;
+            background: linear-gradient(90deg, var(--accent-blue), var(--accent-purple));
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+        }
+        .assessment-card .subtitle { color: var(--text-muted); font-size: 13px; margin-bottom: 20px; }
+
+        .question-group { margin-bottom: 24px; }
+        .question-group-title {
+            font-size: 14px; font-weight: 600; padding: 6px 12px;
+            border-radius: 6px; display: inline-block; margin-bottom: 12px;
+        }
+        .question-group-title.self-eval { background: rgba(91,155,213,0.15); color: var(--accent-blue); }
+        .question-group-title.objective { background: rgba(155,89,182,0.15); color: var(--accent-purple); }
+
+        .question-item {
+            background: rgba(255,255,255,0.04);
+            border: 1px solid rgba(255,255,255,0.06);
+            border-radius: 10px; padding: 14px 16px; margin-bottom: 10px;
+            transition: border-color 0.2s;
+        }
+        .question-item:hover { border-color: rgba(255,255,255,0.15); }
+        .question-item.answered { border-color: rgba(25, 195, 125, 0.4); }
+        .q-number { font-weight: 700; color: var(--accent-blue); margin-right: 6px; }
+        .q-text { font-size: 14px; margin-bottom: 10px; }
+
+        .options-row { display: flex; flex-wrap: wrap; gap: 8px; }
+        .option-btn {
+            flex: 1 1 calc(50% - 8px); min-width: 140px;
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.1);
+            color: var(--text-main); padding: 8px 12px;
+            border-radius: 8px; cursor: pointer; font-size: 13px;
+            transition: all 0.15s; text-align: left;
+        }
+        .option-btn:hover { background: rgba(91,155,213,0.15); border-color: var(--accent-blue); }
+        .option-btn.selected {
+            background: rgba(25,195,125,0.15); border-color: var(--btn-primary);
+            color: var(--btn-primary); font-weight: 600;
+        }
+
+        .assessment-progress {
+            display: flex; align-items: center; gap: 10px;
+            margin-bottom: 16px; font-size: 13px; color: var(--text-muted);
+        }
+        .progress-bar {
+            flex-grow: 1; height: 6px; background: rgba(255,255,255,0.1);
+            border-radius: 3px; overflow: hidden;
+        }
+        .progress-fill {
+            height: 100%; background: linear-gradient(90deg, var(--btn-primary), var(--accent-blue));
+            border-radius: 3px; transition: width 0.3s;
+        }
+
+        .submit-assessment-btn {
+            background: linear-gradient(135deg, var(--btn-primary), var(--accent-blue));
+            color: white; border: none; padding: 14px 28px;
+            border-radius: 10px; font-size: 15px; font-weight: 600;
+            cursor: pointer; width: 100%; margin-top: 16px;
+            transition: all 0.2s; letter-spacing: 0.5px;
+        }
+        .submit-assessment-btn:hover { transform: translateY(-1px); box-shadow: 0 4px 16px rgba(25,195,125,0.3); }
+        .submit-assessment-btn:disabled {
+            opacity: 0.4; cursor: not-allowed; transform: none; box-shadow: none;
+        }
+
+        /* ============ Loading Skeleton ============ */
+        .skeleton { display: flex; flex-direction: column; gap: 8px; padding: 20px; }
+        .skeleton-line {
+            height: 14px; border-radius: 6px;
+            background: linear-gradient(90deg, rgba(255,255,255,0.04) 25%, rgba(255,255,255,0.08) 50%, rgba(255,255,255,0.04) 75%);
+            background-size: 200% 100%;
+            animation: shimmer 1.5s infinite;
+        }
+        @keyframes shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+
+        /* ============ Input Area ============ */
         .input-area {
-            padding: 20px;
-            display: flex;
-            justify-content: center;
-            background-color: var(--bg-main);
-            border-top: 1px solid var(--border-color);
+            padding: 16px 20px; display: flex; justify-content: center;
+            background: var(--bg-main); border-top: 1px solid var(--border-color);
         }
-
-        .input-box {
-            max-width: 800px;
-            width: 100%;
-            position: relative;
-            display: flex;
-        }
-
+        .input-box { max-width: 800px; width: 100%; position: relative; display: flex; }
         .chat-input {
-            width: 100%;
-            background-color: var(--bg-input);
-            color: var(--text-main);
-            border: 1px solid var(--border-color);
-            border-radius: 8px;
-            padding: 14px;
-            font-size: 16px;
-            resize: none;
-            outline: none;
-            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            width: 100%; background: var(--bg-input); color: var(--text-main);
+            border: 1px solid var(--border-color); border-radius: 10px;
+            padding: 14px 50px 14px 14px; font-size: 15px;
+            resize: none; outline: none;
+            transition: border-color 0.2s;
         }
-
+        .chat-input:focus { border-color: var(--btn-primary); }
         .send-btn {
-            position: absolute;
-            right: 10px;
-            bottom: 10px;
-            background-color: var(--btn-primary);
-            color: white;
-            border: none;
-            border-radius: 4px;
-            padding: 8px 12px;
-            cursor: pointer;
+            position: absolute; right: 8px; bottom: 8px;
+            background: var(--btn-primary); color: white;
+            border: none; border-radius: 8px;
+            padding: 8px 14px; cursor: pointer; font-size: 14px;
+            transition: background 0.2s;
         }
-        .send-btn:disabled { background-color: var(--border-color); cursor: not-allowed; }
+        .send-btn:hover { background: var(--btn-hover); }
+        .send-btn:disabled { background: var(--border-color); cursor: not-allowed; }
 
-        /* Status Banner */
+        /* ============ Status Banner ============ */
         .status-banner {
-            background-color: #3e3f4b;
-            color: var(--text-muted);
-            text-align: center;
-            padding: 8px;
-            font-size: 13px;
+            background: linear-gradient(90deg, #3e3f4b, #35364a);
+            color: var(--text-muted); text-align: center;
+            padding: 8px; font-size: 13px;
         }
 
+        /* ============ Responsive ============ */
+        @media (max-width: 768px) {
+            .sidebar { display: none; }
+            .assessment-card { padding: 16px; border-radius: 10px; }
+            .options-row { flex-direction: column; }
+            .option-btn { flex: 1 1 100%; }
+        }
     </style>
 </head>
 <body>
 
     <div class="sidebar">
         <button class="new-chat-btn" onclick="startNewSession()">+ 新的伴学会话</button>
-        
-        <div style="color: var(--text-muted); font-size: 12px; margin-bottom: 10px;">当前 Thread ID:</div>
-        <div id="thread-id-display" style="font-size: 14px; margin-bottom: 20px; word-break: break-all;">haizi_master_01</div>
+
+        <div class="sidebar-label">Thread ID</div>
+        <div id="thread-id-display">haizi_master_01</div>
+
+        <!-- 雷达图区域 -->
+        <div class="radar-section" id="radar-section">
+            <div class="radar-title">📊 学前能力画像</div>
+            <canvas id="radarChartCanvas"></canvas>
+        </div>
 
         <div class="upload-section">
             <input type="file" id="file-input" accept=".pdf,.md,.txt">
-            <button class="upload-btn" onclick="document.getElementById('file-input').click()">上传知识库文件 (PDF/MD)</button>
+            <button class="upload-btn" onclick="document.getElementById('file-input').click()">📁 上传知识库文件</button>
             <div id="upload-status" class="upload-status"></div>
         </div>
     </div>
 
     <div class="main-chat">
         <div id="status-banner" class="status-banner">系统就绪，请在下方输入你想学习的知识点开始。</div>
-        
-        <div class="chat-container" id="chat-container">
-            <!-- Messages will appear here -->
-        </div>
+
+        <div class="chat-container" id="chat-container"></div>
 
         <div class="input-area">
             <div class="input-box">
-                <textarea id="chat-input" class="chat-input" rows="1" placeholder="输入知识点或回答问题..."></textarea>
+                <textarea id="chat-input" class="chat-input" rows="1" placeholder="输入知识点或回答问题…"></textarea>
                 <button id="send-btn" class="send-btn" onclick="sendMessage()">发送</button>
             </div>
         </div>
     </div>
 
     <script>
+        // ============ Global State ============
         let currentThreadId = 'haizi_master_01';
         let eventSource = null;
         let isAwaitingInput = false;
         let currentAgentMessageDiv = null;
         let fullAgentText = "";
+        let assessmentAnswers = {};  // {"1": "A", "2": "C", ...}
+        let totalAssessmentQuestions = 0;
+        let radarChart = null;
 
         const chatContainer = document.getElementById('chat-container');
         const chatInput = document.getElementById('chat-input');
@@ -195,49 +269,363 @@
         const statusBanner = document.getElementById('status-banner');
         const fileInput = document.getElementById('file-input');
 
-        function generateId() {
-            return Math.random().toString(36).substring(2, 9);
+        // ============ Helpers ============
+        function generateId() { return Math.random().toString(36).substring(2, 9); }
+
+        function renderMarkdown(text) {
+            const html = marked.parse(text);
+            return html;
         }
 
+        function renderLatex(el) {
+            if (typeof renderMathInElement !== 'undefined') {
+                renderMathInElement(el, {
+                    delimiters: [
+                        { left: '$$', right: '$$', display: true },
+                        { left: '$', right: '$', display: false },
+                        { left: '\\(', right: '\\)', display: false },
+                        { left: '\\[', right: '\\]', display: true },
+                    ],
+                    throwOnError: false,
+                });
+            }
+        }
+
+        function showSkeleton() {
+            const div = document.createElement('div');
+            div.className = 'message agent';
+            div.id = 'loading-skeleton';
+            div.innerHTML = `<div class="skeleton">
+                <div class="skeleton-line" style="width:90%"></div>
+                <div class="skeleton-line" style="width:75%"></div>
+                <div class="skeleton-line" style="width:85%"></div>
+                <div class="skeleton-line" style="width:60%"></div>
+            </div>`;
+            chatContainer.appendChild(div);
+            chatContainer.scrollTop = chatContainer.scrollHeight;
+        }
+
+        function hideSkeleton() {
+            const el = document.getElementById('loading-skeleton');
+            if (el) el.remove();
+        }
+
+        // ============ Session ============
         function startNewSession() {
             currentThreadId = "web_" + generateId();
             document.getElementById('thread-id-display').innerText = currentThreadId;
             chatContainer.innerHTML = '';
             statusBanner.innerText = '已开启新会话，请输入你想学习的知识点。';
-            if (eventSource) {
-                eventSource.close();
-            }
+            assessmentAnswers = {};
+            totalAssessmentQuestions = 0;
+            // Reset radar
+            const radarSec = document.getElementById('radar-section');
+            radarSec.classList.remove('visible');
+            if (radarChart) { radarChart.destroy(); radarChart = null; }
+            if (eventSource) { eventSource.close(); eventSource = null; }
         }
 
+        // ============ Message Rendering ============
         function appendMessage(role, text) {
+            hideSkeleton();
             const msgDiv = document.createElement('div');
             msgDiv.className = `message ${role}`;
-            
             const contentDiv = document.createElement('div');
             contentDiv.className = 'message-content';
             if (role === 'agent') {
-                contentDiv.innerHTML = marked.parse(text);
+                contentDiv.innerHTML = renderMarkdown(text);
+                renderLatex(contentDiv);
                 currentAgentMessageDiv = contentDiv;
                 fullAgentText = text;
             } else {
                 contentDiv.innerText = text;
             }
-
             msgDiv.appendChild(contentDiv);
             chatContainer.appendChild(msgDiv);
             chatContainer.scrollTop = chatContainer.scrollHeight;
         }
 
         function updateAgentMessage(chunk) {
+            hideSkeleton();
             if (!currentAgentMessageDiv) {
                 appendMessage('agent', chunk);
             } else {
                 fullAgentText += chunk;
-                currentAgentMessageDiv.innerHTML = marked.parse(fullAgentText);
+                currentAgentMessageDiv.innerHTML = renderMarkdown(fullAgentText);
+                renderLatex(currentAgentMessageDiv);
                 chatContainer.scrollTop = chatContainer.scrollHeight;
             }
         }
 
+        // ============ Assessment Card Rendering ============
+        function renderAssessmentForm(questions) {
+            hideSkeleton();
+            assessmentAnswers = {};
+            totalAssessmentQuestions = questions.length;
+
+            const selfEval = questions.filter(q => q.type === 'self_eval');
+            const objective = questions.filter(q => q.type === 'objective');
+
+            const wrapper = document.createElement('div');
+            wrapper.className = 'message agent';
+
+            const card = document.createElement('div');
+            card.className = 'assessment-card';
+            card.innerHTML = `
+                <h2>📋 学前能力测评</h2>
+                <p class="subtitle">请认真作答以下 ${questions.length} 道题目，系统将为你生成个性化能力画像和学习建议。</p>
+                <div class="assessment-progress">
+                    <span id="progress-text">已完成 0/${questions.length}</span>
+                    <div class="progress-bar"><div class="progress-fill" id="progress-fill" style="width:0%"></div></div>
+                </div>
+            `;
+
+            // Self-eval group
+            if (selfEval.length) {
+                card.appendChild(buildQuestionGroup('📝 第一部分：自我评估', 'self-eval', selfEval));
+            }
+            // Objective group
+            if (objective.length) {
+                card.appendChild(buildQuestionGroup('🧠 第二部分：客观测试', 'objective', objective));
+            }
+
+            // Submit button
+            const submitBtn = document.createElement('button');
+            submitBtn.className = 'submit-assessment-btn';
+            submitBtn.id = 'submit-assessment-btn';
+            submitBtn.disabled = true;
+            submitBtn.innerText = `提交测评 (0/${questions.length})`;
+            submitBtn.onclick = submitAssessment;
+            card.appendChild(submitBtn);
+
+            wrapper.appendChild(card);
+            chatContainer.appendChild(wrapper);
+            chatContainer.scrollTop = chatContainer.scrollHeight;
+        }
+
+        function buildQuestionGroup(title, cssClass, questions) {
+            const group = document.createElement('div');
+            group.className = 'question-group';
+            group.innerHTML = `<div class="question-group-title ${cssClass}">${title}</div>`;
+            questions.forEach(q => {
+                const item = document.createElement('div');
+                item.className = 'question-item';
+                item.id = `q-item-${q.id}`;
+                item.innerHTML = `<div class="q-text"><span class="q-number">${q.id}.</span>${q.question}</div>`;
+                const optionsRow = document.createElement('div');
+                optionsRow.className = 'options-row';
+                q.options.forEach(opt => {
+                    const btn = document.createElement('button');
+                    btn.className = 'option-btn';
+                    btn.innerText = opt;
+                    btn.onclick = () => selectOption(q.id, opt, btn);
+                    optionsRow.appendChild(btn);
+                });
+                item.appendChild(optionsRow);
+                group.appendChild(item);
+            });
+            return group;
+        }
+
+        function selectOption(qid, opt, btn) {
+            // Extract option letter (first char like "A" from "A. xxx")
+            const letter = opt.trim().charAt(0);
+            assessmentAnswers[String(qid)] = letter;
+
+            // Style: deselect siblings, select this
+            const parent = btn.parentElement;
+            parent.querySelectorAll('.option-btn').forEach(b => b.classList.remove('selected'));
+            btn.classList.add('selected');
+
+            // Mark question as answered
+            const qItem = document.getElementById(`q-item-${qid}`);
+            if (qItem) qItem.classList.add('answered');
+
+            // Update progress
+            const answered = Object.keys(assessmentAnswers).length;
+            const pText = document.getElementById('progress-text');
+            const pFill = document.getElementById('progress-fill');
+            const submitBtn = document.getElementById('submit-assessment-btn');
+            if (pText) pText.innerText = `已完成 ${answered}/${totalAssessmentQuestions}`;
+            if (pFill) pFill.style.width = `${(answered / totalAssessmentQuestions * 100).toFixed(0)}%`;
+            if (submitBtn) {
+                submitBtn.innerText = `提交测评 (${answered}/${totalAssessmentQuestions})`;
+                submitBtn.disabled = answered < totalAssessmentQuestions;
+            }
+        }
+
+        async function submitAssessment() {
+            const btn = document.getElementById('submit-assessment-btn');
+            if (btn) { btn.disabled = true; btn.innerText = '提交中…'; }
+            statusBanner.innerText = '正在分析你的能力画像…';
+            showSkeleton();
+
+            try {
+                await fetch('/api/submit_assessment', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ thread_id: currentThreadId, answers: assessmentAnswers }),
+                });
+                // Re-connect SSE for profiler streaming
+                connectSSE();
+            } catch (err) {
+                statusBanner.innerText = `❌ 提交失败: ${err.message}`;
+                if (btn) { btn.disabled = false; btn.innerText = '重新提交'; }
+            }
+        }
+
+        // ============ Radar Chart ============
+        function drawRadarChart(data) {
+            const section = document.getElementById('radar-section');
+            section.classList.add('visible');
+            const ctx = document.getElementById('radarChartCanvas').getContext('2d');
+
+            if (radarChart) radarChart.destroy();
+
+            const dims = data.dimensions || [];
+            const selfScores = data.self_scores || [];
+            const objScores = data.objective_scores || [];
+
+            radarChart = new Chart(ctx, {
+                type: 'radar',
+                data: {
+                    labels: dims,
+                    datasets: [
+                        {
+                            label: '自我评估',
+                            data: selfScores,
+                            borderColor: 'rgba(91, 155, 213, 0.9)',
+                            backgroundColor: 'rgba(91, 155, 213, 0.15)',
+                            pointBackgroundColor: '#5b9bd5',
+                            borderWidth: 2,
+                        },
+                        {
+                            label: '客观得分',
+                            data: objScores,
+                            borderColor: 'rgba(155, 89, 182, 0.9)',
+                            backgroundColor: 'rgba(155, 89, 182, 0.15)',
+                            pointBackgroundColor: '#9b59b6',
+                            borderWidth: 2,
+                        },
+                    ],
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { labels: { color: '#c5c5d2', font: { size: 11 } } },
+                    },
+                    scales: {
+                        r: {
+                            suggestedMin: 0, suggestedMax: 100,
+                            grid: { color: 'rgba(255,255,255,0.08)' },
+                            angleLines: { color: 'rgba(255,255,255,0.08)' },
+                            pointLabels: { color: '#c5c5d2', font: { size: 10 } },
+                            ticks: { display: false },
+                        },
+                    },
+                },
+            });
+        }
+
+        // ============ SSE Connection ============
+        function connectSSE() {
+            if (eventSource) eventSource.close();
+            currentAgentMessageDiv = null;
+            fullAgentText = "";
+
+            eventSource = new EventSource(`/api/stream?thread_id=${currentThreadId}`);
+
+            eventSource.addEventListener('node.start', e => {
+                const data = JSON.parse(e.data);
+                statusBanner.innerText = `执行中: [${data.source}]`;
+                currentAgentMessageDiv = null;
+            });
+
+            eventSource.addEventListener('node.stream', e => {
+                const data = JSON.parse(e.data);
+                if (data.data && data.data.text) {
+                    updateAgentMessage(data.data.text);
+                }
+            });
+
+            eventSource.addEventListener('session.info', e => {
+                const data = JSON.parse(e.data);
+                statusBanner.innerText = data.message || "Session Info";
+            });
+
+            // ── 学前测评：收到表单数据 ──
+            eventSource.addEventListener('assessment.form_ready', e => {
+                hideSkeleton();
+                const data = JSON.parse(e.data);
+                const questions = data.data?.questions || [];
+                statusBanner.innerText = `📋 请完成 ${questions.length} 道学前测评题目`;
+                sendBtn.disabled = true;
+                renderAssessmentForm(questions);
+            });
+
+            // ── 雷达图数据 ──
+            eventSource.addEventListener('profile.radar_data', e => {
+                const data = JSON.parse(e.data);
+                const radarData = data.data || {};
+                drawRadarChart(radarData);
+            });
+
+            // ── 评分结果高亮 ──
+            eventSource.addEventListener('assessment.result', e => {
+                const data = JSON.parse(e.data);
+                const d = data.data || {};
+                const html = `
+                    <div style="background:rgba(25,195,125,0.08); border:1px solid rgba(25,195,125,0.3); border-radius:10px; padding:14px; margin:4px 0;">
+                        <div style="font-weight:600; margin-bottom:8px;">📊 考核评分</div>
+                        <div style="display:flex; gap:16px; flex-wrap:wrap; font-size:14px;">
+                            <span>🎯 总分: <strong style="color:var(--btn-primary)">${d.total_score}</strong></span>
+                            <span>🧠 逻辑: <strong>${d.logic_score}</strong></span>
+                            <span>📖 概念: <strong>${d.concept_score}</strong></span>
+                        </div>
+                        <div style="margin-top:8px; color:var(--text-muted); font-size:13px;">💡 ${d.feedback || ''}</div>
+                    </div>`;
+                appendMessage('agent', '');
+                if (currentAgentMessageDiv) {
+                    currentAgentMessageDiv.innerHTML = html;
+                }
+            });
+
+            eventSource.addEventListener('session.awaiting_input', e => {
+                isAwaitingInput = true;
+                sendBtn.disabled = false;
+                const data = JSON.parse(e.data);
+                statusBanner.innerText = "✏️ 等待你的作答…";
+                appendMessage('agent', data.message);
+            });
+
+            eventSource.addEventListener('route.decision', e => {
+                const data = JSON.parse(e.data);
+                const decision = data.data?.decision;
+                if (decision === 'pass') {
+                    statusBanner.innerText = '✅ 恭喜通过考核！';
+                } else {
+                    statusBanner.innerText = '❌ 未通过，系统将重新讲解…';
+                }
+            });
+
+            eventSource.addEventListener('session.end', e => {
+                statusBanner.innerText = '已完成当前执行环节。';
+                sendBtn.disabled = false;
+                eventSource.close();
+                eventSource = null;
+            });
+
+            eventSource.addEventListener('session.error', e => {
+                const data = JSON.parse(e.data);
+                statusBanner.innerText = `❌ 错误: ${data.message}`;
+                sendBtn.disabled = false;
+                eventSource.close();
+                eventSource = null;
+            });
+        }
+
+        // ============ Send Message ============
         async function sendMessage() {
             const text = chatInput.value.trim();
             if (!text) return;
@@ -247,111 +635,54 @@
             sendBtn.disabled = true;
 
             if (isAwaitingInput) {
-                // Submit answer to running session
                 isAwaitingInput = false;
-                statusBanner.innerText = '正在思考...';
+                statusBanner.innerText = '正在思考…';
+                showSkeleton();
                 await fetch('/api/answer', {
                     method: 'POST',
-                    headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify({thread_id: currentThreadId, answer: text})
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ thread_id: currentThreadId, answer: text }),
                 });
             } else {
-                // Start a new session or run step
-                statusBanner.innerText = '正在启动节点...';
+                statusBanner.innerText = '正在启动节点…';
+                showSkeleton();
                 currentAgentMessageDiv = null;
-                
-                // 1. Tell backend to start graph
+
                 await fetch('/api/start', {
                     method: 'POST',
-                    headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify({thread_id: currentThreadId, topic: text})
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ thread_id: currentThreadId, topic: text }),
                 });
 
-                // 2. Connect SSE
-                if (eventSource) eventSource.close();
-                eventSource = new EventSource(`/api/stream?thread_id=${currentThreadId}`);
-                
-                eventSource.addEventListener('node.start', e => {
-                    let data = JSON.parse(e.data);
-                    statusBanner.innerText = `执行中: [${data.source}]`;
-                    currentAgentMessageDiv = null; // Next stream chunks will create a new bubble
-                });
-
-                eventSource.addEventListener('node.stream', e => {
-                    let data = JSON.parse(e.data);
-                    if (data.data && data.data.text) {
-                        updateAgentMessage(data.data.text);
-                    }
-                });
-
-                eventSource.addEventListener('session.info', e => {
-                    let data = JSON.parse(e.data);
-                    statusBanner.innerText = data.message || "Session Info";
-                });
-
-                eventSource.addEventListener('session.awaiting_input', e => {
-                    isAwaitingInput = true;
-                    sendBtn.disabled = false;
-                    let data = JSON.parse(e.data);
-                    statusBanner.innerText = "等待用户输入...";
-                    // Show prompt as agent message if needed
-                    appendMessage('agent', data.message);
-                });
-
-                eventSource.addEventListener('session.end', e => {
-                    statusBanner.innerText = '已完成当前执行环节。';
-                    sendBtn.disabled = false;
-                    eventSource.close();
-                });
-                
-                eventSource.addEventListener('session.error', e => {
-                    let data = JSON.parse(e.data);
-                    statusBanner.innerText = `错误: ${data.message}`;
-                    sendBtn.disabled = false;
-                    eventSource.close();
-                });
+                connectSSE();
             }
         }
 
-        // Handle Enter key
+        // ============ Key / File Events ============
         chatInput.addEventListener('keypress', function (e) {
-            if (e.key === 'Enter' && !e.shiftKey) {
-                e.preventDefault();
-                sendMessage();
-            }
+            if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); }
         });
 
-        // File upload
-        fileInput.addEventListener('change', async function() {
+        fileInput.addEventListener('change', async function () {
             if (!this.files || this.files.length === 0) return;
             const file = this.files[0];
             const formData = new FormData();
             formData.append("file", file);
-
             const statusEl = document.getElementById('upload-status');
-            statusEl.innerText = "上传中...";
-            statusEl.style.color = "var(--text-main)";
-
+            statusEl.innerText = "上传中…"; statusEl.style.color = "var(--text-main)";
             try {
-                const res = await fetch('/api/upload', {
-                    method: 'POST',
-                    body: formData
-                });
+                const res = await fetch('/api/upload', { method: 'POST', body: formData });
                 const data = await res.json();
                 if (data.status === 'success') {
-                    statusEl.innerText = `✅ ${data.filename} 解析成功！`;
-                    statusEl.style.color = "var(--btn-primary)";
+                    statusEl.innerText = `✅ ${data.filename} 已导入`; statusEl.style.color = "var(--btn-primary)";
                 } else {
-                    statusEl.innerText = `❌ 上传失败: ${data.message}`;
-                    statusEl.style.color = "red";
+                    statusEl.innerText = `❌ ${data.message}`; statusEl.style.color = "var(--accent-red)";
                 }
             } catch (err) {
-                statusEl.innerText = `❌ 网络错误`;
-                statusEl.style.color = "red";
+                statusEl.innerText = `❌ 网络错误`; statusEl.style.color = "var(--accent-red)";
             }
-            this.value = ''; // reset
+            this.value = '';
         });
-
     </script>
 </body>
 </html>
