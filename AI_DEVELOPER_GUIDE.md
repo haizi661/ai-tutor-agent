@@ -37,19 +37,23 @@
 
 人类开发者希望你在这个阶段着重完成以下优化（当收到具体需求时，请按此方向发力）：
 
+**🚨 最高优先级：融合 `origin/0305pan` 远程分支的“学前测评”功能**
+团队的其他成员在远程分支 `origin/0305pan` 中提交了 `ai_tutor_agent/nodes/assessment.py`，实现了一套“学前测评量表”。你需要将其融合进当前的 Web 架构中并进行体验升级：
+1. **分析并合并核心逻辑**：提取该分支中 `workflow.py` 的 `check_assessment_needed` 条件入口逻辑，以及 `AssessmentGenerator` 和 `UserProfiler` 节点。
+2. **解决交互瓶颈 (极其重要)**：在 `0305pan` 分支的 `build_assessment_conductor_node` 中，原作者使用了一个 `for` 循环连续 20 次调用 `answer_provider.get_answer()`。在当前的 Web/SSE 架构中，这会导致用户必须在网页聊天框里单题作答 20 次，体验极差。
+   - **重构要求**：你需要将这 20 道题通过一个聚合的 SSE 事件（例如 `assessment.form`）一次性推送到前端。
+   - **前端改造**：在 `frontend/index.html` 中拦截该事件，动态渲染出一个包含 20 道单选题的漂亮 Web 表单卡片。用户做完后点击“一键提交”，前端将一个 JSON 数组发回后端。
+3. **雷达图可视化**：当 `UserProfiler` 节点生成了 6 维画像结果后，前端需引入 `Chart.js`，将原本枯燥的 Markdown 报告升级为直观的多维能力雷达图。
+
 **方向 A：API 层与多模型管理的极致完善**
-- **重构 API 密钥管理与模型选择逻辑**：目前的模型配置机制（依赖单一的 `LLM_PROVIDER` 和零散的 `.env` 变量）较为简陋且不够灵活。你需要协助开发者设计一套**支持多模型配置、多密钥轮询**的健壮工厂模式（在 `infrastructure/llm.py` 中），让系统能优雅地在 OpenAI、DeepSeek、Qwen 和 Google 之间切换，甚至支持每个节点（Tutor/Tester/Evaluator）配置不同的模型。
-- 目前的 FastAPI 仅有基础的 `/api/start`, `/api/stream`, `/api/answer`, `/api/upload`。需要增强健壮性（比如增加上传文件类型校验、大小限制、清理过期会话内存）。
-- 考虑将本地 `InMemoryVectorStore` 升级为带持久化的本地向量库（如 `Chroma`或`FAISS`），避免重启后需要重新上传 PDF。
+- **重构 API 密钥管理与模型选择逻辑**：目前的模型配置机制（依赖单一的 `LLM_PROVIDER` 和零散的 `.env` 变量）较为简陋且不够灵活。你需要协助开发者设计一套**支持多模型配置、多密钥轮询**的健壮工厂模式（在 `infrastructure/llm.py` 中），让系统能优雅地在 OpenAI、DeepSeek、Qwen 和 Google 之间切换。
+- 增强 FastAPI 的健壮性（增加上传文件类型校验、大小限制）。
+- 考虑将本地 `InMemoryVectorStore` 升级为带持久化的本地向量库（如 `Chroma` 或 `FAISS`）。
 
 **方向 B：Web UI 的现代化与友好度增强**
-- 当前 `frontend/index.html` 虽然可用，但比较简陋。你可以使用原生 CSS/JS 增加：加载骨架屏、打分结果的高亮展示雷达图、响应式移动端适配、以及支持 Markdown 中 LaTeX 公式的美观渲染（比如引入 `MathJax` 或 `KaTeX`）。
-- **前端模型切换开关**：在 UI 侧边栏增加一个“大脑切换”下拉菜单，允许用户在界面上直接选择当前使用的 LLM 引擎（需要后端配合升级 API）。
+- **前端模型切换开关**：在 UI 侧边栏增加一个“大脑切换”下拉菜单，允许用户在界面上直接选择当前使用的 LLM 引擎。
 - 增加历史会话记录（History Threads）在侧边栏的展示与切换功能。
-
-**方向 C：伴学智能体教学功能的深度进化**
-- **启发式提示 (Scaffolding)**：在 Tester 环节增加“我要提示”的按钮逻辑。
-- **多维度画像**：优化 Evaluator 输出，提取用户的“弱点知识图谱”，并在下一次 Tutor 讲解时作为前置条件注入 Prompt。
+- 支持 Markdown 中 LaTeX 公式的美观渲染（比如引入 `MathJax` 或 `KaTeX`）。
 
 ### ⚠️ 4. 绝对不可违反的红线 (Critical Constraints)
 
