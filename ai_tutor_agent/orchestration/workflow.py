@@ -19,6 +19,7 @@ from ..nodes.tester import build_tester_node
 from ..nodes.tutor import build_tutor_node
 from ..nodes.greeting import build_greeting_node
 from ..nodes.topic_confirm import build_topic_confirm_node
+from ..nodes.coach import build_coach_node
 from .routing import build_route_logic
 
 
@@ -56,6 +57,22 @@ def get_entry_node(state: AgentState) -> str:
     return "assessment_generator"
 
 
+# ── Evaluator 之后的优化条件路由 ──
+def route_after_evaluator(state: AgentState, pass_score: int) -> str:
+    score = state.get("score", 0)
+    if score >= pass_score:
+        return "pass"
+    
+    # 💡 启发式引导逻辑：
+    # 如果分数在 [40, pass_score) 之间，或者已经是第二次失败，进入 Coach 节点进行启发式引导
+    # 否则（分数太低或初次大败），回 Tutor 重讲
+    attempt = state.get("attempt_count", 0)
+    if (40 <= score < pass_score) or attempt >= 1:
+        return "coach"
+    
+    return "fail"
+
+
 # ── greeter 之后的条件边 ──
 def route_after_intake_router(state: AgentState) -> str:
     if state.get("flow_status") == "meta_qa":
@@ -66,10 +83,6 @@ def route_after_intake_router(state: AgentState) -> str:
 
 
 def route_after_greeter(state: AgentState) -> str:
-    """
-    如果 greeter 没确认 topic，图暂停到 END (等待用户继续发消息)。
-    如果确认了 topic (flow_status 变成了 assessment_pending)，继续流转到 assessment_generator。
-    """
     if state.get("flow_status") == "greeting":
         return "pause"
     if state.get("flow_status") in {"topic_confirmation_pending", "awaiting_topic_confirmation"}:
@@ -87,11 +100,6 @@ def route_after_topic_confirmer(state: AgentState) -> str:
 
 # ── assessment_generator 之后的条件边 ──
 def route_after_assessment_generator(state: AgentState) -> str:
-    """
-    如果 flow_status == 'awaiting_assessment'，图暂停到 END，
-    等待前端提交答案 + API update_state 后重新 invoke。
-    否则继续流转到 user_profiler（在恢复执行时触发）。
-    """
     if state.get("flow_status") == "awaiting_assessment":
         return "pause"
     return "user_profiler"
@@ -121,6 +129,11 @@ def build_workflow(
     workflow.add_node(
         "evaluator",
         build_evaluator_node(evaluator_llm, runtime.event_sink),
+    )
+    # 新增：Coach 助教节点
+    workflow.add_node(
+        "coach",
+        build_coach_node(tutor_llm, runtime.event_sink)
     )
 
     # 学前测评节点
@@ -177,11 +190,20 @@ def build_workflow(
     # 主教学闭环边
     workflow.add_edge("tutor", "tester")
     workflow.add_edge("tester", "evaluator")
+    
+    # 核心优化：Evaluator 后的分流
     workflow.add_conditional_edges(
         "evaluator",
-        build_route_logic(settings.pass_score, runtime.event_sink),
-        {"pass": END, "fail": "tutor"},
+        lambda s: route_after_evaluator(s, settings.pass_score),
+        {
+            "pass": END,
+            "coach": "coach",
+            "fail": "tutor",
+        },
     )
+    
+    # Coach 引导后，回到 Tester 重新考核
+    workflow.add_edge("coach", "tester")
 
     # ========== 条件入口 ==========
     workflow.set_conditional_entry_point(

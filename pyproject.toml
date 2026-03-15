@@ -18,8 +18,11 @@ dependencies = [
   "python-multipart>=0.0.9",
   "pypdf>=5.0.0",
   "sentence-transformers>=3.0.0",
+  "langchain-chroma>=0.2.0",
+  "chromadb>=0.5.0",
   "httpx[socks]>=0.28.1",
   "uvicorn>=0.30.0",
+  "tf-keras>=2.16.0",
 ]
 
 [project.optional-dependencies]
@@ -29,10 +32,10 @@ dev = [
 ]
 
 [project.scripts]
-ai-tutor-agent = "ai_tutor_agent.cli:run_cli"
+ai-tutor-agent = "main:main"
 
 [tool.setuptools]
-include-package-data = false
+include-package-data = true
 
 [tool.setuptools.packages.find]
 where = ["."]

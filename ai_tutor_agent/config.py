@@ -61,6 +61,8 @@ class Settings:
     http_proxy: Optional[str]
     https_proxy: Optional[str]
     local_config_enabled: bool
+    vector_store_backend: str = "chroma"
+    vector_store_dir: str = "data/vector_store"
 
 
 LOCAL_CONFIG_KEYS = [
@@ -80,6 +82,8 @@ LOCAL_CONFIG_KEYS = [
     "KNOWLEDGE_CHUNK_SIZE",
     "KNOWLEDGE_CHUNK_OVERLAP",
     "KNOWLEDGE_TOP_K",
+    "VECTOR_STORE_BACKEND",
+    "VECTOR_STORE_DIR",
     "HTTP_PROXY",
     "HTTPS_PROXY",
     "LOCAL_CONFIG_ENABLED",
@@ -246,6 +250,10 @@ def get_settings() -> Settings:
     if embedding_provider == "openai" and not openai_api_key:
         raise RuntimeError("OPENAI_API_KEY is required when EMBEDDING_PROVIDER=openai.")
 
+    vector_store_backend = os.getenv("VECTOR_STORE_BACKEND", "chroma").strip().lower() or "chroma"
+    if vector_store_backend not in {"chroma", "inmemory"}:
+        raise RuntimeError("VECTOR_STORE_BACKEND must be one of: chroma, inmemory.")
+
     default_embedding_model = {
         "local": "sentence-transformers/all-MiniLM-L6-v2",
         "google": "models/text-embedding-004",
@@ -279,6 +287,8 @@ def get_settings() -> Settings:
         knowledge_chunk_size=_read_env_int("KNOWLEDGE_CHUNK_SIZE", 1000),
         knowledge_chunk_overlap=_read_env_int("KNOWLEDGE_CHUNK_OVERLAP", 150),
         knowledge_top_k=_read_env_int("KNOWLEDGE_TOP_K", 3),
+        vector_store_backend=vector_store_backend,
+        vector_store_dir=os.getenv("VECTOR_STORE_DIR", "data/vector_store").strip() or "data/vector_store",
         default_thread_id=os.getenv("DEFAULT_THREAD_ID", "haizi_master_01").strip() or "haizi_master_01",
         http_proxy=http_proxy,
         https_proxy=https_proxy,

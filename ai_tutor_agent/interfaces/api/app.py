@@ -6,7 +6,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 
 from .config import router as config_router
-from .history import router as history_router
+from .history import messages_router, router as history_router
 from .knowledge import router as knowledge_router
 from .runtime import ApiRuntime, create_lifespan, get_frontend_dir
 from .session import router as session_router
@@ -31,6 +31,7 @@ def create_api_app(
 
     app.include_router(config_router)
     app.include_router(history_router)
+    app.include_router(messages_router)
     app.include_router(knowledge_router)
     app.include_router(session_router)
 

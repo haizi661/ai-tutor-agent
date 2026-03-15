@@ -1,6 +1,10 @@
+import queue
+import threading
+import time
 from collections import defaultdict
 from types import SimpleNamespace
 
+import pytest
 from fastapi.testclient import TestClient
 
 from ai_tutor_agent.config import Settings
@@ -141,6 +145,121 @@ class FakeWorkflowFactory:
         return FakeGraphApp(self.checkpoint_store, runtime), DummyConn()
 
 
+class SlowResumeWorkflowFactory:
+    def __init__(self, checkpoint_store, *, sleep_seconds=0.2):
+        self.checkpoint_store = checkpoint_store
+        self.sleep_seconds = sleep_seconds
+
+    def __call__(self, settings, runtime=None):
+        del settings
+        factory = self
+
+        class SlowResumeGraphApp(FakeGraphApp):
+            def invoke(self_inner, payload, config):
+                thread_id = config["configurable"]["thread_id"]
+                state = dict(self_inner.checkpoint_store.states.get(thread_id, {}))
+                if state.get("flow_status") == "awaiting_assessment":
+                    time.sleep(factory.sleep_seconds)
+                return super().invoke(payload, config)
+
+        return SlowResumeGraphApp(self.checkpoint_store, runtime), DummyConn()
+
+
+class WaitingInputWorkflowFactory:
+    def __init__(self, checkpoint_store):
+        self.checkpoint_store = checkpoint_store
+
+    def __call__(self, settings, runtime=None):
+        del settings
+        factory = self
+
+        class WaitingInputGraphApp:
+            def __init__(self, runtime_context):
+                self.runtime_context = runtime_context
+                self.checkpoint_store = factory.checkpoint_store
+
+            def get_state(self, config):
+                thread_id = config["configurable"]["thread_id"]
+                return FakeStateSnapshot(self.checkpoint_store.states.get(thread_id, {}))
+
+            def update_state(self, config, values):
+                thread_id = config["configurable"]["thread_id"]
+                state = dict(self.checkpoint_store.states.get(thread_id, {}))
+                state.update(values)
+                self.checkpoint_store.save(thread_id, state, source="update", step=2)
+
+            def invoke(self, payload, config):
+                thread_id = config["configurable"]["thread_id"]
+                state = dict(self.checkpoint_store.states.get(thread_id, {}))
+                if payload:
+                    state.update(payload)
+                self.checkpoint_store.save(thread_id, state, source="loop", step=1)
+                answer = self.runtime_context.answer_provider.get_answer(
+                    "请输入回答",
+                    state={"thread_id": thread_id},
+                )
+                state["user_answer"] = answer
+                state["flow_status"] = "normal"
+                self.checkpoint_store.save(thread_id, state, source="loop", step=2)
+                self.runtime_context.event_sink.emit(
+                    make_event("node.stream", "tester", data={"text": answer})
+                )
+
+        return WaitingInputGraphApp(runtime), DummyConn()
+
+
+class TopicConfirmWorkflowFactory:
+    def __init__(self, checkpoint_store):
+        self.checkpoint_store = checkpoint_store
+
+    def __call__(self, settings, runtime=None):
+        del settings
+        factory = self
+
+        class TopicConfirmGraphApp:
+            def __init__(self, runtime_context):
+                self.runtime_context = runtime_context
+                self.checkpoint_store = factory.checkpoint_store
+
+            def get_state(self, config):
+                thread_id = config["configurable"]["thread_id"]
+                return FakeStateSnapshot(self.checkpoint_store.states.get(thread_id, {}))
+
+            def update_state(self, config, values):
+                thread_id = config["configurable"]["thread_id"]
+                state = dict(self.checkpoint_store.states.get(thread_id, {}))
+                state.update(values)
+                self.checkpoint_store.save(thread_id, state, source="update", step=2)
+
+            def invoke(self, payload, config):
+                thread_id = config["configurable"]["thread_id"]
+                state = dict(self.checkpoint_store.states.get(thread_id, {}))
+                if payload:
+                    state.update(payload)
+                if state.get("flow_status") == "assessment_pending":
+                    state["assessment_questions"] = state.get("assessment_questions") or [{"id": 1, "question": "Q1"}]
+                    state["flow_status"] = "awaiting_assessment"
+                    self.checkpoint_store.save(thread_id, state, source="loop", step=3)
+                    self.runtime_context.event_sink.emit(
+                        make_event(
+                            "assessment.form_ready",
+                            "assessment_generator",
+                            data={"questions": state["assessment_questions"]},
+                        )
+                    )
+                    return
+                self.checkpoint_store.save(thread_id, state, source="loop", step=3)
+                self.runtime_context.event_sink.emit(
+                    make_event(
+                        "session.info",
+                        "api",
+                        message="请重新输入学习主题。",
+                    )
+                )
+
+        return TopicConfirmGraphApp(runtime), DummyConn()
+
+
 def build_test_settings(tmp_path):
     return Settings(
         chat_profile="custom",
@@ -172,12 +291,12 @@ def build_test_settings(tmp_path):
     )
 
 
-def create_test_client(tmp_path):
-    checkpoint_store = FakeCheckpointStore()
+def create_test_client(tmp_path, *, checkpoint_store=None, workflow_factory=None):
+    checkpoint_store = checkpoint_store or FakeCheckpointStore()
     runtime = ApiRuntime(
         settings=build_test_settings(tmp_path),
         knowledge_provider=NoopKnowledgeProvider(),
-        workflow_factory=FakeWorkflowFactory(checkpoint_store),
+        workflow_factory=workflow_factory or FakeWorkflowFactory(checkpoint_store),
         checkpoint_factory=lambda path: (checkpoint_store, DummyConn()),
     )
     app = create_api_app(runtime_factory=lambda: runtime)
@@ -354,6 +473,201 @@ def test_api_start_continues_running_session_that_is_waiting_for_input(tmp_path)
         assert response.json()["status"] == "continued"
         assert session["input_q"].get_nowait() == "你是什么模型"
         assert session["awaiting_input"] is False
+
+
+def test_submit_assessment_schedules_resume_when_worker_is_still_finishing(tmp_path):
+    thread_id = "session-race-assessment"
+    checkpoint_store = FakeCheckpointStore()
+    checkpoint_store.save(
+        thread_id,
+        {
+            "current_topic": "控制理论",
+            "assessment_questions": [{"id": 1, "question": "Q1"}],
+            "assessment_answers": {},
+            "flow_status": "awaiting_assessment",
+        },
+        source="loop",
+        step=1,
+    )
+
+    with create_test_client(
+        tmp_path,
+        checkpoint_store=checkpoint_store,
+        workflow_factory=SlowResumeWorkflowFactory(checkpoint_store),
+    ) as client:
+        resume = client.post(f"/api/sessions/{thread_id}/resume")
+        assert resume.status_code == 200
+
+        submit = client.post(
+            "/api/submit_assessment",
+            json={"thread_id": thread_id, "answers": {"1": "C"}},
+        )
+        assert submit.status_code == 200
+
+        deadline = time.time() + 2
+        while time.time() < deadline:
+            detail = client.get(f"/api/history/{thread_id}").json()
+            if detail["state"]["is_assessed"] is True:
+                break
+            time.sleep(0.05)
+
+        final_detail = client.get(f"/api/history/{thread_id}").json()
+        assert final_detail["state"]["is_assessed"] is True
+        assert final_detail["state"]["flow_status"] == "normal"
+
+
+def test_confirm_topic_with_empty_topic_falls_back_to_greeting(tmp_path):
+    thread_id = "session-empty-topic-confirm"
+    checkpoint_store = FakeCheckpointStore()
+    checkpoint_store.save(
+        thread_id,
+        {
+            "current_topic": "",
+            "proposed_topic": "",
+            "flow_status": "awaiting_topic_confirmation",
+            "assessment_questions": [],
+            "assessment_answers": {},
+        },
+        source="loop",
+        step=1,
+    )
+
+    with create_test_client(
+        tmp_path,
+        checkpoint_store=checkpoint_store,
+        workflow_factory=TopicConfirmWorkflowFactory(checkpoint_store),
+    ) as client:
+        confirm = client.post(
+            "/api/confirm_topic",
+            json={"thread_id": thread_id, "confirmed": True, "topic": "   "},
+        )
+        assert confirm.status_code == 200
+
+        stream = client.get(f"/api/stream?thread_id={thread_id}")
+        assert "未检测到可确认的学习主题" in stream.text
+        assert "event: assessment.form_ready" not in stream.text
+
+        updated = client.get(f"/api/history/{thread_id}").json()
+        assert updated["state"]["flow_status"] == "greeting"
+        assert updated["state"]["current_topic"] == ""
+
+
+def test_api_answer_rejects_when_not_awaiting_input(tmp_path):
+    runtime = ApiRuntime(
+        settings=build_test_settings(tmp_path),
+        knowledge_provider=NoopKnowledgeProvider(),
+        workflow_factory=FakeWorkflowFactory(FakeCheckpointStore()),
+        checkpoint_factory=lambda path: (FakeCheckpointStore(), DummyConn()),
+    )
+
+    with TestClient(create_api_app(runtime_factory=lambda: runtime)) as client:
+        response = client.post(
+            "/api/answer",
+            json={"thread_id": "idle-thread", "answer": "hello"},
+        )
+        assert response.status_code == 409
+        assert response.json()["detail"] == "Session is not waiting for input."
+
+
+def test_api_answer_accepts_only_while_awaiting_input(tmp_path):
+    runtime = ApiRuntime(
+        settings=build_test_settings(tmp_path),
+        knowledge_provider=NoopKnowledgeProvider(),
+        workflow_factory=FakeWorkflowFactory(FakeCheckpointStore()),
+        checkpoint_factory=lambda path: (FakeCheckpointStore(), DummyConn()),
+    )
+
+    with TestClient(create_api_app(runtime_factory=lambda: runtime)) as client:
+        session = runtime.session_manager.get_or_create("awaiting-thread")
+        session["is_running"] = True
+        session["awaiting_input"] = True
+
+        response = client.post(
+            "/api/answer",
+            json={"thread_id": "awaiting-thread", "answer": "hello"},
+        )
+        assert response.status_code == 200
+        assert session["input_q"].get_nowait() == "hello"
+        assert session["awaiting_input"] is False
+
+
+def test_waiting_for_input_timeout_emits_error_and_end(monkeypatch, tmp_path):
+    import ai_tutor_agent.interfaces.api.adapter as adapter_module
+
+    monkeypatch.setattr(adapter_module, "INPUT_WAIT_TIMEOUT_SECONDS", 0.05)
+
+    checkpoint_store = FakeCheckpointStore()
+    runtime = ApiRuntime(
+        settings=build_test_settings(tmp_path),
+        knowledge_provider=NoopKnowledgeProvider(),
+        workflow_factory=WaitingInputWorkflowFactory(checkpoint_store),
+        checkpoint_factory=lambda path: (checkpoint_store, DummyConn()),
+    )
+
+    with TestClient(create_api_app(runtime_factory=lambda: runtime)) as client:
+        start = client.post("/api/start", json={"thread_id": "timeout-thread", "topic": "控制理论"})
+        assert start.status_code == 200
+
+        stream = client.get("/api/stream?thread_id=timeout-thread")
+        assert "event: session.awaiting_input" in stream.text
+        assert "event: session.error" in stream.text
+        assert "Timed out while waiting for user input." in stream.text
+        assert "event: session.end" in stream.text
+
+        detail = client.get("/api/history/timeout-thread")
+        assert detail.status_code == 200
+        assert detail.json()["runtime"]["is_running"] is False
+        assert detail.json()["runtime"]["awaiting_input"] is False
+
+
+def test_session_manager_reset_queues_reuses_existing_queue_instances():
+    from ai_tutor_agent.interfaces.api.runtime import SessionManager
+
+    manager = SessionManager()
+    session = manager.get_or_create("thread-queue")
+    event_q = session["event_q"]
+    input_q = session["input_q"]
+    event_q.put("event")
+    input_q.put("input")
+
+    reset = manager.reset_queues("thread-queue")
+
+    assert reset["event_q"] is event_q
+    assert reset["input_q"] is input_q
+    assert reset["awaiting_input"] is False
+    with pytest.raises(queue.Empty):
+        event_q.get_nowait()
+    with pytest.raises(queue.Empty):
+        input_q.get_nowait()
+
+
+def test_session_manager_prepare_worker_start_prevents_double_start():
+    from ai_tutor_agent.interfaces.api.runtime import SessionManager
+
+    manager = SessionManager()
+    worker1 = threading.Thread(target=lambda: None)
+    worker2 = threading.Thread(target=lambda: None)
+
+    first = manager.prepare_worker_start("thread-worker", worker1)
+    second = manager.prepare_worker_start("thread-worker", worker2)
+
+    assert first is not None
+    assert second is None
+    assert manager.get_or_create("thread-worker")["worker"] is worker1
+
+
+def test_runtime_build_falls_back_when_local_embedding_cache_is_missing(monkeypatch, tmp_path):
+    import ai_tutor_agent.interfaces.api.runtime as runtime_module
+
+    monkeypatch.setattr(
+        runtime_module,
+        "LocalFileKnowledgeProvider",
+        lambda settings: (_ for _ in ()).throw(RuntimeError("local cache missing")),
+    )
+
+    runtime = runtime_module.build_runtime(build_test_settings(tmp_path))
+
+    assert isinstance(runtime.knowledge_provider, NoopKnowledgeProvider)
 
 
 def test_local_config_round_trip(monkeypatch, tmp_path):

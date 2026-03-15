@@ -1,8 +1,9 @@
 import queue
 import threading
+import time
 from typing import Dict
 
-from fastapi import APIRouter, Request
+from fastapi import APIRouter, HTTPException, Request
 from fastapi.responses import StreamingResponse
 from pydantic import BaseModel
 
@@ -15,6 +16,10 @@ from .runtime import get_runtime
 
 
 router = APIRouter(prefix="/api", tags=["session"])
+
+SSE_POLL_TIMEOUT_SECONDS = 15
+RESUME_POLL_INTERVAL_SECONDS = 0.05
+RESUME_POLL_TIMEOUT_SECONDS = 3
 
 
 class ChatRequest(BaseModel):
@@ -127,21 +132,38 @@ def _resume_topic_confirmation_worker(
 
         if confirmed:
             confirmed_topic = proposed_topic or next_topic
-            graph_app.update_state(
-                thread_config,
-                {
-                    "current_topic": confirmed_topic,
-                    "proposed_topic": "",
-                    "flow_status": "assessment_pending",
-                },
-            )
-            runtime_context.event_sink.emit(
-                make_event(
-                    "session.info",
-                    "api",
-                    message=f"✅ 已确认学习主题：{confirmed_topic}",
+            if not confirmed_topic:
+                graph_app.update_state(
+                    thread_config,
+                    {
+                        "current_topic": "",
+                        "proposed_topic": "",
+                        "flow_status": "greeting",
+                    },
                 )
-            )
+                runtime_context.event_sink.emit(
+                    make_event(
+                        "session.info",
+                        "api",
+                        message="⚠️ 未检测到可确认的学习主题，请重新输入要学习的主题。",
+                    )
+                )
+            else:
+                graph_app.update_state(
+                    thread_config,
+                    {
+                        "current_topic": confirmed_topic,
+                        "proposed_topic": "",
+                        "flow_status": "assessment_pending",
+                    },
+                )
+                runtime_context.event_sink.emit(
+                    make_event(
+                        "session.info",
+                        "api",
+                        message=f"✅ 已确认学习主题：{confirmed_topic}",
+                    )
+                )
         else:
             graph_app.update_state(
                 thread_config,
@@ -169,15 +191,38 @@ def _resume_topic_confirmation_worker(
 
 
 def _start_worker(thread_id: str, runtime, target, *worker_args):
-    session = runtime.session_manager.reset_queues(thread_id)
-    worker = threading.Thread(
-        target=target,
-        args=(*worker_args, runtime, session["event_q"], session["input_q"]),
-        daemon=True,
-    )
-    runtime.session_manager.mark_running(thread_id, worker)
+    thread_args = {}
+
+    def runner():
+        target(*thread_args["args"])
+
+    worker = threading.Thread(target=runner, daemon=True)
+    session = runtime.session_manager.prepare_worker_start(thread_id, worker)
+    if session is None:
+        return runtime.session_manager.refresh_status(thread_id)
+    thread_args["args"] = (*worker_args, runtime, session["event_q"], session["input_q"])
     worker.start()
     return session
+
+
+def _schedule_resume_worker(thread_id: str, runtime, target, *worker_args) -> str:
+    session = runtime.session_manager.refresh_status(thread_id)
+    if not session["is_running"]:
+        _start_worker(thread_id, runtime, target, *worker_args)
+        return "started"
+
+    def delayed_resume():
+        deadline = time.monotonic() + RESUME_POLL_TIMEOUT_SECONDS
+        while time.monotonic() < deadline:
+            current_session = runtime.session_manager.refresh_status(thread_id)
+            if not current_session["is_running"]:
+                _start_worker(thread_id, runtime, target, *worker_args)
+                return
+            time.sleep(RESUME_POLL_INTERVAL_SECONDS)
+
+    watcher = threading.Thread(target=delayed_resume, daemon=True)
+    watcher.start()
+    return "scheduled"
 
 
 @router.post("/start")
@@ -212,7 +257,11 @@ async def stream_session(thread_id: str, request: Request):
 
     def event_generator():
         while True:
-            event = event_q.get()
+            try:
+                event = event_q.get(timeout=SSE_POLL_TIMEOUT_SECONDS)
+            except queue.Empty:
+                yield format_sse(make_event("session.ping", "api", message="keepalive"))
+                continue
             yield format_sse(event)
             if event.type == "session.end":
                 break
@@ -224,6 +273,8 @@ async def stream_session(thread_id: str, request: Request):
 async def provide_answer(req: AnswerRequest, request: Request):
     runtime = get_runtime(request)
     session = runtime.session_manager.refresh_status(req.thread_id)
+    if not session.get("awaiting_input"):
+        raise HTTPException(status_code=409, detail="Session is not waiting for input.")
     session["input_q"].put(req.answer)
     runtime.session_manager.mark_awaiting_input(req.thread_id, False)
     return {"status": "ok"}
@@ -232,36 +283,29 @@ async def provide_answer(req: AnswerRequest, request: Request):
 @router.post("/submit_assessment")
 async def submit_assessment(req: AssessmentSubmitRequest, request: Request):
     runtime = get_runtime(request)
-    session = runtime.session_manager.refresh_status(req.thread_id)
-
-    if not session["is_running"]:
-        _start_worker(
-            req.thread_id,
-            runtime,
-            _resume_assessment_worker,
-            req.thread_id,
-            req.answers,
-        )
-
+    _schedule_resume_worker(
+        req.thread_id,
+        runtime,
+        _resume_assessment_worker,
+        req.thread_id,
+        req.answers,
+    )
     return {"status": "ok", "message": "Assessment answers received, profiling started."}
 
 
 @router.post("/confirm_topic")
 async def confirm_topic(req: TopicConfirmRequest, request: Request):
     runtime = get_runtime(request)
-    session = runtime.session_manager.refresh_status(req.thread_id)
 
     if not req.confirmed and not req.topic.strip():
         return {"status": "error", "message": "A revised topic is required when confirmation is rejected."}
 
-    if not session["is_running"]:
-        _start_worker(
-            req.thread_id,
-            runtime,
-            _resume_topic_confirmation_worker,
-            req.thread_id,
-            req.confirmed,
-            req.topic,
-        )
-
+    _schedule_resume_worker(
+        req.thread_id,
+        runtime,
+        _resume_topic_confirmation_worker,
+        req.thread_id,
+        req.confirmed,
+        req.topic,
+    )
     return {"status": "ok", "message": "Topic confirmation received."}

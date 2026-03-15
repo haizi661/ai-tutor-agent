@@ -7,7 +7,7 @@
 - `session.py`: 会话启动、恢复、答题、主题确认、SSE 流。
 - `history.py`: 会话历史读取、摘要与删除。
 - `config.py`: 快速档案切换、本机 `.env` 配置读写。
-- `knowledge.py`: 本地知识库状态与文件上传。
+- `knowledge.py`: 本地知识库状态、文件上传、书架列表与删除。
 - `adapter.py`: Web `EventSink` / `AnswerProvider` 适配层。
 
 ## 已实现端点
@@ -19,6 +19,7 @@
 - `POST /api/config/local`
 - `GET /api/history`
 - `GET /api/history/{thread_id}`
+- `GET /api/messages/{thread_id}`
 - `DELETE /api/history/{thread_id}`
 - `POST /api/start`
 - `POST /api/sessions/{thread_id}/resume`
@@ -27,7 +28,10 @@
 - `POST /api/submit_assessment`
 - `POST /api/confirm_topic`
 - `GET /api/knowledge`
+- `GET /api/knowledge/files`
 - `POST /api/upload`
+- `DELETE /api/knowledge/files/{filename}`
+- `DELETE /api/knowledge/files`
 
 ## 约束
 

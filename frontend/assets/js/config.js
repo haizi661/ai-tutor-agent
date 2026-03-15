@@ -8,7 +8,7 @@
         profiles.forEach(profile => {
             const option = document.createElement('option');
             option.value = profile.id;
-            option.textContent = profile.label + (profile.configured ? '' : '（未配置）');
+            option.textContent = profile.label + (profile.configured ? '' : '（尚未配置）');
             option.disabled = !profile.configured;
             select.appendChild(option);
         });
@@ -41,7 +41,7 @@
 
     app.getStoredApiKeyHint = function getStoredApiKeyHint(vendorId, data = state.localConfig) {
         const masked = app.getStoredApiKey(vendorId, data);
-        return masked ? `已保存：${masked}` : '仅本地保存';
+        return masked ? `已保存：${masked}` : '只在本地保存';
     };
 
     app.renderVendorOptions = function renderVendorOptions(selectedVendor) {
@@ -50,7 +50,7 @@
         state.vendorCatalogs.forEach(vendor => {
             const option = document.createElement('option');
             option.value = vendor.id;
-            option.textContent = vendor.label + (!vendor.configured && !vendor.custom ? '（未配置）' : '');
+            option.textContent = vendor.label + (!vendor.configured && !vendor.custom ? '（尚未配置）' : '');
             select.appendChild(option);
         });
         select.value = selectedVendor || 'gemini';
@@ -88,7 +88,7 @@
         } else {
             const option = document.createElement('option');
             option.value = selectedModel || '';
-            option.textContent = selectedModel || '请在高级设置中手动填写模型';
+            option.textContent = selectedModel || '请在高级项里手动填写模型';
             select.appendChild(option);
             select.value = selectedModel || '';
             select.disabled = true;
@@ -107,11 +107,13 @@
         const current = data.current || data;
         const selectedProfile = (data.profiles || []).find(profile => profile.id === current.chat_profile);
         const configured = selectedProfile ? selectedProfile.configured : true;
-        const el = document.getElementById('config-status');
-        el.innerText = configured
-            ? `当前档案：${selectedProfile ? selectedProfile.label : current.chat_profile || current.model_name}。已启动的后台流程不会中途切换，新的档案会在下一次启动或恢复时使用。`
-            : '当前档案未配置可用 API Key，请先在服务端 .env 补齐密钥';
-        el.style.color = configured ? 'var(--text-secondary)' : 'var(--accent-red)';
+        app.setInlineStatus(
+            'config-status',
+            configured
+                ? `当前陪读档案：${selectedProfile ? selectedProfile.label : current.chat_profile || current.model_name}。已经开始的流程不会中途切换；新档案会在下一次开启或恢复时接手。`
+                : '当前档案还不能使用，请先在本地设置里补齐可用的 API Key。',
+            configured ? 'muted' : 'danger'
+        );
     };
 
     app.fetchConfig = async function fetchConfig() {
@@ -138,7 +140,7 @@
             const configButton = document.getElementById('open-config-btn');
             if (configButton) {
                 configButton.disabled = data.local_config_enabled === false;
-                configButton.title = data.local_config_enabled === false ? '服务端已禁用前端本地配置编辑' : '';
+                configButton.title = data.local_config_enabled === false ? '服务端已关闭前端本地设置编辑' : '';
             }
         } catch (error) {
             console.error('Failed to fetch local config:', error);
@@ -154,14 +156,14 @@
         });
         const data = await res.json();
         if (!res.ok) {
-            alert(data.detail || '引擎切换失败');
+            alert(data.detail || '档案切换没有成功');
             return;
         }
         state.chatProfiles = data.profiles || [];
         app.populateModelOptions(state.chatProfiles, data.current || data);
         document.getElementById('model-select').value = (data.current || data).chat_profile || '';
         app.updateConfigStatus(data);
-        alert('模型档案已切换。当前已经在运行的后台流程不会中途换脑；你下一次启动会话，或从暂停点恢复时，会使用新档案。');
+        alert('新的讲解档案已经记下来了。已经在运行的流程不会中途切换；下一次开启或恢复会话时，会自动使用新档案。');
     };
 
     app.populateLocalConfigForm = function populateLocalConfigForm(data) {
@@ -183,40 +185,42 @@
 
     app.openLocalConfigPanel = function openLocalConfigPanel() {
         if (state.localConfig && state.localConfig.local_config_enabled === false) {
-            alert('当前服务端已禁用前端本地配置编辑。');
+            alert('当前服务端已关闭前端本地设置编辑。');
             return;
         }
-        document.getElementById('config-overlay').classList.add('open');
-        document.getElementById('local-config-status').innerText = '';
+        state.lastFocusedElement = document.activeElement;
+        const overlay = document.getElementById('config-overlay');
+        overlay.classList.add('open');
+        overlay.setAttribute('aria-hidden', 'false');
+        app.setInlineStatus('local-config-status', '', 'muted');
         if (state.localConfig) app.populateLocalConfigForm(state.localConfig);
+        document.getElementById('local-chat-profile')?.focus();
     };
 
     app.closeLocalConfigPanel = function closeLocalConfigPanel(event) {
         if (event && event.target && event.target.id !== 'config-overlay') return;
-        document.getElementById('config-overlay').classList.remove('open');
+        const overlay = document.getElementById('config-overlay');
+        overlay.classList.remove('open');
+        overlay.setAttribute('aria-hidden', 'true');
+        state.lastFocusedElement?.focus?.();
     };
 
     app.testConnection = async function testConnection() {
-        const status = document.getElementById('local-config-status');
-        status.innerText = '正在测试当前连接...';
-        status.style.color = 'var(--text-secondary)';
-        
+        app.setInlineStatus('local-config-status', '我在试着连一下当前配置…', 'processing');
+
         try {
             const res = await fetch('/api/config/test', {
                 method: 'POST'
             });
             const data = await res.json();
-            
+
             if (res.ok && data.status === 'ok') {
-                status.innerText = `✅ ${data.message} (回应: ${data.details})`;
-                status.style.color = 'var(--accent-green)';
+                app.setInlineStatus('local-config-status', `${data.message}（返回内容：${data.details}）`, 'success');
             } else {
-                status.innerText = `❌ ${data.message}`;
-                status.style.color = 'var(--accent-red)';
+                app.setInlineStatus('local-config-status', data.message, 'danger');
             }
         } catch (error) {
-            status.innerText = `❌ 测试请求失败: ${error.message}`;
-            status.style.color = 'var(--accent-red)';
+            app.setInlineStatus('local-config-status', `连接测试没有发出去：${error.message}`, 'danger');
         }
     };
 
@@ -266,8 +270,7 @@
                 payload.openai_api_key = apiKey;
             }
         }
-        const status = document.getElementById('local-config-status');
-        status.innerText = '正在保存本地配置并重建运行时...';
+        app.setInlineStatus('local-config-status', '我在保存这些本地设置，并重建当前运行环境…', 'processing');
         const res = await fetch('/api/config/local', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -275,14 +278,12 @@
         });
         const data = await res.json();
         if (!res.ok) {
-            status.innerText = data.detail || '保存失败';
-            status.style.color = 'var(--accent-red)';
+            app.setInlineStatus('local-config-status', data.detail || '保存没有成功', 'danger');
             return;
         }
         state.localConfig = data.local;
         app.populateLocalConfigForm(state.localConfig);
         await app.fetchConfig();
-        status.innerText = '本地配置已保存。聊天档案会在下一次启动或恢复时使用；RAG 已按新配置重建。';
-        status.style.color = 'var(--accent-green)';
+        app.setInlineStatus('local-config-status', '本地设置已经保存好。新的陪读档案会在下一次开启或恢复时使用，资料检索也已经按新设置重建。', 'success');
     };
 })();

@@ -1,3 +1,5 @@
+import pytest
+
 from ai_tutor_agent.config import Settings
 from ai_tutor_agent.infrastructure import retriever
 
@@ -54,3 +56,32 @@ def test_chunk_text_produces_overlapping_segments():
 
     assert len(chunks) >= 2
     assert chunks[0][-10:] == chunks[1][:10]
+
+
+def test_resolve_local_embedding_model_path_raises_clear_error_when_cache_missing(monkeypatch):
+    def fake_snapshot_download(*args, **kwargs):
+        assert kwargs["local_files_only"] is True
+        raise RuntimeError("cache miss")
+
+    monkeypatch.setattr("huggingface_hub.snapshot_download", fake_snapshot_download)
+
+    with pytest.raises(RuntimeError, match="not found in the local HuggingFace cache"):
+        retriever.resolve_local_embedding_model_path("sentence-transformers/all-MiniLM-L6-v2")
+
+
+def test_build_embedding_backend_uses_local_cached_path(monkeypatch, tmp_path):
+    settings = build_test_settings(tmp_path)
+    monkeypatch.setattr(retriever, "resolve_local_embedding_model_path", lambda _: "/tmp/hf-model")
+
+    captured = {}
+
+    class FakeEmbeddings:
+        def __init__(self, model_name):
+            captured["model_name"] = model_name
+
+    monkeypatch.setattr("langchain_huggingface.HuggingFaceEmbeddings", FakeEmbeddings)
+
+    backend = retriever.build_embedding_backend(settings)
+
+    assert isinstance(backend, FakeEmbeddings)
+    assert captured["model_name"] == "/tmp/hf-model"

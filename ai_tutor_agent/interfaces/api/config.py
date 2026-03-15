@@ -59,6 +59,8 @@ class LocalConfigUpdateRequest(BaseModel):
     knowledge_chunk_size: int = 1000
     knowledge_chunk_overlap: int = 150
     knowledge_top_k: int = 3
+    vector_store_backend: str = "chroma"
+    vector_store_dir: str = ""
     http_proxy: str = ""
     https_proxy: str = ""
 
@@ -129,6 +131,8 @@ async def get_local_config(request: Request):
         "knowledge_chunk_size": _coerce_int(raw_values.get("KNOWLEDGE_CHUNK_SIZE"), settings.knowledge_chunk_size),
         "knowledge_chunk_overlap": _coerce_int(raw_values.get("KNOWLEDGE_CHUNK_OVERLAP"), settings.knowledge_chunk_overlap),
         "knowledge_top_k": _coerce_int(raw_values.get("KNOWLEDGE_TOP_K"), settings.knowledge_top_k),
+        "vector_store_backend": raw_values.get("VECTOR_STORE_BACKEND", settings.vector_store_backend),
+        "vector_store_dir": raw_values.get("VECTOR_STORE_DIR", settings.vector_store_dir),
         "http_proxy": raw_values.get("HTTP_PROXY", settings.http_proxy or ""),
         "https_proxy": raw_values.get("HTTPS_PROXY", settings.https_proxy or ""),
     }
@@ -168,6 +172,8 @@ async def update_local_config(req: LocalConfigUpdateRequest, request: Request):
         "KNOWLEDGE_CHUNK_SIZE": str(req.knowledge_chunk_size),
         "KNOWLEDGE_CHUNK_OVERLAP": str(req.knowledge_chunk_overlap),
         "KNOWLEDGE_TOP_K": str(req.knowledge_top_k),
+        "VECTOR_STORE_BACKEND": req.vector_store_backend.strip() or raw_values.get("VECTOR_STORE_BACKEND", "chroma"),
+        "VECTOR_STORE_DIR": req.vector_store_dir.strip() or raw_values.get("VECTOR_STORE_DIR", runtime.settings.vector_store_dir),
         "HTTP_PROXY": req.http_proxy.strip(),
         "HTTPS_PROXY": req.https_proxy.strip(),
     }

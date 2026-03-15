@@ -1,278 +1,71 @@
-# AI Tutor Agent
+# AI Tutor Agent: 极致自适应伴学系统 🎓
 
-动态自适应伴学多智能体系统。当前主干版本已经从早期 CLI MVP 演进为一个可协作的 `Web UI + FastAPI + SSE + 前测画像 + RAG-Lite + SQLite 断点续传` 项目。
+[![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](https://opensource.org/licenses/MIT)
+[![Python 3.9+](https://img.shields.io/badge/python-3.9+-blue.svg)](https://www.python.org/downloads/)
+[![LangGraph](https://img.shields.io/badge/Powered%20by-LangGraph-orange.svg)](https://github.com/langchain-ai/langgraph)
+[![FastAPI](https://img.shields.io/badge/API-FastAPI-009688.svg)](https://fastapi.tiangolo.com/)
 
-## 当前真实能力
+**AI Tutor Agent** 是一款基于 LangGraph 开发的动态自适应伴学系统。它不仅仅是一个聊天机器人，而是一位具备**“讲解-考核-评估-重修”**完整教学闭环的私人 AI 导师。
 
-当前系统已实现以下能力：
+![Web UI Preview](https://via.placeholder.com/800x450.png?text=AI+Tutor+Agent+Web+UI+Preview) <!-- 替换为你的真实截图 -->
 
-- 入口意图分流：区分 `学习主题`、`系统问题`、`轻闲聊`。
-- 学习主题确认：不会把 `你好`、`额`、`在吗` 这类输入直接误判成知识主题。
-- 学前测评：生成量表、暂停等待提交、恢复继续执行。
-- 规则化画像：固定维度雷达图，不再由 LLM 自由打分。
-- 教学闭环：`Tutor -> Tester -> Evaluator -> pass/fail 路由`。
-- 历史恢复：按 `thread_id` 存入 SQLite，支持读取摘要、删除、恢复。
-- RAG-Lite：本地知识文件切块、向量化、检索增强 Tutor。
-- Web 本地配置：选择厂商、模型、API Key，写入本机 `.env`。
-- 多厂商聊天档案：`gemini / qwen / deepseek / openai / minimax / glm / custom`。
+---
 
-当前学习流大致如下：
+## ✨ 核心特性
 
-```text
-intake_router
-  -> meta_qa | smalltalk | greeting
-  -> topic_confirmer
-  -> assessment_generator
-  -> user_profiler
-  -> tutor
-  -> tester
-  -> evaluator
-  -> pass | fail -> tutor
-```
+- 🧠 **闭环教学引擎**：基于 LangGraph 状态机实现 `Tutor (授课)` -> `Tester (出题)` -> `Evaluator (评分)` 的严谨教学循环。
+- 📊 **六维能力画像**：内置学前测评量表，动态生成 `Chart.js` 能力雷达图，真正实现“因材施教”。
+- 📚 **本地/云端混合 RAG**：
+  - **云端大脑**：支持 Google Gemini, 阿里云 Qwen (通义千问), DeepSeek 等主流模型切换。
+  - **本地索引**：使用 `sentence-transformers` 实现本地向量化，彻底解决 PDF 解析时的网络代理痛点。
+- 💻 **现代化 Web 界面**：
+  - ChatGPT 风格的流式打字效果（SSE）。
+  - 原生支持 **LaTeX 数学公式** 与 Markdown 渲染。
+  - 完善的**历史会话管理**与一键模型切换。
+- 🛠️ **开发者友好**：提供详细的 `AI_DEVELOPER_GUIDE.md`，方便使用 Cursor 或 Copilot 进行二次开发。
 
-## Quick Start
+---
 
-1. 安装依赖
+## 🚀 快速开始
+
+### 1. 环境准备
+确保你已安装 Python 3.9+。
 
 ```bash
-cd /home/haizi/ai-tutor-agent
-pip install -e .
-# 或者：pip install -r requirements.txt
+git clone https://github.com/your-username/ai-tutor-agent.git
+cd ai-tutor-agent
+pip install -r requirements.txt
 ```
 
-2. 配置环境变量
+### 2. 配置环境变量
+复制模板并填写你的 API Key：
 
 ```bash
 cp .env.example .env
 ```
+打开 `.env` 文件，根据你的需求填入 `GOOGLE_API_KEY` 或 `OPENAI_API_KEY`。
 
-然后编辑 `.env`，至少填入你准备使用的一个厂商 API Key，例如：
-
-- `GEMINI_API_KEY=...`
-- `QWEN_API_KEY=...`
-- `DEEPSEEK_API_KEY=...`
-- `OPENAI_API_KEY=...`
-- `MINIMAX_API_KEY=...`
-- `GLM_API_KEY=...`
-
-如果你不确定，最稳的起步配置是：
-
-```env
-CHAT_PROFILE=gemini
-GEMINI_API_KEY=your_gemini_api_key_here
-EMBEDDING_PROVIDER=local
-EMBEDDING_MODEL_NAME=sentence-transformers/all-MiniLM-L6-v2
-LOCAL_CONFIG_ENABLED=true
-```
-
-如果你的网络不能直接访问模型 API 或 HuggingFace，再补：
-
-```env
-HTTP_PROXY=http://127.0.0.1:7897
-HTTPS_PROXY=http://127.0.0.1:7897
-```
-
-注意：
-
-1. 代理不是项目硬依赖
-2. 但如果你所在网络无法直连模型厂商 API，或本地 embedding 第一次下载失败，就必须配置代理
-3. 详细说明见 [docs/RUNBOOK_ZH.md](docs/RUNBOOK_ZH.md)
-
-3. 启动 Web 端（默认入口）
-
+### 3. 启动应用
 ```bash
 python main.py
 ```
+访问浏览器：[http://localhost:8000](http://localhost:8000)
 
-打开：`http://127.0.0.1:8000/`
+---
 
-4. 如需 CLI 调试
+## 📂 项目结构
 
-```bash
-python main.py --cli
-```
+- `ai_tutor_agent/core/`：核心状态定义与契约。
+- `ai_tutor_agent/nodes/`：Tutor、Tester、Evaluator 等智能体节点实现。
+- `ai_tutor_agent/infrastructure/`：LLM 工厂、本地 RAG 检索器、SQLite 存储。
+- `frontend/`：基于原生 JS 与现代 CSS 构建的沉浸式前端。
 
-5. 运行测试
+---
 
-```bash
-PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 python -m pytest -q
-```
+## 🤝 贡献与反馈
 
-## 运行与代理说明
+如果你喜欢这个项目，欢迎点个 **Star** 🌟！如果有任何改进建议，请提交 Issue 或 Pull Request。
 
-推荐启动方式：
+## 📜 开源协议
 
-```bash
-python main.py
-```
-
-如果你需要自定义端口，请使用当前环境的 Python 启动：
-
-```bash
-python -m uvicorn ai_tutor_agent.interfaces.api.app:app --host 127.0.0.1 --port 8000
-```
-
-不要优先使用系统裸命令 `uvicorn ...`，否则可能走错解释器环境。
-
-如果你使用 `EMBEDDING_PROVIDER=local`：
-
-1. 第一次启动可能会下载本地 embedding 模型
-2. 第一次启动会比后续更慢
-3. 如果网络受限，可能需要配置代理
-4. 如果加载失败，当前版本会回退到无 RAG 模式
-
-完整运行说明见：
-
-- [docs/RUNBOOK_ZH.md](docs/RUNBOOK_ZH.md)
-
-## Web API 概览
-
-- `GET /api/health`：健康检查。
-- `GET /api/config` / `POST /api/config`：读取与快速切换当前聊天档案。
-- `GET /api/config/local` / `POST /api/config/local`：读取与写入本机 `.env`。
-- `GET /api/history`：列出最近会话。
-- `GET /api/history/{thread_id}`：读取状态摘要与可恢复信息。
-- `DELETE /api/history/{thread_id}`：删除会话历史。
-- `POST /api/start`：启动新会话。
-- `POST /api/sessions/{thread_id}/resume`：恢复暂停会话。
-- `GET /api/stream?thread_id=...`：SSE 事件流。
-- `POST /api/answer`：提交普通输入。
-- `POST /api/submit_assessment`：提交学前测评答案。
-- `POST /api/confirm_topic`：确认或改写候选学习主题。
-- `POST /api/upload`：上传知识库文件。
-- `GET /api/knowledge`：查看知识库状态。
-
-## 目录结构
-
-```text
-ai-tutor-agent/
-├── ai_tutor_agent/
-│   ├── application/
-│   ├── core/
-│   ├── infrastructure/
-│   ├── interfaces/
-│   │   ├── api/
-│   │   └── cli/
-│   ├── nodes/
-│   └── orchestration/
-├── data/
-│   ├── .gitkeep
-│   └── knowledge/
-│       └── .gitkeep
-├── docs/
-├── frontend/
-├── tests/
-├── .env.example
-├── .gitignore
-├── CONTRIBUTING.md
-├── AI_DEVELOPER_GUIDE.md
-├── pyproject.toml
-└── requirements.txt
-```
-
-## 上传与仓库卫生
-
-以下内容不要提交到远端仓库：
-
-- `.env`
-- `data/*.db`
-- `data/*.db-wal`
-- `data/*.db-shm`
-- `data/knowledge/*` 中的本地知识文件
-- `*.log`
-- `.pytest_cache/`、`__pycache__/`、`.coverage` 等缓存
-
-提交前建议执行：
-
-```bash
-git status -sb
-git diff
-PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 python -m pytest -q
-```
-
-如果你在本地运行过服务，SQLite 可能生成 `tutor_memory.db-wal` / `tutor_memory.db-shm`，它们属于临时文件，不需要提交。
-
-## 配置说明
-
-### 1. 聊天模型档案
-
-`CHAT_PROFILE` 控制当前启用的聊天档案，支持：
-
-- `gemini`
-- `qwen`
-- `deepseek`
-- `openai`
-- `minimax`
-- `glm`
-- `custom`
-
-普通使用建议通过网页“本地配置”页选择：
-
-1. 厂商
-2. 模型
-3. 对应 API Key
-
-然后让系统自动匹配 `provider` 与 `base_url`。
-
-### 2. Custom 模式
-
-`custom` 只用于手动模式。只有在你明确知道自己要接哪个兼容接口时，才需要自行填写：
-
-- `LLM_PROVIDER`
-- `OPENAI_API_BASE`
-- `MODEL_NAME`
-- 对应 API Key
-
-### 3. RAG 配置
-
-- `EMBEDDING_PROVIDER`：`local / google / openai`
-- `EMBEDDING_MODEL_NAME`
-- `KNOWLEDGE_CHUNK_SIZE`
-- `KNOWLEDGE_CHUNK_OVERLAP`
-- `KNOWLEDGE_TOP_K`
-
-小团队默认推荐：
-
-```env
-EMBEDDING_PROVIDER=local
-EMBEDDING_MODEL_NAME=sentence-transformers/all-MiniLM-L6-v2
-```
-
-### 4. 本地配置页
-
-网页里的“本地配置”页，本质上是把配置写回本机 `.env`。这适合：
-
-- 个人本地开发
-- 自己单机试验不同模型
-
-不适合：
-
-- 共享部署
-- 多人共用一台服务端
-
-如果你不想让网页修改 `.env`，可以设置：
-
-```env
-LOCAL_CONFIG_ENABLED=false
-```
-
-## 当前验证状态
-
-本仓库当前应满足：
-
-```bash
-python -m py_compile $(rg --files -g '*.py')
-PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 python -m pytest -q
-```
-
-## 必读文档
-
-- [docs/RUNBOOK_ZH.md](docs/RUNBOOK_ZH.md)
-- [docs/PROJECT_MEMORY_ZH.md](docs/PROJECT_MEMORY_ZH.md)
-- [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)
-- [docs/PROJECT_GUIDE_ZH.md](docs/PROJECT_GUIDE_ZH.md)
-- [docs/TEAM_PLAN_ZH.md](docs/TEAM_PLAN_ZH.md)
-- [docs/ROLE_ONBOARDING_ZH.md](docs/ROLE_ONBOARDING_ZH.md)
-- [docs/GITHUB_NEWBIE_GUIDE_ZH.txt](docs/GITHUB_NEWBIE_GUIDE_ZH.txt)
-- [docs/REPO_HYGIENE_ZH.md](docs/REPO_HYGIENE_ZH.md)
-- [CONTRIBUTING.md](CONTRIBUTING.md)
+本项目采用 [MIT License](LICENSE) 协议，你可以自由地进行学习、修改和分发。

@@ -18,6 +18,17 @@ def _should_continue_with_new_turn(state_values: dict, topic: str) -> bool:
     return state_values.get("flow_status") in PRE_TOPIC_FLOW_STATUSES
 
 
+def _should_restart_with_new_topic(state_values: dict, topic: str) -> bool:
+    if not state_values or not topic.strip():
+        return False
+    if not state_values.get("is_assessed"):
+        return False
+    existing_topic = (state_values.get("current_topic") or "").strip()
+    if not existing_topic:
+        return False
+    return existing_topic != topic.strip()
+
+
 def run_learning_session(
     app,
     event_sink,
@@ -30,6 +41,22 @@ def run_learning_session(
     state_snapshot = current_state or app.get_state(thread_config)
 
     if state_snapshot and state_snapshot.values:
+        if _should_restart_with_new_topic(state_snapshot.values, topic):
+            event_sink.emit(
+                make_event(
+                    "session.info",
+                    "session",
+                    message="\n🔄 检测到你输入了新主题，系统将基于当前线程重启一轮完整学习流程。",
+                    data={
+                        "thread_id": thread_id,
+                        "old_topic": state_snapshot.values.get("current_topic", ""),
+                        "new_topic": topic,
+                    },
+                )
+            )
+            app.invoke(build_initial_state(topic), config=thread_config)
+            return
+
         if _should_continue_with_new_turn(state_snapshot.values, topic):
             event_sink.emit(
                 make_event(

@@ -4,12 +4,16 @@ from typing import Any, Optional
 from ...core.events import AgentEvent
 from ...core.ports import AnswerProvider, EventSink
 
+INPUT_WAIT_TIMEOUT_SECONDS = 120
+
+
 class WebEventSink(EventSink):
     def __init__(self, q: queue.Queue):
         self.q = q
 
     def emit(self, event: AgentEvent) -> None:
         self.q.put(event)
+
 
 class WebAnswerProvider(AnswerProvider):
     def __init__(self, q: queue.Queue, event_sink: EventSink, on_awaiting_input=None):
@@ -23,15 +27,17 @@ class WebAnswerProvider(AnswerProvider):
         *,
         state: Optional[dict[str, Any]] = None,
     ) -> str:
-        # Before blocking for answer, emit a special event so the frontend knows it's time to show input box
         from ...core.events import make_event
+
         self.event_sink.emit(
             make_event("session.awaiting_input", "api", message=prompt, data=state)
         )
         if self.on_awaiting_input:
             self.on_awaiting_input(True)
-        # Block and wait for input
-        answer = self.q.get()
-        if self.on_awaiting_input:
-            self.on_awaiting_input(False)
-        return answer
+        try:
+            return self.q.get(timeout=INPUT_WAIT_TIMEOUT_SECONDS)
+        except queue.Empty as exc:
+            raise TimeoutError("Timed out while waiting for user input.") from exc
+        finally:
+            if self.on_awaiting_input:
+                self.on_awaiting_input(False)

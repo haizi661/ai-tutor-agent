@@ -34,4 +34,4 @@ htmlcov/
 Thumbs.db
 
 # AI Agent Context
-GEMINI.md
+docs/GEMINI_CONTEXT.md

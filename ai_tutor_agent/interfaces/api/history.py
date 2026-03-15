@@ -7,6 +7,7 @@ from .runtime import get_runtime
 
 
 router = APIRouter(prefix="/api/history", tags=["history"])
+messages_router = APIRouter(prefix="/api/messages", tags=["history"])
 
 PRE_TOPIC_FLOW_STATUSES = {"greeting", "topic_intake", "meta_qa", "smalltalk"}
 
@@ -22,6 +23,8 @@ def _serialize_state(values: dict[str, Any]) -> dict[str, Any]:
         "logic_score": values.get("logic_score", 0),
         "concept_score": values.get("concept_score", 0),
         "feedback": values.get("feedback", ""),
+        "rubric_feedback": values.get("rubric_feedback", []),
+        "tutor_citations": values.get("tutor_citations", []),
         "assessment_questions": values.get("assessment_questions", []),
         "assessment_answers": values.get("assessment_answers", {}),
         "assessment_radar": values.get("assessment_radar", {}),
@@ -71,6 +74,103 @@ def _history_entries(checkpoint_store, thread_id: str, *, limit: int = 20) -> li
             }
         )
     return entries
+
+
+def _build_evaluator_card(values: dict[str, Any]) -> str:
+    score = values.get("score", 0)
+    logic = values.get("logic_score", 0)
+    concept = values.get("concept_score", 0)
+    feedback = values.get("feedback", "") or "这轮评估已完成。"
+    lines = [
+        "### 最近一轮评估",
+        "",
+        f"- 总分：**{score}**",
+        f"- 逻辑：**{logic}**",
+        f"- 概念：**{concept}**",
+        "",
+        f"简要诊断：{feedback}",
+    ]
+
+    rubric = values.get("rubric_feedback") or []
+    if rubric:
+        lines.append("")
+        lines.append("量表依据：")
+        lines.extend([f"- {item}" for item in rubric])
+
+    return "\n".join(lines)
+
+
+def _reconstruct_messages(checkpoint_store, thread_id: str, *, limit: int = 240) -> list[dict[str, Any]]:
+    config = {"configurable": {"thread_id": thread_id}}
+    timeline: list[dict[str, Any]] = []
+
+    for checkpoint_tuple in checkpoint_store.list(config, limit=limit):
+        values = checkpoint_tuple.checkpoint.get("channel_values", {})
+        timeline.append(
+            {
+                "updated_at": checkpoint_tuple.checkpoint.get("ts") or "",
+                "values": values,
+            }
+        )
+
+    if not timeline:
+        return []
+
+    timeline.sort(key=lambda item: item["updated_at"])
+    messages: list[dict[str, Any]] = []
+    previous_values: dict[str, Any] = {}
+
+    def push(role: str, kind: str, content: str, updated_at: str, *, tone: str = "info") -> None:
+        text = (content or "").strip()
+        if not text:
+            return
+        messages.append(
+            {
+                "role": role,
+                "kind": kind,
+                "content": text,
+                "updated_at": updated_at,
+                "tone": tone,
+            }
+        )
+
+    for item in timeline:
+        updated_at = item["updated_at"]
+        values = item["values"]
+
+        assessment_result = values.get("assessment_result", "")
+        if assessment_result and assessment_result != previous_values.get("assessment_result", ""):
+            push("agent", "assessment_result", assessment_result, updated_at)
+
+        tutor_content = values.get("tutor_content", "")
+        if tutor_content and tutor_content != previous_values.get("tutor_content", ""):
+            push("agent", "tutor", tutor_content, updated_at)
+
+        coach_content = values.get("coach_content", "")
+        if coach_content and coach_content != previous_values.get("coach_content", ""):
+            push("agent", "coach", coach_content, updated_at)
+
+        tester_question = values.get("tester_question", "")
+        if tester_question and tester_question != previous_values.get("tester_question", ""):
+            push("agent", "tester_question", tester_question, updated_at)
+
+        user_answer = values.get("user_answer", "")
+        if user_answer and user_answer != previous_values.get("user_answer", ""):
+            push("user", "user_answer", user_answer, updated_at)
+
+        feedback_changed = (
+            values.get("score", 0) != previous_values.get("score", 0)
+            or values.get("logic_score", 0) != previous_values.get("logic_score", 0)
+            or values.get("concept_score", 0) != previous_values.get("concept_score", 0)
+            or values.get("feedback", "") != previous_values.get("feedback", "")
+            or values.get("rubric_feedback", []) != previous_values.get("rubric_feedback", [])
+        )
+        if feedback_changed and (values.get("score", 0) or values.get("feedback", "")):
+            push("agent", "evaluator_card", _build_evaluator_card(values), updated_at)
+
+        previous_values = values
+
+    return messages
 
 
 @router.get("")
@@ -145,5 +245,25 @@ async def delete_history(thread_id: str, request: Request):
             pass
         runtime.session_manager.remove(thread_id)
         return {"status": "success"}
+    finally:
+        saver_conn.close()
+
+
+@messages_router.get("/{thread_id}")
+async def get_messages(thread_id: str, request: Request):
+    runtime = get_runtime(request)
+    db_path = runtime.settings.memory_db_path
+    checkpoint_store, saver_conn = runtime.checkpoint_factory(db_path)
+    try:
+        checkpoint_tuple = checkpoint_store.get_tuple({"configurable": {"thread_id": thread_id}})
+        if checkpoint_tuple is None:
+            raise HTTPException(status_code=404, detail=f"Unknown thread_id: {thread_id}")
+
+        values = checkpoint_tuple.checkpoint.get("channel_values", {})
+        return {
+            "thread_id": thread_id,
+            "items": _reconstruct_messages(checkpoint_store, thread_id),
+            "state": _serialize_state(values),
+        }
     finally:
         saver_conn.close()

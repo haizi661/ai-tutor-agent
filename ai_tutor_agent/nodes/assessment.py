@@ -204,6 +204,17 @@ def build_user_profiler_node(llm, event_sink: EventSink):
             llm, event_sink, topic, qa_text, radar_data
         )
 
+        # ━━━ Step 3: 根据客观得分计算初始难度等级 ━━━
+        difficulty_level = _calculate_difficulty_level(radar_data)
+        event_sink.emit(
+            make_event(
+                "profile.difficulty_level",
+                "user_profiler",
+                message=f"初始难度等级已设定为 Lv.{difficulty_level}（1=基础 5=专家）",
+                data={"difficulty_level": difficulty_level},
+            )
+        )
+
         event_sink.emit(
             make_event(
                 "node.complete",
@@ -217,6 +228,9 @@ def build_user_profiler_node(llm, event_sink: EventSink):
             "assessment_result": full_report,
             "is_assessed": True,
             "flow_status": "normal",
+            "difficulty_level": difficulty_level,
+            "attempt_count": 0,
+            "score_history": [],
         }
 
     return node
@@ -316,6 +330,24 @@ def _generate_radar_data(event_sink: EventSink, topic: str, questions: list, ans
         "gap_scores": gaps,
         "breakdown": breakdown,
     }
+
+
+def _calculate_difficulty_level(radar_data: dict) -> int:
+    """根据客观得分均值计算初始教学难度等级（1~5）。"""
+    obj_scores = radar_data.get("objective_scores", [])
+    if not obj_scores:
+        return 3  # 默认中等
+    avg = sum(obj_scores) / len(obj_scores)
+    if avg <= 20:
+        return 1
+    elif avg <= 40:
+        return 2
+    elif avg <= 60:
+        return 3
+    elif avg <= 80:
+        return 4
+    else:
+        return 5
 
 
 def _generate_profile_report(
