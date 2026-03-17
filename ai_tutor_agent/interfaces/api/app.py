@@ -5,6 +5,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 
+from .auth import router as auth_router
 from .config import router as config_router
 from .history import router as history_router
 from .knowledge import router as knowledge_router
@@ -29,6 +30,7 @@ def create_api_app(
     async def healthcheck():
         return {"status": "ok"}
 
+    app.include_router(auth_router)
     app.include_router(config_router)
     app.include_router(history_router)
     app.include_router(knowledge_router)

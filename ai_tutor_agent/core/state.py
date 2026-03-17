@@ -18,6 +18,7 @@ class AgentState(TypedDict):
     assessment_result: str              # UserProfiler 生成的 Markdown 画像报告
     is_assessed: bool                   # 是否已完成学前画像评估
     flow_status: str                    # 图流转控制: greeting/topic_intake/meta_qa/smalltalk/topic_confirmation_pending/awaiting_topic_confirmation/awaiting_assessment/profiling/normal
+    conversation_history: list          # 对话历史 [{"role":"user|assistant","kind":"...","content":"..."}]
 
 
 def build_initial_state(topic: str = "") -> AgentState:
@@ -37,4 +38,5 @@ def build_initial_state(topic: str = "") -> AgentState:
         "assessment_result": "",
         "is_assessed": False,
         "flow_status": "greeting",
+        "conversation_history": [],
     }

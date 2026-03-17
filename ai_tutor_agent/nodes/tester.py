@@ -11,6 +11,19 @@ def build_tester_node(
     event_sink: EventSink,
     answer_provider: AnswerProvider,
 ):
+    def render_recent_history(state: AgentState, limit: int = 10) -> str:
+        history = list(state.get("conversation_history", []))
+        if not history:
+            return "（暂无历史对话）"
+
+        lines = []
+        for item in history[-limit:]:
+            role = "学生" if item.get("role") == "user" else "导师"
+            content = str(item.get("content", "")).strip()
+            if content:
+                lines.append(f"{role}: {content}")
+        return "\n".join(lines) if lines else "（暂无历史对话）"
+
     def tester_node(state: AgentState):
         event_sink.emit(
             make_event(
@@ -24,7 +37,12 @@ def build_tester_node(
         system_msg = SystemMessage(
             content="你是刁钻的高校助教。你的任务是基于教授刚讲过的教案，出一道且仅有一道极其刁钻的场景排错题或计算分析题。绝不输出除了题目以外的任何客套话。"
         )
-        human_msg = HumanMessage(content=f"这是教授刚才的教案：\n{state['tutor_content']}")
+        human_msg = HumanMessage(
+            content=(
+                f"这是教授刚才的教案：\n{state['tutor_content']}\n\n"
+                f"这是最近对话历史（用于避免重复、保持连续性）：\n{render_recent_history(state)}"
+            )
+        )
 
         full_question = ""
         for chunk in tester_llm.stream([system_msg, human_msg]):
@@ -63,6 +81,26 @@ def build_tester_node(
             )
         )
 
-        return {"tester_question": full_question, "user_answer": user_input}
+        history = list(state.get("conversation_history", []))
+        history.append(
+            {
+                "role": "assistant",
+                "kind": "tester_question",
+                "content": full_question,
+            }
+        )
+        history.append(
+            {
+                "role": "user",
+                "kind": "tester_answer",
+                "content": user_input,
+            }
+        )
+
+        return {
+            "tester_question": full_question,
+            "user_answer": user_input,
+            "conversation_history": history,
+        }
 
     return tester_node

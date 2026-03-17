@@ -4,7 +4,8 @@
     const PRE_TOPIC_FLOW_STATUSES = new Set(['greeting', 'topic_intake', 'meta_qa', 'smalltalk']);
 
     app.fetchHistory = async function fetchHistory() {
-        const res = await fetch('/api/history');
+        const res = await app.apiFetch('/api/history');
+        if (!res.ok) return;
         const data = await res.json();
         const list = document.getElementById('history-list');
         list.innerHTML = '';
@@ -37,7 +38,7 @@
     app.deleteSession = async function deleteSession(id, event) {
         event.stopPropagation();
         if (!confirm(`确定要彻底删除会话 ${id} 的所有记录吗？`)) return;
-        await fetch(`/api/history/${id}`, { method: 'DELETE' });
+        await app.apiFetch(`/api/history/${id}`, { method: 'DELETE' });
         if (id === state.currentThreadId) app.startNewSession();
         else app.fetchHistory();
     };
@@ -50,7 +51,7 @@
         document.getElementById('profile-panel').classList.add('hidden');
 
         try {
-            const res = await fetch(`/api/history/${id}`);
+            const res = await app.apiFetch(`/api/history/${id}`);
             if (!res.ok) throw new Error(`会话 ${id} 不存在`);
             const data = await res.json();
             app.restoreSessionState(data.state);

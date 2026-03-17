@@ -7,6 +7,19 @@ from ..core.text import content_to_text
 
 
 def build_tutor_node(tutor_llm, runtime: RuntimeContext):
+    def render_recent_history(state: AgentState, limit: int = 10) -> str:
+        history = list(state.get("conversation_history", []))
+        if not history:
+            return "（暂无历史对话）"
+
+        lines = []
+        for item in history[-limit:]:
+            role = "学生" if item.get("role") == "user" else "导师"
+            content = str(item.get("content", "")).strip()
+            if content:
+                lines.append(f"{role}: {content}")
+        return "\n".join(lines) if lines else "（暂无历史对话）"
+
     def tutor_node(state: AgentState):
         event_sink = runtime.event_sink
         knowledge_provider = runtime.knowledge_provider
@@ -36,6 +49,8 @@ def build_tutor_node(tutor_llm, runtime: RuntimeContext):
                 学生在考核时失败了。
                 错因反馈是：{state['feedback']}。
                 学生当前卡在知识点：【{state['current_topic']}】。
+                最近对话历史：
+                {render_recent_history(state)}
                 {knowledge_prompt}
                 请针对该错因，结合上述专业知识（如果有），换一个完全不同、更具直观性的生活比喻，重新开导他。字数控制在400字左右。
                 """
@@ -44,6 +59,8 @@ def build_tutor_node(tutor_llm, runtime: RuntimeContext):
             human_msg = HumanMessage(
                 content=f"""
                 请为学生详细讲解【{state['current_topic']}】的核心原理。
+                最近对话历史：
+                {render_recent_history(state)}
                 {knowledge_prompt}
                 要求逻辑严密，专业术语准确，并给出一个具体的实际应用场景。字数控制在400字左右。
                 """
@@ -69,6 +86,14 @@ def build_tutor_node(tutor_llm, runtime: RuntimeContext):
                 data={"content_length": len(full_response)},
             )
         )
-        return {"tutor_content": full_response}
+        history = list(state.get("conversation_history", []))
+        history.append(
+            {
+                "role": "assistant",
+                "kind": "tutor",
+                "content": full_response,
+            }
+        )
+        return {"tutor_content": full_response, "conversation_history": history}
 
     return tutor_node

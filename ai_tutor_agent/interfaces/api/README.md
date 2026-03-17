@@ -6,6 +6,7 @@
 - `runtime.py`: 运行时状态、SessionManager、厂商/模型目录、lifespan。
 - `session.py`: 会话启动、恢复、答题、主题确认、SSE 流。
 - `history.py`: 会话历史读取、摘要与删除。
+- `auth.py`: 用户注册、登录、鉴权与会话归属控制。
 - `config.py`: 快速档案切换、本机 `.env` 配置读写。
 - `knowledge.py`: 本地知识库状态与文件上传。
 - `adapter.py`: Web `EventSink` / `AnswerProvider` 适配层。
@@ -13,6 +14,10 @@
 ## 已实现端点
 
 - `GET /api/health`
+- `POST /api/auth/register`
+- `POST /api/auth/login`
+- `GET /api/auth/me`
+- `POST /api/auth/logout`
 - `GET /api/config`
 - `POST /api/config`
 - `GET /api/config/local`
@@ -28,6 +33,13 @@
 - `POST /api/confirm_topic`
 - `GET /api/knowledge`
 - `POST /api/upload`
+
+## 鉴权说明
+
+1. 学习会话与历史相关接口（`/api/start`、`/api/stream`、`/api/answer`、`/api/submit_assessment`、`/api/confirm_topic`、`/api/history*`）需要登录后访问。
+2. 普通 HTTP 请求使用 `Authorization: Bearer <token>`。
+3. SSE 接口（`/api/stream`）使用 query 参数 `access_token`。
+4. 学习历史按账号隔离，同一 `thread_id` 只允许所属账号访问。
 
 ## 约束
 

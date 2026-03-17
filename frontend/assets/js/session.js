@@ -25,7 +25,7 @@
             alert('请输入新的学习主题。');
             return;
         }
-        const res = await fetch('/api/confirm_topic', {
+        const res = await app.apiFetch('/api/confirm_topic', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(payload),
@@ -51,7 +51,7 @@
             state.currentAgentMsgEl = null;
             state.currentTextBuffer = '';
             app.showTyping();
-            await fetch('/api/answer', {
+            await app.apiFetch('/api/answer', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ thread_id: state.currentThreadId, answer: text }),
@@ -61,7 +61,7 @@
 
         if (!state.currentThreadId) state.currentThreadId = app.makeThreadId();
         app.showTyping();
-        await fetch('/api/start', {
+        await app.apiFetch('/api/start', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ thread_id: state.currentThreadId, topic: text }),
@@ -73,7 +73,9 @@
         if (state.eventSource) state.eventSource.close();
         state.currentAgentMsgEl = null;
         state.currentTextBuffer = '';
-        state.eventSource = new EventSource(`/api/stream?thread_id=${state.currentThreadId}`);
+        state.eventSource = new EventSource(
+            app.makeAuthedEventSourceUrl(`/api/stream?thread_id=${encodeURIComponent(state.currentThreadId)}`)
+        );
 
         state.eventSource.addEventListener('node.start', e => {
             const data = JSON.parse(e.data);

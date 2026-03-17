@@ -19,6 +19,8 @@
             AI Tutor <span style="font-weight:300; font-size:0.9rem; color:var(--text-secondary);">伴学智能体</span>
         </div>
         <div class="header-right">
+            <span id="auth-user-label" class="config-status">未登录</span>
+            <button class="btn-ghost" onclick="logout()">退出登录</button>
             <div class="model-select-wrapper">
                 <span style="font-size:11px; color:var(--text-secondary);">快速切换:</span>
                 <select id="model-select" class="model-select"></select>
@@ -171,7 +173,52 @@
         </div>
     </div>
 
+    <div id="auth-overlay" class="auth-overlay open">
+        <div class="auth-card">
+            <h3>登录学习账号</h3>
+            <p>学习历史会绑定到登录账号，不同账号的数据互相隔离。</p>
+            <div class="config-field">
+                <label for="auth-username">用户名</label>
+                <input id="auth-username" type="text" placeholder="至少 3 个字符">
+            </div>
+            <div class="config-field">
+                <label for="auth-password">密码</label>
+                <input id="auth-password" type="password" placeholder="至少 6 个字符">
+            </div>
+            <div class="auth-actions">
+                <button class="topic-confirm-btn primary" onclick="login()">登录</button>
+                <button class="topic-confirm-btn secondary" onclick="openRegisterWindow()">注册账号</button>
+            </div>
+            <div id="auth-status" class="auth-status"></div>
+        </div>
+    </div>
+
+    <div id="register-overlay" class="auth-overlay">
+        <div class="auth-card">
+            <h3>创建账号</h3>
+            <p>创建完成后请返回登录窗口，用新账号密码登录。</p>
+            <div class="config-field">
+                <label for="register-username">用户名</label>
+                <input id="register-username" type="text" placeholder="至少 3 个字符">
+            </div>
+            <div class="config-field">
+                <label for="register-password">密码</label>
+                <input id="register-password" type="password" placeholder="至少 6 个字符">
+            </div>
+            <div class="config-field">
+                <label for="register-password-confirm">确认密码</label>
+                <input id="register-password-confirm" type="password" placeholder="请再次输入密码">
+            </div>
+            <div class="auth-actions">
+                <button class="topic-confirm-btn primary" onclick="register()">创建账号</button>
+                <button class="topic-confirm-btn secondary" onclick="closeRegisterWindow()">返回登录</button>
+            </div>
+            <div id="register-status" class="auth-status"></div>
+        </div>
+    </div>
+
     <script defer src="/assets/js/state.js"></script>
+    <script defer src="/assets/js/auth.js"></script>
     <script defer src="/assets/js/ui.js"></script>
     <script defer src="/assets/js/config.js"></script>
     <script defer src="/assets/js/history.js"></script>

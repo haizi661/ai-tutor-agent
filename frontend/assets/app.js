@@ -2,6 +2,8 @@
     const app = window.AITutorApp;
 
     async function initializeApp() {
+        const ready = await app.ensureAuthenticated();
+        if (!ready) return;
         await app.fetchHistory();
         await app.fetchConfig();
         await app.fetchLocalConfig();
@@ -23,7 +25,7 @@
             const statusEl = document.getElementById('upload-status');
             statusEl.innerText = '⏳ 正在分析知识库...';
             try {
-                const res = await fetch('/api/upload', { method: 'POST', body: formData });
+                const res = await app.apiFetch('/api/upload', { method: 'POST', body: formData }, { requireAuth: false });
                 const data = await res.json();
                 statusEl.innerText = data.status === 'success' ? `✅ ${data.filename} 注入成功` : '❌ 上传失败';
             } catch (error) {
@@ -45,6 +47,11 @@
     window.handleSend = () => app.handleSend();
     window.submitTopicConfirmation = confirmed => app.submitTopicConfirmation(confirmed);
     window.showTopicEditInput = () => app.showTopicEditInput();
+    window.login = () => app.login();
+    window.register = () => app.register();
+    window.openRegisterWindow = () => app.openRegisterWindow();
+    window.closeRegisterWindow = () => app.closeRegisterWindow();
+    window.logout = () => app.logout();
 
     window.onload = async () => {
         bindDomEvents();

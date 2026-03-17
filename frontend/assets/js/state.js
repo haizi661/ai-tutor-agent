@@ -12,8 +12,11 @@ window.AITutorApp.state = {
     vendorCatalogs: [],
     localConfig: null,
     pendingTopicConfirmation: null,
+    currentUser: null,
+    accessToken: '',
 };
 
 window.AITutorApp.makeThreadId = function makeThreadId() {
-    return 'session_' + Math.random().toString(36).substring(2, 9);
+    const username = (window.AITutorApp.state.currentUser?.username || 'guest').replace(/[^a-z0-9_-]/gi, '');
+    return `${username}_session_${Math.random().toString(36).substring(2, 9)}`;
 };

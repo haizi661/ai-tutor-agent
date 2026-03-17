@@ -3,6 +3,12 @@ from typing import Any
 
 from fastapi import APIRouter, HTTPException, Request
 
+from .auth import (
+    ensure_thread_access,
+    get_current_user,
+    list_user_thread_ids,
+    remove_thread_owner,
+)
 from .runtime import get_runtime
 
 
@@ -28,6 +34,7 @@ def _serialize_state(values: dict[str, Any]) -> dict[str, Any]:
         "assessment_result": values.get("assessment_result", ""),
         "is_assessed": values.get("is_assessed", False),
         "flow_status": values.get("flow_status", "greeting"),
+        "conversation_history": values.get("conversation_history", []),
     }
 
 
@@ -76,25 +83,17 @@ def _history_entries(checkpoint_store, thread_id: str, *, limit: int = 20) -> li
 @router.get("")
 async def get_history(request: Request):
     runtime = get_runtime(request)
+    user = get_current_user(request)
     db_path = runtime.settings.memory_db_path
     checkpoint_store, saver_conn = runtime.checkpoint_factory(db_path)
     try:
         try:
-            with sqlite3.connect(db_path) as conn:
-                rows = conn.execute(
-                    """
-                    SELECT thread_id
-                    FROM checkpoints
-                    GROUP BY thread_id
-                    ORDER BY MAX(rowid) DESC
-                    LIMIT 50
-                    """
-                ).fetchall()
+            thread_ids = list_user_thread_ids(request, user["id"], limit=50)
         except sqlite3.OperationalError:
             return {"threads": [], "items": []}
 
         items = []
-        for (thread_id,) in rows:
+        for thread_id in thread_ids:
             checkpoint_tuple = checkpoint_store.get_tuple({"configurable": {"thread_id": thread_id}})
             if checkpoint_tuple:
                 items.append(_checkpoint_summary(thread_id, checkpoint_tuple))
@@ -110,6 +109,8 @@ async def get_history(request: Request):
 @router.get("/{thread_id}")
 async def get_history_detail(thread_id: str, request: Request):
     runtime = get_runtime(request)
+    user = get_current_user(request)
+    ensure_thread_access(request, user["id"], thread_id, auto_bind=False)
     session = runtime.session_manager.refresh_status(thread_id)
     db_path = runtime.settings.memory_db_path
     checkpoint_store, saver_conn = runtime.checkpoint_factory(db_path)
@@ -136,6 +137,8 @@ async def get_history_detail(thread_id: str, request: Request):
 @router.delete("/{thread_id}")
 async def delete_history(thread_id: str, request: Request):
     runtime = get_runtime(request)
+    user = get_current_user(request)
+    ensure_thread_access(request, user["id"], thread_id, auto_bind=False)
     db_path = runtime.settings.memory_db_path
     checkpoint_store, saver_conn = runtime.checkpoint_factory(db_path)
     try:
@@ -144,6 +147,7 @@ async def delete_history(thread_id: str, request: Request):
         except sqlite3.OperationalError:
             pass
         runtime.session_manager.remove(thread_id)
+        remove_thread_owner(request, thread_id)
         return {"status": "success"}
     finally:
         saver_conn.close()

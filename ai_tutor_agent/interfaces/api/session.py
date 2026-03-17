@@ -11,6 +11,7 @@ from ...core.events import make_event
 from ...core.ports import RuntimeContext
 from ..sse import format_sse
 from .adapter import WebAnswerProvider, WebEventSink
+from .auth import ensure_thread_access, get_current_user
 from .runtime import get_runtime
 
 
@@ -183,6 +184,8 @@ def _start_worker(thread_id: str, runtime, target, *worker_args):
 @router.post("/start")
 async def start_session(req: ChatRequest, request: Request):
     runtime = get_runtime(request)
+    user = get_current_user(request)
+    ensure_thread_access(request, user["id"], req.thread_id, auto_bind=True)
     session = runtime.session_manager.refresh_status(req.thread_id)
     if session["is_running"] and session.get("awaiting_input") and req.topic.strip():
         session["input_q"].put(req.topic)
@@ -197,6 +200,8 @@ async def start_session(req: ChatRequest, request: Request):
 @router.post("/sessions/{thread_id}/resume")
 async def resume_session(thread_id: str, request: Request):
     runtime = get_runtime(request)
+    user = get_current_user(request)
+    ensure_thread_access(request, user["id"], thread_id, auto_bind=False)
     session = runtime.session_manager.refresh_status(thread_id)
     if not session["is_running"]:
         _start_worker(thread_id, runtime, _graph_worker, thread_id, "")
@@ -207,6 +212,8 @@ async def resume_session(thread_id: str, request: Request):
 @router.get("/stream")
 async def stream_session(thread_id: str, request: Request):
     runtime = get_runtime(request)
+    user = get_current_user(request)
+    ensure_thread_access(request, user["id"], thread_id, auto_bind=False)
     session = runtime.session_manager.get_or_create(thread_id)
     event_q = session["event_q"]
 
@@ -223,6 +230,8 @@ async def stream_session(thread_id: str, request: Request):
 @router.post("/answer")
 async def provide_answer(req: AnswerRequest, request: Request):
     runtime = get_runtime(request)
+    user = get_current_user(request)
+    ensure_thread_access(request, user["id"], req.thread_id, auto_bind=False)
     session = runtime.session_manager.refresh_status(req.thread_id)
     session["input_q"].put(req.answer)
     runtime.session_manager.mark_awaiting_input(req.thread_id, False)
@@ -232,6 +241,8 @@ async def provide_answer(req: AnswerRequest, request: Request):
 @router.post("/submit_assessment")
 async def submit_assessment(req: AssessmentSubmitRequest, request: Request):
     runtime = get_runtime(request)
+    user = get_current_user(request)
+    ensure_thread_access(request, user["id"], req.thread_id, auto_bind=False)
     session = runtime.session_manager.refresh_status(req.thread_id)
 
     if not session["is_running"]:
@@ -249,6 +260,8 @@ async def submit_assessment(req: AssessmentSubmitRequest, request: Request):
 @router.post("/confirm_topic")
 async def confirm_topic(req: TopicConfirmRequest, request: Request):
     runtime = get_runtime(request)
+    user = get_current_user(request)
+    ensure_thread_access(request, user["id"], req.thread_id, auto_bind=False)
     session = runtime.session_manager.refresh_status(req.thread_id)
 
     if not req.confirmed and not req.topic.strip():

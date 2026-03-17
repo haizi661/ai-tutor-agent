@@ -30,6 +30,17 @@ def run_learning_session(
     state_snapshot = current_state or app.get_state(thread_config)
 
     if state_snapshot and state_snapshot.values:
+        if topic.strip():
+            history = list(state_snapshot.values.get("conversation_history", []))
+            history.append({"role": "user", "kind": "topic", "content": topic.strip()})
+            app.update_state(
+                thread_config,
+                {
+                    "current_topic": topic.strip(),
+                    "conversation_history": history,
+                },
+            )
+
         if _should_continue_with_new_turn(state_snapshot.values, topic):
             event_sink.emit(
                 make_event(
@@ -39,7 +50,7 @@ def run_learning_session(
                     data={"thread_id": thread_id, "topic": topic},
                 )
             )
-            app.invoke(build_initial_state(topic), config=thread_config)
+            app.invoke(None, config=thread_config)
             return
 
         if state_snapshot.values.get("flow_status") in PRE_TOPIC_FLOW_STATUSES:
@@ -72,4 +83,9 @@ def run_learning_session(
             data={"thread_id": thread_id},
         )
     )
-    app.invoke(build_initial_state(topic), config=thread_config)
+    initial_state = build_initial_state(topic)
+    if topic.strip():
+        initial_state["conversation_history"] = [
+            {"role": "user", "kind": "topic", "content": topic.strip()}
+        ]
+    app.invoke(initial_state, config=thread_config)

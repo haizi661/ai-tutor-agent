@@ -154,7 +154,7 @@
             }
             submitBtn.disabled = true;
             submitBtn.innerText = '📤 正在分析画像...';
-            await fetch('/api/submit_assessment', {
+            await app.apiFetch('/api/submit_assessment', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ thread_id: state.currentThreadId, answers: state.answers }),
@@ -217,10 +217,19 @@
             : '已恢复历史会话。当前还没有确认的学习主题。';
         app.appendSystemMessage(sessionSummary);
 
-        if (stateSnapshot.assessment_result) app.appendMessage('agent', stateSnapshot.assessment_result);
-        if (stateSnapshot.tutor_content) app.appendMessage('agent', stateSnapshot.tutor_content);
-        if (stateSnapshot.user_answer) app.appendMessage('user', stateSnapshot.user_answer);
-        if (stateSnapshot.tester_question) app.appendMessage('agent', stateSnapshot.tester_question);
+        const historyTurns = Array.isArray(stateSnapshot.conversation_history) ? stateSnapshot.conversation_history : [];
+        if (historyTurns.length) {
+            historyTurns.slice(-40).forEach(turn => {
+                const role = turn.role === 'user' ? 'user' : 'agent';
+                const text = (turn.content || '').trim();
+                if (text) app.appendMessage(role, text);
+            });
+        } else {
+            if (stateSnapshot.assessment_result) app.appendMessage('agent', stateSnapshot.assessment_result);
+            if (stateSnapshot.tutor_content) app.appendMessage('agent', stateSnapshot.tutor_content);
+            if (stateSnapshot.user_answer) app.appendMessage('user', stateSnapshot.user_answer);
+            if (stateSnapshot.tester_question) app.appendMessage('agent', stateSnapshot.tester_question);
+        }
 
         if (stateSnapshot.feedback || stateSnapshot.score) {
             app.appendMessage(

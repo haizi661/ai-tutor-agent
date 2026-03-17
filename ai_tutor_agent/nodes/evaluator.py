@@ -81,11 +81,24 @@ def build_evaluator_node(evaluator_llm, event_sink: EventSink):
             )
         )
 
+        history = list(state.get("conversation_history", []))
+        history.append(
+            {
+                "role": "assistant",
+                "kind": "evaluator_feedback",
+                "content": (
+                    f"评估结果：总分 {score}，逻辑 {logic}，概念 {concept}。"
+                    f" 反馈：{feedback}"
+                ),
+            }
+        )
+
         return {
             "score": score,
             "logic_score": logic,
             "concept_score": concept,
             "feedback": feedback,
+            "conversation_history": history,
         }
 
     return evaluator_node
