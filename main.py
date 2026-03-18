@@ -1,6 +1,6 @@
 import sys
 import os
-
+os.environ["HF_ENDPOINT"] = "https://hf-mirror.com" # 解决国内访问 Hugging Face API 慢的问题
 # 必须先 import，才能打印它的 __file__ 属性
 try:
     import ai_tutor_agent

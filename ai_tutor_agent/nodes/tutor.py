@@ -54,11 +54,40 @@ def build_tutor_node(tutor_llm, runtime: RuntimeContext):
                 print(f"⚠️ 读取长期记忆跳过: {e}\n")
         # ----------------------------------------
 
-        # RAG 逻辑
-        context = knowledge_provider.query(state["current_topic"])
+        # RAG 逻辑: 智能构建查询词
+        history = list(state.get("conversation_history", []))
+        last_user_msg = ""
+        # 寻找最近的一条用户消息
+        for msg in reversed(history):
+            if msg.get("role") == "user":
+                last_user_msg = str(msg.get("content", "")).strip()
+                break
+        
+        search_query = state["current_topic"]
+        rag_reason = "topic_only"
+
+        # 策略1: 错题讲解模式 -> Topic + 错因
+        if state.get("feedback"):
+             search_query = f"{state['current_topic']} {state['feedback']}"
+             rag_reason = "topic_with_feedback"
+        # 策略2: 追问模式 -> Topic + 用户问题
+        elif last_user_msg:
+             search_query = f"{state['current_topic']} {last_user_msg}"
+             rag_reason = "topic_with_question"
+        
+        sys.stderr.write(f"🔍 [RAG] 由于 {rag_reason}，使用查询词: '{search_query}'\n")
+
+        context = knowledge_provider.query(search_query)
         knowledge_prompt = ""
+        
         if context:
-            knowledge_prompt = f"\n\n请参考以下检索到的专业知识进行讲解：\n{context}\n"
+            # 增强 Prompt，明确要求引用
+            knowledge_prompt = (
+                f"\n\n【必须参考的知识库内容】\n"
+                f"以下是从知识库中检索到的关于“{search_query}”的相关资料，"
+                f"请务必优先基于这些资料回答，如果资料不足再补充通用知识：\n"
+                f"---\n{context}\n---\n"
+            )
             sys.stderr.write(f"✅ RAG 检索成功，内容长度: {len(context)}\n")
         else:
             sys.stderr.write("⚠️ RAG 未检索到相关内容\n")

@@ -38,6 +38,11 @@ class TopicConfirmRequest(BaseModel):
     topic: str = ""
 
 
+class InterruptConfirmRequest(BaseModel):
+    thread_id: str
+    confirmed: bool
+
+
 def _build_runtime_context(thread_id: str, runtime, event_q: queue.Queue, input_q: queue.Queue) -> RuntimeContext:
     event_sink = WebEventSink(event_q)
     answer_provider = WebAnswerProvider(
@@ -58,6 +63,13 @@ def _graph_worker(thread_id: str, topic: str, runtime, event_q: queue.Queue, inp
 
     try:
         current_state = graph_app.get_state({"configurable": {"thread_id": thread_id}})
+        state_values = (current_state.values or {}) if current_state else {}
+
+        # When resuming from topic confirmation, the newly sent chat text should be
+        # consumed by answer_provider.get_answer() instead of being dropped.
+        if topic.strip() and state_values.get("flow_status") == "awaiting_topic_confirmation":
+            input_q.put(topic)
+
         run_learning_session(
             graph_app,
             runtime_context.event_sink,
@@ -168,6 +180,58 @@ def _resume_topic_confirmation_worker(
         runtime.session_manager.mark_finished(thread_id)
 
 
+def _resume_interrupt_confirmation_worker(
+    thread_id: str,
+    confirmed: bool,
+    runtime,
+    event_q: queue.Queue,
+    input_q: queue.Queue,
+):
+    del input_q
+    runtime_context = _build_runtime_context(thread_id, runtime, event_q, queue.Queue())
+    graph_app, conn = runtime.workflow_factory(runtime.settings, runtime=runtime_context)
+    thread_config = {"configurable": {"thread_id": thread_id}}
+
+    try:
+        if confirmed:
+            graph_app.invoke(
+                {
+                    "flow_status": "normal",
+                    "interrupt_query": "",
+                    "resume_tester": False,
+                    "skip_reason": "",
+                    "user_answer": "",
+                },
+                config=thread_config,
+            )
+            runtime_context.event_sink.emit(
+                make_event(
+                    "session.info",
+                    "api",
+                    message="✅ 已确认回到主线，继续教学与测评。",
+                )
+            )
+        else:
+            graph_app.update_state(
+                thread_config,
+                {"flow_status": "awaiting_interrupt_confirmation"},
+            )
+            runtime_context.event_sink.emit(
+                make_event(
+                    "session.info",
+                    "api",
+                    message="📝 你可以继续输入临时问题；完成后会再次询问是否回到主线。",
+                    data={"requires_interrupt_confirmation": False},
+                )
+            )
+    except Exception as exc:
+        runtime_context.event_sink.emit(make_event("session.error", "api", message=str(exc)))
+    finally:
+        runtime_context.event_sink.emit(make_event("session.end", "api", message="Session ended."))
+        conn.close()
+        runtime.session_manager.mark_finished(thread_id)
+
+
 def _start_worker(thread_id: str, runtime, target, *worker_args):
     session = runtime.session_manager.reset_queues(thread_id)
     worker = threading.Thread(
@@ -265,3 +329,20 @@ async def confirm_topic(req: TopicConfirmRequest, request: Request):
         )
 
     return {"status": "ok", "message": "Topic confirmation received."}
+
+
+@router.post("/confirm_interrupt")
+async def confirm_interrupt(req: InterruptConfirmRequest, request: Request):
+    runtime = get_runtime(request)
+    session = runtime.session_manager.refresh_status(req.thread_id)
+
+    if not session["is_running"]:
+        _start_worker(
+            req.thread_id,
+            runtime,
+            _resume_interrupt_confirmation_worker,
+            req.thread_id,
+            req.confirmed,
+        )
+
+    return {"status": "ok", "message": "Interrupt confirmation received."}

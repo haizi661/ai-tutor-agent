@@ -39,6 +39,37 @@
         app.connectSSE();
     };
 
+    app.submitInterruptConfirmation = async function submitInterruptConfirmation(confirmed) {
+        const card = document.querySelector('.interrupt-confirm-card');
+        card?.remove();
+        state.pendingInterruptConfirmation = false;
+
+        if (confirmed) app.showTyping();
+
+        const res = await fetch('/api/confirm_interrupt', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ thread_id: state.currentThreadId, confirmed }),
+        });
+        const data = await res.json();
+        if (!res.ok || data.status === 'error') {
+            alert(data.detail || data.message || '确认回主线失败');
+            if (card) {
+                document.getElementById('messages')?.appendChild(card);
+                state.pendingInterruptConfirmation = true;
+            }
+            return;
+        }
+
+        if (!confirmed) {
+            app.appendSystemMessage('你可以继续输入临时问题；完成后会再次询问是否回到主线。');
+            document.getElementById('chat-input')?.focus();
+            return;
+        }
+
+        app.connectSSE();
+    };
+
     app.handleSend = async function handleSend() {
         const input = document.getElementById('chat-input');
         const text = input.value.trim();
@@ -85,6 +116,10 @@
         state.eventSource.addEventListener('node.complete', e => {
             const data = JSON.parse(e.data);
             if (data.message) app.appendSystemMessage(`完成：${data.message}`);
+            if (data.source === 'interruption_tutor') {
+                app.renderInterruptConfirmation();
+                document.getElementById('status-banner').innerText = '等待确认是否回到主线';
+            }
         });
 
         state.eventSource.addEventListener('intent.detected', e => {
@@ -106,6 +141,10 @@
         state.eventSource.addEventListener('session.info', e => {
             const data = JSON.parse(e.data);
             app.appendSystemMessage(data.message || '会话状态已更新');
+            if (data.data?.requires_interrupt_confirmation) {
+                app.renderInterruptConfirmation();
+                document.getElementById('status-banner').innerText = '等待确认是否回到主线';
+            }
         });
 
         state.eventSource.addEventListener('session.warning', e => {
@@ -133,6 +172,13 @@
             document.getElementById('status-banner').innerText = '等待确认学习主题';
         });
 
+        state.eventSource.addEventListener('interrupt.confirmation_needed', e => {
+            const data = JSON.parse(e.data);
+            app.appendSystemMessage(data.message || '临时问题已解答，请确认是否回到主线。');
+            app.renderInterruptConfirmation();
+            document.getElementById('status-banner').innerText = '等待确认是否回到主线';
+        });
+
         state.eventSource.addEventListener('profile.radar_data', e => {
             const data = JSON.parse(e.data).data;
             app.appendSystemMessage('能力画像已生成，右侧面板已更新。');
@@ -152,7 +198,9 @@
         state.eventSource.addEventListener('session.end', () => {
             app.clearTypingIndicator();
             document.getElementById('status-banner').innerText = '系统就绪';
-            app.appendSystemMessage('本轮处理已结束。若页面出现主题确认卡片或测评表单，请继续完成该步骤；如果没有出现新的交互控件，直接发送下一条消息即可。');
+            if (!state.pendingInterruptConfirmation) {
+                app.appendSystemMessage('本轮处理已结束。若页面出现主题确认卡片或测评表单，请继续完成该步骤；如果没有出现新的交互控件，直接发送下一条消息即可。');
+            }
             state.eventSource.close();
             state.eventSource = null;
             app.fetchHistory();

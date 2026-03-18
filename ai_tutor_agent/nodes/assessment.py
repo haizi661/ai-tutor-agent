@@ -10,7 +10,7 @@ import json
 from langchain_core.messages import HumanMessage, SystemMessage
 
 from ..core.events import make_event
-from ..core.ports import EventSink
+from ..core.ports import EventSink, RuntimeContext
 from ..core.state import AgentState
 from ..core.text import content_to_text
 
@@ -158,7 +158,7 @@ def build_assessment_generator_node(llm, event_sink: EventSink):
 # UserProfiler  —— 收到答案后被唤醒，生成 6 维雷达 + Markdown 报告
 # ---------------------------------------------------------------------------
 
-def build_user_profiler_node(llm, event_sink: EventSink):
+def build_user_profiler_node(llm, runtime: RuntimeContext):
     """
     读取 state 中的 assessment_questions + assessment_answers,
     分两步处理:
@@ -167,6 +167,8 @@ def build_user_profiler_node(llm, event_sink: EventSink):
     """
 
     def node(state: AgentState) -> dict:
+        event_sink = runtime.event_sink
+        knowledge_provider = runtime.knowledge_provider
         topic = state["current_topic"]
         questions = state.get("assessment_questions", [])
         answers = state.get("assessment_answers", {})
@@ -199,9 +201,18 @@ def build_user_profiler_node(llm, event_sink: EventSink):
             make_event("profile.radar_data", "user_profiler", data=radar_data)
         )
 
-        # ━━━ Step 2: 流式 Markdown 画像报告 ━━━
+        # ━━━ Step 2: 检索知识库中的针对性建议依据 ━━━
+        weakness_dimensions = [
+            item["dimension"]
+            for item in radar_data.get("breakdown", [])
+            if item.get("objective_score", 0) < 60
+        ]
+        profile_query = f"{topic} 学习建议 {' '.join(weakness_dimensions)}".strip()
+        knowledge_context = knowledge_provider.query(profile_query) if profile_query else ""
+
+        # ━━━ Step 3: 流式 Markdown 画像报告 ━━━
         full_report = _generate_profile_report(
-            llm, event_sink, topic, qa_text, radar_data
+            llm, event_sink, topic, qa_text, radar_data, knowledge_context
         )
 
         event_sink.emit(
@@ -319,12 +330,24 @@ def _generate_radar_data(event_sink: EventSink, topic: str, questions: list, ans
 
 
 def _generate_profile_report(
-    llm, event_sink: EventSink, topic: str, qa_text: str, radar_data: dict
+    llm,
+    event_sink: EventSink,
+    topic: str,
+    qa_text: str,
+    radar_data: dict,
+    knowledge_context: str,
 ) -> str:
     """流式生成 Markdown 能力画像报告。"""
     system_msg = SystemMessage(
         content="你是一位教育心理学专家，擅长撰写清晰深刻的学生能力分析报告。"
     )
+    kb_section = ""
+    if knowledge_context:
+        kb_section = (
+            "\n\n知识库参考资料（请优先据此给出可执行建议）：\n"
+            f"---\n{knowledge_context}\n---\n"
+        )
+
     human_msg = HumanMessage(
         content=f"""根据以下关于【{topic}】的测评数据和能力评分，生成详细的 Markdown 能力画像报告。
 
@@ -333,12 +356,13 @@ def _generate_profile_report(
 
 6 维能力评分:
 {json.dumps(radar_data, ensure_ascii=False, indent=2)}
+{kb_section}
 
 报告要求:
 1. 标题: ## 📊 【{topic}】学前能力画像
 2. 列出 6 个维度的自我评估 vs 客观评价对比
 3. 重点分析 self_scores 与 objective_scores 的差值（认知偏差）
-4. 针对薄弱点给出具体学习建议
+4. 针对薄弱点给出具体学习建议，优先引用知识库材料中的术语、步骤和案例
 5. 字数控制在 500 字左右
 6. 评分已经是规则化计算结果，请不要重新改分，只做解释。"""
     )

@@ -197,6 +197,25 @@
         if (box) box.style.display = 'block';
     };
 
+    app.renderInterruptConfirmation = function renderInterruptConfirmation() {
+        state.pendingInterruptConfirmation = true;
+        app.clearTypingIndicator();
+        document.querySelector('.interrupt-confirm-card')?.remove();
+        const container = document.getElementById('messages');
+        const card = document.createElement('div');
+        card.className = 'topic-confirm-card interrupt-confirm-card';
+        card.innerHTML = `
+            <h3>🔁 返回主线确认</h3>
+            <p style="color:var(--text-secondary); font-size:13px; margin-top:10px;">临时问题已解答。是否现在回到“知识教学 -> 测评”主线？</p>
+            <div class="topic-confirm-actions">
+                <button class="topic-confirm-btn primary" onclick="submitInterruptConfirmation(true)">回到主线</button>
+                <button class="topic-confirm-btn secondary" onclick="submitInterruptConfirmation(false)">继续提问</button>
+            </div>
+        `;
+        container.appendChild(card);
+        container.scrollTop = container.scrollHeight;
+    };
+
     app.restoreSessionState = function restoreSessionState(stateSnapshot) {
         const messages = document.getElementById('messages');
         messages.innerHTML = '';
@@ -239,6 +258,10 @@
 
         if (stateSnapshot.flow_status === 'awaiting_assessment' && (stateSnapshot.assessment_questions || []).length) {
             app.renderAssessmentForm(stateSnapshot.assessment_questions, stateSnapshot.assessment_answers || {});
+        }
+
+        if (stateSnapshot.flow_status === 'awaiting_interrupt_confirmation') {
+            app.renderInterruptConfirmation();
         }
     };
 })();

@@ -12,6 +12,7 @@ window.AITutorApp.state = {
     vendorCatalogs: [],
     localConfig: null,
     pendingTopicConfirmation: null,
+    pendingInterruptConfirmation: false,
 };
 
 window.AITutorApp.makeThreadId = function makeThreadId() {

@@ -44,6 +44,7 @@
     window.deleteSession = (id, event) => app.deleteSession(id, event);
     window.handleSend = () => app.handleSend();
     window.submitTopicConfirmation = confirmed => app.submitTopicConfirmation(confirmed);
+    window.submitInterruptConfirmation = confirmed => app.submitInterruptConfirmation(confirmed);
     window.showTopicEditInput = () => app.showTopicEditInput();
 
     window.onload = async () => {

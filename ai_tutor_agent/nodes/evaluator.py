@@ -31,11 +31,41 @@ def build_evaluator_node(evaluator_llm, runtime: RuntimeContext):
             )
         )
 
+        # 0. 检查是否跳过
+        user_answer = state.get("user_answer", "").strip()
+        if user_answer.lower() in ["/skip", "/pass", "skip", "掌握", "已掌握", "跳过"]:
+             event_sink.emit(make_event("node.info", "evaluator", message="User skipped assessment (mastered)."))
+             return {
+                 "score": 100,
+                 "logic_score": 100,
+                 "concept_score": 100,
+                 "feedback": "用户自评已掌握该知识点。",
+                 "skip_reason": "user_mastered"
+             }
+
+        # 0.5 RAG: 检索参考答案 (Ground Truth)
+        knowledge_provider = runtime.knowledge_provider
+        # 使用题目作为检索词
+        search_query = f"{state['current_topic']} {state['tester_question']}"
+        context = knowledge_provider.query(search_query)
+        
+        rag_prompt = ""
+        if context:
+            rag_prompt = (
+                f"\n\n【参考答案/评分依据】\n"
+                f"以下是知识库中关于该题目的相关资料，请以此为【最高标准】进行评分。"
+                f"如果学生的回答与参考资料冲突，以资料为准；如果资料未覆盖，则使用通用知识。\n"
+                f"---\n{context}\n---\n"
+            )
+            print(f"✅ [Evaluator] RAG 检索命中，长度: {len(context)}")
+        else:
+            print(f"⚠️ [Evaluator] RAG 未命中，使用通用知识评分")
+
         system_msg = SystemMessage(
             content="你是绝对理性的阅卷机器。你只看逻辑和结果。你必须评估学生的回答，并给出详细的评分（0-100）和简短反馈。"
         )
         human_msg = HumanMessage(
-            content=f"当前考核主题：{state['current_topic']}。测试题：{state['tester_question']} 学生的作答：{state['user_answer']}。"
+            content=f"当前考核主题：{state['current_topic']}。\n测试题：{state['tester_question']}\n学生的作答：{state['user_answer']}。\n{rag_prompt}"
         )
 
         # 1. 评分逻辑
@@ -105,6 +135,7 @@ def build_evaluator_node(evaluator_llm, runtime: RuntimeContext):
             "logic_score": logic,
             "concept_score": concept,
             "feedback": feedback,
+            "skip_reason": "",
         }
 
     return evaluator_node
