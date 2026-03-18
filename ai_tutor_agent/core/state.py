@@ -18,10 +18,12 @@ class AgentState(TypedDict):
     assessment_result: str              # UserProfiler 生成的 Markdown 画像报告
     is_assessed: bool                   # 是否已完成学前画像评估
     flow_status: str                    # 图流转控制: greeting/topic_intake/meta_qa/smalltalk/topic_confirmation_pending/awaiting_topic_confirmation/awaiting_assessment/profiling/normal
-
+    # --- 以下是知识库功能拓展字段 ---
+    student_id: str                     # 学生唯一 ID
 
 def build_initial_state(topic: str = "") -> AgentState:
     return {
+        "student_id": "default_student",  # 默认学生 ID
         "current_topic": topic,
         "proposed_topic": "",
         "tutor_content": "",

@@ -1,17 +1,18 @@
 from langchain_core.messages import HumanMessage, SystemMessage
-
 from ..core.events import make_event
-from ..core.ports import AnswerProvider, EventSink
+from ..core.ports import RuntimeContext
 from ..core.state import AgentState
 from ..core.text import content_to_text
 
-
-def build_tester_node(
-    tester_llm,
-    event_sink: EventSink,
-    answer_provider: AnswerProvider,
-):
+def build_tester_node(tester_llm, runtime: RuntimeContext):
+    """
+    重构后的 Tester 节点，统一接收 runtime 对象。
+    """
     def tester_node(state: AgentState):
+        # 从 runtime 中解构出需要的零件
+        event_sink = runtime.event_sink
+        answer_provider = runtime.answer_provider
+
         event_sink.emit(
             make_event(
                 "node.start",
@@ -27,6 +28,7 @@ def build_tester_node(
         human_msg = HumanMessage(content=f"这是教授刚才的教案：\n{state['tutor_content']}")
 
         full_question = ""
+        # 流式输出题目
         for chunk in tester_llm.stream([system_msg, human_msg]):
             chunk_text = content_to_text(chunk.content)
             full_question += chunk_text
@@ -47,13 +49,17 @@ def build_tester_node(
             )
         )
 
+        # 阻塞等待用户回答
+        # 注意：这里我们通过 answer_provider 拿到用户的输入
         user_input = answer_provider.get_answer(
-            ">> 请输入你的解答 (输入 'quit' 退出): ",
+            ">> 请输入你的解答: ",
             state={
                 "current_topic": state["current_topic"],
                 "tester_question": full_question,
+                "student_id": state.get("student_id", "default")
             },
         ).strip()
+
         event_sink.emit(
             make_event(
                 "answer.received",

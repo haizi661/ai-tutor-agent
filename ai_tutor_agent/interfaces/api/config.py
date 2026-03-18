@@ -222,3 +222,33 @@ async def update_local_config(req: LocalConfigUpdateRequest, request: Request):
         "config": serialize_runtime_config(runtime.settings),
         "local": await get_local_config(request),
     }
+
+@router.post("/test")
+async def test_connection(request: Request):
+    """Test the LLM connection using current runtime settings."""
+    runtime = get_runtime(request)
+    settings = runtime.settings
+    
+    try:
+        from langchain_core.messages import HumanMessage
+        from ...infrastructure.llm import build_llms
+        
+        # Build LLMs uses current settings (which includes proxy setup)
+        tutor_llm, _, _ = build_llms(settings)
+        
+        # Send a tiny ping
+        msg = HumanMessage(content="Ping. Reply exactly 'Pong' and nothing else.")
+        resp = tutor_llm.invoke([msg])
+        
+        return {
+            "status": "ok",
+            "message": "连接成功！大模型正常响应。",
+            "details": str(resp.content)
+        }
+    except Exception as e:
+        import traceback
+        return {
+            "status": "error",
+            "message": f"连接失败: {str(e)}",
+            "trace": traceback.format_exc()
+        }

@@ -1,29 +1,27 @@
 import json
-from typing import Optional
-from pydantic import BaseModel, Field
+import sqlite3#检查轮数
 from langchain_core.messages import HumanMessage, SystemMessage
-
 from ..core.events import make_event
-from ..core.ports import EventSink
+from ..core.ports import RuntimeContext, EventSink
 from ..core.state import AgentState
 from ..core.text import content_to_text
 
-
-class EvaluationResult(BaseModel):
-    total_score: int = Field(description="整数 (0-100)，总体得分")
-    logic_score: int = Field(description="整数 (0-100)，评估推演逻辑是否严密")
-    concept_score: int = Field(description="整数 (0-100)，评估专业术语和概念是否准确")
-    feedback: str = Field(description="字符串，一句话极其简短的犀利点评")
-
-
-def build_evaluator_node(evaluator_llm, event_sink: EventSink):
-    # Try to use structured output if supported by the model
+# 注意：这里第二个参数改为 runtime，因为 workflow.py 里可以轻松获取它
+def build_evaluator_node(evaluator_llm, runtime: RuntimeContext):
+    # 尝试结构化输出
+    structured_llm = None
     try:
+        # 保持你原来的 EvaluationResult 导入逻辑
+        from .evaluator_schema import EvaluationResult 
         structured_llm = evaluator_llm.with_structured_output(EvaluationResult)
     except Exception:
-        structured_llm = None
+        pass
 
     def evaluator_node(state: AgentState):
+        # 从 runtime 中提取 event_sink
+        print(f"DEBUG: 进入了评估节点, state keys: {list(state.keys())}")
+        event_sink = runtime.event_sink
+        
         event_sink.emit(
             make_event(
                 "node.start",
@@ -34,51 +32,72 @@ def build_evaluator_node(evaluator_llm, event_sink: EventSink):
         )
 
         system_msg = SystemMessage(
-            content="""
-            你是绝对理性的阅卷机器。你只看逻辑和结果。
-            你必须评估学生的回答，并给出详细的评分（0-100）和简短反馈。
-            """
+            content="你是绝对理性的阅卷机器。你只看逻辑和结果。你必须评估学生的回答，并给出详细的评分（0-100）和简短反馈。"
         )
         human_msg = HumanMessage(
-            content=f"""
-            当前考核主题：{state['current_topic']}。
-            测试题：{state['tester_question']}
-            学生的作答：{state['user_answer']}。
-            """
+            content=f"当前考核主题：{state['current_topic']}。测试题：{state['tester_question']} 学生的作答：{state['user_answer']}。"
         )
 
+        # 1. 评分逻辑
         if structured_llm:
             try:
-                result = structured_llm.invoke([system_msg, human_msg])
-                score = result.total_score
-                logic = result.logic_score
-                concept = result.concept_score
-                feedback = result.feedback
-            except Exception as e:
-                print(f"⚠️ Structured output failed: {e}, falling back to manual parsing.")
+                res = structured_llm.invoke([system_msg, human_msg])
+                score, logic, concept, feedback = res.total_score, res.logic_score, res.concept_score, res.feedback
+            except Exception:
                 score, logic, concept, feedback = _manual_eval(evaluator_llm, system_msg, human_msg, event_sink)
         else:
             score, logic, concept, feedback = _manual_eval(evaluator_llm, system_msg, human_msg, event_sink)
 
+# --- 2. 自动总结逻辑 ---
+        db_path = None
+        try:
+            if hasattr(runtime, 'settings'):
+                db_path = runtime.settings.memory_db_path
+            elif hasattr(runtime, 'config'):
+                db_path = runtime.config.memory_db_path
+        except Exception:
+            db_path = None
+
+        if db_path:
+            try:
+                import sqlite3 # 确保导入了
+                conn = sqlite3.connect(db_path)
+                cursor = conn.cursor()
+                cursor.execute("SELECT COUNT(*) FROM checkpoints")
+                count = cursor.fetchone()[0]
+                
+                # 调试打印：让你看到现在数据库里有多少条记录
+                print(f"DEBUG: 数据库 checkpoints 记录数 = {count}", flush=True)
+
+                # 满足 10 轮且是 10 的倍数时执行（测试时可以临时改成 > 0）
+                if count >= 0:
+                    print("📢 触发长期记忆总结...", flush=True)
+                    student_id = state.get("student_id", "default_student")
+                    summary_prompt = f"请简要总结学生(ID:{student_id})的表现，100字以内。"
+                    summary_res = evaluator_llm.invoke([HumanMessage(content=summary_prompt)])
+                    summary_text = content_to_text(summary_res.content)
+                    
+                    cursor.execute(
+                        "INSERT INTO long_term_memory (student_id, summary) VALUES (?, ?)",
+                        (student_id, summary_text)
+                    )
+                    conn.commit()
+                conn.close()
+            except Exception as e:
+                print(f"⚠️ 数据库操作跳过: {e}", flush=True)
+        # ------------------------------------
+
+        # 3. 后续的事件发送逻辑（确保缩进和 def evaluator_node 对齐）
         event_sink.emit(
             make_event(
                 "assessment.result",
                 "evaluator",
-                data={
-                    "total_score": score,
-                    "logic_score": logic,
-                    "concept_score": concept,
-                    "feedback": feedback,
-                },
+                data={"total_score": score, "logic_score": logic, "concept_score": concept, "feedback": feedback},
             )
         )
 
         event_sink.emit(
-            make_event(
-                "node.complete",
-                "evaluator",
-                message="Evaluator node completed.",
-            )
+            make_event("node.complete", "evaluator", message="Evaluator node completed.")
         )
 
         return {
@@ -89,6 +108,8 @@ def build_evaluator_node(evaluator_llm, event_sink: EventSink):
         }
 
     return evaluator_node
+
+# 记得保留你文件末尾原来的 _manual_eval 函数定义
 
 def _manual_eval(llm, system_msg, human_msg, event_sink):
     # Fallback to manual JSON parsing with improved prompts

@@ -2,9 +2,13 @@ import os
 from dataclasses import dataclass
 from functools import lru_cache
 from typing import Optional
-
+# --- 替换后的代码逻辑 ---
+try:
+    from pydantic_settings import BaseSettings
+except ImportError:
+    from pydantic import BaseSettings
+# -----------------------
 from dotenv import dotenv_values, load_dotenv
-
 
 PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 
@@ -61,6 +65,7 @@ class Settings:
     http_proxy: Optional[str]
     https_proxy: Optional[str]
     local_config_enabled: bool
+    chroma_dir: str
 
 
 LOCAL_CONFIG_KEYS = [
@@ -83,6 +88,7 @@ LOCAL_CONFIG_KEYS = [
     "HTTP_PROXY",
     "HTTPS_PROXY",
     "LOCAL_CONFIG_ENABLED",
+    "CHROMA_DIR",
 ]
 
 
@@ -283,4 +289,5 @@ def get_settings() -> Settings:
         http_proxy=http_proxy,
         https_proxy=https_proxy,
         local_config_enabled=os.getenv("LOCAL_CONFIG_ENABLED", "true").strip().lower() != "false",
+        chroma_dir=os.getenv("CHROMA_DIR", "").strip() or os.path.join(PROJECT_ROOT, "data", "chroma_db"),
     )

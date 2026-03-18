@@ -196,6 +196,30 @@
         document.getElementById('config-overlay').classList.remove('open');
     };
 
+    app.testConnection = async function testConnection() {
+        const status = document.getElementById('local-config-status');
+        status.innerText = '正在测试当前连接...';
+        status.style.color = 'var(--text-secondary)';
+        
+        try {
+            const res = await fetch('/api/config/test', {
+                method: 'POST'
+            });
+            const data = await res.json();
+            
+            if (res.ok && data.status === 'ok') {
+                status.innerText = `✅ ${data.message} (回应: ${data.details})`;
+                status.style.color = 'var(--accent-green)';
+            } else {
+                status.innerText = `❌ ${data.message}`;
+                status.style.color = 'var(--accent-red)';
+            }
+        } catch (error) {
+            status.innerText = `❌ 测试请求失败: ${error.message}`;
+            status.style.color = 'var(--accent-red)';
+        }
+    };
+
     app.saveLocalConfig = async function saveLocalConfig() {
         const vendorId = document.getElementById('local-chat-profile').value;
         const selectedModel = document.getElementById('local-model-select').value;

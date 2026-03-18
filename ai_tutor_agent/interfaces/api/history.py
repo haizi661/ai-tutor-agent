@@ -13,6 +13,7 @@ PRE_TOPIC_FLOW_STATUSES = {"greeting", "topic_intake", "meta_qa", "smalltalk"}
 
 def _serialize_state(values: dict[str, Any]) -> dict[str, Any]:
     return {
+        "student_id": values.get("student_id", "default_student"), # 新增学生id相关
         "current_topic": values.get("current_topic", ""),
         "proposed_topic": values.get("proposed_topic", ""),
         "tutor_content": values.get("tutor_content", ""),
@@ -147,3 +148,24 @@ async def delete_history(thread_id: str, request: Request):
         return {"status": "success"}
     finally:
         saver_conn.close()
+#加一个监听器，实现10轮之前的对话被冷处理
+async def check_and_trigger_cold_memory(thread_id: str, student_id: str, runtime):
+    """检查是否达到10轮，触发冷处理总结"""
+    db_path = runtime.settings.memory_db_path
+    conn = sqlite3.connect(db_path)
+    cursor = conn.cursor()
+    
+    # 1. 统计当前 thread_id 在 LangGraph 里的 checkpoints 数量
+    # 这里简化处理：每当整除 10 时触发一次总结
+    cursor.execute("SELECT COUNT(*) FROM checkpoints WHERE thread_id = ?", (thread_id,))
+    count = cursor.fetchone()[0]
+    
+    # 把 if count > 0 and count % 10 == 0: 
+# 临时改为：
+    if count >= 0: 
+        print("📢 正在执行强制总结测试...")
+
+        print(f"检测到第 {count} 轮对话，启动冷处理摘要...")
+        # 这里以后会调用 LLM 总结并存入 long_term_memory 表
+        # 暂时先打个日志，确保逻辑能跑通
+    conn.close()

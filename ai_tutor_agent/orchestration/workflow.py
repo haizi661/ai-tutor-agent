@@ -114,14 +114,8 @@ def build_workflow(
     workflow.add_node("topic_confirmer", build_topic_confirm_node(runtime.event_sink))
     
     workflow.add_node("tutor", build_tutor_node(tutor_llm, runtime))
-    workflow.add_node(
-        "tester",
-        build_tester_node(tester_llm, runtime.event_sink, runtime.answer_provider),
-    )
-    workflow.add_node(
-        "evaluator",
-        build_evaluator_node(evaluator_llm, runtime.event_sink),
-    )
+    workflow.add_node("tester", build_tester_node(tester_llm, runtime)) # 统一传 runtime
+    workflow.add_node("evaluator", build_evaluator_node(evaluator_llm, runtime)) # 统一传 runtime
 
     # 学前测评节点
     workflow.add_node(
@@ -173,6 +167,7 @@ def build_workflow(
         {"pause": END, "user_profiler": "user_profiler"},
     )
     workflow.add_edge("user_profiler", "tutor")
+    #调试用#raise ValueError("DEBUG: 如果你能看到这个报错，说明 workflow.py 加载正确！")
 
     # 主教学闭环边
     workflow.add_edge("tutor", "tester")
