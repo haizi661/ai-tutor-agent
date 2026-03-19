@@ -199,8 +199,9 @@ def _resume_interrupt_confirmation_worker(
     event_q: queue.Queue,
     input_q: queue.Queue,
 ):
-    del input_q
-    runtime_context = _build_runtime_context(thread_id, runtime, event_q, queue.Queue())
+    # Must reuse the session-managed input queue. Otherwise tester waits on a
+    # different queue and /api/answer cannot resume the blocked worker.
+    runtime_context = _build_runtime_context(thread_id, runtime, event_q, input_q)
     graph_app, conn = runtime.workflow_factory(runtime.settings, runtime=runtime_context)
     thread_config = {"configurable": {"thread_id": thread_id}}
 
