@@ -6,6 +6,30 @@ from ..core.state import AgentState
 from ..core.text import content_to_text
 
 
+def _build_recent_interrupt_context(history: list, limit: int = 6) -> str:
+    interrupt_msgs = []
+    for msg in history or []:
+        kind = str(msg.get("kind", ""))
+        role = str(msg.get("role", ""))
+        if kind in {"interruption_user", "interruption"}:
+            interrupt_msgs.append(msg)
+            continue
+        if role in {"user", "assistant"} and kind.startswith("interruption"):
+            interrupt_msgs.append(msg)
+
+    if not interrupt_msgs:
+        return ""
+
+    clipped = interrupt_msgs[-limit:]
+    lines = []
+    for item in clipped:
+        role = "用户" if str(item.get("role")) == "user" else "老师"
+        content = str(item.get("content", "")).strip()
+        if content:
+            lines.append(f"{role}: {content}")
+    return "\n".join(lines)
+
+
 def build_interruption_node(tutor_llm, runtime: RuntimeContext):
     def node(state: AgentState) -> dict:
         event_sink = runtime.event_sink
@@ -14,6 +38,9 @@ def build_interruption_node(tutor_llm, runtime: RuntimeContext):
         query = str(state.get("interrupt_query", "")).strip()
         if not query:
             return {"resume_tester": False}
+
+        history = list(state.get("conversation_history", []))
+        recent_interrupt_context = _build_recent_interrupt_context(history)
 
         event_sink.emit(
             make_event(
@@ -42,6 +69,7 @@ def build_interruption_node(tutor_llm, runtime: RuntimeContext):
                 f"当前学习主题：{state.get('current_topic', '')}\n"
                 f"用户临时问题：{query}\n"
                 f"{knowledge_prompt}\n"
+                f"最近的临时会话上下文（用于连续对话）：\n{recent_interrupt_context or '无'}\n"
                 "请给出清晰解释，控制在 220 字以内，最后一句请提示“我们继续回到主线作答”。"
             )
         )
@@ -76,7 +104,6 @@ def build_interruption_node(tutor_llm, runtime: RuntimeContext):
             )
         )
 
-        history = list(state.get("conversation_history", []))
         history.append({"role": "assistant", "kind": "interruption", "content": full_response})
 
         return {

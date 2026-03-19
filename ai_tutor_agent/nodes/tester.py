@@ -131,12 +131,15 @@ def build_tester_node(tester_llm, runtime: RuntimeContext):
                 interrupt_query = user_input.strip()
             if not interrupt_query:
                 interrupt_query = "请解释这道题涉及的关键知识点。"
+            history = list(state.get("conversation_history", []))
+            history.append({"role": "user", "kind": "interruption_user", "content": interrupt_query})
             return {
                 "tester_question": full_question,
                 "user_answer": "",
                 "interrupt_query": interrupt_query,
                 "resume_tester": True,
                 "skip_reason": "",
+                "conversation_history": history,
             }
 
         return {

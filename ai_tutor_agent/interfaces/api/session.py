@@ -43,6 +43,18 @@ class InterruptConfirmRequest(BaseModel):
     confirmed: bool
 
 
+def _clear_interrupt_history(history: list) -> list:
+    cleaned = []
+    for msg in history or []:
+        kind = str(msg.get("kind", ""))
+        if kind in {"interruption", "interruption_user"}:
+            continue
+        if kind.startswith("interruption"):
+            continue
+        cleaned.append(msg)
+    return cleaned
+
+
 def _build_runtime_context(thread_id: str, runtime, event_q: queue.Queue, input_q: queue.Queue) -> RuntimeContext:
     event_sink = WebEventSink(event_q)
     answer_provider = WebAnswerProvider(
@@ -194,6 +206,8 @@ def _resume_interrupt_confirmation_worker(
 
     try:
         if confirmed:
+            state = graph_app.get_state(thread_config).values or {}
+            cleaned_history = _clear_interrupt_history(state.get("conversation_history", []))
             graph_app.invoke(
                 {
                     "flow_status": "normal",
@@ -201,6 +215,7 @@ def _resume_interrupt_confirmation_worker(
                     "resume_tester": False,
                     "skip_reason": "",
                     "user_answer": "",
+                    "conversation_history": cleaned_history,
                 },
                 config=thread_config,
             )

@@ -33,6 +33,24 @@ def _is_resume_mainline_command(text: str) -> bool:
     return any(token in normalized for token in ["继续", "回到主线", "返回主线", "继续学习", "继续主线"])
 
 
+def _append_interrupt_user_message(history: list, query: str) -> list:
+    updated = list(history or [])
+    updated.append({"role": "user", "kind": "interruption_user", "content": query})
+    return updated
+
+
+def _clear_interrupt_history(history: list) -> list:
+    cleaned = []
+    for msg in history or []:
+        kind = str(msg.get("kind", ""))
+        if kind in {"interruption", "interruption_user"}:
+            continue
+        if kind.startswith("interruption"):
+            continue
+        cleaned.append(msg)
+    return cleaned
+
+
 def _should_continue_with_new_turn(state_values: dict, topic: str) -> bool:
     if not state_values or not topic.strip():
         return False
@@ -90,6 +108,7 @@ def run_learning_session(
                 return
 
             if _is_resume_mainline_command(topic) or _is_skip_command(topic):
+                cleaned_history = _clear_interrupt_history(state_snapshot.values.get("conversation_history", []))
                 event_sink.emit(
                     make_event(
                         "session.info",
@@ -105,6 +124,7 @@ def run_learning_session(
                         "resume_tester": False,
                         "skip_reason": "",
                         "user_answer": "",
+                        "conversation_history": cleaned_history,
                     },
                     config=thread_config,
                 )
@@ -115,6 +135,7 @@ def run_learning_session(
             query = topic.strip()
             if query.lower().startswith("/ask"):
                 query = query[4:].strip() or topic.strip()
+            history = _append_interrupt_user_message(state_snapshot.values.get("conversation_history", []), query)
             event_sink.emit(
                 make_event(
                     "session.info",
@@ -129,6 +150,7 @@ def run_learning_session(
                     "resume_tester": False,
                     "skip_reason": "",
                     "user_answer": "",
+                    "conversation_history": history,
                 },
                 config=thread_config,
             )
@@ -170,6 +192,7 @@ def run_learning_session(
             query = topic.strip()
             if query.lower().startswith("/ask"):
                 query = query[4:].strip() or topic.strip()
+            history = _append_interrupt_user_message(state_snapshot.values.get("conversation_history", []), query)
 
             event_sink.emit(
                 make_event(
@@ -187,6 +210,7 @@ def run_learning_session(
                     "resume_tester": False,
                     "skip_reason": "",
                     "user_answer": "",
+                    "conversation_history": history,
                 },
                 config=thread_config,
             )

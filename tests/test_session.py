@@ -92,3 +92,69 @@ def test_run_learning_session_does_not_resume_empty_pre_topic_history():
     assert app.updated is None
     assert app.invocations == []
     assert any("主题沟通阶段" in event.message for event in sink.events)
+
+
+def test_run_learning_session_interrupt_follow_up_keeps_context_history():
+    sink = BufferedEventSink()
+    app = FakeApp(
+        {
+            "current_topic": "控制理论",
+            "flow_status": "awaiting_interrupt_confirmation",
+            "is_assessed": True,
+            "conversation_history": [
+                {"role": "user", "kind": "interruption_user", "content": "上一轮追问"},
+                {"role": "assistant", "kind": "interruption", "content": "上一轮解答"},
+            ],
+        }
+    )
+
+    run_learning_session(
+        app,
+        sink,
+        thread_id="thread-4",
+        topic="那这个闭环怎么判断稳定？",
+        current_state=app.get_state({"configurable": {"thread_id": "thread-4"}}),
+    )
+
+    assert app.updated is None
+    payload, config = app.invocations[0]
+    assert payload["interrupt_query"] == "那这个闭环怎么判断稳定？"
+    assert payload["conversation_history"][-1] == {
+        "role": "user",
+        "kind": "interruption_user",
+        "content": "那这个闭环怎么判断稳定？",
+    }
+    assert config == {"configurable": {"thread_id": "thread-4"}}
+
+
+def test_run_learning_session_resume_mainline_clears_interrupt_history():
+    sink = BufferedEventSink()
+    app = FakeApp(
+        {
+            "current_topic": "控制理论",
+            "flow_status": "awaiting_interrupt_confirmation",
+            "is_assessed": True,
+            "conversation_history": [
+                {"role": "user", "kind": "interruption_user", "content": "临时追问1"},
+                {"role": "assistant", "kind": "interruption", "content": "临时解答1"},
+                {"role": "assistant", "kind": "tutor", "content": "主线讲解"},
+            ],
+        }
+    )
+
+    run_learning_session(
+        app,
+        sink,
+        thread_id="thread-5",
+        topic="继续主线",
+        current_state=app.get_state({"configurable": {"thread_id": "thread-5"}}),
+    )
+
+    assert app.updated is None
+    payload, config = app.invocations[0]
+    assert payload["flow_status"] == "normal"
+    assert payload["interrupt_query"] == ""
+    assert payload["conversation_history"] == [
+        {"role": "assistant", "kind": "tutor", "content": "主线讲解"},
+    ]
+    assert config == {"configurable": {"thread_id": "thread-5"}}
