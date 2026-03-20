@@ -35,3 +35,7 @@ Thumbs.db
 
 # AI Agent Context
 GEMINI.md
+
+# ===== vector db =====
+data/chroma_db/
+
