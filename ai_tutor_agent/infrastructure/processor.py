@@ -8,7 +8,7 @@ import tempfile
 import requests
 
 from langchain_core.documents import Document
-from langchain_text_splitters import MarkdownHeaderTextSplitter
+from langchain_text_splitters import MarkdownHeaderTextSplitter, RecursiveCharacterTextSplitter
 from dotenv import load_dotenv
 
 
@@ -20,6 +20,8 @@ class KnowledgeProcessor:
             "Content-Type": "application/json",
             "Authorization": f"Bearer {api_token}"
         }
+        self.session = requests.Session()
+        self.session.trust_env = False
         print(f"🛠️ [DEBUG] Processor 初始化成功. Token 前四位: {self.api_token[:4]}")
 
     def parse_pdf_to_md(self, local_path: str) -> str:
@@ -54,7 +56,7 @@ class KnowledgeProcessor:
 
             try:
                 print("📥 [Step 4] 正在下载解析结果压缩包...")
-                resp_zip = requests.get(full_zip_url, timeout=120)
+                resp_zip = self.session.get(full_zip_url, timeout=120)
                 resp_zip.raise_for_status()
 
                 with open(zip_path, "wb") as f:
@@ -124,7 +126,7 @@ class KnowledgeProcessor:
             }
 
             try:
-                resp_apply = requests.post(
+                resp_apply = self.session.post(
                     apply_url,
                     headers=HEADERS,
                     json=payload,
@@ -160,7 +162,7 @@ class KnowledgeProcessor:
 
             try:
                 with open(local_path, "rb") as f:
-                    resp_upload = requests.put(upload_url, data=f, timeout=300)
+                    resp_upload = self.session.put(upload_url, data=f, timeout=300)
                     resp_upload.raise_for_status()
             except requests.exceptions.Timeout:
                 raise Exception("⏱️ 文件上传超时，请检查网络后重试。")
@@ -179,12 +181,6 @@ class KnowledgeProcessor:
             start_time = time.time()
             poll_interval = 10
 
-            def signal_handler(sig, frame):
-                print("\n\n⚠️ 用户主动终止 (Ctrl+C)。正在退出...")
-                sys.exit(0)
-
-            signal.signal(signal.SIGINT, signal_handler)
-
             final_state = None
             result_url = None
 
@@ -197,7 +193,7 @@ class KnowledgeProcessor:
 
                 try:
                     query_url = f"{BASE_URL}/extract-results/batch/{batch_id}"
-                    resp_query = requests.get(
+                    resp_query = self.session.get(
                         query_url,
                         headers=HEADERS,
                         timeout=15
@@ -248,8 +244,8 @@ class KnowledgeProcessor:
                 except requests.exceptions.Timeout:
                     print(f"   ⚠️ 查询请求超时 (>15s)，重试中... ({elapsed}s)")
                 except KeyboardInterrupt:
-                    print("\n⚠️ 检测到中断信号，正在退出...")
-                    sys.exit(0)
+                    print("\n⚠️ 检测到中断信号，停止当前解析任务。")
+                    raise
                 except Exception as e:
                     print(f"   ❌ 轮询发生异常: {e}")
 
@@ -270,7 +266,56 @@ class KnowledgeProcessor:
             raise
 
     def split_by_semantics(self, md_content: str) -> list[Document]:
-        splitter = MarkdownHeaderTextSplitter(
+        # 第一步：按 Markdown 标题切
+        header_splitter = MarkdownHeaderTextSplitter(
             headers_to_split_on=[("#", "H1"), ("##", "H2"), ("###", "H3")]
         )
-        return splitter.split_text(md_content)
+        header_docs = header_splitter.split_text(md_content)
+
+        # 第二步：再按长度细切，避免单块过长
+        text_splitter = RecursiveCharacterTextSplitter(
+            chunk_size=1000,
+            chunk_overlap=150,
+            separators=["\n\n", "\n", "。", ".", " ", ""]
+        )
+
+        final_docs = []
+        chunk_id = 0
+
+        for doc in header_docs:
+            content = (doc.page_content or "").strip()
+            if not content:
+                continue
+
+            base_meta = dict(doc.metadata) if doc.metadata else {}
+
+            # 尝试抽取 section
+            # 🔥 提取 section（统一字段）
+            section = (
+                base_meta.get("H3")
+                or base_meta.get("H2")
+                or base_meta.get("H1")
+                or "UNKNOWN"
+            )
+            # 太长的块继续切
+            sub_docs = text_splitter.split_text(content)
+
+            for chunk in sub_docs:
+                chunk = chunk.strip()
+                if not chunk:
+                    continue
+
+                meta = dict(base_meta)
+                meta["chunk_id"] = chunk_id
+                meta["section"] = section
+                meta["char_length"] = len(chunk)
+
+                final_docs.append(
+                    Document(
+                        page_content=chunk,
+                        metadata=meta
+                    )
+                )
+                chunk_id += 1
+
+        return final_docs
