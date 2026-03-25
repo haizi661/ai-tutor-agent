@@ -120,14 +120,8 @@ def build_workflow(
     workflow.add_node("topic_confirmer", build_topic_confirm_node(runtime.event_sink))
     
     workflow.add_node("tutor", build_tutor_node(tutor_llm, runtime))
-    workflow.add_node(
-        "tester",
-        build_tester_node(tester_llm, runtime.event_sink, runtime.answer_provider),
-    )
-    workflow.add_node(
-        "evaluator",
-        build_evaluator_node(evaluator_llm, runtime.event_sink, settings.pass_score),
-    )
+    workflow.add_node("tester", build_tester_node(tester_llm, runtime))  # 统一传 runtime
+    workflow.add_node("evaluator", build_evaluator_node(evaluator_llm, runtime))  # 统一传 runtime
     # 新增：Coach 助教节点
     workflow.add_node(
         "coach",

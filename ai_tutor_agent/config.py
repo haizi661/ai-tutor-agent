@@ -63,6 +63,10 @@ class Settings:
     local_config_enabled: bool
     vector_store_backend: str = "chroma"
     vector_store_dir: str = "data/vector_store"
+    # RAG 2.0 新增字段
+    dashscope_api_key: Optional[str] = None
+    mineru_api_token: Optional[str] = None
+    chroma_dir: str = "data/chroma_db"
 
 
 LOCAL_CONFIG_KEYS = [
@@ -243,8 +247,8 @@ def get_settings() -> Settings:
             default_model = "gpt-5-mini"
 
     embedding_provider = os.getenv("EMBEDDING_PROVIDER", "local").strip().lower() or "local"
-    if embedding_provider not in {"local", "google", "openai"}:
-        raise RuntimeError("EMBEDDING_PROVIDER must be one of: local, google, openai.")
+    if embedding_provider not in {"local", "google", "openai", "dashscope"}:
+        raise RuntimeError("EMBEDDING_PROVIDER must be one of: local, google, openai, dashscope.")
     if embedding_provider == "google" and not google_api_key:
         raise RuntimeError("GOOGLE_API_KEY is required when EMBEDDING_PROVIDER=google.")
     if embedding_provider == "openai" and not openai_api_key:
@@ -258,6 +262,7 @@ def get_settings() -> Settings:
         "local": "sentence-transformers/all-MiniLM-L6-v2",
         "google": "models/text-embedding-004",
         "openai": "text-embedding-3-small",
+        "dashscope": "text-embedding-v2",
     }[embedding_provider]
 
     # Explicitly check for MODEL_NAME
@@ -293,4 +298,7 @@ def get_settings() -> Settings:
         http_proxy=http_proxy,
         https_proxy=https_proxy,
         local_config_enabled=os.getenv("LOCAL_CONFIG_ENABLED", "true").strip().lower() != "false",
+        dashscope_api_key=os.getenv("DASHSCOPE_API_KEY", "").strip() or None,
+        mineru_api_token=os.getenv("MINERU_API_TOKEN", "").strip() or None,
+        chroma_dir=os.getenv("CHROMA_DIR", "").strip() or os.path.join(PROJECT_ROOT, "data", "chroma_db"),
     )

@@ -31,10 +31,13 @@ class AgentState(TypedDict):
     is_correct_direction: bool         # 作答方向是否正确
     needs_hint: bool                  # 是否应先给思路提示再重试
     coach_content: str                 # 补救教练节点生成的短讲解
+    # --- 知识库功能拓展字段 ---
+    student_id: str                    # 学生唯一 ID
 
 
 def build_initial_state(topic: str = "") -> AgentState:
     return {
+        "student_id": "default_student",
         "current_topic": topic,
         "proposed_topic": "",
         "tutor_content": "",
