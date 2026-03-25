@@ -12,6 +12,9 @@ if __name__ == "__main__":
     if len(sys.argv) > 1 and sys.argv[1] == "--cli":
         from ai_tutor_agent.cli import run_cli
         run_cli()
+    elif len(sys.argv) > 1 and sys.argv[1] == "--debug-rag":
+        from ai_tutor_agent.tools.debug_rag import main as run_debug_rag
+        run_debug_rag(sys.argv[2:])
     else:
         from ai_tutor_agent.interfaces.api.app import run_api
         run_api()

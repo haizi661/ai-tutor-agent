@@ -75,7 +75,12 @@ def build_tutor_node(tutor_llm, runtime: RuntimeContext):
              search_query = f"{state['current_topic']} {last_user_msg}"
              rag_reason = "topic_with_question"
         
+        rag_hybrid_enabled = bool(
+            getattr(getattr(runtime, "settings", None), "rag_hybrid_enabled", False)
+        )
+        rag_mode = "hybrid" if rag_hybrid_enabled else "vector"
         sys.stderr.write(f"🔍 [RAG] 由于 {rag_reason}，使用查询词: '{search_query}'\n")
+        sys.stderr.write(f"[RAG][node_query] node=tutor mode={rag_mode} query={search_query}\n")
 
         context = knowledge_provider.query(search_query)
         knowledge_prompt = ""

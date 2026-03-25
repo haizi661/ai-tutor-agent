@@ -43,6 +43,11 @@ def build_test_settings() -> Settings:
         http_proxy=None,
         https_proxy=None,
         local_config_enabled=True,
+        chroma_dir="data/chroma_db",
+        dashscope_api_key=None,
+        mineru_api_token=None,
+        rag_hybrid_enabled=False,
+        rag_mineru_enabled=False,
     )
 
 

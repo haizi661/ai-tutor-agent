@@ -30,6 +30,7 @@ dev = [
 
 [project.scripts]
 ai-tutor-agent = "ai_tutor_agent.cli:run_cli"
+ai-tutor-debug-rag = "ai_tutor_agent.tools.debug_rag:main"
 
 [tool.setuptools]
 include-package-data = false

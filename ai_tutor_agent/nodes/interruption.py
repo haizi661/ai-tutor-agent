@@ -1,4 +1,5 @@
 from langchain_core.messages import HumanMessage, SystemMessage
+import sys
 
 from ..core.events import make_event
 from ..core.ports import RuntimeContext
@@ -52,7 +53,20 @@ def build_interruption_node(tutor_llm, runtime: RuntimeContext):
         )
 
         search_query = f"{state.get('current_topic', '')} {query}".strip()
+        rag_hybrid_enabled = bool(
+            getattr(getattr(runtime, "settings", None), "rag_hybrid_enabled", False)
+        )
+        rag_mode = "hybrid" if rag_hybrid_enabled else "vector"
+        sys.stderr.write(f"[RAG][node_query] node=interruption mode={rag_mode} query={search_query}\n")
+        sys.stderr.flush()
         context = knowledge_provider.query(search_query)
+        if not context:
+            fallback_query = query
+            sys.stderr.write(
+                f"[RAG][node_query_fallback] node=interruption mode={rag_mode} query={fallback_query}\n"
+            )
+            sys.stderr.flush()
+            context = knowledge_provider.query(fallback_query)
         knowledge_prompt = ""
         if context:
             knowledge_prompt = (
@@ -60,6 +74,10 @@ def build_interruption_node(tutor_llm, runtime: RuntimeContext):
                 "请优先依据以下知识库内容作答，确保术语与结论准确：\n"
                 f"---\n{context}\n---\n"
             )
+            sys.stderr.write(f"[RAG][node_result] node=interruption hit=true context_len={len(context)}\n")
+        else:
+            sys.stderr.write("[RAG][node_result] node=interruption hit=false context_len=0\n")
+        sys.stderr.flush()
 
         system_msg = SystemMessage(
             content="你是一位耐心、严谨的老师。请先解答用户的临时问题，再提醒其回到主线任务。"

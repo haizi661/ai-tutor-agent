@@ -30,6 +30,11 @@ def build_test_settings(tmp_path):
         http_proxy=None,
         https_proxy=None,
         local_config_enabled=True,
+        chroma_dir=str(tmp_path / "chroma_db"),
+        dashscope_api_key=None,
+        mineru_api_token=None,
+        rag_hybrid_enabled=False,
+        rag_mineru_enabled=False,
     )
 
 
@@ -46,7 +51,8 @@ def test_local_knowledge_provider_falls_back_when_embedding_backend_fails(monkey
 
     assert provider.vector_store is None
     assert provider.query("控制理论") == ""
-    assert provider.add_document(str(tmp_path / "missing.pdf")) is False
+    result = provider.add_document(str(tmp_path / "missing.pdf"))
+    assert result["success"] is False
 
 
 def test_chunk_text_produces_overlapping_segments():

@@ -169,6 +169,11 @@ def build_test_settings(tmp_path):
         http_proxy=None,
         https_proxy=None,
         local_config_enabled=True,
+        chroma_dir=str(tmp_path / "chroma_db"),
+        dashscope_api_key=None,
+        mineru_api_token=None,
+        rag_hybrid_enabled=False,
+        rag_mineru_enabled=False,
     )
 
 
@@ -182,6 +187,27 @@ def create_test_client(tmp_path):
     )
     app = create_api_app(runtime_factory=lambda: runtime)
     return TestClient(app)
+
+
+class UploadableKnowledgeProvider:
+    def __init__(self):
+        self.vector_store = object()
+        self.bm25 = object()
+
+    def query(self, query: str) -> str:
+        del query
+        return ""
+
+    def add_document(self, source_path: str) -> dict:
+        del source_path
+        return {
+            "success": True,
+            "filename": "demo.txt",
+            "chunks": 2,
+            "message": "ok",
+            "parse_backend": "text",
+            "bm25_rebuilt": True,
+        }
 
 
 def test_api_config_endpoint_allows_runtime_model_switch(tmp_path):
@@ -354,6 +380,49 @@ def test_api_start_continues_running_session_that_is_waiting_for_input(tmp_path)
         assert response.json()["status"] == "continued"
         assert session["input_q"].get_nowait() == "你是什么模型"
         assert session["awaiting_input"] is False
+
+
+def test_knowledge_status_exposes_rag2_fields(tmp_path):
+    runtime = ApiRuntime(
+        settings=build_test_settings(tmp_path),
+        knowledge_provider=UploadableKnowledgeProvider(),
+        workflow_factory=FakeWorkflowFactory(FakeCheckpointStore()),
+        checkpoint_factory=lambda path: (FakeCheckpointStore(), DummyConn()),
+    )
+    runtime.settings = runtime.settings.__class__(
+        **{**runtime.settings.__dict__, "rag_hybrid_enabled": True, "rag_mineru_enabled": True}
+    )
+
+    with TestClient(create_api_app(runtime_factory=lambda: runtime)) as client:
+        response = client.get("/api/knowledge")
+        assert response.status_code == 200
+        payload = response.json()
+        assert payload["enabled"] is True
+        assert payload["supports_upload"] is True
+        assert payload["retrieval_mode"] == "hybrid"
+        assert payload["bm25_ready"] is True
+        assert payload["rag_mineru_enabled"] is True
+
+
+def test_upload_returns_optional_parse_backend_and_bm25(tmp_path):
+    runtime = ApiRuntime(
+        settings=build_test_settings(tmp_path),
+        knowledge_provider=UploadableKnowledgeProvider(),
+        workflow_factory=FakeWorkflowFactory(FakeCheckpointStore()),
+        checkpoint_factory=lambda path: (FakeCheckpointStore(), DummyConn()),
+    )
+
+    with TestClient(create_api_app(runtime_factory=lambda: runtime)) as client:
+        response = client.post(
+            "/api/upload",
+            files={"file": ("demo.txt", b"hello world", "text/plain")},
+        )
+        assert response.status_code == 200
+        payload = response.json()
+        assert payload["status"] == "success"
+        assert payload["filename"] == "demo.txt"
+        assert payload["parse_backend"] == "text"
+        assert payload["bm25_rebuilt"] is True
 
 
 def test_local_config_round_trip(monkeypatch, tmp_path):

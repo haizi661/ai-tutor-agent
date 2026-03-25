@@ -82,6 +82,11 @@ def test_google_compatible_key_does_not_mark_openai_vendor_configured(tmp_path):
         http_proxy=None,
         https_proxy=None,
         local_config_enabled=True,
+        chroma_dir=str(tmp_path / "chroma_db"),
+        dashscope_api_key=None,
+        mineru_api_token=None,
+        rag_hybrid_enabled=False,
+        rag_mineru_enabled=False,
     )
 
     profiles = {profile["id"]: profile for profile in build_chat_profiles(settings)}

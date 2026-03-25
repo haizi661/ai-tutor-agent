@@ -24,6 +24,14 @@ def _coerce_int(raw_value: str, fallback: int) -> int:
         return fallback
 
 
+def _coerce_bool(raw_value, fallback: bool) -> bool:
+    if raw_value is None:
+        return fallback
+    if isinstance(raw_value, bool):
+        return raw_value
+    return str(raw_value).strip().lower() == "true"
+
+
 def _raw_base_matches(raw_values: dict[str, str], pattern: str) -> bool:
     return pattern in (raw_values.get("OPENAI_API_BASE", "") or "")
 
@@ -56,9 +64,13 @@ class LocalConfigUpdateRequest(BaseModel):
     model_name: str = ""
     embedding_provider: str = "local"
     embedding_model_name: str = ""
+    dashscope_api_key: str = ""
     knowledge_chunk_size: int = 1000
     knowledge_chunk_overlap: int = 150
     knowledge_top_k: int = 3
+    rag_hybrid_enabled: bool = False
+    rag_mineru_enabled: bool = False
+    mineru_api_token: str = ""
     http_proxy: str = ""
     https_proxy: str = ""
 
@@ -126,9 +138,15 @@ async def get_local_config(request: Request):
         "has_openai_api_key": bool(openai_key),
         "embedding_provider": raw_values.get("EMBEDDING_PROVIDER", settings.embedding_provider),
         "embedding_model_name": raw_values.get("EMBEDDING_MODEL_NAME", settings.embedding_model_name),
+        "dashscope_api_key": _mask_secret(raw_values.get("DASHSCOPE_API_KEY", settings.dashscope_api_key or "")),
         "knowledge_chunk_size": _coerce_int(raw_values.get("KNOWLEDGE_CHUNK_SIZE"), settings.knowledge_chunk_size),
         "knowledge_chunk_overlap": _coerce_int(raw_values.get("KNOWLEDGE_CHUNK_OVERLAP"), settings.knowledge_chunk_overlap),
         "knowledge_top_k": _coerce_int(raw_values.get("KNOWLEDGE_TOP_K"), settings.knowledge_top_k),
+        "rag_hybrid_enabled": _coerce_bool(raw_values.get("RAG_HYBRID_ENABLED"), settings.rag_hybrid_enabled),
+        "rag_mineru_enabled": _coerce_bool(raw_values.get("RAG_MINERU_ENABLED"), settings.rag_mineru_enabled),
+        "mineru_api_token": _mask_secret(raw_values.get("MINERU_API_TOKEN", settings.mineru_api_token or "")),
+        "has_dashscope_api_key": bool(raw_values.get("DASHSCOPE_API_KEY", settings.dashscope_api_key or "")),
+        "has_mineru_api_token": bool(raw_values.get("MINERU_API_TOKEN", settings.mineru_api_token or "")),
         "http_proxy": raw_values.get("HTTP_PROXY", settings.http_proxy or ""),
         "https_proxy": raw_values.get("HTTPS_PROXY", settings.https_proxy or ""),
     }
@@ -165,9 +183,13 @@ async def update_local_config(req: LocalConfigUpdateRequest, request: Request):
         "MODEL_NAME": req.model_name.strip() or raw_values.get("MODEL_NAME", ""),
         "EMBEDDING_PROVIDER": req.embedding_provider.strip() or "local",
         "EMBEDDING_MODEL_NAME": req.embedding_model_name.strip(),
+        "DASHSCOPE_API_KEY": req.dashscope_api_key.strip() or raw_values.get("DASHSCOPE_API_KEY", ""),
         "KNOWLEDGE_CHUNK_SIZE": str(req.knowledge_chunk_size),
         "KNOWLEDGE_CHUNK_OVERLAP": str(req.knowledge_chunk_overlap),
         "KNOWLEDGE_TOP_K": str(req.knowledge_top_k),
+        "RAG_HYBRID_ENABLED": "true" if req.rag_hybrid_enabled else "false",
+        "RAG_MINERU_ENABLED": "true" if req.rag_mineru_enabled else "false",
+        "MINERU_API_TOKEN": req.mineru_api_token.strip() or raw_values.get("MINERU_API_TOKEN", ""),
         "HTTP_PROXY": req.http_proxy.strip(),
         "HTTPS_PROXY": req.https_proxy.strip(),
     }

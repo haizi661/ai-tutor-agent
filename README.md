@@ -92,7 +92,24 @@ python main.py
 python main.py --cli
 ```
 
-5. 运行测试
+5. 如需 RAG 检索调试（结构化调试工具）
+
+```bash
+python main.py --debug-rag
+# 或安装后使用: ai-tutor-debug-rag
+
+# 单次检索并导出报告
+python main.py --debug-rag --mode hybrid --once "PID 控制是什么" --export data/debug_rag_report.json
+
+# 比较不同模式
+python main.py --debug-rag --mode raw
+python main.py --debug-rag --mode rerank --recall-k 10 --final-k 3
+
+# 禁用 query rewrite
+python main.py --debug-rag --no-rewrite
+```
+
+6. 运行测试
 
 ```bash
 PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 python -m pytest -q
@@ -225,17 +242,36 @@ PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 python -m pytest -q
 
 ### 3. RAG 配置
 
-- `EMBEDDING_PROVIDER`：`local / google / openai`
+- `EMBEDDING_PROVIDER`：`local / google / openai / dashscope`
 - `EMBEDDING_MODEL_NAME`
 - `KNOWLEDGE_CHUNK_SIZE`
 - `KNOWLEDGE_CHUNK_OVERLAP`
 - `KNOWLEDGE_TOP_K`
+- `CHROMA_DIR`
+- `DASHSCOPE_API_KEY`（当 `EMBEDDING_PROVIDER=dashscope` 时需要）
+- `MINERU_API_TOKEN`（可选，开启 MinerU PDF 解析时需要）
+- `RAG_HYBRID_ENABLED`（默认 false，开启向量+BM25 混合召回）
+- `RAG_MINERU_ENABLED`（默认 false，开启 MinerU 优先 PDF 解析）
 
 小团队默认推荐：
 
 ```env
 EMBEDDING_PROVIDER=local
 EMBEDDING_MODEL_NAME=sentence-transformers/all-MiniLM-L6-v2
+```
+
+RAG 2.0 推荐灰度顺序：
+
+```env
+RAG_HYBRID_ENABLED=true
+RAG_MINERU_ENABLED=false
+```
+
+当你确认外部网络与配额稳定后，再开启：
+
+```env
+RAG_MINERU_ENABLED=true
+MINERU_API_TOKEN=your_token_here
 ```
 
 ### 4. 本地配置页

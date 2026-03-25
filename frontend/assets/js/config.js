@@ -173,9 +173,17 @@
         document.getElementById('local-model-name').value = data.model_name || '';
         document.getElementById('local-embedding-provider').value = data.embedding_provider || 'local';
         document.getElementById('local-embedding-model').value = data.embedding_model_name || '';
+        const dashscopeKeyInput = document.getElementById('local-dashscope-api-key');
+        dashscopeKeyInput.value = '';
+        dashscopeKeyInput.placeholder = data.dashscope_api_key ? `已保存：${data.dashscope_api_key}` : '仅当 embedding_provider=dashscope 时需要';
         document.getElementById('local-top-k').value = data.knowledge_top_k || 3;
         document.getElementById('local-chunk-size').value = data.knowledge_chunk_size || 1000;
         document.getElementById('local-chunk-overlap').value = data.knowledge_chunk_overlap || 150;
+        document.getElementById('local-rag-hybrid-enabled').value = data.rag_hybrid_enabled ? 'true' : 'false';
+        document.getElementById('local-rag-mineru-enabled').value = data.rag_mineru_enabled ? 'true' : 'false';
+        const mineruTokenInput = document.getElementById('local-mineru-api-token');
+        mineruTokenInput.value = '';
+        mineruTokenInput.placeholder = data.mineru_api_token ? `已保存：${data.mineru_api_token}` : '仅当使用 MinerU 时需要';
         document.getElementById('local-http-proxy').value = data.http_proxy || '';
         document.getElementById('local-https-proxy').value = data.https_proxy || '';
         app.renderVendorModels(data.selected_vendor || data.chat_profile || 'gemini', data.selected_model || data.model_name || '');
@@ -239,9 +247,13 @@
             model_name: vendorId === 'custom' ? document.getElementById('local-model-name').value.trim() : selectedModel,
             embedding_provider: document.getElementById('local-embedding-provider').value,
             embedding_model_name: document.getElementById('local-embedding-model').value.trim(),
+            dashscope_api_key: document.getElementById('local-dashscope-api-key').value.trim(),
             knowledge_top_k: Number(document.getElementById('local-top-k').value || 3),
             knowledge_chunk_size: Number(document.getElementById('local-chunk-size').value || 1000),
             knowledge_chunk_overlap: Number(document.getElementById('local-chunk-overlap').value || 150),
+            rag_hybrid_enabled: document.getElementById('local-rag-hybrid-enabled').value === 'true',
+            rag_mineru_enabled: document.getElementById('local-rag-mineru-enabled').value === 'true',
+            mineru_api_token: document.getElementById('local-mineru-api-token').value.trim(),
             http_proxy: document.getElementById('local-http-proxy').value.trim(),
             https_proxy: document.getElementById('local-https-proxy').value.trim(),
             google_api_key: '',
@@ -282,7 +294,9 @@
         state.localConfig = data.local;
         app.populateLocalConfigForm(state.localConfig);
         await app.fetchConfig();
-        status.innerText = '本地配置已保存。聊天档案会在下一次启动或恢复时使用；RAG 已按新配置重建。';
+        const parserLabel = payload.rag_mineru_enabled ? 'MinerU（云解析）' : 'PyMuPDF（本地解析）';
+        const retrievalLabel = payload.rag_hybrid_enabled ? 'Hybrid（向量+BM25）' : 'Vector（仅向量）';
+        status.innerText = `本地配置已保存。当前检索模式：${retrievalLabel}；PDF 解析器：${parserLabel}。`;
         status.style.color = 'var(--accent-green)';
     };
 })();
