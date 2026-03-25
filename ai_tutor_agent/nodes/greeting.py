@@ -68,7 +68,7 @@ def build_greeting_node(llm, event_sink: EventSink, answer_provider: AnswerProvi
                 prompt="我还没听清你想学什么。请直接告诉我一个明确主题，例如“控制理论”“高等数学”“PID 控制器”。",
                 state=state,
             )
-            return {"current_topic": new_input, "flow_status": "greeting"}
+            return {"proposed_topic": new_input.strip(), "flow_status": "topic_confirmation_pending"}
 
         system_msg = SystemMessage(
             content="""你是一位AI伴学导师，负责确认用户真正想学习的主题。
@@ -116,7 +116,7 @@ def build_greeting_node(llm, event_sink: EventSink, answer_provider: AnswerProvi
                         prompt=assistant_reply or "请直接告诉我一个明确的学习主题。",
                         state=state,
                     )
-                    return {"current_topic": new_input, "flow_status": "greeting"}
+                    return {"proposed_topic": new_input.strip(), "flow_status": "topic_confirmation_pending"}
         except Exception:
             pass
 
@@ -126,6 +126,6 @@ def build_greeting_node(llm, event_sink: EventSink, answer_provider: AnswerProvi
             state=state
         )
 
-        return {"current_topic": new_input, "flow_status": "greeting"}
+        return {"proposed_topic": new_input.strip(), "flow_status": "topic_confirmation_pending"}
 
     return node

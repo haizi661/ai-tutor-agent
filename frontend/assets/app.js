@@ -249,9 +249,16 @@
             if (e.key === 'Enter' && !e.shiftKey) {
                 e.preventDefault();
                 app.handlePrimaryAction();
+                // Reset height after send
+                setTimeout(() => {
+                    chatInput.style.height = 'auto';
+                }, 0);
             }
         });
-        chatInput.addEventListener('input', () => {
+        chatInput.addEventListener('input', function() {
+            // Auto-resize logic
+            this.style.height = 'auto';
+            this.style.height = (this.scrollHeight) + 'px';
             app.applyPrimaryActionState();
         });
 

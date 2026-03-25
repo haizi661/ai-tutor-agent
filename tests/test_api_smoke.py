@@ -449,6 +449,8 @@ def test_topic_confirmation_resume_flow(tmp_path):
         assert updated["state"]["current_topic"] == "控制理论"
         assert updated["state"]["flow_status"] == "awaiting_assessment"
         assert updated["state"]["proposed_topic"] == ""
+        assert updated["state"]["coach_content"] == ""
+        assert updated["state"]["needs_hint"] is False
 
 
 def test_api_start_continues_running_session_that_is_waiting_for_input(tmp_path):
@@ -618,6 +620,41 @@ def test_waiting_for_input_timeout_emits_error_and_end(monkeypatch, tmp_path):
         assert detail.status_code == 200
         assert detail.json()["runtime"]["is_running"] is False
         assert detail.json()["runtime"]["awaiting_input"] is False
+
+
+def test_assessment_stream_event_contract_includes_question_payload(tmp_path):
+    thread_id = "session-assessment-contract"
+    with create_test_client(tmp_path) as client:
+        start = client.post("/api/start", json={"thread_id": thread_id, "topic": "控制理论"})
+        assert start.status_code == 200
+
+        stream = client.get(f"/api/stream?thread_id={thread_id}")
+        assert stream.status_code == 200
+        assert 'event: assessment.form_ready' in stream.text
+        assert '"type": "assessment.form_ready"' in stream.text
+        assert '"source": "assessment_generator"' in stream.text
+        assert '"questions": [{' in stream.text
+        assert '"question": "你对控制系统稳定性的理解程度如何？"' in stream.text
+
+
+def test_profile_radar_stream_event_contract_includes_scores(tmp_path):
+    thread_id = "session-profile-contract"
+    with create_test_client(tmp_path) as client:
+        client.post("/api/start", json={"thread_id": thread_id, "topic": "控制理论"})
+        client.get(f"/api/stream?thread_id={thread_id}")
+        submit = client.post(
+            "/api/submit_assessment",
+            json={"thread_id": thread_id, "answers": {"1": "C"}},
+        )
+        assert submit.status_code == 200
+
+        stream = client.get(f"/api/stream?thread_id={thread_id}")
+        assert stream.status_code == 200
+        assert 'event: profile.radar_data' in stream.text
+        assert '"type": "profile.radar_data"' in stream.text
+        assert '"source": "user_profiler"' in stream.text
+        assert '"dimensions": ["基础概念", "规则理解", "逻辑推理", "场景应用", "细节辨析", "表达信心"]' in stream.text
+        assert '"objective_scores": [65, 60, 55, 50, 45, 40]' in stream.text
 
 
 def test_session_manager_reset_queues_reuses_existing_queue_instances():

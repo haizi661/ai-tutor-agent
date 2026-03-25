@@ -64,6 +64,6 @@ def build_coach_node(llm, event_sink):
             )
         )
 
-        return {"feedback": full_hint} # 将提示作为新的反馈传回
+        return {"coach_content": full_hint}
 
     return node

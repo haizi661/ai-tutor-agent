@@ -212,11 +212,18 @@ def build_evaluator_node(evaluator_llm, event_sink: EventSink, pass_score: int):
         new_score_history = score_history + [(result.total_score, result.logic_score, result.concept_score, result.encouragement)]
         new_attempt_count = 0 if result.total_score >= pass_score else attempt_count + 1
 
-        # 生成完整反馈文本并流式推送
+        # 生成完整反馈文本并模拟流式推送
         rich_feedback = _format_rich_feedback(result, attempt_count)
-        event_sink.emit(
-            make_event("node.stream", "evaluator", data={"text": rich_feedback})
-        )
+        
+        # Simulate streaming for better UX
+        import time
+        chunk_size = 15
+        for i in range(0, len(rich_feedback), chunk_size):
+            chunk = rich_feedback[i:i+chunk_size]
+            event_sink.emit(
+                make_event("node.stream", "evaluator", data={"text": chunk})
+            )
+            time.sleep(0.02)
 
         event_sink.emit(
             make_event(

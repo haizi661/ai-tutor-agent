@@ -10,3 +10,7 @@ def test_build_initial_state():
     assert state["concept_score"] == 0
     assert state["feedback"] == ""
     assert state["assessment_radar"] == {}
+    assert state["attempt_count"] == 0
+    assert state["score_history"] == []
+    assert state["needs_hint"] is False
+    assert state["coach_content"] == ""

@@ -68,6 +68,15 @@ def test_classify_intent_routes_meta_and_smalltalk_and_study():
     assert classify_intent("我想学 API 设计") == "study_topic"
 
 
+def test_classify_intent_boundary_cases():
+    assert classify_intent("你能做什么") == "meta_qa"
+    assert classify_intent("这个项目支持哪些模型") == "meta_qa"
+    assert classify_intent("谢谢你") == "smalltalk"
+    assert classify_intent("在吗") == "smalltalk"
+    assert classify_intent("讲讲控制理论的稳定性") == "study_topic"
+    assert classify_intent("为什么 PID 会震荡") == "study_topic"
+
+
 def test_intake_router_sets_meta_flow_status():
     sink = BufferedEventSink()
     node = build_intake_router_node(sink)

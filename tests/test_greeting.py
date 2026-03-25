@@ -2,6 +2,7 @@ from types import SimpleNamespace
 
 from ai_tutor_agent.core.ports import BufferedEventSink
 from ai_tutor_agent.nodes.greeting import _looks_ambiguous, build_greeting_node
+from ai_tutor_agent.nodes.topic_confirm import build_topic_confirm_node
 
 
 class FakeLLM:
@@ -41,8 +42,8 @@ def test_greeting_node_reasks_when_input_is_ambiguous():
 
     result = node({"current_topic": "你好"})
 
-    assert result["current_topic"] == "控制理论"
-    assert result["flow_status"] == "greeting"
+    assert result["proposed_topic"] == "控制理论"
+    assert result["flow_status"] == "topic_confirmation_pending"
     assert llm.calls == 0
     assert "明确主题" in answer_provider.prompts[0]
 
@@ -58,3 +59,28 @@ def test_greeting_node_confirms_explicit_topic():
     assert result["proposed_topic"] == "控制理论"
     assert result["flow_status"] == "topic_confirmation_pending"
     assert llm.calls == 1
+
+
+def test_topic_confirm_node_emits_confirmation_contract_event():
+    sink = BufferedEventSink()
+    node = build_topic_confirm_node(sink)
+
+    result = node({"proposed_topic": "控制理论"})
+
+    assert result == {"flow_status": "awaiting_topic_confirmation"}
+    assert sink.events[0].type == "topic.confirmation_needed"
+    assert sink.events[0].source == "topic_confirmer"
+    assert sink.events[0].data == {"proposed_topic": "控制理论"}
+    assert "控制理论" in (sink.events[0].message or "")
+    assert sink.events[1].type == "node.complete"
+
+
+def test_topic_confirm_node_warns_when_topic_missing():
+    sink = BufferedEventSink()
+    node = build_topic_confirm_node(sink)
+
+    result = node({"proposed_topic": "   "})
+
+    assert result == {"flow_status": "greeting"}
+    assert len(sink.events) == 1
+    assert sink.events[0].type == "session.warning"

@@ -24,6 +24,21 @@
         }
     };
 
+    let mathRenderTimeout = null;
+
+    app.throttledRender = function throttledRender() {
+        if (!state.currentAgentBodyEl) return;
+        state.currentAgentBodyEl.innerHTML = marked.parse(state.currentTextBuffer);
+        
+        // Debounce heavy KaTeX rendering to prevent flickering and CPU spikes during fast streaming
+        if (mathRenderTimeout) clearTimeout(mathRenderTimeout);
+        mathRenderTimeout = setTimeout(() => {
+            if (state.currentAgentBodyEl) {
+                app.renderMath(state.currentAgentBodyEl);
+            }
+        }, 150);
+    };
+
     app.clearTypingIndicator = function clearTypingIndicator() {
         document.getElementById('typing-indicator')?.remove();
     };
@@ -46,7 +61,14 @@
     app.scrollMessagesToBottom = function scrollMessagesToBottom() {
         const container = document.getElementById('messages');
         if (!container) return;
-        container.scrollTop = container.scrollHeight;
+        
+        // Only auto-scroll if the user is near the bottom
+        // This prevents the screen from jumping down if they scrolled up to read
+        const isNearBottom = container.scrollHeight - container.scrollTop - container.clientHeight < 150;
+        
+        if (isNearBottom) {
+            container.scrollTop = container.scrollHeight;
+        }
     };
 
     app.clearTurnHeartbeat = function clearTurnHeartbeat() {
@@ -334,15 +356,28 @@
 
     app.showTyping = function showTyping() {
         app.clearTypingIndicator();
-        const wrap = document.createElement('div');
-        wrap.className = 'msg-wrapper agent';
-        wrap.id = 'typing-indicator';
-        wrap.innerHTML = `
-            <div class="avatar agent" aria-hidden="true">伴</div>
-            <div class="msg-content"><div class="typing-dots" aria-label="我正在整理下一段讲解"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div></div>
-        `;
-        const messages = document.getElementById('messages');
-        messages.appendChild(wrap);
+        
+        const dotsHtml = `<div class="typing-dots" aria-label="我正在思考..."><div class="dot"></div><div class="dot"></div><div class="dot"></div></div>`;
+        
+        // If an agent turn is already active, put the typing indicator inside its body
+        if (state.currentAgentBodyEl) {
+            const tempDiv = document.createElement('div');
+            tempDiv.id = 'typing-indicator';
+            tempDiv.innerHTML = dotsHtml;
+            // Append it right after the current text
+            state.currentAgentBodyEl.appendChild(tempDiv);
+        } else {
+            // Create a standalone bubble
+            const wrap = document.createElement('div');
+            wrap.className = 'msg-wrapper agent';
+            wrap.id = 'typing-indicator';
+            wrap.innerHTML = `
+                <div class="avatar agent" aria-hidden="true">伴</div>
+                <div class="msg-content">${dotsHtml}</div>
+            `;
+            const messages = document.getElementById('messages');
+            if (messages) messages.appendChild(wrap);
+        }
         app.scrollMessagesToBottom();
     };
 
@@ -562,14 +597,24 @@
 
         if (stateSnapshot.assessment_result) app.appendMessage('agent', stateSnapshot.assessment_result);
         if (stateSnapshot.tutor_content) app.appendMessage('agent', stateSnapshot.tutor_content);
+        if (stateSnapshot.coach_content) app.appendMessage('agent', stateSnapshot.coach_content);
         if (stateSnapshot.user_answer) app.appendMessage('user', stateSnapshot.user_answer);
         if (stateSnapshot.tester_question) app.appendMessage('agent', stateSnapshot.tester_question);
 
         if (stateSnapshot.feedback || stateSnapshot.score) {
-            app.appendMessage(
-                'agent',
-                `最近一轮整理：总分 ${stateSnapshot.score}，逻辑 ${stateSnapshot.logic_score}，概念 ${stateSnapshot.concept_score}。\n\n我记录下来的观察：${stateSnapshot.feedback || '这次还没有补充说明。'}`
-            );
+            const lines = [
+                `最近一轮整理：总分 ${stateSnapshot.score}，逻辑 ${stateSnapshot.logic_score}，概念 ${stateSnapshot.concept_score}。`,
+                '',
+                `我记录下来的观察：${stateSnapshot.feedback || '这次还没有补充说明。'}`,
+            ];
+            if (stateSnapshot.needs_hint) {
+                lines.push('', '建议：先看一条思路提示，再尝试重答。');
+            }
+            if (Array.isArray(stateSnapshot.next_review_points) && stateSnapshot.next_review_points.length) {
+                lines.push('', '建议复习：');
+                lines.push(...stateSnapshot.next_review_points.map(point => `- ${point}`));
+            }
+            app.appendMessage('agent', lines.join('\n'));
         }
 
         applySessionArtifacts(stateSnapshot);

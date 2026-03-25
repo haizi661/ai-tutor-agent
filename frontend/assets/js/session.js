@@ -149,6 +149,7 @@
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ thread_id: state.currentThreadId, answer: text }),
             });
+            app.connectSSE();
             return;
         }
 
@@ -180,11 +181,15 @@
             const message = data.message || '正在把这一小步接好。';
             app.setStatusBanner(message, 'processing');
             appendThinking(message, 'info', 'node.start');
+            
+            // Re-show typing indicator to keep UI alive during long node executions (like evaluator or assessment generation)
+            app.showTyping?.();
         });
 
         state.eventSource.addEventListener('node.complete', e => {
             const data = safelyParseEventData(e.data);
             appendThinking(data.message || '这一小步已经接好。', 'success', 'node.complete');
+            app.clearTypingIndicator?.();
         });
 
         state.eventSource.addEventListener('intent.detected', e => {
@@ -202,8 +207,7 @@
             app.markTurnVisible?.();
             app.clearVisibilityFallback?.({ resetCounter: false });
             state.currentTextBuffer += chunk;
-            state.currentAgentBodyEl.innerHTML = marked.parse(state.currentTextBuffer);
-            app.renderMath(state.currentAgentBodyEl);
+            app.throttledRender?.();
             app.scrollMessagesToBottom?.();
         });
 

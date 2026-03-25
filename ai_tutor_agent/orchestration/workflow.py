@@ -58,18 +58,16 @@ def get_entry_node(state: AgentState) -> str:
 
 
 # ── Evaluator 之后的优化条件路由 ──
-def route_after_evaluator(state: AgentState, pass_score: int) -> str:
-    score = state.get("score", 0)
-    if score >= pass_score:
+def route_after_evaluator(
+    state: AgentState,
+    pass_score: int,
+    runtime_event_sink=None,
+) -> str:
+    decision = build_route_logic(pass_score, runtime_event_sink)(state)
+    if decision == "pass":
         return "pass"
-    
-    # 💡 启发式引导逻辑：
-    # 如果分数在 [40, pass_score) 之间，或者已经是第二次失败，进入 Coach 节点进行启发式引导
-    # 否则（分数太低或初次大败），回 Tutor 重讲
-    attempt = state.get("attempt_count", 0)
-    if (40 <= score < pass_score) or attempt >= 1:
+    if decision == "remediate":
         return "coach"
-    
     return "fail"
 
 
@@ -128,7 +126,7 @@ def build_workflow(
     )
     workflow.add_node(
         "evaluator",
-        build_evaluator_node(evaluator_llm, runtime.event_sink),
+        build_evaluator_node(evaluator_llm, runtime.event_sink, settings.pass_score),
     )
     # 新增：Coach 助教节点
     workflow.add_node(
@@ -194,7 +192,7 @@ def build_workflow(
     # 核心优化：Evaluator 后的分流
     workflow.add_conditional_edges(
         "evaluator",
-        lambda s: route_after_evaluator(s, settings.pass_score),
+        lambda s: route_after_evaluator(s, settings.pass_score, runtime.event_sink),
         {
             "pass": END,
             "coach": "coach",
