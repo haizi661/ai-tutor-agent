@@ -6,6 +6,7 @@ import re
 import sys
 import time
 import signal
+import hashlib
 import ipaddress
 import socket
 import ssl
@@ -70,6 +71,7 @@ class KnowledgeProcessor:
         https_proxy: str | None = None,
         connect_timeout_seconds: int = 5,
         status_file_path: str | None = None,
+        cache_dir: str | None = None,
         public_dns_bypass_enabled: bool = True,
         public_dns_server: str = "223.5.5.5",
         public_dns_port: int = 53,
@@ -89,6 +91,7 @@ class KnowledgeProcessor:
         self.session = requests.Session()
         self.proxy_desc = ""
         self.status_file_path = Path(status_file_path) if status_file_path else None
+        self.cache_dir = Path(cache_dir) if cache_dir else self._default_cache_dir()
         self.public_dns_bypass_enabled = public_dns_bypass_enabled
         self.public_dns_server = public_dns_server
         self.public_dns_port = public_dns_port
@@ -97,8 +100,115 @@ class KnowledgeProcessor:
             for host in re.split(r"[,\s]+", public_dns_hosts or "")
             if host.strip()
         }
+        self.cache_dir.mkdir(parents=True, exist_ok=True)
 
         self._set_session(proxy_mode, announce=True)
+
+    def _default_cache_dir(self) -> Path:
+        if self.status_file_path is not None:
+            return self.status_file_path.parent / "minerU_cache"
+        return Path(__file__).resolve().parents[2] / "data" / "minerU_cache"
+
+    def _cache_fingerprint(self, local_path: str) -> str:
+        stat = os.stat(local_path)
+        raw = f"{os.path.basename(local_path)}|{stat.st_size}|{int(stat.st_mtime)}"
+        return hashlib.sha1(raw.encode("utf-8")).hexdigest()[:12]
+
+    def _sanitize_cache_segment(self, file_name: str) -> str:
+        stem = Path(file_name).stem.strip() or "document"
+        cleaned = re.sub(r"[^\w\u4e00-\u9fff\.-]+", "_", stem, flags=re.UNICODE)
+        cleaned = re.sub(r"_+", "_", cleaned).strip("._")
+        return (cleaned or "document")[:80]
+
+    def _cache_entry_dir(self, local_path: str, *, file_name: str | None = None) -> Path:
+        cache_name = self._sanitize_cache_segment(file_name or os.path.basename(local_path))
+        cache_key = self._cache_fingerprint(local_path)
+        return self.cache_dir / f"{cache_name}__{cache_key}"
+
+    def _load_cached_markdown(self, local_path: str, *, file_name: str) -> str | None:
+        cache_entry_dir = self._cache_entry_dir(local_path, file_name=file_name)
+        md_candidates = [
+            cache_entry_dir / "full.md",
+            cache_entry_dir / "extracted" / "full.md",
+        ]
+        for md_path in md_candidates:
+            if not md_path.exists():
+                continue
+            try:
+                markdown_content = md_path.read_text(encoding="utf-8")
+            except Exception as exc:
+                print(f"⚠️ [MinerU] 读取本地缓存 Markdown 失败，将重新解析: {exc}")
+                return None
+            if markdown_content.strip():
+                print(f"♻️ [MinerU] 命中本地缓存 Markdown: {md_path}")
+                return markdown_content
+        return None
+
+    def _persist_markdown_cache(
+        self,
+        local_path: str,
+        *,
+        file_name: str,
+        batch_id: str,
+        full_zip_url: str,
+        zip_bytes: bytes,
+        extracted_root: str,
+        md_path: str,
+        markdown_content: str,
+    ) -> Path:
+        cache_entry_dir = self._cache_entry_dir(local_path, file_name=file_name)
+        staging_dir = cache_entry_dir.with_name(f"{cache_entry_dir.name}.tmp")
+        shutil.rmtree(staging_dir, ignore_errors=True)
+        staging_dir.mkdir(parents=True, exist_ok=True)
+
+        result_zip_path = staging_dir / "result.zip"
+        result_zip_path.write_bytes(zip_bytes)
+
+        extracted_target = staging_dir / "extracted"
+        extracted_target.mkdir(parents=True, exist_ok=True)
+        for item in Path(extracted_root).iterdir():
+            if item.name == "result.zip":
+                continue
+            target = extracted_target / item.name
+            if item.is_dir():
+                shutil.copytree(item, target, dirs_exist_ok=True)
+            else:
+                shutil.copy2(item, target)
+
+        full_md_path = staging_dir / "full.md"
+        full_md_path.write_text(markdown_content, encoding="utf-8")
+
+        stat = os.stat(local_path)
+        relative_md_path = ""
+        try:
+            relative_md_path = os.path.relpath(md_path, extracted_root)
+        except Exception:
+            relative_md_path = Path(md_path).name
+
+        metadata = {
+            "version": 1,
+            "source_path": os.path.abspath(local_path),
+            "source_filename": file_name,
+            "source_size_bytes": int(stat.st_size),
+            "source_mtime": int(stat.st_mtime),
+            "cache_key": self._cache_fingerprint(local_path),
+            "batch_id": batch_id,
+            "full_zip_url": full_zip_url,
+            "saved_at": int(time.time()),
+            "proxy_mode": self.active_proxy_mode,
+            "proxy_desc": self.proxy_desc,
+            "full_md_path": "full.md",
+            "relative_md_path_in_extract": relative_md_path,
+            "result_zip_path": "result.zip",
+            "extract_dir": "extracted",
+        }
+        with (staging_dir / "metadata.json").open("w", encoding="utf-8") as file_obj:
+            json.dump(metadata, file_obj, ensure_ascii=False, indent=2)
+
+        if cache_entry_dir.exists():
+            shutil.rmtree(cache_entry_dir, ignore_errors=True)
+        staging_dir.rename(cache_entry_dir)
+        return cache_entry_dir
 
     def _load_status(self) -> dict:
         if self.status_file_path is None or not self.status_file_path.exists():
@@ -411,11 +521,6 @@ class KnowledgeProcessor:
         使用 MinerU Token + 本地文件上传方式解析 PDF，并返回 full.md 的文本内容
         """
         load_dotenv()
-        self._check_temporary_disable()
-
-        token = os.getenv("MINERU_API_TOKEN") or self.api_token
-        if not token:
-            raise ValueError("❌ 错误：未在 .env 文件中找到 MINERU_API_TOKEN，且未传入 api_token。")
 
         if not os.path.exists(local_path):
             raise FileNotFoundError(f"❌ 文件不存在: {local_path}")
@@ -423,6 +528,16 @@ class KnowledgeProcessor:
         file_name = os.path.basename(local_path)
         file_size_mb = os.path.getsize(local_path) / 1024 / 1024
         print(f"📄 [任务] 准备解析本地文件: {file_name} ({file_size_mb:.2f} MB)")
+
+        cached_markdown = self._load_cached_markdown(local_path, file_name=file_name)
+        if cached_markdown is not None:
+            return cached_markdown
+
+        token = os.getenv("MINERU_API_TOKEN") or self.api_token
+        if not token:
+            raise ValueError("❌ 错误：未在 .env 文件中找到 MINERU_API_TOKEN，且未传入 api_token。")
+
+        self._check_temporary_disable()
 
         modes_to_try = [self.active_proxy_mode]
         if self.active_proxy_mode != "direct":
@@ -476,7 +591,7 @@ class KnowledgeProcessor:
                 ) from exc
             time.sleep(1)
 
-        def _download_and_extract_markdown(full_zip_url: str) -> str:
+        def _download_and_extract_markdown(full_zip_url: str, *, batch_id: str) -> str:
             """
             下载 MinerU 返回的 zip 结果包，解压并读取 full.md
             """
@@ -555,10 +670,26 @@ class KnowledgeProcessor:
                 print(f"✅ [Step 5] 找到 Markdown 文件: {md_path}")
 
                 with open(md_path, "r", encoding="utf-8") as f:
-                    return f.read()
+                    markdown_content = f.read()
+
+                try:
+                    cache_entry_dir = self._persist_markdown_cache(
+                        local_path,
+                        file_name=file_name,
+                        batch_id=batch_id,
+                        full_zip_url=full_zip_url,
+                        zip_bytes=zip_bytes,
+                        extracted_root=temp_dir,
+                        md_path=md_path,
+                        markdown_content=markdown_content,
+                    )
+                    print(f"💾 [Step 5] 已缓存 MinerU 结果: {cache_entry_dir}")
+                except Exception as cache_exc:
+                    print(f"⚠️ [MinerU] 保存本地缓存失败，但本次解析结果仍可使用: {cache_exc}")
+
+                return markdown_content
 
             finally:
-                # 你如果想保留中间文件做调试，可以先把下面这行注释掉
                 shutil.rmtree(temp_dir, ignore_errors=True)
 
         def _normalize_extract_result(data_obj: dict, expected_file_name: str) -> dict:
@@ -732,7 +863,7 @@ class KnowledgeProcessor:
             if final_state != "done" or not result_url:
                 raise Exception(f"❌ 解析结束但结果异常，final_state={final_state}, result_url={result_url}")
 
-            markdown_content = _download_and_extract_markdown(result_url)
+            markdown_content = _download_and_extract_markdown(result_url, batch_id=batch_id)
 
             if not markdown_content.strip():
                 raise Exception("⚠️ Markdown 内容为空，请检查 PDF 内容或 MinerU 输出结果。")

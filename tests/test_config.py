@@ -23,6 +23,9 @@ def _clear_runtime_env(monkeypatch):
         "MINERU_PUBLIC_DNS_SERVER",
         "MINERU_PUBLIC_DNS_PORT",
         "MINERU_PUBLIC_DNS_HOSTS",
+        "RETRIEVAL_REWRITE_ENABLED",
+        "RETRIEVAL_REWRITE_MODE",
+        "RETRIEVAL_REWRITE_DEBUG",
         "VECTOR_STORE_DIR",
         "CHROMA_DIR",
         "HTTP_PROXY",
@@ -98,6 +101,24 @@ def test_settings_parse_mineru_public_dns_bypass_overrides(monkeypatch):
     assert settings.mineru_public_dns_server == "1.1.1.1"
     assert settings.mineru_public_dns_port == 5353
     assert settings.mineru_public_dns_hosts == "cdn-mineru.openxlab.org.cn,assets.example.com"
+    get_settings.cache_clear()
+
+
+def test_settings_parse_retrieval_rewrite_overrides(monkeypatch):
+    monkeypatch.setattr(config_module, "load_dotenv", lambda *args, **kwargs: None)
+    monkeypatch.setattr(config_module, "read_local_config_values", lambda: {})
+    _clear_runtime_env(monkeypatch)
+    monkeypatch.setenv("GOOGLE_API_KEY", "google-key")
+    monkeypatch.setenv("RETRIEVAL_REWRITE_ENABLED", "true")
+    monkeypatch.setenv("RETRIEVAL_REWRITE_MODE", "smart")
+    monkeypatch.setenv("RETRIEVAL_REWRITE_DEBUG", "true")
+    get_settings.cache_clear()
+
+    settings = get_settings()
+
+    assert settings.retrieval_rewrite_enabled is True
+    assert settings.retrieval_rewrite_mode == "smart"
+    assert settings.retrieval_rewrite_debug is True
     get_settings.cache_clear()
 
 

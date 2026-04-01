@@ -1,9 +1,0 @@
-{
-  "version": 1,
-  "embedding_provider": "local",
-  "embedding_model_name": "sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2",
-  "vector_store_backend": "chroma",
-  "vector_store_dir": "data/chroma_db",
-  "knowledge_chunk_size": 1000,
-  "knowledge_chunk_overlap": 150
-}

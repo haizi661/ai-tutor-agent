@@ -6,7 +6,7 @@ import json
 import os
 import re
 import shutil
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any, Dict, List
 
@@ -15,10 +15,14 @@ import huggingface_hub
 import httpx
 from langchain_chroma import Chroma
 from langchain_core.documents import Document
+from langchain_core.messages import HumanMessage, SystemMessage
 from rank_bm25 import BM25Okapi
 
 from ..config import Settings
+from ..core.output_format import parse_json_object
 from ..core.ports import KnowledgeProvider
+from ..core.text import content_to_text
+from .llm import build_retrieval_planner_llm
 from .processor import KnowledgeProcessor
 
 
@@ -135,6 +139,69 @@ class ScoredChunk:
     metadata: Dict[str, Any]
 
 
+@dataclass(frozen=True)
+class RetrievalRewriteRequest:
+    channel: str
+    raw_query: str
+    current_topic: str = ""
+    attempt_count: int = 0
+    teaching_strategy: str = ""
+    weak_areas_hint: str = ""
+    conversation_hint: str = ""
+
+
+@dataclass
+class RetrievalRewritePlan:
+    intent: str = "concept_overview"
+    rewrite_needed: bool = False
+    reason: str = ""
+    must_keep: list[str] = field(default_factory=list)
+    vector_queries: list[str] = field(default_factory=list)
+    bm25_queries: list[str] = field(default_factory=list)
+    metadata_terms: list[str] = field(default_factory=list)
+
+
+@dataclass
+class RetrievalRewriteTrace:
+    gate_outcome: str
+    gate_reason: str
+    planner_intent: str | None = None
+    raw_query: str = ""
+    rewritten_vector_queries: list[str] = field(default_factory=list)
+    rewritten_bm25_queries: list[str] = field(default_factory=list)
+    metadata_terms: list[str] = field(default_factory=list)
+    must_keep: list[str] = field(default_factory=list)
+    must_keep_repaired: bool = False
+    raw_confidence: dict[str, Any] = field(default_factory=dict)
+    rewritten_confidence: dict[str, Any] = field(default_factory=dict)
+    planner_reason: str = ""
+    planner_error: str = ""
+
+    def to_dict(self) -> dict[str, Any]:
+        return {
+            "gate_outcome": self.gate_outcome,
+            "gate_reason": self.gate_reason,
+            "planner_intent": self.planner_intent,
+            "raw_query": self.raw_query,
+            "rewritten_vector_queries": list(self.rewritten_vector_queries),
+            "rewritten_bm25_queries": list(self.rewritten_bm25_queries),
+            "metadata_terms": list(self.metadata_terms),
+            "must_keep": list(self.must_keep),
+            "must_keep_repaired": bool(self.must_keep_repaired),
+            "raw_confidence": dict(self.raw_confidence or {}),
+            "rewritten_confidence": dict(self.rewritten_confidence or {}),
+            "planner_reason": self.planner_reason,
+            "planner_error": self.planner_error,
+        }
+
+
+@dataclass
+class FamilyHit:
+    doc: Document
+    rank: int
+    score: float | None = None
+
+
 RRF_K = 60
 RRF_SCALE = 100.0
 RETRIEVAL_STATE_VERSION = 1
@@ -143,6 +210,63 @@ CONFIDENT_CITATION_MIN_RRF = 0.03
 FILENAME_MATCH_BOOST = -1.55
 TITLE_MATCH_BOOST = -0.3
 TERM_OVERLAP_BOOST = -0.08
+RETRIEVAL_REWRITE_INTENTS = {
+    "exact_lookup",
+    "concept_overview",
+    "procedure",
+    "comparison",
+    "example_application",
+    "troubleshoot",
+}
+QUESTION_WORD_PATTERN = re.compile(
+    r"(什么|怎么|如何|为什么|区别|差别|步骤|例子|应用|案例|报错|错误|失败|原因|解决|排查|讲解|介绍|原理)"
+)
+QUESTION_HINT_MARKERS = [
+    "什么",
+    "怎么",
+    "如何",
+    "为什么",
+    "区别",
+    "差别",
+    "步骤",
+    "例子",
+    "应用",
+    "案例",
+    "报错",
+    "错误",
+    "失败",
+    "原因",
+    "解决",
+    "排查",
+    "讲解",
+    "介绍",
+    "原理",
+]
+QUERY_INTENT_PREFIXES = [
+    "什么",
+    "怎么",
+    "如何",
+    "为什么",
+    "区别",
+    "差别",
+    "步骤",
+    "例子",
+    "应用",
+    "案例",
+    "报错",
+    "错误",
+    "失败",
+    "原因",
+    "解决",
+    "排查",
+    "讲解",
+    "介绍",
+    "原理",
+]
+QUERY_FUNCTION_PREFIXES = ["是", "的", "里", "中", "上", "下", "把", "给", "对", "在"]
+MAX_REWRITE_VECTOR_QUERIES = 2
+MAX_REWRITE_BM25_QUERIES = 2
+MAX_REWRITE_METADATA_TERMS = 4
 
 
 def _normalize_lookup_text(text: str) -> str:
@@ -176,6 +300,40 @@ def _extract_lookup_terms(text: str) -> list[str]:
     return deduped
 
 
+def _dedupe_texts(values: list[str]) -> list[str]:
+    deduped: list[str] = []
+    seen: set[str] = set()
+    for value in values:
+        cleaned = str(value or "").strip()
+        if not cleaned:
+            continue
+        key = cleaned.lower()
+        if key in seen:
+            continue
+        seen.add(key)
+        deduped.append(cleaned)
+    return deduped
+
+
+def _strip_query_prefixes(term: str) -> str:
+    cleaned = str(term or "").strip().lower()
+    if not cleaned:
+        return ""
+
+    changed = True
+    while changed and cleaned:
+        changed = False
+        for prefix in QUERY_INTENT_PREFIXES:
+            if cleaned.startswith(prefix) and len(cleaned) > len(prefix):
+                cleaned = cleaned[len(prefix) :].strip()
+                changed = True
+        for prefix in QUERY_FUNCTION_PREFIXES:
+            if cleaned.startswith(prefix) and len(cleaned) > len(prefix):
+                cleaned = cleaned[len(prefix) :].strip()
+                changed = True
+    return cleaned
+
+
 class LocalFileKnowledgeProvider(KnowledgeProvider):
     def __init__(self, settings: Settings):
         self.settings = settings
@@ -198,6 +356,7 @@ class LocalFileKnowledgeProvider(KnowledgeProvider):
                 https_proxy=settings.mineru_https_proxy,
                 connect_timeout_seconds=settings.mineru_connect_timeout_seconds,
                 status_file_path=str(self.knowledge_dir.parent / "mineru_runtime_state.json"),
+                cache_dir=str(self.knowledge_dir.parent / "minerU_cache"),
                 public_dns_bypass_enabled=settings.mineru_public_dns_bypass_enabled,
                 public_dns_server=settings.mineru_public_dns_server,
                 public_dns_port=settings.mineru_public_dns_port,
@@ -208,11 +367,19 @@ class LocalFileKnowledgeProvider(KnowledgeProvider):
         )
         self.knowledge_index = self._load_index()
         self.retrieval_state = self._load_retrieval_state()
+        self.retrieval_planner_llm = None
+        self.last_rewrite_trace: dict[str, Any] | None = None
 
         print("🚀 [RAG] 知识库引擎启动中...")
 
         try:
             self._ensure_retrieval_compatibility()
+            if self.settings.retrieval_rewrite_enabled:
+                try:
+                    self.retrieval_planner_llm = build_retrieval_planner_llm(settings)
+                except Exception as exc:
+                    self.retrieval_planner_llm = None
+                    print(f"⚠️ [RAG] Retrieval rewrite planner 初始化失败，已自动禁用改写: {exc}")
             self.embeddings = build_embedding_backend(settings)
             print(f"🧬 [RAG] Embedding Provider: {settings.embedding_provider}")
             print(f"🧬 [RAG] Embedding Backend: {type(self.embeddings).__name__}")
@@ -251,6 +418,550 @@ class LocalFileKnowledgeProvider(KnowledgeProvider):
             return int(self.vector_store._collection.count())
         except Exception:
             return len(self.bm25_docs)
+
+    def _doc_key(self, doc: Document) -> tuple[str, Any, str]:
+        metadata = doc.metadata or {}
+        return (
+            str(metadata.get("filename", "")),
+            metadata.get("chunk_id", -1),
+            (doc.page_content or "")[:120],
+        )
+
+    def _raw_query_for_rewrite(self, query: str, rewrite_request: RetrievalRewriteRequest | None) -> str:
+        if rewrite_request and str(rewrite_request.raw_query or "").strip():
+            return str(rewrite_request.raw_query or "").strip()
+        return str(query or "").strip()
+
+    def _extract_required_must_keep(self, text: str) -> list[str]:
+        cleaned = str(text or "").strip()
+        if not cleaned:
+            return []
+
+        required: list[str] = []
+        for token in re.findall(r"[A-Za-z][A-Za-z0-9_\-\.]{1,24}|[\u4e00-\u9fff0-9]{2,24}", cleaned):
+            normalized = token.strip()
+            if not normalized:
+                continue
+            has_digit = any(ch.isdigit() for ch in normalized)
+            is_ascii_term = bool(re.fullmatch(r"[A-Za-z][A-Za-z0-9_\-\.]{1,24}", normalized))
+            if has_digit or is_ascii_term:
+                required.append(normalized)
+
+        if re.search(r"\.(pdf|md|txt|markdown)\b", cleaned, flags=re.IGNORECASE):
+            required.append(cleaned)
+
+        return _dedupe_texts(required)
+
+    def _looks_like_exact_lookup(self, query: str) -> bool:
+        text = str(query or "").strip()
+        if not text:
+            return False
+        lowered = text.lower()
+        if re.search(r"\.(pdf|md|txt|markdown)\b", lowered):
+            return True
+        if any(marker in text for marker in QUESTION_HINT_MARKERS):
+            return False
+        if QUESTION_WORD_PATTERN.search(text):
+            return False
+
+        terms = _extract_lookup_terms(text)
+        normalized = _normalize_lookup_text(text)
+        if not terms or not normalized:
+            return False
+
+        if any(ch.isdigit() for ch in text) and len(terms) <= 3 and len(text) <= 32 and " " not in text:
+            return True
+
+        if len(terms) == 1 and re.fullmatch(r"[A-Za-z][A-Za-z0-9_\-\.]{1,16}", text):
+            return True
+
+        return False
+
+    def _query_expresses_goal_intent(self, query: str) -> bool:
+        text = str(query or "").strip()
+        if not text:
+            return False
+        if QUESTION_WORD_PATTERN.search(text):
+            return True
+        lowered = text.lower()
+        return any(
+            marker in lowered
+            for marker in [
+                "how",
+                "what",
+                "why",
+                "difference",
+                "compare",
+                "comparison",
+                "example",
+                "examples",
+                "error",
+                "issue",
+                "troubleshoot",
+                "step",
+                "steps",
+            ]
+        )
+
+    def _extract_goal_terms(self, query: str) -> list[str]:
+        lowered = str(query or "").strip().lower()
+        if not lowered:
+            return []
+
+        candidates: list[str] = []
+        seen: set[str] = set()
+        for term in re.findall(r"[a-z0-9]{2,}|[\u4e00-\u9fff]{2,}", lowered):
+            cleaned = _strip_query_prefixes(term)
+            if not cleaned or cleaned in QUESTION_HINT_MARKERS or len(cleaned) < 2:
+                continue
+            normalized = _normalize_lookup_text(cleaned)
+            if not normalized or normalized in seen:
+                continue
+            seen.add(normalized)
+            candidates.append(cleaned)
+        return candidates
+
+    def _doc_query_term_alignment(self, doc: Document, query_terms: list[str]) -> tuple[int, float, list[str]]:
+        if not query_terms:
+            return 0, 0.0, []
+
+        metadata = dict(doc.metadata or {})
+        combined = " ".join(
+            [
+                doc.page_content or "",
+                str(metadata.get("filename") or ""),
+                str(metadata.get("section") or ""),
+                str(metadata.get("H1") or ""),
+                str(metadata.get("H2") or ""),
+                str(metadata.get("H3") or ""),
+            ]
+        )
+        haystack = _normalize_lookup_text(combined)
+        if not haystack:
+            return 0, 0.0, []
+
+        matched: list[str] = []
+        for term in query_terms:
+            needle = _normalize_lookup_text(term)
+            if not needle:
+                continue
+            if needle in haystack:
+                matched.append(term)
+
+        hit_count = len(matched)
+        ratio = hit_count / len(query_terms) if query_terms else 0.0
+        return hit_count, ratio, matched
+
+    def _missing_query_terms(self, query_terms: list[str], matched_terms: list[str]) -> list[str]:
+        matched_norm = {_normalize_lookup_text(term) for term in matched_terms if _normalize_lookup_text(term)}
+        missing: list[str] = []
+        for term in query_terms:
+            normalized = _normalize_lookup_text(term)
+            if normalized and normalized not in matched_norm:
+                missing.append(term)
+        return missing
+
+    def _infer_rewrite_intent(self, query: str, rewrite_request: RetrievalRewriteRequest) -> str:
+        text = " ".join(
+            [
+                str(query or ""),
+                str(rewrite_request.raw_query or ""),
+                str(rewrite_request.current_topic or ""),
+                str(rewrite_request.conversation_hint or ""),
+            ]
+        ).lower()
+        if self._looks_like_exact_lookup(query):
+            return "exact_lookup"
+        if any(marker in text for marker in ["报错", "错误", "失败", "原因", "解决", "排查", "error", "issue", "troubleshoot"]):
+            return "troubleshoot"
+        if any(marker in text for marker in ["区别", "差别", "对比", "compare", "comparison", "difference"]):
+            return "comparison"
+        if any(marker in text for marker in ["例子", "应用", "案例", "example", "examples", "application"]):
+            return "example_application"
+        if any(marker in text for marker in ["怎么", "如何", "步骤", "流程", "方法", "how", "step", "steps"]):
+            return "procedure"
+        return "concept_overview"
+
+    def _should_force_goal_rewrite(self, query: str, summary: dict[str, Any]) -> bool:
+        if not self._query_expresses_goal_intent(query):
+            return False
+        query_term_count = int(summary.get("query_term_count") or 0)
+        if query_term_count <= 0:
+            return False
+        best_query_term_hits = int(summary.get("best_query_term_hits") or 0)
+        best_query_term_ratio = float(summary.get("best_query_term_ratio") or 0.0)
+        return best_query_term_hits < min(2, query_term_count) and best_query_term_ratio < 0.6
+
+    def _build_heuristic_rewrite_plan(
+        self,
+        query: str,
+        rewrite_request: RetrievalRewriteRequest,
+        *,
+        intent_hint: str = "",
+    ) -> RetrievalRewritePlan:
+        raw_query = self._raw_query_for_rewrite(query, rewrite_request)
+        current_topic = str(rewrite_request.current_topic or "").strip()
+        intent = intent_hint or self._infer_rewrite_intent(raw_query, rewrite_request)
+        if intent not in RETRIEVAL_REWRITE_INTENTS:
+            intent = "concept_overview"
+
+        must_keep = _dedupe_texts(
+            self._extract_required_must_keep(raw_query)
+            + self._extract_required_must_keep(current_topic)
+        )
+        goal_terms = self._extract_goal_terms(raw_query)
+        anchor_terms = _dedupe_texts([current_topic] + goal_terms + must_keep)
+        anchor_text = " ".join(anchor_terms).strip()
+
+        if intent == "procedure":
+            vector_queries = _dedupe_texts(
+                [
+                    f"{anchor_text} 操作流程".strip(),
+                    f"{anchor_text} 步骤 方法".strip(),
+                ]
+            )
+            bm25_queries = _dedupe_texts(
+                [
+                    f"{anchor_text} 步骤".strip(),
+                    f"{anchor_text} 登录 操作".strip() if "登录" in anchor_text else f"{anchor_text} 操作".strip(),
+                ]
+            )
+        elif intent == "comparison":
+            vector_queries = _dedupe_texts(
+                [
+                    f"{anchor_text} 区别 对比".strip(),
+                    f"{anchor_text} 适用场景 差异".strip(),
+                ]
+            )
+            bm25_queries = _dedupe_texts(
+                [
+                    f"{anchor_text} 区别".strip(),
+                    f"{anchor_text} 对比".strip(),
+                ]
+            )
+        elif intent == "example_application":
+            vector_queries = _dedupe_texts(
+                [
+                    f"{anchor_text} 例子 应用".strip(),
+                    f"{anchor_text} 案例 场景".strip(),
+                ]
+            )
+            bm25_queries = _dedupe_texts(
+                [
+                    f"{anchor_text} 例子".strip(),
+                    f"{anchor_text} 应用".strip(),
+                ]
+            )
+        elif intent == "troubleshoot":
+            vector_queries = _dedupe_texts(
+                [
+                    f"{anchor_text} 原因 解决".strip(),
+                    f"{anchor_text} 排查 修复".strip(),
+                ]
+            )
+            bm25_queries = _dedupe_texts(
+                [
+                    f"{anchor_text} 报错 原因".strip(),
+                    f"{anchor_text} 解决 排查".strip(),
+                ]
+            )
+        else:
+            vector_queries = _dedupe_texts(
+                [
+                    f"{anchor_text} 核心概念".strip(),
+                    f"{anchor_text} 定义 原理".strip(),
+                ]
+            )
+            bm25_queries = _dedupe_texts(
+                [
+                    f"{anchor_text} 定义".strip(),
+                    f"{anchor_text} 原理".strip(),
+                ]
+            )
+
+        return RetrievalRewritePlan(
+            intent=intent,
+            rewrite_needed=True,
+            reason="raw retrieval misses the user goal terms; use heuristic goal-oriented rewrite fallback",
+            must_keep=must_keep,
+            vector_queries=vector_queries[:MAX_REWRITE_VECTOR_QUERIES],
+            bm25_queries=bm25_queries[:MAX_REWRITE_BM25_QUERIES],
+            metadata_terms=anchor_terms[:MAX_REWRITE_METADATA_TERMS],
+        )
+
+    def _build_retrieval_planner_prompt(
+        self,
+        query: str,
+        rewrite_request: RetrievalRewriteRequest,
+    ) -> tuple[SystemMessage, HumanMessage]:
+        system_msg = SystemMessage(
+            content=(
+                "你是教学知识库的检索规划器。你的任务不是回答问题，而是为混合检索生成更好的查询计划。"
+                "必须严格输出 JSON，不要输出代码块，不要输出 JSON 以外的解释。\n"
+                "JSON schema:\n"
+                "{\n"
+                '  "intent": "exact_lookup|concept_overview|procedure|comparison|example_application|troubleshoot",\n'
+                '  "rewrite_needed": true,\n'
+                '  "reason": "一句话说明为什么需要或不需要改写",\n'
+                '  "must_keep": ["不能丢的实体/术语"],\n'
+                '  "vector_queries": ["适合语义检索的查询1", "适合语义检索的查询2"],\n'
+                '  "bm25_queries": ["适合关键词检索的查询1", "适合关键词检索的查询2"],\n'
+                '  "metadata_terms": ["适合命中文件名/标题/小节名的短词"]\n'
+                "}\n"
+                "要求：\n"
+                "1. 不要改写成泛泛问题，必须围绕用户当前目标。\n"
+                "2. 不要删除文件编号、英文术语、关键实体。\n"
+                "3. vector_queries 与 bm25_queries 各最多 2 条，metadata_terms 最多 4 条。\n"
+                "4. 如果原查询已经足够精确，也要返回 JSON，但 rewrite_needed=false。"
+            )
+        )
+        weak_hint = str(rewrite_request.weak_areas_hint or "").strip() or "无"
+        conversation_hint = str(rewrite_request.conversation_hint or "").strip() or "无"
+        human_msg = HumanMessage(
+            content=(
+                f"检索通道：{rewrite_request.channel}\n"
+                f"原始检索 query：{query}\n"
+                f"用户原话：{rewrite_request.raw_query}\n"
+                f"当前主题：{rewrite_request.current_topic}\n"
+                f"尝试轮次：{rewrite_request.attempt_count}\n"
+                f"教学策略：{rewrite_request.teaching_strategy}\n"
+                f"薄弱点提示：{weak_hint}\n"
+                f"最近会话提示：{conversation_hint}\n"
+                "请基于“用户真正想解决什么问题”来决定是否改写检索。"
+            )
+        )
+        return system_msg, human_msg
+
+    def _invoke_retrieval_planner(
+        self,
+        query: str,
+        rewrite_request: RetrievalRewriteRequest,
+    ) -> tuple[RetrievalRewritePlan | None, str]:
+        if self.retrieval_planner_llm is None:
+            return None, "retrieval rewrite planner unavailable"
+
+        try:
+            system_msg, human_msg = self._build_retrieval_planner_prompt(query, rewrite_request)
+            response = self.retrieval_planner_llm.invoke([system_msg, human_msg])
+            payload = parse_json_object(content_to_text(getattr(response, "content", response)))
+            if payload is None:
+                return None, "planner returned invalid JSON"
+            return self._sanitize_rewrite_plan(payload, query=query, rewrite_request=rewrite_request), ""
+        except Exception as exc:
+            return None, f"planner invocation failed: {exc}"
+
+    def _sanitize_rewrite_plan(
+        self,
+        payload: dict[str, Any],
+        *,
+        query: str,
+        rewrite_request: RetrievalRewriteRequest,
+    ) -> RetrievalRewritePlan:
+        intent = str(payload.get("intent") or "concept_overview").strip().lower()
+        if intent not in RETRIEVAL_REWRITE_INTENTS:
+            intent = "concept_overview"
+
+        plan = RetrievalRewritePlan(
+            intent=intent,
+            rewrite_needed=bool(payload.get("rewrite_needed", False)),
+            reason=str(payload.get("reason") or "").strip()[:240],
+            must_keep=_dedupe_texts([str(item) for item in payload.get("must_keep", []) if str(item or "").strip()]),
+            vector_queries=_dedupe_texts([str(item) for item in payload.get("vector_queries", []) if str(item or "").strip()])[:MAX_REWRITE_VECTOR_QUERIES],
+            bm25_queries=_dedupe_texts([str(item) for item in payload.get("bm25_queries", []) if str(item or "").strip()])[:MAX_REWRITE_BM25_QUERIES],
+            metadata_terms=_dedupe_texts([str(item) for item in payload.get("metadata_terms", []) if str(item or "").strip()])[:MAX_REWRITE_METADATA_TERMS],
+        )
+        required_terms = _dedupe_texts(
+            self._extract_required_must_keep(self._raw_query_for_rewrite(query, rewrite_request))
+            + self._extract_required_must_keep(rewrite_request.current_topic)
+        )
+        plan.must_keep = _dedupe_texts(plan.must_keep + required_terms)
+        return plan
+
+    def _repair_query_with_must_keep(self, query: str, must_keep: list[str]) -> tuple[str, bool]:
+        repaired = str(query or "").strip()
+        changed = False
+        for term in must_keep:
+            if not term:
+                continue
+            if term.lower() not in repaired.lower():
+                repaired = f"{repaired} {term}".strip()
+                changed = True
+        return repaired, changed
+
+    def _repair_rewrite_plan(self, plan: RetrievalRewritePlan) -> tuple[RetrievalRewritePlan, bool]:
+        repaired = False
+        vector_queries: list[str] = []
+        for query in plan.vector_queries:
+            fixed, changed = self._repair_query_with_must_keep(query, plan.must_keep)
+            vector_queries.append(fixed)
+            repaired = repaired or changed
+
+        bm25_queries: list[str] = []
+        for query in plan.bm25_queries:
+            fixed, changed = self._repair_query_with_must_keep(query, plan.must_keep)
+            bm25_queries.append(fixed)
+            repaired = repaired or changed
+
+        metadata_terms = _dedupe_texts(list(plan.metadata_terms) + list(plan.must_keep))[:MAX_REWRITE_METADATA_TERMS]
+        if metadata_terms != plan.metadata_terms:
+            repaired = True
+
+        return (
+            RetrievalRewritePlan(
+                intent=plan.intent,
+                rewrite_needed=plan.rewrite_needed,
+                reason=plan.reason,
+                must_keep=list(plan.must_keep),
+                vector_queries=_dedupe_texts(vector_queries)[:MAX_REWRITE_VECTOR_QUERIES],
+                bm25_queries=_dedupe_texts(bm25_queries)[:MAX_REWRITE_BM25_QUERIES],
+                metadata_terms=metadata_terms,
+            ),
+            repaired,
+        )
+
+    def _build_confidence_summary(self, docs: list[Document], query: str = "") -> dict[str, Any]:
+        query_terms = self._extract_goal_terms(query)
+        summary = {
+            "hit_count": len(docs),
+            "citation_confident": False,
+            "top_filename": "",
+            "dominance": 0.0,
+            "top_rrf_score": 0.0,
+            "top_source_count": 0,
+            "top_multi_source": False,
+            "top_strong_match": False,
+            "query_term_count": len(query_terms),
+            "query_terms": list(query_terms),
+            "top_query_term_hits": 0,
+            "top_query_term_ratio": 0.0,
+            "top_query_terms_matched": [],
+            "top_query_terms_missing": list(query_terms),
+            "best_query_term_hits": 0,
+            "best_query_term_ratio": 0.0,
+            "best_query_terms_matched": [],
+            "best_query_terms_missing": list(query_terms),
+        }
+        if not docs:
+            return summary
+
+        grouped: dict[str, dict[str, Any]] = {}
+        total_weight = 0.0
+        for rank, doc in enumerate(docs, start=1):
+            metadata = dict(doc.metadata or {})
+            filename = str(metadata.get("filename") or "").strip()
+            term_hits, term_ratio, matched_terms = self._doc_query_term_alignment(doc, query_terms)
+            if rank == 1:
+                summary["top_query_term_hits"] = int(term_hits)
+                summary["top_query_term_ratio"] = float(term_ratio)
+                summary["top_query_terms_matched"] = matched_terms
+                summary["top_query_terms_missing"] = self._missing_query_terms(query_terms, matched_terms)
+            if term_hits > int(summary["best_query_term_hits"]) or (
+                term_hits == int(summary["best_query_term_hits"]) and term_ratio > float(summary["best_query_term_ratio"])
+            ):
+                summary["best_query_term_hits"] = int(term_hits)
+                summary["best_query_term_ratio"] = float(term_ratio)
+                summary["best_query_terms_matched"] = matched_terms
+                summary["best_query_terms_missing"] = self._missing_query_terms(query_terms, matched_terms)
+            if not filename:
+                continue
+            weight = float(metadata.get("_rrf_score") or (1.0 / (RRF_K + rank)))
+            total_weight += weight
+            bucket = grouped.setdefault(
+                filename,
+                {
+                    "weight": 0.0,
+                    "best_rrf": 0.0,
+                    "multi_source": False,
+                    "strong_match": False,
+                    "top3_count": 0,
+                    "top_source_count": 0,
+                },
+            )
+            bucket["weight"] += weight
+            bucket["best_rrf"] = max(bucket["best_rrf"], float(metadata.get("_rrf_score") or 0.0))
+            source_count = len(set(metadata.get("_retrieval_sources", [])))
+            bucket["top_source_count"] = max(bucket["top_source_count"], source_count)
+            bucket["multi_source"] = bucket["multi_source"] or source_count >= 2
+            signals = list(metadata.get("_query_match_signals", []))
+            bucket["strong_match"] = bucket["strong_match"] or any(signal in {"filename", "title"} for signal in signals)
+            if rank <= 3:
+                bucket["top3_count"] += 1
+
+        if not grouped or total_weight <= 0:
+            return summary
+
+        top_filename, top_bucket = max(grouped.items(), key=lambda item: item[1]["weight"])
+        dominance = float(top_bucket["weight"]) / total_weight if total_weight else 0.0
+        citation_confident = bool(top_bucket["strong_match"]) or (
+            dominance >= CONFIDENT_CITATION_MIN_DOMINANCE
+            and float(top_bucket["best_rrf"]) >= CONFIDENT_CITATION_MIN_RRF
+            and (int(top_bucket["top3_count"]) >= 2 or bool(top_bucket["multi_source"]))
+        )
+
+        summary.update(
+            {
+                "citation_confident": citation_confident,
+                "top_filename": top_filename,
+                "dominance": float(dominance),
+                "top_rrf_score": float(top_bucket["best_rrf"]),
+                "top_source_count": int(top_bucket["top_source_count"]),
+                "top_multi_source": bool(top_bucket["multi_source"]),
+                "top_strong_match": bool(top_bucket["strong_match"]),
+            }
+        )
+        return summary
+
+    def _confidence_rank_tuple(self, summary: dict[str, Any]) -> tuple:
+        return (
+            int(bool(summary.get("citation_confident"))),
+            int(bool(summary.get("top_strong_match"))),
+            int(bool(summary.get("top_multi_source"))),
+            int(summary.get("top_source_count") or 0),
+            float(summary.get("dominance") or 0.0),
+            float(summary.get("top_rrf_score") or 0.0),
+            int(summary.get("hit_count") or 0),
+        )
+
+    def _goal_alignment_rank_tuple(self, summary: dict[str, Any]) -> tuple:
+        return (
+            int(summary.get("best_query_term_hits") or 0),
+            float(summary.get("best_query_term_ratio") or 0.0),
+        )
+
+    def _should_skip_rewrite_for_raw_confidence(
+        self,
+        query: str,
+        docs: list[Document],
+    ) -> tuple[bool, str, dict[str, Any]]:
+        summary = self._build_confidence_summary(docs, query=query)
+        goal_intent = self._query_expresses_goal_intent(query)
+        strong_support = bool(summary.get("top_multi_source")) or int(summary.get("top_source_count") or 0) >= 2
+        dominance = float(summary.get("dominance") or 0.0)
+        top_rrf_score = float(summary.get("top_rrf_score") or 0.0)
+        citation_confident = bool(summary.get("citation_confident"))
+        best_query_term_hits = int(summary.get("best_query_term_hits") or 0)
+        best_query_term_ratio = float(summary.get("best_query_term_ratio") or 0.0)
+        query_term_count = int(summary.get("query_term_count") or 0)
+        goal_alignment_strong = (
+            query_term_count == 0
+            or best_query_term_hits >= min(2, query_term_count)
+            or best_query_term_ratio >= 0.6
+        )
+        strong_raw_confidence = citation_confident and (
+            strong_support
+            or (
+                dominance >= CONFIDENT_CITATION_MIN_DOMINANCE
+                and top_rrf_score >= CONFIDENT_CITATION_MIN_RRF
+            )
+        )
+
+        if summary.get("top_strong_match") and not goal_intent:
+            return True, "raw retrieval already has strong filename/title signal", summary
+        if goal_intent and not goal_alignment_strong:
+            return False, "raw retrieval misses the user goal terms; rewrite may help", summary
+        if strong_raw_confidence:
+            return True, "raw retrieval is already confident", summary
+        return False, "raw retrieval confidence is weak", summary
 
     def _load_index(self) -> dict[str, dict[str, Any]]:
         if not self.index_file.exists():
@@ -837,6 +1548,54 @@ class LocalFileKnowledgeProvider(KnowledgeProvider):
         k = k or self.settings.knowledge_top_k
         return self.vector_store.similarity_search_with_score(query, k=k)
 
+    def _collect_vector_hits(self, queries: list[str], *, k: int) -> list[FamilyHit]:
+        best: dict[tuple[str, Any, str], FamilyHit] = {}
+        for query in _dedupe_texts(queries):
+            for rank, (doc, score) in enumerate(self.query_with_scores(query, k=k), start=1):
+                key = self._doc_key(doc)
+                score_value = float(score)
+                existing = best.get(key)
+                if existing is None or rank < existing.rank or (
+                    rank == existing.rank and score_value < float(existing.score if existing.score is not None else score_value)
+                ):
+                    best[key] = FamilyHit(doc=doc, rank=rank, score=score_value)
+
+        hits = list(best.values())
+        hits.sort(key=lambda item: (item.rank, float(item.score if item.score is not None else 0.0), len(item.doc.page_content or "")))
+        return hits[:k]
+
+    def _collect_bm25_hits(self, queries: list[str], *, k: int) -> list[FamilyHit]:
+        best: dict[tuple[str, Any, str], FamilyHit] = {}
+        for query in _dedupe_texts(queries):
+            for rank, doc in enumerate(self.query_with_bm25(query, k=k), start=1):
+                key = self._doc_key(doc)
+                score_value = float((doc.metadata or {}).get("_bm25_score") or 0.0)
+                existing = best.get(key)
+                if existing is None or rank < existing.rank or (
+                    rank == existing.rank and score_value > float(existing.score if existing.score is not None else score_value)
+                ):
+                    best[key] = FamilyHit(doc=doc, rank=rank, score=score_value)
+
+        hits = list(best.values())
+        hits.sort(key=lambda item: (item.rank, -float(item.score if item.score is not None else 0.0), len(item.doc.page_content or "")))
+        return hits[:k]
+
+    def _collect_metadata_hits(self, queries: list[str], *, k: int) -> list[FamilyHit]:
+        best: dict[tuple[str, Any, str], FamilyHit] = {}
+        for query in _dedupe_texts(queries):
+            for rank, doc in enumerate(self._query_with_metadata_matches(query, k=k), start=1):
+                key = self._doc_key(doc)
+                score_value = float((doc.metadata or {}).get("_query_match_bonus") or 0.0)
+                existing = best.get(key)
+                if existing is None or rank < existing.rank or (
+                    rank == existing.rank and score_value > float(existing.score if existing.score is not None else score_value)
+                ):
+                    best[key] = FamilyHit(doc=doc, rank=rank, score=score_value)
+
+        hits = list(best.values())
+        hits.sort(key=lambda item: (item.rank, -float(item.score if item.score is not None else 0.0), len(item.doc.page_content or "")))
+        return hits[:k]
+
     def _section_rerank(self, docs_and_scores, final_k: int | None = None, query: str | None = None) -> List[Document]:
         good_keywords = [
             "abstract",
@@ -896,27 +1655,19 @@ class LocalFileKnowledgeProvider(KnowledgeProvider):
 
     def _fuse_with_rrf(
         self,
-        vector_docs_and_scores,
-        bm25_docs: list[Document],
-        metadata_docs: list[Document] | None = None,
+        vector_hits: list[FamilyHit],
+        bm25_hits: list[FamilyHit],
+        metadata_hits: list[FamilyHit] | None = None,
     ) -> list[tuple[Document, float]]:
         merged: list[tuple[Document, float]] = []
         score_map: dict[tuple[str, Any, str], dict[str, Any]] = {}
 
-        def doc_key(doc: Document) -> tuple[str, Any, str]:
-            metadata = doc.metadata or {}
-            return (
-                str(metadata.get("filename", "")),
-                metadata.get("chunk_id", -1),
-                (doc.page_content or "")[:120],
-            )
-
-        for rank, (doc, vector_score) in enumerate(vector_docs_and_scores, start=1):
-            key = doc_key(doc)
+        for hit in vector_hits:
+            key = self._doc_key(hit.doc)
             entry = score_map.setdefault(
                 key,
                 {
-                    "doc": doc,
+                    "doc": hit.doc,
                     "vector_rank": None,
                     "bm25_rank": None,
                     "metadata_rank": None,
@@ -926,15 +1677,16 @@ class LocalFileKnowledgeProvider(KnowledgeProvider):
                     "query_match_bonus": 0.0,
                 },
             )
-            entry["vector_rank"] = rank
-            entry["vector_score"] = float(vector_score)
+            if entry["vector_rank"] is None or int(hit.rank) < int(entry["vector_rank"]):
+                entry["vector_rank"] = int(hit.rank)
+                entry["vector_score"] = float(hit.score if hit.score is not None else 0.0)
 
-        for rank, doc in enumerate(bm25_docs, start=1):
-            key = doc_key(doc)
+        for hit in bm25_hits:
+            key = self._doc_key(hit.doc)
             entry = score_map.setdefault(
                 key,
                 {
-                    "doc": doc,
+                    "doc": hit.doc,
                     "vector_rank": None,
                     "bm25_rank": None,
                     "metadata_rank": None,
@@ -944,17 +1696,16 @@ class LocalFileKnowledgeProvider(KnowledgeProvider):
                     "query_match_bonus": 0.0,
                 },
             )
-            entry["bm25_rank"] = rank
-            bm25_score = (doc.metadata or {}).get("_bm25_score")
-            if bm25_score is not None:
-                entry["bm25_score"] = float(bm25_score)
+            if entry["bm25_rank"] is None or int(hit.rank) < int(entry["bm25_rank"]):
+                entry["bm25_rank"] = int(hit.rank)
+                entry["bm25_score"] = float(hit.score if hit.score is not None else 0.0)
 
-        for rank, doc in enumerate(metadata_docs or [], start=1):
-            key = doc_key(doc)
+        for hit in metadata_hits or []:
+            key = self._doc_key(hit.doc)
             entry = score_map.setdefault(
                 key,
                 {
-                    "doc": doc,
+                    "doc": hit.doc,
                     "vector_rank": None,
                     "bm25_rank": None,
                     "metadata_rank": None,
@@ -964,10 +1715,17 @@ class LocalFileKnowledgeProvider(KnowledgeProvider):
                     "query_match_bonus": 0.0,
                 },
             )
-            entry["doc"] = doc
-            entry["metadata_rank"] = rank
-            entry["query_match_signals"] = list(doc.metadata.get("_query_match_signals", []))
-            entry["query_match_bonus"] = float(doc.metadata.get("_query_match_bonus", 0.0))
+            if entry["metadata_rank"] is None or int(hit.rank) < int(entry["metadata_rank"]):
+                entry["doc"] = hit.doc
+                entry["metadata_rank"] = int(hit.rank)
+                entry["query_match_bonus"] = float(hit.score if hit.score is not None else 0.0)
+            entry["query_match_signals"] = list(
+                dict.fromkeys(entry["query_match_signals"] + list(hit.doc.metadata.get("_query_match_signals", [])))
+            )
+            entry["query_match_bonus"] = max(
+                float(entry["query_match_bonus"] or 0.0),
+                float(hit.doc.metadata.get("_query_match_bonus", 0.0)),
+            )
 
         for entry in score_map.values():
             vector_rank = entry["vector_rank"]
@@ -1013,19 +1771,246 @@ class LocalFileKnowledgeProvider(KnowledgeProvider):
 
         return merged
 
-    def query_hybrid(self, query: str, recall_k: int = 8, final_k: int | None = None) -> list[Document]:
-        final_k = final_k or self.settings.knowledge_top_k
+    def _query_hybrid_once(
+        self,
+        query: str,
+        *,
+        recall_k: int,
+        final_k: int,
+        vector_queries: list[str] | None = None,
+        bm25_queries: list[str] | None = None,
+        metadata_terms: list[str] | None = None,
+    ) -> list[Document]:
+        vector_hits = self._collect_vector_hits([query] + list(vector_queries or []), k=recall_k)
+        bm25_hits = self._collect_bm25_hits([query] + list(bm25_queries or []), k=recall_k)
+        metadata_hits = self._collect_metadata_hits([query] + list(metadata_terms or []), k=recall_k)
 
-        vector_docs_and_scores = self.query_with_scores(query, k=recall_k)
-        bm25_docs = self.query_with_bm25(query, k=recall_k)
-        metadata_docs = self._query_with_metadata_matches(query, k=recall_k)
-
-        merged = self._fuse_with_rrf(vector_docs_and_scores, bm25_docs, metadata_docs=metadata_docs)
-
+        merged = self._fuse_with_rrf(vector_hits, bm25_hits, metadata_hits=metadata_hits)
         if not merged:
             return []
-
         return self._section_rerank(merged, final_k=final_k, query=query)
+
+    def _build_trace(
+        self,
+        *,
+        gate_outcome: str,
+        gate_reason: str,
+        raw_query: str,
+        planner_intent: str | None = None,
+        vector_queries: list[str] | None = None,
+        bm25_queries: list[str] | None = None,
+        metadata_terms: list[str] | None = None,
+        must_keep: list[str] | None = None,
+        must_keep_repaired: bool = False,
+        raw_confidence: dict[str, Any] | None = None,
+        rewritten_confidence: dict[str, Any] | None = None,
+        planner_reason: str = "",
+        planner_error: str = "",
+    ) -> RetrievalRewriteTrace:
+        return RetrievalRewriteTrace(
+            gate_outcome=gate_outcome,
+            gate_reason=gate_reason,
+            planner_intent=planner_intent,
+            raw_query=raw_query,
+            rewritten_vector_queries=list(vector_queries or []),
+            rewritten_bm25_queries=list(bm25_queries or []),
+            metadata_terms=list(metadata_terms or []),
+            must_keep=list(must_keep or []),
+            must_keep_repaired=must_keep_repaired,
+            raw_confidence=dict(raw_confidence or {}),
+            rewritten_confidence=dict(rewritten_confidence or {}),
+            planner_reason=planner_reason,
+            planner_error=planner_error,
+        )
+
+    def _run_rewrite_decision(
+        self,
+        query: str,
+        *,
+        raw_docs: list[Document],
+        recall_k: int,
+        final_k: int,
+        rewrite_request: RetrievalRewriteRequest,
+    ) -> tuple[list[Document], RetrievalRewriteTrace]:
+        raw_query = self._raw_query_for_rewrite(query, rewrite_request)
+        should_skip, skip_reason, raw_confidence = self._should_skip_rewrite_for_raw_confidence(raw_query, raw_docs)
+        force_goal_rewrite = self._should_force_goal_rewrite(raw_query, raw_confidence)
+        if should_skip:
+            return raw_docs, self._build_trace(
+                gate_outcome="bypass",
+                gate_reason=skip_reason,
+                raw_query=raw_query,
+                raw_confidence=raw_confidence,
+            )
+
+        plan, planner_error = self._invoke_retrieval_planner(query, rewrite_request)
+        if plan is None:
+            return raw_docs, self._build_trace(
+                gate_outcome="rewrite_failed_fallback",
+                gate_reason="planner failed; fallback to raw retrieval",
+                raw_query=raw_query,
+                raw_confidence=raw_confidence,
+                planner_error=planner_error,
+            )
+
+        plan, must_keep_repaired = self._repair_rewrite_plan(plan)
+        if not plan.rewrite_needed and force_goal_rewrite:
+            heuristic_plan = self._build_heuristic_rewrite_plan(query, rewrite_request, intent_hint=plan.intent)
+            heuristic_plan, heuristic_repaired = self._repair_rewrite_plan(heuristic_plan)
+            must_keep_repaired = must_keep_repaired or heuristic_repaired
+            planner_reason = f"{plan.reason} | heuristic goal rewrite fallback applied".strip(" |")
+            plan = heuristic_plan
+        else:
+            planner_reason = plan.reason
+
+        if not plan.rewrite_needed:
+            return raw_docs, self._build_trace(
+                gate_outcome="raw_only",
+                gate_reason="planner decided rewrite is unnecessary",
+                raw_query=raw_query,
+                planner_intent=plan.intent,
+                must_keep=plan.must_keep,
+                must_keep_repaired=must_keep_repaired,
+                raw_confidence=raw_confidence,
+                planner_reason=planner_reason,
+            )
+
+        if not (plan.vector_queries or plan.bm25_queries or plan.metadata_terms):
+            return raw_docs, self._build_trace(
+                gate_outcome="rewrite_failed_fallback",
+                gate_reason="planner produced no usable rewritten queries",
+                raw_query=raw_query,
+                planner_intent=plan.intent,
+                must_keep=plan.must_keep,
+                must_keep_repaired=must_keep_repaired,
+                raw_confidence=raw_confidence,
+                planner_reason=planner_reason,
+                planner_error=planner_error,
+            )
+
+        rewrite_docs = self._query_hybrid_once(
+            query,
+            recall_k=recall_k,
+            final_k=final_k,
+            vector_queries=plan.vector_queries,
+            bm25_queries=plan.bm25_queries,
+            metadata_terms=plan.metadata_terms,
+        )
+        rewritten_confidence = self._build_confidence_summary(rewrite_docs, query=raw_query)
+        goal_alignment_not_improved = force_goal_rewrite and (
+            self._goal_alignment_rank_tuple(rewritten_confidence) <= self._goal_alignment_rank_tuple(raw_confidence)
+        )
+        if not rewrite_docs or self._confidence_rank_tuple(rewritten_confidence) < self._confidence_rank_tuple(raw_confidence):
+            return raw_docs, self._build_trace(
+                gate_outcome="rewrite_failed_fallback",
+                gate_reason="rewritten retrieval was empty or weaker than raw retrieval",
+                raw_query=raw_query,
+                planner_intent=plan.intent,
+                vector_queries=plan.vector_queries,
+                bm25_queries=plan.bm25_queries,
+                metadata_terms=plan.metadata_terms,
+                must_keep=plan.must_keep,
+                must_keep_repaired=must_keep_repaired,
+                raw_confidence=raw_confidence,
+                rewritten_confidence=rewritten_confidence,
+                planner_reason=planner_reason,
+                planner_error=planner_error,
+            )
+        if goal_alignment_not_improved:
+            return raw_docs, self._build_trace(
+                gate_outcome="rewrite_failed_fallback",
+                gate_reason="rewritten retrieval did not improve goal-term alignment",
+                raw_query=raw_query,
+                planner_intent=plan.intent,
+                vector_queries=plan.vector_queries,
+                bm25_queries=plan.bm25_queries,
+                metadata_terms=plan.metadata_terms,
+                must_keep=plan.must_keep,
+                must_keep_repaired=must_keep_repaired,
+                raw_confidence=raw_confidence,
+                rewritten_confidence=rewritten_confidence,
+                planner_reason=planner_reason,
+                planner_error=planner_error,
+            )
+
+        return rewrite_docs, self._build_trace(
+            gate_outcome="rewrite_used",
+            gate_reason="rewritten retrieval improved or matched raw confidence",
+            raw_query=raw_query,
+            planner_intent=plan.intent,
+            vector_queries=plan.vector_queries,
+            bm25_queries=plan.bm25_queries,
+            metadata_terms=plan.metadata_terms,
+            must_keep=plan.must_keep,
+            must_keep_repaired=must_keep_repaired,
+            raw_confidence=raw_confidence,
+            rewritten_confidence=rewritten_confidence,
+            planner_reason=planner_reason,
+            planner_error=planner_error,
+        )
+
+    def query_hybrid(
+        self,
+        query: str,
+        recall_k: int = 8,
+        final_k: int | None = None,
+        *,
+        rewrite_request: RetrievalRewriteRequest | None = None,
+        include_debug: bool = False,
+    ):
+        final_k = final_k or self.settings.knowledge_top_k
+        raw_docs = self._query_hybrid_once(query, recall_k=recall_k, final_k=final_k)
+        raw_query = self._raw_query_for_rewrite(query, rewrite_request)
+
+        if not self.settings.retrieval_rewrite_enabled:
+            trace = self._build_trace(
+                gate_outcome="raw_only",
+                gate_reason="retrieval rewrite feature is disabled",
+                raw_query=raw_query,
+                raw_confidence=self._build_confidence_summary(raw_docs, query=raw_query),
+            )
+            self.last_rewrite_trace = trace.to_dict()
+            return {"docs": raw_docs, "debug": trace.to_dict()} if include_debug else raw_docs
+
+        if rewrite_request is None:
+            trace = self._build_trace(
+                gate_outcome="raw_only",
+                gate_reason="no rewrite request provided",
+                raw_query=raw_query,
+                raw_confidence=self._build_confidence_summary(raw_docs, query=raw_query),
+            )
+            self.last_rewrite_trace = trace.to_dict()
+            return {"docs": raw_docs, "debug": trace.to_dict()} if include_debug else raw_docs
+
+        if self.settings.retrieval_rewrite_mode != "smart":
+            trace = self._build_trace(
+                gate_outcome="raw_only",
+                gate_reason=f"unsupported rewrite mode: {self.settings.retrieval_rewrite_mode}",
+                raw_query=raw_query,
+                raw_confidence=self._build_confidence_summary(raw_docs, query=raw_query),
+            )
+            self.last_rewrite_trace = trace.to_dict()
+            return {"docs": raw_docs, "debug": trace.to_dict()} if include_debug else raw_docs
+
+        if self._looks_like_exact_lookup(raw_query):
+            trace = self._build_trace(
+                gate_outcome="bypass",
+                gate_reason="query looks like an exact filename/code/term lookup",
+                raw_query=raw_query,
+                raw_confidence=self._build_confidence_summary(raw_docs, query=raw_query),
+            )
+            self.last_rewrite_trace = trace.to_dict()
+            return {"docs": raw_docs, "debug": trace.to_dict()} if include_debug else raw_docs
+
+        final_docs, trace = self._run_rewrite_decision(
+            query,
+            raw_docs=raw_docs,
+            recall_k=recall_k,
+            final_k=final_k,
+            rewrite_request=rewrite_request,
+        )
+        self.last_rewrite_trace = trace.to_dict()
+        return {"docs": final_docs, "debug": trace.to_dict()} if include_debug else final_docs
 
     def query_reranked(self, query: str, recall_k: int = 8, final_k: int | None = None) -> List[Document]:
         docs_and_scores = self.query_with_scores(query, k=recall_k)
@@ -1033,7 +2018,7 @@ class LocalFileKnowledgeProvider(KnowledgeProvider):
             return []
         return self._section_rerank(docs_and_scores, final_k=final_k, query=query)
 
-    def _select_confident_citation_docs(self, docs: list[Document]) -> list[Document]:
+    def _select_confident_citation_docs(self, docs: list[Document], *, query: str = "") -> list[Document]:
         if not docs:
             return []
 
@@ -1072,25 +2057,62 @@ class LocalFileKnowledgeProvider(KnowledgeProvider):
         top_filename, top_bucket = max(grouped.items(), key=lambda item: item[1]["weight"])
         del top_filename
         dominance = float(top_bucket["weight"]) / total_weight if total_weight else 0.0
+        confidence = self._build_confidence_summary(docs, query=query)
+        goal_intent = self._query_expresses_goal_intent(query)
+        goal_alignment_strong = (
+            int(confidence.get("query_term_count") or 0) == 0
+            or int(confidence.get("best_query_term_hits") or 0) >= min(2, int(confidence.get("query_term_count") or 0))
+            or float(confidence.get("best_query_term_ratio") or 0.0) >= 0.6
+        )
         confident = bool(top_bucket["strong_match"]) or (
             dominance >= CONFIDENT_CITATION_MIN_DOMINANCE
             and float(top_bucket["best_rrf"]) >= CONFIDENT_CITATION_MIN_RRF
             and (int(top_bucket["top3_count"]) >= 2 or bool(top_bucket["multi_source"]))
         )
-        if not confident:
+        if not confident or (goal_intent and not goal_alignment_strong):
             return []
-        return list(top_bucket["docs"][:4])
+        filtered_docs = list(top_bucket["docs"])
+        if goal_intent:
+            aligned_docs = [
+                doc
+                for doc in filtered_docs
+                if self._doc_query_term_alignment(doc, self._extract_goal_terms(query))[0] > 0
+            ]
+            if aligned_docs:
+                filtered_docs = aligned_docs
+        return filtered_docs[:4]
 
-    def query_with_sources(self, query: str) -> dict[str, Any]:
-        docs = self.query_hybrid(
-            query=query,
-            recall_k=8,
-            final_k=self.settings.knowledge_top_k,
-        )
+    def query_with_sources(
+        self,
+        query: str,
+        *,
+        rewrite_request: RetrievalRewriteRequest | None = None,
+        include_debug: bool = False,
+    ) -> dict[str, Any]:
+        try:
+            hybrid_result = self.query_hybrid(
+                query=query,
+                recall_k=8,
+                final_k=self.settings.knowledge_top_k,
+                rewrite_request=rewrite_request,
+                include_debug=include_debug,
+            )
+        except TypeError:
+            hybrid_result = self.query_hybrid(
+                query=query,
+                recall_k=8,
+                final_k=self.settings.knowledge_top_k,
+            )
+        debug_payload = None
+        if include_debug and isinstance(hybrid_result, dict):
+            docs = list(hybrid_result.get("docs", []))
+            debug_payload = hybrid_result.get("debug")
+        else:
+            docs = hybrid_result
 
         context = "\n\n".join(doc.page_content for doc in docs)
         citations: list[dict[str, Any]] = []
-        citation_docs = self._select_confident_citation_docs(docs)
+        citation_docs = self._select_confident_citation_docs(docs, query=query)
 
         for index, doc in enumerate(citation_docs, start=1):
             metadata = dict(doc.metadata or {})
@@ -1115,11 +2137,19 @@ class LocalFileKnowledgeProvider(KnowledgeProvider):
                 }
             )
 
-        return {
+        result = {
             "context": context,
             "citations": citations,
             "citation_confident": bool(citation_docs),
         }
+        if debug_payload is not None:
+            result["debug"] = debug_payload
+        return result
 
-    def query(self, query: str) -> str:
-        return str(self.query_with_sources(query).get("context", ""))
+    def query(
+        self,
+        query: str,
+        *,
+        rewrite_request: RetrievalRewriteRequest | None = None,
+    ) -> str:
+        return str(self.query_with_sources(query, rewrite_request=rewrite_request).get("context", ""))

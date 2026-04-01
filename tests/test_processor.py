@@ -1,3 +1,4 @@
+import json
 import os
 import time
 from io import BytesIO
@@ -282,6 +283,78 @@ def test_mineru_processor_uses_public_dns_bypass_after_direct_ssl_failures(tmp_p
     assert sessions["direct"].download_attempts == 3
     assert bypass_calls == ["https://cdn-mineru.openxlab.org.cn/result.zip"]
     assert not status_file.exists()
+
+
+def test_mineru_processor_persists_extracted_markdown_into_project_cache(tmp_path, monkeypatch):
+    pdf = tmp_path / "sample.pdf"
+    pdf.write_bytes(b"%PDF-1.4")
+    status_file = tmp_path / "mineru_runtime_state.json"
+    cache_dir = tmp_path / "minerU_cache"
+    processor = KnowledgeProcessor(
+        api_token="token-demo",
+        status_file_path=str(status_file),
+        cache_dir=str(cache_dir),
+    )
+    zip_bytes = _build_zip_bytes("# parsed-from-mineru")
+    sessions: dict[str, _FakeMinerUSession] = {}
+
+    def fake_create_session(mode: str):
+        session = sessions.setdefault(
+            mode,
+            _FakeMinerUSession(
+                processor=processor,
+                mode=mode,
+                zip_bytes=zip_bytes,
+                download_failures_before_success=0,
+            ),
+        )
+        proxy_desc = "直连" if mode == "direct" else "继承环境变量 HTTP_PROXY / HTTPS_PROXY"
+        return session, proxy_desc
+
+    monkeypatch.setattr(processor, "_create_session", fake_create_session)
+    monkeypatch.setattr("ai_tutor_agent.infrastructure.processor.time.sleep", lambda _: None)
+    processor.session, processor.proxy_desc = fake_create_session("inherit")
+    processor.active_proxy_mode = "inherit"
+
+    result = processor.parse_pdf_to_md(str(pdf))
+
+    assert result == "# parsed-from-mineru"
+    cache_entries = list(cache_dir.iterdir())
+    assert len(cache_entries) == 1
+    cache_entry = cache_entries[0]
+    assert cache_entry.name.startswith("sample__")
+    assert (cache_entry / "full.md").read_text(encoding="utf-8") == "# parsed-from-mineru"
+    assert (cache_entry / "result.zip").read_bytes() == zip_bytes
+    assert (cache_entry / "extracted" / "full.md").read_text(encoding="utf-8") == "# parsed-from-mineru"
+
+    metadata = json.loads((cache_entry / "metadata.json").read_text(encoding="utf-8"))
+    assert metadata["source_filename"] == "sample.pdf"
+    assert metadata["batch_id"] == "batch-123"
+    assert metadata["full_md_path"] == "full.md"
+    assert metadata["extract_dir"] == "extracted"
+
+
+def test_mineru_processor_reuses_cached_markdown_without_reaching_cloud(tmp_path, monkeypatch):
+    pdf = tmp_path / "sample.pdf"
+    pdf.write_bytes(b"%PDF-1.4")
+    cache_dir = tmp_path / "minerU_cache"
+    processor = KnowledgeProcessor(
+        api_token="token-demo",
+        cache_dir=str(cache_dir),
+    )
+
+    cache_entry = processor._cache_entry_dir(str(pdf), file_name="sample.pdf")
+    cache_entry.mkdir(parents=True, exist_ok=True)
+    (cache_entry / "full.md").write_text("# cached-mineru", encoding="utf-8")
+
+    def fail_parse_once(local_path, *, token, file_name):
+        raise AssertionError(f"cloud parse should not be called for cached markdown: {local_path} {token} {file_name}")
+
+    monkeypatch.setattr(processor, "_parse_pdf_to_md_once", fail_parse_once)
+
+    result = processor.parse_pdf_to_md(str(pdf))
+
+    assert result == "# cached-mineru"
 
 
 def test_mineru_processor_public_doh_ignores_fake_ip_answers(monkeypatch):

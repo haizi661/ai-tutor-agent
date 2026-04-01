@@ -93,6 +93,9 @@ class LocalConfigUpdateRequest(BaseModel):
     mineru_public_dns_server: str = "223.5.5.5"
     mineru_public_dns_port: int = 53
     mineru_public_dns_hosts: str = "cdn-mineru.openxlab.org.cn"
+    retrieval_rewrite_enabled: bool = False
+    retrieval_rewrite_mode: str = "smart"
+    retrieval_rewrite_debug: bool = False
 
 
 @router.get("")
@@ -188,6 +191,9 @@ async def get_local_config(request: Request):
             settings.mineru_public_dns_port,
         ),
         "mineru_public_dns_hosts": raw_values.get("MINERU_PUBLIC_DNS_HOSTS", settings.mineru_public_dns_hosts),
+        "retrieval_rewrite_enabled": (raw_values.get("RETRIEVAL_REWRITE_ENABLED", str(settings.retrieval_rewrite_enabled)).strip().lower() in {"1", "true", "yes", "on"}),
+        "retrieval_rewrite_mode": raw_values.get("RETRIEVAL_REWRITE_MODE", settings.retrieval_rewrite_mode),
+        "retrieval_rewrite_debug": (raw_values.get("RETRIEVAL_REWRITE_DEBUG", str(settings.retrieval_rewrite_debug)).strip().lower() in {"1", "true", "yes", "on"}),
     }
 
 
@@ -249,6 +255,9 @@ async def update_local_config(req: LocalConfigUpdateRequest, request: Request):
         "MINERU_PUBLIC_DNS_SERVER": req.mineru_public_dns_server.strip() or raw_values.get("MINERU_PUBLIC_DNS_SERVER", "223.5.5.5"),
         "MINERU_PUBLIC_DNS_PORT": str(req.mineru_public_dns_port),
         "MINERU_PUBLIC_DNS_HOSTS": req.mineru_public_dns_hosts.strip() or raw_values.get("MINERU_PUBLIC_DNS_HOSTS", "cdn-mineru.openxlab.org.cn"),
+        "RETRIEVAL_REWRITE_ENABLED": "true" if req.retrieval_rewrite_enabled else "false",
+        "RETRIEVAL_REWRITE_MODE": req.retrieval_rewrite_mode.strip() or raw_values.get("RETRIEVAL_REWRITE_MODE", "smart"),
+        "RETRIEVAL_REWRITE_DEBUG": "true" if req.retrieval_rewrite_debug else "false",
     }
 
     selected_api_key = req.api_key.strip()

@@ -1,5 +1,6 @@
 from dataclasses import replace
 from pathlib import Path
+from types import SimpleNamespace
 
 import pytest
 from langchain_core.documents import Document
@@ -38,6 +39,45 @@ def build_test_settings(tmp_path):
         https_proxy=None,
         local_config_enabled=True,
     )
+
+
+class _EmptyCollection:
+    def get(self, include=None):
+        del include
+        return {"documents": [], "metadatas": []}
+
+    def delete(self, ids=None, where=None):
+        del ids, where
+
+    def count(self):
+        return 0
+
+
+class _FakeChroma:
+    def __init__(self, *args, **kwargs):
+        del args, kwargs
+        self._collection = _EmptyCollection()
+
+
+class _FakePlannerLLM:
+    def __init__(self, responses):
+        if isinstance(responses, str):
+            responses = [responses]
+        self.responses = list(responses)
+        self.messages = []
+
+    def invoke(self, messages):
+        self.messages.append(messages)
+        payload = self.responses.pop(0)
+        return SimpleNamespace(content=payload)
+
+
+def _build_provider(monkeypatch, tmp_path, *, settings=None):
+    settings = settings or build_test_settings(tmp_path)
+    monkeypatch.setattr(retriever, "build_embedding_backend", lambda settings: object())
+    monkeypatch.setattr(retriever, "Chroma", _FakeChroma)
+    monkeypatch.setattr(retriever.LocalFileKnowledgeProvider, "_sync_knowledge_dir", lambda self: None)
+    return retriever.LocalFileKnowledgeProvider(settings)
 
 
 def test_local_knowledge_provider_falls_back_when_embedding_backend_fails(monkeypatch, tmp_path):
@@ -459,3 +499,279 @@ def test_legacy_vector_store_without_state_file_triggers_safe_rebuild(monkeypatc
     assert not vector_dir.exists()
     assert provider.retrieval_state_file.exists()
     assert provider.retrieval_state["embedding_model_name"] == settings.embedding_model_name
+
+
+def test_query_hybrid_bypasses_rewrite_for_exact_filename_lookup(monkeypatch, tmp_path):
+    settings = replace(build_test_settings(tmp_path), retrieval_rewrite_enabled=True)
+    planner = _FakePlannerLLM('{"intent":"concept_overview","rewrite_needed":true,"vector_queries":["ignored"],"bm25_queries":[],"metadata_terms":[]}')
+    monkeypatch.setattr(retriever, "build_retrieval_planner_llm", lambda settings: planner)
+    provider = _build_provider(monkeypatch, tmp_path, settings=settings)
+
+    target_doc = Document(page_content="3403 使用说明", metadata={"filename": "3403使用指南.pdf", "chunk_id": 1, "section": "3403使用指南"})
+    monkeypatch.setattr(provider, "query_with_scores", lambda query, k=None: [(target_doc, 0.1)])
+    monkeypatch.setattr(provider, "query_with_bm25", lambda query, k=5: [target_doc])
+
+    result = provider.query_hybrid(
+        "3403使用指南.pdf",
+        include_debug=True,
+        rewrite_request=retriever.RetrievalRewriteRequest(channel="tutor", raw_query="3403使用指南.pdf", current_topic="3403使用指南"),
+    )
+
+    assert result["docs"][0].metadata["filename"] == "3403使用指南.pdf"
+    assert result["debug"]["gate_outcome"] == "bypass"
+    assert planner.messages == []
+
+
+def test_query_hybrid_bypasses_rewrite_for_exact_short_term(monkeypatch, tmp_path):
+    settings = replace(build_test_settings(tmp_path), retrieval_rewrite_enabled=True)
+    planner = _FakePlannerLLM('{"intent":"concept_overview","rewrite_needed":true,"vector_queries":["ignored"],"bm25_queries":[],"metadata_terms":[]}')
+    monkeypatch.setattr(retriever, "build_retrieval_planner_llm", lambda settings: planner)
+    provider = _build_provider(monkeypatch, tmp_path, settings=settings)
+
+    pid_doc = Document(page_content="PID 控制器", metadata={"filename": "control.pdf", "chunk_id": 1, "section": "PID"})
+    monkeypatch.setattr(provider, "query_with_scores", lambda query, k=None: [(pid_doc, 0.1)])
+    monkeypatch.setattr(provider, "query_with_bm25", lambda query, k=5: [pid_doc])
+
+    result = provider.query_hybrid(
+        "PID",
+        include_debug=True,
+        rewrite_request=retriever.RetrievalRewriteRequest(channel="tutor", raw_query="PID", current_topic="PID"),
+    )
+
+    assert result["debug"]["gate_outcome"] == "bypass"
+    assert planner.messages == []
+
+
+def test_query_hybrid_uses_rewrite_for_low_confidence_queries(monkeypatch, tmp_path):
+    settings = replace(build_test_settings(tmp_path), retrieval_rewrite_enabled=True)
+    planner = _FakePlannerLLM(
+        """
+        {
+          "intent": "procedure",
+          "rewrite_needed": true,
+          "reason": "原问题过于口语化，需要补充操作目标。",
+          "must_keep": ["3403"],
+          "vector_queries": ["3403 文档中系统登录的操作流程"],
+          "bm25_queries": ["3403 登录 系统 步骤"],
+          "metadata_terms": ["3403", "登录"]
+        }
+        """
+    )
+    monkeypatch.setattr(retriever, "build_retrieval_planner_llm", lambda settings: planner)
+    provider = _build_provider(monkeypatch, tmp_path, settings=settings)
+
+    raw_doc = Document(page_content="泛化资料", metadata={"filename": "other.pdf", "chunk_id": 1, "section": "intro"})
+    target_doc = Document(page_content="这里是 3403 登录步骤", metadata={"filename": "3403使用指南.pdf", "chunk_id": 2, "H1": "3403使用指南", "section": "登录"})
+
+    def fake_query_with_scores(query, k=None):
+        if "操作流程" in query:
+            return [(target_doc, 0.05)]
+        return [(raw_doc, 0.22)]
+
+    def fake_query_with_bm25(query, k=5):
+        if "登录" in query:
+            enriched = Document(
+                page_content=target_doc.page_content,
+                metadata={**target_doc.metadata, "_bm25_score": 9.4},
+            )
+            return [enriched]
+        return []
+
+    monkeypatch.setattr(provider, "query_with_scores", fake_query_with_scores)
+    monkeypatch.setattr(provider, "query_with_bm25", fake_query_with_bm25)
+
+    result = provider.query_hybrid(
+        "3403 怎么登录",
+        include_debug=True,
+        rewrite_request=retriever.RetrievalRewriteRequest(channel="tutor", raw_query="3403 怎么登录", current_topic="3403使用指南"),
+    )
+
+    assert result["docs"][0].metadata["filename"] == "3403使用指南.pdf"
+    assert result["debug"]["gate_outcome"] == "rewrite_used"
+    assert result["debug"]["planner_intent"] == "procedure"
+
+
+def test_query_hybrid_falls_back_when_planner_returns_invalid_json(monkeypatch, tmp_path):
+    settings = replace(build_test_settings(tmp_path), retrieval_rewrite_enabled=True)
+    planner = _FakePlannerLLM("not-json")
+    monkeypatch.setattr(retriever, "build_retrieval_planner_llm", lambda settings: planner)
+    provider = _build_provider(monkeypatch, tmp_path, settings=settings)
+
+    raw_doc = Document(page_content="泛化资料", metadata={"filename": "other.pdf", "chunk_id": 1, "section": "intro"})
+    monkeypatch.setattr(provider, "query_with_scores", lambda query, k=None: [(raw_doc, 0.22)])
+    monkeypatch.setattr(provider, "query_with_bm25", lambda query, k=5: [])
+
+    result = provider.query_hybrid(
+        "这个东西怎么用",
+        include_debug=True,
+        rewrite_request=retriever.RetrievalRewriteRequest(channel="tutor", raw_query="这个东西怎么用", current_topic="3403使用指南"),
+    )
+
+    assert result["docs"][0].metadata["filename"] == "other.pdf"
+    assert result["debug"]["gate_outcome"] == "rewrite_failed_fallback"
+    assert "invalid JSON" in result["debug"]["planner_error"]
+
+
+def test_query_hybrid_repairs_missing_must_keep_terms(monkeypatch, tmp_path):
+    settings = replace(build_test_settings(tmp_path), retrieval_rewrite_enabled=True)
+    planner = _FakePlannerLLM(
+        """
+        {
+          "intent": "procedure",
+          "rewrite_needed": true,
+          "reason": "需要更明确的步骤查询。",
+          "must_keep": [],
+          "vector_queries": ["系统登录步骤"],
+          "bm25_queries": ["登录 步骤"],
+          "metadata_terms": ["登录"]
+        }
+        """
+    )
+    monkeypatch.setattr(retriever, "build_retrieval_planner_llm", lambda settings: planner)
+    provider = _build_provider(monkeypatch, tmp_path, settings=settings)
+
+    recorded_queries = []
+    raw_doc = Document(page_content="raw", metadata={"filename": "other.pdf", "chunk_id": 1, "section": "intro"})
+    target_doc = Document(page_content="fixed", metadata={"filename": "3403使用指南.pdf", "chunk_id": 2, "section": "登录"})
+
+    def fake_query_with_scores(query, k=None):
+        recorded_queries.append(query)
+        if "系统登录步骤 3403" in query or "系统登录步骤 3403使用指南" in query:
+            return [(target_doc, 0.1)]
+        return [(raw_doc, 0.2)]
+
+    monkeypatch.setattr(provider, "query_with_scores", fake_query_with_scores)
+    monkeypatch.setattr(provider, "query_with_bm25", lambda query, k=5: [])
+
+    result = provider.query_hybrid(
+        "3403使用指南 怎么登录",
+        include_debug=True,
+        rewrite_request=retriever.RetrievalRewriteRequest(channel="tutor", raw_query="3403使用指南 怎么登录", current_topic="3403使用指南"),
+    )
+
+    assert result["debug"]["must_keep_repaired"] is True
+    assert any("3403" in query for query in result["debug"]["rewritten_vector_queries"])
+    assert any(query != "3403使用指南 怎么登录" and "3403" in query for query in recorded_queries)
+
+
+def test_query_hybrid_falls_back_when_rewrite_plan_has_no_queries(monkeypatch, tmp_path):
+    settings = replace(build_test_settings(tmp_path), retrieval_rewrite_enabled=True)
+    planner = _FakePlannerLLM(
+        '{"intent":"concept_overview","rewrite_needed":true,"reason":"需要改写","must_keep":[],"vector_queries":[],"bm25_queries":[],"metadata_terms":[]}'
+    )
+    monkeypatch.setattr(retriever, "build_retrieval_planner_llm", lambda settings: planner)
+    provider = _build_provider(monkeypatch, tmp_path, settings=settings)
+
+    raw_doc = Document(page_content="raw", metadata={"filename": "other.pdf", "chunk_id": 1, "section": "intro"})
+    monkeypatch.setattr(provider, "query_with_scores", lambda query, k=None: [(raw_doc, 0.2)])
+    monkeypatch.setattr(provider, "query_with_bm25", lambda query, k=5: [])
+
+    result = provider.query_hybrid(
+        "控制系统怎么理解",
+        include_debug=True,
+        rewrite_request=retriever.RetrievalRewriteRequest(channel="tutor", raw_query="控制系统怎么理解", current_topic="控制系统"),
+    )
+
+    assert result["debug"]["gate_outcome"] == "rewrite_failed_fallback"
+    assert result["docs"][0].metadata["filename"] == "other.pdf"
+
+
+def test_query_hybrid_keeps_best_rank_per_family_across_multiple_rewritten_queries(monkeypatch, tmp_path):
+    settings = replace(build_test_settings(tmp_path), retrieval_rewrite_enabled=True)
+    planner = _FakePlannerLLM(
+        """
+        {
+          "intent": "comparison",
+          "rewrite_needed": true,
+          "reason": "需要多条检索式覆盖不同表达。",
+          "must_keep": ["PID"],
+          "vector_queries": ["PID 控制器 原理", "PID controller principle"],
+          "bm25_queries": ["PID 控制器", "PID 原理"],
+          "metadata_terms": ["PID"]
+        }
+        """
+    )
+    monkeypatch.setattr(retriever, "build_retrieval_planner_llm", lambda settings: planner)
+    provider = _build_provider(monkeypatch, tmp_path, settings=settings)
+
+    distractor = Document(page_content="other", metadata={"filename": "other.pdf", "chunk_id": 0, "section": "other"})
+    target = Document(page_content="pid", metadata={"filename": "control.pdf", "chunk_id": 3, "section": "PID"})
+
+    def fake_query_with_scores(query, k=None):
+        if query == "PID 控制器 原理":
+            return [(distractor, 0.05), (target, 0.06)]
+        if query == "PID controller principle":
+            return [(target, 0.04)]
+        return [(distractor, 0.03)]
+
+    def fake_query_with_bm25(query, k=5):
+        if query == "PID 控制器":
+            return [
+                Document(page_content=target.page_content, metadata={**target.metadata, "_bm25_score": 7.0}),
+                Document(page_content=distractor.page_content, metadata={**distractor.metadata, "_bm25_score": 6.0}),
+            ]
+        if query == "PID 原理":
+            return [Document(page_content=target.page_content, metadata={**target.metadata, "_bm25_score": 8.0})]
+        return []
+
+    monkeypatch.setattr(provider, "query_with_scores", fake_query_with_scores)
+    monkeypatch.setattr(provider, "query_with_bm25", fake_query_with_bm25)
+
+    result = provider.query_hybrid(
+        "PID 怎么理解",
+        include_debug=True,
+        rewrite_request=retriever.RetrievalRewriteRequest(channel="tutor", raw_query="PID 怎么理解", current_topic="PID"),
+    )
+
+    top_doc = result["docs"][0]
+    assert top_doc.metadata["filename"] == "control.pdf"
+    assert top_doc.metadata["_vector_rank"] == 1
+    assert top_doc.metadata["_bm25_rank"] == 1
+
+
+def test_query_with_sources_keeps_citations_after_rewrite(monkeypatch, tmp_path):
+    settings = replace(build_test_settings(tmp_path), retrieval_rewrite_enabled=True)
+    planner = _FakePlannerLLM(
+        """
+        {
+          "intent": "procedure",
+          "rewrite_needed": true,
+          "reason": "需要突出步骤信息。",
+          "must_keep": ["3403"],
+          "vector_queries": ["3403 文档中的登录流程"],
+          "bm25_queries": ["3403 登录 步骤"],
+          "metadata_terms": ["3403", "登录"]
+        }
+        """
+    )
+    monkeypatch.setattr(retriever, "build_retrieval_planner_llm", lambda settings: planner)
+    provider = _build_provider(monkeypatch, tmp_path, settings=settings)
+
+    raw_doc = Document(page_content="raw", metadata={"filename": "other.pdf", "chunk_id": 1, "section": "intro"})
+    target = Document(
+        page_content="第一步打开系统，第二步输入账号密码。",
+        metadata={"filename": "3403使用指南.pdf", "chunk_id": 2, "section": "登录", "page": 5, "H1": "3403使用指南"},
+    )
+
+    def fake_query_with_scores(query, k=None):
+        if "登录流程" in query:
+            return [(target, 0.05)]
+        return [(raw_doc, 0.2)]
+
+    def fake_query_with_bm25(query, k=5):
+        if "登录" in query:
+            return [Document(page_content=target.page_content, metadata={**target.metadata, "_bm25_score": 9.0})]
+        return []
+
+    monkeypatch.setattr(provider, "query_with_scores", fake_query_with_scores)
+    monkeypatch.setattr(provider, "query_with_bm25", fake_query_with_bm25)
+
+    result = provider.query_with_sources(
+        "3403 怎么登录",
+        rewrite_request=retriever.RetrievalRewriteRequest(channel="tutor", raw_query="3403 怎么登录", current_topic="3403使用指南"),
+        include_debug=True,
+    )
+
+    assert result["citation_confident"] is True
+    assert result["citations"][0]["filename"] == "3403使用指南.pdf"
+    assert result["debug"]["gate_outcome"] == "rewrite_used"

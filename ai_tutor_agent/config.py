@@ -107,6 +107,9 @@ class Settings:
     mineru_public_dns_server: str = "223.5.5.5"
     mineru_public_dns_port: int = 53
     mineru_public_dns_hosts: str = "cdn-mineru.openxlab.org.cn"
+    retrieval_rewrite_enabled: bool = False
+    retrieval_rewrite_mode: str = "smart"
+    retrieval_rewrite_debug: bool = False
 
 
 LOCAL_CONFIG_KEYS = [
@@ -146,6 +149,9 @@ LOCAL_CONFIG_KEYS = [
     "MINERU_PUBLIC_DNS_SERVER",
     "MINERU_PUBLIC_DNS_PORT",
     "MINERU_PUBLIC_DNS_HOSTS",
+    "RETRIEVAL_REWRITE_ENABLED",
+    "RETRIEVAL_REWRITE_MODE",
+    "RETRIEVAL_REWRITE_DEBUG",
     "LOCAL_CONFIG_ENABLED",
 ]
 
@@ -342,6 +348,9 @@ def get_settings() -> Settings:
         raise RuntimeError("PDF_PARSE_BACKEND must be one of: auto, mineru, local.")
     if mineru_proxy_mode not in {"inherit", "direct"}:
         raise RuntimeError("MINERU_PROXY_MODE must be one of: inherit, direct.")
+    retrieval_rewrite_mode = os.getenv("RETRIEVAL_REWRITE_MODE", "smart").strip().lower() or "smart"
+    if retrieval_rewrite_mode not in {"smart"}:
+        raise RuntimeError("RETRIEVAL_REWRITE_MODE must be one of: smart.")
 
     default_embedding_model = {
         "local": "sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2",
@@ -400,4 +409,7 @@ def get_settings() -> Settings:
         mineru_public_dns_server=os.getenv("MINERU_PUBLIC_DNS_SERVER", "223.5.5.5").strip() or "223.5.5.5",
         mineru_public_dns_port=_read_env_int("MINERU_PUBLIC_DNS_PORT", 53),
         mineru_public_dns_hosts=os.getenv("MINERU_PUBLIC_DNS_HOSTS", "cdn-mineru.openxlab.org.cn").strip() or "cdn-mineru.openxlab.org.cn",
+        retrieval_rewrite_enabled=_read_env_bool("RETRIEVAL_REWRITE_ENABLED", False),
+        retrieval_rewrite_mode=retrieval_rewrite_mode,
+        retrieval_rewrite_debug=_read_env_bool("RETRIEVAL_REWRITE_DEBUG", False),
     )

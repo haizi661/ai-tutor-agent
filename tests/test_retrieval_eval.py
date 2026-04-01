@@ -62,8 +62,11 @@ class FakeProvider:
     def __init__(self, docs_by_query):
         self._docs_by_query = docs_by_query
 
-    def query_hybrid(self, query, recall_k=8, final_k=3):
-        del recall_k, final_k
+    def query_hybrid(self, query, recall_k=8, final_k=3, rewrite_request=None, include_debug=False):
+        del recall_k, final_k, rewrite_request
+        docs = self._docs_by_query.get(query, [])
+        if include_debug:
+            return {"docs": docs, "debug": {"gate_outcome": "raw_only"}}
         return self._docs_by_query.get(query, [])
 
 
@@ -88,3 +91,13 @@ def test_evaluate_queries_aggregates_metrics():
     assert report["summary"]["Recall@1"] == pytest.approx(0.5)
     assert report["summary"]["MRR@3"] == pytest.approx(0.75)
     assert "nDCG@3" in report["summary"]
+
+
+def test_evaluate_queries_can_collect_rewrite_debug_payload():
+    provider = FakeProvider({"q1": [Document(page_content="hit", metadata={"filename": "a.md", "chunk_id": 1})]})
+    examples = [RetrievalExample(query="q1", relevant_ids=frozenset({"chunk::a.md::1"}))]
+
+    report = evaluate_queries(provider, examples, recall_k=10, k_values=[1], use_rewrite=True, include_debug=True)
+
+    assert report["rewrite_enabled"] is True
+    assert report["per_query"][0]["debug"]["gate_outcome"] == "raw_only"

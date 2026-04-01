@@ -8,6 +8,8 @@ from typing import Any
 
 from langchain_core.documents import Document
 
+from .retriever import RetrievalRewriteRequest
+
 
 @dataclass(frozen=True)
 class RetrievalExample:
@@ -191,6 +193,8 @@ def evaluate_queries(
     *,
     recall_k: int,
     k_values: list[int],
+    use_rewrite: bool = False,
+    include_debug: bool = False,
 ) -> dict[str, Any]:
     if not examples:
         raise ValueError("No evaluation examples were provided.")
@@ -206,7 +210,27 @@ def evaluate_queries(
     }
 
     for example in examples:
-        docs = provider.query_hybrid(example.query, recall_k=max(recall_k, final_k), final_k=final_k)
+        rewrite_request = None
+        if use_rewrite:
+            rewrite_request = RetrievalRewriteRequest(
+                channel="eval",
+                raw_query=example.query,
+                current_topic="",
+            )
+
+        result = provider.query_hybrid(
+            example.query,
+            recall_k=max(recall_k, final_k),
+            final_k=final_k,
+            rewrite_request=rewrite_request,
+            include_debug=include_debug,
+        )
+        debug_payload = None
+        if include_debug and isinstance(result, dict):
+            docs = list(result.get("docs", []))
+            debug_payload = result.get("debug")
+        else:
+            docs = result
         metrics_by_k = evaluate_ranked_docs(docs, example.relevant_ids, ordered_ks)
 
         per_query_entry = {
@@ -214,6 +238,8 @@ def evaluate_queries(
             "hits": len(docs),
             "metrics": {f"@{k}": metrics_by_k[k] for k in ordered_ks},
         }
+        if debug_payload is not None:
+            per_query_entry["debug"] = debug_payload
         per_query.append(per_query_entry)
 
         for k in ordered_ks:
@@ -236,6 +262,7 @@ def evaluate_queries(
         "examples": len(examples),
         "k_values": ordered_ks,
         "recall_k": max(recall_k, final_k),
+        "rewrite_enabled": bool(use_rewrite),
         "summary": summary,
         "per_query": per_query,
     }

@@ -15,6 +15,7 @@ from ..core.ports import RuntimeContext
 from ..core.state import AgentState
 from ..core.teacher_voice import build_teacher_voice
 from ..core.text import content_to_text
+from ..infrastructure.retriever import RetrievalRewriteRequest
 
 # ─────────────────────────────────────────────────────
 # 教学策略选择：根据失败次数自动切换教学方法
@@ -315,12 +316,26 @@ def build_tutor_node(tutor_llm, runtime: RuntimeContext):
 
         # RAG: 检索相关知识
         citations = []
+        rewrite_request = RetrievalRewriteRequest(
+            channel="tutor",
+            raw_query=topic,
+            current_topic=topic,
+            attempt_count=int(attempt_count or 0),
+            teaching_strategy=str(strategy or ""),
+            weak_areas_hint=str(weak_hint or ""),
+        )
         if hasattr(knowledge_provider, "query_with_sources"):
-            retrieval = knowledge_provider.query_with_sources(topic)
+            try:
+                retrieval = knowledge_provider.query_with_sources(topic, rewrite_request=rewrite_request)
+            except TypeError:
+                retrieval = knowledge_provider.query_with_sources(topic)
             context = retrieval.get("context", "")
             citations = retrieval.get("citations", [])
         else:
-            context = knowledge_provider.query(topic)
+            try:
+                context = knowledge_provider.query(topic, rewrite_request=rewrite_request)
+            except TypeError:
+                context = knowledge_provider.query(topic)
         knowledge_prompt = ""
         if context:
             knowledge_prompt = f"\n\n【参考资料】请优先结合以下知识进行讲解：\n{context}\n"

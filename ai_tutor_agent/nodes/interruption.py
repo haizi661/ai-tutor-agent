@@ -7,6 +7,7 @@ from ..core.ports import RuntimeContext
 from ..core.state import AgentState
 from ..core.teacher_voice import build_teacher_voice
 from ..core.text import content_to_text
+from ..infrastructure.retriever import RetrievalRewriteRequest
 
 
 def _build_recent_interrupt_context(history: list, limit: int = 6) -> str:
@@ -50,9 +51,22 @@ def build_interruption_node(tutor_llm, runtime: RuntimeContext):
         )
 
         search_query = f"{state.get('current_topic', '')} {query}".strip()
-        context = knowledge_provider.query(search_query)
+        rewrite_request = RetrievalRewriteRequest(
+            channel="interruption",
+            raw_query=query,
+            current_topic=str(state.get("current_topic", "") or ""),
+            teaching_strategy="interruption",
+            conversation_hint=recent_interrupt_context,
+        )
+        try:
+            context = knowledge_provider.query(search_query, rewrite_request=rewrite_request)
+        except TypeError:
+            context = knowledge_provider.query(search_query)
         if not context and search_query != query:
-            context = knowledge_provider.query(query)
+            try:
+                context = knowledge_provider.query(query, rewrite_request=rewrite_request)
+            except TypeError:
+                context = knowledge_provider.query(query)
 
         knowledge_prompt = ""
         if context:

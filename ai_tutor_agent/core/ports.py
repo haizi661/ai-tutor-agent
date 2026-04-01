@@ -26,7 +26,7 @@ class AnswerProvider(Protocol):
 
 
 class KnowledgeProvider(Protocol):
-    def query(self, query: str) -> str:
+    def query(self, query: str, *, rewrite_request: Any | None = None) -> str:
         """Query external knowledge source."""
 
 
@@ -49,7 +49,8 @@ class MissingAnswerProvider:
 
 
 class NoopKnowledgeProvider:
-    def query(self, query: str) -> str:
+    def query(self, query: str, *, rewrite_request: Any | None = None) -> str:
+        del rewrite_request
         return ""
 
 

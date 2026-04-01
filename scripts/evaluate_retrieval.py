@@ -36,6 +36,17 @@ def main() -> int:
     parser.add_argument("--k-values", default="1,3,5", help="Comma-separated metric cutoffs, e.g. 1,3,5")
     parser.add_argument("--recall-k", type=int, default=12, help="Recall pool size before final reranking.")
     parser.add_argument("--output", default="", help="Optional output JSON path for full report.")
+    parser.add_argument(
+        "--rewrite-mode",
+        default="raw",
+        choices=["raw", "rewrite", "both"],
+        help="Evaluate raw retrieval, rewrite-enabled retrieval, or both.",
+    )
+    parser.add_argument(
+        "--include-debug",
+        action="store_true",
+        help="Include per-query rewrite trace in the report when available.",
+    )
 
     args = parser.parse_args()
     k_values = parse_k_values(args.k_values)
@@ -50,14 +61,36 @@ def main() -> int:
             "Please fix embedding/vector-store initialization before running retrieval evaluation."
         )
 
-    report = evaluate_queries(
-        provider,
-        examples,
-        recall_k=args.recall_k,
-        k_values=k_values,
-    )
-
-    print(json.dumps(report["summary"], ensure_ascii=False, indent=2))
+    if args.rewrite_mode == "both":
+        report = {
+            "raw": evaluate_queries(
+                provider,
+                examples,
+                recall_k=args.recall_k,
+                k_values=k_values,
+                use_rewrite=False,
+                include_debug=args.include_debug,
+            ),
+            "rewrite": evaluate_queries(
+                provider,
+                examples,
+                recall_k=args.recall_k,
+                k_values=k_values,
+                use_rewrite=True,
+                include_debug=args.include_debug,
+            ),
+        }
+        print(json.dumps({"raw": report["raw"]["summary"], "rewrite": report["rewrite"]["summary"]}, ensure_ascii=False, indent=2))
+    else:
+        report = evaluate_queries(
+            provider,
+            examples,
+            recall_k=args.recall_k,
+            k_values=k_values,
+            use_rewrite=args.rewrite_mode == "rewrite",
+            include_debug=args.include_debug,
+        )
+        print(json.dumps(report["summary"], ensure_ascii=False, indent=2))
 
     if args.output:
         output_path = Path(args.output)

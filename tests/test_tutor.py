@@ -18,7 +18,8 @@ class FakeStreamingLLM:
 
 
 class StubKnowledgeProvider:
-    def query(self, query):
+    def query(self, query, *, rewrite_request=None):
+        del rewrite_request
         del query
         return ""
 
@@ -86,3 +87,42 @@ def test_tutor_fallback_still_builds_stable_sections_from_plain_text():
     assert "### 再拆台阶" in content
     assert "### 代入一个例子" in content
     assert "### 💡 本次核心要点" in content
+
+
+def test_tutor_passes_rewrite_request_to_knowledge_provider():
+    sink = BufferedEventSink()
+    llm = FakeStreamingLLM(
+        """
+        {
+          "main_line": "先抓住主线。",
+          "steps": ["第一步先看整体定义。", "第二步再看关键条件。"],
+          "example": "可以先带入一个简单例子。",
+          "key_points": ["核心点一", "核心点二"],
+          "self_check": ""
+        }
+        """
+    )
+
+    captured = {}
+
+    class CapturingKnowledgeProvider:
+        def query_with_sources(self, query, *, rewrite_request=None, include_debug=False):
+            captured["query"] = query
+            captured["rewrite_request"] = rewrite_request
+            captured["include_debug"] = include_debug
+            return {"context": "资料", "citations": []}
+
+    node = build_tutor_node(llm, RuntimeContext(event_sink=sink, knowledge_provider=CapturingKnowledgeProvider()))
+    node(
+        {
+            "current_topic": "控制系统中的稳定性",
+            "difficulty_level": 3,
+            "attempt_count": 1,
+            "feedback": "",
+            "assessment_radar": {},
+        }
+    )
+
+    assert captured["query"] == "控制系统中的稳定性"
+    assert captured["rewrite_request"].channel == "tutor"
+    assert captured["rewrite_request"].current_topic == "控制系统中的稳定性"
