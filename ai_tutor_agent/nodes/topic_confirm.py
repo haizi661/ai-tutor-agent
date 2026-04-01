@@ -20,7 +20,7 @@ def build_topic_confirm_node(event_sink: EventSink):
             make_event(
                 "topic.confirmation_needed",
                 "topic_confirmer",
-                message=f"我理解你想学的是【{proposed_topic}】。请确认或修改主题。",
+                message=f"我先把你的目标收成【{proposed_topic}】。如果这个表述对，就直接确认；如果你想改，我再跟着你调整。",
                 data={"proposed_topic": proposed_topic},
             )
         )
@@ -28,7 +28,7 @@ def build_topic_confirm_node(event_sink: EventSink):
             make_event(
                 "node.complete",
                 "topic_confirmer",
-                message="等待用户确认学习主题。",
+                message="主题已经整理出来了，等你点头确认。",
             )
         )
         return {"flow_status": "awaiting_topic_confirmation"}

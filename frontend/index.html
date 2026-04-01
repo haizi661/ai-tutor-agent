@@ -17,9 +17,9 @@
             <div class="header-left">
                 <div class="brand-mark" aria-hidden="true">伴</div>
                 <div class="brand-copy">
-                    <div class="brand-eyebrow">Quiet Study Notebook</div>
+                    <div class="brand-eyebrow">Study With Me</div>
                     <div class="brand-title">AI Tutor</div>
-                    <div class="brand-subtitle">把主题收束、小测、讲解与回顾安静地放在同一页，陪你慢慢把一个问题学明白。</div>
+                    <div class="brand-subtitle">把主题收束、小测、讲解、临时追问与回顾放在同一页，像老师坐在你旁边一样，陪你把一个问题慢慢学明白。</div>
                 </div>
             </div>
             <div class="header-right">
@@ -47,7 +47,7 @@
                 <div class="sidebar-header sidebar-header-upload">
                     <div>
                         <div class="sidebar-kicker">Reference Shelf</div>
-                        <p class="sidebar-note sidebar-note-compact">添一份讲义、笔记或 PDF，我会在讲解时优先翻看相关内容。</p>
+                        <p class="sidebar-note sidebar-note-compact">添一份讲义、笔记或 PDF，我会在讲解时优先翻看相关内容。清空书架时，也会同步移除当前知识向量。</p>
                     </div>
                     <input type="file" id="file-input" hidden>
                     <button type="button" class="btn-new" onclick="document.getElementById('file-input').click()">添加讲义 / 笔记</button>
@@ -58,33 +58,29 @@
             </aside>
 
             <main class="chat-main">
-                <div class="chat-topline">
-                    <div class="chat-kicker">Reading Flow</div>
-                    <p class="chat-intro">先把主题说清，再一起校准起点，然后进入正式讲解。中途的提示会像页边注一样提醒你下一步。</p>
-                </div>
                 <div id="messages" class="messages">
                     <div class="msg-wrapper agent">
                         <div class="avatar agent" aria-hidden="true">伴</div>
-                        <div class="msg-content">先告诉我，你这次最想真正弄明白的是什么。我会先帮你把主题收得更准确，再用一轮简短小测判断讲解深度和节奏。</div>
+                        <div class="msg-content">直接告诉我你这次想学什么；如果讲到一半卡住了，也可以随时追问。</div>
                     </div>
                 </div>
 
                 <div class="input-sticky">
-                    <div class="input-frame-label">写下这一步</div>
+                    <div class="input-frame-label">把这一步告诉我，或直接追问卡点</div>
                     <div class="input-inner">
-                        <textarea id="chat-input" class="chat-textarea" rows="1" placeholder="输入想学的主题，或继续补充你的想法…" aria-label="输入学习主题或回答问题"></textarea>
+                        <textarea id="chat-input" class="chat-textarea" rows="1" placeholder="输入想学的主题，或在讲解中直接追问临时问题…" aria-label="输入学习主题或回答问题"></textarea>
                         <div class="input-actions" aria-label="输入区操作">
                             <button type="button" id="mic-btn" class="btn-action btn-mic" onclick="toggleVoiceInput()" aria-label="开始或停止语音输入" aria-pressed="false">语音</button>
                             <button type="button" id="pause-btn" class="btn-action btn-pause" onclick="pauseCurrentSession()" aria-label="暂停当前学习页">暂停</button>
                             <button type="button" id="send-btn" class="btn-send" onclick="handlePrimaryAction()" aria-label="输入内容后发送">发送</button>
                         </div>
                     </div>
-                    <div id="status-banner" class="status-banner status-ready" role="status" aria-live="polite">可以从一个想弄懂的问题开始</div>
+                    <div id="status-banner" class="status-banner status-ready" role="status" aria-live="polite">可以先从一个想弄懂的问题开始；卡住时也能随时打断追问</div>
                 </div>
             </main>
 
             <aside id="profile-panel" class="profile-panel hidden" aria-label="学习旁注面板">
-                <div class="panel-kicker">Study Margin</div>
+                <div class="panel-kicker">Learning Snapshot</div>
                 <div class="panel-header">学习旁注</div>
                 <p class="profile-caption">当你完成小测后，这里会整理出一张六维侧写，帮助我调节讲解速度、例子难度和追问力度。</p>
                 <div class="radar-box">
@@ -102,7 +98,7 @@
         <div class="config-panel" role="dialog" aria-modal="true" aria-labelledby="local-config-title" onclick="event.stopPropagation()">
             <div class="panel-kicker">Local Notes</div>
             <h3 id="local-config-title">本地设置</h3>
-            <p>这里影响的是你这台机器上的私有使用。选好服务来源、模型并填写密钥后，会写入服务端本地 <code>.env</code>；新的聊天档案会在下一次启动或恢复时生效，资料检索设置会立即重建。</p>
+            <p>这里影响的是你这台机器上的私有使用。选好服务来源、模型并填写密钥后，会写入服务端本地 <code>.env</code>；新的聊天档案会在下一次启动或恢复时生效，资料检索设置会立即重建。日常运维通常只需要改服务来源、代理端口、PDF 解析策略和 MinerU 网络模式。</p>
             <div class="config-grid">
                 <div class="config-group">
                     <div class="config-group-title">陪读模型</div>
@@ -157,7 +153,16 @@
                     </div>
                     <div class="config-field">
                         <label for="local-embedding-model">Embedding Model</label>
-                        <input id="local-embedding-model" type="text" placeholder="sentence-transformers/all-MiniLM-L6-v2">
+                        <input id="local-embedding-model" type="text" placeholder="sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2">
+                    </div>
+                    <div class="config-field">
+                        <label for="local-pdf-parse-backend">PDF 解析策略</label>
+                        <select id="local-pdf-parse-backend">
+                            <option value="auto">auto：先试 MinerU，失败回退本地</option>
+                            <option value="mineru">mineru：只用 MinerU</option>
+                            <option value="local">local：只用本地 PyMuPDF</option>
+                        </select>
+                        <small>推荐默认 `auto`。如果 MinerU 经常超时但本地解析足够用，就改成 `local`。</small>
                     </div>
                     <div class="config-field">
                         <label for="local-top-k">Top K</label>
@@ -171,15 +176,59 @@
                         <label for="local-chunk-overlap">Chunk Overlap</label>
                         <input id="local-chunk-overlap" type="number" min="0">
                     </div>
+                    <div class="config-field">
+                        <label for="local-vector-store-dir">向量目录</label>
+                        <input id="local-vector-store-dir" type="text" placeholder="data/chroma_db">
+                        <small>默认推荐 `data/chroma_db`。清空书架会删除当前知识向量，但目录本身可能保留为空数据库目录。</small>
+                    </div>
 
                     <div class="config-group-title config-group-title-spaced">网络代理</div>
                     <div class="config-field">
+                        <label for="local-proxy-port">常用代理端口</label>
+                        <input id="local-proxy-port" type="number" min="1" placeholder="7897">
+                        <small>日常最常改这一项。你的梯子如果从 `7897` 换到 `7892`，通常只需要改这里。</small>
+                    </div>
+                    <div class="config-field">
+                        <label for="local-proxy-host">代理主机</label>
+                        <input id="local-proxy-host" type="text" placeholder="127.0.0.1">
+                    </div>
+                    <div class="config-field">
+                        <label for="local-proxy-scheme">代理协议</label>
+                        <select id="local-proxy-scheme">
+                            <option value="http">http</option>
+                            <option value="https">https</option>
+                        </select>
+                    </div>
+                    <div class="config-field">
                         <label for="local-http-proxy">HTTP Proxy</label>
                         <input id="local-http-proxy" type="text" placeholder="http://127.0.0.1:7897">
+                        <small>高级覆盖项。正常情况下留空，让系统自动根据上面的 host/port/scheme 推导即可。</small>
                     </div>
                     <div class="config-field">
                         <label for="local-https-proxy">HTTPS Proxy</label>
                         <input id="local-https-proxy" type="text" placeholder="http://127.0.0.1:7897">
+                    </div>
+
+                    <div class="config-group-title config-group-title-spaced">MinerU / PDF</div>
+                    <div class="config-field">
+                        <label for="local-mineru-proxy-mode">MinerU 网络模式</label>
+                        <select id="local-mineru-proxy-mode">
+                            <option value="inherit">inherit：跟随全局代理</option>
+                            <option value="direct">direct：MinerU 直连</option>
+                        </select>
+                        <small>如果 HuggingFace 正常，但 MinerU 老超时，优先把这里改成 `direct`。</small>
+                    </div>
+                    <div class="config-field">
+                        <label for="local-mineru-connect-timeout">MinerU 连接超时（秒）</label>
+                        <input id="local-mineru-connect-timeout" type="number" min="1" placeholder="5">
+                    </div>
+                    <div class="config-field">
+                        <label for="local-mineru-http-proxy">MinerU HTTP Proxy</label>
+                        <input id="local-mineru-http-proxy" type="text" placeholder="通常留空，必要时单独覆盖">
+                    </div>
+                    <div class="config-field">
+                        <label for="local-mineru-https-proxy">MinerU HTTPS Proxy</label>
+                        <input id="local-mineru-https-proxy" type="text" placeholder="通常留空，必要时单独覆盖">
                     </div>
                 </details>
             </div>

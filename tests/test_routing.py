@@ -1,6 +1,6 @@
 from ai_tutor_agent.orchestration.workflow import route_after_evaluator
-from ai_tutor_agent.ports import BufferedEventSink
-from ai_tutor_agent.routing import build_route_logic
+from ai_tutor_agent.core.ports import BufferedEventSink
+from ai_tutor_agent.orchestration.routing import build_route_logic
 
 
 def test_route_logic_pass():

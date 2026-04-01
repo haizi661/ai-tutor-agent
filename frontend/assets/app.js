@@ -300,6 +300,7 @@
     window.handlePrimaryAction = () => app.handlePrimaryAction();
     window.handleSend = () => app.handleSend();
     window.submitTopicConfirmation = confirmed => app.submitTopicConfirmation(confirmed);
+    window.submitInterruptConfirmation = confirmed => app.submitInterruptConfirmation(confirmed);
     window.showTopicEditInput = () => app.showTopicEditInput();
 
     window.onload = async () => {

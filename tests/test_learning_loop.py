@@ -104,7 +104,12 @@ def test_retry_loop_accumulates_history_then_resets_attempt_on_pass(monkeypatch)
     coach_text = "先把稳定性的定义单独说清，再联系闭环。"
     coach_node = build_coach_node(FakeStreamingLLM(coach_text), sink)
     tester_llm = FakeStreamingLLM(
-        "请重新解释稳定性，并说明它与瞬态性能的区别。\n\n💡 思路提示：先分开两个概念。"
+        """{
+  "focus": "看你能不能把稳定性和瞬态性能这两个概念分清",
+  "question": "请分别解释稳定性和瞬态性能，并指出二者最关键的区别。",
+  "requirements": ["先分别给出定义", "再说明区别", "最后补一句为什么不能混为一谈"],
+  "hint": "先想系统最后会不会回到平衡点，再想响应过程快不快。"
+}"""
     )
     answer_provider = FakeAnswerProvider("稳定性是回到平衡点，瞬态性能看响应过程。")
     tester_node = build_tester_node(tester_llm, sink, answer_provider)
@@ -133,6 +138,13 @@ def test_retry_loop_accumulates_history_then_resets_attempt_on_pass(monkeypatch)
 
     retry_question = tester_node({**base_state, **first_eval, **coached})
     assert retry_question["coach_content"] == ""
+    assert retry_question["tester_question_type"] == "概念辨析题"
+    assert retry_question["tester_question_template"] == "定义辨析"
+    assert "### 这次题型" in retry_question["tester_question"]
+    assert "概念辨析题 · 定义辨析" in retry_question["tester_question"]
+    assert "### 现在这题考什么" in retry_question["tester_question"]
+    assert "### 题目" in retry_question["tester_question"]
+    assert "### 作答要求" in retry_question["tester_question"]
     assert retry_question["user_answer"] == "稳定性是回到平衡点，瞬态性能看响应过程。"
     assert coach_text in tester_llm.messages[0][1].content
     assert "补救教练刚给出的纠偏卡片" in tester_llm.messages[0][1].content
@@ -149,7 +161,12 @@ def test_retry_loop_accumulates_history_then_resets_attempt_on_pass(monkeypatch)
 def test_tester_only_uses_coach_content_during_remediate_retry():
     sink = BufferedEventSink()
     tester_llm = FakeStreamingLLM(
-        "请解释闭环稳定性的定义。\n\n💡 思路提示：先说最终是否收敛。"
+        """{
+  "focus": "看你能不能把判断标准放回具体情境里用出来",
+  "question": "有一个闭环系统受到扰动后会先振荡几次，但幅度逐渐减小并最终回到平衡点。请判断它是否稳定，并说明你抓住了哪个关键信号作出这个判断。",
+  "requirements": ["先给出判断", "再说明依据", "最后补一句为什么不能只看短时振荡就下结论"],
+  "hint": "先看系统最终会不会回到平衡点。"
+}"""
     )
     answer_provider = FakeAnswerProvider("系统会回到平衡点。")
     tester_node = build_tester_node(tester_llm, sink, answer_provider)
@@ -165,5 +182,11 @@ def test_tester_only_uses_coach_content_during_remediate_retry():
     )
 
     assert result["coach_content"] == ""
+    assert result["tester_question_type"] == "场景判断题"
+    assert result["tester_question_template"] == "工程场景判断"
+    assert "### 这次题型" in result["tester_question"]
+    assert "场景判断题 · 工程场景判断" in result["tester_question"]
+    assert "### 现在这题考什么" in result["tester_question"]
+    assert "### 作答要求" in result["tester_question"]
     assert "补救教练刚给出的纠偏卡片" not in tester_llm.messages[0][1].content
     assert answer_provider.prompts[0]["state"]["current_topic"] == "控制理论"

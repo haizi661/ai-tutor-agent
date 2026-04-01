@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import os
 from dataclasses import dataclass
 from functools import lru_cache
@@ -33,6 +35,35 @@ def _read_env_float(name: str, default: float) -> float:
         raise RuntimeError(f"Environment variable {name} must be a float.") from exc
 
 
+def _read_env_bool(name: str, default: bool) -> bool:
+    value = os.getenv(name, "").strip().lower()
+    if not value:
+        return default
+    if value in {"1", "true", "yes", "on"}:
+        return True
+    if value in {"0", "false", "no", "off"}:
+        return False
+    raise RuntimeError(f"Environment variable {name} must be a boolean.")
+
+
+def _read_derived_proxy_url(values: Optional[dict[str, str]] = None) -> Optional[str]:
+    source = values or os.environ
+
+    proxy_url = (source.get("PROXY_URL", "") or "").strip()
+    if proxy_url:
+        return proxy_url
+
+    proxy_port = (source.get("PROXY_PORT", "") or "").strip()
+    if not proxy_port:
+        return None
+    if not proxy_port.isdigit():
+        raise RuntimeError("Environment variable PROXY_PORT must be an integer.")
+
+    proxy_host = (source.get("PROXY_HOST", "") or "").strip() or "127.0.0.1"
+    proxy_scheme = (source.get("PROXY_SCHEME", "") or "").strip() or "http"
+    return f"{proxy_scheme}://{proxy_host}:{proxy_port}"
+
+
 @dataclass(frozen=True)
 class Settings:
     chat_profile: str
@@ -62,11 +93,20 @@ class Settings:
     https_proxy: Optional[str]
     local_config_enabled: bool
     vector_store_backend: str = "chroma"
-    vector_store_dir: str = "data/vector_store"
+    vector_store_dir: str = "data/chroma_db"
     # RAG 2.0 新增字段
     dashscope_api_key: Optional[str] = None
     mineru_api_token: Optional[str] = None
     chroma_dir: str = "data/chroma_db"
+    pdf_parse_backend: str = "auto"
+    mineru_proxy_mode: str = "inherit"
+    mineru_http_proxy: Optional[str] = None
+    mineru_https_proxy: Optional[str] = None
+    mineru_connect_timeout_seconds: int = 5
+    mineru_public_dns_bypass_enabled: bool = True
+    mineru_public_dns_server: str = "223.5.5.5"
+    mineru_public_dns_port: int = 53
+    mineru_public_dns_hosts: str = "cdn-mineru.openxlab.org.cn"
 
 
 LOCAL_CONFIG_KEYS = [
@@ -76,6 +116,7 @@ LOCAL_CONFIG_KEYS = [
     "DEEPSEEK_API_KEY",
     "MINIMAX_API_KEY",
     "GLM_API_KEY",
+    "DASHSCOPE_API_KEY",
     "LLM_PROVIDER",
     "GOOGLE_API_KEY",
     "OPENAI_API_KEY",
@@ -83,13 +124,28 @@ LOCAL_CONFIG_KEYS = [
     "MODEL_NAME",
     "EMBEDDING_PROVIDER",
     "EMBEDDING_MODEL_NAME",
+    "PDF_PARSE_BACKEND",
+    "MINERU_API_TOKEN",
     "KNOWLEDGE_CHUNK_SIZE",
     "KNOWLEDGE_CHUNK_OVERLAP",
     "KNOWLEDGE_TOP_K",
     "VECTOR_STORE_BACKEND",
     "VECTOR_STORE_DIR",
+    "CHROMA_DIR",
+    "PROXY_URL",
+    "PROXY_HOST",
+    "PROXY_PORT",
+    "PROXY_SCHEME",
     "HTTP_PROXY",
     "HTTPS_PROXY",
+    "MINERU_PROXY_MODE",
+    "MINERU_HTTP_PROXY",
+    "MINERU_HTTPS_PROXY",
+    "MINERU_CONNECT_TIMEOUT_SECONDS",
+    "MINERU_PUBLIC_DNS_BYPASS_ENABLED",
+    "MINERU_PUBLIC_DNS_SERVER",
+    "MINERU_PUBLIC_DNS_PORT",
+    "MINERU_PUBLIC_DNS_HOSTS",
     "LOCAL_CONFIG_ENABLED",
 ]
 
@@ -145,6 +201,7 @@ def update_env_file(updates: dict[str, str]) -> None:
 def get_settings() -> Settings:
     # Ensure we load the absolute latest from .env, ignoring cached system env vars
     load_dotenv(dotenv_path=get_env_file_path(), override=True)
+    raw_values = read_local_config_values()
 
     # Determine provider dynamically
     google_api_key = os.getenv("GOOGLE_API_KEY", "").strip() or None
@@ -160,11 +217,33 @@ def get_settings() -> Settings:
     deepseek_api_key = os.getenv("DEEPSEEK_API_KEY", "").strip() or None
     minimax_api_key = os.getenv("MINIMAX_API_KEY", "").strip() or None
     glm_api_key = os.getenv("GLM_API_KEY", "").strip() or None
+    dashscope_api_key = os.getenv("DASHSCOPE_API_KEY", "").strip() or None
+    mineru_api_token = os.getenv("MINERU_API_TOKEN", "").strip() or None
+    pdf_parse_backend = os.getenv("PDF_PARSE_BACKEND", "auto").strip().lower() or "auto"
+    mineru_proxy_mode = os.getenv("MINERU_PROXY_MODE", "inherit").strip().lower() or "inherit"
+    mineru_http_proxy = os.getenv("MINERU_HTTP_PROXY", "").strip() or None
+    mineru_https_proxy = os.getenv("MINERU_HTTPS_PROXY", "").strip() or None
     chat_profile = os.getenv("CHAT_PROFILE", "").strip().lower() or "custom"
     
     # Proxy settings
-    http_proxy = os.getenv("HTTP_PROXY", "").strip() or os.getenv("http_proxy", "").strip() or None
-    https_proxy = os.getenv("HTTPS_PROXY", "").strip() or os.getenv("https_proxy", "").strip() or None
+    derived_proxy_url_from_file = _read_derived_proxy_url(raw_values)
+    derived_proxy_url = derived_proxy_url_from_file or _read_derived_proxy_url()
+    http_proxy = (
+        (raw_values.get("HTTP_PROXY", "") or "").strip()
+        or derived_proxy_url_from_file
+        or os.getenv("HTTP_PROXY", "").strip()
+        or os.getenv("http_proxy", "").strip()
+        or derived_proxy_url
+        or None
+    )
+    https_proxy = (
+        (raw_values.get("HTTPS_PROXY", "") or "").strip()
+        or derived_proxy_url_from_file
+        or os.getenv("HTTPS_PROXY", "").strip()
+        or os.getenv("https_proxy", "").strip()
+        or derived_proxy_url
+        or None
+    )
 
     if chat_profile == "gemini":
         provider = "openai"
@@ -253,13 +332,19 @@ def get_settings() -> Settings:
         raise RuntimeError("GOOGLE_API_KEY is required when EMBEDDING_PROVIDER=google.")
     if embedding_provider == "openai" and not openai_api_key:
         raise RuntimeError("OPENAI_API_KEY is required when EMBEDDING_PROVIDER=openai.")
+    if embedding_provider == "dashscope" and not dashscope_api_key:
+        raise RuntimeError("DASHSCOPE_API_KEY is required when EMBEDDING_PROVIDER=dashscope.")
 
     vector_store_backend = os.getenv("VECTOR_STORE_BACKEND", "chroma").strip().lower() or "chroma"
     if vector_store_backend not in {"chroma", "inmemory"}:
         raise RuntimeError("VECTOR_STORE_BACKEND must be one of: chroma, inmemory.")
+    if pdf_parse_backend not in {"auto", "mineru", "local"}:
+        raise RuntimeError("PDF_PARSE_BACKEND must be one of: auto, mineru, local.")
+    if mineru_proxy_mode not in {"inherit", "direct"}:
+        raise RuntimeError("MINERU_PROXY_MODE must be one of: inherit, direct.")
 
     default_embedding_model = {
-        "local": "sentence-transformers/all-MiniLM-L6-v2",
+        "local": "sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2",
         "google": "models/text-embedding-004",
         "openai": "text-embedding-3-small",
         "dashscope": "text-embedding-v2",
@@ -268,6 +353,11 @@ def get_settings() -> Settings:
     # Explicitly check for MODEL_NAME
     env_model_name = os.getenv("MODEL_NAME", "").strip()
     model_name = env_model_name or default_model
+    resolved_vector_store_dir = (
+        os.getenv("VECTOR_STORE_DIR", "").strip()
+        or os.getenv("CHROMA_DIR", "").strip()
+        or os.path.join(PROJECT_ROOT, "data", "chroma_db")
+    )
 
     return Settings(
         chat_profile=chat_profile,
@@ -293,12 +383,21 @@ def get_settings() -> Settings:
         knowledge_chunk_overlap=_read_env_int("KNOWLEDGE_CHUNK_OVERLAP", 150),
         knowledge_top_k=_read_env_int("KNOWLEDGE_TOP_K", 3),
         vector_store_backend=vector_store_backend,
-        vector_store_dir=os.getenv("VECTOR_STORE_DIR", "data/vector_store").strip() or "data/vector_store",
+        vector_store_dir=resolved_vector_store_dir,
         default_thread_id=os.getenv("DEFAULT_THREAD_ID", "haizi_master_01").strip() or "haizi_master_01",
         http_proxy=http_proxy,
         https_proxy=https_proxy,
         local_config_enabled=os.getenv("LOCAL_CONFIG_ENABLED", "true").strip().lower() != "false",
-        dashscope_api_key=os.getenv("DASHSCOPE_API_KEY", "").strip() or None,
-        mineru_api_token=os.getenv("MINERU_API_TOKEN", "").strip() or None,
-        chroma_dir=os.getenv("CHROMA_DIR", "").strip() or os.path.join(PROJECT_ROOT, "data", "chroma_db"),
+        dashscope_api_key=dashscope_api_key,
+        mineru_api_token=mineru_api_token,
+        chroma_dir=resolved_vector_store_dir,
+        pdf_parse_backend=pdf_parse_backend,
+        mineru_proxy_mode=mineru_proxy_mode,
+        mineru_http_proxy=mineru_http_proxy,
+        mineru_https_proxy=mineru_https_proxy,
+        mineru_connect_timeout_seconds=_read_env_int("MINERU_CONNECT_TIMEOUT_SECONDS", 5),
+        mineru_public_dns_bypass_enabled=_read_env_bool("MINERU_PUBLIC_DNS_BYPASS_ENABLED", True),
+        mineru_public_dns_server=os.getenv("MINERU_PUBLIC_DNS_SERVER", "223.5.5.5").strip() or "223.5.5.5",
+        mineru_public_dns_port=_read_env_int("MINERU_PUBLIC_DNS_PORT", 53),
+        mineru_public_dns_hosts=os.getenv("MINERU_PUBLIC_DNS_HOSTS", "cdn-mineru.openxlab.org.cn").strip() or "cdn-mineru.openxlab.org.cn",
     )

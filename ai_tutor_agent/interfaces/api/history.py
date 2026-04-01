@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import sqlite3
 from typing import Any
 
@@ -18,6 +20,8 @@ def _serialize_state(values: dict[str, Any]) -> dict[str, Any]:
         "proposed_topic": values.get("proposed_topic", ""),
         "tutor_content": values.get("tutor_content", ""),
         "tester_question": values.get("tester_question", ""),
+        "tester_question_type": values.get("tester_question_type", ""),
+        "tester_question_template": values.get("tester_question_template", ""),
         "user_answer": values.get("user_answer", ""),
         "score": values.get("score", 0),
         "logic_score": values.get("logic_score", 0),
@@ -34,6 +38,10 @@ def _serialize_state(values: dict[str, Any]) -> dict[str, Any]:
         "score_history": values.get("score_history", []),
         "coach_content": values.get("coach_content", ""),
         "tutor_citations": values.get("tutor_citations", []),
+        "skip_reason": values.get("skip_reason", ""),
+        "interrupt_query": values.get("interrupt_query", ""),
+        "resume_tester": values.get("resume_tester", False),
+        "conversation_history": values.get("conversation_history", []),
         "assessment_questions": values.get("assessment_questions", []),
         "assessment_answers": values.get("assessment_answers", {}),
         "assessment_radar": values.get("assessment_radar", {}),
@@ -109,6 +117,38 @@ def _build_evaluator_card(values: dict[str, Any]) -> str:
     return "\n".join(lines)
 
 
+def _build_citations_card(citations: list[dict[str, Any]]) -> str:
+    if not citations:
+        return ""
+
+    lines = ["### 参考来源"]
+    seen: set[tuple[str, Any, Any]] = set()
+
+    for index, item in enumerate(citations[:4], start=1):
+        filename = str(item.get("filename", "")).strip()
+        if not filename:
+            continue
+
+        page = item.get("page")
+        chunk_index = item.get("chunk_index")
+        key = (filename, page, chunk_index)
+        if key in seen:
+            continue
+        seen.add(key)
+
+        page_text = f"（第 {page} 页）" if isinstance(page, int) else ""
+        chunk_text = f" · 片段 #{chunk_index}" if isinstance(chunk_index, int) else ""
+        lines.append("")
+        lines.append(f"{index}. {filename}{page_text}{chunk_text}")
+
+        snippet = str(item.get("snippet", "")).strip()
+        if snippet:
+            one_line_snippet = " ".join(snippet.split())
+            lines.append(f"> {one_line_snippet}")
+
+    return "\n".join(lines)
+
+
 def _reconstruct_messages(checkpoint_store, thread_id: str, *, limit: int = 240) -> list[dict[str, Any]]:
     config = {"configurable": {"thread_id": thread_id}}
     timeline: list[dict[str, Any]] = []
@@ -154,6 +194,12 @@ def _reconstruct_messages(checkpoint_store, thread_id: str, *, limit: int = 240)
         tutor_content = values.get("tutor_content", "")
         if tutor_content and tutor_content != previous_values.get("tutor_content", ""):
             push("agent", "tutor", tutor_content, updated_at)
+
+        tutor_citations = values.get("tutor_citations") or []
+        if tutor_citations and tutor_citations != previous_values.get("tutor_citations", []):
+            citations_card = _build_citations_card(tutor_citations)
+            if citations_card:
+                push("agent", "tutor_citations", citations_card, updated_at)
 
         coach_content = values.get("coach_content", "")
         if coach_content and coach_content != previous_values.get("coach_content", ""):

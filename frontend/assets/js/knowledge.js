@@ -102,7 +102,7 @@
             app.setInlineStatus('upload-status', '书架已经是空的', 'muted');
             return;
         }
-        if (!confirm('确定要清空书架里的所有资料吗？此操作不可恢复。')) return;
+        if (!confirm('确定要清空书架里的所有资料吗？此操作会同时删除当前知识向量，不可恢复。')) return;
 
         app.setInlineStatus('upload-status', '正在清空书架…', 'processing');
         try {
@@ -112,7 +112,7 @@
                 app.setInlineStatus('upload-status', data.message || '清空失败，请稍后重试', 'danger');
                 return;
             }
-            app.setInlineStatus('upload-status', `已清空 ${data.removed || 0} 份资料`, 'success');
+            app.setInlineStatus('upload-status', `已清空 ${data.removed || 0} 份资料，并移除对应知识向量`, 'success');
             await fetchKnowledgeFiles();
         } catch (_error) {
             app.setInlineStatus('upload-status', '清空失败，网络可能暂时断开', 'danger');

@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import dashscope
 from http import HTTPStatus
 

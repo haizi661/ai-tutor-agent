@@ -8,8 +8,10 @@
         if (state.eventSource) state.eventSource.close();
         state.eventSource = null;
         state.pendingTopicConfirmation = null;
+        state.pendingInterruptConfirmation = false;
         state.isAwaitingInput = false;
         state.isStreaming = false;
+        app.setChatInputPlaceholder?.();
         app.clearTypingIndicator?.();
         app.finalizeAgentTurn?.();
         document.getElementById('messages').innerHTML = '';
@@ -65,8 +67,8 @@
         resetRuntimeView();
         state.currentThreadId = app.makeThreadId();
         window.localStorage.setItem(LAST_THREAD_STORAGE_KEY, state.currentThreadId);
-        app.appendMessage('agent', '新的一页已经打开了。告诉我这次最想学清楚的主题，我会先帮你把范围收稳，再继续往下。');
-        app.setStatusBanner('可以从一个新主题开始', 'ready');
+        app.appendMessage('agent', '新的一页已经打开。直接告诉我这次想学什么，或者在讲解里随时追问卡点。');
+        app.setStatusBanner('可以从一个新主题开始；卡住时也能随时追问', 'ready');
         app.applyPrimaryActionState?.();
         app.fetchHistory();
     };
@@ -109,18 +111,27 @@
 
             if (runtime.awaiting_input) {
                 state.isAwaitingInput = true;
-                app.setStatusBanner('已经回到等待你补充的位置', 'awaiting');
+                app.setChatInputPlaceholder?.('输入你的解答，或先追问一个临时问题…');
+                app.setStatusBanner('已经回到等你补充的那一步', 'awaiting');
             } else if (runtime.is_running) {
-                app.setStatusBanner('会话仍在运行中，正在恢复实时进度…', 'processing');
+                app.setChatInputPlaceholder?.();
+                app.setStatusBanner('这页还在运行，我正在把实时进度接回来', 'processing');
                 app.connectSSE?.();
             } else if (PRE_TOPIC_FLOW_STATUSES.has(data.state.flow_status)) {
-                app.setStatusBanner('已经回到这页内容，可以直接继续', 'info');
+                app.setChatInputPlaceholder?.();
+                app.setStatusBanner('已经回到这页内容了，你可以直接继续', 'info');
             } else if (data.state.flow_status === 'awaiting_topic_confirmation') {
-                app.setStatusBanner('这一步在等你确认主题', 'awaiting');
+                app.setChatInputPlaceholder?.();
+                app.setStatusBanner('这一步在等你点头确认主题', 'awaiting');
+            } else if (data.state.flow_status === 'awaiting_interrupt_confirmation') {
+                app.setChatInputPlaceholder?.();
+                app.setStatusBanner('这个卡点已经讲清楚了，等你决定要不要回主线', 'awaiting');
             } else if (data.state.flow_status === 'awaiting_assessment') {
+                app.setChatInputPlaceholder?.();
                 app.setStatusBanner('这一步在等你完成开始前的小测', 'awaiting');
             } else {
-                app.setStatusBanner('已经回到之前的位置，请顺着当前上下文继续', 'info');
+                app.setChatInputPlaceholder?.();
+                app.setStatusBanner('已经回到之前的位置了，顺着当前上下文继续就行', 'info');
             }
         } catch (err) {
             app.appendMessage('agent', `这页没有恢复成功：${err.message}`);

@@ -39,7 +39,7 @@ def build_meta_node(settings: Settings, llm, event_sink: EventSink, answer_provi
             make_event(
                 "node.start",
                 "meta_qa",
-                message="正在回答关于系统的问题…",
+                message="我先回答你关于这套系统的问题。",
             )
         )
 
@@ -58,12 +58,12 @@ def build_meta_node(settings: Settings, llm, event_sink: EventSink, answer_provi
             make_event(
                 "node.complete",
                 "meta_qa",
-                message="系统问题已回答，等待下一步输入。",
+                message="这个系统相关的问题我先回答到这里。",
             )
         )
 
         next_input = answer_provider.get_answer(
-            prompt="还有什么想知道的，或者准备开始学点什么？",
+            prompt="还有什么想知道的，或者准备开始学点什么？如果想开始，我们就直接收主题往下走。",
             state=state,
         )
         return {

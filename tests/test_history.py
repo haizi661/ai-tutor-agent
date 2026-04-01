@@ -34,6 +34,8 @@ def test_serialize_state_includes_closed_loop_fields():
             "attempt_count": 2,
             "score_history": [(45, 40, 42, "上轮反馈")],
             "coach_content": "先看闭环框图。",
+            "tester_question_type": "概念辨析题",
+            "tester_question_template": "定义辨析",
         }
     )
 
@@ -46,6 +48,8 @@ def test_serialize_state_includes_closed_loop_fields():
     assert serialized["attempt_count"] == 2
     assert serialized["score_history"] == [(45, 40, 42, "上轮反馈")]
     assert serialized["coach_content"] == "先看闭环框图。"
+    assert serialized["tester_question_type"] == "概念辨析题"
+    assert serialized["tester_question_template"] == "定义辨析"
 
 
 def test_reconstruct_messages_keeps_coach_turn_and_evaluator_summary():
@@ -83,3 +87,32 @@ def test_reconstruct_messages_keeps_coach_turn_and_evaluator_summary():
     assert coach_item["content"] == "先看闭环框图。"
     assert "总分：**35**" in evaluator_item["content"]
     assert "量表依据" in evaluator_item["content"]
+
+
+def test_reconstruct_messages_includes_tutor_citations_card():
+    store = FakeCheckpointStore(
+        [
+            _checkpoint(
+                {
+                    "tutor_content": "先讲闭环稳定性。",
+                    "tutor_citations": [
+                        {
+                            "filename": "控制系统导论.pdf",
+                            "page": 12,
+                            "chunk_index": 3,
+                            "snippet": "稳定性的核心判断是极点是否位于左半平面。",
+                        }
+                    ],
+                },
+                "2026-03-18T10:00:00+00:00",
+            )
+        ]
+    )
+
+    items = _reconstruct_messages(store, "thread-2")
+    citation_item = next(item for item in items if item["kind"] == "tutor_citations")
+
+    assert "参考来源" in citation_item["content"]
+    assert "控制系统导论.pdf" in citation_item["content"]
+    assert "第 12 页" in citation_item["content"]
+    assert "稳定性的核心判断" in citation_item["content"]

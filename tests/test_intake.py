@@ -42,7 +42,7 @@ def build_test_settings() -> Settings:
         glm_api_key=None,
         model_name="gemini-2.5-pro",
         embedding_provider="local",
-        embedding_model_name="sentence-transformers/all-MiniLM-L6-v2",
+        embedding_model_name="sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2",
         tutor_temperature=0.7,
         tester_temperature=0.4,
         evaluator_temperature=0.0,

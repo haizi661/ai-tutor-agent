@@ -26,7 +26,7 @@ def build_smalltalk_node(llm, event_sink: EventSink, answer_provider: AnswerProv
             make_event(
                 "node.start",
                 "smalltalk",
-                message="正在回应你…",
+                message="我先陪你接一句，再看看要不要顺势进入学习。",
             )
         )
 
@@ -45,12 +45,12 @@ def build_smalltalk_node(llm, event_sink: EventSink, answer_provider: AnswerProv
             make_event(
                 "node.complete",
                 "smalltalk",
-                message="随便聊了几句，等待你的下一步。",
+                message="这句我先接住了，等你决定下一步要聊还是要学。",
             )
         )
 
         next_input = answer_provider.get_answer(
-            prompt="随时可以告诉我想学的主题，或者继续聊也行。",
+            prompt="随时可以告诉我想学的主题，或者继续聊也行。你想开始时，我就顺着那个点带你进去。",
             state=state,
         )
         return {

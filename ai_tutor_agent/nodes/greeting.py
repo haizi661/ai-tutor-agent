@@ -52,7 +52,7 @@ def build_greeting_node(llm, event_sink: EventSink, answer_provider: AnswerProvi
             make_event(
                 "node.start",
                 "greeter",
-                message="正在与用户沟通学习需求...",
+                message="我先听听你这次到底想学什么，再帮你把主题收准。",
             )
         )
 
@@ -61,11 +61,11 @@ def build_greeting_node(llm, event_sink: EventSink, answer_provider: AnswerProvi
                 make_event(
                     "node.complete",
                     "greeter",
-                    message="用户输入还不足以确认学习主题，继续追问。",
+                    message="这句话还不足以确认学习主题，我再追问一句把方向收准。",
                 )
             )
             new_input = answer_provider.get_answer(
-                prompt="我还没听清你想学什么。请直接告诉我一个明确主题，例如“控制理论”“高等数学”“PID 控制器”。",
+                prompt="我还没听清你想学什么。请直接告诉我一个明确主题，例如“控制理论”“高等数学”“PID 控制器”。这样我才能更准确地带你往下走。",
                 state=state,
             )
             return {"proposed_topic": new_input.strip(), "flow_status": "topic_confirmation_pending"}
@@ -111,18 +111,18 @@ def build_greeting_node(llm, event_sink: EventSink, answer_provider: AnswerProvi
                         "flow_status": "topic_confirmation_pending",
                     }
                 if status == "clarify":
-                    event_sink.emit(make_event("node.complete", "greeter", message="等待用户进一步澄清学习主题..."))
+                    event_sink.emit(make_event("node.complete", "greeter", message="我还想再收紧一下主题，再听你补一句。"))
                     new_input = answer_provider.get_answer(
-                        prompt=assistant_reply or "请直接告诉我一个明确的学习主题。",
+                        prompt=assistant_reply or "请直接告诉我一个明确的学习主题，这样我能更像老师一样顺着这个点往下带。",
                         state=state,
                     )
                     return {"proposed_topic": new_input.strip(), "flow_status": "topic_confirmation_pending"}
         except Exception:
             pass
 
-        event_sink.emit(make_event("node.complete", "greeter", message="等待用户确认学习主题..."))
+        event_sink.emit(make_event("node.complete", "greeter", message="主题还没完全收稳，我再听你补一句。"))
         new_input = answer_provider.get_answer(
-            prompt="请直接告诉我你想学的具体主题，例如“线性代数矩阵乘法”或“控制理论中的 PID”。",
+            prompt="请直接告诉我你想学的具体主题，例如“线性代数矩阵乘法”或“控制理论中的 PID”。这样我能尽快把主题确认得更准确。",
             state=state
         )
 

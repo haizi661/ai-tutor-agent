@@ -1,4 +1,6 @@
-from typing import TypedDict, List, Dict, Any
+from __future__ import annotations
+
+from typing import TypedDict
 
 
 class AgentState(TypedDict):
@@ -6,6 +8,8 @@ class AgentState(TypedDict):
     proposed_topic: str
     tutor_content: str
     tester_question: str
+    tester_question_type: str
+    tester_question_template: str
     user_answer: str
     score: int
     logic_score: int
@@ -33,15 +37,24 @@ class AgentState(TypedDict):
     coach_content: str                 # 补救教练节点生成的短讲解
     # --- 知识库功能拓展字段 ---
     student_id: str                    # 学生唯一 ID
+    skip_reason: str                   # 跳过原因（用于控制指令）
+    interrupt_query: str               # 临时提问内容
+    resume_tester: bool                # 临时提问后是否回到原测题
+    conversation_history: list         # 临时问答历史
 
 
 def build_initial_state(topic: str = "") -> AgentState:
     return {
         "student_id": "default_student",
+        "skip_reason": "",
+        "interrupt_query": "",
+        "resume_tester": False,
         "current_topic": topic,
         "proposed_topic": "",
         "tutor_content": "",
         "tester_question": "",
+        "tester_question_type": "",
+        "tester_question_template": "",
         "user_answer": "",
         "score": 0,
         "logic_score": 0,
@@ -65,4 +78,5 @@ def build_initial_state(topic: str = "") -> AgentState:
         "is_correct_direction": True,
         "needs_hint": False,
         "coach_content": "",
+        "conversation_history": [],
     }

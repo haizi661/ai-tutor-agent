@@ -1,4 +1,7 @@
+from __future__ import annotations
+
 import os
+from urllib.parse import urlparse
 
 from fastapi import APIRouter, HTTPException, Request
 from pydantic import BaseModel
@@ -36,6 +39,20 @@ def _mask_secret(raw_value: str) -> str:
     return f"****{raw_value[-4:]}"
 
 
+def _derive_proxy_parts(raw_values: dict[str, str], settings) -> tuple[str, str, str]:
+    proxy_host = raw_values.get("PROXY_HOST", "")
+    proxy_port = raw_values.get("PROXY_PORT", "")
+    proxy_scheme = raw_values.get("PROXY_SCHEME", "http") or "http"
+    if proxy_host and proxy_port:
+        return proxy_host, proxy_port, proxy_scheme
+
+    proxy_url = raw_values.get("PROXY_URL", "") or settings.http_proxy or settings.https_proxy or ""
+    parsed = urlparse(proxy_url)
+    if not parsed.scheme or not parsed.hostname or not parsed.port:
+        return proxy_host, proxy_port, proxy_scheme
+    return parsed.hostname, str(parsed.port), parsed.scheme
+
+
 class ConfigUpdateRequest(BaseModel):
     profile_id: str
 
@@ -56,13 +73,26 @@ class LocalConfigUpdateRequest(BaseModel):
     model_name: str = ""
     embedding_provider: str = "local"
     embedding_model_name: str = ""
+    pdf_parse_backend: str = "auto"
     knowledge_chunk_size: int = 1000
     knowledge_chunk_overlap: int = 150
     knowledge_top_k: int = 3
     vector_store_backend: str = "chroma"
     vector_store_dir: str = ""
+    proxy_url: str = ""
+    proxy_host: str = ""
+    proxy_port: str = ""
+    proxy_scheme: str = "http"
     http_proxy: str = ""
     https_proxy: str = ""
+    mineru_proxy_mode: str = "inherit"
+    mineru_http_proxy: str = ""
+    mineru_https_proxy: str = ""
+    mineru_connect_timeout_seconds: int = 5
+    mineru_public_dns_bypass_enabled: bool = True
+    mineru_public_dns_server: str = "223.5.5.5"
+    mineru_public_dns_port: int = 53
+    mineru_public_dns_hosts: str = "cdn-mineru.openxlab.org.cn"
 
 
 @router.get("")
@@ -103,6 +133,7 @@ async def get_local_config(request: Request):
     glm_key = raw_values.get("GLM_API_KEY", "")
     google_key = raw_values.get("GOOGLE_API_KEY", "")
     openai_key = raw_values.get("OPENAI_API_KEY", "")
+    proxy_host, proxy_port, proxy_scheme = _derive_proxy_parts(raw_values, settings)
     return {
         "local_config_enabled": settings.local_config_enabled,
         "chat_profile": settings.chat_profile,
@@ -128,13 +159,35 @@ async def get_local_config(request: Request):
         "has_openai_api_key": bool(openai_key),
         "embedding_provider": raw_values.get("EMBEDDING_PROVIDER", settings.embedding_provider),
         "embedding_model_name": raw_values.get("EMBEDDING_MODEL_NAME", settings.embedding_model_name),
+        "pdf_parse_backend": raw_values.get("PDF_PARSE_BACKEND", settings.pdf_parse_backend),
         "knowledge_chunk_size": _coerce_int(raw_values.get("KNOWLEDGE_CHUNK_SIZE"), settings.knowledge_chunk_size),
         "knowledge_chunk_overlap": _coerce_int(raw_values.get("KNOWLEDGE_CHUNK_OVERLAP"), settings.knowledge_chunk_overlap),
         "knowledge_top_k": _coerce_int(raw_values.get("KNOWLEDGE_TOP_K"), settings.knowledge_top_k),
         "vector_store_backend": raw_values.get("VECTOR_STORE_BACKEND", settings.vector_store_backend),
-        "vector_store_dir": raw_values.get("VECTOR_STORE_DIR", settings.vector_store_dir),
+        "vector_store_dir": raw_values.get(
+            "VECTOR_STORE_DIR",
+            raw_values.get("CHROMA_DIR", settings.vector_store_dir),
+        ),
+        "proxy_url": raw_values.get("PROXY_URL", ""),
+        "proxy_host": proxy_host,
+        "proxy_port": proxy_port,
+        "proxy_scheme": proxy_scheme,
         "http_proxy": raw_values.get("HTTP_PROXY", settings.http_proxy or ""),
         "https_proxy": raw_values.get("HTTPS_PROXY", settings.https_proxy or ""),
+        "mineru_proxy_mode": raw_values.get("MINERU_PROXY_MODE", settings.mineru_proxy_mode),
+        "mineru_http_proxy": raw_values.get("MINERU_HTTP_PROXY", settings.mineru_http_proxy or ""),
+        "mineru_https_proxy": raw_values.get("MINERU_HTTPS_PROXY", settings.mineru_https_proxy or ""),
+        "mineru_connect_timeout_seconds": _coerce_int(
+            raw_values.get("MINERU_CONNECT_TIMEOUT_SECONDS"),
+            settings.mineru_connect_timeout_seconds,
+        ),
+        "mineru_public_dns_bypass_enabled": (raw_values.get("MINERU_PUBLIC_DNS_BYPASS_ENABLED", str(settings.mineru_public_dns_bypass_enabled)).strip().lower() != "false"),
+        "mineru_public_dns_server": raw_values.get("MINERU_PUBLIC_DNS_SERVER", settings.mineru_public_dns_server),
+        "mineru_public_dns_port": _coerce_int(
+            raw_values.get("MINERU_PUBLIC_DNS_PORT"),
+            settings.mineru_public_dns_port,
+        ),
+        "mineru_public_dns_hosts": raw_values.get("MINERU_PUBLIC_DNS_HOSTS", settings.mineru_public_dns_hosts),
     }
 
 
@@ -169,13 +222,33 @@ async def update_local_config(req: LocalConfigUpdateRequest, request: Request):
         "MODEL_NAME": req.model_name.strip() or raw_values.get("MODEL_NAME", ""),
         "EMBEDDING_PROVIDER": req.embedding_provider.strip() or "local",
         "EMBEDDING_MODEL_NAME": req.embedding_model_name.strip(),
+        "PDF_PARSE_BACKEND": req.pdf_parse_backend.strip() or raw_values.get("PDF_PARSE_BACKEND", "auto"),
         "KNOWLEDGE_CHUNK_SIZE": str(req.knowledge_chunk_size),
         "KNOWLEDGE_CHUNK_OVERLAP": str(req.knowledge_chunk_overlap),
         "KNOWLEDGE_TOP_K": str(req.knowledge_top_k),
         "VECTOR_STORE_BACKEND": req.vector_store_backend.strip() or raw_values.get("VECTOR_STORE_BACKEND", "chroma"),
-        "VECTOR_STORE_DIR": req.vector_store_dir.strip() or raw_values.get("VECTOR_STORE_DIR", runtime.settings.vector_store_dir),
+        "VECTOR_STORE_DIR": req.vector_store_dir.strip() or raw_values.get(
+            "VECTOR_STORE_DIR",
+            raw_values.get("CHROMA_DIR", runtime.settings.vector_store_dir),
+        ),
+        "CHROMA_DIR": req.vector_store_dir.strip() or raw_values.get(
+            "VECTOR_STORE_DIR",
+            raw_values.get("CHROMA_DIR", runtime.settings.vector_store_dir),
+        ),
+        "PROXY_URL": req.proxy_url.strip(),
+        "PROXY_HOST": req.proxy_host.strip(),
+        "PROXY_PORT": req.proxy_port.strip(),
+        "PROXY_SCHEME": req.proxy_scheme.strip() or raw_values.get("PROXY_SCHEME", "http"),
         "HTTP_PROXY": req.http_proxy.strip(),
         "HTTPS_PROXY": req.https_proxy.strip(),
+        "MINERU_PROXY_MODE": req.mineru_proxy_mode.strip() or raw_values.get("MINERU_PROXY_MODE", "inherit"),
+        "MINERU_HTTP_PROXY": req.mineru_http_proxy.strip(),
+        "MINERU_HTTPS_PROXY": req.mineru_https_proxy.strip(),
+        "MINERU_CONNECT_TIMEOUT_SECONDS": str(req.mineru_connect_timeout_seconds),
+        "MINERU_PUBLIC_DNS_BYPASS_ENABLED": "true" if req.mineru_public_dns_bypass_enabled else "false",
+        "MINERU_PUBLIC_DNS_SERVER": req.mineru_public_dns_server.strip() or raw_values.get("MINERU_PUBLIC_DNS_SERVER", "223.5.5.5"),
+        "MINERU_PUBLIC_DNS_PORT": str(req.mineru_public_dns_port),
+        "MINERU_PUBLIC_DNS_HOSTS": req.mineru_public_dns_hosts.strip() or raw_values.get("MINERU_PUBLIC_DNS_HOSTS", "cdn-mineru.openxlab.org.cn"),
     }
 
     selected_api_key = req.api_key.strip()

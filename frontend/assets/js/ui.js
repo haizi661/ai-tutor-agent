@@ -3,6 +3,21 @@
     const state = app.state;
     const PRE_TOPIC_FLOW_STATUSES = new Set(['greeting', 'topic_intake', 'meta_qa', 'smalltalk']);
     const STATUS_BANNER_TONES = ['status-ready', 'status-info', 'status-awaiting', 'status-processing', 'status-success', 'status-warning', 'status-danger', 'status-paused'];
+    const TURN_ROLE_COPY = {
+        teacher: { label: '老师讲解', avatar: '讲' },
+        tutor: { label: '老师讲解', avatar: '讲' },
+        coach: { label: '纠偏提示', avatar: '引' },
+        tester: { label: '练习题', avatar: '题' },
+        interruption: { label: '追问讲解', avatar: '答' },
+        interruption_tutor: { label: '追问讲解', avatar: '答' },
+        evaluation: { label: '这轮反馈', avatar: '评' },
+        profile: { label: '起点画像', avatar: '像' },
+        assessment: { label: '开始前的小测', avatar: '测' },
+        topic_confirmation: { label: '主题确认', avatar: '题' },
+        interrupt_confirmation: { label: '回主线确认', avatar: '回' },
+        prompt: { label: '老师提示', avatar: '导' },
+        system: { label: '老师提示', avatar: '导' },
+    };
     const SHORT_VISIBLE_FALLBACK_MS = 1600;
     const LONG_VISIBLE_FALLBACK_MS = 5200;
     const MAX_VISIBLE_FALLBACKS = 2;
@@ -22,6 +37,54 @@
                 throwOnError: false,
             });
         }
+    };
+
+    app.formatTutorCitations = function formatTutorCitations(citations) {
+        if (!Array.isArray(citations) || !citations.length) return '';
+
+        const normalized = [];
+        const seen = new Set();
+
+        citations.forEach(raw => {
+            const filename = String(raw?.filename || '').trim();
+            if (!filename) return;
+
+            const page = Number.isInteger(raw?.page) ? raw.page : null;
+            const chunkIndex = Number.isInteger(raw?.chunk_index) ? raw.chunk_index : null;
+            const snippet = String(raw?.snippet || '').replace(/\s+/g, ' ').trim();
+            const dedupKey = `${filename}|${page ?? ''}|${chunkIndex ?? ''}|${snippet.slice(0, 80)}`;
+            if (seen.has(dedupKey)) return;
+            seen.add(dedupKey);
+
+            normalized.push({ filename, page, chunkIndex, snippet });
+        });
+
+        if (!normalized.length) return '';
+
+        const lines = ['### 参考来源'];
+        normalized.slice(0, 4).forEach((item, index) => {
+            const pageSuffix = item.page ? `（第 ${item.page} 页）` : '';
+            const chunkSuffix = Number.isInteger(item.chunkIndex) ? ` · 片段 #${item.chunkIndex}` : '';
+            lines.push('');
+            lines.push(`${index + 1}. ${item.filename}${pageSuffix}${chunkSuffix}`);
+            if (item.snippet) {
+                lines.push(`> ${item.snippet}`);
+            }
+        });
+
+        return lines.join('\n');
+    };
+
+    app.renderTutorCitations = function renderTutorCitations(citations, options = {}) {
+        const markdown = app.formatTutorCitations(citations);
+        if (!markdown) return false;
+
+        return app.appendVisibleSystemTurn(markdown, options.tone || 'info', {
+            kind: 'citation',
+            role: options.role || 'tutor',
+            clearTyping: Boolean(options.clearTyping),
+            markVisible: true,
+        });
     };
 
     let mathRenderTimeout = null;
@@ -98,6 +161,7 @@
     app.resetTurnLifecycleState = function resetTurnLifecycleState() {
         app.clearVisibilityFallback({ resetCounter: true });
         state.currentTurnId = '';
+        state.currentTurnRole = 'teacher';
         state.turnHasVisibleOutput = false;
         state.turnStartedAt = 0;
         state.lastVisibleAt = 0;
@@ -136,10 +200,50 @@
     };
 
     app.getTurnProgressFallbackText = function getTurnProgressFallbackText() {
-        if (state.latestRouteDecisionSummary) return `系统流程进展：${state.latestRouteDecisionSummary}`;
-        if (state.latestNodeStartMessage) return `系统流程进展：${state.latestNodeStartMessage}`;
-        if (state.latestProgressSummary) return `系统流程进展：${state.latestProgressSummary}`;
-        return '系统流程仍在继续，我拿到更具体结果后会立即显示。';
+        if (state.latestRouteDecisionSummary) return `我这边的推进情况：${state.latestRouteDecisionSummary}`;
+        if (state.latestNodeStartMessage) return `我这边正在做这一步：${state.latestNodeStartMessage}`;
+        if (state.latestProgressSummary) return `我这边已经推进到这里：${state.latestProgressSummary}`;
+        return '我还在整理这一步，拿到更具体结果后会立刻告诉你。';
+    };
+
+    app.getTurnRoleMeta = function getTurnRoleMeta(role = 'teacher') {
+        return TURN_ROLE_COPY[role] || TURN_ROLE_COPY.teacher;
+    };
+
+    app.applyCurrentTurnRole = function applyCurrentTurnRole(role = state.currentTurnRole || 'teacher') {
+        state.currentTurnRole = role || 'teacher';
+        if (!state.currentAgentTurnEl) return;
+        const meta = app.getTurnRoleMeta(state.currentTurnRole);
+        state.currentAgentTurnEl.dataset.role = state.currentTurnRole;
+        state.currentAgentTurnKickerEl && (state.currentAgentTurnKickerEl.textContent = meta.label);
+        const avatar = state.currentAgentTurnEl.querySelector('.avatar.agent');
+        if (avatar) avatar.textContent = meta.avatar;
+    };
+
+    app.currentTurnHasRenderableContent = function currentTurnHasRenderableContent() {
+        return Boolean(state.currentTextBuffer.trim())
+            || Boolean(state.currentAgentMainFlowEl?.childElementCount)
+            || state.turnHasVisibleOutput;
+    };
+
+    app.setPendingTurnRole = function setPendingTurnRole(role, { forceSplit = false } = {}) {
+        const nextRole = role || 'teacher';
+        if (!state.currentAgentTurnEl) {
+            state.currentTurnRole = nextRole;
+            return;
+        }
+        if (state.currentTurnRole === nextRole) {
+            app.applyCurrentTurnRole(nextRole);
+            return;
+        }
+        if (forceSplit || app.currentTurnHasRenderableContent()) {
+            const wasStreaming = state.isStreaming;
+            app.finalizeAgentTurn?.();
+            if (wasStreaming) app.startAgentTurnLifecycle?.();
+            state.currentTurnRole = nextRole;
+            return;
+        }
+        app.applyCurrentTurnRole(nextRole);
     };
 
     app.scheduleVisibilityFallback = function scheduleVisibilityFallback() {
@@ -152,7 +256,7 @@
             if (state.currentTurnId !== turnId || !state.isStreaming) return;
 
             if (state.visibilityFallbackCount === 0) {
-                app.appendVisibleSystemTurn('我已接上这一步，正在处理中。', 'info', {
+                app.appendVisibleSystemTurn('我已经接上这一步了，正在替你往下理。', 'info', {
                     kind: 'progress',
                     clearTyping: false,
                 });
@@ -171,26 +275,29 @@
         }, delay);
     };
 
-    app.appendAgentTurnShell = function appendAgentTurnShell(initialText = '') {
+    app.appendAgentTurnShell = function appendAgentTurnShell(initialText = '', role = state.currentTurnRole || 'teacher') {
+        const meta = app.getTurnRoleMeta(role);
         const wrap = document.createElement('div');
         wrap.className = 'msg-wrapper agent';
+        wrap.dataset.role = role;
         wrap.innerHTML = `
-            <div class="avatar agent" aria-hidden="true">伴</div>
+            <div class="avatar agent" aria-hidden="true">${meta.avatar}</div>
             <div class="msg-content agent-turn">
+                <div class="agent-turn-kicker">${meta.label}</div>
                 <div class="agent-body"></div>
                 <div class="agent-main-flow" hidden></div>
                 <div class="turn-heartbeat" hidden aria-live="polite"></div>
                 <details class="meta-block meta-block-thinking">
                     <summary>
-                        <span class="meta-title">思考过程（系统信号）</span>
-                        <span class="meta-badge" aria-label="思考过程条数">0</span>
+                        <span class="meta-title">我这边的推进过程</span>
+                        <span class="meta-badge" aria-label="推进过程条数">0</span>
                     </summary>
                     <ol class="thinking-list"></ol>
                 </details>
                 <details class="meta-block meta-block-notes">
                     <summary>
-                        <span class="meta-title">注释（辅助说明）</span>
-                        <span class="meta-badge" aria-label="注释条数">0</span>
+                        <span class="meta-title">补充说明</span>
+                        <span class="meta-badge" aria-label="补充说明条数">0</span>
                     </summary>
                     <ul class="notes-list"></ul>
                 </details>
@@ -202,6 +309,7 @@
         state.currentAgentTurnEl = wrap;
         state.currentAgentMainFlowEl = wrap.querySelector('.agent-main-flow');
         state.currentAgentBodyEl = wrap.querySelector('.agent-body');
+        state.currentAgentTurnKickerEl = wrap.querySelector('.agent-turn-kicker');
         state.currentAgentMsgEl = state.currentAgentBodyEl;
         state.currentTurnHeartbeatEl = wrap.querySelector('.turn-heartbeat');
         state.currentThinkingBlockEl = wrap.querySelector('.meta-block-thinking');
@@ -220,16 +328,17 @@
         return wrap;
     };
 
-    app.ensureAgentTurn = function ensureAgentTurn() {
+    app.ensureAgentTurn = function ensureAgentTurn(role = state.currentTurnRole || 'teacher') {
         if (
             state.currentAgentBodyEl &&
             state.currentAgentMainFlowEl &&
             state.currentThinkingListEl &&
             state.currentNotesListEl
         ) {
+            app.applyCurrentTurnRole(role);
             return state.currentAgentTurnEl;
         }
-        return app.appendAgentTurnShell('');
+        return app.appendAgentTurnShell('', role);
     };
 
     app.updateMetaBadges = function updateMetaBadges() {
@@ -274,11 +383,13 @@
             clearTyping = false,
             createIfNeeded = true,
             markVisible = true,
+            role = state.currentTurnRole || 'teacher',
         } = options;
 
         if (clearTyping) app.clearTypingIndicator();
         if (createIfNeeded && (state.currentTurnId || state.isStreaming || state.currentAgentTurnEl)) {
-            app.ensureAgentTurn();
+            app.setPendingTurnRole?.(role);
+            app.ensureAgentTurn(role);
         }
 
         if (!state.currentAgentMainFlowEl) {
@@ -291,6 +402,7 @@
         item.className = 'agent-visible-item';
         item.dataset.tone = tone;
         item.dataset.kind = kind;
+        item.dataset.role = role;
         renderMarkdown(item, text);
         state.currentAgentMainFlowEl.hidden = false;
         state.currentAgentMainFlowEl.appendChild(item);
@@ -305,6 +417,7 @@
         state.currentAgentTurnEl = null;
         state.currentAgentMainFlowEl = null;
         state.currentAgentBodyEl = null;
+        state.currentAgentTurnKickerEl = null;
         state.currentTurnHeartbeatEl = null;
         state.currentThinkingBlockEl = null;
         state.currentThinkingListEl = null;
@@ -318,11 +431,22 @@
         app.resetTurnLifecycleState();
     };
 
-    app.appendMessage = function appendMessage(role, text) {
+    app.roleFromMessageKind = function roleFromMessageKind(kind) {
+        if (kind === 'tutor') return 'tutor';
+        if (kind === 'tutor_citations') return 'tutor';
+        if (kind === 'coach') return 'coach';
+        if (kind === 'tester_question') return 'tester';
+        if (kind === 'evaluator_card') return 'evaluation';
+        if (kind === 'assessment_result') return 'profile';
+        return 'teacher';
+    };
+
+    app.appendMessage = function appendMessage(role, text, options = {}) {
         app.clearTypingIndicator();
 
         if (role === 'agent') {
-            app.appendAgentTurnShell(text);
+            const turnRole = options.turnRole || app.roleFromMessageKind(options.kind);
+            app.appendAgentTurnShell(text, turnRole);
             app.finalizeAgentTurn();
             return;
         }
@@ -346,7 +470,7 @@
         wrap.className = 'msg-wrapper system';
         wrap.dataset.tone = tone;
         wrap.innerHTML = `
-            <div class="avatar system" aria-hidden="true">注</div>
+            <div class="avatar system" aria-hidden="true">导</div>
             <div class="msg-content system">${marked.parse(text)}</div>
         `;
         const container = document.getElementById('messages');
@@ -357,7 +481,7 @@
     app.showTyping = function showTyping() {
         app.clearTypingIndicator();
         
-        const dotsHtml = `<div class="typing-dots" aria-label="我正在思考..."><div class="dot"></div><div class="dot"></div><div class="dot"></div></div>`;
+        const dotsHtml = `<div class="typing-dots" aria-label="我在整理思路..."><div class="dot"></div><div class="dot"></div><div class="dot"></div></div>`;
         
         // If an agent turn is already active, put the typing indicator inside its body
         if (state.currentAgentBodyEl) {
@@ -501,7 +625,7 @@
         card.className = 'topic-confirm-card';
         card.innerHTML = `
             <h3>先确认这次要学什么</h3>
-            <p class="topic-confirm-lead">我先把你的目标收成下面这个主题。确认后，我们就继续进入小测和正式讲解。</p>
+            <p class="topic-confirm-lead">我先帮你把目标收成一句清楚的话。确认后，我们就顺着它进入小测和正式讲解。</p>
             <div class="topic-confirm-topic"></div>
             <div class="topic-confirm-actions">
                 <button type="button" class="topic-confirm-btn primary" onclick="submitTopicConfirmation(true)">对，就按这个学</button>
@@ -515,6 +639,24 @@
             </div>
         `;
         card.querySelector('.topic-confirm-topic').textContent = topic;
+        container.appendChild(card);
+        app.scrollMessagesToBottom();
+    };
+
+    app.renderInterruptConfirmation = function renderInterruptConfirmation() {
+        state.pendingInterruptConfirmation = true;
+        document.querySelector('.interrupt-confirm-card')?.remove();
+        const container = document.getElementById('messages');
+        const card = document.createElement('div');
+        card.className = 'topic-confirm-card interrupt-confirm-card';
+        card.innerHTML = `
+            <h3>临时问题已经解答</h3>
+            <p class="topic-confirm-lead">这一步我先替你讲到这里。要现在回到刚才那道题继续，还是顺着这个卡点再追问两句？</p>
+            <div class="topic-confirm-actions">
+                <button type="button" class="topic-confirm-btn primary" onclick="submitInterruptConfirmation(true)">回到主线</button>
+                <button type="button" class="topic-confirm-btn secondary" onclick="submitInterruptConfirmation(false)">继续追问</button>
+            </div>
+        `;
         container.appendChild(card);
         app.scrollMessagesToBottom();
     };
@@ -534,6 +676,10 @@
 
         if (stateSnapshot.flow_status === 'awaiting_topic_confirmation' && stateSnapshot.proposed_topic) {
             app.renderTopicConfirmation(stateSnapshot.proposed_topic);
+        }
+
+        if (stateSnapshot.flow_status === 'awaiting_interrupt_confirmation') {
+            app.renderInterruptConfirmation();
         }
 
         if (stateSnapshot.flow_status === 'awaiting_assessment' && (stateSnapshot.assessment_questions || []).length) {
@@ -564,7 +710,7 @@
                 app.appendSystemMessage(content, item.tone || 'info');
                 return;
             }
-            app.appendMessage('agent', content);
+            app.appendMessage('agent', content, { kind: item.kind || '' });
         });
 
         if (stateSnapshot) {
@@ -595,11 +741,15 @@
             : '已回到之前的学习页。这一页还没有确认最终主题。';
         app.appendSystemMessage(sessionSummary, 'info');
 
-        if (stateSnapshot.assessment_result) app.appendMessage('agent', stateSnapshot.assessment_result);
-        if (stateSnapshot.tutor_content) app.appendMessage('agent', stateSnapshot.tutor_content);
-        if (stateSnapshot.coach_content) app.appendMessage('agent', stateSnapshot.coach_content);
+        if (stateSnapshot.assessment_result) app.appendMessage('agent', stateSnapshot.assessment_result, { kind: 'assessment_result' });
+        if (stateSnapshot.tutor_content) app.appendMessage('agent', stateSnapshot.tutor_content, { kind: 'tutor' });
+        if ((stateSnapshot.tutor_citations || []).length) {
+            const citationMarkdown = app.formatTutorCitations(stateSnapshot.tutor_citations);
+            if (citationMarkdown) app.appendMessage('agent', citationMarkdown, { kind: 'tutor_citations' });
+        }
+        if (stateSnapshot.coach_content) app.appendMessage('agent', stateSnapshot.coach_content, { kind: 'coach' });
         if (stateSnapshot.user_answer) app.appendMessage('user', stateSnapshot.user_answer);
-        if (stateSnapshot.tester_question) app.appendMessage('agent', stateSnapshot.tester_question);
+        if (stateSnapshot.tester_question) app.appendMessage('agent', stateSnapshot.tester_question, { kind: 'tester_question' });
 
         if (stateSnapshot.feedback || stateSnapshot.score) {
             const lines = [
@@ -614,7 +764,7 @@
                 lines.push('', '建议复习：');
                 lines.push(...stateSnapshot.next_review_points.map(point => `- ${point}`));
             }
-            app.appendMessage('agent', lines.join('\n'));
+            app.appendMessage('agent', lines.join('\n'), { kind: 'evaluator_card' });
         }
 
         applySessionArtifacts(stateSnapshot);

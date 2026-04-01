@@ -43,6 +43,27 @@ class TopicConfirmRequest(BaseModel):
     topic: str = ""
 
 
+class InterruptConfirmRequest(BaseModel):
+    thread_id: str
+    confirmed: bool
+
+
+def _thread_config(thread_id: str) -> dict:
+    return {"configurable": {"thread_id": thread_id}}
+
+
+def _clear_interrupt_history(history: list) -> list:
+    cleaned = []
+    for msg in history or []:
+        kind = str(msg.get("kind", ""))
+        if kind in {"interruption", "interruption_user"}:
+            continue
+        if kind.startswith("interruption"):
+            continue
+        cleaned.append(msg)
+    return cleaned
+
+
 def _build_runtime_context(thread_id: str, runtime, event_q: queue.Queue, input_q: queue.Queue) -> RuntimeContext:
     event_sink = WebEventSink(event_q)
     answer_provider = WebAnswerProvider(
@@ -57,12 +78,30 @@ def _build_runtime_context(thread_id: str, runtime, event_q: queue.Queue, input_
     )
 
 
-def _graph_worker(thread_id: str, topic: str, runtime, event_q: queue.Queue, input_q: queue.Queue):
+def _run_graph_session(
+    thread_id: str,
+    runtime,
+    event_q: queue.Queue,
+    input_q: queue.Queue,
+    runner,
+):
     runtime_context = _build_runtime_context(thread_id, runtime, event_q, input_q)
     graph_app, conn = runtime.workflow_factory(runtime.settings, runtime=runtime_context)
+    thread_config = _thread_config(thread_id)
 
     try:
-        current_state = graph_app.get_state({"configurable": {"thread_id": thread_id}})
+        runner(graph_app, runtime_context, thread_config)
+    except Exception as exc:
+        runtime_context.event_sink.emit(make_event("session.error", "api", message=str(exc)))
+    finally:
+        runtime_context.event_sink.emit(make_event("session.end", "api", message="Session ended."))
+        conn.close()
+        runtime.session_manager.mark_finished(thread_id)
+
+
+def _graph_worker(thread_id: str, topic: str, runtime, event_q: queue.Queue, input_q: queue.Queue):
+    def runner(graph_app, runtime_context, thread_config):
+        current_state = graph_app.get_state(thread_config)
         run_learning_session(
             graph_app,
             runtime_context.event_sink,
@@ -70,12 +109,8 @@ def _graph_worker(thread_id: str, topic: str, runtime, event_q: queue.Queue, inp
             topic=topic,
             current_state=current_state,
         )
-    except Exception as exc:
-        runtime_context.event_sink.emit(make_event("session.error", "api", message=str(exc)))
-    finally:
-        runtime_context.event_sink.emit(make_event("session.end", "api", message="Session ended."))
-        conn.close()
-        runtime.session_manager.mark_finished(thread_id)
+
+    _run_graph_session(thread_id, runtime, event_q, input_q, runner)
 
 
 def _resume_assessment_worker(
@@ -85,11 +120,7 @@ def _resume_assessment_worker(
     event_q: queue.Queue,
     input_q: queue.Queue,
 ):
-    runtime_context = _build_runtime_context(thread_id, runtime, event_q, input_q)
-    graph_app, conn = runtime.workflow_factory(runtime.settings, runtime=runtime_context)
-    thread_config = {"configurable": {"thread_id": thread_id}}
-
-    try:
+    def runner(graph_app, runtime_context, thread_config):
         graph_app.update_state(
             thread_config,
             {
@@ -105,12 +136,8 @@ def _resume_assessment_worker(
             )
         )
         graph_app.invoke(None, config=thread_config)
-    except Exception as exc:
-        runtime_context.event_sink.emit(make_event("session.error", "api", message=str(exc)))
-    finally:
-        runtime_context.event_sink.emit(make_event("session.end", "api", message="Session ended."))
-        conn.close()
-        runtime.session_manager.mark_finished(thread_id)
+
+    _run_graph_session(thread_id, runtime, event_q, input_q, runner)
 
 
 def _resume_topic_confirmation_worker(
@@ -121,11 +148,7 @@ def _resume_topic_confirmation_worker(
     event_q: queue.Queue,
     input_q: queue.Queue,
 ):
-    runtime_context = _build_runtime_context(thread_id, runtime, event_q, input_q)
-    graph_app, conn = runtime.workflow_factory(runtime.settings, runtime=runtime_context)
-    thread_config = {"configurable": {"thread_id": thread_id}}
-
-    try:
+    def runner(graph_app, runtime_context, thread_config):
         state = graph_app.get_state(thread_config).values or {}
         proposed_topic = state.get("proposed_topic", "").strip()
         next_topic = (topic or "").strip()
@@ -182,12 +205,56 @@ def _resume_topic_confirmation_worker(
             )
 
         graph_app.invoke(None, config=thread_config)
-    except Exception as exc:
-        runtime_context.event_sink.emit(make_event("session.error", "api", message=str(exc)))
-    finally:
-        runtime_context.event_sink.emit(make_event("session.end", "api", message="Session ended."))
-        conn.close()
-        runtime.session_manager.mark_finished(thread_id)
+
+    _run_graph_session(thread_id, runtime, event_q, input_q, runner)
+
+
+def _resume_interrupt_confirmation_worker(
+    thread_id: str,
+    confirmed: bool,
+    runtime,
+    event_q: queue.Queue,
+    input_q: queue.Queue,
+):
+    def runner(graph_app, runtime_context, thread_config):
+        state = graph_app.get_state(thread_config).values or {}
+        if confirmed:
+            cleaned_history = _clear_interrupt_history(state.get("conversation_history", []))
+            resume_tester = bool(state.get("tester_question"))
+            graph_app.update_state(
+                thread_config,
+                {
+                    "flow_status": "normal",
+                    "interrupt_query": "",
+                    "resume_tester": resume_tester,
+                    "skip_reason": "",
+                    "user_answer": "",
+                    "conversation_history": cleaned_history,
+                },
+            )
+            runtime_context.event_sink.emit(
+                make_event(
+                    "session.info",
+                    "api",
+                    message="✅ 已确认回到主线，继续教学与测评。",
+                )
+            )
+            graph_app.invoke(None, config=thread_config)
+        else:
+            graph_app.update_state(
+                thread_config,
+                {"flow_status": "awaiting_interrupt_confirmation"},
+            )
+            runtime_context.event_sink.emit(
+                make_event(
+                    "session.info",
+                    "api",
+                    message="📝 你可以继续输入临时问题；完成后会再次询问是否回到主线。",
+                    data={"requires_interrupt_confirmation": False},
+                )
+            )
+
+    _run_graph_session(thread_id, runtime, event_q, input_q, runner)
 
 
 def _start_worker(thread_id: str, runtime, target, *worker_args):
@@ -233,6 +300,11 @@ async def start_session(req: ChatRequest, request: Request):
         session["input_q"].put(req.topic)
         runtime.session_manager.mark_awaiting_input(req.thread_id, False)
         return {"status": "continued", "thread_id": req.thread_id}
+    if session["is_running"] and req.topic.strip():
+        raise HTTPException(
+            status_code=409,
+            detail="Session is still processing the previous turn. Wait for the current step to finish before sending a new message.",
+        )
     if not session["is_running"]:
         _start_worker(req.thread_id, runtime, _graph_worker, req.thread_id, req.topic)
         return {"status": "started", "thread_id": req.thread_id}
@@ -309,3 +381,16 @@ async def confirm_topic(req: TopicConfirmRequest, request: Request):
         req.topic,
     )
     return {"status": "ok", "message": "Topic confirmation received."}
+
+
+@router.post("/confirm_interrupt")
+async def confirm_interrupt(req: InterruptConfirmRequest, request: Request):
+    runtime = get_runtime(request)
+    _schedule_resume_worker(
+        req.thread_id,
+        runtime,
+        _resume_interrupt_confirmation_worker,
+        req.thread_id,
+        req.confirmed,
+    )
+    return {"status": "ok", "message": "Interrupt confirmation received."}

@@ -1,6 +1,8 @@
 (() => {
     const app = window.AITutorApp;
     const state = app.state;
+    const DEFAULT_CHAT_PLACEHOLDER = '输入想学的主题，或在讲解中直接追问临时问题…';
+    const ANSWER_CHAT_PLACEHOLDER = '输入你的解答，或先追问一个临时问题…';
 
     function closeEventSource() {
         if (!state.eventSource) return;
@@ -45,6 +47,20 @@
         return appendMeta('note', text, tone, options);
     }
 
+    function turnRoleForSource(source, eventType = '') {
+        if (eventType === 'assessment.result') return 'evaluation';
+        if (eventType === 'assessment.form_ready') return 'assessment';
+        if (eventType === 'topic.confirmation_needed') return 'topic_confirmation';
+        if (eventType === 'interrupt.confirmation_needed') return 'interrupt_confirmation';
+        if (source === 'tutor') return 'tutor';
+        if (source === 'coach') return 'coach';
+        if (source === 'tester') return 'tester';
+        if (source === 'interruption_tutor') return 'interruption';
+        if (source === 'user_profiler') return 'profile';
+        if (source === 'evaluator') return 'evaluation';
+        return 'teacher';
+    }
+
     function startStreamingTurn(statusMessage) {
         state.isStreaming = true;
         state.isAwaitingInput = false;
@@ -60,6 +76,40 @@
         app.appendVisibleSystemTurn?.(text, tone, options);
         app.clearTypingIndicator?.();
         return true;
+    }
+
+    function setChatInputPlaceholder(text = DEFAULT_CHAT_PLACEHOLDER) {
+        const input = document.getElementById('chat-input');
+        if (!input) return;
+        input.placeholder = text;
+    }
+
+    app.setChatInputPlaceholder = setChatInputPlaceholder;
+
+    async function parseResponseJson(response) {
+        try {
+            return await response.json();
+        } catch (_error) {
+            return {};
+        }
+    }
+
+    async function postJson(url, payload, fallback) {
+        const res = await fetch(url, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload),
+        });
+        const data = await parseResponseJson(res);
+        if (!res.ok || data.status === 'error') {
+            throw new Error(pickErrorMessage(data, fallback));
+        }
+        return data;
+    }
+
+    function pickErrorMessage(payload, fallback) {
+        if (!payload || typeof payload !== 'object') return fallback;
+        return payload.detail || payload.message || fallback;
     }
 
     function summarizeAssessmentResult(data) {
@@ -84,10 +134,41 @@
 
     function finalizeStreamState(statusMessage, tone = 'ready') {
         state.isStreaming = false;
+        setChatInputPlaceholder();
         app.setStatusBanner(statusMessage, tone);
         closeEventSource();
         app.finalizeAgentTurn?.();
         app.applyPrimaryActionState?.();
+    }
+
+    function pauseStreamingForAwaiting(statusMessage, { render } = {}) {
+        state.isStreaming = false;
+        app.setStatusBanner(statusMessage, 'awaiting');
+        render?.();
+        closeEventSource();
+        app.finalizeAgentTurn?.();
+        app.applyPrimaryActionState?.();
+    }
+
+    function consumeAwaitingTurn(message, statusMessage, options = {}) {
+        const {
+            role = 'prompt',
+            render,
+            awaitingInput = false,
+            pendingInterruptConfirmation = false,
+            showInChat = true,
+            placeholder = DEFAULT_CHAT_PLACEHOLDER,
+        } = options;
+
+        if (showInChat) {
+            consumeVisibleTurn(message, 'info', { kind: 'awaiting', role, clearTyping: true });
+        } else {
+            app.clearTypingIndicator?.();
+        }
+        state.isAwaitingInput = awaitingInput;
+        state.pendingInterruptConfirmation = pendingInterruptConfirmation;
+        setChatInputPlaceholder(placeholder);
+        pauseStreamingForAwaiting(statusMessage, { render });
     }
 
     app.pauseCurrentSession = function pauseCurrentSession() {
@@ -98,6 +179,7 @@
         }
         closeEventSource();
         state.isStreaming = false;
+        setChatInputPlaceholder();
         app.finalizeAgentTurn?.();
         app.setStatusBanner('这一页先停在这里，稍后可以继续', 'paused');
         app.appendSystemMessage('我先替你把这一页停住了。之后回到这个会话时，可以顺着刚才的位置继续。', 'warning');
@@ -115,20 +197,45 @@
             return;
         }
         app.setStatusBanner('我在记录这次主题确认', 'processing');
-        const res = await fetch('/api/confirm_topic', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(payload),
-        });
-        const data = await res.json();
-        if (!res.ok || data.status === 'error') {
-            app.setStatusBanner(data.detail || data.message || '主题确认没有保存成功', 'danger');
-            alert(data.detail || data.message || '主题确认没有保存成功');
+        try {
+            await postJson('/api/confirm_topic', payload, '主题确认没有保存成功');
+            state.pendingTopicConfirmation = null;
+            document.querySelector('.topic-confirm-card')?.remove();
+            startStreamingTurn('我在接上主题确认后的流程');
+            app.connectSSE();
+        } catch (error) {
+            const message = `主题确认请求失败：${error.message}`;
+            app.setStatusBanner(message, 'danger');
+            alert(message);
+        }
+    };
+
+    app.submitInterruptConfirmation = async function submitInterruptConfirmation(confirmed) {
+        document.querySelector('.interrupt-confirm-card')?.remove();
+        state.pendingInterruptConfirmation = false;
+
+        if (!confirmed) {
+            appendNote('好，我们先不急着回主线。你继续追问这个点，我会顺着给你讲。', 'info');
+            app.setStatusBanner('可以继续追问这个卡点', 'awaiting');
+            document.getElementById('chat-input')?.focus();
+            app.applyPrimaryActionState?.();
             return;
         }
-        document.querySelector('.topic-confirm-card')?.remove();
-        startStreamingTurn('我在接上主题确认后的流程');
-        app.connectSSE();
+
+        startStreamingTurn('我在把你带回刚才那道题');
+        try {
+            await postJson(
+                '/api/confirm_interrupt',
+                { thread_id: state.currentThreadId, confirmed },
+                '回到主线失败'
+            );
+            app.connectSSE();
+        } catch (error) {
+            state.pendingInterruptConfirmation = true;
+            app.renderInterruptConfirmation?.();
+            app.setStatusBanner(`回主线请求失败：${error.message}`, 'danger');
+            finalizeStreamState('回主线请求失败，请稍后重试', 'danger');
+        }
     };
 
     app.handleSend = async function handleSend() {
@@ -140,26 +247,58 @@
         state.voiceInputBase = '';
         state.voiceFinalTranscript = '';
         state.voiceInterimTranscript = '';
+        if (state.pendingInterruptConfirmation) {
+            document.querySelector('.interrupt-confirm-card')?.remove();
+            state.pendingInterruptConfirmation = false;
+        }
         app.appendMessage('user', text);
 
         if (state.isAwaitingInput) {
             startStreamingTurn('收到你的补充了，我继续往下整理');
-            await fetch('/api/answer', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ thread_id: state.currentThreadId, answer: text }),
-            });
+            try {
+                await postJson(
+                    '/api/answer',
+                    { thread_id: state.currentThreadId, answer: text },
+                    '服务端没有接住这次补充'
+                );
+            } catch (error) {
+                consumeVisibleTurn(
+                    `这次补充提交失败：${error.message}。你可以直接重发一次。`,
+                    'danger',
+                    { kind: 'error', role: 'prompt', clearTyping: true }
+                );
+                finalizeStreamState('补充提交失败，可以重试', 'danger');
+                return;
+            }
             app.connectSSE();
             return;
         }
 
         if (!state.currentThreadId) state.currentThreadId = app.makeThreadId();
         startStreamingTurn('先帮你铺开这一页的学习流程');
-        await fetch('/api/start', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ thread_id: state.currentThreadId, topic: text }),
-        });
+        try {
+            await postJson(
+                '/api/start',
+                { thread_id: state.currentThreadId, topic: text },
+                '服务端没有成功启动会话'
+            );
+        } catch (error) {
+            if (state.currentThreadId) {
+                app.connectSSE();
+            }
+            consumeVisibleTurn(
+                error.message.includes('previous turn')
+                    ? '上一轮还在处理中，这条消息还没有真正送进工作流。等当前步骤结束后再发，或者先看页面里是不是在等你确认主题/填写小测/输入答案。'
+                    : `这次发起学习失败：${error.message}。请确认服务在线后重试。`,
+                error.message.includes('previous turn') ? 'warning' : 'danger',
+                { kind: 'error', role: 'prompt', clearTyping: true }
+            );
+            finalizeStreamState(
+                error.message.includes('previous turn') ? '上一轮还在处理中，请稍等' : '会话启动失败，请重试',
+                error.message.includes('previous turn') ? 'warning' : 'danger'
+            );
+            return;
+        }
         app.connectSSE();
     };
 
@@ -178,7 +317,8 @@
 
         state.eventSource.addEventListener('node.start', e => {
             const data = safelyParseEventData(e.data);
-            const message = data.message || '正在把这一小步接好。';
+            const message = data.message || '我在把这一小步接好。';
+            app.setPendingTurnRole?.(turnRoleForSource(data.source));
             app.setStatusBanner(message, 'processing');
             appendThinking(message, 'info', 'node.start');
             
@@ -188,13 +328,18 @@
 
         state.eventSource.addEventListener('node.complete', e => {
             const data = safelyParseEventData(e.data);
-            appendThinking(data.message || '这一小步已经接好。', 'success', 'node.complete');
+            app.setPendingTurnRole?.(turnRoleForSource(data.source));
+            appendThinking(data.message || '这一步已经接好了。', 'success', 'node.complete');
+            const citations = Array.isArray(data.data?.citations) ? data.data.citations : [];
+            if (data.source === 'tutor' && citations.length) {
+                app.renderTutorCitations?.(citations, { tone: 'info', role: 'tutor' });
+            }
             app.clearTypingIndicator?.();
         });
 
         state.eventSource.addEventListener('intent.detected', e => {
             const data = safelyParseEventData(e.data);
-            appendThinking(data.message || '我已经识别到你当前这一步的意图。', 'info', 'intent.detected');
+            appendThinking(data.message || '我已经判断出你这一步更像哪种需求了。', 'info', 'intent.detected');
         });
 
         state.eventSource.addEventListener('node.stream', e => {
@@ -202,8 +347,10 @@
             const chunk = data.data?.text;
             if (!chunk) return;
 
+            const role = turnRoleForSource(data.source);
+            app.setPendingTurnRole?.(role);
             app.clearTypingIndicator?.();
-            app.ensureAgentTurn?.();
+            app.ensureAgentTurn?.(role);
             app.markTurnVisible?.();
             app.clearVisibilityFallback?.({ resetCounter: false });
             state.currentTextBuffer += chunk;
@@ -213,7 +360,14 @@
 
         state.eventSource.addEventListener('session.info', e => {
             const data = safelyParseEventData(e.data);
-            appendNote(data.message || '这页状态有了新的进展。', 'info');
+            appendNote(data.message || '这页内容有了新的进展。', 'info');
+            if (data.data?.requires_interrupt_confirmation) {
+                state.isAwaitingInput = false;
+                state.pendingInterruptConfirmation = true;
+                pauseStreamingForAwaiting('这个卡点已经讲清楚了，等你决定要不要回主线', {
+                    render: () => app.renderInterruptConfirmation?.(),
+                });
+            }
         });
 
         state.eventSource.addEventListener('session.warning', e => {
@@ -234,38 +388,44 @@
         state.eventSource.addEventListener('assessment.form_ready', e => {
             const data = safelyParseEventData(e.data);
             const message = data.message || '小测已经准备好了，先一起对齐起点。';
-            consumeVisibleTurn(message, 'info', { kind: 'awaiting', clearTyping: true });
-            state.isStreaming = false;
-            app.setStatusBanner('先完成这轮小测，我们再继续', 'awaiting');
-            app.renderAssessmentForm(data.data?.questions || []);
-            closeEventSource();
-            app.finalizeAgentTurn?.();
-            app.applyPrimaryActionState?.();
+            state.pendingTopicConfirmation = null;
+            consumeAwaitingTurn(message, '先完成这轮小测，我们再继续', {
+                role: 'assessment',
+                render: () => app.renderAssessmentForm(data.data?.questions || []),
+            });
         });
 
         state.eventSource.addEventListener('topic.confirmation_needed', e => {
             const data = safelyParseEventData(e.data);
             const message = data.message || '先把这次主题确认一下。';
-            consumeVisibleTurn(message, 'info', { kind: 'awaiting', clearTyping: true });
-            state.isStreaming = false;
-            app.setStatusBanner('等你确认这次要学的主题', 'awaiting');
-            app.renderTopicConfirmation(data.data?.proposed_topic || '');
-            closeEventSource();
-            app.finalizeAgentTurn?.();
-            app.applyPrimaryActionState?.();
+            consumeAwaitingTurn(message, '等你确认这次要学的主题', {
+                role: 'topic_confirmation',
+                render: () => app.renderTopicConfirmation(data.data?.proposed_topic || ''),
+            });
+        });
+
+        state.eventSource.addEventListener('interrupt.confirmation_needed', e => {
+            const data = safelyParseEventData(e.data);
+            const message = data.message || '临时问题已经解答，等你确认是否回到主线。';
+            consumeAwaitingTurn(message, '这个卡点已经讲清楚了，等你决定要不要回主线', {
+                role: 'interrupt_confirmation',
+                render: () => app.renderInterruptConfirmation?.(),
+                pendingInterruptConfirmation: true,
+            });
         });
 
         state.eventSource.addEventListener('assessment.result', e => {
             const payload = safelyParseEventData(e.data);
             const summary = summarizeAssessmentResult(payload.data || {});
-            consumeVisibleTurn(summary, 'success', { kind: 'result', clearTyping: true });
-            app.setStatusBanner('这轮评估结果已经整理好了', 'success');
+            consumeVisibleTurn(summary, 'success', { kind: 'result', role: 'evaluation', clearTyping: true });
+            app.setStatusBanner('这轮评估我已经替你整理好了', 'success');
         });
 
         state.eventSource.addEventListener('profile.radar_data', e => {
             const payload = safelyParseEventData(e.data);
             consumeVisibleTurn(payload.message || '学习画像已更新，右侧可以看到新的雷达图。', 'success', {
                 kind: 'result',
+                role: 'profile',
                 clearTyping: false,
             });
             app.showRadar(payload.data);
@@ -273,14 +433,14 @@
 
         state.eventSource.addEventListener('session.awaiting_input', e => {
             const data = safelyParseEventData(e.data);
-            const message = data.message || '这一步需要你再补充一点。';
-            consumeVisibleTurn(message, 'info', { kind: 'awaiting', clearTyping: true });
-            state.isAwaitingInput = true;
-            state.isStreaming = false;
-            app.setStatusBanner(message, 'awaiting');
-            closeEventSource();
-            app.finalizeAgentTurn?.();
-            app.applyPrimaryActionState?.();
+            const message = data.message || '这里还需要你再补一句，我才能继续往下带。';
+            consumeAwaitingTurn(message, message, {
+                role: 'prompt',
+                awaitingInput: true,
+                showInChat: false,
+                placeholder: ANSWER_CHAT_PLACEHOLDER,
+            });
+            document.getElementById('chat-input')?.focus();
         });
 
         state.eventSource.addEventListener('session.ping', e => {
@@ -294,14 +454,20 @@
 
         state.eventSource.addEventListener('session.end', e => {
             const data = safelyParseEventData(e.data);
-            const message = data.message || '这一步先告一段落。若页面里出现主题确认卡或小测，请继续完成；如果没有新的控件，直接发送下一条内容就可以。';
+            if (state.pendingInterruptConfirmation) {
+                state.isAwaitingInput = false;
+                finalizeStreamState('这个卡点已经讲清楚了，等你决定要不要回主线', 'awaiting');
+                app.fetchHistory();
+                return;
+            }
+            const message = data.message || '这一小段先到这里。如果页面里出现主题确认卡或小测，就顺着完成；如果没有新控件，直接发下一条内容就行。';
             if (!state.turnHasVisibleOutput) {
-                consumeVisibleTurn(message, 'success', { kind: 'end', clearTyping: true });
+                consumeVisibleTurn(message, 'success', { kind: 'end', role: 'prompt', clearTyping: true });
             } else {
                 app.clearTypingIndicator?.();
             }
             state.isAwaitingInput = false;
-            finalizeStreamState('这一段已经整理好了', 'ready');
+            finalizeStreamState('这一段我已经整理好了', 'ready');
             app.fetchHistory();
         });
 
@@ -310,6 +476,7 @@
             const message = data.message || '暂时没有拿到更具体的错误信息。';
             consumeVisibleTurn(`这一步出了点问题：${message}。你可以稍后再试一次，或换一种表述继续告诉我。`, 'danger', {
                 kind: 'error',
+                role: 'prompt',
                 clearTyping: true,
             });
             state.isAwaitingInput = false;
@@ -320,6 +487,7 @@
             if (!state.eventSource) return;
             consumeVisibleTurn('连接暂时断了一下。这一轮已先停住；你可以稍后重试，或直接继续发送下一条内容。', 'danger', {
                 kind: 'error',
+                role: 'prompt',
                 clearTyping: true,
             });
             state.isAwaitingInput = false;

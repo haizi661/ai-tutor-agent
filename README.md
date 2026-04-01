@@ -1,71 +1,159 @@
-# AI Tutor Agent: 极致自适应伴学系统 🎓
+# AI Tutor Agent
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](https://opensource.org/licenses/MIT)
-[![Python 3.9+](https://img.shields.io/badge/python-3.9+-blue.svg)](https://www.python.org/downloads/)
-[![LangGraph](https://img.shields.io/badge/Powered%20by-LangGraph-orange.svg)](https://github.com/langchain-ai/langgraph)
-[![FastAPI](https://img.shields.io/badge/API-FastAPI-009688.svg)](https://fastapi.tiangolo.com/)
+`AI Tutor Agent` 是一个围绕“讲解 -> 出题 -> 评估 -> 补讲”闭环构建的自适应伴学系统。当前主入口是 Web 端，支持上传资料做 RAG 检索，也支持在正式流程中临时追问，再回到原来的主线。
 
-**AI Tutor Agent** 是一款基于 LangGraph 开发的动态自适应伴学系统。它不仅仅是一个聊天机器人，而是一位具备**“讲解-考核-评估-重修”**完整教学闭环的私人 AI 导师。
+## 核心能力
 
-![Web UI Preview](https://via.placeholder.com/800x450.png?text=AI+Tutor+Agent+Web+UI+Preview) <!-- 替换为你的真实截图 -->
+- 闭环教学：`Tutor -> Tester -> Evaluator`
+- 临时提问不中断主线：支持“继续追问 / 回到主线”
+- Web 会话恢复：支持历史恢复、等待输入恢复、状态横幅恢复
+- RAG 资料检索：支持上传 PDF / Markdown / 文本，向量库存储默认在 `data/chroma_db`
+- 本地运维配置：Web 本地设置页与 `.env` 一致
 
----
+## 运行要求
 
-## ✨ 核心特性
+- 推荐 Python `3.9+`
+- 如果要跑在 Python `3.8`，需要额外维护一套旧版本依赖约束；默认依赖矩阵不保证即装即用
 
-- 🧠 **闭环教学引擎**：基于 LangGraph 状态机实现 `Tutor (授课)` -> `Tester (出题)` -> `Evaluator (评分)` 的严谨教学循环。
-- 📊 **六维能力画像**：内置学前测评量表，动态生成 `Chart.js` 能力雷达图，真正实现“因材施教”。
-- 📚 **本地/云端混合 RAG**：
-  - **云端大脑**：支持 Google Gemini, 阿里云 Qwen (通义千问), DeepSeek 等主流模型切换。
-  - **本地索引**：使用 `sentence-transformers` 实现本地向量化，彻底解决 PDF 解析时的网络代理痛点。
-- 💻 **现代化 Web 界面**：
-  - ChatGPT 风格的流式打字效果（SSE）。
-  - 原生支持 **LaTeX 数学公式** 与 Markdown 渲染。
-  - 完善的**历史会话管理**与一键模型切换。
-- 🛠️ **开发者友好**：提供详细的 `AI_DEVELOPER_GUIDE.md`，方便使用 Cursor 或 Copilot 进行二次开发。
-
----
-
-## 🚀 快速开始
-
-### 1. 环境准备
-确保你已安装 Python 3.9+。
+安装：
 
 ```bash
-git clone https://github.com/your-username/ai-tutor-agent.git
-cd ai-tutor-agent
-pip install -r requirements.txt
+cd /home/haizi/ai-tutor-agent
+python -m pip install -r requirements.txt
 ```
 
-### 2. 配置环境变量
-复制模板并填写你的 API Key：
+或：
+
+```bash
+cd /home/haizi/ai-tutor-agent
+python -m pip install -e .
+```
+
+## 快速启动
+
+1. 复制配置模板
 
 ```bash
 cp .env.example .env
 ```
-打开 `.env` 文件，根据你的需求填入 `GOOGLE_API_KEY` 或 `OPENAI_API_KEY`。
 
-### 3. 启动应用
+2. 在 `.env` 里至少配置一组可用模型 Key
+
+- `GOOGLE_API_KEY`
+- `QWEN_API_KEY`
+- `DEEPSEEK_API_KEY`
+- `OPENAI_API_KEY`
+- `MINIMAX_API_KEY`
+- `GLM_API_KEY`
+
+3. 启动服务
+
 ```bash
 python main.py
 ```
-访问浏览器：[http://localhost:8000](http://localhost:8000)
 
----
+4. 浏览器访问
 
-## 📂 项目结构
+```text
+http://127.0.0.1:8000
+```
 
-- `ai_tutor_agent/core/`：核心状态定义与契约。
-- `ai_tutor_agent/nodes/`：Tutor、Tester、Evaluator 等智能体节点实现。
-- `ai_tutor_agent/infrastructure/`：LLM 工厂、本地 RAG 检索器、SQLite 存储。
-- `frontend/`：基于原生 JS 与现代 CSS 构建的沉浸式前端。
+## 日常运维只看这几项
 
----
+最常改的配置只有下面四类：
 
-## 🤝 贡献与反馈
+- `PROXY_PORT`：你的本地代理端口，例如 `7897` 或 `7892`
+- `PDF_PARSE_BACKEND`：`auto` / `mineru` / `local`
+- `MINERU_PROXY_MODE`：`inherit` / `direct`
+- `VECTOR_STORE_DIR`：推荐保持 `data/chroma_db`
 
-如果你喜欢这个项目，欢迎点个 **Star** 🌟！如果有任何改进建议，请提交 Issue 或 Pull Request。
+推荐默认值：
 
-## 📜 开源协议
+```env
+PROXY_HOST=127.0.0.1
+PROXY_PORT=7897
+PROXY_SCHEME=http
+PDF_PARSE_BACKEND=auto
+MINERU_PROXY_MODE=inherit
+VECTOR_STORE_DIR=data/chroma_db
+```
 
-本项目采用 [MIT License](LICENSE) 协议，你可以自由地进行学习、修改和分发。
+行为说明：
+
+- `PDF_PARSE_BACKEND=auto`：先试 MinerU，失败回退本地 PyMuPDF
+- `MINERU_PROXY_MODE=direct`：只让 MinerU 直连，其他模型和 HuggingFace 继续走代理
+- Web 端“清空书架”会删除知识文件和当前知识向量，但 `data/chroma_db` 目录本身可能保留为空数据库目录
+
+## Web 使用方式
+
+1. 先输入主题，系统可能先做主题确认和学前小测
+2. 正式流程按“讲解 -> 出题 -> 作答 -> 评估”推进
+3. 中途如果只想问当前卡点，直接输入问题即可
+4. 临时问题回答后，页面会出现“回到主线 / 继续追问”确认卡
+5. 选择“回到主线”后，会回到刚才那一道题，而不是重新开始
+
+## 项目结构
+
+当前目录按职责拆分，后续扩展优先在现有层次上加，不要继续横向堆脚本：
+
+- `ai_tutor_agent/application/`：会话协调与跨节点流程控制
+- `ai_tutor_agent/core/`：状态、事件、协议
+- `ai_tutor_agent/nodes/`：教学节点实现
+- `ai_tutor_agent/orchestration/`：LangGraph 编排和路由
+- `ai_tutor_agent/infrastructure/`：模型、RAG、存储、外部集成
+- `ai_tutor_agent/interfaces/`：Web API / CLI 入口适配
+- `frontend/`：前端页面与交互
+- `tests/`：回归测试
+
+## 扩展约定
+
+为了后续可扩张，新增功能尽量遵守下面这套边界：
+
+- 新教学步骤：优先加到 `ai_tutor_agent/nodes/`，再在 `orchestration/` 接线
+- 新模型或 embedding：优先加到 `ai_tutor_agent/infrastructure/`
+- 新 API：优先加到 `ai_tutor_agent/interfaces/api/`
+- 不要在仓库根目录继续增加临时调试脚本、重复说明文档、一次性分析文件
+
+## 验证
+
+开发后至少跑一遍：
+
+```bash
+pytest -q
+```
+
+## 离线检索评测（Recall@k / MRR / nDCG）
+
+用于做 RAG 检索回归对比：
+
+```bash
+cd /home/haizi/ai-tutor-agent
+python scripts/evaluate_retrieval.py \
+	--eval-file data/retrieval_eval/sample_eval.jsonl \
+	--k-values 1,3,5 \
+	--recall-k 12 \
+	--output data/retrieval_eval/latest_report.json
+```
+
+评测集支持 `JSON` 或 `JSONL`，每条至少包含：
+
+```json
+{
+	"query": "什么是闭环控制",
+	"relevant": [
+		{"filename": "控制系统导论.pdf", "chunk_id": 12},
+		{"filename": "lecture_notes.md"}
+	],
+	"relevant_filenames": ["控制系统导论.pdf"]
+}
+```
+
+说明：
+
+- `relevant` 支持 chunk 级标签（`filename + chunk_id`）和文件级标签（仅 `filename`）。
+- `relevant_filenames` 是可选文件级补充标签。
+- 输出会给出汇总指标（Recall@k / MRR@k / nDCG@k）和逐 query 明细，适合做周度回归。
+
+## License
+
+项目使用 [MIT License](LICENSE)。

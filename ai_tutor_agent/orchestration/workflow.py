@@ -13,6 +13,7 @@ from ..nodes.assessment import (
 )
 from ..nodes.evaluator import build_evaluator_node
 from ..nodes.intake import build_intake_router_node
+from ..nodes.interruption import build_interruption_node
 from ..nodes.meta import build_meta_node
 from ..nodes.smalltalk import build_smalltalk_node
 from ..nodes.tester import build_tester_node
@@ -33,6 +34,9 @@ def get_entry_node(state: AgentState) -> str:
     4. 如果有历史 tutor_content，进入 tutor
     5. 否则（已经有了 topic 但还没评测），进入 assessment_generator
     """
+    if state.get("interrupt_query"):
+        return "interruption_tutor"
+
     if state.get("flow_status") in {"greeting", "topic_intake", "meta_qa", "smalltalk"}:
         if state.get("flow_status") == "topic_intake":
             return "greeter"
@@ -47,6 +51,9 @@ def get_entry_node(state: AgentState) -> str:
     
     if state.get("flow_status") == "profiling":
         return "user_profiler"
+
+    if state.get("resume_tester") and state.get("tester_question"):
+        return "tester"
 
     if state.get("is_assessed", False):
         return "tutor"
@@ -103,6 +110,20 @@ def route_after_assessment_generator(state: AgentState) -> str:
     return "user_profiler"
 
 
+def route_after_tester(state: AgentState) -> str:
+    if state.get("interrupt_query"):
+        return "interruption"
+    return "evaluator"
+
+
+def route_after_interruption(state: AgentState) -> str:
+    if state.get("flow_status") == "awaiting_interrupt_confirmation":
+        return "pause"
+    if state.get("resume_tester"):
+        return "tester"
+    return "pause"
+
+
 def build_workflow(
     settings: Settings,
     runtime: Optional[RuntimeContext] = None,
@@ -115,11 +136,12 @@ def build_workflow(
     # ========== 注册所有节点 ==========
     workflow.add_node("intake_router", build_intake_router_node(runtime.event_sink))
     workflow.add_node("greeter", build_greeting_node(tutor_llm, runtime.event_sink, runtime.answer_provider))
-    workflow.add_node("meta_qa", build_meta_node(settings, runtime.event_sink, runtime.answer_provider))
-    workflow.add_node("smalltalk", build_smalltalk_node(runtime.event_sink, runtime.answer_provider))
+    workflow.add_node("meta_qa", build_meta_node(settings, tutor_llm, runtime.event_sink, runtime.answer_provider))
+    workflow.add_node("smalltalk", build_smalltalk_node(tutor_llm, runtime.event_sink, runtime.answer_provider))
     workflow.add_node("topic_confirmer", build_topic_confirm_node(runtime.event_sink))
     
     workflow.add_node("tutor", build_tutor_node(tutor_llm, runtime))
+    workflow.add_node("interruption_tutor", build_interruption_node(tutor_llm, runtime))
     workflow.add_node("tester", build_tester_node(tester_llm, runtime))  # 统一传 runtime
     workflow.add_node("evaluator", build_evaluator_node(evaluator_llm, runtime))  # 统一传 runtime
     # 新增：Coach 助教节点
@@ -181,7 +203,22 @@ def build_workflow(
 
     # 主教学闭环边
     workflow.add_edge("tutor", "tester")
-    workflow.add_edge("tester", "evaluator")
+    workflow.add_conditional_edges(
+        "tester",
+        route_after_tester,
+        {
+            "interruption": "interruption_tutor",
+            "evaluator": "evaluator",
+        },
+    )
+    workflow.add_conditional_edges(
+        "interruption_tutor",
+        route_after_interruption,
+        {
+            "tester": "tester",
+            "pause": END,
+        },
+    )
     
     # 核心优化：Evaluator 后的分流
     workflow.add_conditional_edges(
@@ -206,6 +243,7 @@ def build_workflow(
             "meta_qa": "meta_qa",
             "smalltalk": "smalltalk",
             "topic_confirmer": "topic_confirmer",
+            "interruption_tutor": "interruption_tutor",
             "tutor": "tutor",
             "assessment_generator": "assessment_generator",
             "user_profiler": "user_profiler",

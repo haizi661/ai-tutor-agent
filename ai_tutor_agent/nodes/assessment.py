@@ -12,6 +12,7 @@ from langchain_core.messages import HumanMessage, SystemMessage
 from ..core.events import make_event
 from ..core.ports import EventSink
 from ..core.state import AgentState
+from ..core.teacher_voice import build_teacher_voice
 from ..core.text import content_to_text
 
 
@@ -58,7 +59,7 @@ def build_assessment_generator_node(llm, event_sink: EventSink):
             make_event(
                 "node.start",
                 "assessment_generator",
-                message=f"正在为【{topic}】生成学前测评量表…",
+                message=f"我先为【{topic}】准备一轮学前小测，用来判断更适合你的讲解起点。",
                 data={"topic": topic},
             )
         )
@@ -131,7 +132,7 @@ def build_assessment_generator_node(llm, event_sink: EventSink):
             make_event(
                 "assessment.form_ready",
                 "assessment_generator",
-                message="学前测评量表已生成，请在前端完成作答。",
+                message="学前小测已经准备好了。你先做完这一轮，我再按你的起点来调讲解深度。",
                 data={"questions": questions},
             )
         )
@@ -140,7 +141,7 @@ def build_assessment_generator_node(llm, event_sink: EventSink):
             make_event(
                 "node.complete",
                 "assessment_generator",
-                message="测评量表生成完毕。",
+                message="学前小测已经整理好了。",
                 data={"count": len(questions)},
             )
         )
@@ -175,7 +176,7 @@ def build_user_profiler_node(llm, event_sink: EventSink):
             make_event(
                 "node.start",
                 "user_profiler",
-                message="正在分析用户能力画像…",
+                message="我在根据这轮小测整理你的起点画像，看看该从哪里切进去更合适。",
                 data={"topic": topic},
             )
         )
@@ -210,7 +211,7 @@ def build_user_profiler_node(llm, event_sink: EventSink):
             make_event(
                 "profile.difficulty_level",
                 "user_profiler",
-                message=f"初始难度等级已设定为 Lv.{difficulty_level}（1=基础 5=专家）",
+                message=f"我先把起始讲解难度定在 Lv.{difficulty_level}（1=基础，5=专家）。",
                 data={"difficulty_level": difficulty_level},
             )
         )
@@ -219,7 +220,7 @@ def build_user_profiler_node(llm, event_sink: EventSink):
             make_event(
                 "node.complete",
                 "user_profiler",
-                message="用户画像生成完毕。",
+                message="这轮起点画像已经整理好了。",
             )
         )
 
@@ -355,7 +356,9 @@ def _generate_profile_report(
 ) -> str:
     """流式生成 Markdown 能力画像报告。"""
     system_msg = SystemMessage(
-        content="你是一位教育心理学专家，擅长撰写清晰深刻的学生能力分析报告。"
+        content=build_teacher_voice(
+            """你是一位会做入学访谈的老师，擅长把测评结果解释成学生听得懂、也愿意继续往前走的学习画像。"""
+        )
     )
     human_msg = HumanMessage(
         content=f"""根据以下关于【{topic}】的测评数据和能力评分，生成详细的 Markdown 能力画像报告。
@@ -370,9 +373,10 @@ def _generate_profile_report(
 1. 标题: ## 📊 【{topic}】学前能力画像
 2. 列出 6 个维度的自我评估 vs 客观评价对比
 3. 重点分析 self_scores 与 objective_scores 的差值（认知偏差）
-4. 针对薄弱点给出具体学习建议
+4. 针对薄弱点给出具体学习建议，像老师在解释“我们为什么要从这里开始”
 5. 字数控制在 500 字左右
-6. 评分已经是规则化计算结果，请不要重新改分，只做解释。"""
+6. 评分已经是规则化计算结果，请不要重新改分，只做解释
+7. 语气要让学生觉得“被看见了”，但不要空泛鼓励。"""
     )
 
     full_report = ""

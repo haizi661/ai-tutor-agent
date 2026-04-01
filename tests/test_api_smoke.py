@@ -2,6 +2,7 @@ import queue
 import threading
 import time
 from collections import defaultdict
+from pathlib import Path
 from types import SimpleNamespace
 
 import pytest
@@ -208,6 +209,41 @@ class WaitingInputWorkflowFactory:
         return WaitingInputGraphApp(runtime), DummyConn()
 
 
+class MutableKnowledgeProvider:
+    def __init__(self):
+        self.files = {}
+
+    def query(self, query):
+        del query
+        return ""
+
+    def list_documents(self):
+        return [
+            {
+                "filename": name,
+                "size_bytes": meta["size_bytes"],
+                "chunk_count": meta["chunk_count"],
+            }
+            for name, meta in sorted(self.files.items())
+        ]
+
+    def add_document(self, source_path):
+        path = Path(source_path)
+        self.files[path.name] = {
+            "size_bytes": path.stat().st_size,
+            "chunk_count": 1,
+        }
+        return True
+
+    def delete_document(self, filename):
+        return self.files.pop(filename, None) is not None
+
+    def clear_documents(self):
+        removed = len(self.files)
+        self.files = {}
+        return removed
+
+
 class TopicConfirmWorkflowFactory:
     def __init__(self, checkpoint_store):
         self.checkpoint_store = checkpoint_store
@@ -260,6 +296,50 @@ class TopicConfirmWorkflowFactory:
         return TopicConfirmGraphApp(runtime), DummyConn()
 
 
+class InterruptConfirmWorkflowFactory:
+    def __init__(self, checkpoint_store):
+        self.checkpoint_store = checkpoint_store
+
+    def __call__(self, settings, runtime=None):
+        del settings
+        factory = self
+
+        class InterruptConfirmGraphApp:
+            def __init__(self, runtime_context):
+                self.runtime_context = runtime_context
+                self.checkpoint_store = factory.checkpoint_store
+
+            def get_state(self, config):
+                thread_id = config["configurable"]["thread_id"]
+                return FakeStateSnapshot(self.checkpoint_store.states.get(thread_id, {}))
+
+            def update_state(self, config, values):
+                thread_id = config["configurable"]["thread_id"]
+                state = dict(self.checkpoint_store.states.get(thread_id, {}))
+                state.update(values)
+                self.checkpoint_store.save(thread_id, state, source="update", step=2)
+
+            def invoke(self, payload, config):
+                thread_id = config["configurable"]["thread_id"]
+                state = dict(self.checkpoint_store.states.get(thread_id, {}))
+                if payload:
+                    state.update(payload)
+                if state.get("resume_tester") and state.get("tester_question"):
+                    state["flow_status"] = "normal"
+                    self.checkpoint_store.save(thread_id, state, source="loop", step=3)
+                    self.runtime_context.event_sink.emit(
+                        make_event(
+                            "node.stream",
+                            "tester",
+                            data={"text": f"回到主线，请继续回答上一题：\n{state['tester_question']}"},
+                        )
+                    )
+                    return
+                self.checkpoint_store.save(thread_id, state, source="loop", step=3)
+
+        return InterruptConfirmGraphApp(runtime), DummyConn()
+
+
 def build_test_settings(tmp_path):
     return Settings(
         chat_profile="custom",
@@ -274,7 +354,7 @@ def build_test_settings(tmp_path):
         glm_api_key="glm-key",
         model_name="gemini-2.5-pro",
         embedding_provider="local",
-        embedding_model_name="sentence-transformers/all-MiniLM-L6-v2",
+        embedding_model_name="sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2",
         tutor_temperature=0.7,
         tester_temperature=0.4,
         evaluator_temperature=0.0,
@@ -477,6 +557,68 @@ def test_api_start_continues_running_session_that_is_waiting_for_input(tmp_path)
         assert session["awaiting_input"] is False
 
 
+def test_api_start_rejects_new_message_while_previous_turn_is_still_running(tmp_path):
+    runtime = ApiRuntime(
+        settings=build_test_settings(tmp_path),
+        knowledge_provider=NoopKnowledgeProvider(),
+        workflow_factory=FakeWorkflowFactory(FakeCheckpointStore()),
+        checkpoint_factory=lambda path: (FakeCheckpointStore(), DummyConn()),
+    )
+
+    with TestClient(create_api_app(runtime_factory=lambda: runtime)) as client:
+        session = runtime.session_manager.get_or_create("busy-thread")
+        session["is_running"] = True
+        session["awaiting_input"] = False
+
+        response = client.post(
+            "/api/start",
+            json={"thread_id": "busy-thread", "topic": "新的问题"},
+        )
+
+        assert response.status_code == 409
+        assert "previous turn" in response.json()["detail"]
+        with pytest.raises(queue.Empty):
+            session["input_q"].get_nowait()
+
+
+def test_api_start_does_not_buffer_topic_during_topic_confirmation_resume(tmp_path):
+    thread_id = "session-topic-confirm-resume"
+    checkpoint_store = FakeCheckpointStore()
+    checkpoint_store.save(
+        thread_id,
+        {
+            "current_topic": "",
+            "proposed_topic": "控制理论",
+            "flow_status": "awaiting_topic_confirmation",
+            "assessment_questions": [],
+            "assessment_answers": {},
+        },
+        source="loop",
+        step=1,
+    )
+    runtime = ApiRuntime(
+        settings=build_test_settings(tmp_path),
+        knowledge_provider=NoopKnowledgeProvider(),
+        workflow_factory=TopicConfirmWorkflowFactory(checkpoint_store),
+        checkpoint_factory=lambda path: (checkpoint_store, DummyConn()),
+    )
+
+    with TestClient(create_api_app(runtime_factory=lambda: runtime)) as client:
+        start = client.post(
+            "/api/start",
+            json={"thread_id": thread_id, "topic": "矩阵求逆"},
+        )
+        assert start.status_code == 200
+
+        stream = client.get(f"/api/stream?thread_id={thread_id}")
+        assert stream.status_code == 200
+        assert "event: session.end" in stream.text
+
+        session = runtime.session_manager.get_or_create(thread_id)
+        with pytest.raises(queue.Empty):
+            session["input_q"].get_nowait()
+
+
 def test_submit_assessment_schedules_resume_when_worker_is_still_finishing(tmp_path):
     thread_id = "session-race-assessment"
     checkpoint_store = FakeCheckpointStore()
@@ -552,6 +694,124 @@ def test_confirm_topic_with_empty_topic_falls_back_to_greeting(tmp_path):
         updated = client.get(f"/api/history/{thread_id}").json()
         assert updated["state"]["flow_status"] == "greeting"
         assert updated["state"]["current_topic"] == ""
+
+
+def test_confirm_interrupt_resumes_existing_tester_question(tmp_path):
+    thread_id = "session-interrupt-confirm"
+    checkpoint_store = FakeCheckpointStore()
+    checkpoint_store.save(
+        thread_id,
+        {
+            "current_topic": "控制理论",
+            "flow_status": "awaiting_interrupt_confirmation",
+            "is_assessed": True,
+            "tester_question": "请解释闭环系统稳定性判断条件。",
+            "resume_tester": True,
+            "conversation_history": [
+                {"role": "user", "kind": "interruption_user", "content": "为什么这里看特征根？"},
+                {"role": "assistant", "kind": "interruption", "content": "因为稳定性与极点位置有关。"},
+                {"role": "assistant", "kind": "tutor", "content": "主线讲解"},
+            ],
+        },
+        source="loop",
+        step=1,
+    )
+
+    with create_test_client(
+        tmp_path,
+        checkpoint_store=checkpoint_store,
+        workflow_factory=InterruptConfirmWorkflowFactory(checkpoint_store),
+    ) as client:
+        confirm = client.post(
+            "/api/confirm_interrupt",
+            json={"thread_id": thread_id, "confirmed": True},
+        )
+        assert confirm.status_code == 200
+
+        stream = client.get(f"/api/stream?thread_id={thread_id}")
+        assert "已确认回到主线" in stream.text
+        assert "回到主线，请继续回答上一题" in stream.text
+
+        updated = client.get(f"/api/history/{thread_id}").json()
+        assert updated["state"]["flow_status"] == "normal"
+        assert updated["state"]["resume_tester"] is True
+        assert updated["state"]["conversation_history"] == [
+            {"role": "assistant", "kind": "tutor", "content": "主线讲解"},
+        ]
+
+
+def test_confirm_interrupt_false_keeps_follow_up_mode(tmp_path):
+    thread_id = "session-interrupt-follow-up"
+    checkpoint_store = FakeCheckpointStore()
+    checkpoint_store.save(
+        thread_id,
+        {
+            "current_topic": "控制理论",
+            "flow_status": "awaiting_interrupt_confirmation",
+            "is_assessed": True,
+            "tester_question": "请解释闭环系统稳定性判断条件。",
+            "resume_tester": True,
+            "conversation_history": [
+                {"role": "user", "kind": "interruption_user", "content": "为什么这里看特征根？"},
+                {"role": "assistant", "kind": "interruption", "content": "因为稳定性与极点位置有关。"},
+            ],
+        },
+        source="loop",
+        step=1,
+    )
+
+    with create_test_client(
+        tmp_path,
+        checkpoint_store=checkpoint_store,
+        workflow_factory=InterruptConfirmWorkflowFactory(checkpoint_store),
+    ) as client:
+        confirm = client.post(
+            "/api/confirm_interrupt",
+            json={"thread_id": thread_id, "confirmed": False},
+        )
+        assert confirm.status_code == 200
+
+        stream = client.get(f"/api/stream?thread_id={thread_id}")
+        assert "可以继续输入临时问题" in stream.text
+        assert "回到主线，请继续回答上一题" not in stream.text
+
+        updated = client.get(f"/api/history/{thread_id}").json()
+        assert updated["state"]["flow_status"] == "awaiting_interrupt_confirmation"
+        assert updated["state"]["resume_tester"] is True
+        assert updated["state"]["conversation_history"] == [
+            {"role": "user", "kind": "interruption_user", "content": "为什么这里看特征根？"},
+            {"role": "assistant", "kind": "interruption", "content": "因为稳定性与极点位置有关。"},
+        ]
+
+
+def test_knowledge_upload_and_clear_flow(tmp_path):
+    runtime = ApiRuntime(
+        settings=build_test_settings(tmp_path),
+        knowledge_provider=MutableKnowledgeProvider(),
+        workflow_factory=FakeWorkflowFactory(FakeCheckpointStore()),
+        checkpoint_factory=lambda path: (FakeCheckpointStore(), DummyConn()),
+    )
+
+    with TestClient(create_api_app(runtime_factory=lambda: runtime)) as client:
+        upload = client.post(
+            "/api/upload",
+            files={"file": ("notes.md", b"# control theory", "text/markdown")},
+        )
+        assert upload.status_code == 200
+        assert upload.json()["status"] == "success"
+
+        listed = client.get("/api/knowledge/files")
+        assert listed.status_code == 200
+        assert listed.json()["items"][0]["filename"] == "notes.md"
+
+        cleared = client.delete("/api/knowledge/files")
+        assert cleared.status_code == 200
+        assert cleared.json()["status"] == "success"
+        assert cleared.json()["removed"] == 1
+
+        listed_after = client.get("/api/knowledge/files")
+        assert listed_after.status_code == 200
+        assert listed_after.json()["items"] == []
 
 
 def test_api_answer_rejects_when_not_awaiting_input(tmp_path):
@@ -716,7 +976,7 @@ def test_local_config_round_trip(monkeypatch, tmp_path):
                 "GOOGLE_API_KEY=google-key",
                 "GEMINI_API_KEY=gemini-key",
                 "EMBEDDING_PROVIDER=local",
-                "EMBEDDING_MODEL_NAME=sentence-transformers/all-MiniLM-L6-v2",
+                "EMBEDDING_MODEL_NAME=sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2",
                 "LOCAL_CONFIG_ENABLED=true",
             ]
         )
@@ -761,12 +1021,19 @@ def test_local_config_round_trip(monkeypatch, tmp_path):
                 "openai_api_base": "",
                 "model_name": "qwen-plus",
                 "embedding_provider": "local",
-                "embedding_model_name": "sentence-transformers/all-MiniLM-L6-v2",
+                "embedding_model_name": "sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2",
+                "pdf_parse_backend": "auto",
                 "knowledge_chunk_size": 800,
                 "knowledge_chunk_overlap": 100,
                 "knowledge_top_k": 5,
+                "vector_store_dir": "data/chroma_db",
+                "proxy_host": "127.0.0.1",
+                "proxy_port": "7892",
+                "proxy_scheme": "http",
                 "http_proxy": "http://127.0.0.1:7890",
                 "https_proxy": "http://127.0.0.1:7890",
+                "mineru_proxy_mode": "direct",
+                "mineru_connect_timeout_seconds": 7,
             },
         )
         assert updated.status_code == 200
@@ -776,6 +1043,9 @@ def test_local_config_round_trip(monkeypatch, tmp_path):
         assert payload["local"]["qwen_api_key"] == "****-new"
         assert payload["local"]["has_qwen_api_key"] is True
         assert payload["local"]["knowledge_top_k"] == 5
+        assert payload["local"]["vector_store_dir"] == "data/chroma_db"
+        assert payload["local"]["proxy_port"] == "7892"
+        assert payload["local"]["mineru_proxy_mode"] == "direct"
 
         glm_update = client.post(
             "/api/config/local",
@@ -794,12 +1064,19 @@ def test_local_config_round_trip(monkeypatch, tmp_path):
                 "openai_api_base": "",
                 "model_name": "glm-5",
                 "embedding_provider": "local",
-                "embedding_model_name": "sentence-transformers/all-MiniLM-L6-v2",
+                "embedding_model_name": "sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2",
+                "pdf_parse_backend": "local",
                 "knowledge_chunk_size": 800,
                 "knowledge_chunk_overlap": 100,
                 "knowledge_top_k": 5,
+                "vector_store_dir": "data/chroma_db",
+                "proxy_host": "127.0.0.1",
+                "proxy_port": "7892",
+                "proxy_scheme": "http",
                 "http_proxy": "http://127.0.0.1:7890",
                 "https_proxy": "http://127.0.0.1:7890",
+                "mineru_proxy_mode": "inherit",
+                "mineru_connect_timeout_seconds": 5,
             },
         )
         assert glm_update.status_code == 200
@@ -812,3 +1089,6 @@ def test_local_config_round_trip(monkeypatch, tmp_path):
         assert "CHAT_PROFILE=glm" in content
         assert "QWEN_API_KEY=qwen-key-new" in content
         assert "GLM_API_KEY=glm-key-new" in content
+        assert "VECTOR_STORE_DIR=data/chroma_db" in content
+        assert "CHROMA_DIR=data/chroma_db" in content
+        assert "PROXY_PORT=7892" in content

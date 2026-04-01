@@ -175,11 +175,20 @@
         document.getElementById('local-model-name').value = data.model_name || '';
         document.getElementById('local-embedding-provider').value = data.embedding_provider || 'local';
         document.getElementById('local-embedding-model').value = data.embedding_model_name || '';
+        document.getElementById('local-pdf-parse-backend').value = data.pdf_parse_backend || 'auto';
         document.getElementById('local-top-k').value = data.knowledge_top_k || 3;
         document.getElementById('local-chunk-size').value = data.knowledge_chunk_size || 1000;
         document.getElementById('local-chunk-overlap').value = data.knowledge_chunk_overlap || 150;
+        document.getElementById('local-vector-store-dir').value = data.vector_store_dir || 'data/chroma_db';
+        document.getElementById('local-proxy-host').value = data.proxy_host || '';
+        document.getElementById('local-proxy-port').value = data.proxy_port || '';
+        document.getElementById('local-proxy-scheme').value = data.proxy_scheme || 'http';
         document.getElementById('local-http-proxy').value = data.http_proxy || '';
         document.getElementById('local-https-proxy').value = data.https_proxy || '';
+        document.getElementById('local-mineru-proxy-mode').value = data.mineru_proxy_mode || 'inherit';
+        document.getElementById('local-mineru-http-proxy').value = data.mineru_http_proxy || '';
+        document.getElementById('local-mineru-https-proxy').value = data.mineru_https_proxy || '';
+        document.getElementById('local-mineru-connect-timeout').value = data.mineru_connect_timeout_seconds || 5;
         app.renderVendorModels(data.selected_vendor || data.chat_profile || 'gemini', data.selected_model || data.model_name || '');
     };
 
@@ -243,11 +252,20 @@
             model_name: vendorId === 'custom' ? document.getElementById('local-model-name').value.trim() : selectedModel,
             embedding_provider: document.getElementById('local-embedding-provider').value,
             embedding_model_name: document.getElementById('local-embedding-model').value.trim(),
+            pdf_parse_backend: document.getElementById('local-pdf-parse-backend').value,
             knowledge_top_k: Number(document.getElementById('local-top-k').value || 3),
             knowledge_chunk_size: Number(document.getElementById('local-chunk-size').value || 1000),
             knowledge_chunk_overlap: Number(document.getElementById('local-chunk-overlap').value || 150),
+            vector_store_dir: document.getElementById('local-vector-store-dir').value.trim(),
+            proxy_host: document.getElementById('local-proxy-host').value.trim(),
+            proxy_port: document.getElementById('local-proxy-port').value.trim(),
+            proxy_scheme: document.getElementById('local-proxy-scheme').value,
             http_proxy: document.getElementById('local-http-proxy').value.trim(),
             https_proxy: document.getElementById('local-https-proxy').value.trim(),
+            mineru_proxy_mode: document.getElementById('local-mineru-proxy-mode').value,
+            mineru_http_proxy: document.getElementById('local-mineru-http-proxy').value.trim(),
+            mineru_https_proxy: document.getElementById('local-mineru-https-proxy').value.trim(),
+            mineru_connect_timeout_seconds: Number(document.getElementById('local-mineru-connect-timeout').value || 5),
             google_api_key: '',
         };
         if (vendorId === 'gemini') {

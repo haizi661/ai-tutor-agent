@@ -3,6 +3,7 @@ from langchain_core.messages import HumanMessage, SystemMessage
 from ..core.events import make_event
 from ..core.ports import RuntimeContext
 from ..core.state import AgentState
+from ..core.teacher_voice import build_teacher_voice
 from ..core.text import content_to_text
 
 
@@ -22,19 +23,21 @@ def build_coach_node(llm, event_sink):
             make_event(
                 "node.start",
                 "coach",
-                message="导师正在为你准备启发式提示...",
+                message="我不急着直接给答案，先帮你搭一个更容易继续往下想的抓手。",
             )
         )
 
         system_msg = SystemMessage(
-            content="""你是一位充满智慧的苏格拉底式助教。
-            当学生在回答问题遇到困难时，你的任务不是直接给答案，也不是重读教材，而是：
-            1. 肯定学生回答中正确的部分（哪怕只有一点点）。
-            2. 针对他犯错的地方，给出一个不直接给答案的【关键提示】或【思考角度】。
-            3. 抛出一个简单的引导性问题，鼓励他再试一次。
-            
-            语气要幽默、轻松，像个贴身学长。
-            """
+            content=build_teacher_voice(
+                """你现在不是重讲整段教材，而是在学生答错后给一个“还能继续想下去”的脚手架。
+
+输出要求：
+1. 先点出学生已经抓到的部分，哪怕只有半步
+2. 再指出目前最关键的偏差或漏掉的判断点
+3. 给一个不直接泄题的抓手，可以是判断标准、类比、观察顺序或拆题步骤
+4. 最后丢一个很短的引导问题，邀请学生再试一次
+5. 全文控制在 4 句以内，不要直接给完整标准答案"""
+            )
         )
         
         human_msg = HumanMessage(
@@ -44,7 +47,7 @@ def build_coach_node(llm, event_sink):
             学生的回答：{user_answer}
             评估反馈：{feedback}
             
-            请根据以上信息，给出一个启发式的提示。
+            请根据以上信息，给出一个启发式提示，让学生感觉“差一点就能自己想出来了”。
             """
         )
 
@@ -60,7 +63,7 @@ def build_coach_node(llm, event_sink):
             make_event(
                 "node.complete",
                 "coach",
-                message="提示已发送，等待你再次尝试。",
+                message="我先给到你一个抓手，等你带着它再试一次。",
             )
         )
 

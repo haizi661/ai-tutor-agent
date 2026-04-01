@@ -1,8 +1,19 @@
+from __future__ import annotations
+
+import re
+
 from langchain_core.messages import HumanMessage, SystemMessage
 
 from ..core.events import make_event
+from ..core.output_format import (
+    collapse_blank_lines,
+    parse_json_object,
+    split_sentences,
+    stream_text_chunks,
+)
 from ..core.ports import RuntimeContext
 from ..core.state import AgentState
+from ..core.teacher_voice import build_teacher_voice
 from ..core.text import content_to_text
 
 # ─────────────────────────────────────────────────────
@@ -160,6 +171,122 @@ def _build_citation_markdown(citations: list[dict]) -> tuple[str, list[dict]]:
     return "\n".join(lines) + "\n", concise
 
 
+def _normalize_phrase(text: str) -> str:
+    cleaned = re.sub(r"^[#>\-\d\.\)\s]+", "", (text or "").strip())
+    cleaned = re.sub(r"\s+", " ", cleaned)
+    return cleaned.strip("：: ")
+
+
+def _build_tutor_sections_from_text(raw_text: str, topic: str) -> dict:
+    cleaned = collapse_blank_lines(raw_text)
+    paragraphs = [segment.strip() for segment in cleaned.split("\n\n") if segment.strip()]
+    sentences = split_sentences(cleaned)
+
+    main_line = _normalize_phrase(paragraphs[0] if paragraphs else (sentences[0] if sentences else f"这一轮先抓住【{topic}】最关键的主线。"))
+
+    example = ""
+    for paragraph in paragraphs:
+        if any(token in paragraph for token in ["例如", "比如", "想象", "举个例子", "可以把它看成"]):
+            example = _normalize_phrase(paragraph)
+            break
+
+    body_paragraphs = [paragraph for paragraph in paragraphs[1:] if _normalize_phrase(paragraph)]
+    if not example and body_paragraphs:
+        example = _normalize_phrase(body_paragraphs[-1])
+        body_paragraphs = body_paragraphs[:-1]
+    if not example:
+        example = f"可以把【{topic}】放进一个具体场景里再看一遍，这样更容易抓住它到底在判断什么。"
+
+    steps: list[str] = []
+    for paragraph in body_paragraphs:
+        if "核心要点" in paragraph:
+            continue
+        for sentence in split_sentences(paragraph):
+            normalized = _normalize_phrase(sentence)
+            if normalized and normalized not in steps:
+                steps.append(normalized)
+            if len(steps) >= 4:
+                break
+        if len(steps) >= 4:
+            break
+
+    if not steps:
+        fallback_sentences = [_normalize_phrase(item) for item in sentences[1:5] if _normalize_phrase(item)]
+        steps = fallback_sentences[:4]
+
+    if not steps:
+        steps = [
+            f"先明确【{topic}】到底在判断什么。",
+            "再分清它和容易混淆的概念边界。",
+            "最后把判断标准放回题目或场景里验证一次。",
+        ]
+
+    key_points: list[str] = []
+    keypoint_match = re.search(r"核心要点[:：]\s*(.+)", cleaned, flags=re.DOTALL)
+    if keypoint_match:
+        for line in keypoint_match.group(1).splitlines():
+            normalized = _normalize_phrase(line)
+            if normalized:
+                key_points.append(normalized)
+
+    if not key_points:
+        key_points = steps[:2]
+
+    self_check = ""
+    for sentence in sentences:
+        if any(token in sentence for token in ["你现在可以先试着想", "你可以先想", "想一想", "自测", "自己试着"]):
+            self_check = _normalize_phrase(sentence)
+            break
+
+    return {
+        "main_line": main_line,
+        "steps": steps[:4],
+        "example": example,
+        "key_points": key_points[:2],
+        "self_check": self_check,
+    }
+
+
+def _format_tutor_markdown(payload: dict, topic: str) -> str:
+    main_line = _normalize_phrase(payload.get("main_line", "")) or f"这一轮先抓住【{topic}】最关键的主线。"
+    steps = [
+        _normalize_phrase(item)
+        for item in payload.get("steps", [])
+        if _normalize_phrase(item)
+    ]
+    if not steps:
+        steps = _build_tutor_sections_from_text(main_line, topic)["steps"]
+
+    example = _normalize_phrase(payload.get("example", "")) or f"你可以把【{topic}】放回一个具体场景里再看，这样更容易抓住它到底在判断什么。"
+    key_points = [
+        _normalize_phrase(item)
+        for item in payload.get("key_points", [])
+        if _normalize_phrase(item)
+    ] or steps[:2]
+    self_check = _normalize_phrase(payload.get("self_check", ""))
+
+    lines = [
+        "### 先抓主线",
+        main_line,
+        "",
+        "### 再拆台阶",
+    ]
+    lines.extend([f"{index}. {item}" for index, item in enumerate(steps[:4], start=1)])
+    lines.extend(
+        [
+            "",
+            "### 代入一个例子",
+            example,
+            "",
+            "### 💡 本次核心要点",
+        ]
+    )
+    lines.extend([f"- {item}" for item in key_points[:2]])
+    if self_check:
+        lines.extend(["", f"你现在可以先试着想：{self_check}"])
+    return collapse_blank_lines("\n".join(lines))
+
+
 # ─────────────────────────────────────────────────────
 # 主节点构建函数
 # ─────────────────────────────────────────────────────
@@ -198,7 +325,8 @@ def build_tutor_node(tutor_llm, runtime: RuntimeContext):
         if context:
             knowledge_prompt = f"\n\n【参考资料】请优先结合以下知识进行讲解：\n{context}\n"
 
-        system_content = f"""你是一位顶尖的自适应AI教师，拥有20年教学经验，能根据每位学生的水平动态调整教学方式。
+        system_content = build_teacher_voice(
+            f"""你现在负责正式讲解环节，要把一个知识点讲得既有方向感，又让学生愿意继续跟着你走。
 
 当前学生档案：
 - 知识水平：{diff["depth"]}
@@ -206,12 +334,15 @@ def build_tutor_node(tutor_llm, runtime: RuntimeContext):
 - 讲解风格：{diff["style"]}
 - 字数控制：{diff["length"]}{weak_hint}
 
-核心准则（必须遵守）：
-1. 用"你"直接称呼学生，一对一辅导感
-2. 绝不说空话套话，每句话都有实质内容
-3. 讲解结束时必须用「💡 本次核心要点：」总结 1~2 句关键记忆点
-4. 如果有参考资料，优先参考，但要用自己的话讲，不要照搬原文
-5. 根据难度级别严格匹配用语复杂度"""
+讲解要求：
+1. 开头先用一句话点出“这一步最该抓住什么”
+2. 正文按 2~4 个台阶推进，每次只解释一个关键点
+3. 如果适合，给一个贴近日常直觉的类比、判断口诀或观察角度
+4. 如果学生容易混淆两个概念，要直接点破“不要把 A 和 B 混在一起”
+5. 如果有参考资料，优先参考，但必须用自己的话讲，不要照搬原文
+6. 结尾必须有「💡 本次核心要点：」总结 1~2 句最值得记住的话
+7. 如果这一轮适合自检，可以在最后再补一句「你现在可以先试着想：...」，但只允许一句"""
+        )
 
         strategy_inst = _strategy_instruction(strategy, feedback, attempt_count)
         human_content = f"""请讲解主题：【{topic}】
@@ -219,23 +350,32 @@ def build_tutor_node(tutor_llm, runtime: RuntimeContext):
 {strategy_inst}{knowledge_prompt}
 
 输出格式要求：
-- 直接开始讲解正文，不要说"好的"、"当然"、"没问题"之类的开场白
-- 结尾必须有「💡 本次核心要点：」一行总结"""
+- 必须严格输出 JSON，不要输出 Markdown 代码块，不要输出 JSON 以外的解释
+- 字段 schema：
+{{
+  "main_line": "一句话先点出这一步最该抓住什么",
+  "steps": ["步骤1", "步骤2", "步骤3"],
+  "example": "一个贴近直觉的例子或场景",
+  "key_points": ["关键记忆点1", "关键记忆点2"],
+  "self_check": "可选，一句让学生自检的话；如果不需要则给空字符串"
+}}
+- `steps` 保持 2~4 条，每条只说一个动作或判断点
+- 不要写空话，不要写“好的”“当然”等开场白"""
 
         system_msg = SystemMessage(content=system_content)
         human_msg = HumanMessage(content=human_content)
 
-        full_response = ""
+        raw_response = ""
         for chunk in tutor_llm.stream([system_msg, human_msg]):
             chunk_text = content_to_text(chunk.content)
-            full_response += chunk_text
-            event_sink.emit(
-                make_event(
-                    "node.stream",
-                    "tutor",
-                    data={"text": chunk_text},
-                )
-            )
+            raw_response += chunk_text
+
+        structured = parse_json_object(raw_response)
+        if structured is None:
+            structured = _build_tutor_sections_from_text(raw_response, topic)
+
+        full_response = _format_tutor_markdown(structured, topic)
+        stream_text_chunks(event_sink, "tutor", full_response)
 
         citation_markdown, concise_sources = _build_citation_markdown(citations)
         if citation_markdown:

@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import re
 
 from ..core.events import make_event
