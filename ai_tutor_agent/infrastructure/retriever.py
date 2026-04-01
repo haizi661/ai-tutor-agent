@@ -92,6 +92,15 @@ class ScoredChunk:
     adjusted_score: float
     metadata: Dict[str, Any]
 
+#文档范围限制
+def detect_target_filename(self, query: str, available_filenames: list[str]) -> str | None:
+    q = query.lower()
+    for fn in available_filenames:
+        base = fn.lower().replace(".pdf", "")
+        if base in q:
+            return fn
+    return None
+    
 #新增mineru处理逻辑
 class LocalFileKnowledgeProvider(KnowledgeProvider):
     def __init__(self, settings: Settings):
@@ -129,6 +138,46 @@ class LocalFileKnowledgeProvider(KnowledgeProvider):
         self.bm25_docs = []
         self._build_bm25_index()
         print(f"✅ [DEBUG] BM25 索引建立完成，共 {len(self.bm25_docs)} 个文档。")
+    
+    def _normalize_chunk_text(self, text: str, max_len: int = 1800) -> str:
+        text = (text or "").strip()
+        text = re.sub(r"\s+", " ", text)
+        return text[:max_len]
+
+    def _sanitize_docs_for_embedding(self, docs: List[Document]) -> List[Document]:
+        cleaned: List[Document] = []
+
+        for doc in docs:
+            text = self._normalize_chunk_text(doc.page_content, max_len=1800)
+            if not text:
+                continue
+
+            meta = dict(doc.metadata or {})
+            meta["char_length"] = len(text)
+            doc.page_content = text
+            doc.metadata = meta
+            cleaned.append(doc)
+
+        return cleaned
+
+    def _detect_query_block_types(self, query: str) -> List[str]:
+        q = (query or "").lower()
+
+        formula_keywords = ["公式", "equation", "latex", "损失函数", "目标函数", "约束", "推导"]
+        figure_keywords = ["图", "figure", "fig.", "架构图", "流程图", "曲线", "柱状图", "折线图", "示意图", "图表", "图示"]
+        table_keywords = ["表格", "table", "参数表", "指标", "对比", "precision", "recall", "map", "结果表"]
+
+        if any(k in q for k in formula_keywords):
+            return ["formula", "text"]
+
+        # 先判 figure，避免“图表”里的“表”被 table 抢走
+        if any(k in q for k in figure_keywords):
+            return ["figure", "text"]
+
+        if any(k in q for k in table_keywords):
+            return ["table", "text"]
+
+        return ["text"]
 
     def _load_index(self):
         """加载已处理文件索引"""
@@ -197,10 +246,11 @@ class LocalFileKnowledgeProvider(KnowledgeProvider):
         print(f"📂 [DEBUG] 正在解析文件: {os.path.basename(file_path)}")
 
         if ext == ".pdf":
-            print(f"🔥 [FIRE] 强制进入 MinerU 解析路径！")
-            # 这里的调用会产生 MinerU 费用和用量
-            md_content = self.processor.parse_pdf_to_md(file_path)
-            return self.processor.split_by_semantics(md_content)
+            print("🔥 [FIRE] 进入 MinerU 多类型解析路径")
+            parse_result = self.processor.parse_pdf(file_path, keep_extract_dir=True)
+            persisted_manifest = self.processor.persist_parse_result(file_path, parse_result)
+            docs = self.processor.build_multitype_documents(parse_result, persisted_manifest)
+            return docs
 
         if ext == ".txt":
             from langchain_community.document_loaders import TextLoader
@@ -208,6 +258,7 @@ class LocalFileKnowledgeProvider(KnowledgeProvider):
             return loader.load_and_split()
 
         return []
+
     def _cleanup_deleted_files(self):
         """清理已经从 knowledge_dir 删除的文件对应的向量和索引"""
         current_files = {
@@ -234,7 +285,6 @@ class LocalFileKnowledgeProvider(KnowledgeProvider):
         fingerprint = self._get_file_fingerprint(source_path)
         old_record = self.knowledge_index.get(filename)
 
-        # 如果这个文件以前处理过，但现在变了，先删旧向量
         if old_record is not None:
             old_fingerprint = old_record.get("fingerprint")
             if old_fingerprint != fingerprint:
@@ -242,35 +292,86 @@ class LocalFileKnowledgeProvider(KnowledgeProvider):
                 self._delete_existing_vectors(filename)
 
         docs = self._parse_file(source_path)
+        docs = self._sanitize_docs_for_embedding(docs)
+
         if docs:
-            # 给每个 chunk 打 metadata，方便后续删除和追踪
+            type_counter: Dict[str, int] = {}
+
             for doc in docs:
                 if doc.metadata is None:
                     doc.metadata = {}
+
                 doc.metadata["source"] = source_path
                 doc.metadata["filename"] = filename
                 doc.metadata["fingerprint"] = fingerprint
 
-            print(f"🧬 [DEBUG] 正在向量化 {len(docs)} 个片段...")
+                block_type = doc.metadata.get("block_type", "text")
+                type_counter[block_type] = type_counter.get(block_type, 0) + 1
 
+            print(f"🧬 [DEBUG] 正在向量化 {len(docs)} 个片段...")
             for i, doc in enumerate(docs):
                 text = (doc.page_content or "").strip()
-                print(f"   [CHUNK {i}] 长度: {len(text)}")
-                
+                print(f"   [CHUNK {i}] type={doc.metadata.get('block_type')} 长度={len(text)}")
+
             self.vector_store.add_documents(docs)
 
-            # 成功后记录索引
             self.knowledge_index[filename] = {
                 "fingerprint": fingerprint,
                 "chunks": len(docs),
+                "block_types": type_counter,
             }
             self._save_index()
 
             print(f"✅ [DEBUG] 文件处理完成并已写入索引: {filename}")
-            return {"success": True, "chunks": len(docs)}
+            print(f"📊 [DEBUG] 块类型统计: {type_counter}")
+            self._build_bm25_index()
+
+            return {
+                "success": True,
+                "chunks": len(docs),
+                "block_types": type_counter,
+            }
 
         return {"success": False, "chunks": 0}
     
+    def query_with_scores_filtered(
+        self,
+        query: str,
+        k: int | None = None,
+        block_types: Optional[List[str]] = None,
+    ):
+        k = k or self.settings.knowledge_top_k
+
+        if not block_types:
+            return self.vector_store.similarity_search_with_score(query, k=k)
+
+        all_hits = []
+        for block_type in block_types:
+            try:
+                hits = self.vector_store.similarity_search_with_score(
+                    query,
+                    k=k,
+                    filter={"block_type": block_type},
+                )
+                all_hits.extend(hits)
+            except Exception as e:
+                print(f"⚠️ [DEBUG] block_type={block_type} 检索失败: {e}")
+
+        seen = set()
+        merged = []
+        for doc, score in sorted(all_hits, key=lambda x: x[1]):
+            key = (
+                doc.metadata.get("filename", ""),
+                doc.metadata.get("chunk_id", -1),
+                (doc.page_content or "")[:120],
+            )
+            if key in seen:
+                continue
+            seen.add(key)
+            merged.append((doc, score))
+
+        return merged[:k]
+
     def _tokenize_for_bm25(self, text: str) -> list[str]:
         text = (text or "").lower()
         tokens = re.findall(r"[a-zA-Z0-9_\-\.\(\)]+|[\u4e00-\u9fff]+", text)
@@ -310,7 +411,7 @@ class LocalFileKnowledgeProvider(KnowledgeProvider):
             self.bm25_docs = []
             print(f"⚠️ [DEBUG] BM25 索引构建失败: {e}")
 
-    def query_with_bm25(self, query: str, k: int = 5) -> list[Document]:
+    def query_with_bm25(self, query: str, k: int = 5, block_types: Optional[List[str]] = None) -> list[Document]:
         if not self.bm25 or not self.bm25_docs:
             return []
 
@@ -318,10 +419,23 @@ class LocalFileKnowledgeProvider(KnowledgeProvider):
         if not query_tokens:
             return []
 
-        scores = self.bm25.get_scores(query_tokens)
+        candidates = self.bm25_docs
+        if block_types:
+            candidates = [
+                d for d in self.bm25_docs
+                if (d.metadata or {}).get("block_type", "text") in block_types
+            ]
+            if not candidates:
+                return []
+
+            tokenized_corpus = [self._tokenize_for_bm25(d.page_content) for d in candidates]
+            temp_bm25 = BM25Okapi(tokenized_corpus)
+            scores = temp_bm25.get_scores(query_tokens)
+        else:
+            scores = self.bm25.get_scores(query_tokens)
 
         ranked = sorted(
-            zip(self.bm25_docs, scores),
+            zip(candidates, scores),
             key=lambda x: x[1],
             reverse=True
         )
@@ -330,28 +444,28 @@ class LocalFileKnowledgeProvider(KnowledgeProvider):
         for doc, score in ranked[:k]:
             meta = dict(doc.metadata or {})
             meta["_bm25_score"] = float(score)
-            results.append(
-                Document(
-                    page_content=doc.page_content,
-                    metadata=meta
-                )
-            )
+            results.append(Document(page_content=doc.page_content, metadata=meta))
         return results
 
-    def query_hybrid(self, query: str, recall_k: int = 8, final_k: int | None = None) -> list[Document]:
-        """
-        混合检索：
-        1. 向量召回
-        2. BM25召回
-        3. 合并去重
-        4. 走现有轻量 rerank
-        """
+    def query_hybrid(
+        self,
+        query: str,
+        recall_k: int = 8,
+        final_k: int | None = None,
+    ) -> list[Document]:
         final_k = final_k or self.settings.knowledge_top_k
+        block_types = self._detect_query_block_types(query)
 
-        vector_docs_and_scores = self.query_with_scores(query, k=recall_k)
-        vector_docs = [doc for doc, _ in vector_docs_and_scores]
-
-        bm25_docs = self.query_with_bm25(query, k=recall_k)
+        vector_docs_and_scores = self.query_with_scores_filtered(
+            query=query,
+            k=recall_k,
+            block_types=block_types,
+        )
+        bm25_docs = self.query_with_bm25(
+            query=query,
+            k=recall_k,
+            block_types=block_types,
+        )
 
         merged = []
         seen = set()
@@ -364,7 +478,6 @@ class LocalFileKnowledgeProvider(KnowledgeProvider):
                 (doc.page_content or "")[:120]
             )
 
-        # 先放向量召回
         for doc, score in vector_docs_and_scores:
             key = doc_key(doc)
             if key in seen:
@@ -372,14 +485,22 @@ class LocalFileKnowledgeProvider(KnowledgeProvider):
             seen.add(key)
             merged.append((doc, score))
 
-        # 再补 BM25 召回
         for doc in bm25_docs:
             key = doc_key(doc)
             if key in seen:
                 continue
             seen.add(key)
-            # BM25 结果没有向量 score，先给一个中性较大值
             merged.append((doc, 999.0))
+
+        # 如果某类块召回太少，补一点 text
+        if len(merged) < final_k:
+            fallback = self.query_with_scores_filtered(query=query, k=recall_k, block_types=["text"])
+            for doc, score in fallback:
+                key = doc_key(doc)
+                if key in seen:
+                    continue
+                seen.add(key)
+                merged.append((doc, score))
 
         return self._section_rerank(merged, final_k=final_k)
 
@@ -440,8 +561,14 @@ class LocalFileKnowledgeProvider(KnowledgeProvider):
                 bonus += 0.35
 
             # 明显的表格块稍微降权
-            if "<table>" in content_head:
-                bonus += 0.12
+            block_type = meta.get("block_type", "text")
+
+            if block_type == "table":
+                bonus += 0.08
+            elif block_type == "formula":
+                bonus -= 0.03
+            elif block_type == "figure":
+                bonus -= 0.02
 
             # dataset / benchmark 问题时常有帮助，轻微加权
             if any(k in content_head for k in ["benchmark", "benchmarks", "dataset", "datasets"]):

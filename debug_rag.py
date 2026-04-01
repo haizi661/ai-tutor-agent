@@ -7,7 +7,10 @@ from openai import OpenAI
 from ai_tutor_agent.config import get_settings
 from ai_tutor_agent.infrastructure.retriever import LocalFileKnowledgeProvider
 
-
+#图表公式用
+import subprocess
+import sys
+#----
 @dataclass
 class RetrievedChunk:
     rank: int
@@ -154,14 +157,19 @@ class DebugKnowledgeSearcher:
         for item in results:
             print(f"\n[Rank {item.rank}] score = {item.score}")
             print("[Metadata]")
-            if item.metadata:
-                for k, v in item.metadata.items():
-                    print(f"  - {k}: {v}")
-            else:
-                print("  (无 metadata)")
+
+            meta = item.metadata or {}
+            important_keys = [
+                "block_type", "filename", "chunk_id", "section",
+                "figure_id", "figure_caption", "image_path", "image_path_abs",
+                "vlm_desc", "table_id", "latex", "char_length"
+            ]
+            for k in important_keys:
+                if k in meta:
+                    print(f"  - {k}: {meta[k]}")
 
             print("[Content Preview]")
-            preview = item.content[:800].replace("\n", " ")
+            preview = item.content[:1000].replace("\n", " ")
             print(preview)
             print("-" * 100)
 
@@ -259,6 +267,22 @@ def rerank_by_section(results):
 
     return final
 
+def open_image_file(path: str):
+    if not path or not os.path.exists(path):
+        print(f"❌ 图片不存在: {path}")
+        return
+
+    try:
+        if os.name == "nt":
+            os.startfile(path)
+        elif sys.platform == "darwin":
+            subprocess.run(["open", path], check=False)
+        else:
+            subprocess.run(["xdg-open", path], check=False)
+        print(f"🖼️ 已尝试打开图片: {path}")
+    except Exception as e:
+        print(f"❌ 打开图片失败: {e}")
+
 def build_rewriter_from_settings(settings):
     """
     优先使用 DeepSeek；
@@ -280,47 +304,7 @@ def build_rewriter_from_settings(settings):
 
     raise RuntimeError("没有可用的改写模型配置。请至少在 .env 中配置 DEEPSEEK_API_KEY 或 OPENAI_API_KEY。")
 
-def rerank_by_section(results):
-    """
-    results: List[RetrievedChunk]
-    分数越小越相似，所以这里做一个“修正后分数”，仍然按从小到大排序
-    """
-    bad_sections = {
-        "author contributions", "acknowledgements", "references"
-    }
-    good_keywords = {
-        "abstract", "introduction", "method", "methodology",
-        "experiment", "evaluation", "benchmark", "conclusion"
-    }
 
-    reranked = []
-    for item in results:
-        h1 = str(item.metadata.get("H1", "")).lower()
-        score = item.score if item.score is not None else 999.0
-
-        bonus = 0.0
-
-        if any(bad in h1 for bad in bad_sections):
-            bonus += 0.35   # 降权：让分数变大
-
-        if any(good in h1 for good in good_keywords):
-            bonus -= 0.15   # 加权：让分数变小
-
-        # 表格块轻微降权
-        content_head = (item.content or "")[:200].lower()
-        if "<table>" in content_head:
-            bonus += 0.15
-
-        new_score = score + bonus
-        reranked.append((new_score, item))
-
-    reranked.sort(key=lambda x: x[0])
-
-    final = []
-    for idx, (_, item) in enumerate(reranked, start=1):
-        item.rank = idx
-        final.append(item)
-    return final
 
 def main():
     print("🚀 [DEBUG_RAG] 启动知识库调试模式...")
@@ -341,20 +325,70 @@ def main():
 
     chat_history: List[Dict[str, str]] = []
 
+    last_results: List[RetrievedChunk] = []
+
     while True:
         question = input("请输入测试问题: ").strip()
         if not question:
             continue
+
         if question.lower() in {"exit", "quit", "q"}:
             print("👋 已退出 debug_rag。")
             break
 
+        if question.lower().startswith("figonly:"):
+            raw_q = question[len("figonly:"):].strip()
+            docs = provider.query_with_scores_filtered(raw_q, k=8, block_types=["figure"])
+            results = []
+            for idx, (doc, score) in enumerate(docs[:3], start=1):
+                results.append(
+                    RetrievedChunk(
+                        rank=idx,
+                        score=score,
+                        content=doc.page_content,
+                        metadata=doc.metadata or {},
+                    )
+                )
+            searcher.pretty_print(raw_q, raw_q, results)
+            last_results = results
+            continue
+
+        if question.lower().startswith("open "):
+            try:
+                idx = int(question.split()[1]) - 1
+                if idx < 0 or idx >= len(last_results):
+                    print("❌ rank 越界")
+                    continue
+
+                meta = last_results[idx].metadata or {}
+                block_type = meta.get("block_type")
+
+                if block_type != "figure":
+                    print(f"❌ Rank {idx+1} 不是 figure 结果，而是 {block_type}，无法打开图片。")
+                    continue
+
+                path = meta.get("image_path_abs")
+                if not path:
+                    print("❌ 该 figure 没有 image_path_abs")
+                    continue
+
+                open_image_file(path)
+
+            except Exception as exc:
+                print(f"❌ open 命令失败: {exc}")
+
+            continue
+
         try:
-            rewritten = rewriter.rewrite(question, chat_history=chat_history)
+            q_lower = question.lower()
+            if any(k in q_lower for k in ["figure", "fig.", "图", "表格", "table", "公式", "equation"]):
+                rewritten = question
+            else:
+                rewritten = rewriter.rewrite(question, chat_history=chat_history)
             results = searcher.search_hybrid(rewritten, recall_k=8, final_k=3)
             searcher.pretty_print(question, rewritten, results)
+            last_results = results
 
-            # 仅用于后续 query rewrite 测试，不参与正式业务
             chat_history.append({"role": "user", "content": question})
             chat_history.append({"role": "assistant", "content": rewritten})
 
