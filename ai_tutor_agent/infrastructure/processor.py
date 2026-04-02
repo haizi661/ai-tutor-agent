@@ -218,7 +218,7 @@ class KnowledgeProcessor:
         return result
     
     # ---------------------------
-    #缓存工具
+    #缓存下载工具
     # ---------------------------
     def _file_md5(self, file_path: str) -> str:
         md5 = hashlib.md5()
@@ -333,7 +333,179 @@ class KnowledgeProcessor:
 
         fallback = os.path.join(persisted_manifest["images_dir"], image_name)
         return fallback
-        
+
+
+     # -------------
+     #图片索引
+     # -------------
+    
+    def _parse_figure_caption_line(self, line: str) -> Optional[Dict[str, Any]]:
+        line = (line or "").strip()
+        m = re.match(r"^\s*(Figure|Fig\.?)\s*(\d+)\s*[:\.]\s*(.*)$", line, flags=re.I)
+        if not m:
+            return None
+
+        num = int(m.group(2))
+        tail = (m.group(3) or "").strip()
+        label = f"Figure {num}"
+        caption = f"{label}: {tail}" if tail else label
+
+        return {
+            "figure_num": num,
+            "figure_label": label,
+            "caption": caption,
+        }   
+
+    def _extract_image_paths_from_line(self, line: str) -> List[str]:
+        matches = re.findall(r"!\[(.*?)\]\((.*?)\)", line or "")
+        paths = []
+        for _, img_path in matches:
+            img_path = (img_path or "").strip().replace("\\", "/")
+            if img_path:
+                paths.append(img_path)
+        return paths
+
+    def _parse_table_caption_line(self, line: str) -> Optional[Dict[str, Any]]:
+        line = (line or "").strip()
+        m = re.match(r"^\s*(Table|表)\s*(\d+)\s*[:：\.]?\s*(.*)$", line, flags=re.I)
+        if not m:
+            return None
+
+        num = int(m.group(2))
+        tail = (m.group(3) or "").strip()
+        label = f"Table {num}"
+        caption = f"{label}: {tail}" if tail else label
+
+        return {
+            "table_num": num,
+            "table_label": label,
+            "caption": caption,
+        }
+
+    def _is_markdown_table_line(self, line: str) -> bool:
+        line = (line or "").strip()
+        if not line:
+            return False
+
+        if line.count("|") >= 2:
+            return True
+
+        if re.match(r"^\s*\|?[\-\:\|\s]{3,}\|?\s*$", line):
+            return True
+
+        return False
+
+    def _normalize_math_text(self, text: str) -> str:
+        text = (text or "").strip()
+        text = re.sub(r"\s+", " ", text)
+        return text
+
+    def extract_figure_objects(
+        self,
+        md_content: str,
+        persisted_manifest: Dict[str, Any],
+    ) -> List[Dict[str, Any]]:
+        lines = md_content.splitlines()
+        figure_objects: List[Dict[str, Any]] = []
+
+        pending_images: List[str] = []
+        current_obj: Optional[Dict[str, Any]] = None
+
+        def flush_current():
+            nonlocal current_obj
+            if not current_obj:
+                return
+
+            # 去重保持顺序
+            seen = set()
+            dedup_rel = []
+            for p in current_obj["image_paths"]:
+                p = (p or "").replace("\\", "/").strip()
+                if p and p not in seen:
+                    seen.add(p)
+                    dedup_rel.append(p)
+
+            image_paths_abs = []
+            image_friendly_names = []
+
+            for rel_path in dedup_rel:
+                abs_path = self._resolve_image_abs_path(rel_path, persisted_manifest)
+                image_paths_abs.append(abs_path)
+
+                image_info = persisted_manifest.get("images", {}).get(rel_path, {})
+                image_friendly_names.append(
+                    image_info.get("friendly_name", os.path.basename(abs_path))
+                )
+
+            current_obj["image_paths"] = dedup_rel
+            current_obj["image_paths_abs"] = image_paths_abs
+            current_obj["image_friendly_names"] = image_friendly_names
+            current_obj["surrounding_text"] = self._safe_text(
+                " ".join(current_obj["surrounding_text_parts"]),
+                max_len=1200
+            )
+
+            figure_objects.append(current_obj)
+            current_obj = None
+
+        for i, raw_line in enumerate(lines):
+            line = (raw_line or "").strip()
+            if not line:
+                continue
+
+            # 1) 图片行：先暂存，等后面的 Figure X caption 来认领
+            image_paths = self._extract_image_paths_from_line(line)
+            if image_paths:
+                if current_obj is None:
+                    pending_images.extend(image_paths)
+                else:
+                    text_after_caption_count = current_obj.get("text_after_caption_count", 0)
+                    current_has_images = bool(current_obj.get("image_paths"))
+
+                    # 情况1：caption 后立刻跟图，属于当前 figure
+                    if text_after_caption_count == 0:
+                        current_obj["image_paths"].extend(image_paths)
+
+                    # 情况2：caption 后已经出现过正文，再出现图片，更可能是下一个 figure 的图
+                    else:
+                        pending_images.extend(image_paths)
+
+                continue
+
+            # 2) caption 行
+            cap = self._parse_figure_caption_line(line)
+            if cap:
+                flush_current()
+
+                prev_text = " ".join(lines[max(0, i - 3):i]).strip()
+                next_text = " ".join(lines[i + 1:i + 4]).strip()
+
+                current_obj = {
+                    "figure_num": cap["figure_num"],
+                    "figure_label": cap["figure_label"],
+                    "caption": cap["caption"],
+                    "image_paths": list(pending_images),
+                    "surrounding_text_parts": [],
+                    "text_after_caption_count": 0,
+                }
+                pending_images = []
+
+                if prev_text:
+                    current_obj["surrounding_text_parts"].append(prev_text)
+                current_obj["surrounding_text_parts"].append(line)
+                if next_text:
+                    current_obj["surrounding_text_parts"].append(next_text)
+                continue
+
+            # 3) 普通正文
+            if current_obj is not None:
+                if len(" ".join(current_obj["surrounding_text_parts"])) < 1500:
+                    current_obj["surrounding_text_parts"].append(line)
+
+                current_obj["text_after_caption_count"] = current_obj.get("text_after_caption_count", 0) + 1
+
+        flush_current()
+        return figure_objects
 
     # ---------------------------
     # 工具函数
@@ -341,6 +513,130 @@ class KnowledgeProcessor:
     def _safe_text(self, text: str, max_len: int = 1800) -> str:
         text = re.sub(r"\n{3,}", "\n\n", (text or "").strip())
         return text[:max_len]
+
+    def extract_table_objects(self, md_content: str) -> List[Dict[str, Any]]:
+        lines = md_content.splitlines()
+        table_objects: List[Dict[str, Any]] = []
+        debug_table = True
+
+        current_obj: Optional[Dict[str, Any]] = None
+
+        def flush_current():
+            nonlocal current_obj
+            if not current_obj:
+                return
+            if debug_table:
+                print(
+                    f"🧪 [TABLE DEBUG] flush {current_obj['table_label']} | "
+                    f"rows={len(current_obj['table_lines'])} | "
+                    f"preview={(current_obj['caption'][:80])}"
+                )
+
+            current_obj["table_text"] = self._safe_text(
+                "\n".join(current_obj["table_lines"]),
+                max_len=4000
+            )
+            current_obj["surrounding_text"] = self._safe_text(
+                " ".join(current_obj["surrounding_text_parts"]),
+                max_len=1200
+            )
+
+            table_objects.append(current_obj)
+            current_obj = None
+
+        i = 0
+        while i < len(lines):
+            stripped = (lines[i] or "").strip()
+
+            if not stripped:
+                i += 1
+                continue
+
+            cap = self._parse_table_caption_line(stripped)
+            if cap:
+                if debug_table:
+                    print(f"🧪 [TABLE DEBUG] 命中 caption: {cap['table_label']} @ line {i+1}")
+
+                flush_current()
+
+                current_obj = {
+                    "table_num": cap["table_num"],
+                    "table_label": cap["table_label"],
+                    "caption": cap["caption"],
+                    "table_lines": [],
+                    "surrounding_text_parts": [stripped],
+                }
+                i += 1
+                continue
+
+            if current_obj is not None:
+                # 遇到下一个 Table / Figure caption，先收束当前 table
+                if self._parse_table_caption_line(stripped) or self._parse_figure_caption_line(stripped):
+                    flush_current()
+                    continue
+
+                # 收集 html table
+                if re.search(r"<table.*?>", stripped, flags=re.I):
+                    if debug_table:
+                        print(f"🧪 [TABLE DEBUG] {current_obj['table_label']} 开始收集 HTML table @ line {i+1}")
+
+                    # 先处理“单行完整 table”
+                    single_match = re.search(r"(<table.*?</table>)", stripped, flags=re.S | re.I)
+                    if single_match:
+                        current_obj["table_lines"].append(single_match.group(1).strip())
+                        i += 1
+                        continue
+
+                    # 再处理“多行 table”
+                    html_parts = [stripped]
+                    i += 1
+                    while i < len(lines):
+                        html_line = (lines[i] or "").rstrip()
+                        html_strip = html_line.strip()
+
+                        # 如果还没遇到 </table>，却先遇到新的 Table / Figure caption，
+                        # 说明前一个 table 收集范围有问题，立刻停止，把机会留给外层重新识别
+                        if self._parse_table_caption_line(html_strip) or self._parse_figure_caption_line(html_strip):
+                            i -= 1
+                            break
+
+                        html_parts.append(html_line)
+
+                        if re.search(r"</table>", html_strip, flags=re.I):
+                            break
+
+                        i += 1
+
+                    html_blob = "\n".join(html_parts)
+                    m = re.search(r"(<table.*?</table>)", html_blob, flags=re.S | re.I)
+                    if m:
+                        current_obj["table_lines"].append(m.group(1).strip())
+                    else:
+                        current_obj["table_lines"].append(html_blob.strip())
+
+                    i += 1
+                    continue
+
+                # 收集 markdown table
+                if self._is_markdown_table_line(stripped):
+                    current_obj["table_lines"].append(stripped)
+                    i += 1
+                    continue
+
+                # 少量附近正文
+                if len(" ".join(current_obj["surrounding_text_parts"])) < 1200:
+                    current_obj["surrounding_text_parts"].append(stripped)
+
+            i += 1
+
+        flush_current()
+
+        if debug_table:
+            print("🧪 [TABLE DEBUG] 最终抽到的 table 对象：")
+            for obj in table_objects:
+                print(f"   - {obj['table_label']} | rows={len(obj['table_lines'])}")
+
+        return table_objects
 
     def _guess_section(self, meta: Dict[str, Any]) -> str:
         return (
@@ -399,67 +695,262 @@ class KnowledgeProcessor:
     # ---------------------------
     # 公式块
     # ---------------------------
-    def build_formula_chunks(self, md_content: str, start_chunk_id: int = 100000) -> List[Document]:
+    def build_formula_chunks(
+        self,
+        md_content: str,
+        persisted_manifest: Dict[str, Any],
+        start_chunk_id: int = 100000
+    ) -> List[Document]:
         docs: List[Document] = []
         chunk_id = start_chunk_id
 
-        # ```math ... ```
-        fence_matches = re.findall(r"```math\s*(.*?)```", md_content, flags=re.S)
-        # $$ ... $$
-        fence_matches += re.findall(r"\$\$(.*?)\$\$", md_content, flags=re.S)
+        lines = md_content.splitlines()
+        pending_images: List[str] = []
 
-        for formula in fence_matches:
-            latex = self._safe_text(formula, max_len=1200)
-            if not latex:
+        i = 0
+        while i < len(lines):
+            raw_line = lines[i]
+            line = (raw_line or "").rstrip()
+            stripped = line.strip()
+
+            # 先缓存图片，留给后面的公式块认领
+            image_paths = self._extract_image_paths_from_line(stripped)
+            if image_paths:
+                pending_images.extend(image_paths)
+                i += 1
                 continue
 
-            text = f"公式内容：{latex}\nLaTeX：{latex}\n该块为论文中的公式或数学表达式。"
-            meta = {
-                "chunk_id": chunk_id,
-                "block_type": "formula",
-                "section": "FORMULA",
-                "char_length": len(text),
-                "latex": latex[:1000],
-            }
-            docs.append(Document(page_content=text, metadata=meta))
-            chunk_id += 1
+            formula_lines: List[str] = []
+            surrounding_parts: List[str] = []
 
-        return docs
+            # 情况1：```math ... ```
+            if stripped.startswith("```math"):
+                j = i + 1
+                while j < len(lines):
+                    candidate = lines[j]
+                    if (candidate or "").strip().startswith("```"):
+                        break
+                    formula_lines.append(candidate)
+                    j += 1
 
-    # ---------------------------
-    # 表格块
-    # ---------------------------
-    def build_table_chunks(self, md_content: str, start_chunk_id: int = 200000) -> List[Document]:
-        docs: List[Document] = []
-        chunk_id = start_chunk_id
+                if formula_lines:
+                    prev_text = " ".join(lines[max(0, i - 3):i]).strip()
+                    next_text = " ".join(lines[j + 1:min(len(lines), j + 4)]).strip()
+                    if prev_text:
+                        surrounding_parts.append(prev_text)
+                    if next_text:
+                        surrounding_parts.append(next_text)
 
-        table_pattern = re.compile(r"(<table.*?>.*?</table>)", flags=re.S | re.I)
-        tables = table_pattern.findall(md_content)
+                    latex = self._normalize_math_text("\n".join(formula_lines))
+                    surrounding_text = self._safe_text(" ".join(surrounding_parts), max_len=1200)
 
-        for idx, table_html in enumerate(tables, start=1):
-            compact = re.sub(r"\s+", " ", table_html).strip()
-            if not compact:
+                    # 把 pending_images 归给当前公式
+                    seen = set()
+                    dedup_rel = []
+                    seen = set()
+                    dedup_rel = []
+                    for p in pending_images:
+                        p = (p or "").replace("\\", "/").strip()
+                        if p and p not in seen:
+                            seen.add(p)
+                            dedup_rel.append(p)
+
+                    # 公式图最多保留 3 张
+                    dedup_rel = dedup_rel[:3]
+
+                    image_paths_abs = []
+                    image_friendly_names = []
+                    for rel_path in dedup_rel:
+                        abs_path = self._resolve_image_abs_path(rel_path, persisted_manifest)
+                        image_paths_abs.append(abs_path)
+
+                        image_info = persisted_manifest.get("images", {}).get(rel_path, {})
+                        image_friendly_names.append(
+                            image_info.get("friendly_name", os.path.basename(abs_path))
+                        )
+
+                    page_content = (
+                        f"公式块\n"
+                        f"LaTeX：{latex}\n"
+                        f"关联图片数量：{len(image_paths_abs)}\n"
+                        f"图片相对路径列表：{dedup_rel}\n"
+                        f"图片友好文件名列表：{image_friendly_names}\n"
+                        f"图片绝对路径列表：{image_paths_abs}\n"
+                        f"附近正文：{surrounding_text}\n"
+                        f"该块为论文中的公式或数学表达式。"
+                    )
+
+                    meta = {
+                        "chunk_id": chunk_id,
+                        "block_type": "formula",
+                        "section": "FORMULA",
+                        "char_length": len(page_content),
+                        "latex": latex[:1000],
+                        "surrounding_text": surrounding_text[:1000],
+                        "image_count": len(image_paths_abs),
+                    }
+
+                    if dedup_rel:
+                        meta["image_paths"] = dedup_rel
+                    if image_paths_abs:
+                        meta["image_paths_abs"] = image_paths_abs
+                    if image_friendly_names:
+                        meta["image_friendly_names"] = image_friendly_names
+
+                    docs.append(Document(page_content=page_content, metadata=meta))
+                    chunk_id += 1
+                    pending_images = []
+
+                i = j + 1
                 continue
 
-            summary = f"表格块 Table {idx}。包含 HTML 表格结构，可用于查找参数、指标、实验结果或对比信息。"
-            page_content = f"{summary}\n原始表格HTML：\n{compact[:1600]}"
+            # 情况2：$$ ... $$
+            if stripped.startswith("$$"):
+                after = stripped[2:]
+                closed_same_line = False
 
-            meta = {
-                "chunk_id": chunk_id,
-                "block_type": "table",
-                "section": "TABLE",
-                "table_id": idx,
-                "char_length": len(page_content),
-                "table_html": compact[:1500],
-            }
-            docs.append(Document(page_content=page_content, metadata=meta))
-            chunk_id += 1
+                if after.endswith("$$") and len(after) > 2:
+                    formula_lines.append(after[:-2].strip())
+                    closed_same_line = True
+                    j = i
+                else:
+                    if after.strip():
+                        formula_lines.append(after)
+                    j = i + 1
+                    while j < len(lines):
+                        candidate = (lines[j] or "").rstrip()
+                        cstrip = candidate.strip()
+
+                        if cstrip.endswith("$$"):
+                            content = cstrip[:-2].rstrip()
+                            if content:
+                                formula_lines.append(content)
+                            break
+
+                        formula_lines.append(candidate)
+                        j += 1
+
+                if formula_lines:
+                    prev_text = " ".join(lines[max(0, i - 3):i]).strip()
+                    next_text = " ".join(lines[j + 1:min(len(lines), j + 4)]).strip()
+                    if prev_text:
+                        surrounding_parts.append(prev_text)
+                    if next_text:
+                        surrounding_parts.append(next_text)
+
+                    latex = self._normalize_math_text("\n".join(formula_lines))
+                    surrounding_text = self._safe_text(" ".join(surrounding_parts), max_len=1200)
+
+                    seen = set()
+                    dedup_rel = []
+                    for p in pending_images:
+                        p = (p or "").replace("\\", "/").strip()
+                        if p and p not in seen:
+                            seen.add(p)
+                            dedup_rel.append(p)
+                    dedup_rel = dedup_rel[:1]
+
+                    image_paths_abs = []
+                    image_friendly_names = []
+                    for rel_path in dedup_rel:
+                        abs_path = self._resolve_image_abs_path(rel_path, persisted_manifest)
+                        image_paths_abs.append(abs_path)
+
+                        image_info = persisted_manifest.get("images", {}).get(rel_path, {})
+                        image_friendly_names.append(
+                            image_info.get("friendly_name", os.path.basename(abs_path))
+                        )
+
+                    page_content = (
+                        f"公式块\n"
+                        f"LaTeX：{latex}\n"
+                        f"关联图片数量：{len(image_paths_abs)}\n"
+                        f"图片相对路径列表：{dedup_rel}\n"
+                        f"图片友好文件名列表：{image_friendly_names}\n"
+                        f"图片绝对路径列表：{image_paths_abs}\n"
+                        f"附近正文：{surrounding_text}\n"
+                        f"该块为论文中的公式或数学表达式。"
+                    )
+
+                    meta = {
+                        "chunk_id": chunk_id,
+                        "block_type": "formula",
+                        "section": "FORMULA",
+                        "char_length": len(page_content),
+                        "latex": latex[:1000],
+                        "surrounding_text": surrounding_text[:1000],
+                        "image_count": len(image_paths_abs),
+                    }
+
+                    if dedup_rel:
+                        meta["image_paths"] = dedup_rel
+                    if image_paths_abs:
+                        meta["image_paths_abs"] = image_paths_abs
+                    if image_friendly_names:
+                        meta["image_friendly_names"] = image_friendly_names
+
+                    docs.append(Document(page_content=page_content, metadata=meta))
+                    chunk_id += 1
+                    pending_images = []
+
+                i = j + 1 if not closed_same_line else i + 1
+                continue
+
+            i += 1
 
         return docs
 
     # ---------------------------
     # 图片/图表块
     # ---------------------------
+    def build_table_chunks(
+        self,
+        md_content: str,
+        persisted_manifest: Dict[str, Any],
+        start_chunk_id: int = 200000
+    ) -> List[Document]:
+        docs: List[Document] = []
+        chunk_id = start_chunk_id
+
+        table_objects = self.extract_table_objects(md_content)
+
+        for obj in table_objects:
+            table_num = obj["table_num"]
+            table_label = obj["table_label"]
+            caption = obj["caption"]
+            table_text = obj["table_text"]
+            surrounding_text = obj["surrounding_text"]
+
+            page_content = (
+                f"表格块 {table_label}\n"
+                f"表标题或说明：{caption}\n"
+                f"表格内容：\n{table_text if table_text else '[未抽取到结构化表格正文]'}\n"
+                f"附近正文：{surrounding_text}\n"
+            )
+
+            meta = {
+                "chunk_id": chunk_id,
+                "block_type": "table",
+                "section": "TABLE",
+                "table_id": table_num,
+                "table_label": table_label,
+                "table_caption": caption[:500],
+                "surrounding_text": surrounding_text[:1000],
+                "char_length": len(page_content),
+            }
+
+            if table_text:
+                meta["table_text"] = table_text[:3500]
+
+                m = re.search(r"(<table.*?</table>)", table_text, flags=re.S | re.I)
+                if m:
+                    meta["table_html"] = m.group(1).strip()
+
+            docs.append(Document(page_content=page_content, metadata=meta))
+            chunk_id += 1
+
+        return docs
+
     def build_figure_chunks(
         self,
         md_content: str,
@@ -469,33 +960,24 @@ class KnowledgeProcessor:
         docs: List[Document] = []
         chunk_id = start_chunk_id
 
-        lines = md_content.splitlines()
-        pattern = re.compile(r"!\[(.*?)\]\((.*?)\)")
+        figure_objects = self.extract_figure_objects(md_content, persisted_manifest)
 
-        figure_idx = 1
-        for i, line in enumerate(lines):
-            m = pattern.search(line)
-            if not m:
-                continue
+        for obj in figure_objects:
+            figure_num = obj["figure_num"]
+            figure_label = obj["figure_label"]
+            caption = obj["caption"]
+            image_paths = obj["image_paths"]
+            image_paths_abs = obj["image_paths_abs"]
+            image_friendly_names = obj["image_friendly_names"]
+            surrounding_text = obj["surrounding_text"]
 
-            caption = (m.group(1) or "").strip() or f"Figure {figure_idx}"
-            img_path_rel = (m.group(2) or "").strip()
-            img_path_abs = self._resolve_image_abs_path(img_path_rel, persisted_manifest)
-            image_info = persisted_manifest.get("images", {}).get(img_path_rel, {})
-            friendly_name = image_info.get("friendly_name", os.path.basename(img_path_abs))
-            figure_num = image_info.get("index", figure_idx)
-
-            # 取前后文
-            prev_text = " ".join(lines[max(0, i - 3):i]).strip()
-            next_text = " ".join(lines[i + 1:i + 4]).strip()
-            surrounding_text = f"{prev_text} {next_text}".strip()
-            surrounding_text = self._safe_text(surrounding_text, max_len=800)
-            
             page_content = (
-                f"图片/图表块 Figure {figure_idx}\n"
+                f"图片/图表块 {figure_label}\n"
                 f"图标题或说明：{caption}\n"
-                f"图片相对路径：{img_path_rel}\n"
-                f"图片绝对路径：{img_path_abs}\n"
+                f"关联图片数量：{len(image_paths_abs)}\n"
+                f"图片相对路径列表：{image_paths}\n"
+                f"图片友好文件名列表：{image_friendly_names}\n"
+                f"图片绝对路径列表：{image_paths_abs}\n"
                 f"附近正文：{surrounding_text}\n"
             )
 
@@ -503,28 +985,25 @@ class KnowledgeProcessor:
                 "chunk_id": chunk_id,
                 "block_type": "figure",
                 "section": "FIGURE",
-                "figure_id": figure_num,
+                "figure_num": figure_num,
+                "figure_label": figure_label,
                 "figure_caption": caption[:500],
-                "image_path": img_path_rel[:500],
-                "image_path_abs": img_path_abs,
-                "image_friendly_name": friendly_name,
-                "surrounding_text": surrounding_text[:800],
+                "surrounding_text": surrounding_text[:1000],
                 "char_length": len(page_content),
+                "image_count": len(image_paths_abs),
             }
 
-            # --VLM处理图像预留接口
-            vlm_desc = self.describe_image_with_vlm(img_path_abs)
-            if vlm_desc:
-                page_content += f"图片视觉描述：{vlm_desc}\n"
-                meta["vlm_desc"] = vlm_desc[:1000]
-            #----------
+            if image_paths:
+                meta["image_paths"] = image_paths
+            if image_paths_abs:
+                meta["image_paths_abs"] = image_paths_abs
+            if image_friendly_names:
+                meta["image_friendly_names"] = image_friendly_names
 
             docs.append(Document(page_content=page_content, metadata=meta))
             chunk_id += 1
-            figure_idx += 1
 
         return docs
-
     # ---------------------------
     # 预留VLM模型接口，用于后续接入mineru图像理解模型
     # ---------------------------
@@ -555,8 +1034,8 @@ class KnowledgeProcessor:
         md = parse_result.full_md
 
         text_docs = self.build_text_chunks(md, start_chunk_id=0)
-        formula_docs = self.build_formula_chunks(md, start_chunk_id=100000)
-        table_docs = self.build_table_chunks(md, start_chunk_id=200000)
+        formula_docs = self.build_formula_chunks(md, persisted_manifest=persisted_manifest,start_chunk_id=100000)
+        table_docs = self.build_table_chunks(md, persisted_manifest=persisted_manifest,start_chunk_id=200000)
         figure_docs = self.build_figure_chunks(md, persisted_manifest=persisted_manifest,start_chunk_id=300000)
 
         all_docs = text_docs + formula_docs + table_docs + figure_docs

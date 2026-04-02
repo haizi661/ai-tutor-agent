@@ -10,6 +10,8 @@ from ai_tutor_agent.infrastructure.retriever import LocalFileKnowledgeProvider
 #图表公式用
 import subprocess
 import sys
+import tempfile
+import re
 #----
 @dataclass
 class RetrievedChunk:
@@ -161,8 +163,9 @@ class DebugKnowledgeSearcher:
             meta = item.metadata or {}
             important_keys = [
                 "block_type", "filename", "chunk_id", "section",
-                "figure_id", "figure_caption", "image_path", "image_path_abs",
-                "vlm_desc", "table_id", "latex", "char_length"
+                "figure_num", "figure_label", "figure_caption",
+                "image_paths_abs", "image_friendly_names",
+                "table_id", "latex", "char_length"
             ]
             for k in important_keys:
                 if k in meta:
@@ -172,6 +175,7 @@ class DebugKnowledgeSearcher:
             preview = item.content[:1000].replace("\n", " ")
             print(preview)
             print("-" * 100)
+
 
     def search_hybrid(self, query: str, recall_k: int = 8, final_k: int = 3) -> List[RetrievedChunk]:
         vector_docs_and_scores = self.provider.query_with_scores(query, k=recall_k)
@@ -283,6 +287,251 @@ def open_image_file(path: str):
     except Exception as e:
         print(f"❌ 打开图片失败: {e}")
 
+def open_image_files(paths: List[str]):
+    if not paths:
+        print("❌ 没有可打开的图片路径")
+        return
+
+    for p in paths:
+        open_image_file(p)
+
+def open_table_html(title: str, table_html: str):
+    if not table_html or not table_html.strip():
+        print("❌ 没有可打开的表格 HTML 内容")
+        return
+
+    try:
+        safe_title = "".join(c if c.isalnum() or c in ("-", "_") else "_" for c in title)[:80]
+        temp_dir = tempfile.gettempdir()
+        temp_path = os.path.join(temp_dir, f"{safe_title}.html")
+
+        html_doc = f"""<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <title>{title}</title>
+  <style>
+    body {{
+      font-family: Arial, "Microsoft YaHei", sans-serif;
+      margin: 24px;
+      background: #ffffff;
+      color: #222;
+    }}
+    h3 {{
+      margin-bottom: 16px;
+      font-size: 20px;
+    }}
+    .table-wrap {{
+      overflow-x: auto;
+    }}
+    table {{
+      border-collapse: collapse;
+      width: auto;
+      min-width: 720px;
+      font-size: 14px;
+    }}
+    th, td {{
+      border: 1px solid #666;
+      padding: 8px 10px;
+      text-align: center;
+      vertical-align: middle;
+      white-space: nowrap;
+    }}
+    tr:nth-child(even) {{
+      background: #f7f7f7;
+    }}
+  </style>
+</head>
+<body>
+  <h3>{title}</h3>
+  <div class="table-wrap">
+    {table_html}
+  </div>
+</body>
+</html>
+"""
+
+        with open(temp_path, "w", encoding="utf-8") as f:
+            f.write(html_doc)
+
+        if os.name == "nt":
+            os.startfile(temp_path)
+        elif sys.platform == "darwin":
+            subprocess.run(["open", temp_path], check=False)
+        else:
+            subprocess.run(["xdg-open", temp_path], check=False)
+
+        print(f"📊 已尝试打开表格 HTML: {temp_path}")
+    except Exception as e:
+        print(f"❌ 打开表格 HTML 失败: {e}")
+
+def open_formula_html(title: str, latex: str):
+    if not latex or not latex.strip():
+        print("❌ 没有可渲染的 LaTeX 内容")
+        return
+
+    try:
+        safe_title = "".join(c if c.isalnum() or c in ("-", "_") else "_" for c in title)[:80]
+        temp_dir = tempfile.gettempdir()
+        temp_path = os.path.join(temp_dir, f"{safe_title}.html")
+
+        html_doc = f"""<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <title>{title}</title>
+  <script>
+    window.MathJax = {{
+      tex: {{
+        inlineMath: [['$', '$'], ['\\\\(', '\\\\)']],
+        displayMath: [['\\\\[', '\\\\]'], ['$$', '$$']]
+      }},
+      svg: {{ fontCache: 'global' }},
+      startup: {{ typeset: false }}
+    }};
+  </script>
+  <script defer src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
+  <style>
+    body {{
+      font-family: Arial, "Microsoft YaHei", sans-serif;
+      margin: 30px;
+      background: #fff;
+      color: #222;
+    }}
+    h3 {{
+      margin-bottom: 24px;
+      font-size: 22px;
+    }}
+    .formula {{
+      font-size: 28px;
+      padding: 24px;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      display: inline-block;
+      background: #fafafa;
+      min-width: 300px;
+    }}
+  </style>
+</head>
+<body>
+  <h3>{title}</h3>
+  <div id="formula" class="formula">\\[{latex}\\]</div>
+
+  <script>
+    window.addEventListener("load", function() {{
+      if (window.MathJax && MathJax.typesetPromise) {{
+        MathJax.typesetPromise([document.getElementById("formula")]).catch(function(err) {{
+          console.error(err);
+        }});
+      }}
+    }});
+  </script>
+</body>
+</html>
+"""
+
+        with open(temp_path, "w", encoding="utf-8") as f:
+            f.write(html_doc)
+
+        if os.name == "nt":
+            os.startfile(temp_path)
+        elif sys.platform == "darwin":
+            subprocess.run(["open", temp_path], check=False)
+        else:
+            subprocess.run(["xdg-open", temp_path], check=False)
+
+        print(f"🧮 已尝试打开公式 HTML: {temp_path}")
+    except Exception as e:
+        print(f"❌ 打开公式 HTML 失败: {e}")
+
+def extract_table_html_from_meta(meta: Dict[str, Any], content: str) -> str:
+    # 1) 先从 metadata 的 table_html 取
+    table_html = (meta.get("table_html") or "").strip()
+    if table_html:
+        m = re.search(r"(<table.*?</table>)", table_html, flags=re.S | re.I)
+        if m:
+            return m.group(1).strip()
+
+    # 2) 再从 table_text 里严格截取第一个完整 table
+    table_text = (meta.get("table_text") or "").strip()
+    if table_text:
+        m = re.search(r"(<table.*?</table>)", table_text, flags=re.S | re.I)
+        if m:
+            return m.group(1).strip()
+
+    # 3) 最后从整段 content 里严格截取
+    if content:
+        m = re.search(r"(<table.*?</table>)", content, flags=re.S | re.I)
+        if m:
+            return m.group(1).strip()
+
+    return ""
+
+def pick_best_show_result(results: List[RetrievedChunk], raw_query: str) -> Optional[RetrievedChunk]:
+    if not results:
+        return None
+
+    q = (raw_query or "").lower()
+
+    target_block_type = None
+    if any(k in q for k in ["figure", "fig.", "图"]):
+        target_block_type = "figure"
+    elif any(k in q for k in ["table", "表"]):
+        target_block_type = "table"
+    elif any(k in q for k in ["公式", "equation", "perplexity", "ppl", "latex"]):
+        target_block_type = "formula"
+
+    # 1. 优先：目标类型 + 有图
+    if target_block_type:
+        for item in results:
+            meta = item.metadata or {}
+            paths = meta.get("image_paths_abs") or []
+            if meta.get("block_type") == target_block_type and paths:
+                return item
+
+    # 2. 次优：任意有图
+    for item in results:
+        meta = item.metadata or {}
+        paths = meta.get("image_paths_abs") or []
+        if paths:
+            return item
+
+    # 3. 再次：目标类型
+    if target_block_type:
+        for item in results:
+            meta = item.metadata or {}
+            if meta.get("block_type") == target_block_type:
+                return item
+
+    # 4. 最后：第一个
+    return results[0]
+
+def open_text_content(title: str, content: str, suffix: str = ".txt"):
+    if not content or not content.strip():
+        print("❌ 没有可打开的文本内容")
+        return
+
+    try:
+        import tempfile
+
+        safe_title = "".join(c if c.isalnum() or c in ("-", "_") else "_" for c in title)[:80]
+        temp_dir = tempfile.gettempdir()
+        temp_path = os.path.join(temp_dir, f"{safe_title}{suffix}")
+
+        with open(temp_path, "w", encoding="utf-8") as f:
+            f.write(content)
+
+        if os.name == "nt":
+            os.startfile(temp_path)
+        elif sys.platform == "darwin":
+            subprocess.run(["open", temp_path], check=False)
+        else:
+            subprocess.run(["xdg-open", temp_path], check=False)
+
+        print(f"📄 已尝试打开文本文件: {temp_path}")
+    except Exception as e:
+        print(f"❌ 打开文本内容失败: {e}")
+
 def build_rewriter_from_settings(settings):
     """
     优先使用 DeepSeek；
@@ -336,6 +585,73 @@ def main():
             print("👋 已退出 debug_rag。")
             break
 
+        if question.lower().startswith("show "):
+            raw_q = question[len("show "):].strip()
+            results = searcher.search_hybrid(raw_q, recall_k=8, final_k=3)
+            searcher.pretty_print(raw_q, raw_q, results)
+            last_results = results
+
+            chosen = pick_best_show_result(results, raw_q)
+            if chosen:
+                item = chosen
+                meta = item.metadata or {}
+                block_type = meta.get("block_type")
+                confidence = meta.get("image_binding_confidence", "low")
+
+                q = raw_q.lower()
+                target_block_type = None
+                if any(k in q for k in ["figure", "fig.", "图"]):
+                    target_block_type = "figure"
+                elif any(k in q for k in ["table", "表"]):
+                    target_block_type = "table"
+                elif any(k in q for k in ["公式", "equation", "perplexity", "ppl", "latex"]):
+                    target_block_type = "formula"
+
+                paths = meta.get("image_paths_abs") or []
+                if not paths:
+                    single = meta.get("image_path_abs")
+                    if single:
+                        paths = [single]
+
+                # table：优先打开 html，不再优先开图片
+                if target_block_type == "table":
+                    if block_type != "table":
+                        print("⚠️ 已检索到结果，但没有命中可靠的表格对象。")
+                    else:
+                        title = meta.get("table_label") or f"Table {meta.get('table_id', 'unknown')}"
+                        table_html = extract_table_html_from_meta(meta, item.content)
+                        if table_html:
+                            print(f"🎯 show 将打开表格 HTML: chunk_id={meta.get('chunk_id')}")
+                            open_table_html(title, table_html)
+                        else:
+                            print("⚠️ 已定位到表格结果，但没有可渲染的 HTML 表格内容。")
+
+                # formula：暂时还是只在高置信度时开图
+                elif target_block_type == "formula":
+                    if block_type != "formula":
+                        print("⚠️ 已检索到结果，但没有命中可靠的公式对象。")
+                    else:
+                        latex = (meta.get("latex") or "").strip()
+                        if latex:
+                            title = f"Formula_{meta.get('chunk_id', 'unknown')}"
+                            print(f"🎯 show 将打开公式渲染页: chunk_id={meta.get('chunk_id')}")
+                            open_formula_html(title, latex)
+                        else:
+                            print("⚠️ 已定位到公式结果，但没有可渲染的 LaTeX。")
+
+                # figure：保持原样
+                else:
+                    if block_type == "figure" and paths:
+                        print(f"🎯 show 将打开命中结果: block_type={block_type}, chunk_id={meta.get('chunk_id')}")
+                        open_image_files(paths)
+                    elif paths:
+                        print(f"🎯 show 将打开命中结果: block_type={block_type}, chunk_id={meta.get('chunk_id')}")
+                        open_image_files(paths)
+                    else:
+                        print("⚠️ 没有找到可打开的图片结果；可能数据库缺失，或文章内没有对应图片。")
+
+            continue
+
         if question.lower().startswith("figonly:"):
             raw_q = question[len("figonly:"):].strip()
             docs = provider.query_with_scores_filtered(raw_q, k=8, block_types=["figure"])
@@ -353,6 +669,23 @@ def main():
             last_results = results
             continue
 
+        if question.lower() == "list tables":
+            raw = provider.vector_store._collection.get(include=["documents", "metadatas"])
+            metas = raw.get("metadatas", [])
+            seen = []
+            for meta in metas:
+                if (meta or {}).get("block_type") == "table":
+                    seen.append({
+                        "table_id": meta.get("table_id"),
+                        "table_label": meta.get("table_label"),
+                        "chunk_id": meta.get("chunk_id"),
+                    })
+
+            print("📋 当前库中的 table：")
+            for item in sorted(seen, key=lambda x: (x["table_id"] if x["table_id"] is not None else 9999)):
+                print(item)
+            continue
+        
         if question.lower().startswith("open "):
             try:
                 idx = int(question.split()[1]) - 1
@@ -363,16 +696,28 @@ def main():
                 meta = last_results[idx].metadata or {}
                 block_type = meta.get("block_type")
 
-                if block_type != "figure":
-                    print(f"❌ Rank {idx+1} 不是 figure 结果，而是 {block_type}，无法打开图片。")
+                if block_type == "table":
+                    title = meta.get("table_label") or f"Table {meta.get('table_id', 'unknown')}"
+                    table_html = extract_table_html_from_meta(meta, last_results[idx].content)
+                    if table_html:
+                        open_table_html(title, table_html)
+                    else:
+                        print("⚠️ 该表格没有可渲染的 HTML 内容。")
                     continue
 
-                path = meta.get("image_path_abs")
-                if not path:
-                    print("❌ 该 figure 没有 image_path_abs")
+                paths = meta.get("image_paths_abs") or []
+                if not paths:
+                    single = meta.get("image_path_abs")
+                    if single:
+                        paths = [single]
+
+                if not paths:
+                    print(f"⚠️ Rank {idx+1} 没有关联图片，block_type={block_type}。")
                     continue
 
-                open_image_file(path)
+                open_image_files(paths)
+
+                open_image_files(paths)
 
             except Exception as exc:
                 print(f"❌ open 命令失败: {exc}")

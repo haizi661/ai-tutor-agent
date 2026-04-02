@@ -2,7 +2,6 @@ import glob
 import os
 import shutil
 import json
-from typing import List
 
 import httpx
 import fitz  # PyMuPDF
@@ -454,6 +453,11 @@ class LocalFileKnowledgeProvider(KnowledgeProvider):
         final_k: int | None = None,
     ) -> list[Document]:
         final_k = final_k or self.settings.knowledge_top_k
+
+        exact_hits = self.query_exact_object(query)
+        if exact_hits:
+            return exact_hits[:final_k]
+        
         block_types = self._detect_query_block_types(query)
 
         vector_docs_and_scores = self.query_with_scores_filtered(
@@ -601,3 +605,48 @@ class LocalFileKnowledgeProvider(KnowledgeProvider):
             final_k=self.settings.knowledge_top_k
         )
         return "\n\n".join([doc.page_content for doc in results])
+
+    def _extract_target_ref(self, query: str) -> Optional[Dict[str, Any]]:
+        q = (query or "").strip()
+
+        m = re.search(r"(figure|fig\.?)\s*_?\s*(\d+)", q, flags=re.I)
+        if m:
+            return {"target_type": "figure", "target_num": int(m.group(2))}
+
+        m = re.search(r"(table|表)\s*_?\s*(\d+)", q, flags=re.I)
+        if m:
+            return {"target_type": "table", "target_num": int(m.group(2))}
+
+        m = re.search(r"(公式|equation)\s*[\(\[]?\s*(\d+)\s*[\)\]]?", q, flags=re.I)
+        if m:
+            return {"target_type": "formula", "target_num": int(m.group(2))}
+
+        return None
+
+    def query_exact_object(self, query: str) -> List[Document]:
+        ref = self._extract_target_ref(query)
+        if not ref:
+            return []
+
+        target_type = ref["target_type"]
+        target_num = ref["target_num"]
+
+        results = []
+        for d in self.bm25_docs:
+            meta = d.metadata or {}
+            block_type = meta.get("block_type")
+
+            if target_type == "figure" and block_type == "figure":
+                if meta.get("figure_num") == target_num:
+                    results.append(d)
+
+            elif target_type == "table" and block_type == "table":
+                if meta.get("table_id") == target_num:
+                    results.append(d)
+
+            elif target_type == "formula" and block_type == "formula":
+                latex = meta.get("latex", "")
+                if f"tag {{ {target_num} }}" in latex or f"tag{{{target_num}}}" in latex:
+                    results.append(d)
+
+        return results
