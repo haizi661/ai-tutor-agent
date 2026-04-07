@@ -454,14 +454,18 @@
 
         state.eventSource.addEventListener('session.end', e => {
             const data = safelyParseEventData(e.data);
+            const rawMessage = String(data.message || '').trim();
+            const isGenericEndMarker = !rawMessage || /^session ended\.?$/i.test(rawMessage);
             if (state.pendingInterruptConfirmation) {
                 state.isAwaitingInput = false;
                 finalizeStreamState('这个卡点已经讲清楚了，等你决定要不要回主线', 'awaiting');
                 app.fetchHistory();
                 return;
             }
-            const message = data.message || '这一小段先到这里。如果页面里出现主题确认卡或小测，就顺着完成；如果没有新控件，直接发下一条内容就行。';
-            if (!state.turnHasVisibleOutput) {
+            const message = isGenericEndMarker
+                ? '这一小段先到这里。如果页面里出现主题确认卡或小测，就顺着完成；如果没有新控件，直接发下一条内容就行。'
+                : rawMessage;
+            if (!state.turnHasVisibleOutput && !isGenericEndMarker) {
                 consumeVisibleTurn(message, 'success', { kind: 'end', role: 'prompt', clearTyping: true });
             } else {
                 app.clearTypingIndicator?.();

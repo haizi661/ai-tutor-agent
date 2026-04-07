@@ -127,8 +127,8 @@ def build_workflow(
     # ========== 注册所有节点 ==========
     workflow.add_node("intake_router", build_intake_router_node(runtime.event_sink))
     workflow.add_node("greeter", build_greeting_node(tutor_llm, runtime.event_sink, runtime.answer_provider))
-    workflow.add_node("meta_qa", build_meta_node(settings, runtime.event_sink, runtime.answer_provider))
-    workflow.add_node("smalltalk", build_smalltalk_node(runtime.event_sink, runtime.answer_provider))
+    workflow.add_node("meta_qa", build_meta_node(settings, tutor_llm, runtime.event_sink, runtime.answer_provider))
+    workflow.add_node("smalltalk", build_smalltalk_node(tutor_llm, runtime.event_sink, runtime.answer_provider))
     workflow.add_node("topic_confirmer", build_topic_confirm_node(runtime.event_sink, runtime.answer_provider))
     
     workflow.add_node("tutor", build_tutor_node(tutor_llm, runtime))

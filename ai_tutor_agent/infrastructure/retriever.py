@@ -1,4 +1,5 @@
 import glob
+import hashlib
 import importlib
 import json
 import os
@@ -228,8 +229,13 @@ class LocalFileKnowledgeProvider(KnowledgeProvider):
             print(f"Failed to save knowledge index: {exc}")
 
     def _get_file_fingerprint(self, file_path: str) -> str:
+        hasher = hashlib.sha256()
+        with open(file_path, "rb") as fh:
+            for chunk in iter(lambda: fh.read(1024 * 1024), b""):
+                hasher.update(chunk)
         stat = os.stat(file_path)
-        return f"{os.path.basename(file_path)}_{stat.st_size}_{int(stat.st_mtime)}"
+        digest = hasher.hexdigest()
+        return f"{os.path.basename(file_path)}_{stat.st_size}_{digest}"
 
     def _should_process(self, file_path: str) -> bool:
         filename = os.path.basename(file_path)
@@ -259,6 +265,99 @@ class LocalFileKnowledgeProvider(KnowledgeProvider):
 
         if deleted_files:
             self._save_index()
+
+    def list_documents(self) -> list[dict[str, Any]]:
+        entries: list[dict[str, Any]] = []
+        knowledge_dir = self.settings.knowledge_dir
+        os.makedirs(knowledge_dir, exist_ok=True)
+
+        filenames = set(self.knowledge_index.keys())
+        for path in glob.glob(os.path.join(knowledge_dir, "*.*")):
+            filenames.add(os.path.basename(path))
+
+        for filename in sorted(filenames):
+            file_path = os.path.join(knowledge_dir, filename)
+            size_bytes = 0
+            if os.path.exists(file_path):
+                try:
+                    size_bytes = int(os.path.getsize(file_path))
+                except Exception:
+                    size_bytes = 0
+
+            record = self.knowledge_index.get(filename, {})
+            entries.append(
+                {
+                    "filename": filename,
+                    "size_bytes": size_bytes,
+                    "chunk_count": int(record.get("chunks", 0) or 0),
+                }
+            )
+
+        return entries
+
+    def delete_document(self, filename: str) -> dict[str, Any]:
+        target = os.path.basename((filename or "").strip())
+        if not target:
+            return {"success": False, "message": "filename is required"}
+
+        removed_file = False
+        removed_index = False
+        knowledge_path = os.path.join(self.settings.knowledge_dir, target)
+
+        if os.path.exists(knowledge_path):
+            try:
+                os.remove(knowledge_path)
+                removed_file = True
+            except Exception as exc:
+                return {"success": False, "message": f"failed to delete file: {exc}"}
+
+        if self.vector_store:
+            self._delete_existing_vectors(target)
+
+        if target in self.knowledge_index:
+            self.knowledge_index.pop(target, None)
+            removed_index = True
+            self._save_index()
+
+        self._build_bm25_index()
+
+        if not removed_file and not removed_index:
+            return {"success": False, "message": f"file not found: {target}"}
+
+        return {
+            "success": True,
+            "filename": target,
+            "removed_file": removed_file,
+            "removed_index": removed_index,
+        }
+
+    def clear_documents(self) -> dict[str, Any]:
+        knowledge_dir = self.settings.knowledge_dir
+        os.makedirs(knowledge_dir, exist_ok=True)
+
+        removed_files = 0
+        for path in glob.glob(os.path.join(knowledge_dir, "*.*")):
+            try:
+                os.remove(path)
+                removed_files += 1
+            except Exception:
+                continue
+
+        indexed_filenames = list(self.knowledge_index.keys())
+        if self.vector_store:
+            for filename in indexed_filenames:
+                self._delete_existing_vectors(filename)
+
+        removed_index = len(indexed_filenames)
+        self.knowledge_index = {}
+        self._save_index()
+        self._build_bm25_index()
+
+        return {
+            "success": True,
+            "removed": removed_files,
+            "removed_index": removed_index,
+        }
 
     def _purge_stale_vectors(self, active_filenames: set[str]) -> int:
         if not self.vector_store:
@@ -463,6 +562,16 @@ class LocalFileKnowledgeProvider(KnowledgeProvider):
             retrieval_mode="hybrid" if self.settings.rag_hybrid_enabled else "vector",
             mineru_enabled=bool(self.settings.rag_mineru_enabled and self.settings.mineru_api_token),
         )
+
+        if old_record and old_record.get("fingerprint") == fingerprint:
+            chunks = int(old_record.get("chunks", 0) or 0)
+            self._log("upload_skipped", filename=filename, reason="fingerprint_unchanged", chunks=chunks)
+            return {
+                "success": True,
+                "chunks": chunks,
+                "filename": filename,
+                "message": f"already indexed, skipped re-import: {filename}",
+            }
 
         if old_record and old_record.get("fingerprint") != fingerprint:
             self._delete_existing_vectors(filename)

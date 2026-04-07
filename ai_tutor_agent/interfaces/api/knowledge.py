@@ -33,6 +33,58 @@ async def get_knowledge_status(request: Request):
     }
 
 
+@router.get("/knowledge/files")
+async def list_knowledge_files(request: Request):
+    runtime = get_runtime(request)
+    knowledge_provider = runtime.knowledge_provider
+    if not hasattr(knowledge_provider, "list_documents"):
+        return {"status": "success", "items": []}
+
+    items = knowledge_provider.list_documents()  # type: ignore[attr-defined]
+    return {"status": "success", "items": items}
+
+
+@router.delete("/knowledge/files/{filename}")
+async def delete_knowledge_file(filename: str, request: Request):
+    runtime = get_runtime(request)
+    knowledge_provider = runtime.knowledge_provider
+    if not hasattr(knowledge_provider, "delete_document"):
+        return {"status": "error", "message": "Knowledge provider does not support deleting files."}
+
+    result = knowledge_provider.delete_document(filename)  # type: ignore[attr-defined]
+    if not isinstance(result, dict):
+        return {"status": "error", "message": "Unexpected delete result."}
+    if not result.get("success"):
+        return {"status": "error", "message": result.get("message", "delete failed")}
+
+    return {
+        "status": "success",
+        "filename": result.get("filename", filename),
+        "removed_file": bool(result.get("removed_file", False)),
+        "removed_index": bool(result.get("removed_index", False)),
+    }
+
+
+@router.delete("/knowledge/files")
+async def clear_knowledge_files(request: Request):
+    runtime = get_runtime(request)
+    knowledge_provider = runtime.knowledge_provider
+    if not hasattr(knowledge_provider, "clear_documents"):
+        return {"status": "error", "message": "Knowledge provider does not support clearing files."}
+
+    result = knowledge_provider.clear_documents()  # type: ignore[attr-defined]
+    if not isinstance(result, dict):
+        return {"status": "error", "message": "Unexpected clear result."}
+    if not result.get("success"):
+        return {"status": "error", "message": result.get("message", "clear failed")}
+
+    return {
+        "status": "success",
+        "removed": int(result.get("removed", 0) or 0),
+        "removed_index": int(result.get("removed_index", 0) or 0),
+    }
+
+
 @router.post("/upload")
 async def upload_file(request: Request, file: UploadFile = File(...)):
     runtime = get_runtime(request)

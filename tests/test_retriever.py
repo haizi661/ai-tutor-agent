@@ -102,6 +102,56 @@ def test_local_knowledge_provider_falls_back_when_embedding_backend_fails(monkey
     assert result["success"] is False
 
 
+def test_add_local_file_skips_reimport_when_fingerprint_unchanged(monkeypatch, tmp_path):
+    settings = build_test_settings(tmp_path)
+
+    class FakeCollection:
+        def get(self, include=None):
+            del include
+            return {"documents": [], "metadatas": []}
+
+        def delete(self, ids=None, where=None):
+            del ids, where
+
+        def count(self):
+            return 0
+
+    class FakeChroma:
+        def __init__(self, *args, **kwargs):
+            del args, kwargs
+            self._collection = FakeCollection()
+            self.added_docs = []
+
+        def add_documents(self, docs):
+            self.added_docs.append(docs)
+
+    monkeypatch.setattr(retriever, "build_embedding_backend", lambda settings: object())
+    monkeypatch.setattr(retriever, "Chroma", FakeChroma)
+    monkeypatch.setattr(retriever.LocalFileKnowledgeProvider, "_sync_knowledge_dir", lambda self: None)
+    monkeypatch.setattr(retriever.LocalFileKnowledgeProvider, "_build_bm25_index", lambda self: None)
+
+    provider = retriever.LocalFileKnowledgeProvider(settings)
+    sample = Path(settings.knowledge_dir) / "dup.pdf"
+    sample.parent.mkdir(parents=True, exist_ok=True)
+    sample.write_bytes(b"%PDF-1.4\nDUPLICATE")
+
+    fingerprint = provider._get_file_fingerprint(str(sample))
+    provider.knowledge_index["dup.pdf"] = {"fingerprint": fingerprint, "chunks": 3}
+
+    monkeypatch.setattr(
+        provider,
+        "_parse_file",
+        lambda source_path: [Document(page_content="x", metadata={"filename": "dup.pdf", "chunk_id": 0})],
+    )
+
+    result = provider.add_local_file(str(sample))
+
+    assert result["success"] is True
+    assert result["chunks"] == 3
+    assert "skipped re-import" in result["message"]
+    assert provider.vector_store.added_docs == []
+
+
 def test_chunk_text_produces_overlapping_segments():
     chunks = retriever.chunk_text("abcdefghij" * 30, chunk_size=50, chunk_overlap=10)
 

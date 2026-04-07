@@ -193,6 +193,10 @@ class UploadableKnowledgeProvider:
     def __init__(self):
         self.vector_store = object()
         self.bm25 = object()
+        self.items = [
+            {"filename": "demo.txt", "size_bytes": 11, "chunk_count": 2},
+            {"filename": "guide.pdf", "size_bytes": 2048, "chunk_count": 6},
+        ]
 
     def query(self, query: str) -> str:
         del query
@@ -208,6 +212,26 @@ class UploadableKnowledgeProvider:
             "parse_backend": "text",
             "bm25_rebuilt": True,
         }
+
+    def list_documents(self) -> list[dict]:
+        return list(self.items)
+
+    def delete_document(self, filename: str) -> dict:
+        for idx, item in enumerate(self.items):
+            if item["filename"] == filename:
+                self.items.pop(idx)
+                return {
+                    "success": True,
+                    "filename": filename,
+                    "removed_file": True,
+                    "removed_index": True,
+                }
+        return {"success": False, "message": f"file not found: {filename}"}
+
+    def clear_documents(self) -> dict:
+        removed = len(self.items)
+        self.items = []
+        return {"success": True, "removed": removed, "removed_index": removed}
 
 
 def test_api_config_endpoint_allows_runtime_model_switch(tmp_path):
@@ -423,6 +447,41 @@ def test_upload_returns_optional_parse_backend_and_bm25(tmp_path):
         assert payload["filename"] == "demo.txt"
         assert payload["parse_backend"] == "text"
         assert payload["bm25_rebuilt"] is True
+
+
+def test_knowledge_files_list_and_delete_and_clear(tmp_path):
+    runtime = ApiRuntime(
+        settings=build_test_settings(tmp_path),
+        knowledge_provider=UploadableKnowledgeProvider(),
+        workflow_factory=FakeWorkflowFactory(FakeCheckpointStore()),
+        checkpoint_factory=lambda path: (FakeCheckpointStore(), DummyConn()),
+    )
+
+    with TestClient(create_api_app(runtime_factory=lambda: runtime)) as client:
+        listing = client.get("/api/knowledge/files")
+        assert listing.status_code == 200
+        payload = listing.json()
+        assert payload["status"] == "success"
+        assert len(payload["items"]) == 2
+
+        deleted = client.delete("/api/knowledge/files/demo.txt")
+        assert deleted.status_code == 200
+        deleted_payload = deleted.json()
+        assert deleted_payload["status"] == "success"
+        assert deleted_payload["filename"] == "demo.txt"
+
+        listing_after_delete = client.get("/api/knowledge/files")
+        assert len(listing_after_delete.json()["items"]) == 1
+
+        cleared = client.delete("/api/knowledge/files")
+        assert cleared.status_code == 200
+        clear_payload = cleared.json()
+        assert clear_payload["status"] == "success"
+        assert clear_payload["removed"] == 1
+
+        listing_after_clear = client.get("/api/knowledge/files")
+        assert listing_after_clear.status_code == 200
+        assert listing_after_clear.json()["items"] == []
 
 
 def test_local_config_round_trip(monkeypatch, tmp_path):

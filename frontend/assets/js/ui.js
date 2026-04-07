@@ -22,8 +22,23 @@
     const LONG_VISIBLE_FALLBACK_MS = 5200;
     const MAX_VISIBLE_FALLBACKS = 2;
 
+    function parseMarkdownWithMath(text) {
+        const source = String(text ?? '');
+        const tokens = [];
+
+        // Protect math segments from markdown parser side-effects (notably backslashes)
+        const protectedText = source.replace(/\$\$[\s\S]+?\$\$|\$(?:\\.|[^$\\])+\$/g, match => {
+            const idx = tokens.push(match) - 1;
+            return `@@MATH_TOKEN_${idx}@@`;
+        });
+
+        let html = marked.parse(protectedText);
+        html = html.replace(/@@MATH_TOKEN_(\d+)@@/g, (_all, index) => tokens[Number(index)] || '');
+        return html;
+    }
+
     function renderMarkdown(target, text) {
-        target.innerHTML = marked.parse(text);
+        target.innerHTML = parseMarkdownWithMath(text);
         app.renderMath(target);
     }
 
@@ -33,6 +48,8 @@
                 delimiters: [
                     { left: '$$', right: '$$', display: true },
                     { left: '$', right: '$', display: false },
+                    { left: '\\(', right: '\\)', display: false },
+                    { left: '\\[', right: '\\]', display: true },
                 ],
                 throwOnError: false,
             });
@@ -91,7 +108,7 @@
 
     app.throttledRender = function throttledRender() {
         if (!state.currentAgentBodyEl) return;
-        state.currentAgentBodyEl.innerHTML = marked.parse(state.currentTextBuffer);
+        state.currentAgentBodyEl.innerHTML = parseMarkdownWithMath(state.currentTextBuffer);
         
         // Debounce heavy KaTeX rendering to prevent flickering and CPU spikes during fast streaming
         if (mathRenderTimeout) clearTimeout(mathRenderTimeout);
@@ -456,8 +473,10 @@
         const avatarLabel = role === 'user' ? '你' : '伴';
         wrap.innerHTML = `
             <div class="avatar ${role}" aria-hidden="true">${avatarLabel.charAt(0)}</div>
-            <div class="msg-content">${marked.parse(text)}</div>
+            <div class="msg-content">${parseMarkdownWithMath(text)}</div>
         `;
+        const contentEl = wrap.querySelector('.msg-content');
+        if (contentEl) app.renderMath(contentEl);
         const container = document.getElementById('messages');
         container.appendChild(wrap);
         app.scrollMessagesToBottom();
@@ -471,8 +490,10 @@
         wrap.dataset.tone = tone;
         wrap.innerHTML = `
             <div class="avatar system" aria-hidden="true">导</div>
-            <div class="msg-content system">${marked.parse(text)}</div>
+            <div class="msg-content system">${parseMarkdownWithMath(text)}</div>
         `;
+        const contentEl = wrap.querySelector('.msg-content.system');
+        if (contentEl) app.renderMath(contentEl);
         const container = document.getElementById('messages');
         container.appendChild(wrap);
         app.scrollMessagesToBottom();
