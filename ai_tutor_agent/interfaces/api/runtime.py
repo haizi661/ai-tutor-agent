@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import os
 import queue
 import threading
@@ -210,7 +212,7 @@ def build_vendor_catalogs(settings: Settings) -> list[dict]:
 
 class SessionManager:
     def __init__(self) -> None:
-        self._lock = threading.Lock()
+        self._lock = threading.RLock()
         self.sessions: dict[str, dict[str, object]] = {}
 
     def get_or_create(self, thread_id: str) -> dict[str, object]:
@@ -226,42 +228,63 @@ class SessionManager:
             return self.sessions[thread_id]
 
     def refresh_status(self, thread_id: str) -> dict[str, object]:
-        session = self.get_or_create(thread_id)
-        worker = session.get("worker")
-        if worker is not None and not worker.is_alive():
+        with self._lock:
+            session = self.get_or_create(thread_id)
+            worker = session.get("worker")
+            if worker is not None and worker.ident is not None and not worker.is_alive():
+                session["worker"] = None
+                session["is_running"] = False
+                session["awaiting_input"] = False
+            return session
+
+    def mark_running(self, thread_id: str, worker: threading.Thread) -> dict[str, object]:
+        with self._lock:
+            session = self.get_or_create(thread_id)
+            session["worker"] = worker
+            session["is_running"] = True
+            session["awaiting_input"] = False
+            return session
+
+    def prepare_worker_start(self, thread_id: str, worker: threading.Thread) -> Optional[dict[str, object]]:
+        with self._lock:
+            session = self.refresh_status(thread_id)
+            if session["is_running"]:
+                return None
+            session = self.reset_queues(thread_id)
+            session["worker"] = worker
+            session["is_running"] = True
+            session["awaiting_input"] = False
+            return session
+
+    def mark_finished(self, thread_id: str) -> None:
+        with self._lock:
+            session = self.get_or_create(thread_id)
             session["worker"] = None
             session["is_running"] = False
             session["awaiting_input"] = False
-        return session
-
-    def mark_running(self, thread_id: str, worker: threading.Thread) -> dict[str, object]:
-        session = self.get_or_create(thread_id)
-        session["worker"] = worker
-        session["is_running"] = True
-        session["awaiting_input"] = False
-        return session
-
-    def mark_finished(self, thread_id: str) -> None:
-        session = self.get_or_create(thread_id)
-        session["worker"] = None
-        session["is_running"] = False
-        session["awaiting_input"] = False
 
     def mark_awaiting_input(self, thread_id: str, awaiting: bool) -> dict[str, object]:
-        session = self.get_or_create(thread_id)
-        session["awaiting_input"] = awaiting
-        return session
+        with self._lock:
+            session = self.get_or_create(thread_id)
+            session["awaiting_input"] = awaiting
+            return session
 
     def remove(self, thread_id: str) -> None:
         with self._lock:
             self.sessions.pop(thread_id, None)
 
     def reset_queues(self, thread_id: str) -> dict[str, object]:
-        session = self.get_or_create(thread_id)
-        session["event_q"] = queue.Queue()
-        session["input_q"] = queue.Queue()
-        session["awaiting_input"] = False
-        return session
+        with self._lock:
+            session = self.get_or_create(thread_id)
+            for queue_name in ("event_q", "input_q"):
+                session_queue = session[queue_name]
+                while True:
+                    try:
+                        session_queue.get_nowait()
+                    except queue.Empty:
+                        break
+            session["awaiting_input"] = False
+            return session
 
 
 @dataclass

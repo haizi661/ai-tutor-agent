@@ -72,7 +72,7 @@ def route_after_intake_router(state: AgentState) -> str:
 def route_after_greeter(state: AgentState) -> str:
     """
     如果 greeter 没确认 topic，图暂停到 END (等待用户继续发消息)。
-    如果确认了 topic (flow_status 变成了 assessment_pending)，继续流转到 assessment_generator。
+    如果确认了 topic (flow_status 变成了 awaiting_assessment)，继续流转到 assessment_generator。
     """
     if state.get("flow_status") == "greeting":
         return "pause"

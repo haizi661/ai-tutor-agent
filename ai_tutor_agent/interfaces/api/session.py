@@ -156,7 +156,7 @@ def _resume_topic_confirmation_worker(
                 {
                     "current_topic": confirmed_topic,
                     "proposed_topic": "",
-                    "flow_status": "assessment_pending",
+                    "flow_status": "awaiting_assessment",
                 },
             )
             runtime_context.event_sink.emit(

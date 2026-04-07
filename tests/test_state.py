@@ -1,4 +1,4 @@
-from ai_tutor_agent.state import build_initial_state
+from ai_tutor_agent.core.state import build_initial_state
 
 
 def test_build_initial_state():
@@ -10,3 +10,12 @@ def test_build_initial_state():
     assert state["concept_score"] == 0
     assert state["feedback"] == ""
     assert state["assessment_radar"] == {}
+    assert state["attempt_count"] == 0
+    assert state["score_history"] == []
+    assert state["tester_question_type"] == ""
+    assert state["tester_question_template"] == ""
+    assert state["needs_hint"] is False
+    assert state["coach_content"] == ""
+    assert state["interrupt_query"] == ""
+    assert state["resume_tester"] is False
+    assert state["conversation_history"] == []

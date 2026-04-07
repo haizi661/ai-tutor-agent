@@ -1,7 +1,7 @@
 import json
 
-from ai_tutor_agent.events import make_event
-from ai_tutor_agent.sse import format_sse
+from ai_tutor_agent.core.events import make_event
+from ai_tutor_agent.interfaces.sse import format_sse
 
 
 def test_format_sse_uses_event_name_and_json_payload():

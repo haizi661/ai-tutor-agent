@@ -15,7 +15,10 @@ def run_cli() -> None:
     # Initialize KnowledgeProvider (RAG)
     try:
         knowledge_provider = LocalFileKnowledgeProvider(settings)
-        print("📚 知识库加载成功，已启用 RAG 增强。")
+        if getattr(knowledge_provider, "vector_store", None):
+            print("📚 知识库加载成功，已启用 RAG 增强。")
+        else:
+            print("⚠️ 知识库已初始化，但当前处于无 RAG 回退模式。")
     except Exception as e:
         from ...core.ports import NoopKnowledgeProvider
         knowledge_provider = NoopKnowledgeProvider()

@@ -19,8 +19,18 @@ venv/
 *.sqlite-wal
 *.log
 *.pid
+data/*
+!data/.gitkeep
+!data/knowledge/
+!data/chroma_db/
+!data/minerU_cache/
 data/knowledge/*
 !data/knowledge/.gitkeep
+data/chroma_db/*
+!data/chroma_db/.gitkeep
+data/minerU_cache/*
+!data/minerU_cache/.gitkeep
+data/vector_store/
 
 # Tool caches
 .pytest_cache/
@@ -34,4 +44,4 @@ htmlcov/
 Thumbs.db
 
 # AI Agent Context
-GEMINI.md
+docs/GEMINI_CONTEXT.md

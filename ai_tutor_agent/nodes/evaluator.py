@@ -100,7 +100,7 @@ def build_evaluator_node(evaluator_llm, runtime: RuntimeContext):
                 print(f"DEBUG: 数据库 checkpoints 记录数 = {count}", flush=True)
 
                 # 满足 10 轮且是 10 的倍数时执行（测试时可以临时改成 > 0）
-                if count >= 0:
+                if count >= 10 and count % 10 == 0:
                     print("📢 触发长期记忆总结...", flush=True)
                     student_id = state.get("student_id", "default_student")
                     summary_prompt = f"请简要总结学生(ID:{student_id})的表现，100字以内。"

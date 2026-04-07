@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI Tutor - 极致伴学系统</title>
+    <title>AI Tutor · 安静学习笔记本</title>
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
@@ -12,82 +12,98 @@
     <link rel="stylesheet" href="/assets/styles.css">
 </head>
 <body>
-
-    <div class="header">
-        <div class="header-left">
-            <div style="background:var(--accent-green); padding:5px; border-radius:6px; color:white;">🎓</div>
-            AI Tutor <span style="font-weight:300; font-size:0.9rem; color:var(--text-secondary);">伴学智能体</span>
-        </div>
-        <div class="header-right">
-            <div class="model-select-wrapper">
-                <span style="font-size:11px; color:var(--text-secondary);">快速切换:</span>
-                <select id="model-select" class="model-select"></select>
-                <button class="config-save-btn" onclick="updateModelConfig()">应用</button>
+    <div class="page-shell">
+        <header class="header">
+            <div class="header-left">
+                <div class="brand-mark" aria-hidden="true">伴</div>
+                <div class="brand-copy">
+                    <div class="brand-eyebrow">Study With Me</div>
+                    <div class="brand-title">AI Tutor</div>
+                    <div class="brand-subtitle">把主题收束、小测、讲解、临时追问与回顾放在同一页，像老师坐在你旁边一样，陪你把一个问题慢慢学明白。</div>
+                </div>
             </div>
-            <div id="config-status" class="config-status">这里只切换当前使用的厂商档案；详细模型与 API Key 请在“本地配置”里设置</div>
-            <button id="open-config-btn" class="btn-ghost" onclick="openLocalConfigPanel()">本地配置</button>
-            <button class="btn-ghost" onclick="pauseCurrentSession()">暂停会话</button>
-            <button class="btn-new" onclick="startNewSession()" style="width:auto; padding: 5px 15px;">新建会话</button>
+            <div class="header-right">
+                <div class="model-select-wrapper">
+                    <label class="model-select-label" for="model-select">当前讲解档案</label>
+                    <select id="model-select" class="model-select" aria-label="切换当前使用的模型档案"></select>
+                    <button type="button" class="config-save-btn" onclick="updateModelConfig()">应用</button>
+                </div>
+                <div id="config-status" class="config-status status-inline" aria-live="polite">这里只切换本次陪读使用的档案；模型细节与密钥在“本地设置”里维护。</div>
+                <button type="button" id="open-config-btn" class="btn-ghost" onclick="openLocalConfigPanel()">本地设置</button>
+                <button type="button" class="btn-new header-new-session" onclick="startNewSession()">开启新页</button>
+            </div>
+        </header>
+
+        <div class="container">
+            <aside class="sidebar" aria-label="学习记录与资料区">
+                <div class="sidebar-header">
+                    <div class="sidebar-kicker">Study Index</div>
+                    <h2 class="sidebar-title">学习目录</h2>
+                    <p class="sidebar-note">从上次停下的地方继续，或把不再需要的草稿 quietly 收起来。</p>
+                </div>
+                <div id="history-list" class="history-container">
+                    <!-- Thread IDs will go here -->
+                </div>
+                <div class="sidebar-header sidebar-header-upload">
+                    <div>
+                        <div class="sidebar-kicker">Reference Shelf</div>
+                        <p class="sidebar-note sidebar-note-compact">添一份讲义、笔记或 PDF，我会在讲解时优先翻看相关内容。清空书架时，也会同步移除当前知识向量。</p>
+                    </div>
+                    <input type="file" id="file-input" hidden>
+                    <button type="button" class="btn-new" onclick="document.getElementById('file-input').click()">添加讲义 / 笔记</button>
+                    <button type="button" id="clear-knowledge-btn" class="btn-ghost btn-knowledge-clear">清空书架</button>
+                    <div id="upload-status" class="status-inline upload-status" aria-live="polite"></div>
+                    <div id="knowledge-shelf" class="knowledge-shelf" aria-live="polite"></div>
+                </div>
+            </aside>
+
+            <main class="chat-main">
+                <div id="messages" class="messages">
+                    <div class="msg-wrapper agent">
+                        <div class="avatar agent" aria-hidden="true">伴</div>
+                        <div class="msg-content">直接告诉我你这次想学什么；如果讲到一半卡住了，也可以随时追问。</div>
+                    </div>
+                </div>
+
+                <div class="input-sticky">
+                    <div class="input-frame-label">把这一步告诉我，或直接追问卡点</div>
+                    <div class="input-inner">
+                        <textarea id="chat-input" class="chat-textarea" rows="1" placeholder="输入想学的主题，或在讲解中直接追问临时问题…" aria-label="输入学习主题或回答问题"></textarea>
+                        <div class="input-actions" aria-label="输入区操作">
+                            <button type="button" id="mic-btn" class="btn-action btn-mic" onclick="toggleVoiceInput()" aria-label="开始或停止语音输入" aria-pressed="false">语音</button>
+                            <button type="button" id="pause-btn" class="btn-action btn-pause" onclick="pauseCurrentSession()" aria-label="暂停当前学习页">暂停</button>
+                            <button type="button" id="send-btn" class="btn-send" onclick="handlePrimaryAction()" aria-label="输入内容后发送">发送</button>
+                        </div>
+                    </div>
+                    <div id="status-banner" class="status-banner status-ready" role="status" aria-live="polite">可以先从一个想弄懂的问题开始；卡住时也能随时打断追问</div>
+                </div>
+            </main>
+
+            <aside id="profile-panel" class="profile-panel hidden" aria-label="学习旁注面板">
+                <div class="panel-kicker">Learning Snapshot</div>
+                <div class="panel-header">学习旁注</div>
+                <p class="profile-caption">当你完成小测后，这里会整理出一张六维侧写，帮助我调节讲解速度、例子难度和追问力度。</p>
+                <div class="radar-box">
+                    <canvas id="radarChart"></canvas>
+                </div>
+                <div class="panel-note">
+                    <strong>这页在帮什么</strong>
+                    <p>它不是给你贴标签，而是在提醒我：哪些地方可以讲慢一点，哪些地方可以直接往前走。</p>
+                </div>
+            </aside>
         </div>
     </div>
 
-    <div class="container">
-        <!-- Sidebar -->
-        <div class="sidebar">
-            <div class="sidebar-header">
-                <div class="sidebar-title" style="font-size:12px; color:var(--text-secondary); margin-bottom:10px;">最近学习记录</div>
-            </div>
-            <div id="history-list" class="history-container">
-                <!-- Thread IDs will go here -->
-            </div>
-            <div class="sidebar-header" style="border-top:1px solid var(--border);">
-                <input type="file" id="file-input" hidden>
-                <button class="btn-new" onclick="document.getElementById('file-input').click()">📁 注入本地知识库</button>
-                <div id="upload-status" style="font-size:11px; margin-top:8px; text-align:center;"></div>
-            </div>
-        </div>
-
-        <!-- Chat -->
-        <div class="chat-main">
-            <div id="messages" class="messages">
-                <div class="msg-wrapper agent">
-                    <div class="avatar agent">T</div>
-                    <div class="msg-content">你好！我是你的私人伴学导师。你想开始学习哪个知识点？或者选择左侧的历史进度。</div>
-                </div>
-            </div>
-
-            <div class="input-sticky">
-                <div class="input-inner">
-                    <textarea id="chat-input" class="chat-textarea" rows="1" placeholder="输入学习主题或回答问题..."></textarea>
-                    <button id="send-btn" class="btn-send" onclick="handleSend()">发送</button>
-                </div>
-                <div id="status-banner" style="font-size:11px; color:var(--text-secondary); margin-top:8px; text-align:center;">
-                    系统就绪
-                </div>
-            </div>
-        </div>
-
-        <!-- Profile -->
-        <div id="profile-panel" class="profile-panel hidden">
-            <div class="panel-header">📊 学习画像</div>
-            <div class="radar-box">
-                <canvas id="radarChart"></canvas>
-            </div>
-            <div style="font-size:12px; color:var(--text-secondary); margin-top:20px; line-height:1.6; background:rgba(255,255,255,0.02); padding:15px; border-radius:10px;">
-                💡 <b>导师提示：</b> 这是根据你的测评生成的六维能力图。我将据此动态调整后续讲解的难度。
-            </div>
-        </div>
-    </div>
-
-    <div id="config-overlay" class="config-overlay" onclick="closeLocalConfigPanel(event)">
-        <div class="config-panel" onclick="event.stopPropagation()">
-            <h3>本地配置</h3>
-            <p>此面板适合个人本地使用。你只需要选择厂商、模型并填写对应 API Key；`provider/base_url` 会由系统自动匹配。保存后会写入服务端本地 `.env`，新的聊天档案会在下一次启动学习或恢复暂停流程时生效；RAG 配置会立即重建。</p>
+    <div id="config-overlay" class="config-overlay" aria-hidden="true" onclick="closeLocalConfigPanel(event)">
+        <div class="config-panel" role="dialog" aria-modal="true" aria-labelledby="local-config-title" onclick="event.stopPropagation()">
+            <div class="panel-kicker">Local Notes</div>
+            <h3 id="local-config-title">本地设置</h3>
+            <p>这里影响的是你这台机器上的私有使用。选好服务来源、模型并填写密钥后，会写入服务端本地 <code>.env</code>；新的聊天档案会在下一次启动或恢复时生效，资料检索设置会立即重建。日常运维通常只需要改服务来源、代理端口、PDF 解析策略和 MinerU 网络模式。</p>
             <div class="config-grid">
                 <div class="config-group">
-                    <div class="config-group-title">聊天模型</div>
+                    <div class="config-group-title">陪读模型</div>
                     <div class="config-field">
-                        <label for="local-chat-profile">厂商 / 档案</label>
+                        <label for="local-chat-profile">服务来源 / 档案</label>
                         <select id="local-chat-profile" onchange="renderVendorModels(this.value, '')">
                             <option value="gemini">Gemini</option>
                             <option value="qwen">Qwen</option>
@@ -97,20 +113,20 @@
                             <option value="glm">GLM</option>
                             <option value="custom">Custom</option>
                         </select>
-                        <small>已知厂商会自动匹配接口地址和 provider，只有 Custom 才手动配置。</small>
+                        <small>已知服务会自动补齐常用接口信息；只有 Custom 需要你手动指定。</small>
                     </div>
                     <div class="config-field">
-                        <label for="local-model-select">模型</label>
+                        <label for="local-model-select">具体模型</label>
                         <select id="local-model-select"></select>
                     </div>
                     <div class="config-field">
                         <label id="local-api-key-label" for="local-api-key">API Key</label>
-                        <input id="local-api-key" type="password" placeholder="仅本地保存">
+                        <input id="local-api-key" type="password" placeholder="只保存在本地环境">
                     </div>
                 </div>
 
                 <details id="local-advanced-details">
-                    <summary>高级设置</summary>
+                    <summary>展开高级项</summary>
                     <div id="custom-provider-field" class="config-field">
                         <label for="local-llm-provider">Custom Provider</label>
                         <select id="local-llm-provider">
@@ -126,23 +142,27 @@
                         <label for="local-openai-base">Custom Base URL</label>
                         <input id="local-openai-base" type="text" placeholder="https://...">
                     </div>
-                    <div class="config-group-title" style="margin-top:16px;">RAG</div>
+                    <div class="config-group-title config-group-title-spaced">资料检索</div>
                     <div class="config-field">
                         <label for="local-embedding-provider">Embedding Provider</label>
                         <select id="local-embedding-provider">
                             <option value="local">local</option>
                             <option value="google">google</option>
                             <option value="openai">openai</option>
-                            <option value="dashscope">dashscope</option>
                         </select>
                     </div>
                     <div class="config-field">
                         <label for="local-embedding-model">Embedding Model</label>
-                        <input id="local-embedding-model" type="text" placeholder="sentence-transformers/all-MiniLM-L6-v2">
+                        <input id="local-embedding-model" type="text" placeholder="sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2">
                     </div>
                     <div class="config-field">
-                        <label for="local-dashscope-api-key">DashScope API Key（Embedding）</label>
-                        <input id="local-dashscope-api-key" type="password" placeholder="仅当 embedding_provider=dashscope 时需要">
+                        <label for="local-pdf-parse-backend">PDF 解析策略</label>
+                        <select id="local-pdf-parse-backend">
+                            <option value="auto">auto：先试 MinerU，失败回退本地</option>
+                            <option value="mineru">mineru：只用 MinerU</option>
+                            <option value="local">local：只用本地 PyMuPDF</option>
+                        </select>
+                        <small>推荐默认 `auto`。如果 MinerU 经常超时但本地解析足够用，就改成 `local`。</small>
                     </div>
                     <div class="config-field">
                         <label for="local-top-k">Top K</label>
@@ -157,42 +177,67 @@
                         <input id="local-chunk-overlap" type="number" min="0">
                     </div>
                     <div class="config-field">
-                        <label for="local-rag-hybrid-enabled">RAG Hybrid 检索</label>
-                        <select id="local-rag-hybrid-enabled">
-                            <option value="false">关闭（仅向量检索）</option>
-                            <option value="true">开启（向量 + BM25）</option>
-                        </select>
-                    </div>
-                    <div class="config-field">
-                        <label for="local-rag-mineru-enabled">PDF 解析后端</label>
-                        <select id="local-rag-mineru-enabled">
-                            <option value="false">PyMuPDF（本地）</option>
-                            <option value="true">MinerU（云解析）</option>
-                        </select>
-                        <small>MinerU 开启后需填写 Token，否则会自动回退到 PyMuPDF。</small>
-                    </div>
-                    <div class="config-field">
-                        <label for="local-mineru-api-token">MinerU API Token</label>
-                        <input id="local-mineru-api-token" type="password" placeholder="仅当使用 MinerU 时需要">
+                        <label for="local-vector-store-dir">向量目录</label>
+                        <input id="local-vector-store-dir" type="text" placeholder="data/chroma_db">
+                        <small>默认推荐 `data/chroma_db`。清空书架会删除当前知识向量，但目录本身可能保留为空数据库目录。</small>
                     </div>
 
-                    <div class="config-group-title" style="margin-top:16px;">网络</div>
+                    <div class="config-group-title config-group-title-spaced">网络代理</div>
+                    <div class="config-field">
+                        <label for="local-proxy-port">常用代理端口</label>
+                        <input id="local-proxy-port" type="number" min="1" placeholder="7897">
+                        <small>日常最常改这一项。你的梯子如果从 `7897` 换到 `7892`，通常只需要改这里。</small>
+                    </div>
+                    <div class="config-field">
+                        <label for="local-proxy-host">代理主机</label>
+                        <input id="local-proxy-host" type="text" placeholder="127.0.0.1">
+                    </div>
+                    <div class="config-field">
+                        <label for="local-proxy-scheme">代理协议</label>
+                        <select id="local-proxy-scheme">
+                            <option value="http">http</option>
+                            <option value="https">https</option>
+                        </select>
+                    </div>
                     <div class="config-field">
                         <label for="local-http-proxy">HTTP Proxy</label>
                         <input id="local-http-proxy" type="text" placeholder="http://127.0.0.1:7897">
+                        <small>高级覆盖项。正常情况下留空，让系统自动根据上面的 host/port/scheme 推导即可。</small>
                     </div>
                     <div class="config-field">
                         <label for="local-https-proxy">HTTPS Proxy</label>
                         <input id="local-https-proxy" type="text" placeholder="http://127.0.0.1:7897">
                     </div>
+
+                    <div class="config-group-title config-group-title-spaced">MinerU / PDF</div>
+                    <div class="config-field">
+                        <label for="local-mineru-proxy-mode">MinerU 网络模式</label>
+                        <select id="local-mineru-proxy-mode">
+                            <option value="inherit">inherit：跟随全局代理</option>
+                            <option value="direct">direct：MinerU 直连</option>
+                        </select>
+                        <small>如果 HuggingFace 正常，但 MinerU 老超时，优先把这里改成 `direct`。</small>
+                    </div>
+                    <div class="config-field">
+                        <label for="local-mineru-connect-timeout">MinerU 连接超时（秒）</label>
+                        <input id="local-mineru-connect-timeout" type="number" min="1" placeholder="5">
+                    </div>
+                    <div class="config-field">
+                        <label for="local-mineru-http-proxy">MinerU HTTP Proxy</label>
+                        <input id="local-mineru-http-proxy" type="text" placeholder="通常留空，必要时单独覆盖">
+                    </div>
+                    <div class="config-field">
+                        <label for="local-mineru-https-proxy">MinerU HTTPS Proxy</label>
+                        <input id="local-mineru-https-proxy" type="text" placeholder="通常留空，必要时单独覆盖">
+                    </div>
                 </details>
             </div>
             <div class="config-actions">
-                <button class="topic-confirm-btn primary" onclick="saveLocalConfig()">保存本地配置</button>
-                <button class="topic-confirm-btn primary" style="background-color: var(--accent-blue);" onclick="testConnection()">测试当前连接</button>
-                <button class="topic-confirm-btn secondary" onclick="closeLocalConfigPanel()">关闭</button>
+                <button type="button" class="topic-confirm-btn primary" onclick="saveLocalConfig()">保存设置</button>
+                <button type="button" class="topic-confirm-btn info" onclick="testConnection()">试一下连接</button>
+                <button type="button" class="topic-confirm-btn secondary" onclick="closeLocalConfigPanel()">收起</button>
             </div>
-            <div id="local-config-status" style="font-size:12px; color:var(--text-secondary); margin-top:12px;"></div>
+            <div id="local-config-status" class="status-inline config-panel-status" aria-live="polite"></div>
         </div>
     </div>
 
@@ -200,6 +245,7 @@
     <script defer src="/assets/js/ui.js"></script>
     <script defer src="/assets/js/config.js"></script>
     <script defer src="/assets/js/history.js"></script>
+    <script defer src="/assets/js/knowledge.js"></script>
     <script defer src="/assets/js/session.js"></script>
     <script defer src="/assets/app.js"></script>
 </body>
