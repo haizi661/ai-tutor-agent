@@ -202,6 +202,27 @@ NOISY_EXACT_TERMS = {
     "table",
 }
 
+OUTLINE_WEIGHT_KEYWORDS = [
+    ("熟练掌握", 0.20),
+    ("重点掌握", 0.18),
+    ("掌握", 0.14),
+    ("理解与掌握", 0.12),
+    ("理解和掌握", 0.12),
+    ("理解并掌握", 0.12),
+    ("理解", 0.10),
+    ("了解", 0.06),
+]
+
+GENERIC_MATCH_FRAGMENTS = {
+    "控制系统",
+    "传递函数",
+    "闭环传递",
+    "开环传递",
+    "控制器",
+    "根轨迹",
+    "状态空间",
+}
+
 NOISY_TERM_REGEX = [
     re.compile(r"^第[一二三四五六七八九十百千0-9]+[章节篇].*"),
     re.compile(r"^图\s*\d+[-－]\d+.*"),
@@ -291,13 +312,20 @@ class PDFKnowledgeGraphBuilder:
 
         graph = nx.MultiDiGraph(name=graph_name)
         for _, row in nodes_df.iterrows():
+            node_attrs = {
+                "label": row["label"],
+                "chapters": row["chapters"],
+                "pages": row["pages"],
+                "confidence": float(row["confidence"]),
+                "evidence": row.get("evidence", ""),
+            }
+            for optional_col in ("weight", "weight_bonus", "weight_reason", "outline_hits", "outline_keywords"):
+                if optional_col in row and pd.notna(row.get(optional_col)):
+                    node_attrs[optional_col] = row.get(optional_col)
+
             graph.add_node(
                 row["node_id"],
-                label=row["label"],
-                chapters=row["chapters"],
-                pages=row["pages"],
-                confidence=float(row["confidence"]),
-                evidence=row.get("evidence", ""),
+                **node_attrs,
             )
 
         for _, row in edges_df.iterrows():
@@ -343,6 +371,113 @@ class PDFKnowledgeGraphBuilder:
             "json": json_path,
             "html": html_path,
         }
+
+    def annotate_node_weights_from_outline(
+        self,
+        nodes_df: pd.DataFrame,
+        outline_pdf_path: str,
+        *,
+        base_weight_col: str = "confidence",
+    ) -> tuple[pd.DataFrame, dict[str, Any]]:
+        if nodes_df.empty:
+            return nodes_df.copy(), {
+                "outline_pdf": outline_pdf_path,
+                "total_nodes": 0,
+                "boosted_nodes": 0,
+                "mentioned_nodes": 0,
+                "unchanged_nodes": 0,
+                "avg_bonus": 0.0,
+            }
+
+        if not os.path.exists(outline_pdf_path):
+            raise FileNotFoundError(f"Outline PDF not found: {outline_pdf_path}")
+
+        outline_pages = self._read_pdf(outline_pdf_path)
+        outline_text = "\n".join(outline_pages)
+        outline_sentences = self._split_sentences(outline_text)
+        keyword_hits_by_sentence = [
+            self._keywords_in_text(sentence)
+            for sentence in outline_sentences
+        ]
+
+        weighted = nodes_df.copy()
+        if base_weight_col not in weighted.columns:
+            weighted[base_weight_col] = 0.5
+
+        weight_values: list[float] = []
+        bonus_values: list[float] = []
+        boosted_count = 0
+        mentioned_count = 0
+
+        for idx, row in weighted.iterrows():
+            label = str(row.get("label", "")).strip()
+            base_weight = self._clamp01(row.get(base_weight_col, 0.5))
+
+            aliases = self._build_label_aliases(label)
+            hit_indexes = [
+                sent_idx
+                for sent_idx, sentence in enumerate(outline_sentences)
+                if self._text_matches_aliases(sentence, aliases)
+            ]
+            hits = [outline_sentences[sent_idx] for sent_idx in hit_indexes]
+            matched_keywords: set[str] = set()
+            best_delta = 0.0
+
+            for sent_idx in hit_indexes:
+                window_start = max(0, sent_idx - 1)
+                window_end = min(len(outline_sentences), sent_idx + 2)
+                for nearby_idx in range(window_start, window_end):
+                    for keyword in keyword_hits_by_sentence[nearby_idx]:
+                        matched_keywords.add(keyword)
+
+            for keyword, delta in OUTLINE_WEIGHT_KEYWORDS:
+                if keyword in matched_keywords:
+                    best_delta = max(best_delta, delta)
+
+            if hits:
+                mentioned_count += 1
+
+            mention_bonus = 0.0
+            if best_delta > 0:
+                # 同一知识点在大纲中多次被提及时，给予小幅累积增益。
+                mention_bonus = min(0.06, 0.02 * max(0, len(hits) - 1))
+
+            total_bonus = best_delta + mention_bonus
+            new_weight = self._clamp01(base_weight + total_bonus)
+
+            if total_bonus > 0:
+                boosted_count += 1
+                reason = (
+                    f"base={base_weight:.3f}; +keyword={best_delta:.3f}; "
+                    f"+mention={mention_bonus:.3f}; hits={len(hits)}; "
+                    f"keywords={','.join(sorted(matched_keywords))}"
+                )
+            elif hits:
+                reason = f"base={base_weight:.3f}; outline_mentioned_without_weight_keyword; hits={len(hits)}"
+            else:
+                reason = f"base={base_weight:.3f}; not_mentioned_in_outline"
+
+            weighted.at[idx, "weight"] = round(new_weight, 4)
+            weighted.at[idx, "weight_bonus"] = round(total_bonus, 4)
+            weighted.at[idx, "outline_hits"] = int(len(hits))
+            weighted.at[idx, "outline_keywords"] = ",".join(sorted(matched_keywords))
+            weighted.at[idx, "weight_reason"] = reason
+
+            weight_values.append(new_weight)
+            bonus_values.append(total_bonus)
+
+        unchanged_nodes = int(len(weighted) - boosted_count)
+        summary = {
+            "outline_pdf": outline_pdf_path,
+            "total_nodes": int(len(weighted)),
+            "boosted_nodes": int(boosted_count),
+            "mentioned_nodes": int(mentioned_count),
+            "unchanged_nodes": unchanged_nodes,
+            "avg_weight": round(sum(weight_values) / max(1, len(weight_values)), 4),
+            "avg_bonus": round(sum(bonus_values) / max(1, len(bonus_values)), 4),
+            "base_weight_col": base_weight_col,
+        }
+        return weighted, summary
 
     def _read_pdf(self, pdf_path: str) -> list[str]:
         page_texts: list[str] = []
@@ -900,6 +1035,8 @@ class PDFKnowledgeGraphBuilder:
                 f"章节: {attrs.get('chapters', '')}<br>"
                 f"页码: {attrs.get('pages', '')}<br>"
                 f"置信度: {attrs.get('confidence', '')}<br>"
+                f"课程大纲权重: {attrs.get('weight', '')}<br>"
+                f"权重增量: {attrs.get('weight_bonus', '')}<br>"
                 f"证据: {attrs.get('evidence', '')}"
             )
             net.add_node(node_id, label=attrs.get("label", node_id), title=title)
@@ -916,3 +1053,62 @@ class PDFKnowledgeGraphBuilder:
 
         Path(html_path).parent.mkdir(parents=True, exist_ok=True)
         net.save_graph(html_path)
+
+    @staticmethod
+    def _clamp01(value: Any, default: float = 0.5) -> float:
+        try:
+            numeric = float(value)
+        except Exception:
+            numeric = default
+        return max(0.0, min(1.0, numeric))
+
+    @staticmethod
+    def _keywords_in_text(text: str) -> set[str]:
+        return {keyword for keyword, _ in OUTLINE_WEIGHT_KEYWORDS if keyword in text}
+
+    @staticmethod
+    def _normalize_match_text(text: str) -> str:
+        normalized = re.sub(r"[\s\u3000]+", "", text or "")
+        normalized = re.sub(r"[：:，,。；;、（）()【】\[\]《》<>\-—]+", "", normalized)
+        return normalized
+
+    def _build_label_aliases(self, label: str) -> list[str]:
+        raw = (label or "").strip()
+        if not raw:
+            return []
+
+        aliases: set[str] = {raw}
+        base = raw.replace("系统的", "").replace("的", "")
+        aliases.add(base)
+
+        normalized_aliases = {
+            self._normalize_match_text(item)
+            for item in aliases
+            if len(self._normalize_match_text(item)) >= 2
+        }
+        # 避免 2 字过短词导致误匹配，保留长度 >=3 的优先匹配别名。
+        return sorted(normalized_aliases, key=len, reverse=True)
+
+    def _text_matches_aliases(self, text: str, aliases: list[str]) -> bool:
+        if not aliases:
+            return False
+        normalized_text = self._normalize_match_text(text)
+        if not normalized_text:
+            return False
+
+        for alias in aliases:
+            if len(alias) >= 3 and alias in normalized_text:
+                return True
+
+        # 兜底: 对较长知识点允许共享连续子串命中，缓解表述差异。
+        for alias in aliases:
+            if len(alias) < 6:
+                continue
+            for i in range(0, len(alias) - 4):
+                frag = alias[i : i + 5]
+                if frag in GENERIC_MATCH_FRAGMENTS:
+                    continue
+                if frag in normalized_text:
+                    return True
+
+        return False

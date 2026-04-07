@@ -1,0 +1,706 @@
+﻿keep,source,target,source_label,target_label,relation,chapter,weight,confidence,evidence
+True,K001,K003,线性系统的状态空间,非线性控制系统,contrasts_with,concept_pair,1.0,0.78,contrasts_with:concept_pair
+True,K071,K001,具有饱和特性的非线性控制系统,线性系统的状态空间,contrasts_with,concept_pair,1.0,0.78,contrasts_with:concept_pair
+True,K002,K003,线性离散系统的分析与校正,非线性控制系统,contrasts_with,concept_pair,1.0,0.78,contrasts_with:concept_pair
+True,K071,K002,具有饱和特性的非线性控制系统,线性离散系统的分析与校正,contrasts_with,concept_pair,1.0,0.78,contrasts_with:concept_pair
+True,K002,K093,线性离散系统的分析与校正,连续部分传递函数,contrasts_with,concept_pair,1.0,0.78,contrasts_with:concept_pair
+True,K005,K003,线性系统的校正,非线性控制系统,contrasts_with,concept_pair,1.0,0.78,contrasts_with:concept_pair
+True,K006,K003,线性系统的根轨迹,非线性控制系统,contrasts_with,concept_pair,1.0,0.78,contrasts_with:concept_pair
+True,K036,K003,线性二次型最优控制,非线性控制系统,contrasts_with,concept_pair,1.0,0.78,contrasts_with:concept_pair
+True,K069,K003,线性系统的状态空间分析与综合,非线性控制系统,contrasts_with,concept_pair,1.0,0.78,contrasts_with:concept_pair
+True,K070,K003,线性系统的时域分析法,非线性控制系统,contrasts_with,concept_pair,1.0,0.78,contrasts_with:concept_pair
+True,K071,K005,具有饱和特性的非线性控制系统,线性系统的校正,contrasts_with,concept_pair,1.0,0.78,contrasts_with:concept_pair
+True,K071,K006,具有饱和特性的非线性控制系统,线性系统的根轨迹,contrasts_with,concept_pair,1.0,0.78,contrasts_with:concept_pair
+True,K011,K007,开环传递函数,闭环传递函数,contrasts_with,concept_pair,1.0,0.78,contrasts_with:concept_pair
+True,K012,K007,系统开环传递函数,闭环传递函数,contrasts_with,concept_pair,1.0,0.78,contrasts_with:concept_pair
+True,K020,K007,系统开环频率特性,闭环传递函数,contrasts_with,concept_pair,1.0,0.78,contrasts_with:concept_pair
+True,K023,K007,其开环传递函数,闭环传递函数,contrasts_with,concept_pair,1.0,0.78,contrasts_with:concept_pair
+True,K024,K007,开环系统脉冲传递函数,闭环传递函数,contrasts_with,concept_pair,1.0,0.78,contrasts_with:concept_pair
+True,K025,K007,系统的开环传递函数,闭环传递函数,contrasts_with,concept_pair,1.0,0.78,contrasts_with:concept_pair
+True,K041,K007,建立开环系统,闭环传递函数,contrasts_with,concept_pair,1.0,0.78,contrasts_with:concept_pair
+True,K056,K007,绘制系统的开环频率特性,闭环传递函数,contrasts_with,concept_pair,1.0,0.78,contrasts_with:concept_pair
+True,K085,K007,系统的开环和闭环传递函数,闭环传递函数,contrasts_with,concept_pair,1.0,0.78,contrasts_with:concept_pair
+True,K011,K018,开环传递函数,相应的闭环传递函数,contrasts_with,concept_pair,1.0,0.78,contrasts_with:concept_pair
+True,K011,K030,开环传递函数,系统闭环传递函数,contrasts_with,concept_pair,1.0,0.78,contrasts_with:concept_pair
+True,K055,K011,其闭环传递函数,开环传递函数,contrasts_with,concept_pair,1.0,0.78,contrasts_with:concept_pair
+True,K011,K058,开环传递函数,绘制系统的闭环频率特性,contrasts_with,concept_pair,1.0,0.78,contrasts_with:concept_pair
+True,K011,K072,开环传递函数,无前置滤波器时系统的闭环传递函数,contrasts_with,concept_pair,1.0,0.78,contrasts_with:concept_pair
+True,K011,K073,开环传递函数,有前置滤波器时系统的闭环传递函数,contrasts_with,concept_pair,1.0,0.78,contrasts_with:concept_pair
+True,K074,K011,建立闭环系统,开环传递函数,contrasts_with,concept_pair,1.0,0.78,contrasts_with:concept_pair
+True,K018,K012,相应的闭环传递函数,系统开环传递函数,contrasts_with,concept_pair,1.0,0.78,contrasts_with:concept_pair
+True,K012,K030,系统开环传递函数,系统闭环传递函数,contrasts_with,concept_pair,1.0,0.78,contrasts_with:concept_pair
+True,K055,K012,其闭环传递函数,系统开环传递函数,contrasts_with,concept_pair,1.0,0.78,contrasts_with:concept_pair
+True,K012,K058,系统开环传递函数,绘制系统的闭环频率特性,contrasts_with,concept_pair,1.0,0.78,contrasts_with:concept_pair
+True,K072,K012,无前置滤波器时系统的闭环传递函数,系统开环传递函数,contrasts_with,concept_pair,1.0,0.78,contrasts_with:concept_pair
+True,K073,K012,有前置滤波器时系统的闭环传递函数,系统开环传递函数,contrasts_with,concept_pair,1.0,0.78,contrasts_with:concept_pair
+True,K074,K012,建立闭环系统,系统开环传递函数,contrasts_with,concept_pair,1.0,0.78,contrasts_with:concept_pair
+True,K012,K078,系统开环传递函数,闭环脉冲传递函数,contrasts_with,concept_pair,1.0,0.78,contrasts_with:concept_pair
+True,K012,K083,系统开环传递函数,系统的闭环传递函数,contrasts_with,concept_pair,1.0,0.78,contrasts_with:concept_pair
+True,K012,K085,系统开环传递函数,系统的开环和闭环传递函数,contrasts_with,concept_pair,1.0,0.78,contrasts_with:concept_pair
+True,K018,K020,相应的闭环传递函数,系统开环频率特性,contrasts_with,concept_pair,1.0,0.78,contrasts_with:concept_pair
+True,K023,K018,其开环传递函数,相应的闭环传递函数,contrasts_with,concept_pair,1.0,0.78,contrasts_with:concept_pair
+True,K024,K018,开环系统脉冲传递函数,相应的闭环传递函数,contrasts_with,concept_pair,1.0,0.78,contrasts_with:concept_pair
+True,K018,K025,相应的闭环传递函数,系统的开环传递函数,contrasts_with,concept_pair,1.0,0.78,contrasts_with:concept_pair
+True,K041,K018,建立开环系统,相应的闭环传递函数,contrasts_with,concept_pair,1.0,0.78,contrasts_with:concept_pair
+True,K018,K056,相应的闭环传递函数,绘制系统的开环频率特性,contrasts_with,concept_pair,1.0,0.78,contrasts_with:concept_pair
+True,K018,K085,相应的闭环传递函数,系统的开环和闭环传递函数,contrasts_with,concept_pair,1.0,0.78,contrasts_with:concept_pair
+True,K020,K030,系统开环频率特性,系统闭环传递函数,contrasts_with,concept_pair,1.0,0.78,contrasts_with:concept_pair
+True,K055,K020,其闭环传递函数,系统开环频率特性,contrasts_with,concept_pair,1.0,0.78,contrasts_with:concept_pair
+True,K020,K058,系统开环频率特性,绘制系统的闭环频率特性,contrasts_with,concept_pair,1.0,0.78,contrasts_with:concept_pair
+True,K072,K020,无前置滤波器时系统的闭环传递函数,系统开环频率特性,contrasts_with,concept_pair,1.0,0.78,contrasts_with:concept_pair
+True,K073,K020,有前置滤波器时系统的闭环传递函数,系统开环频率特性,contrasts_with,concept_pair,1.0,0.78,contrasts_with:concept_pair
+True,K074,K020,建立闭环系统,系统开环频率特性,contrasts_with,concept_pair,1.0,0.78,contrasts_with:concept_pair
+True,K020,K078,系统开环频率特性,闭环脉冲传递函数,contrasts_with,concept_pair,1.0,0.78,contrasts_with:concept_pair
+True,K020,K083,系统开环频率特性,系统的闭环传递函数,contrasts_with,concept_pair,1.0,0.78,contrasts_with:concept_pair
+True,K020,K085,系统开环频率特性,系统的开环和闭环传递函数,contrasts_with,concept_pair,1.0,0.78,contrasts_with:concept_pair
+True,K023,K030,其开环传递函数,系统闭环传递函数,contrasts_with,concept_pair,1.0,0.78,contrasts_with:concept_pair
+True,K023,K055,其开环传递函数,其闭环传递函数,contrasts_with,concept_pair,1.0,0.78,contrasts_with:concept_pair
+True,K023,K058,其开环传递函数,绘制系统的闭环频率特性,contrasts_with,concept_pair,1.0,0.78,contrasts_with:concept_pair
+True,K023,K072,其开环传递函数,无前置滤波器时系统的闭环传递函数,contrasts_with,concept_pair,1.0,0.78,contrasts_with:concept_pair
+True,K024,K030,开环系统脉冲传递函数,系统闭环传递函数,contrasts_with,concept_pair,1.0,0.78,contrasts_with:concept_pair
+True,K055,K024,其闭环传递函数,开环系统脉冲传递函数,contrasts_with,concept_pair,1.0,0.78,contrasts_with:concept_pair
+True,K024,K058,开环系统脉冲传递函数,绘制系统的闭环频率特性,contrasts_with,concept_pair,1.0,0.78,contrasts_with:concept_pair
+True,K024,K072,开环系统脉冲传递函数,无前置滤波器时系统的闭环传递函数,contrasts_with,concept_pair,1.0,0.78,contrasts_with:concept_pair
+True,K024,K073,开环系统脉冲传递函数,有前置滤波器时系统的闭环传递函数,contrasts_with,concept_pair,1.0,0.78,contrasts_with:concept_pair
+True,K074,K024,建立闭环系统,开环系统脉冲传递函数,contrasts_with,concept_pair,1.0,0.78,contrasts_with:concept_pair
+True,K025,K030,系统的开环传递函数,系统闭环传递函数,contrasts_with,concept_pair,1.0,0.78,contrasts_with:concept_pair
+True,K055,K025,其闭环传递函数,系统的开环传递函数,contrasts_with,concept_pair,1.0,0.78,contrasts_with:concept_pair
+True,K025,K058,系统的开环传递函数,绘制系统的闭环频率特性,contrasts_with,concept_pair,1.0,0.78,contrasts_with:concept_pair
+True,K072,K025,无前置滤波器时系统的闭环传递函数,系统的开环传递函数,contrasts_with,concept_pair,1.0,0.78,contrasts_with:concept_pair
+True,K073,K025,有前置滤波器时系统的闭环传递函数,系统的开环传递函数,contrasts_with,concept_pair,1.0,0.78,contrasts_with:concept_pair
+True,K074,K025,建立闭环系统,系统的开环传递函数,contrasts_with,concept_pair,1.0,0.78,contrasts_with:concept_pair
+True,K025,K078,系统的开环传递函数,闭环脉冲传递函数,contrasts_with,concept_pair,1.0,0.78,contrasts_with:concept_pair
+True,K025,K083,系统的开环传递函数,系统的闭环传递函数,contrasts_with,concept_pair,1.0,0.78,contrasts_with:concept_pair
+True,K025,K085,系统的开环传递函数,系统的开环和闭环传递函数,contrasts_with,concept_pair,1.0,0.78,contrasts_with:concept_pair
+True,K041,K030,建立开环系统,系统闭环传递函数,contrasts_with,concept_pair,1.0,0.78,contrasts_with:concept_pair
+True,K030,K056,系统闭环传递函数,绘制系统的开环频率特性,contrasts_with,concept_pair,1.0,0.78,contrasts_with:concept_pair
+True,K085,K030,系统的开环和闭环传递函数,系统闭环传递函数,contrasts_with,concept_pair,1.0,0.78,contrasts_with:concept_pair
+True,K071,K036,具有饱和特性的非线性控制系统,线性二次型最优控制,contrasts_with,concept_pair,1.0,0.78,contrasts_with:concept_pair
+True,K055,K041,其闭环传递函数,建立开环系统,contrasts_with,concept_pair,1.0,0.78,contrasts_with:concept_pair
+True,K041,K058,建立开环系统,绘制系统的闭环频率特性,contrasts_with,concept_pair,1.0,0.78,contrasts_with:concept_pair
+True,K041,K072,建立开环系统,无前置滤波器时系统的闭环传递函数,contrasts_with,concept_pair,1.0,0.78,contrasts_with:concept_pair
+True,K041,K073,建立开环系统,有前置滤波器时系统的闭环传递函数,contrasts_with,concept_pair,1.0,0.78,contrasts_with:concept_pair
+True,K050,K093,离散系统的稳定性,连续部分传递函数,contrasts_with,concept_pair,1.0,0.78,contrasts_with:concept_pair
+True,K056,K058,绘制系统的开环频率特性,绘制系统的闭环频率特性,contrasts_with,concept_pair,1.0,0.78,contrasts_with:concept_pair
+True,K072,K056,无前置滤波器时系统的闭环传递函数,绘制系统的开环频率特性,contrasts_with,concept_pair,1.0,0.78,contrasts_with:concept_pair
+True,K073,K056,有前置滤波器时系统的闭环传递函数,绘制系统的开环频率特性,contrasts_with,concept_pair,1.0,0.78,contrasts_with:concept_pair
+True,K074,K056,建立闭环系统,绘制系统的开环频率特性,contrasts_with,concept_pair,1.0,0.78,contrasts_with:concept_pair
+True,K056,K078,绘制系统的开环频率特性,闭环脉冲传递函数,contrasts_with,concept_pair,1.0,0.78,contrasts_with:concept_pair
+True,K083,K056,系统的闭环传递函数,绘制系统的开环频率特性,contrasts_with,concept_pair,1.0,0.78,contrasts_with:concept_pair
+True,K085,K056,系统的开环和闭环传递函数,绘制系统的开环频率特性,contrasts_with,concept_pair,1.0,0.78,contrasts_with:concept_pair
+True,K086,K056,系统的闭环稳定性,绘制系统的开环频率特性,contrasts_with,concept_pair,1.0,0.78,contrasts_with:concept_pair
+True,K085,K058,系统的开环和闭环传递函数,绘制系统的闭环频率特性,contrasts_with,concept_pair,1.0,0.78,contrasts_with:concept_pair
+True,K071,K069,具有饱和特性的非线性控制系统,线性系统的状态空间分析与综合,contrasts_with,concept_pair,1.0,0.78,contrasts_with:concept_pair
+True,K072,K085,无前置滤波器时系统的闭环传递函数,系统的开环和闭环传递函数,contrasts_with,concept_pair,1.0,0.78,contrasts_with:concept_pair
+True,K073,K085,有前置滤波器时系统的闭环传递函数,系统的开环和闭环传递函数,contrasts_with,concept_pair,1.0,0.78,contrasts_with:concept_pair
+True,K085,K078,系统的开环和闭环传递函数,闭环脉冲传递函数,contrasts_with,concept_pair,1.0,0.78,contrasts_with:concept_pair
+True,K085,K083,系统的开环和闭环传递函数,系统的闭环传递函数,contrasts_with,concept_pair,1.0,0.78,contrasts_with:concept_pair
+True,K088,K093,离散系统的数字校正,连续部分传递函数,contrasts_with,concept_pair,1.0,0.78,contrasts_with:concept_pair
+True,K077,K001,通道的串联补偿器传递函数,线性系统的状态空间,method_for,分段章节 6,1.0,0.72,method_for:分段章节 6
+True,K002,K003,线性离散系统的分析与校正,非线性控制系统,method_for,分段章节 5,1.0,0.72,method_for:分段章节 5
+True,K002,K012,线性离散系统的分析与校正,系统开环传递函数,method_for,分段章节 4,1.0,0.72,method_for:分段章节 4
+True,K002,K013,线性离散系统的分析与校正,脉冲传递函数,method_for,分段章节 4,1.0,0.72,method_for:分段章节 4
+True,K002,K018,线性离散系统的分析与校正,相应的闭环传递函数,method_for,分段章节 4,1.0,0.72,method_for:分段章节 4
+True,K002,K022,线性离散系统的分析与校正,复合控制系统,method_for,分段章节 4,1.0,0.72,method_for:分段章节 4
+True,K002,K023,线性离散系统的分析与校正,其开环传递函数,method_for,分段章节 4,1.0,0.72,method_for:分段章节 4
+True,K002,K024,线性离散系统的分析与校正,开环系统脉冲传递函数,method_for,分段章节 5,1.0,0.72,method_for:分段章节 5
+True,K002,K029,线性离散系统的分析与校正,数字控制系统,method_for,分段章节 4,1.0,0.72,method_for:分段章节 4
+True,K019,K003,数字控制器,非线性控制系统,method_for,分段章节 5,1.0,0.72,method_for:分段章节 5
+True,K047,K003,数字控制器脉冲传递函数,非线性控制系统,method_for,分段章节 5,1.0,0.72,method_for:分段章节 5
+True,K077,K003,通道的串联补偿器传递函数,非线性控制系统,method_for,分段章节 6,1.0,0.72,method_for:分段章节 6
+True,K088,K003,离散系统的数字校正,非线性控制系统,method_for,分段章节 5,1.0,0.72,method_for:分段章节 5
+True,K008,K004,复合校正,动态系统的最优控制,method_for,分段章节 8,1.0,0.72,method_for:分段章节 8
+True,K031,K004,绘制根轨迹,动态系统的最优控制,method_for,分段章节 8,1.0,0.72,method_for:分段章节 8
+True,K038,K004,绘制校正,动态系统的最优控制,method_for,分段章节 8,1.0,0.72,method_for:分段章节 8
+True,K005,K012,线性系统的校正,系统开环传递函数,method_for,分段章节 4,1.0,0.72,method_for:分段章节 4
+True,K005,K013,线性系统的校正,脉冲传递函数,method_for,分段章节 4,1.0,0.72,method_for:分段章节 4
+True,K005,K018,线性系统的校正,相应的闭环传递函数,method_for,分段章节 4,1.0,0.72,method_for:分段章节 4
+True,K005,K022,线性系统的校正,复合控制系统,method_for,分段章节 4,1.0,0.72,method_for:分段章节 4
+True,K005,K023,线性系统的校正,其开环传递函数,method_for,分段章节 4,1.0,0.72,method_for:分段章节 4
+True,K005,K029,线性系统的校正,数字控制系统,method_for,分段章节 4,1.0,0.72,method_for:分段章节 4
+True,K005,K034,线性系统的校正,控制器的传递函数,method_for,分段章节 4,1.0,0.72,method_for:分段章节 4
+True,K005,K044,线性系统的校正,前置滤波的传递函数,method_for,分段章节 4,1.0,0.72,method_for:分段章节 4
+True,K006,K007,线性系统的根轨迹,闭环传递函数,method_for,分段章节 2,1.0,0.72,method_for:分段章节 2
+True,K006,K011,线性系统的根轨迹,开环传递函数,method_for,分段章节 3,1.0,0.72,method_for:分段章节 3
+True,K006,K012,线性系统的根轨迹,系统开环传递函数,method_for,分段章节 2,1.0,0.72,method_for:分段章节 2
+True,K006,K014,线性系统的根轨迹,反馈控制系统,method_for,分段章节 3,1.0,0.72,method_for:分段章节 3
+True,K006,K018,线性系统的根轨迹,相应的闭环传递函数,method_for,分段章节 2,1.0,0.72,method_for:分段章节 2
+True,K006,K023,线性系统的根轨迹,其开环传递函数,method_for,分段章节 3,1.0,0.72,method_for:分段章节 3
+True,K006,K025,线性系统的根轨迹,系统的开环传递函数,method_for,分段章节 2,1.0,0.72,method_for:分段章节 2
+True,K006,K027,线性系统的根轨迹,磁头控制系统,method_for,分段章节 2,1.0,0.72,method_for:分段章节 2
+True,K028,K007,零度根轨迹,闭环传递函数,method_for,分段章节 3,1.0,0.72,method_for:分段章节 3
+True,K039,K007,所以根轨迹,闭环传递函数,method_for,分段章节 2,1.0,0.72,method_for:分段章节 2
+True,K042,K007,绘制相应系统的根轨迹,闭环传递函数,method_for,分段章节 3,1.0,0.72,method_for:分段章节 3
+True,K062,K007,因此根轨迹,闭环传递函数,method_for,分段章节 2,1.0,0.72,method_for:分段章节 2
+True,K063,K007,如果根轨迹,闭环传递函数,method_for,分段章节 2,1.0,0.72,method_for:分段章节 2
+True,K008,K011,复合校正,开环传递函数,method_for,分段章节 8,1.0,0.72,method_for:分段章节 8
+True,K008,K012,复合校正,系统开环传递函数,method_for,分段章节 4,1.0,0.72,method_for:分段章节 4
+True,K008,K013,复合校正,脉冲传递函数,method_for,分段章节 4,1.0,0.72,method_for:分段章节 4
+True,K008,K014,复合校正,反馈控制系统,method_for,分段章节 8,1.0,0.72,method_for:分段章节 8
+True,K008,K015,复合校正,系统的传递函数,method_for,分段章节 8,1.0,0.72,method_for:分段章节 8
+True,K008,K017,复合校正,判断系统的可控性,method_for,分段章节 8,1.0,0.72,method_for:分段章节 8
+True,K008,K018,复合校正,相应的闭环传递函数,method_for,分段章节 4,1.0,0.72,method_for:分段章节 4
+True,K009,K012,超前校正,系统开环传递函数,method_for,分段章节 4,1.0,0.72,method_for:分段章节 4
+True,K009,K013,超前校正,脉冲传递函数,method_for,分段章节 4,1.0,0.72,method_for:分段章节 4
+True,K009,K018,超前校正,相应的闭环传递函数,method_for,分段章节 4,1.0,0.72,method_for:分段章节 4
+True,K009,K022,超前校正,复合控制系统,method_for,分段章节 4,1.0,0.72,method_for:分段章节 4
+True,K009,K023,超前校正,其开环传递函数,method_for,分段章节 4,1.0,0.72,method_for:分段章节 4
+True,K009,K029,超前校正,数字控制系统,method_for,分段章节 4,1.0,0.72,method_for:分段章节 4
+True,K009,K034,超前校正,控制器的传递函数,method_for,分段章节 4,1.0,0.72,method_for:分段章节 4
+True,K009,K044,超前校正,前置滤波的传递函数,method_for,分段章节 4,1.0,0.72,method_for:分段章节 4
+True,K028,K011,零度根轨迹,开环传递函数,method_for,分段章节 3,1.0,0.72,method_for:分段章节 3
+True,K031,K011,绘制根轨迹,开环传递函数,method_for,分段章节 8,1.0,0.72,method_for:分段章节 8
+True,K038,K011,绘制校正,开环传递函数,method_for,分段章节 8,1.0,0.72,method_for:分段章节 8
+True,K042,K011,绘制相应系统的根轨迹,开环传递函数,method_for,分段章节 3,1.0,0.72,method_for:分段章节 3
+True,K021,K012,串联校正,系统开环传递函数,method_for,分段章节 4,1.0,0.72,method_for:分段章节 4
+True,K028,K012,零度根轨迹,系统开环传递函数,method_for,分段章节 3,1.0,0.72,method_for:分段章节 3
+True,K033,K012,反馈校正,系统开环传递函数,method_for,分段章节 4,1.0,0.72,method_for:分段章节 4
+True,K034,K012,控制器的传递函数,系统开环传递函数,method_for,分段章节 4,1.0,0.72,method_for:分段章节 4
+True,K039,K012,所以根轨迹,系统开环传递函数,method_for,分段章节 2,1.0,0.72,method_for:分段章节 2
+True,K040,K012,使已校正,系统开环传递函数,method_for,分段章节 4,1.0,0.72,method_for:分段章节 4
+True,K042,K012,绘制相应系统的根轨迹,系统开环传递函数,method_for,分段章节 3,1.0,0.72,method_for:分段章节 3
+True,K043,K012,控制规律的控制器,系统开环传递函数,method_for,分段章节 4,1.0,0.72,method_for:分段章节 4
+True,K062,K012,因此根轨迹,系统开环传递函数,method_for,分段章节 2,1.0,0.72,method_for:分段章节 2
+True,K063,K012,如果根轨迹,系统开环传递函数,method_for,分段章节 2,1.0,0.72,method_for:分段章节 2
+True,K064,K012,在串联校正,系统开环传递函数,method_for,分段章节 4,1.0,0.72,method_for:分段章节 4
+True,K065,K012,算出待校正,系统开环传递函数,method_for,分段章节 4,1.0,0.72,method_for:分段章节 4
+True,K067,K012,前馈补偿,系统开环传递函数,method_for,分段章节 4,1.0,0.72,method_for:分段章节 4
+True,K068,K012,的前馈补偿,系统开环传递函数,method_for,分段章节 4,1.0,0.72,method_for:分段章节 4
+True,K021,K013,串联校正,脉冲传递函数,method_for,分段章节 4,1.0,0.72,method_for:分段章节 4
+True,K033,K013,反馈校正,脉冲传递函数,method_for,分段章节 4,1.0,0.72,method_for:分段章节 4
+True,K034,K013,控制器的传递函数,脉冲传递函数,method_for,分段章节 4,1.0,0.72,method_for:分段章节 4
+True,K040,K013,使已校正,脉冲传递函数,method_for,分段章节 4,1.0,0.72,method_for:分段章节 4
+True,K043,K013,控制规律的控制器,脉冲传递函数,method_for,分段章节 4,1.0,0.72,method_for:分段章节 4
+True,K064,K013,在串联校正,脉冲传递函数,method_for,分段章节 4,1.0,0.72,method_for:分段章节 4
+True,K065,K013,算出待校正,脉冲传递函数,method_for,分段章节 4,1.0,0.72,method_for:分段章节 4
+True,K067,K013,前馈补偿,脉冲传递函数,method_for,分段章节 4,1.0,0.72,method_for:分段章节 4
+True,K068,K013,的前馈补偿,脉冲传递函数,method_for,分段章节 4,1.0,0.72,method_for:分段章节 4
+True,K028,K014,零度根轨迹,反馈控制系统,method_for,分段章节 3,1.0,0.72,method_for:分段章节 3
+True,K031,K014,绘制根轨迹,反馈控制系统,method_for,分段章节 8,1.0,0.72,method_for:分段章节 8
+True,K038,K014,绘制校正,反馈控制系统,method_for,分段章节 8,1.0,0.72,method_for:分段章节 8
+True,K042,K014,绘制相应系统的根轨迹,反馈控制系统,method_for,分段章节 3,1.0,0.72,method_for:分段章节 3
+True,K031,K015,绘制根轨迹,系统的传递函数,method_for,分段章节 8,1.0,0.72,method_for:分段章节 8
+True,K038,K015,绘制校正,系统的传递函数,method_for,分段章节 8,1.0,0.72,method_for:分段章节 8
+True,K077,K015,通道的串联补偿器传递函数,系统的传递函数,method_for,分段章节 6,1.0,0.72,method_for:分段章节 6
+True,K031,K017,绘制根轨迹,判断系统的可控性,method_for,分段章节 8,1.0,0.72,method_for:分段章节 8
+True,K038,K017,绘制校正,判断系统的可控性,method_for,分段章节 8,1.0,0.72,method_for:分段章节 8
+True,K021,K018,串联校正,相应的闭环传递函数,method_for,分段章节 4,1.0,0.72,method_for:分段章节 4
+True,K033,K018,反馈校正,相应的闭环传递函数,method_for,分段章节 4,1.0,0.72,method_for:分段章节 4
+True,K034,K018,控制器的传递函数,相应的闭环传递函数,method_for,分段章节 4,1.0,0.72,method_for:分段章节 4
+True,K039,K018,所以根轨迹,相应的闭环传递函数,method_for,分段章节 2,1.0,0.72,method_for:分段章节 2
+True,K040,K018,使已校正,相应的闭环传递函数,method_for,分段章节 4,1.0,0.72,method_for:分段章节 4
+True,K043,K018,控制规律的控制器,相应的闭环传递函数,method_for,分段章节 4,1.0,0.72,method_for:分段章节 4
+True,K062,K018,因此根轨迹,相应的闭环传递函数,method_for,分段章节 2,1.0,0.72,method_for:分段章节 2
+True,K063,K018,如果根轨迹,相应的闭环传递函数,method_for,分段章节 2,1.0,0.72,method_for:分段章节 2
+True,K064,K018,在串联校正,相应的闭环传递函数,method_for,分段章节 4,1.0,0.72,method_for:分段章节 4
+True,K065,K018,算出待校正,相应的闭环传递函数,method_for,分段章节 4,1.0,0.72,method_for:分段章节 4
+True,K067,K018,前馈补偿,相应的闭环传递函数,method_for,分段章节 4,1.0,0.72,method_for:分段章节 4
+True,K068,K018,的前馈补偿,相应的闭环传递函数,method_for,分段章节 4,1.0,0.72,method_for:分段章节 4
+True,K019,K024,数字控制器,开环系统脉冲传递函数,method_for,分段章节 5,1.0,0.72,method_for:分段章节 5
+True,K019,K046,数字控制器,的脉冲传递函数,method_for,分段章节 5,1.0,0.72,method_for:分段章节 5
+True,K019,K047,数字控制器,数字控制器脉冲传递函数,method_for,分段章节 5,1.0,0.72,method_for:分段章节 5
+True,K019,K050,数字控制器,离散系统的稳定性,method_for,分段章节 5,1.0,0.72,method_for:分段章节 5
+True,K019,K071,数字控制器,具有饱和特性的非线性控制系统,method_for,分段章节 5,1.0,0.72,method_for:分段章节 5
+True,K019,K078,数字控制器,闭环脉冲传递函数,method_for,分段章节 5,1.0,0.72,method_for:分段章节 5
+True,K019,K089,数字控制器,广义对象脉冲传递函数,method_for,分段章节 5,1.0,0.72,method_for:分段章节 5
+True,K021,K022,串联校正,复合控制系统,method_for,分段章节 4,1.0,0.72,method_for:分段章节 4
+True,K021,K023,串联校正,其开环传递函数,method_for,分段章节 4,1.0,0.72,method_for:分段章节 4
+True,K021,K029,串联校正,数字控制系统,method_for,分段章节 4,1.0,0.72,method_for:分段章节 4
+True,K021,K034,串联校正,控制器的传递函数,method_for,分段章节 4,1.0,0.72,method_for:分段章节 4
+True,K021,K044,串联校正,前置滤波的传递函数,method_for,分段章节 4,1.0,0.72,method_for:分段章节 4
+True,K033,K022,反馈校正,复合控制系统,method_for,分段章节 4,1.0,0.72,method_for:分段章节 4
+True,K034,K022,控制器的传递函数,复合控制系统,method_for,分段章节 4,1.0,0.72,method_for:分段章节 4
+True,K040,K022,使已校正,复合控制系统,method_for,分段章节 4,1.0,0.72,method_for:分段章节 4
+True,K043,K022,控制规律的控制器,复合控制系统,method_for,分段章节 4,1.0,0.72,method_for:分段章节 4
+True,K064,K022,在串联校正,复合控制系统,method_for,分段章节 4,1.0,0.72,method_for:分段章节 4
+True,K065,K022,算出待校正,复合控制系统,method_for,分段章节 4,1.0,0.72,method_for:分段章节 4
+True,K067,K022,前馈补偿,复合控制系统,method_for,分段章节 4,1.0,0.72,method_for:分段章节 4
+True,K068,K022,的前馈补偿,复合控制系统,method_for,分段章节 4,1.0,0.72,method_for:分段章节 4
+True,K028,K023,零度根轨迹,其开环传递函数,method_for,分段章节 3,1.0,0.72,method_for:分段章节 3
+True,K033,K023,反馈校正,其开环传递函数,method_for,分段章节 4,1.0,0.72,method_for:分段章节 4
+True,K034,K023,控制器的传递函数,其开环传递函数,method_for,分段章节 4,1.0,0.72,method_for:分段章节 4
+True,K040,K023,使已校正,其开环传递函数,method_for,分段章节 4,1.0,0.72,method_for:分段章节 4
+True,K042,K023,绘制相应系统的根轨迹,其开环传递函数,method_for,分段章节 3,1.0,0.72,method_for:分段章节 3
+True,K043,K023,控制规律的控制器,其开环传递函数,method_for,分段章节 4,1.0,0.72,method_for:分段章节 4
+True,K064,K023,在串联校正,其开环传递函数,method_for,分段章节 4,1.0,0.72,method_for:分段章节 4
+True,K065,K023,算出待校正,其开环传递函数,method_for,分段章节 4,1.0,0.72,method_for:分段章节 4
+True,K067,K023,前馈补偿,其开环传递函数,method_for,分段章节 4,1.0,0.72,method_for:分段章节 4
+True,K068,K023,的前馈补偿,其开环传递函数,method_for,分段章节 4,1.0,0.72,method_for:分段章节 4
+True,K047,K024,数字控制器脉冲传递函数,开环系统脉冲传递函数,method_for,分段章节 5,1.0,0.72,method_for:分段章节 5
+True,K088,K024,离散系统的数字校正,开环系统脉冲传递函数,method_for,分段章节 5,1.0,0.72,method_for:分段章节 5
+True,K039,K025,所以根轨迹,系统的开环传递函数,method_for,分段章节 2,1.0,0.72,method_for:分段章节 2
+True,K062,K025,因此根轨迹,系统的开环传递函数,method_for,分段章节 2,1.0,0.72,method_for:分段章节 2
+True,K063,K025,如果根轨迹,系统的开环传递函数,method_for,分段章节 2,1.0,0.72,method_for:分段章节 2
+True,K077,K026,通道的串联补偿器传递函数,输出可控性,method_for,分段章节 6,1.0,0.72,method_for:分段章节 6
+True,K039,K027,所以根轨迹,磁头控制系统,method_for,分段章节 2,1.0,0.72,method_for:分段章节 2
+True,K062,K027,因此根轨迹,磁头控制系统,method_for,分段章节 2,1.0,0.72,method_for:分段章节 2
+True,K063,K027,如果根轨迹,磁头控制系统,method_for,分段章节 2,1.0,0.72,method_for:分段章节 2
+True,K028,K032,零度根轨迹,雕刻机控制系统,method_for,分段章节 3,1.0,0.72,method_for:分段章节 3
+True,K028,K060,零度根轨迹,磁头位置控制系统,method_for,分段章节 3,1.0,0.72,method_for:分段章节 3
+True,K028,K083,零度根轨迹,系统的闭环传递函数,method_for,分段章节 3,1.0,0.72,method_for:分段章节 3
+True,K033,K029,反馈校正,数字控制系统,method_for,分段章节 4,1.0,0.72,method_for:分段章节 4
+True,K034,K029,控制器的传递函数,数字控制系统,method_for,分段章节 4,1.0,0.72,method_for:分段章节 4
+True,K040,K029,使已校正,数字控制系统,method_for,分段章节 4,1.0,0.72,method_for:分段章节 4
+True,K043,K029,控制规律的控制器,数字控制系统,method_for,分段章节 4,1.0,0.72,method_for:分段章节 4
+True,K064,K029,在串联校正,数字控制系统,method_for,分段章节 4,1.0,0.72,method_for:分段章节 4
+True,K065,K029,算出待校正,数字控制系统,method_for,分段章节 4,1.0,0.72,method_for:分段章节 4
+True,K067,K029,前馈补偿,数字控制系统,method_for,分段章节 4,1.0,0.72,method_for:分段章节 4
+True,K068,K029,的前馈补偿,数字控制系统,method_for,分段章节 4,1.0,0.72,method_for:分段章节 4
+True,K039,K030,所以根轨迹,系统闭环传递函数,method_for,分段章节 2,1.0,0.72,method_for:分段章节 2
+True,K062,K030,因此根轨迹,系统闭环传递函数,method_for,分段章节 2,1.0,0.72,method_for:分段章节 2
+True,K063,K030,如果根轨迹,系统闭环传递函数,method_for,分段章节 2,1.0,0.72,method_for:分段章节 2
+True,K077,K030,通道的串联补偿器传递函数,系统闭环传递函数,method_for,分段章节 6,1.0,0.72,method_for:分段章节 6
+True,K031,K036,绘制根轨迹,线性二次型最优控制,method_for,分段章节 8,1.0,0.72,method_for:分段章节 8
+True,K031,K081,绘制根轨迹,检验可控性与可观性,method_for,分段章节 8,1.0,0.72,method_for:分段章节 8
+True,K042,K032,绘制相应系统的根轨迹,雕刻机控制系统,method_for,分段章节 3,1.0,0.72,method_for:分段章节 3
+True,K033,K034,反馈校正,控制器的传递函数,method_for,分段章节 4,1.0,0.72,method_for:分段章节 4
+True,K033,K044,反馈校正,前置滤波的传递函数,method_for,分段章节 4,1.0,0.72,method_for:分段章节 4
+True,K040,K034,使已校正,控制器的传递函数,method_for,分段章节 4,1.0,0.72,method_for:分段章节 4
+True,K043,K034,控制规律的控制器,控制器的传递函数,method_for,分段章节 4,1.0,0.72,method_for:分段章节 4
+True,K034,K044,控制器的传递函数,前置滤波的传递函数,method_for,分段章节 4,1.0,0.72,method_for:分段章节 4
+True,K064,K034,在串联校正,控制器的传递函数,method_for,分段章节 4,1.0,0.72,method_for:分段章节 4
+True,K065,K034,算出待校正,控制器的传递函数,method_for,分段章节 4,1.0,0.72,method_for:分段章节 4
+True,K034,K066,控制器的传递函数,如果控制系统,method_for,分段章节 4,1.0,0.72,method_for:分段章节 4
+True,K067,K034,前馈补偿,控制器的传递函数,method_for,分段章节 4,1.0,0.72,method_for:分段章节 4
+True,K068,K034,的前馈补偿,控制器的传递函数,method_for,分段章节 4,1.0,0.72,method_for:分段章节 4
+True,K039,K035,所以根轨迹,位置控制系统,method_for,分段章节 2,1.0,0.72,method_for:分段章节 2
+True,K062,K035,因此根轨迹,位置控制系统,method_for,分段章节 2,1.0,0.72,method_for:分段章节 2
+True,K063,K035,如果根轨迹,位置控制系统,method_for,分段章节 2,1.0,0.72,method_for:分段章节 2
+True,K038,K036,绘制校正,线性二次型最优控制,method_for,分段章节 8,1.0,0.72,method_for:分段章节 8
+True,K039,K037,所以根轨迹,钻机控制系统,method_for,分段章节 2,1.0,0.72,method_for:分段章节 2
+True,K062,K037,因此根轨迹,钻机控制系统,method_for,分段章节 2,1.0,0.72,method_for:分段章节 2
+True,K063,K037,如果根轨迹,钻机控制系统,method_for,分段章节 2,1.0,0.72,method_for:分段章节 2
+True,K038,K081,绘制校正,检验可控性与可观性,method_for,分段章节 8,1.0,0.72,method_for:分段章节 8
+True,K040,K044,使已校正,前置滤波的传递函数,method_for,分段章节 4,1.0,0.72,method_for:分段章节 4
+True,K042,K060,绘制相应系统的根轨迹,磁头位置控制系统,method_for,分段章节 3,1.0,0.72,method_for:分段章节 3
+True,K042,K083,绘制相应系统的根轨迹,系统的闭环传递函数,method_for,分段章节 3,1.0,0.72,method_for:分段章节 3
+True,K043,K044,控制规律的控制器,前置滤波的传递函数,method_for,分段章节 4,1.0,0.72,method_for:分段章节 4
+True,K064,K044,在串联校正,前置滤波的传递函数,method_for,分段章节 4,1.0,0.72,method_for:分段章节 4
+True,K065,K044,算出待校正,前置滤波的传递函数,method_for,分段章节 4,1.0,0.72,method_for:分段章节 4
+True,K067,K044,前馈补偿,前置滤波的传递函数,method_for,分段章节 4,1.0,0.72,method_for:分段章节 4
+True,K068,K044,的前馈补偿,前置滤波的传递函数,method_for,分段章节 4,1.0,0.72,method_for:分段章节 4
+True,K047,K046,数字控制器脉冲传递函数,的脉冲传递函数,method_for,分段章节 5,1.0,0.72,method_for:分段章节 5
+True,K088,K046,离散系统的数字校正,的脉冲传递函数,method_for,分段章节 5,1.0,0.72,method_for:分段章节 5
+True,K047,K050,数字控制器脉冲传递函数,离散系统的稳定性,method_for,分段章节 5,1.0,0.72,method_for:分段章节 5
+True,K047,K071,数字控制器脉冲传递函数,具有饱和特性的非线性控制系统,method_for,分段章节 5,1.0,0.72,method_for:分段章节 5
+True,K047,K078,数字控制器脉冲传递函数,闭环脉冲传递函数,method_for,分段章节 5,1.0,0.72,method_for:分段章节 5
+True,K088,K047,离散系统的数字校正,数字控制器脉冲传递函数,method_for,分段章节 5,1.0,0.72,method_for:分段章节 5
+True,K047,K089,数字控制器脉冲传递函数,广义对象脉冲传递函数,method_for,分段章节 5,1.0,0.72,method_for:分段章节 5
+True,K047,K093,数字控制器脉冲传递函数,连续部分传递函数,method_for,分段章节 5,1.0,0.72,method_for:分段章节 5
+True,K088,K050,离散系统的数字校正,离散系统的稳定性,method_for,分段章节 5,1.0,0.72,method_for:分段章节 5
+True,K077,K069,通道的串联补偿器传递函数,线性系统的状态空间分析与综合,method_for,分段章节 6,1.0,0.72,method_for:分段章节 6
+True,K088,K071,离散系统的数字校正,具有饱和特性的非线性控制系统,method_for,分段章节 5,1.0,0.72,method_for:分段章节 5
+True,K088,K078,离散系统的数字校正,闭环脉冲传递函数,method_for,分段章节 5,1.0,0.72,method_for:分段章节 5
+True,K088,K089,离散系统的数字校正,广义对象脉冲传递函数,method_for,分段章节 5,1.0,0.72,method_for:分段章节 5
+True,K019,K003,数字控制器,非线性控制系统,part_of,component,1.0,0.8,part_of:component
+True,K034,K003,控制器的传递函数,非线性控制系统,part_of,component,1.0,0.8,part_of:component
+True,K043,K003,控制规律的控制器,非线性控制系统,part_of,component,1.0,0.8,part_of:component
+True,K047,K003,数字控制器脉冲传递函数,非线性控制系统,part_of,component,1.0,0.8,part_of:component
+True,K019,K010,数字控制器,自动控制系统,part_of,component,1.0,0.8,part_of:component
+True,K034,K010,控制器的传递函数,自动控制系统,part_of,component,1.0,0.8,part_of:component
+True,K043,K010,控制规律的控制器,自动控制系统,part_of,component,1.0,0.8,part_of:component
+True,K047,K010,数字控制器脉冲传递函数,自动控制系统,part_of,component,1.0,0.8,part_of:component
+True,K019,K014,数字控制器,反馈控制系统,part_of,component,1.0,0.8,part_of:component
+True,K034,K014,控制器的传递函数,反馈控制系统,part_of,component,1.0,0.8,part_of:component
+True,K043,K014,控制规律的控制器,反馈控制系统,part_of,component,1.0,0.8,part_of:component
+True,K047,K014,数字控制器脉冲传递函数,反馈控制系统,part_of,component,1.0,0.8,part_of:component
+True,K019,K022,数字控制器,复合控制系统,part_of,component,1.0,0.8,part_of:component
+True,K019,K027,数字控制器,磁头控制系统,part_of,component,1.0,0.8,part_of:component
+True,K019,K029,数字控制器,数字控制系统,part_of,component,1.0,0.8,part_of:component
+True,K034,K022,控制器的传递函数,复合控制系统,part_of,component,1.0,0.8,part_of:component
+True,K043,K022,控制规律的控制器,复合控制系统,part_of,component,1.0,0.8,part_of:component
+True,K047,K022,数字控制器脉冲传递函数,复合控制系统,part_of,component,1.0,0.8,part_of:component
+True,K034,K027,控制器的传递函数,磁头控制系统,part_of,component,1.0,0.8,part_of:component
+True,K043,K027,控制规律的控制器,磁头控制系统,part_of,component,1.0,0.8,part_of:component
+True,K047,K027,数字控制器脉冲传递函数,磁头控制系统,part_of,component,1.0,0.8,part_of:component
+True,K034,K029,控制器的传递函数,数字控制系统,part_of,component,1.0,0.8,part_of:component
+True,K043,K029,控制规律的控制器,数字控制系统,part_of,component,1.0,0.8,part_of:component
+True,K047,K029,数字控制器脉冲传递函数,数字控制系统,part_of,component,1.0,0.8,part_of:component
+True,K001,K002,线性系统的状态空间,线性离散系统的分析与校正,prerequisite_of,1->4,1.0,0.74,prerequisite_of:1->4
+True,K001,K004,线性系统的状态空间,动态系统的最优控制,prerequisite_of,1->7,1.0,0.74,prerequisite_of:1->7
+True,K001,K005,线性系统的状态空间,线性系统的校正,prerequisite_of,1->4,1.0,0.74,prerequisite_of:1->4
+True,K001,K029,线性系统的状态空间,数字控制系统,prerequisite_of,1->4,1.0,0.74,prerequisite_of:1->4
+True,K001,K050,线性系统的状态空间,离散系统的稳定性,prerequisite_of,1->5,1.0,0.74,prerequisite_of:1->5
+True,K001,K069,线性系统的状态空间,线性系统的状态空间分析与综合,prerequisite_of,1->6,1.0,0.74,prerequisite_of:1->6
+True,K001,K071,线性系统的状态空间,具有饱和特性的非线性控制系统,prerequisite_of,1->5,1.0,0.74,prerequisite_of:1->5
+True,K001,K088,线性系统的状态空间,离散系统的数字校正,prerequisite_of,1->5,1.0,0.74,prerequisite_of:1->5
+True,K012,K002,系统开环传递函数,线性离散系统的分析与校正,prerequisite_of,2->4,1.0,0.74,prerequisite_of:2->4
+True,K015,K002,系统的传递函数,线性离散系统的分析与校正,prerequisite_of,1->4,1.0,0.74,prerequisite_of:1->4
+True,K025,K002,系统的开环传递函数,线性离散系统的分析与校正,prerequisite_of,2->4,1.0,0.74,prerequisite_of:2->4
+True,K030,K002,系统闭环传递函数,线性离散系统的分析与校正,prerequisite_of,2->4,1.0,0.74,prerequisite_of:2->4
+True,K083,K002,系统的闭环传递函数,线性离散系统的分析与校正,prerequisite_of,3->4,1.0,0.74,prerequisite_of:3->4
+True,K085,K002,系统的开环和闭环传递函数,线性离散系统的分析与校正,prerequisite_of,3->4,1.0,0.74,prerequisite_of:3->4
+True,K086,K002,系统的闭环稳定性,线性离散系统的分析与校正,prerequisite_of,3->4,1.0,0.74,prerequisite_of:3->4
+True,K012,K004,系统开环传递函数,动态系统的最优控制,prerequisite_of,2->7,1.0,0.74,prerequisite_of:2->7
+True,K015,K004,系统的传递函数,动态系统的最优控制,prerequisite_of,1->7,1.0,0.74,prerequisite_of:1->7
+True,K024,K004,开环系统脉冲传递函数,动态系统的最优控制,prerequisite_of,5->7,1.0,0.74,prerequisite_of:5->7
+True,K025,K004,系统的开环传递函数,动态系统的最优控制,prerequisite_of,2->7,1.0,0.74,prerequisite_of:2->7
+True,K030,K004,系统闭环传递函数,动态系统的最优控制,prerequisite_of,2->7,1.0,0.74,prerequisite_of:2->7
+True,K034,K004,控制器的传递函数,动态系统的最优控制,prerequisite_of,4->7,1.0,0.74,prerequisite_of:4->7
+True,K047,K004,数字控制器脉冲传递函数,动态系统的最优控制,prerequisite_of,5->7,1.0,0.74,prerequisite_of:5->7
+True,K050,K004,离散系统的稳定性,动态系统的最优控制,prerequisite_of,5->7,1.0,0.74,prerequisite_of:5->7
+True,K069,K004,线性系统的状态空间分析与综合,动态系统的最优控制,prerequisite_of,6->7,1.0,0.74,prerequisite_of:6->7
+True,K072,K004,无前置滤波器时系统的闭环传递函数,动态系统的最优控制,prerequisite_of,4->7,1.0,0.74,prerequisite_of:4->7
+True,K073,K004,有前置滤波器时系统的闭环传递函数,动态系统的最优控制,prerequisite_of,4->7,1.0,0.74,prerequisite_of:4->7
+True,K083,K004,系统的闭环传递函数,动态系统的最优控制,prerequisite_of,3->7,1.0,0.74,prerequisite_of:3->7
+True,K085,K004,系统的开环和闭环传递函数,动态系统的最优控制,prerequisite_of,3->7,1.0,0.74,prerequisite_of:3->7
+True,K086,K004,系统的闭环稳定性,动态系统的最优控制,prerequisite_of,3->7,1.0,0.74,prerequisite_of:3->7
+True,K012,K005,系统开环传递函数,线性系统的校正,prerequisite_of,2->4,1.0,0.74,prerequisite_of:2->4
+True,K015,K005,系统的传递函数,线性系统的校正,prerequisite_of,1->4,1.0,0.74,prerequisite_of:1->4
+True,K025,K005,系统的开环传递函数,线性系统的校正,prerequisite_of,2->4,1.0,0.74,prerequisite_of:2->4
+True,K030,K005,系统闭环传递函数,线性系统的校正,prerequisite_of,2->4,1.0,0.74,prerequisite_of:2->4
+True,K083,K005,系统的闭环传递函数,线性系统的校正,prerequisite_of,3->4,1.0,0.74,prerequisite_of:3->4
+True,K085,K005,系统的开环和闭环传递函数,线性系统的校正,prerequisite_of,3->4,1.0,0.74,prerequisite_of:3->4
+True,K086,K005,系统的闭环稳定性,线性系统的校正,prerequisite_of,3->4,1.0,0.74,prerequisite_of:3->4
+True,K007,K047,闭环传递函数,数字控制器脉冲传递函数,prerequisite_of,1->5,1.0,0.74,prerequisite_of:1->5
+True,K007,K077,闭环传递函数,通道的串联补偿器传递函数,prerequisite_of,1->6,1.0,0.74,prerequisite_of:1->6
+True,K011,K047,开环传递函数,数字控制器脉冲传递函数,prerequisite_of,3->5,1.0,0.74,prerequisite_of:3->5
+True,K011,K077,开环传递函数,通道的串联补偿器传递函数,prerequisite_of,3->6,1.0,0.74,prerequisite_of:3->6
+True,K012,K029,系统开环传递函数,数字控制系统,prerequisite_of,2->4,1.0,0.74,prerequisite_of:2->4
+True,K012,K047,系统开环传递函数,数字控制器脉冲传递函数,prerequisite_of,2->5,1.0,0.74,prerequisite_of:2->5
+True,K012,K050,系统开环传递函数,离散系统的稳定性,prerequisite_of,2->5,1.0,0.74,prerequisite_of:2->5
+True,K012,K069,系统开环传递函数,线性系统的状态空间分析与综合,prerequisite_of,2->6,1.0,0.74,prerequisite_of:2->6
+True,K012,K071,系统开环传递函数,具有饱和特性的非线性控制系统,prerequisite_of,2->5,1.0,0.74,prerequisite_of:2->5
+True,K013,K047,脉冲传递函数,数字控制器脉冲传递函数,prerequisite_of,4->5,1.0,0.74,prerequisite_of:4->5
+True,K013,K077,脉冲传递函数,通道的串联补偿器传递函数,prerequisite_of,4->6,1.0,0.74,prerequisite_of:4->6
+True,K015,K029,系统的传递函数,数字控制系统,prerequisite_of,1->4,1.0,0.74,prerequisite_of:1->4
+True,K015,K047,系统的传递函数,数字控制器脉冲传递函数,prerequisite_of,1->5,1.0,0.74,prerequisite_of:1->5
+True,K015,K050,系统的传递函数,离散系统的稳定性,prerequisite_of,1->5,1.0,0.74,prerequisite_of:1->5
+True,K015,K069,系统的传递函数,线性系统的状态空间分析与综合,prerequisite_of,1->6,1.0,0.74,prerequisite_of:1->6
+True,K015,K071,系统的传递函数,具有饱和特性的非线性控制系统,prerequisite_of,1->5,1.0,0.74,prerequisite_of:1->5
+True,K018,K047,相应的闭环传递函数,数字控制器脉冲传递函数,prerequisite_of,2->5,1.0,0.74,prerequisite_of:2->5
+True,K018,K077,相应的闭环传递函数,通道的串联补偿器传递函数,prerequisite_of,2->6,1.0,0.74,prerequisite_of:2->6
+True,K034,K019,控制器的传递函数,数字控制器,prerequisite_of,4->5,1.0,0.74,prerequisite_of:4->5
+True,K023,K047,其开环传递函数,数字控制器脉冲传递函数,prerequisite_of,3->5,1.0,0.74,prerequisite_of:3->5
+True,K023,K077,其开环传递函数,通道的串联补偿器传递函数,prerequisite_of,3->6,1.0,0.74,prerequisite_of:3->6
+True,K024,K069,开环系统脉冲传递函数,线性系统的状态空间分析与综合,prerequisite_of,5->6,1.0,0.74,prerequisite_of:5->6
+True,K024,K077,开环系统脉冲传递函数,通道的串联补偿器传递函数,prerequisite_of,5->6,1.0,0.74,prerequisite_of:5->6
+True,K025,K029,系统的开环传递函数,数字控制系统,prerequisite_of,2->4,1.0,0.74,prerequisite_of:2->4
+True,K025,K047,系统的开环传递函数,数字控制器脉冲传递函数,prerequisite_of,2->5,1.0,0.74,prerequisite_of:2->5
+True,K025,K050,系统的开环传递函数,离散系统的稳定性,prerequisite_of,2->5,1.0,0.74,prerequisite_of:2->5
+True,K025,K069,系统的开环传递函数,线性系统的状态空间分析与综合,prerequisite_of,2->6,1.0,0.74,prerequisite_of:2->6
+True,K025,K071,系统的开环传递函数,具有饱和特性的非线性控制系统,prerequisite_of,2->5,1.0,0.74,prerequisite_of:2->5
+True,K030,K029,系统闭环传递函数,数字控制系统,prerequisite_of,2->4,1.0,0.74,prerequisite_of:2->4
+True,K083,K029,系统的闭环传递函数,数字控制系统,prerequisite_of,3->4,1.0,0.74,prerequisite_of:3->4
+True,K085,K029,系统的开环和闭环传递函数,数字控制系统,prerequisite_of,3->4,1.0,0.74,prerequisite_of:3->4
+True,K086,K029,系统的闭环稳定性,数字控制系统,prerequisite_of,3->4,1.0,0.74,prerequisite_of:3->4
+True,K030,K047,系统闭环传递函数,数字控制器脉冲传递函数,prerequisite_of,2->5,1.0,0.74,prerequisite_of:2->5
+True,K030,K050,系统闭环传递函数,离散系统的稳定性,prerequisite_of,2->5,1.0,0.74,prerequisite_of:2->5
+True,K030,K069,系统闭环传递函数,线性系统的状态空间分析与综合,prerequisite_of,2->6,1.0,0.74,prerequisite_of:2->6
+True,K030,K071,系统闭环传递函数,具有饱和特性的非线性控制系统,prerequisite_of,2->5,1.0,0.74,prerequisite_of:2->5
+True,K034,K036,控制器的传递函数,线性二次型最优控制,prerequisite_of,4->8,1.0,0.74,prerequisite_of:4->8
+True,K034,K047,控制器的传递函数,数字控制器脉冲传递函数,prerequisite_of,4->5,1.0,0.74,prerequisite_of:4->5
+True,K034,K071,控制器的传递函数,具有饱和特性的非线性控制系统,prerequisite_of,4->5,1.0,0.74,prerequisite_of:4->5
+True,K034,K077,控制器的传递函数,通道的串联补偿器传递函数,prerequisite_of,4->6,1.0,0.74,prerequisite_of:4->6
+True,K047,K036,数字控制器脉冲传递函数,线性二次型最优控制,prerequisite_of,5->8,1.0,0.74,prerequisite_of:5->8
+True,K044,K047,前置滤波的传递函数,数字控制器脉冲传递函数,prerequisite_of,4->5,1.0,0.74,prerequisite_of:4->5
+True,K044,K077,前置滤波的传递函数,通道的串联补偿器传递函数,prerequisite_of,4->6,1.0,0.74,prerequisite_of:4->6
+True,K046,K077,的脉冲传递函数,通道的串联补偿器传递函数,prerequisite_of,5->6,1.0,0.74,prerequisite_of:5->6
+True,K053,K047,称为传递函数,数字控制器脉冲传递函数,prerequisite_of,1->5,1.0,0.74,prerequisite_of:1->5
+True,K055,K047,其闭环传递函数,数字控制器脉冲传递函数,prerequisite_of,2->5,1.0,0.74,prerequisite_of:2->5
+True,K072,K047,无前置滤波器时系统的闭环传递函数,数字控制器脉冲传递函数,prerequisite_of,4->5,1.0,0.74,prerequisite_of:4->5
+True,K073,K047,有前置滤波器时系统的闭环传递函数,数字控制器脉冲传递函数,prerequisite_of,4->5,1.0,0.74,prerequisite_of:4->5
+True,K047,K077,数字控制器脉冲传递函数,通道的串联补偿器传递函数,prerequisite_of,5->6,1.0,0.74,prerequisite_of:5->6
+True,K080,K047,之间的传递函数,数字控制器脉冲传递函数,prerequisite_of,1->5,1.0,0.74,prerequisite_of:1->5
+True,K082,K047,则其传递函数,数字控制器脉冲传递函数,prerequisite_of,1->5,1.0,0.74,prerequisite_of:1->5
+True,K083,K047,系统的闭环传递函数,数字控制器脉冲传递函数,prerequisite_of,3->5,1.0,0.74,prerequisite_of:3->5
+True,K085,K047,系统的开环和闭环传递函数,数字控制器脉冲传递函数,prerequisite_of,3->5,1.0,0.74,prerequisite_of:3->5
+True,K050,K069,离散系统的稳定性,线性系统的状态空间分析与综合,prerequisite_of,5->6,1.0,0.74,prerequisite_of:5->6
+True,K072,K050,无前置滤波器时系统的闭环传递函数,离散系统的稳定性,prerequisite_of,4->5,1.0,0.74,prerequisite_of:4->5
+True,K073,K050,有前置滤波器时系统的闭环传递函数,离散系统的稳定性,prerequisite_of,4->5,1.0,0.74,prerequisite_of:4->5
+True,K083,K050,系统的闭环传递函数,离散系统的稳定性,prerequisite_of,3->5,1.0,0.74,prerequisite_of:3->5
+True,K085,K050,系统的开环和闭环传递函数,离散系统的稳定性,prerequisite_of,3->5,1.0,0.74,prerequisite_of:3->5
+True,K086,K050,系统的闭环稳定性,离散系统的稳定性,prerequisite_of,3->5,1.0,0.74,prerequisite_of:3->5
+True,K053,K077,称为传递函数,通道的串联补偿器传递函数,prerequisite_of,1->6,1.0,0.74,prerequisite_of:1->6
+True,K055,K077,其闭环传递函数,通道的串联补偿器传递函数,prerequisite_of,2->6,1.0,0.74,prerequisite_of:2->6
+True,K072,K069,无前置滤波器时系统的闭环传递函数,线性系统的状态空间分析与综合,prerequisite_of,4->6,1.0,0.74,prerequisite_of:4->6
+True,K073,K069,有前置滤波器时系统的闭环传递函数,线性系统的状态空间分析与综合,prerequisite_of,4->6,1.0,0.74,prerequisite_of:4->6
+True,K083,K069,系统的闭环传递函数,线性系统的状态空间分析与综合,prerequisite_of,3->6,1.0,0.74,prerequisite_of:3->6
+True,K085,K069,系统的开环和闭环传递函数,线性系统的状态空间分析与综合,prerequisite_of,3->6,1.0,0.74,prerequisite_of:3->6
+True,K086,K069,系统的闭环稳定性,线性系统的状态空间分析与综合,prerequisite_of,3->6,1.0,0.74,prerequisite_of:3->6
+True,K072,K071,无前置滤波器时系统的闭环传递函数,具有饱和特性的非线性控制系统,prerequisite_of,4->5,1.0,0.74,prerequisite_of:4->5
+True,K073,K071,有前置滤波器时系统的闭环传递函数,具有饱和特性的非线性控制系统,prerequisite_of,4->5,1.0,0.74,prerequisite_of:4->5
+True,K083,K071,系统的闭环传递函数,具有饱和特性的非线性控制系统,prerequisite_of,3->5,1.0,0.74,prerequisite_of:3->5
+True,K085,K071,系统的开环和闭环传递函数,具有饱和特性的非线性控制系统,prerequisite_of,3->5,1.0,0.74,prerequisite_of:3->5
+True,K086,K071,系统的闭环稳定性,具有饱和特性的非线性控制系统,prerequisite_of,3->5,1.0,0.74,prerequisite_of:3->5
+True,K072,K077,无前置滤波器时系统的闭环传递函数,通道的串联补偿器传递函数,prerequisite_of,4->6,1.0,0.74,prerequisite_of:4->6
+True,K072,K088,无前置滤波器时系统的闭环传递函数,离散系统的数字校正,prerequisite_of,4->5,1.0,0.74,prerequisite_of:4->5
+True,K073,K077,有前置滤波器时系统的闭环传递函数,通道的串联补偿器传递函数,prerequisite_of,4->6,1.0,0.74,prerequisite_of:4->6
+True,K073,K088,有前置滤波器时系统的闭环传递函数,离散系统的数字校正,prerequisite_of,4->5,1.0,0.74,prerequisite_of:4->5
+True,K078,K077,闭环脉冲传递函数,通道的串联补偿器传递函数,prerequisite_of,5->6,1.0,0.74,prerequisite_of:5->6
+True,K080,K077,之间的传递函数,通道的串联补偿器传递函数,prerequisite_of,1->6,1.0,0.74,prerequisite_of:1->6
+True,K082,K077,则其传递函数,通道的串联补偿器传递函数,prerequisite_of,1->6,1.0,0.74,prerequisite_of:1->6
+True,K089,K077,广义对象脉冲传递函数,通道的串联补偿器传递函数,prerequisite_of,5->6,1.0,0.74,prerequisite_of:5->6
+True,K093,K077,连续部分传递函数,通道的串联补偿器传递函数,prerequisite_of,5->6,1.0,0.74,prerequisite_of:5->6
+True,K086,K088,系统的闭环稳定性,离散系统的数字校正,prerequisite_of,3->5,1.0,0.74,prerequisite_of:3->5
+True,K001,K069,线性系统的状态空间,线性系统的状态空间分析与综合,same_chapter,分段章节 7,1.2,0.88,same_chapter:分段章节 7
+True,K001,K092,线性系统的状态空间,单输出系统的状态空间,same_chapter,分段章节 7,1.2,0.88,same_chapter:分段章节 7
+True,K069,K092,线性系统的状态空间分析与综合,单输出系统的状态空间,same_chapter,分段章节 7,1.2,0.88,same_chapter:分段章节 7
+True,K007,K015,闭环传递函数,系统的传递函数,same_chapter,分段章节 1,1.2,0.88,same_chapter:分段章节 1
+True,K007,K053,闭环传递函数,称为传递函数,same_chapter,分段章节 1,1.2,0.88,same_chapter:分段章节 1
+True,K007,K080,闭环传递函数,之间的传递函数,same_chapter,分段章节 1,1.2,0.88,same_chapter:分段章节 1
+True,K007,K082,闭环传递函数,则其传递函数,same_chapter,分段章节 1,1.2,0.88,same_chapter:分段章节 1
+True,K015,K053,系统的传递函数,称为传递函数,same_chapter,分段章节 1,1.2,0.88,same_chapter:分段章节 1
+True,K015,K080,系统的传递函数,之间的传递函数,same_chapter,分段章节 1,1.2,0.88,same_chapter:分段章节 1
+True,K015,K082,系统的传递函数,则其传递函数,same_chapter,分段章节 1,1.2,0.88,same_chapter:分段章节 1
+True,K053,K080,称为传递函数,之间的传递函数,same_chapter,分段章节 1,1.2,0.88,same_chapter:分段章节 1
+True,K053,K082,称为传递函数,则其传递函数,same_chapter,分段章节 1,1.2,0.88,same_chapter:分段章节 1
+True,K080,K082,之间的传递函数,则其传递函数,same_chapter,分段章节 1,1.2,0.88,same_chapter:分段章节 1
+True,K001,K069,线性系统的状态空间,线性系统的状态空间分析与综合,same_chapter,分段章节 6,1.2,0.88,same_chapter:分段章节 6
+True,K015,K030,系统的传递函数,系统闭环传递函数,same_chapter,分段章节 6,1.2,0.88,same_chapter:分段章节 6
+True,K015,K077,系统的传递函数,通道的串联补偿器传递函数,same_chapter,分段章节 6,1.2,0.88,same_chapter:分段章节 6
+True,K030,K077,系统闭环传递函数,通道的串联补偿器传递函数,same_chapter,分段章节 6,1.2,0.88,same_chapter:分段章节 6
+True,K024,K046,开环系统脉冲传递函数,的脉冲传递函数,same_chapter,分段章节 5,1.2,0.88,same_chapter:分段章节 5
+True,K024,K047,开环系统脉冲传递函数,数字控制器脉冲传递函数,same_chapter,分段章节 5,1.2,0.88,same_chapter:分段章节 5
+True,K024,K078,开环系统脉冲传递函数,闭环脉冲传递函数,same_chapter,分段章节 5,1.2,0.88,same_chapter:分段章节 5
+True,K024,K089,开环系统脉冲传递函数,广义对象脉冲传递函数,same_chapter,分段章节 5,1.2,0.88,same_chapter:分段章节 5
+True,K046,K047,的脉冲传递函数,数字控制器脉冲传递函数,same_chapter,分段章节 5,1.2,0.88,same_chapter:分段章节 5
+True,K046,K078,的脉冲传递函数,闭环脉冲传递函数,same_chapter,分段章节 5,1.2,0.88,same_chapter:分段章节 5
+True,K046,K089,的脉冲传递函数,广义对象脉冲传递函数,same_chapter,分段章节 5,1.2,0.88,same_chapter:分段章节 5
+True,K046,K093,的脉冲传递函数,连续部分传递函数,same_chapter,分段章节 5,1.2,0.88,same_chapter:分段章节 5
+True,K047,K078,数字控制器脉冲传递函数,闭环脉冲传递函数,same_chapter,分段章节 5,1.2,0.88,same_chapter:分段章节 5
+True,K047,K089,数字控制器脉冲传递函数,广义对象脉冲传递函数,same_chapter,分段章节 5,1.2,0.88,same_chapter:分段章节 5
+True,K047,K093,数字控制器脉冲传递函数,连续部分传递函数,same_chapter,分段章节 5,1.2,0.88,same_chapter:分段章节 5
+True,K078,K089,闭环脉冲传递函数,广义对象脉冲传递函数,same_chapter,分段章节 5,1.2,0.88,same_chapter:分段章节 5
+True,K078,K093,闭环脉冲传递函数,连续部分传递函数,same_chapter,分段章节 5,1.2,0.88,same_chapter:分段章节 5
+True,K089,K093,广义对象脉冲传递函数,连续部分传递函数,same_chapter,分段章节 5,1.2,0.88,same_chapter:分段章节 5
+True,K012,K013,系统开环传递函数,脉冲传递函数,same_chapter,分段章节 4,1.2,0.88,same_chapter:分段章节 4
+True,K012,K018,系统开环传递函数,相应的闭环传递函数,same_chapter,分段章节 4,1.2,0.88,same_chapter:分段章节 4
+True,K012,K023,系统开环传递函数,其开环传递函数,same_chapter,分段章节 4,1.2,0.88,same_chapter:分段章节 4
+True,K012,K034,系统开环传递函数,控制器的传递函数,same_chapter,分段章节 4,1.2,0.88,same_chapter:分段章节 4
+True,K013,K018,脉冲传递函数,相应的闭环传递函数,same_chapter,分段章节 4,1.2,0.88,same_chapter:分段章节 4
+True,K013,K023,脉冲传递函数,其开环传递函数,same_chapter,分段章节 4,1.2,0.88,same_chapter:分段章节 4
+True,K013,K034,脉冲传递函数,控制器的传递函数,same_chapter,分段章节 4,1.2,0.88,same_chapter:分段章节 4
+True,K013,K044,脉冲传递函数,前置滤波的传递函数,same_chapter,分段章节 4,1.2,0.88,same_chapter:分段章节 4
+True,K018,K023,相应的闭环传递函数,其开环传递函数,same_chapter,分段章节 4,1.2,0.88,same_chapter:分段章节 4
+True,K018,K034,相应的闭环传递函数,控制器的传递函数,same_chapter,分段章节 4,1.2,0.88,same_chapter:分段章节 4
+True,K018,K044,相应的闭环传递函数,前置滤波的传递函数,same_chapter,分段章节 4,1.2,0.88,same_chapter:分段章节 4
+True,K018,K072,相应的闭环传递函数,无前置滤波器时系统的闭环传递函数,same_chapter,分段章节 4,1.2,0.88,same_chapter:分段章节 4
+True,K023,K034,其开环传递函数,控制器的传递函数,same_chapter,分段章节 4,1.2,0.88,same_chapter:分段章节 4
+True,K023,K044,其开环传递函数,前置滤波的传递函数,same_chapter,分段章节 4,1.2,0.88,same_chapter:分段章节 4
+True,K023,K072,其开环传递函数,无前置滤波器时系统的闭环传递函数,same_chapter,分段章节 4,1.2,0.88,same_chapter:分段章节 4
+True,K023,K073,其开环传递函数,有前置滤波器时系统的闭环传递函数,same_chapter,分段章节 4,1.2,0.88,same_chapter:分段章节 4
+True,K034,K044,控制器的传递函数,前置滤波的传递函数,same_chapter,分段章节 4,1.2,0.88,same_chapter:分段章节 4
+True,K034,K072,控制器的传递函数,无前置滤波器时系统的闭环传递函数,same_chapter,分段章节 4,1.2,0.88,same_chapter:分段章节 4
+True,K034,K073,控制器的传递函数,有前置滤波器时系统的闭环传递函数,same_chapter,分段章节 4,1.2,0.88,same_chapter:分段章节 4
+True,K044,K072,前置滤波的传递函数,无前置滤波器时系统的闭环传递函数,same_chapter,分段章节 4,1.2,0.88,same_chapter:分段章节 4
+True,K044,K073,前置滤波的传递函数,有前置滤波器时系统的闭环传递函数,same_chapter,分段章节 4,1.2,0.88,same_chapter:分段章节 4
+True,K072,K073,无前置滤波器时系统的闭环传递函数,有前置滤波器时系统的闭环传递函数,same_chapter,分段章节 4,1.2,0.88,same_chapter:分段章节 4
+True,K011,K015,开环传递函数,系统的传递函数,same_chapter,分段章节 8,1.2,0.88,same_chapter:分段章节 8
+True,K007,K011,闭环传递函数,开环传递函数,same_chapter,分段章节 3,1.2,0.88,same_chapter:分段章节 3
+True,K007,K012,闭环传递函数,系统开环传递函数,same_chapter,分段章节 3,1.2,0.88,same_chapter:分段章节 3
+True,K011,K012,开环传递函数,系统开环传递函数,same_chapter,分段章节 3,1.2,0.88,same_chapter:分段章节 3
+True,K011,K023,开环传递函数,其开环传递函数,same_chapter,分段章节 3,1.2,0.88,same_chapter:分段章节 3
+True,K011,K083,开环传递函数,系统的闭环传递函数,same_chapter,分段章节 3,1.2,0.88,same_chapter:分段章节 3
+True,K011,K085,开环传递函数,系统的开环和闭环传递函数,same_chapter,分段章节 3,1.2,0.88,same_chapter:分段章节 3
+True,K012,K023,系统开环传递函数,其开环传递函数,same_chapter,分段章节 3,1.2,0.88,same_chapter:分段章节 3
+True,K012,K083,系统开环传递函数,系统的闭环传递函数,same_chapter,分段章节 3,1.2,0.88,same_chapter:分段章节 3
+True,K023,K083,其开环传递函数,系统的闭环传递函数,same_chapter,分段章节 3,1.2,0.88,same_chapter:分段章节 3
+True,K023,K085,其开环传递函数,系统的开环和闭环传递函数,same_chapter,分段章节 3,1.2,0.88,same_chapter:分段章节 3
+True,K083,K085,系统的闭环传递函数,系统的开环和闭环传递函数,same_chapter,分段章节 3,1.2,0.88,same_chapter:分段章节 3
+True,K018,K025,相应的闭环传递函数,系统的开环传递函数,same_chapter,分段章节 2,1.2,0.88,same_chapter:分段章节 2
+True,K018,K030,相应的闭环传递函数,系统闭环传递函数,same_chapter,分段章节 2,1.2,0.88,same_chapter:分段章节 2
+True,K025,K030,系统的开环传递函数,系统闭环传递函数,same_chapter,分段章节 2,1.2,0.88,same_chapter:分段章节 2
+True,K025,K055,系统的开环传递函数,其闭环传递函数,same_chapter,分段章节 2,1.2,0.88,same_chapter:分段章节 2
+True,K030,K055,系统闭环传递函数,其闭环传递函数,same_chapter,分段章节 2,1.2,0.88,same_chapter:分段章节 2
+True,K001,K004,线性系统的状态空间,动态系统的最优控制,same_chapter,分段章节 7,0.8,0.88,same_chapter:分段章节 7
+True,K001,K027,线性系统的状态空间,磁头控制系统,same_chapter,分段章节 7,0.8,0.88,same_chapter:分段章节 7
+True,K004,K027,动态系统的最优控制,磁头控制系统,same_chapter,分段章节 7,0.8,0.88,same_chapter:分段章节 7
+True,K004,K069,动态系统的最优控制,线性系统的状态空间分析与综合,same_chapter,分段章节 7,0.8,0.88,same_chapter:分段章节 7
+True,K004,K092,动态系统的最优控制,单输出系统的状态空间,same_chapter,分段章节 7,0.8,0.88,same_chapter:分段章节 7
+True,K027,K069,磁头控制系统,线性系统的状态空间分析与综合,same_chapter,分段章节 7,0.8,0.88,same_chapter:分段章节 7
+True,K027,K092,磁头控制系统,单输出系统的状态空间,same_chapter,分段章节 7,0.8,0.88,same_chapter:分段章节 7
+True,K075,K076,渐近稳定性,原点稳定性,same_chapter,分段章节 7,0.8,0.88,same_chapter:分段章节 7
+True,K075,K090,渐近稳定性,李雅普诺夫稳定性,same_chapter,分段章节 7,0.8,0.88,same_chapter:分段章节 7
+True,K076,K090,原点稳定性,李雅普诺夫稳定性,same_chapter,分段章节 7,0.8,0.88,same_chapter:分段章节 7
+True,K001,K003,线性系统的状态空间,非线性控制系统,same_chapter,分段章节 1,0.8,0.88,same_chapter:分段章节 1
+True,K003,K010,非线性控制系统,自动控制系统,same_chapter,分段章节 1,0.8,0.88,same_chapter:分段章节 1
+True,K003,K014,非线性控制系统,反馈控制系统,same_chapter,分段章节 1,0.8,0.88,same_chapter:分段章节 1
+True,K003,K015,非线性控制系统,系统的传递函数,same_chapter,分段章节 1,0.8,0.88,same_chapter:分段章节 1
+True,K003,K045,非线性控制系统,锅炉液位控制系统,same_chapter,分段章节 1,0.8,0.88,same_chapter:分段章节 1
+True,K010,K014,自动控制系统,反馈控制系统,same_chapter,分段章节 1,0.8,0.88,same_chapter:分段章节 1
+True,K010,K015,自动控制系统,系统的传递函数,same_chapter,分段章节 1,0.8,0.88,same_chapter:分段章节 1
+True,K010,K045,自动控制系统,锅炉液位控制系统,same_chapter,分段章节 1,0.8,0.88,same_chapter:分段章节 1
+True,K010,K048,自动控制系统,对自动控制系统,same_chapter,分段章节 1,0.8,0.88,same_chapter:分段章节 1
+True,K014,K015,反馈控制系统,系统的传递函数,same_chapter,分段章节 1,0.8,0.88,same_chapter:分段章节 1
+True,K014,K045,反馈控制系统,锅炉液位控制系统,same_chapter,分段章节 1,0.8,0.88,same_chapter:分段章节 1
+True,K014,K048,反馈控制系统,对自动控制系统,same_chapter,分段章节 1,0.8,0.88,same_chapter:分段章节 1
+True,K014,K049,反馈控制系统,龙门刨床速度控制系统,same_chapter,分段章节 1,0.8,0.88,same_chapter:分段章节 1
+True,K015,K045,系统的传递函数,锅炉液位控制系统,same_chapter,分段章节 1,0.8,0.88,same_chapter:分段章节 1
+True,K045,K048,锅炉液位控制系统,对自动控制系统,same_chapter,分段章节 1,0.8,0.88,same_chapter:分段章节 1
+True,K045,K049,锅炉液位控制系统,龙门刨床速度控制系统,same_chapter,分段章节 1,0.8,0.88,same_chapter:分段章节 1
+True,K045,K051,锅炉液位控制系统,这类控制系统,same_chapter,分段章节 1,0.8,0.88,same_chapter:分段章节 1
+True,K045,K052,锅炉液位控制系统,建立控制系统,same_chapter,分段章节 1,0.8,0.88,same_chapter:分段章节 1
+True,K048,K049,对自动控制系统,龙门刨床速度控制系统,same_chapter,分段章节 1,0.8,0.88,same_chapter:分段章节 1
+True,K048,K051,对自动控制系统,这类控制系统,same_chapter,分段章节 1,0.8,0.88,same_chapter:分段章节 1
+True,K048,K052,对自动控制系统,建立控制系统,same_chapter,分段章节 1,0.8,0.88,same_chapter:分段章节 1
+True,K048,K079,对自动控制系统,压力控制系统,same_chapter,分段章节 1,0.8,0.88,same_chapter:分段章节 1
+True,K049,K051,龙门刨床速度控制系统,这类控制系统,same_chapter,分段章节 1,0.8,0.88,same_chapter:分段章节 1
+True,K049,K052,龙门刨床速度控制系统,建立控制系统,same_chapter,分段章节 1,0.8,0.88,same_chapter:分段章节 1
+True,K049,K079,龙门刨床速度控制系统,压力控制系统,same_chapter,分段章节 1,0.8,0.88,same_chapter:分段章节 1
+True,K049,K091,龙门刨床速度控制系统,转速控制系统,same_chapter,分段章节 1,0.8,0.88,same_chapter:分段章节 1
+True,K051,K052,这类控制系统,建立控制系统,same_chapter,分段章节 1,0.8,0.88,same_chapter:分段章节 1
+True,K051,K079,这类控制系统,压力控制系统,same_chapter,分段章节 1,0.8,0.88,same_chapter:分段章节 1
+True,K051,K091,这类控制系统,转速控制系统,same_chapter,分段章节 1,0.8,0.88,same_chapter:分段章节 1
+True,K051,K094,这类控制系统,恒值控制系统,same_chapter,分段章节 1,0.8,0.88,same_chapter:分段章节 1
+True,K052,K079,建立控制系统,压力控制系统,same_chapter,分段章节 1,0.8,0.88,same_chapter:分段章节 1
+True,K052,K091,建立控制系统,转速控制系统,same_chapter,分段章节 1,0.8,0.88,same_chapter:分段章节 1
+True,K052,K094,建立控制系统,恒值控制系统,same_chapter,分段章节 1,0.8,0.88,same_chapter:分段章节 1
+True,K052,K095,建立控制系统,程序控制系统,same_chapter,分段章节 1,0.8,0.88,same_chapter:分段章节 1
+True,K079,K091,压力控制系统,转速控制系统,same_chapter,分段章节 1,0.8,0.88,same_chapter:分段章节 1
+True,K079,K094,压力控制系统,恒值控制系统,same_chapter,分段章节 1,0.8,0.88,same_chapter:分段章节 1
+True,K079,K095,压力控制系统,程序控制系统,same_chapter,分段章节 1,0.8,0.88,same_chapter:分段章节 1
+True,K091,K094,转速控制系统,恒值控制系统,same_chapter,分段章节 1,0.8,0.88,same_chapter:分段章节 1
+True,K091,K095,转速控制系统,程序控制系统,same_chapter,分段章节 1,0.8,0.88,same_chapter:分段章节 1
+True,K094,K095,恒值控制系统,程序控制系统,same_chapter,分段章节 1,0.8,0.88,same_chapter:分段章节 1
+True,K003,K015,非线性控制系统,系统的传递函数,same_chapter,分段章节 6,0.8,0.88,same_chapter:分段章节 6
+True,K003,K030,非线性控制系统,系统闭环传递函数,same_chapter,分段章节 6,0.8,0.88,same_chapter:分段章节 6
+True,K030,K069,系统闭环传递函数,线性系统的状态空间分析与综合,same_chapter,分段章节 6,0.8,0.88,same_chapter:分段章节 6
+True,K002,K003,线性离散系统的分析与校正,非线性控制系统,same_chapter,分段章节 5,0.8,0.88,same_chapter:分段章节 5
+True,K002,K024,线性离散系统的分析与校正,开环系统脉冲传递函数,same_chapter,分段章节 5,0.8,0.88,same_chapter:分段章节 5
+True,K002,K050,线性离散系统的分析与校正,离散系统的稳定性,same_chapter,分段章节 5,0.8,0.88,same_chapter:分段章节 5
+True,K002,K071,线性离散系统的分析与校正,具有饱和特性的非线性控制系统,same_chapter,分段章节 5,0.8,0.88,same_chapter:分段章节 5
+True,K019,K047,数字控制器,数字控制器脉冲传递函数,same_chapter,分段章节 5,0.8,0.88,same_chapter:分段章节 5
+True,K019,K071,数字控制器,具有饱和特性的非线性控制系统,same_chapter,分段章节 5,0.8,0.88,same_chapter:分段章节 5
+True,K047,K071,数字控制器脉冲传递函数,具有饱和特性的非线性控制系统,same_chapter,分段章节 5,0.8,0.88,same_chapter:分段章节 5
+True,K050,K071,离散系统的稳定性,具有饱和特性的非线性控制系统,same_chapter,分段章节 5,0.8,0.88,same_chapter:分段章节 5
+True,K050,K074,离散系统的稳定性,建立闭环系统,same_chapter,分段章节 5,0.8,0.88,same_chapter:分段章节 5
+True,K050,K088,离散系统的稳定性,离散系统的数字校正,same_chapter,分段章节 5,0.8,0.88,same_chapter:分段章节 5
+True,K071,K074,具有饱和特性的非线性控制系统,建立闭环系统,same_chapter,分段章节 5,0.8,0.88,same_chapter:分段章节 5
+True,K071,K088,具有饱和特性的非线性控制系统,离散系统的数字校正,same_chapter,分段章节 5,0.8,0.88,same_chapter:分段章节 5
+True,K074,K088,建立闭环系统,离散系统的数字校正,same_chapter,分段章节 5,0.8,0.88,same_chapter:分段章节 5
+True,K002,K005,线性离散系统的分析与校正,线性系统的校正,same_chapter,分段章节 4,0.8,0.88,same_chapter:分段章节 4
+True,K002,K008,线性离散系统的分析与校正,复合校正,same_chapter,分段章节 4,0.8,0.88,same_chapter:分段章节 4
+True,K005,K008,线性系统的校正,复合校正,same_chapter,分段章节 4,0.8,0.88,same_chapter:分段章节 4
+True,K005,K009,线性系统的校正,超前校正,same_chapter,分段章节 4,0.8,0.88,same_chapter:分段章节 4
+True,K005,K012,线性系统的校正,系统开环传递函数,same_chapter,分段章节 4,0.8,0.88,same_chapter:分段章节 4
+True,K005,K021,线性系统的校正,串联校正,same_chapter,分段章节 4,0.8,0.88,same_chapter:分段章节 4
+True,K008,K009,复合校正,超前校正,same_chapter,分段章节 4,0.8,0.88,same_chapter:分段章节 4
+True,K008,K021,复合校正,串联校正,same_chapter,分段章节 4,0.8,0.88,same_chapter:分段章节 4
+True,K008,K033,复合校正,反馈校正,same_chapter,分段章节 4,0.8,0.88,same_chapter:分段章节 4
+True,K008,K040,复合校正,使已校正,same_chapter,分段章节 4,0.8,0.88,same_chapter:分段章节 4
+True,K009,K021,超前校正,串联校正,same_chapter,分段章节 4,0.8,0.88,same_chapter:分段章节 4
+True,K009,K033,超前校正,反馈校正,same_chapter,分段章节 4,0.8,0.88,same_chapter:分段章节 4
+True,K009,K040,超前校正,使已校正,same_chapter,分段章节 4,0.8,0.88,same_chapter:分段章节 4
+True,K009,K064,超前校正,在串联校正,same_chapter,分段章节 4,0.8,0.88,same_chapter:分段章节 4
+True,K021,K033,串联校正,反馈校正,same_chapter,分段章节 4,0.8,0.88,same_chapter:分段章节 4
+True,K021,K040,串联校正,使已校正,same_chapter,分段章节 4,0.8,0.88,same_chapter:分段章节 4
+True,K021,K064,串联校正,在串联校正,same_chapter,分段章节 4,0.8,0.88,same_chapter:分段章节 4
+True,K021,K065,串联校正,算出待校正,same_chapter,分段章节 4,0.8,0.88,same_chapter:分段章节 4
+True,K022,K029,复合控制系统,数字控制系统,same_chapter,分段章节 4,0.8,0.88,same_chapter:分段章节 4
+True,K022,K034,复合控制系统,控制器的传递函数,same_chapter,分段章节 4,0.8,0.88,same_chapter:分段章节 4
+True,K022,K043,复合控制系统,控制规律的控制器,same_chapter,分段章节 4,0.8,0.88,same_chapter:分段章节 4
+True,K022,K066,复合控制系统,如果控制系统,same_chapter,分段章节 4,0.8,0.88,same_chapter:分段章节 4
+True,K029,K034,数字控制系统,控制器的传递函数,same_chapter,分段章节 4,0.8,0.88,same_chapter:分段章节 4
+True,K029,K043,数字控制系统,控制规律的控制器,same_chapter,分段章节 4,0.8,0.88,same_chapter:分段章节 4
+True,K029,K066,数字控制系统,如果控制系统,same_chapter,分段章节 4,0.8,0.88,same_chapter:分段章节 4
+True,K029,K072,数字控制系统,无前置滤波器时系统的闭环传递函数,same_chapter,分段章节 4,0.8,0.88,same_chapter:分段章节 4
+True,K033,K040,反馈校正,使已校正,same_chapter,分段章节 4,0.8,0.88,same_chapter:分段章节 4
+True,K033,K064,反馈校正,在串联校正,same_chapter,分段章节 4,0.8,0.88,same_chapter:分段章节 4
+True,K033,K065,反馈校正,算出待校正,same_chapter,分段章节 4,0.8,0.88,same_chapter:分段章节 4
+True,K034,K043,控制器的传递函数,控制规律的控制器,same_chapter,分段章节 4,0.8,0.88,same_chapter:分段章节 4
+True,K040,K064,使已校正,在串联校正,same_chapter,分段章节 4,0.8,0.88,same_chapter:分段章节 4
+True,K040,K065,使已校正,算出待校正,same_chapter,分段章节 4,0.8,0.88,same_chapter:分段章节 4
+True,K043,K066,控制规律的控制器,如果控制系统,same_chapter,分段章节 4,0.8,0.88,same_chapter:分段章节 4
+True,K064,K065,在串联校正,算出待校正,same_chapter,分段章节 4,0.8,0.88,same_chapter:分段章节 4
+True,K066,K072,如果控制系统,无前置滤波器时系统的闭环传递函数,same_chapter,分段章节 4,0.8,0.88,same_chapter:分段章节 4
+True,K066,K073,如果控制系统,有前置滤波器时系统的闭环传递函数,same_chapter,分段章节 4,0.8,0.88,same_chapter:分段章节 4
+True,K004,K014,动态系统的最优控制,反馈控制系统,same_chapter,分段章节 8,0.8,0.88,same_chapter:分段章节 8
+True,K004,K015,动态系统的最优控制,系统的传递函数,same_chapter,分段章节 8,0.8,0.88,same_chapter:分段章节 8
+True,K004,K017,动态系统的最优控制,判断系统的可控性,same_chapter,分段章节 8,0.8,0.88,same_chapter:分段章节 8
+True,K008,K038,复合校正,绘制校正,same_chapter,分段章节 8,0.8,0.88,same_chapter:分段章节 8
+True,K014,K015,反馈控制系统,系统的传递函数,same_chapter,分段章节 8,0.8,0.88,same_chapter:分段章节 8
+True,K014,K017,反馈控制系统,判断系统的可控性,same_chapter,分段章节 8,0.8,0.88,same_chapter:分段章节 8
+True,K017,K041,判断系统的可控性,建立开环系统,same_chapter,分段章节 8,0.8,0.88,same_chapter:分段章节 8
+True,K017,K084,判断系统的可控性,描述系统的微分方程,same_chapter,分段章节 8,0.8,0.88,same_chapter:分段章节 8
+True,K041,K084,建立开环系统,描述系统的微分方程,same_chapter,分段章节 8,0.8,0.88,same_chapter:分段章节 8
+True,K006,K012,线性系统的根轨迹,系统开环传递函数,same_chapter,分段章节 3,0.8,0.88,same_chapter:分段章节 3
+True,K006,K014,线性系统的根轨迹,反馈控制系统,same_chapter,分段章节 3,0.8,0.88,same_chapter:分段章节 3
+True,K006,K020,线性系统的根轨迹,系统开环频率特性,same_chapter,分段章节 3,0.8,0.88,same_chapter:分段章节 3
+True,K006,K028,线性系统的根轨迹,零度根轨迹,same_chapter,分段章节 3,0.8,0.88,same_chapter:分段章节 3
+True,K020,K032,系统开环频率特性,雕刻机控制系统,same_chapter,分段章节 3,0.8,0.88,same_chapter:分段章节 3
+True,K020,K042,系统开环频率特性,绘制相应系统的根轨迹,same_chapter,分段章节 3,0.8,0.88,same_chapter:分段章节 3
+True,K020,K056,系统开环频率特性,绘制系统的开环频率特性,same_chapter,分段章节 3,0.8,0.88,same_chapter:分段章节 3
+True,K020,K058,系统开环频率特性,绘制系统的闭环频率特性,same_chapter,分段章节 3,0.8,0.88,same_chapter:分段章节 3
+True,K028,K042,零度根轨迹,绘制相应系统的根轨迹,same_chapter,分段章节 3,0.8,0.88,same_chapter:分段章节 3
+True,K032,K042,雕刻机控制系统,绘制相应系统的根轨迹,same_chapter,分段章节 3,0.8,0.88,same_chapter:分段章节 3
+True,K032,K056,雕刻机控制系统,绘制系统的开环频率特性,same_chapter,分段章节 3,0.8,0.88,same_chapter:分段章节 3
+True,K032,K058,雕刻机控制系统,绘制系统的闭环频率特性,same_chapter,分段章节 3,0.8,0.88,same_chapter:分段章节 3
+True,K032,K060,雕刻机控制系统,磁头位置控制系统,same_chapter,分段章节 3,0.8,0.88,same_chapter:分段章节 3
+True,K042,K056,绘制相应系统的根轨迹,绘制系统的开环频率特性,same_chapter,分段章节 3,0.8,0.88,same_chapter:分段章节 3
+True,K042,K058,绘制相应系统的根轨迹,绘制系统的闭环频率特性,same_chapter,分段章节 3,0.8,0.88,same_chapter:分段章节 3
+True,K042,K060,绘制相应系统的根轨迹,磁头位置控制系统,same_chapter,分段章节 3,0.8,0.88,same_chapter:分段章节 3
+True,K042,K083,绘制相应系统的根轨迹,系统的闭环传递函数,same_chapter,分段章节 3,0.8,0.88,same_chapter:分段章节 3
+True,K056,K058,绘制系统的开环频率特性,绘制系统的闭环频率特性,same_chapter,分段章节 3,0.8,0.88,same_chapter:分段章节 3
+True,K056,K060,绘制系统的开环频率特性,磁头位置控制系统,same_chapter,分段章节 3,0.8,0.88,same_chapter:分段章节 3
+True,K056,K083,绘制系统的开环频率特性,系统的闭环传递函数,same_chapter,分段章节 3,0.8,0.88,same_chapter:分段章节 3
+True,K056,K085,绘制系统的开环频率特性,系统的开环和闭环传递函数,same_chapter,分段章节 3,0.8,0.88,same_chapter:分段章节 3
+True,K058,K060,绘制系统的闭环频率特性,磁头位置控制系统,same_chapter,分段章节 3,0.8,0.88,same_chapter:分段章节 3
+True,K058,K083,绘制系统的闭环频率特性,系统的闭环传递函数,same_chapter,分段章节 3,0.8,0.88,same_chapter:分段章节 3
+True,K058,K085,绘制系统的闭环频率特性,系统的开环和闭环传递函数,same_chapter,分段章节 3,0.8,0.88,same_chapter:分段章节 3
+True,K058,K086,绘制系统的闭环频率特性,系统的闭环稳定性,same_chapter,分段章节 3,0.8,0.88,same_chapter:分段章节 3
+True,K060,K083,磁头位置控制系统,系统的闭环传递函数,same_chapter,分段章节 3,0.8,0.88,same_chapter:分段章节 3
+True,K060,K085,磁头位置控制系统,系统的开环和闭环传递函数,same_chapter,分段章节 3,0.8,0.88,same_chapter:分段章节 3
+True,K060,K086,磁头位置控制系统,系统的闭环稳定性,same_chapter,分段章节 3,0.8,0.88,same_chapter:分段章节 3
+True,K083,K086,系统的闭环传递函数,系统的闭环稳定性,same_chapter,分段章节 3,0.8,0.88,same_chapter:分段章节 3
+True,K085,K086,系统的开环和闭环传递函数,系统的闭环稳定性,same_chapter,分段章节 3,0.8,0.88,same_chapter:分段章节 3
+True,K006,K012,线性系统的根轨迹,系统开环传递函数,same_chapter,分段章节 2,0.8,0.88,same_chapter:分段章节 2
+True,K006,K025,线性系统的根轨迹,系统的开环传递函数,same_chapter,分段章节 2,0.8,0.88,same_chapter:分段章节 2
+True,K025,K027,系统的开环传递函数,磁头控制系统,same_chapter,分段章节 2,0.8,0.88,same_chapter:分段章节 2
+True,K025,K035,系统的开环传递函数,位置控制系统,same_chapter,分段章节 2,0.8,0.88,same_chapter:分段章节 2
+True,K027,K030,磁头控制系统,系统闭环传递函数,same_chapter,分段章节 2,0.8,0.88,same_chapter:分段章节 2
+True,K027,K035,磁头控制系统,位置控制系统,same_chapter,分段章节 2,0.8,0.88,same_chapter:分段章节 2
+True,K027,K037,磁头控制系统,钻机控制系统,same_chapter,分段章节 2,0.8,0.88,same_chapter:分段章节 2
+True,K027,K054,磁头控制系统,微分控制系统,same_chapter,分段章节 2,0.8,0.88,same_chapter:分段章节 2
+True,K030,K035,系统闭环传递函数,位置控制系统,same_chapter,分段章节 2,0.8,0.88,same_chapter:分段章节 2
+True,K030,K037,系统闭环传递函数,钻机控制系统,same_chapter,分段章节 2,0.8,0.88,same_chapter:分段章节 2
+True,K030,K054,系统闭环传递函数,微分控制系统,same_chapter,分段章节 2,0.8,0.88,same_chapter:分段章节 2
+True,K035,K037,位置控制系统,钻机控制系统,same_chapter,分段章节 2,0.8,0.88,same_chapter:分段章节 2
+True,K035,K054,位置控制系统,微分控制系统,same_chapter,分段章节 2,0.8,0.88,same_chapter:分段章节 2
+True,K035,K057,位置控制系统,积分控制系统,same_chapter,分段章节 2,0.8,0.88,same_chapter:分段章节 2
+True,K035,K059,位置控制系统,所示的控制系统,same_chapter,分段章节 2,0.8,0.88,same_chapter:分段章节 2
+True,K037,K054,钻机控制系统,微分控制系统,same_chapter,分段章节 2,0.8,0.88,same_chapter:分段章节 2
+True,K037,K057,钻机控制系统,积分控制系统,same_chapter,分段章节 2,0.8,0.88,same_chapter:分段章节 2
+True,K037,K059,钻机控制系统,所示的控制系统,same_chapter,分段章节 2,0.8,0.88,same_chapter:分段章节 2
+True,K037,K061,钻机控制系统,串级控制系统,same_chapter,分段章节 2,0.8,0.88,same_chapter:分段章节 2
+True,K039,K062,所以根轨迹,因此根轨迹,same_chapter,分段章节 2,0.8,0.88,same_chapter:分段章节 2
+True,K039,K063,所以根轨迹,如果根轨迹,same_chapter,分段章节 2,0.8,0.88,same_chapter:分段章节 2
+True,K054,K057,微分控制系统,积分控制系统,same_chapter,分段章节 2,0.8,0.88,same_chapter:分段章节 2
+True,K054,K059,微分控制系统,所示的控制系统,same_chapter,分段章节 2,0.8,0.88,same_chapter:分段章节 2
+True,K054,K061,微分控制系统,串级控制系统,same_chapter,分段章节 2,0.8,0.88,same_chapter:分段章节 2
+True,K054,K070,微分控制系统,线性系统的时域分析法,same_chapter,分段章节 2,0.8,0.88,same_chapter:分段章节 2
+True,K057,K059,积分控制系统,所示的控制系统,same_chapter,分段章节 2,0.8,0.88,same_chapter:分段章节 2
+True,K057,K061,积分控制系统,串级控制系统,same_chapter,分段章节 2,0.8,0.88,same_chapter:分段章节 2
+True,K057,K070,积分控制系统,线性系统的时域分析法,same_chapter,分段章节 2,0.8,0.88,same_chapter:分段章节 2
+True,K057,K087,积分控制系统,例如导弹控制系统,same_chapter,分段章节 2,0.8,0.88,same_chapter:分段章节 2
+True,K059,K061,所示的控制系统,串级控制系统,same_chapter,分段章节 2,0.8,0.88,same_chapter:分段章节 2
+True,K059,K070,所示的控制系统,线性系统的时域分析法,same_chapter,分段章节 2,0.8,0.88,same_chapter:分段章节 2
+True,K059,K087,所示的控制系统,例如导弹控制系统,same_chapter,分段章节 2,0.8,0.88,same_chapter:分段章节 2
+True,K061,K070,串级控制系统,线性系统的时域分析法,same_chapter,分段章节 2,0.8,0.88,same_chapter:分段章节 2
+True,K061,K087,串级控制系统,例如导弹控制系统,same_chapter,分段章节 2,0.8,0.88,same_chapter:分段章节 2
+True,K062,K063,因此根轨迹,如果根轨迹,same_chapter,分段章节 2,0.8,0.88,same_chapter:分段章节 2
+True,K070,K087,线性系统的时域分析法,例如导弹控制系统,same_chapter,分段章节 2,0.8,0.88,same_chapter:分段章节 2
+True,K069,K001,线性系统的状态空间分析与综合,线性系统的状态空间,subtopic_of,lexical,1.0,0.76,subtopic_of:lexical
+True,K071,K003,具有饱和特性的非线性控制系统,非线性控制系统,subtopic_of,lexical,1.0,0.76,subtopic_of:lexical
+True,K018,K007,相应的闭环传递函数,闭环传递函数,subtopic_of,lexical,1.0,0.76,subtopic_of:lexical
+True,K030,K007,系统闭环传递函数,闭环传递函数,subtopic_of,lexical,1.0,0.76,subtopic_of:lexical
+True,K055,K007,其闭环传递函数,闭环传递函数,subtopic_of,lexical,1.0,0.76,subtopic_of:lexical
+True,K072,K007,无前置滤波器时系统的闭环传递函数,闭环传递函数,subtopic_of,lexical,1.0,0.76,subtopic_of:lexical
+True,K073,K007,有前置滤波器时系统的闭环传递函数,闭环传递函数,subtopic_of,lexical,1.0,0.76,subtopic_of:lexical
+True,K083,K007,系统的闭环传递函数,闭环传递函数,subtopic_of,lexical,1.0,0.76,subtopic_of:lexical
+True,K085,K007,系统的开环和闭环传递函数,闭环传递函数,subtopic_of,lexical,1.0,0.76,subtopic_of:lexical
+True,K048,K010,对自动控制系统,自动控制系统,subtopic_of,lexical,1.0,0.76,subtopic_of:lexical
+True,K012,K011,系统开环传递函数,开环传递函数,subtopic_of,lexical,1.0,0.76,subtopic_of:lexical
+True,K023,K011,其开环传递函数,开环传递函数,subtopic_of,lexical,1.0,0.76,subtopic_of:lexical
+True,K025,K011,系统的开环传递函数,开环传递函数,subtopic_of,lexical,1.0,0.76,subtopic_of:lexical
+True,K024,K013,开环系统脉冲传递函数,脉冲传递函数,subtopic_of,lexical,1.0,0.76,subtopic_of:lexical
+True,K046,K013,的脉冲传递函数,脉冲传递函数,subtopic_of,lexical,1.0,0.76,subtopic_of:lexical
+True,K047,K013,数字控制器脉冲传递函数,脉冲传递函数,subtopic_of,lexical,1.0,0.76,subtopic_of:lexical
+True,K078,K013,闭环脉冲传递函数,脉冲传递函数,subtopic_of,lexical,1.0,0.76,subtopic_of:lexical
+True,K089,K013,广义对象脉冲传递函数,脉冲传递函数,subtopic_of,lexical,1.0,0.76,subtopic_of:lexical
+True,K047,K019,数字控制器脉冲传递函数,数字控制器,subtopic_of,lexical,1.0,0.76,subtopic_of:lexical
+True,K064,K021,在串联校正,串联校正,subtopic_of,lexical,1.0,0.76,subtopic_of:lexical
+True,K060,K035,磁头位置控制系统,位置控制系统,subtopic_of,lexical,1.0,0.76,subtopic_of:lexical
+True,K068,K067,的前馈补偿,前馈补偿,subtopic_of,lexical,1.0,0.76,subtopic_of:lexical
+True,K072,K083,无前置滤波器时系统的闭环传递函数,系统的闭环传递函数,subtopic_of,lexical,1.0,0.76,subtopic_of:lexical
+True,K073,K083,有前置滤波器时系统的闭环传递函数,系统的闭环传递函数,subtopic_of,lexical,1.0,0.76,subtopic_of:lexical
