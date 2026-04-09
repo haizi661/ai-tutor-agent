@@ -13,6 +13,10 @@ from ai_tutor_agent.knowledge_map.config.course_graph_config import COURSE_GRAPH
 
 from ai_tutor_agent.knowledge_map.builders.node_content_enricher import NodeContentEnricher
 from ai_tutor_agent.knowledge_map.config.document_config import DOCUMENT_PATHS
+from ai_tutor_agent.knowledge_map.builders.node_retrieval_builder import NodeRetrievalBuilder
+from ai_tutor_agent.knowledge_map.builders.vector_index_builder import VectorIndexBuilder
+from ai_tutor_agent.knowledge_map.builders.node_property_generator import NodePropertyGenerator
+
 
 class KnowledgeMapPipelineV2:
     """
@@ -47,6 +51,17 @@ class KnowledgeMapPipelineV2:
         )
         nodes = enricher.enrich_nodes(nodes)
 
+        retrieval_builder = NodeRetrievalBuilder(
+            textbook_pdf_path=DOCUMENT_PATHS.get("textbook_pdf")
+        )
+        nodes = retrieval_builder.enrich_nodes(nodes)
+
+        vector_index_builder = VectorIndexBuilder()
+        index_summary = vector_index_builder.rebuild_from_nodes(nodes)
+
+        property_generator = NodePropertyGenerator()
+        nodes = property_generator.enrich_nodes(nodes)
+
         nodes_df = pd.DataFrame(nodes)
         edges_df = pd.DataFrame(edges)
 
@@ -59,6 +74,8 @@ class KnowledgeMapPipelineV2:
             "level2_count": int((nodes_df["level"] == 2).sum()) if not nodes_df.empty else 0,
             "textbook_pdf": str(DOCUMENT_PATHS.get("textbook_pdf", "")),
             "textbook_pdf_exists": bool(DOCUMENT_PATHS.get("textbook_pdf") and DOCUMENT_PATHS["textbook_pdf"].exists()),
+            "vector_collection_name": index_summary.get("collection_name", ""),
+            "vector_document_count": index_summary.get("document_count", 0),
         }
         return nodes_df, edges_df, metadata
 
