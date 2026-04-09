@@ -45,3 +45,7 @@ Thumbs.db
 
 # AI Agent Context
 docs/GEMINI_CONTEXT.md
+
+# ===== vector db =====
+data/
+

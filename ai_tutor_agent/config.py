@@ -49,6 +49,10 @@ class Settings:
     deepseek_api_key: Optional[str]
     minimax_api_key: Optional[str]
     glm_api_key: Optional[str]
+    # --- 新增字段 (不带默认值，保持风格一致) ---
+    dashscope_api_key: str
+    mineru_api_token: str
+    # ---------------------------------------
     model_name: str
     embedding_provider: str
     embedding_model_name: str
@@ -174,6 +178,10 @@ def get_settings() -> Settings:
     http_proxy = os.getenv("HTTP_PROXY", "").strip() or os.getenv("http_proxy", "").strip() or None
     https_proxy = os.getenv("HTTPS_PROXY", "").strip() or os.getenv("https_proxy", "").strip() or None
 
+    #知识库相关API Key
+    dashscope_api_key = os.getenv("DASHSCOPE_API_KEY", "").strip()
+    mineru_api_token = os.getenv("MINERU_API_TOKEN", "").strip()
+
     if chat_profile == "gemini":
         provider = "openai"
         openai_api_base = "https://generativelanguage.googleapis.com/v1beta/openai/"
@@ -287,7 +295,9 @@ def get_settings() -> Settings:
         minimax_api_key=minimax_api_key,
         glm_api_key=glm_api_key,
         model_name=model_name,
-        embedding_provider=embedding_provider,
+        dashscope_api_key=dashscope_api_key,
+        mineru_api_token=mineru_api_token,
+        embedding_provider=os.getenv("EMBEDDING_PROVIDER", "dashscope").strip(), # 建议默认设为 dashscope
         embedding_model_name=(os.getenv("EMBEDDING_MODEL_NAME", "").strip() or default_embedding_model),
         tutor_temperature=_read_env_float("TUTOR_TEMPERATURE", 0.7),
         tester_temperature=_read_env_float("TESTER_TEMPERATURE", 0.4),
@@ -303,8 +313,6 @@ def get_settings() -> Settings:
         https_proxy=https_proxy,
         local_config_enabled=os.getenv("LOCAL_CONFIG_ENABLED", "true").strip().lower() != "false",
         chroma_dir=os.getenv("CHROMA_DIR", "").strip() or os.path.join(PROJECT_ROOT, "data", "chroma_db"),
-        dashscope_api_key=dashscope_api_key,
-        mineru_api_token=mineru_api_token,
         rag_hybrid_enabled=os.getenv("RAG_HYBRID_ENABLED", "false").strip().lower() == "true",
         rag_mineru_enabled=os.getenv("RAG_MINERU_ENABLED", "false").strip().lower() == "true",
     )
