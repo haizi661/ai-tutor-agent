@@ -72,6 +72,7 @@ class GraphSkeletonBuilder:
                 "chapter_page_range": chapter_cfg.get("page_range", []),
                 "retrieval_keywords": chapter_cfg.get("retrieval_keywords", []),
                 "syllabus_rule_source": "course_graph_config",
+                "configured_prerequisites": chapter_cfg.get("prerequisites", []),
             },
         }
         return normalize_node_record(node)
@@ -113,6 +114,7 @@ class GraphSkeletonBuilder:
                 "chapter_page_range": chapter_cfg.get("page_range", []),
                 "retrieval_keywords": chapter_cfg.get("retrieval_keywords", []),
                 "syllabus_rule_source": "chapter_inherited",
+                "configured_prerequisites": subtopic_cfg.get("prerequisites", []),
             },
         }
         return normalize_node_record(node)

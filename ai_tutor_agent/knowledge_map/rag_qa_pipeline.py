@@ -1,71 +1,127 @@
 from __future__ import annotations
 
-import json
+import ast
 from pathlib import Path
 from typing import Any
 
 import pandas as pd
 
 from ai_tutor_agent.knowledge_map.builders.node_selector import NodeSelector
-from ai_tutor_agent.knowledge_map.builders.rag_answer_generator import RagAnswerGenerator
-from ai_tutor_agent.knowledge_map.builders.vector_retriever import VectorRetriever
+from ai_tutor_agent.knowledge_map.builders.rag_answer_generator import RAGAnswerGenerator
 
 
-class KnowledgeMapRAGPipeline:
+class KnowledgeMapRAGQAPipeline:
     """
-    最小可用版 RAG 问答：
-    1. 读取 nodes.csv
-    2. 粗选最相关节点
-    3. 在该节点里做向量检索
-    4. 用 DeepSeek 生成答案
+    图谱驱动的问答流程。
+
+    支持：
+    1. learning_path
+    2. requirement_query
+    3. prerequisite_query
+    4. knowledge_qa
     """
 
-    def __init__(self, nodes_csv_path: str) -> None:
+    def __init__(
+        self,
+        nodes_csv_path: str = "data/knowledge_map_outputs/auto_control_knowledge_map_v2_nodes.csv",
+    ) -> None:
         self.nodes_csv_path = Path(nodes_csv_path)
         self.node_selector = NodeSelector()
-        self.retriever = VectorRetriever()
-        self.answer_generator = RagAnswerGenerator()
+        self.answer_generator = RAGAnswerGenerator()
+        self.nodes = self._load_nodes()
+        self.node_map = {node["node_id"]: node for node in self.nodes}
 
-    def answer(self, question: str) -> dict[str, Any]:
-        nodes_df = pd.read_csv(self.nodes_csv_path)
-        nodes = nodes_df.to_dict(orient="records")
+    def ask(self, question: str) -> dict[str, Any]:
+        question_type = self.node_selector.detect_question_type(question)
+        matched_node = self.node_selector.select_node(question, self.nodes)
 
-        best_node = self.node_selector.select_best_node(question, nodes)
-        if not best_node:
-            return {
-                "question": question,
-                "matched_node": None,
-                "retrieval_rows": [],
-                "answer": "未找到合适的知识点节点。",
-            }
+        retrieval_evidence: list[dict[str, Any]] = []
 
-        node_id = str(best_node.get("node_id", "")).strip()
-        node_name = str(best_node.get("name", "")).strip()
+        # 只有普通知识问答才进入证据检索
+        if question_type == "knowledge_qa" and matched_node is not None:
+            retrieval_evidence = self._build_simple_evidence(matched_node)
 
-        retrieval_rows = self.retriever.retrieve(
-            query=question,
-            node_id=node_id,
-            top_k=5,
-            use_rerank=True,
-            target_node_name=node_name,
-        )
-
-        contexts = [str(row.get("text", "")).strip() for row in retrieval_rows if row.get("text")]
-
-        answer_text = self.answer_generator.generate_answer(
+        final_answer = self.answer_generator.generate_answer(
             question=question,
-            node_name=node_name,
-            contexts=contexts,
+            question_type=question_type,
+            matched_node=matched_node,
+            retrieval_evidence=retrieval_evidence,
+            node_map=self.node_map,
         )
 
         return {
             "question": question,
-            "matched_node": {
-                "node_id": node_id,
-                "name": node_name,
-                "chapter": best_node.get("chapter", ""),
-                "summary": best_node.get("summary", ""),
-            },
-            "retrieval_rows": retrieval_rows,
-            "answer": answer_text,
+            "question_type": question_type,
+            "matched_node": matched_node,
+            "retrieval_evidence": retrieval_evidence,
+            "final_answer": final_answer,
         }
+
+    def _load_nodes(self) -> list[dict[str, Any]]:
+        if not self.nodes_csv_path.exists():
+            raise FileNotFoundError(f"节点表不存在: {self.nodes_csv_path}")
+
+        df = pd.read_csv(self.nodes_csv_path)
+
+        records = df.to_dict(orient="records")
+        parsed_records = [self._parse_record(record) for record in records]
+        return parsed_records
+
+    def _parse_record(self, record: dict[str, Any]) -> dict[str, Any]:
+        parsed = dict(record)
+
+        list_like_fields = [
+            "tags",
+            "core_concepts",
+            "key_points",
+            "formulas",
+            "examples",
+            "figures_refs",
+            "page_refs",
+            "definition_candidates",
+            "key_point_candidates",
+            "formula_candidates",
+            "example_candidates",
+            "prerequisite_nodes",
+            "next_nodes",
+            "related_nodes",
+            "application_nodes",
+            "recommended_next_nodes",
+        ]
+
+        for field in list_like_fields:
+            parsed[field] = self._safe_parse_python_literal(parsed.get(field))
+
+        parsed["extra"] = self._safe_parse_python_literal(parsed.get("extra"), default={})
+
+        return parsed
+
+    def _safe_parse_python_literal(self, value: Any, default: Any = None) -> Any:
+        if isinstance(value, (list, dict)):
+            return value
+
+        if value is None:
+            return [] if default is None else default
+
+        text = str(value).strip()
+        if not text:
+            return [] if default is None else default
+
+        try:
+            return ast.literal_eval(text)
+        except Exception:
+            return [] if default is None else default
+
+    def _build_simple_evidence(self, matched_node: dict[str, Any]) -> list[dict[str, Any]]:
+        evidence = []
+
+        for text in (matched_node.get("definition_candidates", []) or [])[:2]:
+            evidence.append({"text": text, "candidate_type": "definition"})
+
+        for text in (matched_node.get("key_point_candidates", []) or [])[:2]:
+            evidence.append({"text": text, "candidate_type": "key_point"})
+
+        for text in (matched_node.get("example_candidates", []) or [])[:1]:
+            evidence.append({"text": text, "candidate_type": "example"})
+
+        return evidence
