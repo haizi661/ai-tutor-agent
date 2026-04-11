@@ -8,10 +8,11 @@ from ai_tutor_agent.knowledge_map.schema.node_schema import normalize_edge_recor
 class GraphRelationBuilder:
     """
     根据骨架节点生成第一版规则关系。
-    当前阶段先做：
+    当前阶段做：
     1. HAS_SUBTOPIC
     2. PRE_REQUIRES
     3. LEADS_TO
+    4. 同章节二级节点顺序关系
     """
 
     def __init__(self, relation_types: dict[str, str]) -> None:
@@ -22,12 +23,12 @@ class GraphRelationBuilder:
         edges: list[dict[str, Any]] = []
 
         level1_nodes = [n for n in nodes if int(n.get("level", 0)) == 1]
+        level2_nodes = [n for n in nodes if int(n.get("level", 0)) == 2]
+
         parent_map = {n["node_id"]: n for n in level1_nodes}
 
         # 1. 包含关系：一级 -> 二级
-        for node in nodes:
-            if int(node.get("level", 0)) != 2:
-                continue
+        for node in level2_nodes:
             parent_id = node.get("part_of", "")
             if not parent_id or parent_id not in parent_map:
                 continue
@@ -66,6 +67,39 @@ class GraphRelationBuilder:
                     source_type="rule_sequence",
                 )
             )
+
+        # 3. 同一父节点下的二级节点按配置顺序串联
+        children_by_parent: dict[str, list[dict[str, Any]]] = {}
+        for node in level2_nodes:
+            parent_id = node.get("part_of", "")
+            if not parent_id:
+                continue
+            children_by_parent.setdefault(parent_id, []).append(node)
+
+        for parent_id, children in children_by_parent.items():
+            for i in range(len(children) - 1):
+                current_child = children[i]
+                next_child = children[i + 1]
+
+                edges.append(
+                    self._build_edge(
+                        source=current_child["node_id"],
+                        target=next_child["node_id"],
+                        relation="LEADS_TO",
+                        evidence=f"rule: sibling order under {parent_id}",
+                        source_type="rule_subtopic_sequence",
+                    )
+                )
+
+                edges.append(
+                    self._build_edge(
+                        source=next_child["node_id"],
+                        target=current_child["node_id"],
+                        relation="PRE_REQUIRES",
+                        evidence=f"rule: reverse sibling order under {parent_id}",
+                        source_type="rule_subtopic_sequence",
+                    )
+                )
 
         return edges
 

@@ -8,10 +8,11 @@ from ai_tutor_agent.knowledge_map.schema.node_schema import normalize_node_recor
 class GraphSkeletonBuilder:
     """
     根据静态课程配置，生成知识图谱骨架节点。
-    当前阶段只做：
+    当前阶段做：
     1. 一级节点
     2. 二级节点（仅重点章节默认展开）
-    3. 基本字段补齐
+    3. 大纲规则字段写入
+    4. 基本字段补齐
     """
 
     def __init__(self, config: dict[str, Any]) -> None:
@@ -29,7 +30,6 @@ class GraphSkeletonBuilder:
             parent_node = self._build_parent_node(chapter_cfg)
             nodes.append(parent_node)
 
-            # 关键改动：
             # 只有重点章节才默认展开二级节点
             should_expand_subtopics = chapter_cfg.get("is_focus", False)
 
@@ -59,6 +59,10 @@ class GraphSkeletonBuilder:
             "level": chapter_cfg.get("level", 1),
             "summary": chapter_cfg.get("summary", ""),
             "tags": chapter_cfg.get("tags", []),
+            "requirement_level": chapter_cfg.get("requirement_level", ""),
+            "mastery_threshold": chapter_cfg.get("mastery_threshold", 0.0),
+            "importance_level": chapter_cfg.get("importance_level", ""),
+            "assessment_focus": chapter_cfg.get("assessment_focus", ""),
             "part_of": "",
             "source_type": "skeleton_parent",
             "extra": {
@@ -67,6 +71,7 @@ class GraphSkeletonBuilder:
                 "subtopic_count_configured": len(chapter_cfg.get("subtopics", []) or []),
                 "chapter_page_range": chapter_cfg.get("page_range", []),
                 "retrieval_keywords": chapter_cfg.get("retrieval_keywords", []),
+                "syllabus_rule_source": "course_graph_config",
             },
         }
         return normalize_node_record(node)
@@ -84,6 +89,22 @@ class GraphSkeletonBuilder:
             "level": 2,
             "summary": subtopic_cfg.get("summary", ""),
             "tags": subtopic_cfg.get("tags", []),
+            "requirement_level": subtopic_cfg.get(
+                "requirement_level",
+                chapter_cfg.get("requirement_level", ""),
+            ),
+            "mastery_threshold": subtopic_cfg.get(
+                "mastery_threshold",
+                chapter_cfg.get("mastery_threshold", 0.0),
+            ),
+            "importance_level": subtopic_cfg.get(
+                "importance_level",
+                chapter_cfg.get("importance_level", ""),
+            ),
+            "assessment_focus": subtopic_cfg.get(
+                "assessment_focus",
+                chapter_cfg.get("assessment_focus", ""),
+            ),
             "part_of": parent_node["node_id"],
             "source_type": "skeleton_child",
             "extra": {
@@ -91,6 +112,7 @@ class GraphSkeletonBuilder:
                 "is_focus_chapter": chapter_cfg.get("is_focus", False),
                 "chapter_page_range": chapter_cfg.get("page_range", []),
                 "retrieval_keywords": chapter_cfg.get("retrieval_keywords", []),
+                "syllabus_rule_source": "chapter_inherited",
             },
         }
         return normalize_node_record(node)

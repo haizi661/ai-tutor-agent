@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import copy
 from typing import Any
 
 
@@ -10,6 +11,7 @@ RELATION_TYPES = {
     "HAS_SUBTOPIC": "包含关系",
     "RELATED_TO": "相关关系",
     "APPLIED_IN": "应用关系",
+    "RECOMMENDED_NEXT": "推荐学习",
 }
 
 
@@ -36,6 +38,10 @@ COURSE_GRAPH_CONFIG: dict[str, Any] = {
             "retrieval_keywords": ["自动控制", "一般概念", "反馈控制系统"],
             "summary": "介绍自动控制的基本原理、系统组成、分类、要求及分析设计工具。",
             "tags": ["自动控制", "基本概念", "控制系统"],
+            "requirement_level": "了解",
+            "mastery_threshold": 0.60,
+            "importance_level": "核心",
+            "assessment_focus": "概念",
             "subtopics": [
                 {
                     "name": "自动控制的基本原理与方式",
@@ -74,6 +80,10 @@ COURSE_GRAPH_CONFIG: dict[str, Any] = {
             "retrieval_keywords": ["数学模型", "系统建模", "传递函数"],
             "summary": "介绍控制系统的时域模型、复域模型、结构图与信号流图等数学表示方法。",
             "tags": ["数学模型", "传递函数", "方块图", "信号流图"],
+            "requirement_level": "掌握",
+            "mastery_threshold": 0.80,
+            "importance_level": "核心",
+            "assessment_focus": "建模方法",
             "subtopics": [
                 {
                     "name": "控制系统的时域数学模型",
@@ -107,6 +117,10 @@ COURSE_GRAPH_CONFIG: dict[str, Any] = {
             "retrieval_keywords": ["时域分析", "时间响应", "系统响应"],
             "summary": "研究线性系统的动态响应、稳态误差与稳定性等时域分析内容。",
             "tags": ["时域分析", "动态响应", "稳态误差", "稳定性"],
+            "requirement_level": "掌握",
+            "mastery_threshold": 0.82,
+            "importance_level": "核心",
+            "assessment_focus": "分析方法",
             "subtopics": [
                 {
                     "name": "系统时间响应的性能指标",
@@ -155,6 +169,10 @@ COURSE_GRAPH_CONFIG: dict[str, Any] = {
             "retrieval_keywords": ["根轨迹", "根轨迹法"],
             "summary": "介绍根轨迹法的基本概念、绘制规则及其在系统分析设计中的应用。",
             "tags": ["根轨迹", "复域分析", "系统设计"],
+            "requirement_level": "掌握",
+            "mastery_threshold": 0.78,
+            "importance_level": "重点",
+            "assessment_focus": "分析方法",
             "subtopics": [
                 {
                     "name": "根轨迹法的基本概念",
@@ -193,6 +211,10 @@ COURSE_GRAPH_CONFIG: dict[str, Any] = {
             "retrieval_keywords": ["频域分析", "频率响应", "波特图"],
             "summary": "介绍频率特性、频域稳定性分析及频域性能分析方法。",
             "tags": ["频域分析", "频率特性", "Nyquist", "Bode"],
+            "requirement_level": "掌握",
+            "mastery_threshold": 0.82,
+            "importance_level": "核心",
+            "assessment_focus": "稳定性分析",
             "subtopics": [
                 {
                     "name": "频率特性",
@@ -221,6 +243,10 @@ COURSE_GRAPH_CONFIG: dict[str, Any] = {
             "retrieval_keywords": ["系统校正", "控制器设计"],
             "summary": "介绍串联校正、反馈校正、复合校正等控制系统校正方法。",
             "tags": ["校正方法", "超前校正", "滞后校正", "复合校正"],
+            "requirement_level": "掌握",
+            "mastery_threshold": 0.80,
+            "importance_level": "核心",
+            "assessment_focus": "设计方法",
             "subtopics": [
                 {
                     "name": "常用校正装置及其特性",
@@ -254,6 +280,10 @@ COURSE_GRAPH_CONFIG: dict[str, Any] = {
             "retrieval_keywords": ["离散系统", "采样系统"],
             "summary": "介绍离散系统的基本概念、分析方法及数字校正。",
             "tags": ["离散系统", "Z变换", "数字控制"],
+            "requirement_level": "了解",
+            "mastery_threshold": 0.65,
+            "importance_level": "一般",
+            "assessment_focus": "基本原理",
             "subtopics": [
                 {
                     "name": "离散系统的基本概念",
@@ -277,6 +307,10 @@ COURSE_GRAPH_CONFIG: dict[str, Any] = {
             "retrieval_keywords": ["状态空间", "状态变量"],
             "summary": "介绍状态空间表达、可控性、可观性和状态反馈等内容。",
             "tags": ["状态空间", "可控性", "可观性", "状态反馈"],
+            "requirement_level": "了解",
+            "mastery_threshold": 0.65,
+            "importance_level": "一般",
+            "assessment_focus": "基本概念",
             "subtopics": [
                 {
                     "name": "状态空间表达式",
@@ -300,6 +334,10 @@ COURSE_GRAPH_CONFIG: dict[str, Any] = {
             "retrieval_keywords": ["非线性系统"],
             "summary": "介绍非线性系统的特点及常见分析方法。",
             "tags": ["非线性系统", "相平面", "描述函数"],
+            "requirement_level": "了解",
+            "mastery_threshold": 0.60,
+            "importance_level": "一般",
+            "assessment_focus": "基本概念",
             "subtopics": [],
         },
         {
@@ -312,6 +350,10 @@ COURSE_GRAPH_CONFIG: dict[str, Any] = {
             "retrieval_keywords": ["现代控制", "最优控制"],
             "summary": "介绍最优控制的基本思想和典型方法。",
             "tags": ["最优控制", "性能指标", "最优化"],
+            "requirement_level": "了解",
+            "mastery_threshold": 0.60,
+            "importance_level": "一般",
+            "assessment_focus": "基本概念",
             "subtopics": [],
         },
     ],

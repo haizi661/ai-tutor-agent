@@ -9,6 +9,7 @@ import pandas as pd
 
 from ai_tutor_agent.knowledge_map.builders.graph_relation_builder import GraphRelationBuilder
 from ai_tutor_agent.knowledge_map.builders.graph_skeleton_builder import GraphSkeletonBuilder
+from ai_tutor_agent.knowledge_map.builders.learning_path_builder import LearningPathBuilder
 from ai_tutor_agent.knowledge_map.config.course_graph_config import COURSE_GRAPH_CONFIG, RELATION_TYPES
 
 from ai_tutor_agent.knowledge_map.builders.node_content_enricher import NodeContentEnricher
@@ -20,21 +21,19 @@ from ai_tutor_agent.knowledge_map.builders.node_property_generator import NodePr
 
 class KnowledgeMapPipelineV2:
     """
-    V2 第一阶段：
+    V2 第二阶段：
     1. 从静态课程骨架生成节点
     2. 从规则生成基础关系
     3. 回填节点内部关系字段
-    4. 导出 csv / json / graphml
-
-    暂不做：
-    - PDF 自动抽取
-    - RAG 属性补全
-    - 教师风格改写
+    4. 生成学习路径推荐
+    5. 教材内容增强
+    6. 候选池构建
+    7. 向量索引构建
+    8. 节点属性生成
     """
 
     def __init__(self, config: dict[str, Any] | None = None) -> None:
         self.config = config or COURSE_GRAPH_CONFIG
-
 
     def generate(self) -> tuple[pd.DataFrame, pd.DataFrame, dict[str, Any]]:
         skeleton_builder = GraphSkeletonBuilder(self.config)
@@ -45,7 +44,10 @@ class KnowledgeMapPipelineV2:
 
         nodes = self._populate_node_relation_fields(nodes, edges)
 
-        # 新增：教材 PDF 内容增强
+        learning_path_builder = LearningPathBuilder()
+        nodes = learning_path_builder.build_learning_paths(nodes, edges)
+
+        # 教材 PDF 内容增强
         enricher = NodeContentEnricher(
             textbook_pdf_path=DOCUMENT_PATHS.get("textbook_pdf")
         )
@@ -73,7 +75,13 @@ class KnowledgeMapPipelineV2:
             "level1_count": int((nodes_df["level"] == 1).sum()) if not nodes_df.empty else 0,
             "level2_count": int((nodes_df["level"] == 2).sum()) if not nodes_df.empty else 0,
             "textbook_pdf": str(DOCUMENT_PATHS.get("textbook_pdf", "")),
-            "textbook_pdf_exists": bool(DOCUMENT_PATHS.get("textbook_pdf") and DOCUMENT_PATHS["textbook_pdf"].exists()),
+            "textbook_pdf_exists": bool(
+                DOCUMENT_PATHS.get("textbook_pdf") and DOCUMENT_PATHS["textbook_pdf"].exists()
+            ),
+            "outline_pdf": str(DOCUMENT_PATHS.get("outline_pdf", "")),
+            "outline_pdf_exists": bool(
+                DOCUMENT_PATHS.get("outline_pdf") and DOCUMENT_PATHS["outline_pdf"].exists()
+            ),
             "vector_collection_name": index_summary.get("collection_name", ""),
             "vector_document_count": index_summary.get("document_count", 0),
         }
