@@ -1,7 +1,7 @@
 window.A2_GRAPH_VIEWER_DATA = {
   "meta": {
     "dataset": "A2 Control Theory Knowledge Graph",
-    "generated_at": "2026-04-10T11:07:19.786466+00:00",
+    "generated_at": "2026-04-12T12:38:04.020547+00:00",
     "note_count": 85,
     "internal_edge_count": 240,
     "out_of_scope_reference_count": 83,
