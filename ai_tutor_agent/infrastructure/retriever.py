@@ -245,15 +245,27 @@ class LocalFileKnowledgeProvider(KnowledgeProvider):
             print(f"⚠️ [DEBUG] 删除旧向量失败: {filename}, 错误: {e}")
 
     def _sync_knowledge_dir(self):
-        """扫描目录，仅处理新增或变更文件"""
-        if not os.path.exists(self.settings.knowledge_dir):
-            os.makedirs(self.settings.knowledge_dir)
+        base_dir = self.settings.knowledge_dir
 
-        # 先清理磁盘上已删除的文件
+        # 🔥 新增：优先找切分目录
+        split_root = os.path.join("data", "knowledge_splits")
+
+        all_files = []
+
+        if os.path.exists(split_root):
+            print("📂 [DEBUG] 使用章节切分后的PDF目录")
+            for sub in os.listdir(split_root):
+                sub_path = os.path.join(split_root, sub)
+                if os.path.isdir(sub_path):
+                    all_files.extend(glob.glob(os.path.join(sub_path, "*.pdf")))
+        else:
+            print("📂 [DEBUG] 使用原始 knowledge 目录")
+            all_files = glob.glob(os.path.join(base_dir, "*.*"))
+
+        # 后面逻辑不变
         self._cleanup_deleted_files()
 
-        files = glob.glob(os.path.join(self.settings.knowledge_dir, "*.*"))
-        for f in files:
+        for f in all_files:
             if self._should_process(f):
                 self.add_local_file(f)
 
