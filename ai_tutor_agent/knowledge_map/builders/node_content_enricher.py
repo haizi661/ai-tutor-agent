@@ -1,24 +1,22 @@
 from __future__ import annotations
 
 import json
-import os
 import re
 from pathlib import Path
-from typing import Any
+from typing import Any, Optional
 
 
 class NodeContentEnricher:
     """
     基于现有 MinerU 缓存结果做节点内容增强：
-    1. 不再直接读取原始 PDF
-    2. 从 data/mineru_cache 下的 full.md 里按章节范围取内容
-    3. 为节点补充：
-       - page_refs
-       - anchor_page
-       - page_refs_refined
-       - explanation_raw
-       - core_concepts
-       - key_points
+    1. 按章节 full.md 读取
+    2. 在章节内按标题切块
+    3. 为节点定位最相关的小节块
+    4. 用该小节块生成 explanation_raw / key_points 等
+
+    当前目标：
+    - 解决同一章节多个二级节点都吃整章内容的问题
+    - 不重跑 MinerU，直接复用已缓存的 full.md
     """
 
     def __init__(
@@ -47,32 +45,55 @@ class NodeContentEnricher:
                 continue
 
             chapter_start, chapter_end = chapter_page_range
-            matched_doc = self._find_matching_chapter_doc(chapter_docs, chapter_start, chapter_end)
+            matched_doc = self._find_matching_chapter_doc(
+                chapter_docs=chapter_docs,
+                start_page=chapter_start,
+                end_page=chapter_end,
+            )
 
             if matched_doc is None:
                 node["extra"]["page_ref_status"] = "mineru_doc_not_found"
                 continue
 
+            full_md = matched_doc["full_md"]
+            chapter_blocks = self._split_md_into_blocks(full_md)
+
             node["page_refs"] = list(range(chapter_start, chapter_end + 1))
-            node["extra"]["anchor_page"] = chapter_start
-            node["extra"]["page_refs_refined"] = self._build_refined_pages(node, chapter_start, chapter_end)
             node["extra"]["mineru_doc_name"] = matched_doc["pdf_name"]
 
-            explanation_raw = self._build_explanation_raw_from_md(node, matched_doc["full_md"])
+            best_block = self._find_best_block_for_node(node, chapter_blocks)
+
+            anchor_page = self._estimate_anchor_page(
+                node=node,
+                chapter_start=chapter_start,
+                chapter_end=chapter_end,
+                best_block=best_block,
+            )
+            node["extra"]["anchor_page"] = anchor_page
+
+            refined_pages = self._build_refined_pages(
+                node=node,
+                chapter_start=chapter_start,
+                chapter_end=chapter_end,
+                best_block=best_block,
+                anchor_page=anchor_page,
+            )
+            node["extra"]["page_refs_refined"] = refined_pages
+
+            explanation_raw = self._build_explanation_raw_from_block(node, best_block, full_md)
             node["explanation_raw"] = explanation_raw
 
-            core_concepts = self._build_core_concepts(node)
-            node["core_concepts"] = core_concepts
-
-            key_points = self._build_key_points(node, explanation_raw)
-            node["key_points"] = key_points
+            node["core_concepts"] = self._build_core_concepts(node)
+            node["key_points"] = self._build_key_points(explanation_raw)
 
             if not str(node.get("summary", "")).strip():
                 node["summary"] = self._build_summary_from_explanation(explanation_raw)
 
             node["extra"]["page_ref_status"] = "ok"
             node["extra"]["page_ref_count"] = len(node["page_refs"])
-            node["extra"]["page_refined_count"] = len(node["extra"]["page_refs_refined"])
+            node["extra"]["page_refined_count"] = len(refined_pages)
+            node["extra"]["matched_block_title"] = best_block["title"] if best_block else ""
+            node["extra"]["matched_block_score"] = best_block["score"] if best_block else 0
 
         return nodes
 
@@ -101,7 +122,6 @@ class NodeContentEnricher:
 
                 pdf_name = str(manifest.get("pdf_name", "")).strip()
                 page_range = self._extract_page_range_from_pdf_name(pdf_name)
-
                 if page_range is None:
                     continue
 
@@ -122,11 +142,6 @@ class NodeContentEnricher:
         return docs
 
     def _extract_page_range_from_pdf_name(self, pdf_name: str) -> tuple[int, int] | None:
-        """
-        从章节切分后的文件名里提取原书页码范围。
-        例如：
-        chapter_03_p082-159_xxx.pdf -> (82, 159)
-        """
         m = re.search(r"_p(\d+)-(\d+)_", pdf_name)
         if not m:
             m = re.search(r"_p(\d+)-(\d+)\.pdf$", pdf_name, flags=re.I)
@@ -152,11 +167,151 @@ class NodeContentEnricher:
 
         return None
 
+    def _split_md_into_blocks(self, full_md: str) -> list[dict[str, Any]]:
+        """
+        按 markdown 标题切块。
+        每个块结构：
+        {
+            "title": str,
+            "level": int,
+            "content": str
+        }
+        """
+        lines = full_md.splitlines()
+        blocks: list[dict[str, Any]] = []
+
+        current_title = "ROOT"
+        current_level = 0
+        current_lines: list[str] = []
+
+        def flush_block() -> None:
+            nonlocal current_title, current_level, current_lines
+            content = "\n".join(current_lines).strip()
+            if content:
+                blocks.append(
+                    {
+                        "title": current_title,
+                        "level": current_level,
+                        "content": content,
+                    }
+                )
+            current_lines = []
+
+        for raw in lines:
+            line = (raw or "").rstrip()
+            stripped = line.strip()
+
+            if not stripped:
+                current_lines.append("")
+                continue
+
+            m = re.match(r"^(#{1,6})\s+(.*)$", stripped)
+            if m:
+                flush_block()
+                current_level = len(m.group(1))
+                current_title = m.group(2).strip()
+                continue
+
+            current_lines.append(line)
+
+        flush_block()
+        return blocks
+
+    def _find_best_block_for_node(
+        self,
+        node: dict[str, Any],
+        blocks: list[dict[str, Any]],
+    ) -> Optional[dict[str, Any]]:
+        if not blocks:
+            return None
+
+        node_name = str(node.get("name", "")).strip()
+        tags = node.get("tags", []) or []
+        extra = node.get("extra", {}) or {}
+        retrieval_keywords = extra.get("retrieval_keywords", []) or []
+        level = int(node.get("level", 1))
+
+        best_block: Optional[dict[str, Any]] = None
+        best_score = -1
+
+        for block in blocks:
+            title = str(block.get("title", "")).strip()
+            content = str(block.get("content", "")).strip()
+            head_text = content[:1200]
+
+            score = 0
+
+            if node_name and node_name in title:
+                score += 20
+
+            if node_name and node_name in head_text:
+                score += 6
+
+            tail_name = self._extract_tail_name(node_name)
+            if tail_name and tail_name in title:
+                score += 12
+
+            for kw in retrieval_keywords:
+                kw = str(kw).strip()
+                if len(kw) >= 2 and kw in title:
+                    score += 4
+                if len(kw) >= 2 and kw in head_text:
+                    score += 2
+
+            for tag in tags:
+                tag = str(tag).strip()
+                if len(tag) >= 2 and tag in title:
+                    score += 2
+                if len(tag) >= 2 and tag in head_text:
+                    score += 1
+
+            # 二级节点优先匹配更细粒度标题块
+            if level == 2 and block.get("level", 0) >= 2:
+                score += 2
+
+            # 一级节点优先大标题块
+            if level == 1 and block.get("level", 0) == 1:
+                score += 2
+
+            if score > best_score:
+                best_score = score
+                best_block = dict(block)
+                best_block["score"] = score
+
+        return best_block
+
+    def _estimate_anchor_page(
+        self,
+        node: dict[str, Any],
+        chapter_start: int,
+        chapter_end: int,
+        best_block: Optional[dict[str, Any]],
+    ) -> int:
+        if best_block is None:
+            return chapter_start
+
+        level = int(node.get("level", 1))
+        title = str(best_block.get("title", "")).strip()
+        content = str(best_block.get("content", "")).strip()
+
+        # 粗略估计：二级节点往章节中部或后部偏移一点
+        # 不求绝对精确，先让不同子节点不再都落在同一页
+        chapter_len = max(1, chapter_end - chapter_start + 1)
+
+        if level == 1:
+            return chapter_start
+
+        hash_base = title + content[:200]
+        bucket = sum(ord(ch) for ch in hash_base) % min(6, chapter_len)
+        return min(chapter_start + bucket, chapter_end)
+
     def _build_refined_pages(
         self,
         node: dict[str, Any],
         chapter_start: int,
         chapter_end: int,
+        best_block: Optional[dict[str, Any]],
+        anchor_page: int,
     ) -> list[int]:
         level = int(node.get("level", 1))
 
@@ -164,17 +319,29 @@ class NodeContentEnricher:
             end = min(chapter_start + 3, chapter_end)
             return list(range(chapter_start, end + 1))
 
-        # 二级节点先取该章前 4 页，后续如果你想再细化，可再做标题定位
-        end = min(chapter_start + 3, chapter_end)
-        return list(range(chapter_start, end + 1))
+        # 二级节点围绕估计锚点收缩，避免所有子节点都共享同一组页
+        start = max(chapter_start, anchor_page - 1)
+        end = min(chapter_end, anchor_page + 2)
+        return list(range(start, end + 1))
 
-    def _build_explanation_raw_from_md(self, node: dict[str, Any], full_md: str) -> str:
+    def _build_explanation_raw_from_block(
+        self,
+        node: dict[str, Any],
+        best_block: Optional[dict[str, Any]],
+        full_md: str,
+    ) -> str:
+        if best_block is None:
+            lines = self._clean_md_lines(full_md)
+            return " ".join(lines[:4])
+
+        block_text = str(best_block.get("content", "")).strip()
+        lines = self._clean_md_lines(block_text)
+
         node_name = str(node.get("name", "")).strip()
         tags = node.get("tags", []) or []
         extra = node.get("extra", {}) or {}
         retrieval_keywords = extra.get("retrieval_keywords", []) or []
 
-        lines = self._clean_md_lines(full_md)
         scored_lines: list[tuple[int, str]] = []
 
         for line in lines:
@@ -183,10 +350,14 @@ class NodeContentEnricher:
             if node_name and node_name in line:
                 score += 5
 
+            tail_name = self._extract_tail_name(node_name)
+            if tail_name and tail_name in line:
+                score += 3
+
             for kw in retrieval_keywords:
                 kw = str(kw).strip()
                 if len(kw) >= 2 and kw in line:
-                    score += 3
+                    score += 2
 
             for tag in tags:
                 tag = str(tag).strip()
@@ -195,6 +366,9 @@ class NodeContentEnricher:
 
             if score > 0:
                 scored_lines.append((score, line))
+
+        if not scored_lines:
+            return " ".join(lines[:4])
 
         scored_lines.sort(key=lambda x: (-x[0], len(x[1])))
 
@@ -207,10 +381,10 @@ class NodeContentEnricher:
 
         return " ".join(selected)
 
-    def _clean_md_lines(self, full_md: str) -> list[str]:
-        lines: list[str] = []
+    def _clean_md_lines(self, text: str) -> list[str]:
+        results: list[str] = []
 
-        for raw in full_md.splitlines():
+        for raw in text.splitlines():
             line = (raw or "").strip()
             if not line:
                 continue
@@ -231,9 +405,9 @@ class NodeContentEnricher:
             line = re.sub(r"\s+", " ", line).strip()
 
             if len(line) >= 10:
-                lines.append(line)
+                results.append(line)
 
-        return lines
+        return results
 
     def _build_core_concepts(self, node: dict[str, Any]) -> list[str]:
         tags = node.get("tags", []) or []
@@ -249,7 +423,7 @@ class NodeContentEnricher:
 
         return concepts[:6]
 
-    def _build_key_points(self, node: dict[str, Any], explanation_raw: str) -> list[str]:
+    def _build_key_points(self, explanation_raw: str) -> list[str]:
         if not explanation_raw.strip():
             return []
 
@@ -277,6 +451,13 @@ class NodeContentEnricher:
             return ""
 
         return cleaned[0][:120]
+
+    def _extract_tail_name(self, node_name: str) -> str:
+        if "的" in node_name:
+            tail = node_name.split("的")[-1].strip()
+            if len(tail) >= 2:
+                return tail
+        return ""
 
     @staticmethod
     def _clean_sentence(text: str) -> str:

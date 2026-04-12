@@ -3,14 +3,16 @@ from __future__ import annotations
 import json
 import re
 from pathlib import Path
-from typing import Any
+from typing import Any, Optional
 
 
 class NodeRetrievalBuilder:
     """
     基于现有 MinerU 缓存结果做节点候选抽取：
-    1. 不再从原始 PDF 读文本
-    2. 直接从章节 full.md 中抽 definition / keypoint / formula / example
+    1. 读取章节 full.md
+    2. 先按标题切成小节块
+    3. 节点优先在自己最匹配的小节块内抽取 candidates
+    4. 重点收紧公式候选，减少自然语言解释句污染
     """
 
     def __init__(
@@ -32,37 +34,51 @@ class NodeRetrievalBuilder:
 
         for node in nodes:
             node.setdefault("extra", {})
-            chapter_page_range = node["extra"].get("chapter_page_range", []) or []
 
+            chapter_page_range = node["extra"].get("chapter_page_range", []) or []
             if not isinstance(chapter_page_range, list) or len(chapter_page_range) != 2:
                 node["extra"]["retrieval_status"] = "chapter_page_range_missing"
                 continue
 
             chapter_start, chapter_end = chapter_page_range
-            matched_doc = self._find_matching_chapter_doc(chapter_docs, chapter_start, chapter_end)
+            matched_doc = self._find_matching_chapter_doc(
+                chapter_docs=chapter_docs,
+                start_page=chapter_start,
+                end_page=chapter_end,
+            )
 
             if matched_doc is None:
                 node["extra"]["retrieval_status"] = "mineru_doc_not_found"
                 continue
 
             md_content = matched_doc["full_md"]
+            chapter_blocks = self._split_md_into_blocks(md_content)
+            best_block = self._find_best_block_for_node(node, chapter_blocks)
 
-            text_lines = self._collect_text_lines(md_content)
-            formula_lines = self._collect_formula_lines(md_content)
-            figure_lines = self._collect_figure_related_lines(md_content)
+            block_text = best_block["content"] if best_block else md_content
+
+            text_lines = self._collect_text_lines(block_text)
+            formula_lines = self._collect_formula_lines(block_text)
+            figure_lines = self._collect_figure_related_lines(block_text)
 
             candidate_sentences = self._collect_candidate_sentences(node, text_lines)
 
-            node["definition_candidates"] = self._select_definition_candidates(node, candidate_sentences)
-            node["key_point_candidates"] = self._select_key_point_candidates(node, candidate_sentences)
-            node["formula_candidates"] = self._select_formula_candidates(node, formula_lines, candidate_sentences)
-            node["example_candidates"] = self._select_example_candidates(node, candidate_sentences, figure_lines)
+            node["definition_candidates"] = self._select_definition_candidates(candidate_sentences)
+            node["key_point_candidates"] = self._select_key_point_candidates(candidate_sentences)
+            node["formula_candidates"] = self._select_formula_candidates(
+                node=node,
+                formula_lines=formula_lines,
+                candidate_sentences=candidate_sentences,
+            )
+            node["example_candidates"] = self._select_example_candidates(candidate_sentences, figure_lines)
 
             node["extra"]["retrieval_status"] = "ok"
             node["extra"]["retrieval_candidate_sentence_count"] = len(candidate_sentences)
             node["extra"]["retrieval_formula_line_count"] = len(formula_lines)
             node["extra"]["retrieval_figure_line_count"] = len(figure_lines)
             node["extra"]["retrieval_source_pdf"] = matched_doc["pdf_name"]
+            node["extra"]["retrieval_matched_block_title"] = best_block["title"] if best_block else ""
+            node["extra"]["retrieval_matched_block_score"] = best_block["score"] if best_block else 0
 
         return nodes
 
@@ -136,6 +152,108 @@ class NodeRetrievalBuilder:
 
         return None
 
+    def _split_md_into_blocks(self, full_md: str) -> list[dict[str, Any]]:
+        lines = full_md.splitlines()
+        blocks: list[dict[str, Any]] = []
+
+        current_title = "ROOT"
+        current_level = 0
+        current_lines: list[str] = []
+
+        def flush_block() -> None:
+            nonlocal current_title, current_level, current_lines
+            content = "\n".join(current_lines).strip()
+            if content:
+                blocks.append(
+                    {
+                        "title": current_title,
+                        "level": current_level,
+                        "content": content,
+                    }
+                )
+            current_lines = []
+
+        for raw in lines:
+            line = (raw or "").rstrip()
+            stripped = line.strip()
+
+            if not stripped:
+                current_lines.append("")
+                continue
+
+            m = re.match(r"^(#{1,6})\s+(.*)$", stripped)
+            if m:
+                flush_block()
+                current_level = len(m.group(1))
+                current_title = m.group(2).strip()
+                continue
+
+            current_lines.append(line)
+
+        flush_block()
+        return blocks
+
+    def _find_best_block_for_node(
+        self,
+        node: dict[str, Any],
+        blocks: list[dict[str, Any]],
+    ) -> Optional[dict[str, Any]]:
+        if not blocks:
+            return None
+
+        node_name = str(node.get("name", "")).strip()
+        tags = node.get("tags", []) or []
+        extra = node.get("extra", {}) or {}
+        retrieval_keywords = extra.get("retrieval_keywords", []) or []
+        level = int(node.get("level", 1))
+
+        best_block: Optional[dict[str, Any]] = None
+        best_score = -1
+
+        for block in blocks:
+            title = str(block.get("title", "")).strip()
+            content = str(block.get("content", "")).strip()
+            head_text = content[:1200]
+
+            score = 0
+
+            if node_name and node_name in title:
+                score += 20
+
+            if node_name and node_name in head_text:
+                score += 6
+
+            tail_name = self._extract_tail_name(node_name)
+            if tail_name and tail_name in title:
+                score += 12
+
+            for kw in retrieval_keywords:
+                kw = str(kw).strip()
+                if len(kw) >= 2 and kw in title:
+                    score += 4
+                if len(kw) >= 2 and kw in head_text:
+                    score += 2
+
+            for tag in tags:
+                tag = str(tag).strip()
+                if len(tag) >= 2 and tag in title:
+                    score += 2
+                if len(tag) >= 2 and tag in head_text:
+                    score += 1
+
+            if level == 2 and block.get("level", 0) >= 2:
+                score += 2
+
+            if level == 1 and block.get("level", 0) == 1:
+                score += 2
+
+            if score > best_score:
+                best_score = score
+                best_block = dict(block)
+                best_block["score"] = score
+
+        return best_block
+
     def _collect_text_lines(self, md_content: str) -> list[str]:
         lines: list[str] = []
 
@@ -177,6 +295,7 @@ class NodeRetrievalBuilder:
             line = (lines[i] or "").rstrip()
             stripped = line.strip()
 
+            # ```math ... ```
             if stripped.startswith("```math"):
                 formula_parts: list[str] = []
                 i += 1
@@ -189,17 +308,23 @@ class NodeRetrievalBuilder:
                     i += 1
 
                 if formula_parts:
-                    results.append(self._normalize_formula_text(" ".join(formula_parts)))
+                    joined = self._normalize_formula_text(" ".join(formula_parts))
+                    if self._is_formula_like_candidate(joined):
+                        results.append(joined)
+
                 i += 1
                 continue
 
+            # $$ ... $$
             if stripped.startswith("$$"):
                 formula_parts: list[str] = []
                 after = stripped[2:]
 
                 if after.endswith("$$") and len(after) > 2:
                     formula_parts.append(after[:-2].strip())
-                    results.append(self._normalize_formula_text(" ".join(formula_parts)))
+                    joined = self._normalize_formula_text(" ".join(formula_parts))
+                    if self._is_formula_like_candidate(joined):
+                        results.append(joined)
                     i += 1
                     continue
 
@@ -222,12 +347,17 @@ class NodeRetrievalBuilder:
                     i += 1
 
                 if formula_parts:
-                    results.append(self._normalize_formula_text(" ".join(formula_parts)))
+                    joined = self._normalize_formula_text(" ".join(formula_parts))
+                    if self._is_formula_like_candidate(joined):
+                        results.append(joined)
+
                 i += 1
                 continue
 
-            if self._looks_like_formula_text(stripped):
-                results.append(self._normalize_formula_text(stripped))
+            # 单行公式风格
+            normalized = self._normalize_formula_text(stripped)
+            if self._is_formula_like_candidate(normalized):
+                results.append(normalized)
 
             i += 1
 
@@ -248,8 +378,8 @@ class NodeRetrievalBuilder:
                 continue
 
             if self._is_figure_caption_line(line):
-                prev_text = " ".join((lines[max(0, idx - 2):idx]))
-                next_text = " ".join((lines[idx + 1:min(len(lines), idx + 3)]))
+                prev_text = " ".join(lines[max(0, idx - 2):idx])
+                next_text = " ".join(lines[idx + 1:min(len(lines), idx + 3)])
                 combined = f"{prev_text} {line} {next_text}"
                 combined = re.sub(r"\s+", " ", combined).strip()
                 if combined:
@@ -275,10 +405,14 @@ class NodeRetrievalBuilder:
             if node_name and node_name in line:
                 score += 5
 
+            tail_name = self._extract_tail_name(node_name)
+            if tail_name and tail_name in line:
+                score += 3
+
             for kw in retrieval_keywords:
                 kw = str(kw).strip()
                 if len(kw) >= 2 and kw in line:
-                    score += 3
+                    score += 2
 
             for tag in tags:
                 tag = str(tag).strip()
@@ -297,11 +431,7 @@ class NodeRetrievalBuilder:
 
         return unique_sentences
 
-    def _select_definition_candidates(
-        self,
-        node: dict[str, Any],
-        candidate_sentences: list[str],
-    ) -> list[str]:
+    def _select_definition_candidates(self, candidate_sentences: list[str]) -> list[str]:
         definition_markers = [
             "是",
             "指",
@@ -319,11 +449,7 @@ class NodeRetrievalBuilder:
             keep_top=4,
         )
 
-    def _select_key_point_candidates(
-        self,
-        node: dict[str, Any],
-        candidate_sentences: list[str],
-    ) -> list[str]:
+    def _select_key_point_candidates(self, candidate_sentences: list[str]) -> list[str]:
         keypoint_markers = [
             "主要",
             "一般",
@@ -353,42 +479,128 @@ class NodeRetrievalBuilder:
     ) -> list[str]:
         node_name = str(node.get("name", "")).strip()
         tags = node.get("tags", []) or []
-        results: list[str] = []
+        results_with_score: list[tuple[int, str]] = []
 
-        # 先优先取 markdown 里明确识别到的公式块
+        # 1. 优先吃真正的公式行
         for line in formula_lines:
-            score = 0
+            score = self._score_formula_candidate(
+                text=line,
+                node_name=node_name,
+                tags=tags,
+            )
+            if score > 0:
+                results_with_score.append((score, line))
 
-            if node_name and node_name in line:
-                score += 3
-
-            for tag in tags:
-                tag = str(tag).strip()
-                if len(tag) >= 2 and tag in line:
-                    score += 1
-
-            if score > 0 or self._looks_like_formula_text(line):
-                cleaned = self._normalize_formula_text(line)
-                if cleaned and cleaned not in results:
-                    results.append(cleaned)
-
-            if len(results) >= 4:
-                return results
-
-        # 再退回候选句中带公式特征的内容
+        # 2. 再从普通句子里捞“像公式”的短句
         for sent in candidate_sentences:
-            if self._looks_like_formula_text(sent):
-                cleaned = self._normalize_formula_text(sent)
-                if cleaned and cleaned not in results:
-                    results.append(cleaned)
+            normalized = self._normalize_formula_text(sent)
+            if not self._is_formula_like_candidate(normalized):
+                continue
+
+            score = self._score_formula_candidate(
+                text=normalized,
+                node_name=node_name,
+                tags=tags,
+            )
+            if score > 0:
+                results_with_score.append((score, normalized))
+
+        results_with_score.sort(key=lambda x: (-x[0], len(x[1])))
+
+        results: list[str] = []
+        for _, text in results_with_score:
+            if text not in results:
+                results.append(text)
             if len(results) >= 4:
                 break
 
         return results
 
+    def _score_formula_candidate(
+        self,
+        text: str,
+        node_name: str,
+        tags: list[str],
+    ) -> int:
+        """
+        分数越高越像真正公式候选。
+        """
+        score = 0
+        text = self._normalize_formula_text(text)
+
+        if not text:
+            return 0
+
+        # 明显是解释句，直接重罚
+        negative_markers = [
+            "例如",
+            "比如",
+            "一般来说",
+            "通常",
+            "可以看出",
+            "说明",
+            "表示为",
+            "主要有以下",
+            "其特点是",
+            "系统由",
+            "系统可以",
+            "控制系统是",
+            "自动控制系统",
+            "反馈控制系统",
+            "核心任务",
+            "学习这部分内容",
+            "同学们",
+        ]
+        for marker in negative_markers:
+            if marker in text:
+                score -= 4
+
+        # 特征越“数学”，分越高
+        if "=" in text:
+            score += 3
+
+        if re.search(r"[A-Za-z]+\([sztjw]\)", text):
+            score += 4
+
+        if re.search(r"[CRGHXYW]\([sztjw]\)", text):
+            score += 5
+
+        if re.search(r"\b\d+(\.\d+)?\b", text):
+            score += 1
+
+        if re.search(r"[+\-*/^]", text):
+            score += 2
+
+        if re.search(r"frac|\\frac|\\dfrac|∑|Σ|∫|lim", text):
+            score += 4
+
+        if any(k in text for k in ["传递函数", "微分方程", "状态方程", "特征方程", "拉普拉斯变换", "Z变换", "z变换"]):
+            score += 3
+
+        if len(text) > 160:
+            score -= 2
+        if len(text) > 260:
+            score -= 3
+
+        if "。" in text:
+            score -= 2
+
+        if node_name and node_name in text:
+            score += 2
+
+        tail_name = self._extract_tail_name(node_name)
+        if tail_name and tail_name in text:
+            score += 1
+
+        for tag in tags:
+            tag = str(tag).strip()
+            if len(tag) >= 2 and tag in text:
+                score += 1
+
+        return score
+
     def _select_example_candidates(
         self,
-        node: dict[str, Any],
         candidate_sentences: list[str],
         figure_lines: list[str],
     ) -> list[str]:
@@ -456,22 +668,14 @@ class NodeRetrievalBuilder:
         return bool(re.match(r"^\s*(Figure|Fig\.?|图)\s*\d+", text, flags=re.I))
 
     def _looks_like_formula_text(self, text: str) -> bool:
+        """
+        宽松判断：用于初筛。
+        真正是否保留，还要交给 _score_formula_candidate。
+        """
         if not text:
             return False
 
-        formula_markers = [
-            "=",
-            "传递函数",
-            "微分方程",
-            "状态方程",
-            "拉氏变换",
-            "拉普拉斯变换",
-            "z变换",
-            "Z变换",
-            "频率特性",
-        ]
-
-        if any(marker in text for marker in formula_markers):
+        if re.search(r"[CRGHXYW]\([sztjw]\)", text):
             return True
 
         if re.search(r"[A-Za-z]+\([sztjw]\)", text):
@@ -483,9 +687,68 @@ class NodeRetrievalBuilder:
         if re.search(r"\$.*?\$", text):
             return True
 
+        if any(
+            marker in text
+            for marker in [
+                "=",
+                "传递函数",
+                "微分方程",
+                "状态方程",
+                "特征方程",
+                "拉氏变换",
+                "拉普拉斯变换",
+                "z变换",
+                "Z变换",
+            ]
+        ):
+            return True
+
+        return False
+
+    def _is_formula_like_candidate(self, text: str) -> bool:
+        """
+        严格判断：尽量排除纯解释句。
+        """
+        if not text:
+            return False
+
+        text = self._normalize_formula_text(text)
+
+        strong_patterns = [
+            r"[CRGHXYW]\([sztjw]\)",
+            r"[A-Za-z]+\([sztjw]\)\s*=\s*",
+            r"[A-Za-z]+\s*=\s*[^。]+",
+            r"\\frac|frac|∑|Σ|∫|lim",
+        ]
+
+        if any(re.search(p, text) for p in strong_patterns):
+            return True
+
+        strong_keywords = [
+            "传递函数",
+            "微分方程",
+            "状态方程",
+            "特征方程",
+            "闭环传递函数",
+            "开环传递函数",
+        ]
+        if any(k in text for k in strong_keywords) and "=" in text:
+            return True
+
+        # 太长且没有明确公式结构，排除
+        if len(text) > 140 and not re.search(r"[A-Za-z]+\([sztjw]\)|=", text):
+            return False
+
         return False
 
     def _normalize_formula_text(self, text: str) -> str:
         text = text.replace("\n", " ").strip()
         text = re.sub(r"\s+", " ", text)
         return text[:600]
+
+    def _extract_tail_name(self, node_name: str) -> str:
+        if "的" in node_name:
+            tail = node_name.split("的")[-1].strip()
+            if len(tail) >= 2:
+                return tail
+        return ""

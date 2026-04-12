@@ -1,3 +1,18 @@
+# 比较老了但可以看看
+
+## 快速上手看结果
+
+切分pdf文件python ai_tutor_agent\split_pdf_by_chapters.py
+
+调试图谱用
+第一步python -m ai_tutor_agent.knowledge_map.debug_pipeline_v2
+第二步python -m ai_tutor_agent.knowledge_map.debug_vector_retrieval
+第三步python -m ai_tutor_agent.knowledge_map.debug_rag_qa
+
+调试图谱问答用python -m ai_tutor_agent.knowledge_map.debug_companion
+输入help就会弹出推荐用的问题
+
+
 # knowledge_map 模块 README
 
 ## 1. 模块目标
