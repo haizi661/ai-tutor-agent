@@ -426,7 +426,7 @@ class KnowledgeMapDebugger:
         recommended_ids = current_node.get("recommended_next_nodes", []) or []
         visited = set(self.student_state.visited_nodes)
 
-        results: list[tuple[float, str, str]] = []
+        results = []
 
         for node_id in recommended_ids:
             target = self.node_map.get(node_id)
@@ -451,13 +451,19 @@ class KnowledgeMapDebugger:
 
         if not results:
             print("当前没有新的推荐节点，可能推荐项都已学过。")
+            self.student_state.recommended_queue = []
+            self.state_store.save(self.student_state)
             return
+
+        # ✅ 关键：这里必须定义
+        queue = []
 
         for idx, (_, node_id, reason) in enumerate(results[:5], start=1):
             node = self.node_map[node_id]
             print(f"{idx}. {node_id} | {node['name']} | {reason}")
-        
-        # 关键新增：写回学生状态
+            queue.append(node_id)
+
+        # ✅ 写回状态
         self.student_state.recommended_queue = queue
         self.state_store.save(self.student_state)
 
@@ -511,6 +517,15 @@ class KnowledgeMapDebugger:
     def _match_node(self, text: str) -> Optional[dict[str, Any]]:
         q = text.strip()
 
+        # 1. 优先按 node_id 直接查
+        if q in self.node_map:
+            return self.node_map[q]
+
+        # 2. 再按完整名称精确查
+        if q in self.name_map:
+            return self.name_map[q]
+
+        # 3. 最后走模糊匹配
         best_node = None
         best_score = -1
 
@@ -545,10 +560,17 @@ class KnowledgeMapDebugger:
 
         return score
 
-    def _require_node(self, node_name: str) -> dict[str, Any]:
-        node = self._match_node(node_name)
+    def _require_node(self, node_key: str) -> dict[str, Any]:
+        node_key = node_key.strip()
+
+        # 1. 先按 node_id 直接查
+        if node_key in self.node_map:
+            return self.node_map[node_key]
+
+        # 2. 再按 name / 关键词匹配
+        node = self._match_node(node_key)
         if node is None:
-            raise ValueError(f"未找到节点: {node_name}")
+            raise ValueError(f"未找到节点: {node_key}")
         return node
 
     def _print_requirement_block(self, node: dict[str, Any]) -> None:
