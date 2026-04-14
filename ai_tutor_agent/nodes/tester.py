@@ -337,6 +337,8 @@ def _select_question_type(state: AgentState) -> dict:
 
     misconceptions = " ".join(state.get("misconceptions", []) or [])
     next_review_points = " ".join(state.get("next_review_points", []) or [])
+    graph_common_errors = " ".join(state.get("graph_common_errors", []) or [])
+    graph_learning_objectives = " ".join(state.get("graph_learning_objectives", []) or [])
     context = "\n".join(
         [
             str(state.get("current_topic", "") or ""),
@@ -345,6 +347,8 @@ def _select_question_type(state: AgentState) -> dict:
             str(state.get("feedback", "") or ""),
             misconceptions,
             next_review_points,
+            graph_common_errors,
+            graph_learning_objectives,
             str(state.get("tester_question", "") or ""),
         ]
     )
@@ -360,6 +364,7 @@ def _select_question_type(state: AgentState) -> dict:
             [
                 misconceptions,
                 next_review_points,
+                graph_common_errors,
                 str(state.get("feedback", "") or ""),
                 str(state.get("coach_content", "") or ""),
             ]
@@ -400,6 +405,8 @@ def _select_question_template(state: AgentState, question_type_spec: dict) -> di
             str(state.get("feedback", "") or ""),
             " ".join(state.get("misconceptions", []) or []),
             " ".join(state.get("next_review_points", []) or []),
+            " ".join(state.get("graph_common_errors", []) or []),
+            " ".join(state.get("graph_learning_objectives", []) or []),
         ]
     )
 
@@ -766,8 +773,28 @@ def build_tester_node(
         tutor_content = state.get("tutor_content", "")
         coach_content = state.get("coach_content", "").strip()
         difficulty_level = state.get("difficulty_level", 3)
-        question_type_spec = _select_question_type(state)
-        question_template_spec = _select_question_template(state, question_type_spec)
+        graph_learning_objectives = [str(item).strip() for item in (state.get("graph_learning_objectives") or []) if str(item).strip()]
+        graph_common_errors = [str(item).strip() for item in (state.get("graph_common_errors") or []) if str(item).strip()]
+        graph_must_know = [str(item).strip() for item in (state.get("graph_must_know") or []) if str(item).strip()]
+        practice_generation_mode = str(state.get("practice_generation_mode", "") or "").strip()
+        if practice_generation_mode == "same_type" and state.get("tester_question_type"):
+            question_type_spec = {
+                **_get_question_type_spec(state.get("tester_question_type")),
+                "reason": "沿用你刚才已经通过的题型，再换一道同类型题巩固一次。",
+            }
+            if state.get("tester_question_template"):
+                question_template_spec = {
+                    **_get_question_template_spec(
+                        state.get("tester_question_template"),
+                        question_type=question_type_spec["key"],
+                    ),
+                    "reason": "保留同一子模板，让你在熟悉的考法上再稳一次。",
+                }
+            else:
+                question_template_spec = _select_question_template(state, question_type_spec)
+        else:
+            question_type_spec = _select_question_type(state)
+            question_template_spec = _select_question_template(state, question_type_spec)
         question_type_label = question_type_spec["label"]
         question_template_label = question_template_spec["label"]
         question_identity_label = _question_identity_label(question_type_spec, question_template_spec)
@@ -826,6 +853,9 @@ def build_tester_node(
                 human_content = (
                     f"这是教授刚才的教案：\n{tutor_content}\n\n"
                     f"补救教练刚给出的纠偏卡片：\n{coach_content}\n\n"
+                    f"该节点学习目标：{'；'.join(graph_learning_objectives) if graph_learning_objectives else '未提供'}\n"
+                    f"该节点必会点：{'；'.join(graph_must_know) if graph_must_know else '未提供'}\n"
+                    f"该节点常见误区：{'；'.join(graph_common_errors) if graph_common_errors else '未提供'}\n"
                     f"当前难度级别：{difficulty_level}\n"
                     f"本轮题型已确定：{question_type_label}\n"
                     f"本轮子模板已确定：{question_template_label}\n"
@@ -847,6 +877,9 @@ def build_tester_node(
             else:
                 human_content = (
                     f"这是教授刚才的教案：\n{tutor_content}\n\n"
+                    f"该节点学习目标：{'；'.join(graph_learning_objectives) if graph_learning_objectives else '未提供'}\n"
+                    f"该节点必会点：{'；'.join(graph_must_know) if graph_must_know else '未提供'}\n"
+                    f"该节点常见误区：{'；'.join(graph_common_errors) if graph_common_errors else '未提供'}\n"
                     f"当前难度级别：{difficulty_level}\n"
                     f"本轮题型已确定：{question_type_label}\n"
                     f"本轮子模板已确定：{question_template_label}\n"
@@ -955,6 +988,10 @@ def build_tester_node(
             history.append(
                 {"role": "user", "kind": "interruption_user", "content": interrupt_query}
             )
+            message_history = list(state.get("message_history", []))
+            message_history.append(
+                {"role": "user", "kind": "interruption_user", "content": interrupt_query}
+            )
             return {
                 "tester_question": full_question,
                 "tester_question_type": question_type_label,
@@ -962,10 +999,15 @@ def build_tester_node(
                 "user_answer": "",
                 "interrupt_query": interrupt_query,
                 "resume_tester": True,
+                "practice_generation_mode": "",
+                "post_eval_choice": "",
                 "skip_reason": "",
                 "conversation_history": history,
+                "message_history": message_history,
             }
 
+        message_history = list(state.get("message_history", []))
+        message_history.append({"role": "user", "kind": "user_answer", "content": user_input})
         return {
             "tester_question": full_question,
             "tester_question_type": question_type_label,
@@ -974,7 +1016,10 @@ def build_tester_node(
             "coach_content": "",
             "resume_tester": False,
             "interrupt_query": "",
+            "practice_generation_mode": "",
+            "post_eval_choice": "",
             "skip_reason": "",
+            "message_history": message_history,
         }
 
     return tester_node

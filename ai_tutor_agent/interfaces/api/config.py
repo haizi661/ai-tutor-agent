@@ -96,6 +96,10 @@ class LocalConfigUpdateRequest(BaseModel):
     retrieval_rewrite_enabled: bool = False
     retrieval_rewrite_mode: str = "smart"
     retrieval_rewrite_debug: bool = False
+    web_search_enabled: bool = False
+    web_search_provider: str = "tavily"
+    tavily_api_key: str = ""
+    web_search_max_results: int = 5
 
 
 @router.get("")
@@ -194,6 +198,11 @@ async def get_local_config(request: Request):
         "retrieval_rewrite_enabled": (raw_values.get("RETRIEVAL_REWRITE_ENABLED", str(settings.retrieval_rewrite_enabled)).strip().lower() in {"1", "true", "yes", "on"}),
         "retrieval_rewrite_mode": raw_values.get("RETRIEVAL_REWRITE_MODE", settings.retrieval_rewrite_mode),
         "retrieval_rewrite_debug": (raw_values.get("RETRIEVAL_REWRITE_DEBUG", str(settings.retrieval_rewrite_debug)).strip().lower() in {"1", "true", "yes", "on"}),
+        "web_search_enabled": (raw_values.get("WEB_SEARCH_ENABLED", str(settings.web_search_enabled)).strip().lower() in {"1", "true", "yes", "on"}),
+        "web_search_provider": raw_values.get("WEB_SEARCH_PROVIDER", settings.web_search_provider),
+        "tavily_api_key": _mask_secret(raw_values.get("TAVILY_API_KEY", settings.tavily_api_key or "")),
+        "has_tavily_api_key": bool(raw_values.get("TAVILY_API_KEY", settings.tavily_api_key or "")),
+        "web_search_max_results": _coerce_int(raw_values.get("WEB_SEARCH_MAX_RESULTS"), settings.web_search_max_results),
     }
 
 
@@ -258,6 +267,10 @@ async def update_local_config(req: LocalConfigUpdateRequest, request: Request):
         "RETRIEVAL_REWRITE_ENABLED": "true" if req.retrieval_rewrite_enabled else "false",
         "RETRIEVAL_REWRITE_MODE": req.retrieval_rewrite_mode.strip() or raw_values.get("RETRIEVAL_REWRITE_MODE", "smart"),
         "RETRIEVAL_REWRITE_DEBUG": "true" if req.retrieval_rewrite_debug else "false",
+        "WEB_SEARCH_ENABLED": "true" if req.web_search_enabled else "false",
+        "WEB_SEARCH_PROVIDER": req.web_search_provider.strip() or raw_values.get("WEB_SEARCH_PROVIDER", "tavily"),
+        "TAVILY_API_KEY": req.tavily_api_key.strip() or raw_values.get("TAVILY_API_KEY", ""),
+        "WEB_SEARCH_MAX_RESULTS": str(req.web_search_max_results),
     }
 
     selected_api_key = req.api_key.strip()

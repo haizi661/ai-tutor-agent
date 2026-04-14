@@ -131,6 +131,9 @@ def build_evaluator_node(
         topic = state["current_topic"]
         question = state["tester_question"]
         user_answer = state["user_answer"]
+        graph_learning_objectives = [str(item).strip() for item in (state.get("graph_learning_objectives") or []) if str(item).strip()]
+        graph_common_errors = [str(item).strip() for item in (state.get("graph_common_errors") or []) if str(item).strip()]
+        graph_must_know = [str(item).strip() for item in (state.get("graph_must_know") or []) if str(item).strip()]
 
         event_sink.emit(
             make_event(
@@ -159,6 +162,9 @@ def build_evaluator_node(
                 f"当前考核主题：{topic}\n"
                 f"测试题：{question}\n"
                 f"学生作答：{user_answer}\n"
+                f"该节点学习目标：{'；'.join(graph_learning_objectives) if graph_learning_objectives else '未提供'}\n"
+                f"该节点必会点：{'；'.join(graph_must_know) if graph_must_know else '未提供'}\n"
+                f"该节点常见误区：{'；'.join(graph_common_errors) if graph_common_errors else '未提供'}\n"
                 "请严格基于作答内容进行评估。"
             )
         )
@@ -181,6 +187,11 @@ def build_evaluator_node(
         encouragement = str(getattr(result, "encouragement", "") or "")
         next_review_points = list(getattr(result, "next_review_points", []) or [])
         needs_hint = bool(getattr(result, "needs_hint", False))
+
+        if not next_review_points and graph_learning_objectives:
+            next_review_points = graph_learning_objectives[:2]
+        if not rubric_feedback and graph_common_errors:
+            rubric_feedback = [f"图谱误区参考：{graph_common_errors[0]}"]
 
         if _should_cap_score(user_answer):
             total_score = min(total_score, 35)

@@ -18,12 +18,13 @@ from langchain_core.documents import Document
 from langchain_core.messages import HumanMessage, SystemMessage
 from rank_bm25 import BM25Okapi
 
-from ..config import Settings
+from ..config import PROJECT_ROOT, Settings
 from ..core.output_format import parse_json_object
 from ..core.ports import KnowledgeProvider
 from ..core.text import content_to_text
 from .llm import build_retrieval_planner_llm
 from .processor import KnowledgeProcessor
+from .web_search import TavilySearchClient, WebSearchResult
 
 
 def chunk_text(text: str, chunk_size: int, chunk_overlap: int) -> list[str]:
@@ -202,14 +203,26 @@ class FamilyHit:
     score: float | None = None
 
 
+@dataclass(frozen=True)
+class KnowledgeSourceSpec:
+    scope: str
+    path: Path
+    label: str
+    primary: bool = False
+    managed_uploads: bool = False
+
+
 RRF_K = 60
 RRF_SCALE = 100.0
-RETRIEVAL_STATE_VERSION = 1
+RETRIEVAL_STATE_VERSION = 2
 CONFIDENT_CITATION_MIN_DOMINANCE = 0.74
 CONFIDENT_CITATION_MIN_RRF = 0.03
 FILENAME_MATCH_BOOST = -1.55
 TITLE_MATCH_BOOST = -0.3
 TERM_OVERLAP_BOOST = -0.08
+COURSE_PRIMARY_SOURCE_BOOST = -0.06
+SOURCE_SCOPE_COURSE_PRIMARY = "course_primary"
+SOURCE_SCOPE_SUPPLEMENTAL = "supplemental"
 RETRIEVAL_REWRITE_INTENTS = {
     "exact_lookup",
     "concept_overview",
@@ -267,6 +280,65 @@ QUERY_FUNCTION_PREFIXES = ["是", "的", "里", "中", "上", "下", "把", "给
 MAX_REWRITE_VECTOR_QUERIES = 2
 MAX_REWRITE_BM25_QUERIES = 2
 MAX_REWRITE_METADATA_TERMS = 4
+MAX_CITABLE_EVIDENCE_ITEMS = 4
+COURSE_PRIMARY_MIN_RESULTS = 2
+SUPPLEMENTAL_MIN_RESULTS = 1
+GRAPH_NOTE_ENRICHMENT_FIELDS = (
+    "id",
+    "prerequisites",
+    "neighbors",
+    "learning_objectives",
+    "must_know",
+    "teaching_modes",
+    "assessment_modes",
+    "target_mastery_level",
+    "common_errors",
+    "difficulty",
+)
+
+
+@dataclass
+class EvidenceItem:
+    source_type: str
+    source_id: str
+    display_label: str
+    snippet: str
+    goal_alignment: float
+    can_cite: bool
+    rank_score: float
+    filename: str = ""
+    page: int | None = None
+    section: str = ""
+    chunk_index: int | None = None
+    source_scope: str = ""
+    url: str = ""
+    domain: str = ""
+    title: str = ""
+    published_date: str = ""
+    retrieval_sources: list[str] = field(default_factory=list)
+    citation_index: int | None = None
+
+    def to_dict(self) -> dict[str, Any]:
+        return {
+            "source_type": self.source_type,
+            "source_id": self.source_id,
+            "display_label": self.display_label,
+            "snippet": self.snippet,
+            "goal_alignment": float(self.goal_alignment),
+            "can_cite": bool(self.can_cite),
+            "rank_score": float(self.rank_score),
+            "filename": self.filename,
+            "page": self.page,
+            "section": self.section,
+            "chunk_index": self.chunk_index,
+            "source_scope": self.source_scope,
+            "url": self.url,
+            "domain": self.domain,
+            "title": self.title,
+            "published_date": self.published_date,
+            "retrieval_sources": list(self.retrieval_sources),
+            "citation_index": self.citation_index,
+        }
 
 
 def _normalize_lookup_text(text: str) -> str:
@@ -339,15 +411,23 @@ class LocalFileKnowledgeProvider(KnowledgeProvider):
         self.settings = settings
         self.knowledge_dir = Path(settings.knowledge_dir)
         self.knowledge_dir.mkdir(parents=True, exist_ok=True)
+        self.course_primary_dir = self._resolve_source_dir(settings.course_primary_dir)
         self.index_file = self.knowledge_dir.parent / "knowledge_index.json"
+        self.index_files = {
+            SOURCE_SCOPE_COURSE_PRIMARY: self.knowledge_dir.parent / "knowledge_index__course_primary.json",
+            SOURCE_SCOPE_SUPPLEMENTAL: self.knowledge_dir.parent / "knowledge_index__supplemental.json",
+        }
         self.bm25_cache_file = self.knowledge_dir.parent / "bm25_cache.json"
         self.retrieval_state_file = self.knowledge_dir.parent / "retrieval_state.json"
 
         self.initialization_error: str | None = None
         self.embeddings = None
         self.vector_store = None
+        self.vector_stores: dict[str, Chroma] = {}
         self.bm25 = None
         self.bm25_docs: list[Document] = []
+        self.bm25_by_scope: dict[str, BM25Okapi | None] = {}
+        self.bm25_docs_by_scope: dict[str, list[Document]] = {}
         self.processor = (
             KnowledgeProcessor(
                 api_token=settings.mineru_api_token,
@@ -365,15 +445,33 @@ class LocalFileKnowledgeProvider(KnowledgeProvider):
             if settings.mineru_api_token
             else None
         )
+        self.source_specs = self._build_source_specs()
+        self.source_specs_by_scope = {spec.scope: spec for spec in self.source_specs}
+        self.bm25_cache_files = {
+            spec.scope: self._bm25_cache_file_for_scope(spec.scope)
+            for spec in self.source_specs
+        }
         self.knowledge_index = self._load_index()
         self.retrieval_state = self._load_retrieval_state()
+        self.course_graph_index = self._load_course_graph_index()
         self.retrieval_planner_llm = None
+        self.web_search_client = None
         self.last_rewrite_trace: dict[str, Any] | None = None
 
         print("🚀 [RAG] 知识库引擎启动中...")
 
         try:
             self._ensure_retrieval_compatibility()
+            if self.settings.web_search_enabled and self.settings.tavily_api_key:
+                try:
+                    self.web_search_client = TavilySearchClient(
+                        api_key=self.settings.tavily_api_key,
+                        max_results=self.settings.web_search_max_results,
+                        proxy_url=self.settings.https_proxy or self.settings.http_proxy,
+                    )
+                except Exception as exc:
+                    self.web_search_client = None
+                    print(f"⚠️ [RAG] Tavily 搜索客户端初始化失败，已自动禁用外部搜索: {exc}")
             if self.settings.retrieval_rewrite_enabled:
                 try:
                     self.retrieval_planner_llm = build_retrieval_planner_llm(settings)
@@ -383,7 +481,12 @@ class LocalFileKnowledgeProvider(KnowledgeProvider):
             self.embeddings = build_embedding_backend(settings)
             print(f"🧬 [RAG] Embedding Provider: {settings.embedding_provider}")
             print(f"🧬 [RAG] Embedding Backend: {type(self.embeddings).__name__}")
-            self.vector_store = self._create_vector_store()
+            self.vector_stores = self._create_vector_stores()
+            self.vector_store = (
+                self.vector_stores.get(SOURCE_SCOPE_SUPPLEMENTAL)
+                or self.vector_stores.get(SOURCE_SCOPE_COURSE_PRIMARY)
+            )
+            self._log_source_layout()
             self._sync_knowledge_dir()
             self._build_bm25_index()
             self._save_retrieval_state()
@@ -396,32 +499,260 @@ class LocalFileKnowledgeProvider(KnowledgeProvider):
             self.initialization_error = str(exc)
             self.embeddings = None
             self.vector_store = None
+            self.vector_stores = {}
             self.bm25 = None
             self.bm25_docs = []
+            self.bm25_by_scope = {}
+            self.bm25_docs_by_scope = {}
             print(f"⚠️ [RAG] 初始化失败，已回退为无知识库模式: {exc}")
 
-    def _create_vector_store(self) -> Chroma:
+    def _resolve_source_dir(self, path_value: str) -> Path:
+        candidate = Path(path_value)
+        if candidate.is_absolute():
+            return candidate
+        return (Path(PROJECT_ROOT) / candidate).resolve()
+
+    def _build_source_specs(self) -> list[KnowledgeSourceSpec]:
+        specs: list[KnowledgeSourceSpec] = []
+        if self.settings.course_primary_enabled:
+            specs.append(
+                KnowledgeSourceSpec(
+                    scope=SOURCE_SCOPE_COURSE_PRIMARY,
+                    path=self.course_primary_dir,
+                    label="主课程知识源",
+                    primary=True,
+                    managed_uploads=False,
+                )
+            )
+        specs.append(
+            KnowledgeSourceSpec(
+                scope=SOURCE_SCOPE_SUPPLEMENTAL,
+                path=self.knowledge_dir,
+                label="补充知识源",
+                primary=False,
+                managed_uploads=True,
+            )
+        )
+        return specs
+
+    def _log_source_layout(self) -> None:
+        for spec in self.source_specs:
+            if not spec.path.exists():
+                if spec.scope == SOURCE_SCOPE_COURSE_PRIMARY:
+                    print(f"⚠️ [RAG] {spec.label}目录不存在，已跳过: {spec.path}")
+                continue
+            file_count = len(
+                [
+                    path
+                    for path in spec.path.iterdir()
+                    if path.is_file() and path.name != ".gitkeep"
+                ]
+            )
+            print(f"📚 [RAG] {spec.label}: {spec.path} ({file_count} files)")
+
+    def _bm25_cache_file_for_scope(self, source_scope: str) -> Path:
+        if source_scope == SOURCE_SCOPE_SUPPLEMENTAL:
+            return self.bm25_cache_file
+        return self.knowledge_dir.parent / f"bm25_cache__{source_scope}.json"
+
+    def _record_key(self, filename: str, source_scope: str) -> str:
+        return f"{source_scope}::{filename}"
+
+    def _load_course_graph_index(self) -> dict[str, dict[str, Any]]:
+        notes_path = self.course_primary_dir.parent / "notes.jsonl"
+        index: dict[str, dict[str, Any]] = {}
+        self.course_graph_nodes: dict[str, dict[str, Any]] = {}
+        self.course_graph_lookup: dict[str, str] = {}
+        if not notes_path.exists():
+            return index
+
+        try:
+            with notes_path.open("r", encoding="utf-8") as file_obj:
+                for line in file_obj:
+                    line = line.strip()
+                    if not line:
+                        continue
+                    item = json.loads(line)
+                    source_path = str(item.get("source_path") or item.get("raw_copy_path") or "").strip()
+                    filename = Path(source_path).name if source_path else ""
+                    title = str(item.get("title") or Path(filename).stem or "").strip()
+                    node_id = str(item.get("id") or title or Path(filename).stem or "").strip()
+                    node = {
+                        "id": node_id,
+                        "title": title,
+                        "filename": filename,
+                        "prerequisites": self._normalize_graph_list(item.get("prerequisites")),
+                        "neighbors": self._normalize_graph_list(item.get("neighbors")),
+                        "learning_objectives": self._normalize_graph_list(item.get("learning_objectives")),
+                        "must_know": self._normalize_graph_list(item.get("must_know")),
+                        "common_errors": self._normalize_graph_list(item.get("common_errors")),
+                        "teaching_modes": self._normalize_graph_list(item.get("teaching_modes")),
+                        "assessment_modes": self._normalize_graph_list(item.get("assessment_modes")),
+                        "target_mastery_level": str(item.get("target_mastery_level") or "").strip(),
+                        "difficulty": str(item.get("difficulty") or "").strip(),
+                    }
+                    if title:
+                        self.course_graph_nodes[title] = node
+                    for candidate in [node_id, title, filename, Path(filename).stem if filename else ""]:
+                        normalized_candidate = _normalize_lookup_text(candidate)
+                        if normalized_candidate and title:
+                            self.course_graph_lookup[normalized_candidate] = title
+                    enrichment = {
+                        field: item.get(field)
+                        for field in GRAPH_NOTE_ENRICHMENT_FIELDS
+                        if item.get(field) not in (None, "", [], {})
+                    }
+                    if title:
+                        enrichment["title"] = title
+                        enrichment["_title"] = title
+                    if filename:
+                        enrichment["_filename"] = filename
+                        index[filename] = enrichment
+                    if title:
+                        index[title] = enrichment
+        except Exception as exc:
+            print(f"⚠️ [RAG] 课程图谱精细化字段加载失败，已忽略: {exc}")
+            return {}
+        return index
+
+    def _normalize_graph_list(self, value: Any) -> list[str]:
+        if isinstance(value, list):
+            return _dedupe_texts([str(item).strip() for item in value if str(item).strip()])
+        if isinstance(value, dict):
+            return _dedupe_texts([str(key).strip() for key in value.keys() if str(key).strip()])
+        text = str(value or "").strip()
+        if not text:
+            return []
+        parts = re.split(r"[；;、,，/\n]+", text)
+        return _dedupe_texts(parts)
+
+    def _serialize_graph_value(self, value: Any) -> str:
+        if isinstance(value, list):
+            items = [str(item).strip() for item in value if str(item).strip()]
+            return "；".join(items)
+        if isinstance(value, dict):
+            parts: list[str] = []
+            for key, sub_value in value.items():
+                if isinstance(sub_value, dict):
+                    reason = str(sub_value.get("reason") or "").strip()
+                    priority = str(sub_value.get("priority") or "").strip()
+                    fragment = f"{key}:{priority}" if priority else str(key)
+                    if reason:
+                        fragment = f"{fragment} {reason}"
+                    parts.append(fragment.strip())
+                else:
+                    text = str(sub_value).strip()
+                    if text:
+                        parts.append(f"{key}:{text}")
+            return "；".join([part for part in parts if part])
+        return str(value or "").strip()
+
+    def _graph_enrichment_for_file(self, filename: str) -> dict[str, str]:
+        raw = self.course_graph_index.get(filename) or self.course_graph_index.get(Path(filename).stem) or {}
+        if not raw:
+            return {}
+
+        serialized: dict[str, str] = {}
+        for key, value in raw.items():
+            if str(key).startswith("_"):
+                continue
+            text = self._serialize_graph_value(value)
+            if text:
+                serialized[f"kg_{key}"] = text
+        return serialized
+
+    def _split_record_key(self, key: str) -> tuple[str, str]:
+        raw = str(key or "").strip()
+        if "::" in raw:
+            scope, filename = raw.split("::", 1)
+            return scope or SOURCE_SCOPE_SUPPLEMENTAL, filename
+        return SOURCE_SCOPE_SUPPLEMENTAL, raw
+
+    def _source_priority(self, source_scope: str) -> int:
+        return 0 if source_scope == SOURCE_SCOPE_COURSE_PRIMARY else 1
+
+    def _find_record(self, filename: str, source_scope: str) -> dict[str, Any] | None:
+        record = self.knowledge_index.get(self._record_key(filename, source_scope))
+        if record is not None:
+            return record
+        if source_scope == SOURCE_SCOPE_SUPPLEMENTAL:
+            legacy = self.knowledge_index.get(filename)
+            if isinstance(legacy, dict):
+                return legacy
+        return None
+
+    def _pop_record(self, filename: str, source_scope: str) -> None:
+        self.knowledge_index.pop(self._record_key(filename, source_scope), None)
+        if source_scope == SOURCE_SCOPE_SUPPLEMENTAL:
+            self.knowledge_index.pop(filename, None)
+
+    def _infer_source_scope(self, source_path: str) -> str:
+        try:
+            resolved = Path(source_path).resolve()
+        except Exception:
+            return SOURCE_SCOPE_SUPPLEMENTAL
+        try:
+            resolved.relative_to(self.course_primary_dir)
+            return SOURCE_SCOPE_COURSE_PRIMARY
+        except Exception:
+            return SOURCE_SCOPE_SUPPLEMENTAL
+
+    def _source_bucket_key(self, metadata: dict[str, Any]) -> tuple[str, str]:
+        return (
+            str(metadata.get("source_scope") or SOURCE_SCOPE_SUPPLEMENTAL),
+            str(metadata.get("filename") or "").strip(),
+        )
+
+    def _collection_name_for_scope(self, source_scope: str) -> str:
+        return f"knowledge__{source_scope}"
+
+    def _create_vector_store(self, source_scope: str) -> Chroma:
         persist_directory = None
         if self.settings.vector_store_backend == "chroma":
             persist_directory = self.settings.vector_store_dir
 
         return Chroma(
-            collection_name="knowledge",
+            collection_name=self._collection_name_for_scope(source_scope),
             embedding_function=self.embeddings,
             persist_directory=persist_directory,
         )
 
-    def _vector_doc_count(self) -> int:
-        if self.vector_store is None:
-            return 0
-        try:
-            return int(self.vector_store._collection.count())
-        except Exception:
-            return len(self.bm25_docs)
+    def _create_vector_stores(self) -> dict[str, Chroma]:
+        stores: dict[str, Chroma] = {}
+        for spec in self.source_specs:
+            stores[spec.scope] = self._create_vector_store(spec.scope)
+        return stores
 
-    def _doc_key(self, doc: Document) -> tuple[str, Any, str]:
+    def _vector_store_for_scope(self, source_scope: str) -> Chroma | None:
+        return self.vector_stores.get(source_scope)
+
+    def _refresh_bm25_views(self) -> None:
+        self.bm25_docs = []
+        self.bm25 = None
+        for spec in self.source_specs:
+            docs = list(self.bm25_docs_by_scope.get(spec.scope) or [])
+            self.bm25_docs.extend(docs)
+            if self.bm25 is None and self.bm25_by_scope.get(spec.scope) is not None:
+                self.bm25 = self.bm25_by_scope.get(spec.scope)
+
+    def _vector_doc_count(self) -> int:
+        if not self.vector_stores:
+            return 0
+        count = 0
+        for scope in [spec.scope for spec in self.source_specs]:
+            store = self._vector_store_for_scope(scope)
+            if store is None:
+                continue
+            try:
+                count += int(store._collection.count())
+            except Exception:
+                count += len(self.bm25_docs_by_scope.get(scope) or [])
+        return count
+
+    def _doc_key(self, doc: Document) -> tuple[str, str, Any, str]:
         metadata = doc.metadata or {}
         return (
+            str(metadata.get("source_scope") or SOURCE_SCOPE_SUPPLEMENTAL),
             str(metadata.get("filename", "")),
             metadata.get("chunk_id", -1),
             (doc.page_content or "")[:120],
@@ -825,6 +1156,7 @@ class LocalFileKnowledgeProvider(KnowledgeProvider):
             "hit_count": len(docs),
             "citation_confident": False,
             "top_filename": "",
+            "top_source_scope": "",
             "dominance": 0.0,
             "top_rrf_score": 0.0,
             "top_source_count": 0,
@@ -844,11 +1176,12 @@ class LocalFileKnowledgeProvider(KnowledgeProvider):
         if not docs:
             return summary
 
-        grouped: dict[str, dict[str, Any]] = {}
+        grouped: dict[tuple[str, str], dict[str, Any]] = {}
         total_weight = 0.0
         for rank, doc in enumerate(docs, start=1):
             metadata = dict(doc.metadata or {})
             filename = str(metadata.get("filename") or "").strip()
+            source_scope = str(metadata.get("source_scope") or SOURCE_SCOPE_SUPPLEMENTAL)
             term_hits, term_ratio, matched_terms = self._doc_query_term_alignment(doc, query_terms)
             if rank == 1:
                 summary["top_query_term_hits"] = int(term_hits)
@@ -867,7 +1200,7 @@ class LocalFileKnowledgeProvider(KnowledgeProvider):
             weight = float(metadata.get("_rrf_score") or (1.0 / (RRF_K + rank)))
             total_weight += weight
             bucket = grouped.setdefault(
-                filename,
+                (source_scope, filename),
                 {
                     "weight": 0.0,
                     "best_rrf": 0.0,
@@ -890,7 +1223,7 @@ class LocalFileKnowledgeProvider(KnowledgeProvider):
         if not grouped or total_weight <= 0:
             return summary
 
-        top_filename, top_bucket = max(grouped.items(), key=lambda item: item[1]["weight"])
+        (top_source_scope, top_filename), top_bucket = max(grouped.items(), key=lambda item: item[1]["weight"])
         dominance = float(top_bucket["weight"]) / total_weight if total_weight else 0.0
         citation_confident = bool(top_bucket["strong_match"]) or (
             dominance >= CONFIDENT_CITATION_MIN_DOMINANCE
@@ -902,6 +1235,7 @@ class LocalFileKnowledgeProvider(KnowledgeProvider):
             {
                 "citation_confident": citation_confident,
                 "top_filename": top_filename,
+                "top_source_scope": top_source_scope,
                 "dominance": float(dominance),
                 "top_rrf_score": float(top_bucket["best_rrf"]),
                 "top_source_count": int(top_bucket["top_source_count"]),
@@ -964,6 +1298,34 @@ class LocalFileKnowledgeProvider(KnowledgeProvider):
         return False, "raw retrieval confidence is weak", summary
 
     def _load_index(self) -> dict[str, dict[str, Any]]:
+        normalized: dict[str, dict[str, Any]] = {}
+
+        def ingest(data: dict[str, Any], *, default_scope: str | None = None) -> None:
+            for raw_key, raw_record in data.items():
+                if not isinstance(raw_record, dict):
+                    continue
+                source_scope, filename = self._split_record_key(str(raw_key))
+                if default_scope:
+                    source_scope = default_scope
+                    filename = str(raw_key)
+                record = dict(raw_record)
+                record["source_scope"] = source_scope
+                normalized[self._record_key(filename, source_scope)] = record
+
+        split_exists = any(path.exists() for path in self.index_files.values())
+        if split_exists:
+            for scope, path in self.index_files.items():
+                if not path.exists():
+                    continue
+                try:
+                    with path.open("r", encoding="utf-8") as file_obj:
+                        data = json.load(file_obj)
+                    if isinstance(data, dict):
+                        ingest(data, default_scope=scope)
+                except Exception as exc:
+                    print(f"⚠️ [RAG] 读取知识库索引失败，将忽略 {path.name}: {exc}")
+            return normalized
+
         if not self.index_file.exists():
             return {}
 
@@ -971,7 +1333,8 @@ class LocalFileKnowledgeProvider(KnowledgeProvider):
             with self.index_file.open("r", encoding="utf-8") as file_obj:
                 data = json.load(file_obj)
                 if isinstance(data, dict):
-                    return data
+                    ingest(data)
+                    return normalized
         except Exception as exc:
             print(f"⚠️ [RAG] 读取知识库索引失败，将使用空索引: {exc}")
 
@@ -980,8 +1343,17 @@ class LocalFileKnowledgeProvider(KnowledgeProvider):
     def _save_index(self) -> None:
         try:
             self.index_file.parent.mkdir(parents=True, exist_ok=True)
-            with self.index_file.open("w", encoding="utf-8") as file_obj:
-                json.dump(self.knowledge_index, file_obj, ensure_ascii=False, indent=2)
+            payloads: dict[str, dict[str, Any]] = {scope: {} for scope in self.index_files}
+            for record_key, record in self.knowledge_index.items():
+                source_scope, filename = self._split_record_key(record_key)
+                clean_record = dict(record)
+                clean_record["source_scope"] = source_scope
+                payloads.setdefault(source_scope, {})[filename] = clean_record
+
+            for scope, path in self.index_files.items():
+                with path.open("w", encoding="utf-8") as file_obj:
+                    json.dump(payloads.get(scope, {}), file_obj, ensure_ascii=False, indent=2)
+            self.index_file.unlink(missing_ok=True)
         except Exception as exc:
             print(f"⚠️ [RAG] 保存知识库索引失败: {exc}")
 
@@ -992,6 +1364,8 @@ class LocalFileKnowledgeProvider(KnowledgeProvider):
             "embedding_model_name": self.settings.embedding_model_name,
             "vector_store_backend": self.settings.vector_store_backend,
             "vector_store_dir": self.settings.vector_store_dir,
+            "vector_store_layout": {spec.scope: self._collection_name_for_scope(spec.scope) for spec in self.source_specs},
+            "knowledge_index_layout": {scope: path.name for scope, path in self.index_files.items()},
             "knowledge_chunk_size": int(self.settings.knowledge_chunk_size),
             "knowledge_chunk_overlap": int(self.settings.knowledge_chunk_overlap),
         }
@@ -1024,8 +1398,10 @@ class LocalFileKnowledgeProvider(KnowledgeProvider):
         if self.settings.vector_store_backend == "chroma" and vector_dir.exists():
             shutil.rmtree(vector_dir, ignore_errors=True)
 
-        if self.bm25_cache_file.exists():
-            self.bm25_cache_file.unlink(missing_ok=True)
+        for cache_path in self.knowledge_dir.parent.glob("bm25_cache*.json"):
+            cache_path.unlink(missing_ok=True)
+        for index_path in self.knowledge_dir.parent.glob("knowledge_index*.json"):
+            index_path.unlink(missing_ok=True)
 
         self.knowledge_index = {}
         self._save_index()
@@ -1058,11 +1434,17 @@ class LocalFileKnowledgeProvider(KnowledgeProvider):
 
         self.retrieval_state = current_state
 
-    def _bm25_signature(self) -> str:
+    def _bm25_signature(self, source_scope: str) -> str:
+        scope_index = {
+            key: value
+            for key, value in self.knowledge_index.items()
+            if self._split_record_key(key)[0] == source_scope
+        }
         payload = {
-            "version": 1,
+            "version": RETRIEVAL_STATE_VERSION,
+            "source_scope": source_scope,
             "tokenizer": "regex_v2_multilingual_terms",
-            "knowledge_index": self.knowledge_index,
+            "knowledge_index": scope_index,
         }
         serialized = json.dumps(payload, ensure_ascii=False, sort_keys=True, separators=(",", ":"))
         return hashlib.sha256(serialized.encode("utf-8")).hexdigest()
@@ -1076,12 +1458,13 @@ class LocalFileKnowledgeProvider(KnowledgeProvider):
             return [self._to_json_safe(item) for item in value]
         return str(value)
 
-    def _load_bm25_cache(self, signature: str) -> bool:
-        if not self.bm25_cache_file.exists():
+    def _load_bm25_cache(self, signature: str, *, source_scope: str) -> bool:
+        cache_file = self._bm25_cache_file_for_scope(source_scope)
+        if not cache_file.exists():
             return False
 
         try:
-            with self.bm25_cache_file.open("r", encoding="utf-8") as file_obj:
+            with cache_file.open("r", encoding="utf-8") as file_obj:
                 payload = json.load(file_obj)
         except Exception as exc:
             print(f"⚠️ [RAG] 读取 BM25 缓存失败，将重建索引: {exc}")
@@ -1121,18 +1504,19 @@ class LocalFileKnowledgeProvider(KnowledgeProvider):
         if len(docs) != len(tokenized_corpus):
             return False
 
-        self.bm25_docs = docs
-        self.bm25 = BM25Okapi(tokenized_corpus) if tokenized_corpus else None
+        self.bm25_docs_by_scope[source_scope] = docs
+        self.bm25_by_scope[source_scope] = BM25Okapi(tokenized_corpus) if tokenized_corpus else None
+        self._refresh_bm25_views()
         return True
 
-    def _save_bm25_cache(self, signature: str, tokenized_corpus: list[list[str]]) -> None:
+    def _save_bm25_cache(self, signature: str, tokenized_corpus: list[list[str]], *, source_scope: str) -> None:
         try:
             docs_payload = [
                 {
                     "page_content": doc.page_content,
                     "metadata": self._to_json_safe(doc.metadata or {}),
                 }
-                for doc in self.bm25_docs
+                for doc in (self.bm25_docs_by_scope.get(source_scope) or [])
             ]
             payload = {
                 "version": 1,
@@ -1140,8 +1524,9 @@ class LocalFileKnowledgeProvider(KnowledgeProvider):
                 "docs": docs_payload,
                 "tokenized_corpus": tokenized_corpus,
             }
-            self.bm25_cache_file.parent.mkdir(parents=True, exist_ok=True)
-            with self.bm25_cache_file.open("w", encoding="utf-8") as file_obj:
+            cache_file = self._bm25_cache_file_for_scope(source_scope)
+            cache_file.parent.mkdir(parents=True, exist_ok=True)
+            with cache_file.open("w", encoding="utf-8") as file_obj:
                 json.dump(payload, file_obj, ensure_ascii=False)
         except Exception as exc:
             print(f"⚠️ [RAG] 保存 BM25 缓存失败: {exc}")
@@ -1150,60 +1535,86 @@ class LocalFileKnowledgeProvider(KnowledgeProvider):
         stat = os.stat(file_path)
         return f"{os.path.basename(file_path)}_{stat.st_size}_{int(stat.st_mtime)}"
 
-    def _should_process(self, file_path: str) -> bool:
+    def _should_process(self, file_path: str, *, source_scope: str) -> bool:
         filename = os.path.basename(file_path)
         fingerprint = self._get_file_fingerprint(file_path)
-        old_record = self.knowledge_index.get(filename)
+        old_record = self._find_record(filename, source_scope)
         return not old_record or old_record.get("fingerprint") != fingerprint
 
-    def _delete_existing_vectors(self, filename: str) -> None:
-        if self.vector_store is None:
+    def _delete_existing_vectors(self, filename: str, *, source_scope: str) -> None:
+        store = self._vector_store_for_scope(source_scope)
+        if store is None:
             return
 
         try:
-            self.vector_store._collection.delete(where={"filename": filename})
+            store._collection.delete(
+                where={
+                    "$and": [
+                        {"filename": filename},
+                        {"source_scope": source_scope},
+                    ]
+                }
+            )
         except Exception as exc:
-            print(f"⚠️ [RAG] 删除旧向量失败: {filename}: {exc}")
+            print(f"⚠️ [RAG] 删除旧向量失败: {source_scope}/{filename}: {exc}")
 
-    def _delete_all_vectors(self) -> None:
-        if self.vector_store is None:
-            return
-
-        try:
-            raw = self.vector_store._collection.get(include=[])
-            ids = raw.get("ids") or []
-            if ids:
-                self.vector_store._collection.delete(ids=ids)
-        except Exception as exc:
-            print(f"⚠️ [RAG] 清空向量库失败: {exc}")
+    def _delete_all_vectors(self, *, source_scope: str | None = None) -> None:
+        scopes = [source_scope] if source_scope else [spec.scope for spec in self.source_specs]
+        for scope in scopes:
+            store = self._vector_store_for_scope(scope)
+            if store is None:
+                continue
+            try:
+                raw = store._collection.get(include=[])
+                ids = raw.get("ids") or []
+                if ids:
+                    store._collection.delete(ids=ids)
+            except Exception as exc:
+                print(f"⚠️ [RAG] 清空向量库失败: {scope}: {exc}")
 
     def _sync_knowledge_dir(self) -> None:
         self._cleanup_deleted_files()
 
-        for file_path in sorted(glob.glob(os.path.join(self.settings.knowledge_dir, "*.*"))):
-            if Path(file_path).name == ".gitkeep":
+        for spec in self.source_specs:
+            if not spec.path.exists():
                 continue
-            if not self._should_process(file_path):
-                continue
-            result = self.add_local_file(file_path)
-            if not result.get("success"):
-                print(f"⚠️ [RAG] 资料未成功入库: {Path(file_path).name}")
+            for file_path in sorted(glob.glob(os.path.join(str(spec.path), "*.*"))):
+                if Path(file_path).name == ".gitkeep":
+                    continue
+                if not self._should_process(file_path, source_scope=spec.scope):
+                    continue
+                result = self.add_local_file(file_path, source_scope=spec.scope)
+                if not result.get("success"):
+                    print(f"⚠️ [RAG] 资料未成功入库: {spec.scope}/{Path(file_path).name}")
 
     def _cleanup_deleted_files(self) -> None:
-        current_files = {
-            path.name
-            for path in self.knowledge_dir.iterdir()
-            if path.is_file() and path.name != ".gitkeep"
+        current_files_by_scope: dict[str, set[str]] = {
+            spec.scope: set()
+            for spec in self.source_specs
         }
-        indexed_files = set(self.knowledge_index.keys())
-        deleted_files = indexed_files - current_files
+        for spec in self.source_specs:
+            if not spec.path.exists():
+                continue
+            current_files_by_scope[spec.scope] = {
+                path.name
+                for path in spec.path.iterdir()
+                if path.is_file() and path.name != ".gitkeep"
+            }
 
-        if not deleted_files:
+        deleted_records: list[tuple[str, str, str]] = []
+        for record_key in list(self.knowledge_index.keys()):
+            source_scope, filename = self._split_record_key(record_key)
+            current_files = current_files_by_scope.get(source_scope, set())
+            if filename in current_files:
+                continue
+            deleted_records.append((record_key, source_scope, filename))
+
+        if not deleted_records:
             return
 
-        for filename in deleted_files:
-            self._delete_existing_vectors(filename)
-            self.knowledge_index.pop(filename, None)
+        for record_key, source_scope, filename in deleted_records:
+            self._delete_existing_vectors(filename, source_scope=source_scope)
+            self.knowledge_index.pop(record_key, None)
 
         self._save_index()
 
@@ -1288,8 +1699,10 @@ class LocalFileKnowledgeProvider(KnowledgeProvider):
         print(f"⚠️ [RAG] 暂不支持的文件类型: {filename}")
         return []
 
-    def add_local_file(self, source_path: str) -> dict[str, Any]:
-        if self.vector_store is None:
+    def add_local_file(self, source_path: str, *, source_scope: str | None = None) -> dict[str, Any]:
+        source_scope = source_scope or self._infer_source_scope(source_path)
+        store = self._vector_store_for_scope(source_scope)
+        if store is None:
             return {"success": False, "chunks": 0, "error": self.initialization_error or "vector store unavailable"}
 
         filename = os.path.basename(source_path)
@@ -1299,9 +1712,9 @@ class LocalFileKnowledgeProvider(KnowledgeProvider):
         except FileNotFoundError:
             return {"success": False, "chunks": 0, "error": "file not found"}
 
-        old_record = self.knowledge_index.get(filename)
+        old_record = self._find_record(filename, source_scope)
         if old_record and old_record.get("fingerprint") != fingerprint:
-            self._delete_existing_vectors(filename)
+            self._delete_existing_vectors(filename, source_scope=source_scope)
 
         try:
             docs = self._parse_file(source_path)
@@ -1316,22 +1729,27 @@ class LocalFileKnowledgeProvider(KnowledgeProvider):
             doc.metadata["source"] = source_path
             doc.metadata["filename"] = filename
             doc.metadata["fingerprint"] = fingerprint
+            doc.metadata["source_scope"] = source_scope
+            doc.metadata["source_priority"] = self._source_priority(source_scope)
+            if source_scope == SOURCE_SCOPE_COURSE_PRIMARY:
+                doc.metadata.update(self._graph_enrichment_for_file(filename))
 
         try:
-            self.vector_store.add_documents(docs)
+            store.add_documents(docs)
         except Exception as exc:
             return {"success": False, "chunks": 0, "error": str(exc)}
 
-        self.knowledge_index[filename] = {
+        self.knowledge_index[self._record_key(filename, source_scope)] = {
             "fingerprint": fingerprint,
             "chunks": len(docs),
+            "source_scope": source_scope,
         }
         self._save_index()
         self._build_bm25_index()
         return {"success": True, "chunks": len(docs)}
 
     def add_document(self, source_path: str) -> bool:
-        if self.vector_store is None or not os.path.exists(source_path):
+        if not self.vector_stores or not os.path.exists(source_path):
             return False
 
         destination = self.knowledge_dir / Path(source_path).name
@@ -1349,7 +1767,7 @@ class LocalFileKnowledgeProvider(KnowledgeProvider):
             if not path.is_file() or path.name == ".gitkeep":
                 continue
 
-            record = self.knowledge_index.get(path.name, {})
+            record = self._find_record(path.name, SOURCE_SCOPE_SUPPLEMENTAL) or {}
             items.append(
                 {
                     "filename": path.name,
@@ -1369,12 +1787,12 @@ class LocalFileKnowledgeProvider(KnowledgeProvider):
             path.unlink()
             removed = True
 
-        if safe_name in self.knowledge_index:
-            self.knowledge_index.pop(safe_name, None)
+        if self._find_record(safe_name, SOURCE_SCOPE_SUPPLEMENTAL):
+            self._pop_record(safe_name, SOURCE_SCOPE_SUPPLEMENTAL)
             self._save_index()
             removed = True
 
-        self._delete_existing_vectors(safe_name)
+        self._delete_existing_vectors(safe_name, source_scope=SOURCE_SCOPE_SUPPLEMENTAL)
         self._build_bm25_index()
         return removed
 
@@ -1383,10 +1801,6 @@ class LocalFileKnowledgeProvider(KnowledgeProvider):
         for filename in files:
             self.delete_document(filename)
 
-        self._delete_all_vectors()
-        self.knowledge_index = {}
-        self._save_index()
-        self._build_bm25_index()
         return len(files)
 
     def _tokenize_for_bm25(self, text: str) -> list[str]:
@@ -1418,6 +1832,18 @@ class LocalFileKnowledgeProvider(KnowledgeProvider):
             if re.fullmatch(r"page-\d+", value.lower()):
                 continue
             if value not in candidates:
+                candidates.append(value)
+        for candidate in [
+            metadata.get("kg_title"),
+            metadata.get("kg_prerequisites"),
+            metadata.get("kg_neighbors"),
+            metadata.get("kg_learning_objectives"),
+            metadata.get("kg_must_know"),
+            metadata.get("kg_target_mastery_level"),
+            metadata.get("kg_difficulty"),
+        ]:
+            value = str(candidate or "").strip()
+            if value and value not in candidates:
                 candidates.append(value)
         return candidates
 
@@ -1459,13 +1885,27 @@ class LocalFileKnowledgeProvider(KnowledgeProvider):
 
         return bonus, signals
 
-    def _query_with_metadata_matches(self, query: str, k: int = 5) -> list[Document]:
-        if not self.bm25_docs:
+    def _query_with_metadata_matches(
+        self,
+        query: str,
+        k: int = 5,
+        *,
+        source_scope: str | None = None,
+    ) -> list[Document]:
+        if source_scope:
+            docs_pool = list(self.bm25_docs_by_scope.get(source_scope) or [])
+            if not docs_pool:
+                docs_pool = list(self.bm25_docs)
+        else:
+            docs_pool = list(self.bm25_docs)
+        if not docs_pool:
             return []
 
         candidates: list[tuple[float, int, Document]] = []
-        for doc in self.bm25_docs:
+        for doc in docs_pool:
             metadata = dict(doc.metadata or {})
+            if source_scope and str(metadata.get("source_scope") or SOURCE_SCOPE_SUPPLEMENTAL) != source_scope:
+                continue
             bonus, signals = self._query_match_bonus(metadata, query)
             if not signals:
                 continue
@@ -1484,74 +1924,151 @@ class LocalFileKnowledgeProvider(KnowledgeProvider):
         return [doc for _, _, doc in candidates[:k]]
 
     def _build_bm25_index(self) -> None:
-        if self.vector_store is None:
+        if not self.vector_stores:
             self.bm25 = None
             self.bm25_docs = []
+            self.bm25_by_scope = {}
+            self.bm25_docs_by_scope = {}
             return
 
-        signature = self._bm25_signature()
-        if self._load_bm25_cache(signature):
-            return
+        for spec in self.source_specs:
+            source_scope = spec.scope
+            store = self._vector_store_for_scope(source_scope)
+            if store is None:
+                self.bm25_docs_by_scope[source_scope] = []
+                self.bm25_by_scope[source_scope] = None
+                continue
 
-        try:
-            raw = self.vector_store._collection.get(include=["documents", "metadatas"])
-            docs = raw.get("documents", [])
-            metas = raw.get("metadatas", [])
+            signature = self._bm25_signature(source_scope)
+            if self._load_bm25_cache(signature, source_scope=source_scope):
+                continue
 
-            self.bm25_docs = []
-            tokenized_corpus = []
+            try:
+                raw = store._collection.get(include=["documents", "metadatas"])
+                docs = raw.get("documents", [])
+                metas = raw.get("metadatas", [])
 
-            for doc_text, meta in zip(docs, metas):
-                if not doc_text:
-                    continue
+                scope_docs: list[Document] = []
+                tokenized_corpus: list[list[str]] = []
 
-                self.bm25_docs.append(Document(page_content=doc_text, metadata=meta or {}))
-                tokenized_corpus.append(self._tokenize_for_bm25(doc_text))
+                for doc_text, meta in zip(docs, metas):
+                    if not doc_text:
+                        continue
 
-            self.bm25 = BM25Okapi(tokenized_corpus) if tokenized_corpus else None
-            self._save_bm25_cache(signature, tokenized_corpus)
-        except Exception as exc:
-            self.bm25 = None
-            self.bm25_docs = []
-            print(f"⚠️ [RAG] BM25 索引构建失败: {exc}")
+                    scope_docs.append(Document(page_content=doc_text, metadata=meta or {}))
+                    tokenized_corpus.append(self._tokenize_for_bm25(doc_text))
 
-    def query_with_bm25(self, query: str, k: int = 5) -> list[Document]:
-        if not self.bm25 or not self.bm25_docs:
-            return []
+                self.bm25_docs_by_scope[source_scope] = scope_docs
+                self.bm25_by_scope[source_scope] = BM25Okapi(tokenized_corpus) if tokenized_corpus else None
+                self._save_bm25_cache(signature, tokenized_corpus, source_scope=source_scope)
+            except Exception as exc:
+                self.bm25_by_scope[source_scope] = None
+                self.bm25_docs_by_scope[source_scope] = []
+                print(f"⚠️ [RAG] BM25 索引构建失败: {source_scope}: {exc}")
 
+        self._refresh_bm25_views()
+
+    def query_with_bm25(
+        self,
+        query: str,
+        k: int = 5,
+        *,
+        source_scope: str | None = None,
+    ) -> list[Document]:
         query_tokens = self._tokenize_for_bm25(query)
         if not query_tokens:
             return []
 
-        scores = self.bm25.get_scores(query_tokens)
-        ranked = sorted(zip(self.bm25_docs, scores), key=lambda item: item[1], reverse=True)
+        ranked: list[tuple[Document, float]] = []
+        scopes = [source_scope] if source_scope else [spec.scope for spec in self.source_specs]
+        for scope in scopes:
+            bm25 = self.bm25_by_scope.get(scope)
+            docs = self.bm25_docs_by_scope.get(scope) or []
+            if not bm25 or not docs:
+                continue
+            ranked.extend(zip(docs, bm25.get_scores(query_tokens)))
+        ranked.sort(
+            key=lambda item: (
+                -item[1],
+                self._source_priority(str((item[0].metadata or {}).get("source_scope") or SOURCE_SCOPE_SUPPLEMENTAL)),
+                len(item[0].page_content or ""),
+            )
+        )
 
         results: list[Document] = []
-        for doc, score in ranked[:k]:
+        for doc, score in ranked:
             metadata = dict(doc.metadata or {})
+            if source_scope and str(metadata.get("source_scope") or SOURCE_SCOPE_SUPPLEMENTAL) != source_scope:
+                continue
             metadata["_bm25_score"] = float(score)
             results.append(Document(page_content=doc.page_content, metadata=metadata))
+            if len(results) >= k:
+                break
 
         return results
 
-    def query_with_docs(self, query: str, k: int | None = None) -> List[Document]:
-        if self.vector_store is None:
-            return []
+    def query_with_docs(
+        self,
+        query: str,
+        k: int | None = None,
+        *,
+        source_scope: str | None = None,
+    ) -> List[Document]:
+        return [doc for doc, _ in self.query_with_scores(query, k=k, source_scope=source_scope)]
 
+    def query_with_scores(
+        self,
+        query: str,
+        k: int | None = None,
+        *,
+        source_scope: str | None = None,
+    ):
         k = k or self.settings.knowledge_top_k
-        return self.vector_store.similarity_search(query, k=k)
+        fetch_k = max(k * 4, k)
+        scopes = [source_scope] if source_scope else [spec.scope for spec in self.source_specs]
+        docs_and_scores: list[tuple[Document, float]] = []
+        for scope in scopes:
+            store = self._vector_store_for_scope(scope)
+            if store is None:
+                continue
+            try:
+                scoped_results = store.similarity_search_with_score(query, k=fetch_k)
+            except Exception:
+                continue
+            for doc, score in scoped_results:
+                metadata = dict(doc.metadata or {})
+                metadata.setdefault("source_scope", scope)
+                docs_and_scores.append((Document(page_content=doc.page_content, metadata=metadata), float(score)))
 
-    def query_with_scores(self, query: str, k: int | None = None):
-        if self.vector_store is None:
-            return []
+        docs_and_scores.sort(
+            key=lambda item: (
+                item[1],
+                self._source_priority(str((item[0].metadata or {}).get("source_scope") or SOURCE_SCOPE_SUPPLEMENTAL)),
+                len(item[0].page_content or ""),
+            )
+        )
+        return docs_and_scores[:k]
 
-        k = k or self.settings.knowledge_top_k
-        return self.vector_store.similarity_search_with_score(query, k=k)
-
-    def _collect_vector_hits(self, queries: list[str], *, k: int) -> list[FamilyHit]:
+    def _collect_vector_hits(
+        self,
+        queries: list[str],
+        *,
+        k: int,
+        source_scope: str | None = None,
+    ) -> list[FamilyHit]:
         best: dict[tuple[str, Any, str], FamilyHit] = {}
         for query in _dedupe_texts(queries):
-            for rank, (doc, score) in enumerate(self.query_with_scores(query, k=k), start=1):
+            try:
+                docs_and_scores = self.query_with_scores(query, k=k, source_scope=source_scope)
+            except TypeError:
+                docs_and_scores = self.query_with_scores(query, k=k)
+                if source_scope:
+                    docs_and_scores = [
+                        (doc, score)
+                        for doc, score in docs_and_scores
+                        if str((doc.metadata or {}).get("source_scope") or SOURCE_SCOPE_SUPPLEMENTAL) == source_scope
+                    ]
+            for rank, (doc, score) in enumerate(docs_and_scores, start=1):
                 key = self._doc_key(doc)
                 score_value = float(score)
                 existing = best.get(key)
@@ -1564,10 +2081,26 @@ class LocalFileKnowledgeProvider(KnowledgeProvider):
         hits.sort(key=lambda item: (item.rank, float(item.score if item.score is not None else 0.0), len(item.doc.page_content or "")))
         return hits[:k]
 
-    def _collect_bm25_hits(self, queries: list[str], *, k: int) -> list[FamilyHit]:
+    def _collect_bm25_hits(
+        self,
+        queries: list[str],
+        *,
+        k: int,
+        source_scope: str | None = None,
+    ) -> list[FamilyHit]:
         best: dict[tuple[str, Any, str], FamilyHit] = {}
         for query in _dedupe_texts(queries):
-            for rank, doc in enumerate(self.query_with_bm25(query, k=k), start=1):
+            try:
+                docs = self.query_with_bm25(query, k=k, source_scope=source_scope)
+            except TypeError:
+                docs = self.query_with_bm25(query, k=k)
+                if source_scope:
+                    docs = [
+                        doc
+                        for doc in docs
+                        if str((doc.metadata or {}).get("source_scope") or SOURCE_SCOPE_SUPPLEMENTAL) == source_scope
+                    ]
+            for rank, doc in enumerate(docs, start=1):
                 key = self._doc_key(doc)
                 score_value = float((doc.metadata or {}).get("_bm25_score") or 0.0)
                 existing = best.get(key)
@@ -1580,10 +2113,26 @@ class LocalFileKnowledgeProvider(KnowledgeProvider):
         hits.sort(key=lambda item: (item.rank, -float(item.score if item.score is not None else 0.0), len(item.doc.page_content or "")))
         return hits[:k]
 
-    def _collect_metadata_hits(self, queries: list[str], *, k: int) -> list[FamilyHit]:
+    def _collect_metadata_hits(
+        self,
+        queries: list[str],
+        *,
+        k: int,
+        source_scope: str | None = None,
+    ) -> list[FamilyHit]:
         best: dict[tuple[str, Any, str], FamilyHit] = {}
         for query in _dedupe_texts(queries):
-            for rank, doc in enumerate(self._query_with_metadata_matches(query, k=k), start=1):
+            try:
+                docs = self._query_with_metadata_matches(query, k=k, source_scope=source_scope)
+            except TypeError:
+                docs = self._query_with_metadata_matches(query, k=k)
+                if source_scope:
+                    docs = [
+                        doc
+                        for doc in docs
+                        if str((doc.metadata or {}).get("source_scope") or SOURCE_SCOPE_SUPPLEMENTAL) == source_scope
+                    ]
+            for rank, doc in enumerate(docs, start=1):
                 key = self._doc_key(doc)
                 score_value = float((doc.metadata or {}).get("_query_match_bonus") or 0.0)
                 existing = best.get(key)
@@ -1631,6 +2180,8 @@ class LocalFileKnowledgeProvider(KnowledgeProvider):
                 bonus += 0.12
             if any(keyword in content_head for keyword in ["benchmark", "benchmarks", "dataset", "datasets"]):
                 bonus -= 0.08
+            if str(metadata.get("source_scope") or "") == SOURCE_SCOPE_COURSE_PRIMARY:
+                bonus += COURSE_PRIMARY_SOURCE_BOOST
 
             query_bonus, query_signals = self._query_match_bonus(metadata, query or "")
             if query_bonus:
@@ -1771,6 +2322,322 @@ class LocalFileKnowledgeProvider(KnowledgeProvider):
 
         return merged
 
+    def _query_scope_hybrid(
+        self,
+        query: str,
+        *,
+        source_scope: str,
+        recall_k: int,
+        final_k: int,
+        vector_queries: list[str] | None = None,
+        bm25_queries: list[str] | None = None,
+        metadata_terms: list[str] | None = None,
+    ) -> list[Document]:
+        lane_recall_k = max(recall_k, max(1, final_k) * 2)
+        vector_hits = self._collect_vector_hits(
+            [query] + list(vector_queries or []),
+            k=lane_recall_k,
+            source_scope=source_scope,
+        )
+        bm25_hits = self._collect_bm25_hits(
+            [query] + list(bm25_queries or []),
+            k=lane_recall_k,
+            source_scope=source_scope,
+        )
+        metadata_hits = self._collect_metadata_hits(
+            [query] + list(metadata_terms or []),
+            k=lane_recall_k,
+            source_scope=source_scope,
+        )
+        merged = self._fuse_with_rrf(vector_hits, bm25_hits, metadata_hits=metadata_hits)
+        if not merged:
+            return []
+        return self._section_rerank(merged, final_k=lane_recall_k, query=query)[:final_k]
+
+    def _dedupe_docs(self, docs: list[Document]) -> list[Document]:
+        deduped: list[Document] = []
+        seen: set[tuple[str, str, Any, str]] = set()
+        for doc in docs:
+            key = self._doc_key(doc)
+            if key in seen:
+                continue
+            seen.add(key)
+            deduped.append(doc)
+        return deduped
+
+    def _resolve_graph_node(self, *candidates: str) -> dict[str, Any] | None:
+        cleaned_candidates = [str(item or "").strip() for item in candidates if str(item or "").strip()]
+        if not cleaned_candidates or not self.course_graph_nodes:
+            return None
+
+        for candidate in cleaned_candidates:
+            normalized = _normalize_lookup_text(candidate)
+            title = self.course_graph_lookup.get(normalized)
+            if title and title in self.course_graph_nodes:
+                return dict(self.course_graph_nodes[title])
+
+        best_score = 0
+        best_title = ""
+        for candidate in cleaned_candidates:
+            normalized_candidate = _normalize_lookup_text(candidate)
+            candidate_terms = set(_extract_lookup_terms(candidate))
+            if not normalized_candidate and not candidate_terms:
+                continue
+            for title, node in self.course_graph_nodes.items():
+                node_title_norm = _normalize_lookup_text(title)
+                node_file_norm = _normalize_lookup_text(Path(str(node.get("filename") or "")).stem)
+                score = 0
+                if normalized_candidate and node_title_norm and (
+                    normalized_candidate in node_title_norm or node_title_norm in normalized_candidate
+                ):
+                    score += 6
+                if normalized_candidate and node_file_norm and (
+                    normalized_candidate in node_file_norm or node_file_norm in normalized_candidate
+                ):
+                    score += 4
+                node_terms = set(_extract_lookup_terms(" ".join([title, str(node.get("filename") or "")])))
+                score += 2 * len(candidate_terms & node_terms)
+                if score > best_score:
+                    best_score = score
+                    best_title = title
+
+        if best_title and best_score >= 2:
+            return dict(self.course_graph_nodes[best_title])
+        return None
+
+    def _graph_next_steps_from_node(self, node: dict[str, Any] | None) -> list[dict[str, str]]:
+        if not node:
+            return []
+
+        current_title = str(node.get("title") or "").strip()
+        current_id = str(node.get("id") or current_title).strip()
+        prerequisites = [item for item in self._normalize_graph_list(node.get("prerequisites")) if item != current_title]
+        neighbors = [item for item in self._normalize_graph_list(node.get("neighbors")) if item != current_title]
+
+        steps: list[dict[str, str]] = []
+        if prerequisites:
+            prereq_title = prerequisites[0]
+            prereq_node = self._resolve_graph_node(prereq_title) or {}
+            steps.append(
+                {
+                    "choice": "review_prerequisite",
+                    "label": f"先补前置：{prereq_title}",
+                    "target": prereq_title,
+                    "target_id": str(prereq_node.get("id") or prereq_title).strip(),
+                    "relation": "prerequisite",
+                }
+            )
+        if current_title:
+            steps.append(
+                {
+                    "choice": "continue_current",
+                    "label": f"继续当前：{current_title}",
+                    "target": current_title,
+                    "target_id": current_id,
+                    "relation": "current",
+                }
+            )
+        if neighbors:
+            neighbor_title = neighbors[0]
+            neighbor_node = self._resolve_graph_node(neighbor_title) or {}
+            steps.append(
+                {
+                    "choice": "branch_related",
+                    "label": f"转到相关：{neighbor_title}",
+                    "target": neighbor_title,
+                    "target_id": str(neighbor_node.get("id") or neighbor_title).strip(),
+                    "relation": "neighbor",
+                }
+            )
+        if current_title:
+            steps.append(
+                {
+                    "choice": "practice_now",
+                    "label": f"围绕{current_title}来一道题",
+                    "target": current_title,
+                    "target_id": current_id,
+                    "relation": "practice",
+                }
+            )
+        steps.append(
+            {
+                "choice": "summarize_now",
+                "label": "先收束当前点",
+                "target": current_title,
+                "target_id": current_id,
+                "relation": "summary",
+            }
+        )
+        return steps
+
+    def _build_graph_context(
+        self,
+        *,
+        query: str,
+        rewrite_request: RetrievalRewriteRequest | None = None,
+        docs: list[Document] | None = None,
+    ) -> dict[str, Any]:
+        anchor = self._resolve_graph_node(
+            str(getattr(rewrite_request, "current_topic", "") or ""),
+            str(getattr(rewrite_request, "raw_query", "") or ""),
+            query,
+        )
+        if anchor is None and docs:
+            for doc in docs:
+                metadata = dict(doc.metadata or {})
+                if str(metadata.get("source_scope") or "") != SOURCE_SCOPE_COURSE_PRIMARY:
+                    continue
+                anchor = self._resolve_graph_node(str(metadata.get("kg_title") or metadata.get("filename") or ""))
+                if anchor:
+                    break
+
+        if not anchor:
+            return {}
+
+        return {
+            "anchor": anchor,
+            "anchor_id": str(anchor.get("id") or anchor.get("title") or "").strip(),
+            "anchor_title": str(anchor.get("title") or "").strip(),
+            "anchor_filename": str(anchor.get("filename") or "").strip(),
+            "prerequisites": self._normalize_graph_list(anchor.get("prerequisites")),
+            "neighbors": self._normalize_graph_list(anchor.get("neighbors")),
+            "learning_objectives": self._normalize_graph_list(anchor.get("learning_objectives")),
+            "must_know": self._normalize_graph_list(anchor.get("must_know")),
+            "common_errors": self._normalize_graph_list(anchor.get("common_errors")),
+            "target_mastery_level": str(anchor.get("target_mastery_level") or "").strip(),
+            "difficulty": str(anchor.get("difficulty") or "").strip(),
+            "next_steps": self._graph_next_steps_from_node(anchor),
+        }
+
+    def resolve_graph_context(self, query: str) -> dict[str, Any]:
+        """Resolve one explicit graph anchor into the normalized graph-context contract."""
+        text = str(query or "").strip()
+        if not text:
+            return {}
+        rewrite_request = RetrievalRewriteRequest(
+            channel="graph_context",
+            raw_query=text,
+            current_topic=text,
+        )
+        return self._build_graph_context(query=text, rewrite_request=rewrite_request)
+
+    def _query_graph_priority(
+        self,
+        query: str,
+        *,
+        final_k: int,
+        rewrite_request: RetrievalRewriteRequest | None = None,
+    ) -> tuple[list[Document], dict[str, Any], dict[str, Any]]:
+        graph_context = self._build_graph_context(query=query, rewrite_request=rewrite_request)
+        if not graph_context:
+            return [], {}, {"graph_priority": False}
+
+        anchor_title = str(graph_context.get("anchor_title") or "").strip()
+        related_queries = [
+            *list(graph_context.get("prerequisites") or [])[:2],
+            *list(graph_context.get("neighbors") or [])[:2],
+        ]
+        quotas = dict(self._source_scope_quotas(final_k))
+        course_quota = int(quotas.get(SOURCE_SCOPE_COURSE_PRIMARY, 0))
+        supplemental_quota = int(quotas.get(SOURCE_SCOPE_SUPPLEMENTAL, 0))
+
+        current_docs = self._query_scope_hybrid(
+            anchor_title or query,
+            source_scope=SOURCE_SCOPE_COURSE_PRIMARY,
+            recall_k=8,
+            final_k=max(1, min(course_quota or final_k, 2)),
+            vector_queries=[query],
+            bm25_queries=[str(getattr(rewrite_request, "raw_query", "") or query)],
+            metadata_terms=[anchor_title, Path(str(graph_context.get("anchor_filename") or "")).stem],
+        )
+        related_docs: list[Document] = []
+        remaining_quota = max(0, course_quota - len(current_docs))
+        for related in related_queries:
+            if remaining_quota <= 0:
+                break
+            related_docs.extend(
+                self._query_scope_hybrid(
+                    related,
+                    source_scope=SOURCE_SCOPE_COURSE_PRIMARY,
+                    recall_k=4,
+                    final_k=1,
+                    metadata_terms=[related],
+                )
+            )
+            remaining_quota -= 1
+
+        supplemental_docs: list[Document] = []
+        if supplemental_quota > 0:
+            supplemental_docs = self._query_scope_hybrid(
+                query,
+                source_scope=SOURCE_SCOPE_SUPPLEMENTAL,
+                recall_k=8,
+                final_k=max(1, supplemental_quota),
+            )
+
+        docs = self._merge_source_lane_docs(
+            {
+                SOURCE_SCOPE_COURSE_PRIMARY: self._dedupe_docs(current_docs + related_docs),
+                SOURCE_SCOPE_SUPPLEMENTAL: self._dedupe_docs(supplemental_docs),
+            },
+            final_k=final_k,
+        )
+        return docs, graph_context, {
+            "graph_priority": True,
+            "graph_anchor": anchor_title,
+            "graph_related_queries": related_queries,
+        }
+
+    def _source_scope_quotas(self, final_k: int) -> list[tuple[str, int]]:
+        active_scopes = [spec.scope for spec in self.source_specs if spec.path.exists()]
+        if SOURCE_SCOPE_COURSE_PRIMARY not in active_scopes:
+            return [(SOURCE_SCOPE_SUPPLEMENTAL, final_k)]
+
+        quotas: list[tuple[str, int]] = []
+        course_quota = min(final_k, max(COURSE_PRIMARY_MIN_RESULTS, final_k - SUPPLEMENTAL_MIN_RESULTS))
+        supplemental_quota = max(0, final_k - course_quota)
+
+        if course_quota > 0:
+            quotas.append((SOURCE_SCOPE_COURSE_PRIMARY, course_quota))
+        if supplemental_quota > 0:
+            quotas.append((SOURCE_SCOPE_SUPPLEMENTAL, supplemental_quota))
+        return quotas
+
+    def _merge_source_lane_docs(
+        self,
+        docs_by_scope: dict[str, list[Document]],
+        *,
+        final_k: int,
+    ) -> list[Document]:
+        merged: list[Document] = []
+        seen: set[tuple[str, str, Any, str]] = set()
+
+        for source_scope, quota in self._source_scope_quotas(final_k):
+            lane_docs = docs_by_scope.get(source_scope, [])
+            taken = 0
+            for doc in lane_docs:
+                key = self._doc_key(doc)
+                if key in seen:
+                    continue
+                seen.add(key)
+                merged.append(doc)
+                taken += 1
+                if taken >= quota:
+                    break
+
+        overflow: list[Document] = []
+        for source_scope in [spec.scope for spec in self.source_specs]:
+            for doc in docs_by_scope.get(source_scope, []):
+                key = self._doc_key(doc)
+                if key in seen:
+                    continue
+                overflow.append(doc)
+                seen.add(key)
+
+        if len(merged) < final_k:
+            merged.extend(overflow[: max(0, final_k - len(merged))])
+        return merged[:final_k]
+
     def _query_hybrid_once(
         self,
         query: str,
@@ -1781,14 +2648,19 @@ class LocalFileKnowledgeProvider(KnowledgeProvider):
         bm25_queries: list[str] | None = None,
         metadata_terms: list[str] | None = None,
     ) -> list[Document]:
-        vector_hits = self._collect_vector_hits([query] + list(vector_queries or []), k=recall_k)
-        bm25_hits = self._collect_bm25_hits([query] + list(bm25_queries or []), k=recall_k)
-        metadata_hits = self._collect_metadata_hits([query] + list(metadata_terms or []), k=recall_k)
+        docs_by_scope: dict[str, list[Document]] = {}
+        for source_scope, lane_quota in self._source_scope_quotas(final_k):
+            docs_by_scope[source_scope] = self._query_scope_hybrid(
+                query,
+                source_scope=source_scope,
+                recall_k=recall_k,
+                final_k=max(1, lane_quota * 2),
+                vector_queries=vector_queries,
+                bm25_queries=bm25_queries,
+                metadata_terms=metadata_terms,
+            )
 
-        merged = self._fuse_with_rrf(vector_hits, bm25_hits, metadata_hits=metadata_hits)
-        if not merged:
-            return []
-        return self._section_rerank(merged, final_k=final_k, query=query)
+        return self._merge_source_lane_docs(docs_by_scope, final_k=final_k)
 
     def _build_trace(
         self,
@@ -2018,21 +2890,208 @@ class LocalFileKnowledgeProvider(KnowledgeProvider):
             return []
         return self._section_rerank(docs_and_scores, final_k=final_k, query=query)
 
+    def _trim_snippet(self, text: str, *, max_chars: int = 260) -> str:
+        normalized = re.sub(r"\s+", " ", str(text or "")).strip()
+        if len(normalized) <= max_chars:
+            return normalized
+        return f"{normalized[: max_chars - 3]}..."
+
+    def _format_local_label(self, metadata: dict[str, Any]) -> str:
+        scope = str(metadata.get("source_scope") or SOURCE_SCOPE_SUPPLEMENTAL)
+        filename = str(metadata.get("filename") or "未命名资料").strip()
+        page = metadata.get("page")
+        section = str(
+            metadata.get("section")
+            or metadata.get("H3")
+            or metadata.get("H2")
+            or metadata.get("H1")
+            or ""
+        ).strip()
+        parts = [filename]
+        if isinstance(page, int):
+            parts.append(f"第 {page} 页")
+        if section and not re.fullmatch(r"page-\d+", section.lower()):
+            parts.append(section)
+        prefix = "课程图谱" if scope == SOURCE_SCOPE_COURSE_PRIMARY else "上传资料"
+        return f"[{prefix}] " + " · ".join(parts)
+
+    def _format_web_label(self, result: WebSearchResult) -> str:
+        parts = [result.title or result.domain or result.url]
+        if result.domain:
+            parts.append(result.domain)
+        return " · ".join(parts)
+
+    def _build_local_evidence_items(self, docs: list[Document], *, query: str) -> list[EvidenceItem]:
+        query_terms = self._extract_goal_terms(query)
+        items: list[EvidenceItem] = []
+        for doc in docs:
+            metadata = dict(doc.metadata or {})
+            source_scope = str(metadata.get("source_scope") or SOURCE_SCOPE_SUPPLEMENTAL)
+            term_hits, term_ratio, _ = self._doc_query_term_alignment(doc, query_terms)
+            signals = list(metadata.get("_query_match_signals", []))
+            retrieval_sources = list(metadata.get("_retrieval_sources", []))
+            pure_title_match = bool(signals) and set(signals).issubset({"filename", "title"}) and term_hits == 0
+            can_cite = bool(self._trim_snippet(doc.page_content)) and not pure_title_match and (
+                not query_terms or term_hits > 0 or any(source in {"vector", "bm25"} for source in retrieval_sources)
+            )
+            items.append(
+                EvidenceItem(
+                    source_type="local_kb",
+                    source_id=f"{source_scope}::{metadata.get('filename','')}::{metadata.get('chunk_id','')}",
+                    display_label=self._format_local_label(metadata),
+                    snippet=self._trim_snippet(doc.page_content),
+                    goal_alignment=float(term_ratio if query_terms else 1.0),
+                    can_cite=can_cite,
+                    rank_score=float(metadata.get("_rrf_score") or 0.0),
+                    filename=str(metadata.get("filename") or "").strip(),
+                    page=metadata.get("page") if isinstance(metadata.get("page"), int) else None,
+                    section=str(metadata.get("section") or metadata.get("H3") or metadata.get("H2") or metadata.get("H1") or "").strip(),
+                    chunk_index=metadata.get("chunk_id") if isinstance(metadata.get("chunk_id"), int) else None,
+                    source_scope=source_scope,
+                    retrieval_sources=retrieval_sources,
+                )
+            )
+        return items
+
+    def _build_web_evidence_items(self, results: list[WebSearchResult], *, query: str) -> list[EvidenceItem]:
+        query_terms = self._extract_goal_terms(query)
+        items: list[EvidenceItem] = []
+        for index, result in enumerate(results, start=1):
+            combined = " ".join([result.title, result.snippet, result.domain])
+            doc = Document(page_content=combined, metadata={})
+            term_hits, term_ratio, _ = self._doc_query_term_alignment(doc, query_terms)
+            can_cite = bool(result.snippet) and (not query_terms or term_hits > 0 or term_ratio >= 0.5)
+            items.append(
+                EvidenceItem(
+                    source_type="web_search",
+                    source_id=result.url or f"web::{index}",
+                    display_label=self._format_web_label(result),
+                    snippet=self._trim_snippet(result.snippet),
+                    goal_alignment=float(term_ratio if query_terms else 1.0),
+                    can_cite=can_cite,
+                    rank_score=float(result.score or 0.0),
+                    url=result.url,
+                    domain=result.domain,
+                    title=result.title,
+                    published_date=result.published_date,
+                )
+            )
+        return items
+
+    def _select_web_search_query(self, query: str, debug_payload: dict[str, Any] | None) -> str:
+        candidates = [str(query or "").strip()]
+        if isinstance(debug_payload, dict):
+            candidates.extend(debug_payload.get("rewritten_vector_queries", []) or [])
+            candidates.extend(debug_payload.get("rewritten_bm25_queries", []) or [])
+        deduped = _dedupe_texts(candidates)
+        return deduped[0] if deduped else str(query or "").strip()
+
+    def _search_web_evidence(self, query: str, *, debug_payload: dict[str, Any] | None = None) -> list[EvidenceItem]:
+        if self.web_search_client is None:
+            return []
+        search_query = self._select_web_search_query(query, debug_payload)
+        try:
+            results = self.web_search_client.search(search_query, max_results=self.settings.web_search_max_results)
+        except Exception as exc:
+            print(f"⚠️ [RAG] Tavily 外部搜索失败，已忽略本次外部补充: {exc}")
+            return []
+        return self._build_web_evidence_items(results, query=query)
+
+    def _build_context_from_evidence(self, evidence_items: list[EvidenceItem]) -> str:
+        blocks: list[str] = []
+        for index, item in enumerate(evidence_items, start=1):
+            label = item.display_label
+            if item.source_type == "web_search" and item.url:
+                label = f"{label} ({item.url})"
+            blocks.append(f"[证据{index}] {label}\n{item.snippet}")
+        return "\n\n".join(blocks)
+
+    def _build_graph_guidance(self, docs: list[Document], *, graph_context: dict[str, Any] | None = None) -> str:
+        lines: list[str] = []
+        if graph_context:
+            anchor_title = str(graph_context.get("anchor_title") or "").strip()
+            prerequisites = "；".join(graph_context.get("prerequisites") or [])
+            must_know = "；".join(graph_context.get("must_know") or [])
+            objectives = "；".join(graph_context.get("learning_objectives") or [])
+            mastery = str(graph_context.get("target_mastery_level") or "").strip()
+            difficulty = str(graph_context.get("difficulty") or "").strip()
+            entry = [f"- 节点：{anchor_title}"]
+            if prerequisites:
+                entry.append(f"前置：{prerequisites}")
+            if must_know:
+                entry.append(f"核心抓手：{must_know}")
+            if objectives:
+                entry.append(f"目标：{objectives}")
+            descriptor = " / ".join([item for item in [mastery, difficulty] if item])
+            if descriptor:
+                entry.append(f"建议层级：{descriptor}")
+            if len(entry) > 1:
+                lines.append("；".join(entry))
+
+        seen_files: set[str] = set()
+        for doc in docs:
+            metadata = dict(doc.metadata or {})
+            if str(metadata.get("source_scope") or "") != SOURCE_SCOPE_COURSE_PRIMARY:
+                continue
+            filename = str(metadata.get("filename") or "").strip()
+            if not filename or filename in seen_files:
+                continue
+            seen_files.add(filename)
+
+            title = str(metadata.get("kg_title") or Path(filename).stem).strip()
+            must_know = str(metadata.get("kg_must_know") or "").strip()
+            prerequisites = str(metadata.get("kg_prerequisites") or "").strip()
+            objectives = str(metadata.get("kg_learning_objectives") or "").strip()
+            mastery = str(metadata.get("kg_target_mastery_level") or "").strip()
+            difficulty = str(metadata.get("kg_difficulty") or "").strip()
+
+            entry = [f"- 节点：{title}"]
+            if prerequisites:
+                entry.append(f"前置：{prerequisites}")
+            if must_know:
+                entry.append(f"核心抓手：{must_know}")
+            if objectives:
+                entry.append(f"目标：{objectives}")
+            descriptor = " / ".join([item for item in [mastery, difficulty] if item])
+            if descriptor:
+                entry.append(f"建议层级：{descriptor}")
+            line = "；".join(entry)
+            if line not in lines:
+                lines.append(line)
+            if len(lines) >= 2:
+                break
+
+        return "\n".join(lines)
+
+    def _build_follow_up_question(self, query: str, confidence: dict[str, Any]) -> str:
+        matched_terms = list(confidence.get("best_query_terms_matched") or [])
+        missing_terms = list(confidence.get("best_query_terms_missing") or [])
+        if matched_terms and missing_terms:
+            return (
+                f"我现在只定位到和「{'」「'.join(matched_terms)}」相关的资料，还没有准确定位到「{'」「'.join(missing_terms)}」。"
+                "你能再补一句你最想解决的具体问题吗？比如想看某一步操作、某个概念，还是某种报错原因。"
+            )
+        return (
+            f"我还没有在当前资料里定位到能直接支撑“{query}”的证据片段。"
+            "你可以把问题再收紧一点，例如说明具体步骤、概念、例题，或者报错现象。"
+        )
+
     def _select_confident_citation_docs(self, docs: list[Document], *, query: str = "") -> list[Document]:
         if not docs:
             return []
 
-        grouped: dict[str, dict[str, Any]] = {}
+        grouped: dict[tuple[str, str], dict[str, Any]] = {}
         total_weight = 0.0
         for rank, doc in enumerate(docs, start=1):
             metadata = dict(doc.metadata or {})
             filename = str(metadata.get("filename") or "").strip()
+            source_scope = str(metadata.get("source_scope") or SOURCE_SCOPE_SUPPLEMENTAL)
             if not filename:
                 continue
             weight = float(metadata.get("_rrf_score") or (1.0 / (RRF_K + rank)))
             total_weight += weight
             bucket = grouped.setdefault(
-                filename,
+                (source_scope, filename),
                 {
                     "docs": [],
                     "weight": 0.0,
@@ -2054,8 +3113,7 @@ class LocalFileKnowledgeProvider(KnowledgeProvider):
         if not grouped or total_weight <= 0:
             return []
 
-        top_filename, top_bucket = max(grouped.items(), key=lambda item: item[1]["weight"])
-        del top_filename
+        _, top_bucket = max(grouped.items(), key=lambda item: item[1]["weight"])
         dominance = float(top_bucket["weight"]) / total_weight if total_weight else 0.0
         confidence = self._build_confidence_summary(docs, query=query)
         goal_intent = self._query_expresses_goal_intent(query)
@@ -2089,60 +3147,120 @@ class LocalFileKnowledgeProvider(KnowledgeProvider):
         rewrite_request: RetrievalRewriteRequest | None = None,
         include_debug: bool = False,
     ) -> dict[str, Any]:
-        try:
-            hybrid_result = self.query_hybrid(
-                query=query,
-                recall_k=8,
-                final_k=self.settings.knowledge_top_k,
-                rewrite_request=rewrite_request,
-                include_debug=include_debug,
-            )
-        except TypeError:
-            hybrid_result = self.query_hybrid(
-                query=query,
-                recall_k=8,
-                final_k=self.settings.knowledge_top_k,
-            )
+        alignment_query = self._raw_query_for_rewrite(query, rewrite_request)
+        should_collect_debug = include_debug or self.settings.retrieval_rewrite_debug or bool(self.web_search_client)
+        graph_docs, graph_context, graph_debug = self._query_graph_priority(
+            query,
+            final_k=self.settings.knowledge_top_k,
+            rewrite_request=rewrite_request,
+        )
         debug_payload = None
-        if include_debug and isinstance(hybrid_result, dict):
-            docs = list(hybrid_result.get("docs", []))
-            debug_payload = hybrid_result.get("debug")
+        docs: list[Document]
+        if graph_docs:
+            docs = graph_docs
+            debug_payload = graph_debug
         else:
-            docs = hybrid_result
+            try:
+                hybrid_result = self.query_hybrid(
+                    query=query,
+                    recall_k=8,
+                    final_k=self.settings.knowledge_top_k,
+                    rewrite_request=rewrite_request,
+                    include_debug=should_collect_debug,
+                )
+            except TypeError:
+                hybrid_result = self.query_hybrid(
+                    query=query,
+                    recall_k=8,
+                    final_k=self.settings.knowledge_top_k,
+                )
+            if isinstance(hybrid_result, dict):
+                docs = list(hybrid_result.get("docs", []))
+                debug_payload = hybrid_result.get("debug")
+            else:
+                docs = hybrid_result
+            graph_context = self._build_graph_context(query=alignment_query, rewrite_request=rewrite_request, docs=docs)
 
-        context = "\n\n".join(doc.page_content for doc in docs)
+        local_confidence = self._build_confidence_summary(docs, query=alignment_query)
+        local_evidence = self._build_local_evidence_items(docs, query=alignment_query)
+        citation_docs = self._select_confident_citation_docs(docs, query=alignment_query)
+        confident_ids = {
+            f"{str(doc.metadata.get('source_scope') or SOURCE_SCOPE_SUPPLEMENTAL)}::{str(doc.metadata.get('filename') or '')}::{doc.metadata.get('chunk_id')}"
+            for doc in citation_docs
+        }
+        citation_plan: list[EvidenceItem] = [
+            item
+            for item in local_evidence
+            if item.source_id in confident_ids and item.can_cite
+        ][:MAX_CITABLE_EVIDENCE_ITEMS]
+
+        web_evidence: list[EvidenceItem] = []
+        needs_web_search = (
+            self.web_search_client is not None
+            and (
+                not citation_plan
+                or not bool(local_confidence.get("citation_confident"))
+                or (
+                    self._query_expresses_goal_intent(alignment_query)
+                    and float(local_confidence.get("best_query_term_ratio") or 0.0) < 0.6
+                )
+            )
+        )
+        if needs_web_search:
+            web_evidence = self._search_web_evidence(alignment_query, debug_payload=debug_payload)
+            web_citable = [item for item in web_evidence if item.can_cite]
+            if not citation_plan:
+                citation_plan = web_citable[:MAX_CITABLE_EVIDENCE_ITEMS]
+            elif len(citation_plan) < MAX_CITABLE_EVIDENCE_ITEMS:
+                remaining = MAX_CITABLE_EVIDENCE_ITEMS - len(citation_plan)
+                citation_plan.extend(web_citable[:remaining])
+
+        for index, item in enumerate(citation_plan, start=1):
+            item.citation_index = index
+
+        context = self._build_context_from_evidence(citation_plan)
+        graph_guidance = self._build_graph_guidance(docs, graph_context=graph_context)
         citations: list[dict[str, Any]] = []
-        citation_docs = self._select_confident_citation_docs(docs, query=query)
-
-        for index, doc in enumerate(citation_docs, start=1):
-            metadata = dict(doc.metadata or {})
-            snippet = re.sub(r"\s+", " ", doc.page_content or "").strip()
-            if len(snippet) > 180:
-                snippet = f"{snippet[:177]}..."
-
+        for item in citation_plan:
             citations.append(
                 {
-                    "rank": index,
-                    "filename": metadata.get("filename") or "",
-                    "page": metadata.get("page"),
-                    "section": metadata.get("section") or metadata.get("H3") or metadata.get("H2") or metadata.get("H1"),
-                    "chunk_index": metadata.get("chunk_id"),
-                    "sources": metadata.get("_retrieval_sources", []),
-                    "vector_rank": metadata.get("_vector_rank"),
-                    "bm25_rank": metadata.get("_bm25_rank"),
-                    "vector_score": metadata.get("_vector_score"),
-                    "bm25_score": metadata.get("_bm25_score"),
-                    "rrf_score": metadata.get("_rrf_score"),
-                    "snippet": snippet,
+                    "rank": item.citation_index,
+                    "filename": item.filename,
+                    "page": item.page,
+                    "section": item.section,
+                    "chunk_index": item.chunk_index,
+                    "source_scope": item.source_scope,
+                    "sources": list(item.retrieval_sources),
+                    "rrf_score": item.rank_score,
+                    "snippet": item.snippet,
+                    "source_type": item.source_type,
+                    "display_label": item.display_label,
+                    "url": item.url,
+                    "domain": item.domain,
+                    "title": item.title,
+                    "published_date": item.published_date,
                 }
             )
 
+        needs_follow_up = not bool(citation_plan)
+        follow_up_question = self._build_follow_up_question(alignment_query, local_confidence) if needs_follow_up else ""
         result = {
             "context": context,
+            "graph_guidance": graph_guidance,
+            "graph_context": graph_context,
+            "graph_next_steps": list(graph_context.get("next_steps") or []),
             "citations": citations,
-            "citation_confident": bool(citation_docs),
+            "citation_plan": citations,
+            "evidence": [item.to_dict() for item in (local_evidence + web_evidence)],
+            "source_breakdown": {
+                "course_primary": len([item for item in local_evidence if item.source_scope == SOURCE_SCOPE_COURSE_PRIMARY]),
+                "supplemental": len([item for item in local_evidence if item.source_scope == SOURCE_SCOPE_SUPPLEMENTAL]),
+            },
+            "citation_confident": bool(citation_plan),
+            "needs_follow_up": needs_follow_up,
+            "follow_up_question": follow_up_question,
         }
-        if debug_payload is not None:
+        if include_debug and debug_payload is not None:
             result["debug"] = debug_payload
         return result
 

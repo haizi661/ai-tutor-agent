@@ -92,6 +92,8 @@ class Settings:
     http_proxy: Optional[str]
     https_proxy: Optional[str]
     local_config_enabled: bool
+    course_primary_enabled: bool = True
+    course_primary_dir: str = "a2-control-theory/source-notes"
     vector_store_backend: str = "chroma"
     vector_store_dir: str = "data/chroma_db"
     # RAG 2.0 新增字段
@@ -110,6 +112,10 @@ class Settings:
     retrieval_rewrite_enabled: bool = False
     retrieval_rewrite_mode: str = "smart"
     retrieval_rewrite_debug: bool = False
+    web_search_enabled: bool = False
+    web_search_provider: str = "tavily"
+    tavily_api_key: Optional[str] = None
+    web_search_max_results: int = 5
 
 
 LOCAL_CONFIG_KEYS = [
@@ -129,6 +135,8 @@ LOCAL_CONFIG_KEYS = [
     "EMBEDDING_MODEL_NAME",
     "PDF_PARSE_BACKEND",
     "MINERU_API_TOKEN",
+    "COURSE_PRIMARY_ENABLED",
+    "COURSE_PRIMARY_DIR",
     "KNOWLEDGE_CHUNK_SIZE",
     "KNOWLEDGE_CHUNK_OVERLAP",
     "KNOWLEDGE_TOP_K",
@@ -152,6 +160,10 @@ LOCAL_CONFIG_KEYS = [
     "RETRIEVAL_REWRITE_ENABLED",
     "RETRIEVAL_REWRITE_MODE",
     "RETRIEVAL_REWRITE_DEBUG",
+    "WEB_SEARCH_ENABLED",
+    "WEB_SEARCH_PROVIDER",
+    "TAVILY_API_KEY",
+    "WEB_SEARCH_MAX_RESULTS",
     "LOCAL_CONFIG_ENABLED",
 ]
 
@@ -351,6 +363,9 @@ def get_settings() -> Settings:
     retrieval_rewrite_mode = os.getenv("RETRIEVAL_REWRITE_MODE", "smart").strip().lower() or "smart"
     if retrieval_rewrite_mode not in {"smart"}:
         raise RuntimeError("RETRIEVAL_REWRITE_MODE must be one of: smart.")
+    web_search_provider = os.getenv("WEB_SEARCH_PROVIDER", "tavily").strip().lower() or "tavily"
+    if web_search_provider not in {"tavily"}:
+        raise RuntimeError("WEB_SEARCH_PROVIDER must be one of: tavily.")
 
     default_embedding_model = {
         "local": "sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2",
@@ -388,6 +403,8 @@ def get_settings() -> Settings:
         pass_score=_read_env_int("PASS_SCORE", 80),
         memory_db_path=os.getenv("MEMORY_DB_PATH", "data/tutor_memory.db").strip() or "data/tutor_memory.db",
         knowledge_dir=os.getenv("KNOWLEDGE_DIR", "data/knowledge").strip() or "data/knowledge",
+        course_primary_enabled=_read_env_bool("COURSE_PRIMARY_ENABLED", True),
+        course_primary_dir=os.getenv("COURSE_PRIMARY_DIR", "a2-control-theory/source-notes").strip() or "a2-control-theory/source-notes",
         knowledge_chunk_size=_read_env_int("KNOWLEDGE_CHUNK_SIZE", 1000),
         knowledge_chunk_overlap=_read_env_int("KNOWLEDGE_CHUNK_OVERLAP", 150),
         knowledge_top_k=_read_env_int("KNOWLEDGE_TOP_K", 3),
@@ -412,4 +429,8 @@ def get_settings() -> Settings:
         retrieval_rewrite_enabled=_read_env_bool("RETRIEVAL_REWRITE_ENABLED", False),
         retrieval_rewrite_mode=retrieval_rewrite_mode,
         retrieval_rewrite_debug=_read_env_bool("RETRIEVAL_REWRITE_DEBUG", False),
+        web_search_enabled=_read_env_bool("WEB_SEARCH_ENABLED", False),
+        web_search_provider=web_search_provider,
+        tavily_api_key=os.getenv("TAVILY_API_KEY", "").strip() or None,
+        web_search_max_results=_read_env_int("WEB_SEARCH_MAX_RESULTS", 5),
     )

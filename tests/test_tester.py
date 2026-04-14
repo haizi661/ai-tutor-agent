@@ -238,6 +238,37 @@ def test_tester_resume_keeps_existing_question_type_and_normalizes_heading():
     assert tester_llm.messages == []
 
 
+def test_tester_same_type_mode_reuses_last_passed_template():
+    sink = BufferedEventSink()
+    tester_llm = FakeStreamingLLM(
+        """{
+  "focus": "继续看你能不能把稳定性和瞬态性能分清",
+  "question": "请再换一个角度说明稳定性和瞬态性能的区别，并补一句为什么二者不能混为一谈。",
+  "requirements": ["先说稳定性", "再说瞬态性能", "最后补一句关键区别"],
+  "hint": "先想最终状态，再想中间过程。"
+}"""
+    )
+    answer_provider = FakeAnswerProvider("稳定性看最终状态，瞬态性能看过程表现。")
+    tester_node = build_tester_node(tester_llm, sink, answer_provider)
+
+    result = tester_node(
+        {
+            "current_topic": "控制理论",
+            "tutor_content": "本轮讲解聚焦稳定性与瞬态性能。",
+            "difficulty_level": 3,
+            "attempt_count": 0,
+            "practice_generation_mode": "same_type",
+            "tester_question_type": "概念辨析题",
+            "tester_question_template": "定义辨析",
+        }
+    )
+
+    assert result["tester_question_type"] == "概念辨析题"
+    assert result["tester_question_template"] == "定义辨析"
+    assert "沿用你刚才已经通过的题型" in tester_llm.messages[0][1].content
+    assert result["practice_generation_mode"] == ""
+
+
 def test_tester_guardrails_rewrite_double_prompt_questions():
     sink = BufferedEventSink()
     tester_llm = FakeStreamingLLM(
@@ -320,3 +351,35 @@ def test_tester_guardrails_rewrite_numeric_questions_with_missing_conditions():
 
     assert "请根据题目给出的数值条件，写出关键关系或公式，完成必要的计算，并给出最终结论。" in result["tester_question"]
     assert _warning_messages(sink)
+
+
+def test_tester_injects_graph_objectives_and_common_errors_into_prompt():
+    sink = BufferedEventSink()
+    tester_llm = FakeStreamingLLM(
+        """{
+  "focus": "看你能不能把反馈的核心作用说清楚",
+  "question": "请解释反馈在控制系统里的核心作用，并指出一个容易混淆的错误理解。",
+  "requirements": ["先说核心作用", "再指出误区", "最后补一句为什么会混淆"],
+  "hint": "先想输出回到输入以后，系统为什么更容易修正偏差。"
+}"""
+    )
+    answer_provider = FakeAnswerProvider("反馈能帮助系统修正偏差。")
+    tester_node = build_tester_node(tester_llm, sink, answer_provider)
+
+    tester_node(
+        {
+            "current_topic": "反馈",
+            "tutor_content": "本轮讲了反馈如何把输出信息回送到输入端，并改善系统表现。",
+            "difficulty_level": 3,
+            "attempt_count": 0,
+            "graph_learning_objectives": ["能解释反馈的作用"],
+            "graph_common_errors": ["把反馈和闭环画法混为一谈"],
+            "graph_must_know": ["输出回到输入形成比较"],
+            "coach_content": "",
+        }
+    )
+
+    human_content = tester_llm.messages[0][1].content
+    assert "该节点学习目标：能解释反馈的作用" in human_content
+    assert "该节点常见误区：把反馈和闭环画法混为一谈" in human_content
+    assert "该节点必会点：输出回到输入形成比较" in human_content

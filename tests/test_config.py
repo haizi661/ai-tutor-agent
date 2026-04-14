@@ -46,6 +46,8 @@ def test_settings_default_to_local_embedding_provider(monkeypatch):
     assert settings.llm_provider == "google"
     assert settings.embedding_provider == "local"
     assert settings.embedding_model_name == "sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2"
+    assert settings.course_primary_enabled is True
+    assert settings.course_primary_dir == "a2-control-theory/source-notes"
     assert settings.pdf_parse_backend == "auto"
     get_settings.cache_clear()
 

@@ -37,10 +37,21 @@ class AssessmentSubmitRequest(BaseModel):
     answers: Dict[str, str]
 
 
+class AssessmentDraftRequest(BaseModel):
+    thread_id: str
+    answers: Dict[str, str]
+
+
+class AssessmentAnswerRequest(BaseModel):
+    thread_id: str
+    answer: str  # A/B/C/D
+
+
 class TopicConfirmRequest(BaseModel):
     thread_id: str
     confirmed: bool
     topic: str = ""
+    start_mode: str = "assessment"
 
 
 class InterruptConfirmRequest(BaseModel):
@@ -50,6 +61,15 @@ class InterruptConfirmRequest(BaseModel):
 
 def _thread_config(thread_id: str) -> dict:
     return {"configurable": {"thread_id": thread_id}}
+
+
+def _checkpoint_state_patch(thread_id: str, runtime, patch: dict) -> None:
+    runtime_context = RuntimeContext(knowledge_provider=runtime.knowledge_provider)
+    graph_app, conn = runtime.workflow_factory(runtime.settings, runtime=runtime_context)
+    try:
+        graph_app.update_state(_thread_config(thread_id), patch)
+    finally:
+        conn.close()
 
 
 def _clear_interrupt_history(history: list) -> list:
@@ -69,7 +89,11 @@ def _build_runtime_context(thread_id: str, runtime, event_q: queue.Queue, input_
     answer_provider = WebAnswerProvider(
         input_q,
         event_sink,
-        on_awaiting_input=lambda awaiting: runtime.session_manager.mark_awaiting_input(thread_id, awaiting),
+        on_awaiting_input=lambda awaiting, payload=None: runtime.session_manager.mark_awaiting_input(
+            thread_id,
+            awaiting,
+            payload,
+        ),
     )
     return RuntimeContext(
         event_sink=event_sink,
@@ -132,8 +156,28 @@ def _resume_assessment_worker(
             make_event(
                 "session.info",
                 "api",
-                message="📝 已收到学前测评答案，正在生成能力画像…",
+                message="📝 已收到学前测评答案，正在校准起点，随后直接进入讲解…",
             )
+        )
+        graph_app.invoke(None, config=thread_config)
+
+    _run_graph_session(thread_id, runtime, event_q, input_q, runner)
+
+
+def _resume_assessment_dialog_worker(
+    thread_id: str,
+    answer: str,
+    runtime,
+    event_q: queue.Queue,
+    input_q: queue.Queue,
+):
+    def runner(graph_app, runtime_context, thread_config):
+        graph_app.update_state(
+            thread_config,
+            {
+                "pending_interaction_answer": answer,
+                "flow_status": "assessment_dialog",
+            },
         )
         graph_app.invoke(None, config=thread_config)
 
@@ -144,6 +188,7 @@ def _resume_topic_confirmation_worker(
     thread_id: str,
     confirmed: bool,
     topic: str,
+    start_mode: str,
     runtime,
     event_q: queue.Queue,
     input_q: queue.Queue,
@@ -151,7 +196,17 @@ def _resume_topic_confirmation_worker(
     def runner(graph_app, runtime_context, thread_config):
         state = graph_app.get_state(thread_config).values or {}
         proposed_topic = state.get("proposed_topic", "").strip()
+        current_goal = (state.get("current_user_goal") or "").strip()
+        session_goal = (state.get("session_goal") or current_goal).strip()
+        turn_goal = (state.get("turn_goal") or current_goal).strip()
+        topic_focus = (state.get("topic_focus") or "").strip()
+        topic_background = (state.get("topic_background") or "").strip()
+        topic_detail_summary = (state.get("topic_detail_summary") or "").strip()
+        topic_starter_options = list(state.get("topic_starter_options") or [])
         next_topic = (topic or "").strip()
+        requested_mode = (start_mode or "assessment").strip().lower()
+        if requested_mode not in {"assessment", "direct_tutor", "analogy_tutor"}:
+            requested_mode = "assessment"
 
         if confirmed:
             confirmed_topic = proposed_topic or next_topic
@@ -160,6 +215,7 @@ def _resume_topic_confirmation_worker(
                     thread_config,
                     {
                         "current_topic": "",
+                        "current_user_goal": "",
                         "proposed_topic": "",
                         "flow_status": "greeting",
                     },
@@ -176,15 +232,28 @@ def _resume_topic_confirmation_worker(
                     thread_config,
                     {
                         "current_topic": confirmed_topic,
+                        "current_user_goal": current_goal or confirmed_topic,
+                        "session_goal": session_goal or current_goal or confirmed_topic,
+                        "turn_goal": turn_goal or topic_focus or current_goal or confirmed_topic,
                         "proposed_topic": "",
-                        "flow_status": "assessment_pending",
+                        "flow_status": "assessment_pending" if requested_mode == "assessment" else "direct_tutor",
+                        "teaching_strategy": "analogy" if requested_mode == "analogy_tutor" else "explain",
+                        "topic_focus": topic_focus,
+                        "topic_background": topic_background,
+                        "topic_detail_summary": topic_detail_summary,
+                        "topic_starter_options": topic_starter_options,
                     },
                 )
+                start_message = {
+                    "assessment": f"✅ 已确认学习主题：{confirmed_topic}。我们先快速摸一下起点，再开始正式讲解。",
+                    "direct_tutor": f"✅ 已确认学习主题：{confirmed_topic}。我先直接开始讲，讲到合适的位置再决定要不要练一题。",
+                    "analogy_tutor": f"✅ 已确认学习主题：{confirmed_topic}。我先用更直观的例子带你入门，再逐步深入。",
+                }[requested_mode]
                 runtime_context.event_sink.emit(
                     make_event(
                         "session.info",
                         "api",
-                        message=f"✅ 已确认学习主题：{confirmed_topic}",
+                        message=start_message,
                     )
                 )
         else:
@@ -192,7 +261,15 @@ def _resume_topic_confirmation_worker(
                 thread_config,
                 {
                     "current_topic": next_topic,
+                    "current_user_goal": next_topic,
+                    "session_goal": next_topic,
+                    "turn_goal": next_topic,
                     "proposed_topic": "",
+                    "topic_focus": "",
+                    "topic_background": "",
+                    "topic_detail_summary": "",
+                    "topic_starter_options": [],
+                    "topic_clarify_rounds": 0,
                     "flow_status": "greeting",
                 },
             )
@@ -253,6 +330,37 @@ def _resume_interrupt_confirmation_worker(
                     data={"requires_interrupt_confirmation": False},
                 )
             )
+
+    _run_graph_session(thread_id, runtime, event_q, input_q, runner)
+
+
+def _resume_pending_selector_worker(
+    thread_id: str,
+    answer: str,
+    runtime,
+    event_q: queue.Queue,
+    input_q: queue.Queue,
+):
+    def runner(graph_app, runtime_context, thread_config):
+        state = graph_app.get_state(thread_config).values or {}
+        flow_status = str(state.get("flow_status", "") or "")
+        if flow_status not in {"awaiting_next_step_selector", "awaiting_post_eval_selector"}:
+            runtime_context.event_sink.emit(
+                make_event(
+                    "session.warning",
+                    "api",
+                    message="当前没有可恢复的选择器步骤。",
+                )
+            )
+            return
+
+        graph_app.update_state(
+            thread_config,
+            {
+                "pending_interaction_answer": answer,
+            },
+        )
+        graph_app.invoke(None, config=thread_config)
 
     _run_graph_session(thread_id, runtime, event_q, input_q, runner)
 
@@ -346,6 +454,24 @@ async def provide_answer(req: AnswerRequest, request: Request):
     runtime = get_runtime(request)
     session = runtime.session_manager.refresh_status(req.thread_id)
     if not session.get("awaiting_input"):
+        db_path = runtime.settings.memory_db_path
+        checkpoint_store, saver_conn = runtime.checkpoint_factory(db_path)
+        try:
+            checkpoint_tuple = checkpoint_store.get_tuple(_thread_config(req.thread_id))
+            state = checkpoint_tuple.checkpoint.get("channel_values", {}) if checkpoint_tuple else {}
+        finally:
+            saver_conn.close()
+
+        if state.get("flow_status") in {"awaiting_next_step_selector", "awaiting_post_eval_selector"}:
+            _schedule_resume_worker(
+                req.thread_id,
+                runtime,
+                _resume_pending_selector_worker,
+                req.thread_id,
+                req.answer,
+            )
+            return {"status": "ok"}
+
         raise HTTPException(status_code=409, detail="Session is not waiting for input.")
     session["input_q"].put(req.answer)
     runtime.session_manager.mark_awaiting_input(req.thread_id, False)
@@ -365,6 +491,31 @@ async def submit_assessment(req: AssessmentSubmitRequest, request: Request):
     return {"status": "ok", "message": "Assessment answers received, profiling started."}
 
 
+@router.post("/assessment_draft")
+async def save_assessment_draft(req: AssessmentDraftRequest, request: Request):
+    runtime = get_runtime(request)
+    _checkpoint_state_patch(
+        req.thread_id,
+        runtime,
+        {"assessment_answers": req.answers},
+    )
+    return {"status": "ok", "message": "Assessment draft saved."}
+
+
+@router.post("/assessment_answer")
+async def assessment_answer(req: AssessmentAnswerRequest, request: Request):
+    """对话式测评：用户逐题作答，每次提交一道题的答案。"""
+    runtime = get_runtime(request)
+    _schedule_resume_worker(
+        req.thread_id,
+        runtime,
+        _resume_assessment_dialog_worker,
+        req.thread_id,
+        req.answer,
+    )
+    return {"status": "ok", "message": "Answer received, proceeding."}
+
+
 @router.post("/confirm_topic")
 async def confirm_topic(req: TopicConfirmRequest, request: Request):
     runtime = get_runtime(request)
@@ -379,6 +530,7 @@ async def confirm_topic(req: TopicConfirmRequest, request: Request):
         req.thread_id,
         req.confirmed,
         req.topic,
+        req.start_mode,
     )
     return {"status": "ok", "message": "Topic confirmation received."}
 

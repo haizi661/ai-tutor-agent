@@ -1,0 +1,181 @@
+{
+  "dataset": "A2 Control Theory Knowledge Graph",
+  "generated_at": "2026-04-12T12:38:04.020547+00:00",
+  "note_count": 85,
+  "internal_edge_count": 240,
+  "out_of_scope_reference_count": 83,
+  "missing_reference_count": 34,
+  "external_reference_count": 117,
+  "subgraphs": {
+    "0. 基础知识": 10,
+    "1. 经典控制理论": 34,
+    "2. 现代控制理论": 23,
+    "3. 计算机控制系统": 15,
+    "4. 先进控制理论": 2,
+    "未分类": 1
+  },
+  "most_referenced_out_of_scope_topics": [
+    {
+      "target": "z 变换",
+      "count": 9
+    },
+    {
+      "target": "拉普拉斯变换",
+      "count": 8
+    },
+    {
+      "target": "友矩阵",
+      "count": 4
+    },
+    {
+      "target": "特征值和特征向量",
+      "count": 3
+    },
+    {
+      "target": "矩阵指数函数",
+      "count": 3
+    },
+    {
+      "target": "微分方程",
+      "count": 2
+    },
+    {
+      "target": "冲激函数",
+      "count": 2
+    },
+    {
+      "target": "复数",
+      "count": 2
+    },
+    {
+      "target": "模拟式PID控制器",
+      "count": 2
+    },
+    {
+      "target": "插值",
+      "count": 2
+    },
+    {
+      "target": "雅可比矩阵",
+      "count": 2
+    },
+    {
+      "target": "二次型",
+      "count": 2
+    },
+    {
+      "target": "矩阵对角化",
+      "count": 2
+    },
+    {
+      "target": "凯莱-哈密顿定理",
+      "count": 2
+    },
+    {
+      "target": "差分方程",
+      "count": 2
+    },
+    {
+      "target": "z 反变换",
+      "count": 2
+    },
+    {
+      "target": "机器人",
+      "count": 2
+    },
+    {
+      "target": "正态分布",
+      "count": 2
+    },
+    {
+      "target": "协方差矩阵",
+      "count": 2
+    },
+    {
+      "target": "概率论",
+      "count": 1
+    }
+  ],
+  "most_referenced_missing_topics": [
+    {
+      "target": "放大电路",
+      "count": 2
+    },
+    {
+      "target": "伺服系统",
+      "count": 2
+    },
+    {
+      "target": "最小相位系统",
+      "count": 2
+    },
+    {
+      "target": "范德蒙德矩阵",
+      "count": 2
+    },
+    {
+      "target": "最优控制",
+      "count": 2
+    },
+    {
+      "target": "贝叶斯估计理论",
+      "count": 2
+    },
+    {
+      "target": "控制论",
+      "count": 1
+    },
+    {
+      "target": "非线性",
+      "count": 1
+    },
+    {
+      "target": "自组织",
+      "count": 1
+    },
+    {
+      "target": "信息",
+      "count": 1
+    },
+    {
+      "target": "信号",
+      "count": 1
+    },
+    {
+      "target": "分贝",
+      "count": 1
+    },
+    {
+      "target": "一元二次方程",
+      "count": 1
+    },
+    {
+      "target": "根轨迹分析系统性能",
+      "count": 1
+    },
+    {
+      "target": "滞后-超前校正",
+      "count": 1
+    },
+    {
+      "target": "PD",
+      "count": 1
+    },
+    {
+      "target": "卷绕数",
+      "count": 1
+    },
+    {
+      "target": "能",
+      "count": 1
+    },
+    {
+      "target": "神经网络的稳定性",
+      "count": 1
+    },
+    {
+      "target": "Jordan矩阵",
+      "count": 1
+    }
+  ]
+}

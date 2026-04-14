@@ -5,7 +5,15 @@ from typing import TypedDict
 
 class AgentState(TypedDict):
     current_topic: str
+    current_user_goal: str
+    session_goal: str
+    turn_goal: str
     proposed_topic: str
+    topic_focus: str
+    topic_background: str
+    topic_detail_summary: str
+    topic_starter_options: list
+    topic_clarify_rounds: int
     tutor_content: str
     tester_question: str
     tester_question_type: str
@@ -21,14 +29,38 @@ class AgentState(TypedDict):
     assessment_answers: dict            # 用户前端提交的答题结果 {"1": "A", ...}
     assessment_radar: dict              # 6 维雷达图结构化数据
     assessment_result: str              # UserProfiler 生成的 Markdown 画像报告
+    assessment_concept_gaps: dict       # 概念级差距分析 {concept: {self_score, actual_score, gap, gap_type, calibrated}}
+    user_knowledge_graph: dict          # 用户知识掌握图谱 {node_title: {status, turn_count, calibrated}} status: not_started|in_progress|mastered|skipped
+    assessment_state: dict              # 对话式测评状态机 {phase, current_pair_index, pairs, answers, pending_self_score}
     is_assessed: bool                   # 是否已完成学前画像评估
-    flow_status: str                    # 图流转控制: greeting/topic_intake/meta_qa/smalltalk/topic_confirmation_pending/awaiting_topic_confirmation/assessment_pending/awaiting_assessment/profiling/normal
+    flow_status: str                    # 图流转控制: greeting/topic_intake/meta_qa/smalltalk/topic_confirmation_pending/awaiting_topic_confirmation/assessment_pending/awaiting_assessment/assessment_dialog/profiling/normal
     # ── 自适应学习字段 ──
     difficulty_level: int               # 1=非常基础 2=基础 3=中等 4=进阶 5=专家，由画像自动计算
     attempt_count: int                  # 当前主题连续失败次数，失败+1, 通过归零
     score_history: list                 # 历史得分记录 [(total, logic, concept, feedback_str), ...]
     teaching_strategy: str             # 当前教学策略: explain/analogy/stepbystep/socratic
+    next_step_choice: str              # 讲解后的下一步选择
+    post_eval_choice: str              # 通过评估后的下一步选择
+    practice_generation_mode: str      # 练习生成模式: ""/same_type
+    pending_interaction_kind: str      # 挂起中的交互类型
+    pending_interaction_prompt: str    # 挂起中的交互提示
+    pending_interaction_options: list  # 挂起中的交互选项
+    pending_interaction_recommended: str  # 挂起中的推荐选项
+    pending_interaction_answer: str    # 挂起中的交互答案
     tutor_citations: list             # Tutor 节点引用来源列表
+    tutor_evidence: list              # Tutor 节点实际引用的证据列表
+    graph_anchor_id: str              # 当前课程图谱锚点 ID
+    graph_anchor_title: str           # 当前课程图谱锚点
+    graph_anchor_filename: str        # 当前课程图谱节点文件
+    graph_prerequisites: list         # 当前节点前置知识
+    graph_neighbors: list             # 当前节点关联知识
+    graph_learning_objectives: list   # 当前节点学习目标
+    graph_must_know: list             # 当前节点必会点
+    graph_common_errors: list         # 当前节点常见误区
+    graph_target_mastery_level: str   # 当前节点目标掌握层级
+    graph_difficulty: str             # 当前节点难度标签
+    graph_next_steps: list            # 当前节点推荐下一步
+    message_history: list             # 用户侧对话记录，用于恢复时间线
     model_answer: str                   # 评估节点提供的参考答案，评估后推送给学生
     misconceptions: list               # 评估节点识别到的误区列表
     next_review_points: list           # 下一步建议复习点
@@ -41,6 +73,7 @@ class AgentState(TypedDict):
     interrupt_query: str               # 临时提问内容
     resume_tester: bool                # 临时提问后是否回到原测题
     conversation_history: list         # 临时问答历史
+    affect_signals: dict               # 最近一轮情绪信号 {frustrated: 0.8, curious: 0.4}
 
 
 def build_initial_state(topic: str = "") -> AgentState:
@@ -50,7 +83,15 @@ def build_initial_state(topic: str = "") -> AgentState:
         "interrupt_query": "",
         "resume_tester": False,
         "current_topic": topic,
+        "current_user_goal": topic,
+        "session_goal": topic,
+        "turn_goal": topic,
         "proposed_topic": "",
+        "topic_focus": "",
+        "topic_background": "",
+        "topic_detail_summary": "",
+        "topic_starter_options": [],
+        "topic_clarify_rounds": 0,
         "tutor_content": "",
         "tester_question": "",
         "tester_question_type": "",
@@ -65,13 +106,39 @@ def build_initial_state(topic: str = "") -> AgentState:
         "assessment_answers": {},
         "assessment_radar": {},
         "assessment_result": "",
+        "assessment_concept_gaps": {},
+        "user_knowledge_graph": {},
+        "assessment_state": {},
         "is_assessed": False,
         "flow_status": "greeting",
         "difficulty_level": 3,
         "attempt_count": 0,
         "score_history": [],
         "teaching_strategy": "explain",
+        "next_step_choice": "",
+        "post_eval_choice": "",
+        "practice_generation_mode": "",
+        "pending_interaction_kind": "",
+        "pending_interaction_prompt": "",
+        "pending_interaction_options": [],
+        "pending_interaction_recommended": "",
+        "pending_interaction_answer": "",
         "tutor_citations": [],
+        "tutor_evidence": [],
+        "graph_anchor_id": "",
+        "graph_anchor_title": "",
+        "graph_anchor_filename": "",
+        "graph_prerequisites": [],
+        "graph_neighbors": [],
+        "graph_learning_objectives": [],
+        "graph_must_know": [],
+        "graph_common_errors": [],
+        "graph_target_mastery_level": "",
+        "graph_difficulty": "",
+        "graph_next_steps": [],
+        "message_history": (
+            [{"role": "user", "kind": "topic_input", "content": topic}] if topic.strip() else []
+        ),
         "model_answer": "",
         "misconceptions": [],
         "next_review_points": [],
@@ -79,4 +146,5 @@ def build_initial_state(topic: str = "") -> AgentState:
         "needs_hint": False,
         "coach_content": "",
         "conversation_history": [],
+        "affect_signals": {},
     }

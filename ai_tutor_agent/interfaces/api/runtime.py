@@ -224,6 +224,7 @@ class SessionManager:
                     "worker": None,
                     "is_running": False,
                     "awaiting_input": False,
+                    "awaiting_input_state": None,
                 }
             return self.sessions[thread_id]
 
@@ -235,6 +236,7 @@ class SessionManager:
                 session["worker"] = None
                 session["is_running"] = False
                 session["awaiting_input"] = False
+                session["awaiting_input_state"] = None
             return session
 
     def mark_running(self, thread_id: str, worker: threading.Thread) -> dict[str, object]:
@@ -243,6 +245,7 @@ class SessionManager:
             session["worker"] = worker
             session["is_running"] = True
             session["awaiting_input"] = False
+            session["awaiting_input_state"] = None
             return session
 
     def prepare_worker_start(self, thread_id: str, worker: threading.Thread) -> Optional[dict[str, object]]:
@@ -254,6 +257,7 @@ class SessionManager:
             session["worker"] = worker
             session["is_running"] = True
             session["awaiting_input"] = False
+            session["awaiting_input_state"] = None
             return session
 
     def mark_finished(self, thread_id: str) -> None:
@@ -262,11 +266,18 @@ class SessionManager:
             session["worker"] = None
             session["is_running"] = False
             session["awaiting_input"] = False
+            session["awaiting_input_state"] = None
 
-    def mark_awaiting_input(self, thread_id: str, awaiting: bool) -> dict[str, object]:
+    def mark_awaiting_input(
+        self,
+        thread_id: str,
+        awaiting: bool,
+        payload: Optional[dict[str, object]] = None,
+    ) -> dict[str, object]:
         with self._lock:
             session = self.get_or_create(thread_id)
             session["awaiting_input"] = awaiting
+            session["awaiting_input_state"] = payload if awaiting else None
             return session
 
     def remove(self, thread_id: str) -> None:
@@ -284,6 +295,7 @@ class SessionManager:
                     except queue.Empty:
                         break
             session["awaiting_input"] = False
+            session["awaiting_input_state"] = None
             return session
 
 

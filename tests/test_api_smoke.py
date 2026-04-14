@@ -84,7 +84,7 @@ class FakeGraphApp:
 
         if state.get("flow_status") == "profiling":
             radar = {
-                "dimensions": ["基础概念", "规则理解", "逻辑推理", "场景应用", "细节辨析", "表达信心"],
+                "dimensions": ["基础概念", "规则理解", "逻辑推理", "场景应用", "细节辨析", "综合应用"],
                 "self_scores": [60, 55, 50, 45, 40, 35],
                 "objective_scores": [65, 60, 55, 50, 45, 40],
             }
@@ -207,6 +207,52 @@ class WaitingInputWorkflowFactory:
                 )
 
         return WaitingInputGraphApp(runtime), DummyConn()
+
+
+class SelectorResumeWorkflowFactory:
+    def __init__(self, checkpoint_store):
+        self.checkpoint_store = checkpoint_store
+
+    def __call__(self, settings, runtime=None):
+        del settings
+        factory = self
+
+        class SelectorResumeGraphApp:
+            def __init__(self, runtime_context):
+                self.runtime_context = runtime_context
+                self.checkpoint_store = factory.checkpoint_store
+
+            def get_state(self, config):
+                thread_id = config["configurable"]["thread_id"]
+                return FakeStateSnapshot(self.checkpoint_store.states.get(thread_id, {}))
+
+            def update_state(self, config, values):
+                thread_id = config["configurable"]["thread_id"]
+                state = dict(self.checkpoint_store.states.get(thread_id, {}))
+                state.update(values)
+                self.checkpoint_store.save(thread_id, state, source="update", step=2)
+
+            def invoke(self, payload, config):
+                thread_id = config["configurable"]["thread_id"]
+                state = dict(self.checkpoint_store.states.get(thread_id, {}))
+                if payload:
+                    state.update(payload)
+                if state.get("flow_status") == "awaiting_next_step_selector" and state.get("pending_interaction_answer"):
+                    state.update(
+                        {
+                            "flow_status": "normal",
+                            "next_step_choice": state["pending_interaction_answer"],
+                            "pending_interaction_answer": "",
+                        }
+                    )
+                    self.checkpoint_store.save(thread_id, state, source="loop", step=2)
+                    self.runtime_context.event_sink.emit(
+                        make_event("node.complete", "next_step_selector", message="已恢复并接住这次选择。")
+                    )
+                    return
+                self.checkpoint_store.save(thread_id, state, source="loop", step=1)
+
+        return SelectorResumeGraphApp(runtime), DummyConn()
 
 
 class MutableKnowledgeProvider:
@@ -660,6 +706,32 @@ def test_submit_assessment_schedules_resume_when_worker_is_still_finishing(tmp_p
         assert final_detail["state"]["flow_status"] == "normal"
 
 
+def test_assessment_draft_persists_partial_answers_for_history_restore(tmp_path):
+    thread_id = "session-assessment-draft"
+    checkpoint_store = FakeCheckpointStore()
+    checkpoint_store.save(
+        thread_id,
+        {
+            "current_topic": "控制理论",
+            "assessment_questions": [{"id": 1, "question": "Q1"}],
+            "assessment_answers": {},
+            "flow_status": "awaiting_assessment",
+        },
+        source="loop",
+        step=1,
+    )
+
+    with create_test_client(tmp_path, checkpoint_store=checkpoint_store) as client:
+        response = client.post(
+            "/api/assessment_draft",
+            json={"thread_id": thread_id, "answers": {"1": "C"}},
+        )
+
+        assert response.status_code == 200
+        detail = client.get(f"/api/history/{thread_id}").json()
+        assert detail["state"]["assessment_answers"] == {"1": "C"}
+
+
 def test_confirm_topic_with_empty_topic_falls_back_to_greeting(tmp_path):
     thread_id = "session-empty-topic-confirm"
     checkpoint_store = FakeCheckpointStore()
@@ -853,6 +925,49 @@ def test_api_answer_accepts_only_while_awaiting_input(tmp_path):
         assert session["awaiting_input"] is False
 
 
+def test_api_answer_can_resume_pending_selector_from_checkpoint(tmp_path):
+    checkpoint_store = FakeCheckpointStore()
+    checkpoint_store.save(
+        "selector-thread",
+        {
+            "flow_status": "awaiting_next_step_selector",
+            "pending_interaction_kind": "next_step_selector",
+            "pending_interaction_prompt": "下一步怎么继续？",
+            "pending_interaction_options": [
+                {"value": "continue_deeper", "label": "继续深入"},
+                {"value": "practice_now", "label": "来一道题"},
+            ],
+            "pending_interaction_recommended": "continue_deeper",
+            "pending_interaction_answer": "",
+        },
+    )
+    runtime = ApiRuntime(
+        settings=build_test_settings(tmp_path),
+        knowledge_provider=NoopKnowledgeProvider(),
+        workflow_factory=SelectorResumeWorkflowFactory(checkpoint_store),
+        checkpoint_factory=lambda path: (checkpoint_store, DummyConn()),
+    )
+
+    with TestClient(create_api_app(runtime_factory=lambda: runtime)) as client:
+        response = client.post(
+            "/api/answer",
+            json={"thread_id": "selector-thread", "answer": "practice_now"},
+        )
+        assert response.status_code == 200
+
+        deadline = time.time() + 2
+        while time.time() < deadline:
+            updated = checkpoint_store.states.get("selector-thread", {})
+            if updated.get("flow_status") == "normal":
+                break
+            time.sleep(0.05)
+
+        updated = checkpoint_store.states["selector-thread"]
+        assert updated["flow_status"] == "normal"
+        assert updated["next_step_choice"] == "practice_now"
+        assert updated["pending_interaction_answer"] == ""
+
+
 def test_waiting_for_input_timeout_emits_error_and_end(monkeypatch, tmp_path):
     import ai_tutor_agent.interfaces.api.adapter as adapter_module
 
@@ -913,7 +1028,7 @@ def test_profile_radar_stream_event_contract_includes_scores(tmp_path):
         assert 'event: profile.radar_data' in stream.text
         assert '"type": "profile.radar_data"' in stream.text
         assert '"source": "user_profiler"' in stream.text
-        assert '"dimensions": ["基础概念", "规则理解", "逻辑推理", "场景应用", "细节辨析", "表达信心"]' in stream.text
+        assert '"dimensions": ["基础概念", "规则理解", "逻辑推理", "场景应用", "细节辨析", "综合应用"]' in stream.text
         assert '"objective_scores": [65, 60, 55, 50, 45, 40]' in stream.text
 
 

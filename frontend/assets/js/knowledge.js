@@ -25,18 +25,21 @@
 
         const files = app.state.knowledgeFiles || [];
         if (!files.length) {
-            container.innerHTML = '<div class="knowledge-empty">书架还是空的，先上传一份资料吧。</div>';
+            container.innerHTML = '<div class="knowledge-empty">还没有参考资料。</div>';
             return;
         }
 
         const rows = files.map(item => {
             const safeFilename = escapeHtml(item.filename);
-            const chunkSuffix = Number.isInteger(item.chunk_count) ? ` · ${item.chunk_count} 段` : '';
+            const chunkSuffix = Number.isInteger(item.chunk_count) ? `${item.chunk_count}段 · ` : '';
             return `
-                <div class="knowledge-item">
-                    <div class="knowledge-main" title="${safeFilename}">
-                        <div class="knowledge-name">${safeFilename}</div>
-                        <div class="knowledge-meta">${formatFileSize(item.size_bytes)}${chunkSuffix}</div>
+                <div class="knowledge-item ref-item">
+                    <div class="ref-icon" aria-hidden="true">
+                        <svg viewBox="0 0 16 16"><path d="M3 2h10v12H3V2zm2 3h6M5 8h6M5 11h4"/></svg>
+                    </div>
+                    <div class="knowledge-main ref-info" title="${safeFilename}">
+                        <div class="knowledge-name ref-name">${safeFilename}</div>
+                        <div class="knowledge-meta ref-meta">${chunkSuffix}${formatFileSize(item.size_bytes)}</div>
                     </div>
                     <button type="button" class="knowledge-delete" data-filename="${safeFilename}" aria-label="删除资料 ${safeFilename}">移除</button>
                 </div>
@@ -58,20 +61,20 @@
 
     async function deleteKnowledgeFile(filename) {
         if (!filename) return;
-        if (!confirm(`确定要从书架移除这份资料吗？\n${filename}`)) return;
+        if (!confirm(`确定移除这份资料吗？\n${filename}`)) return;
 
-        app.setInlineStatus('upload-status', '正在从书架移除资料…', 'processing');
+        app.setInlineStatus('upload-status', '正在移除…', 'processing');
         try {
             const res = await fetch(`/api/knowledge/files/${encodeURIComponent(filename)}`, { method: 'DELETE' });
             const data = await res.json();
             if (data.status !== 'success') {
-                app.setInlineStatus('upload-status', data.message || '移除失败，请稍后重试', 'danger');
+                app.setInlineStatus('upload-status', data.message || '移除失败', 'danger');
                 return;
             }
-            app.setInlineStatus('upload-status', `${filename} 已从书架移除`, 'success');
+            app.setInlineStatus('upload-status', `${filename} 已移除`, 'success');
             await fetchKnowledgeFiles();
         } catch (_error) {
-            app.setInlineStatus('upload-status', '移除失败，网络可能暂时断开', 'danger');
+            app.setInlineStatus('upload-status', '移除失败', 'danger');
         }
     }
 
@@ -79,43 +82,43 @@
         if (!file) return;
         const formData = new FormData();
         formData.append('file', file);
-        app.setInlineStatus('upload-status', '我在整理这份资料，请稍等一下…', 'processing');
+        app.setInlineStatus('upload-status', '正在整理资料…', 'processing');
         try {
             const res = await fetch('/api/upload', { method: 'POST', body: formData });
             const data = await res.json();
             app.setInlineStatus(
                 'upload-status',
-                data.status === 'success' ? `${data.filename} 已经放进参考资料里了` : '这份资料暂时没有添加成功',
+                data.status === 'success' ? `${data.filename} 已加入资料区` : '添加失败',
                 data.status === 'success' ? 'success' : 'danger'
             );
             if (data.status === 'success') {
                 await fetchKnowledgeFiles();
             }
         } catch (_error) {
-            app.setInlineStatus('upload-status', '上传时网络断开了，请稍后再试', 'danger');
+            app.setInlineStatus('upload-status', '上传失败', 'danger');
         }
     }
 
     async function clearKnowledgeFiles() {
         const files = app.state.knowledgeFiles || [];
         if (!files.length) {
-            app.setInlineStatus('upload-status', '书架已经是空的', 'muted');
+            app.setInlineStatus('upload-status', '资料区为空', 'muted');
             return;
         }
-        if (!confirm('确定要清空书架里的所有资料吗？此操作会同时删除当前知识向量，不可恢复。')) return;
+        if (!confirm('确定清空所有资料吗？这会同时删除对应向量。')) return;
 
-        app.setInlineStatus('upload-status', '正在清空书架…', 'processing');
+        app.setInlineStatus('upload-status', '正在清空…', 'processing');
         try {
             const res = await fetch('/api/knowledge/files', { method: 'DELETE' });
             const data = await res.json();
             if (data.status !== 'success') {
-                app.setInlineStatus('upload-status', data.message || '清空失败，请稍后重试', 'danger');
+                app.setInlineStatus('upload-status', data.message || '清空失败', 'danger');
                 return;
             }
-            app.setInlineStatus('upload-status', `已清空 ${data.removed || 0} 份资料，并移除对应知识向量`, 'success');
+            app.setInlineStatus('upload-status', `已清空 ${data.removed || 0} 份资料`, 'success');
             await fetchKnowledgeFiles();
         } catch (_error) {
-            app.setInlineStatus('upload-status', '清空失败，网络可能暂时断开', 'danger');
+            app.setInlineStatus('upload-status', '清空失败', 'danger');
         }
     }
 

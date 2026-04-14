@@ -68,3 +68,63 @@ def test_build_workflow_registers_meta_and_smalltalk_nodes(monkeypatch):
     graph = workflow_module.build_workflow(build_test_settings(), runtime=runtime)
 
     assert graph is not None
+
+
+def test_route_after_topic_confirmer_can_go_directly_to_tutor():
+    decision = workflow_module.route_after_topic_confirmer({"flow_status": "direct_tutor"})
+
+    assert decision == "tutor"
+
+
+def test_route_after_tutor_now_goes_to_next_step_selector():
+    decision = workflow_module.route_after_tutor({"interrupt_query": ""})
+
+    assert decision == "next_step_selector"
+
+
+def test_route_after_next_step_selector_can_branch_back_to_tutor():
+    decision = workflow_module.route_after_next_step_selector({"next_step_choice": "continue_deeper", "interrupt_query": ""})
+
+    assert decision == "tutor"
+
+
+def test_route_after_next_step_selector_can_pause_while_waiting_choice():
+    decision = workflow_module.route_after_next_step_selector({"flow_status": "awaiting_next_step_selector"})
+
+    assert decision == "pause"
+
+
+def test_route_after_next_step_selector_can_branch_to_tester():
+    decision = workflow_module.route_after_next_step_selector({"next_step_choice": "practice_now", "interrupt_query": ""})
+
+    assert decision == "tester"
+
+
+def test_get_entry_node_can_resume_tester_from_next_step_choice():
+    decision = workflow_module.get_entry_node({"next_step_choice": "practice_now"})
+
+    assert decision == "tester"
+
+
+def test_route_after_evaluator_pass_now_goes_to_post_eval_selector():
+    decision = workflow_module.route_after_evaluator({"score": 95, "logic_score": 90, "concept_score": 90}, 80)
+
+    assert decision == "post_eval_selector"
+
+
+def test_route_after_post_eval_selector_can_branch_to_wrapup():
+    decision = workflow_module.route_after_post_eval_selector({"post_eval_choice": "summarize_wrapup"})
+
+    assert decision == "post_eval_wrapup"
+
+
+def test_route_after_post_eval_selector_can_pause_while_waiting_choice():
+    decision = workflow_module.route_after_post_eval_selector({"flow_status": "awaiting_post_eval_selector"})
+
+    assert decision == "pause"
+
+
+def test_get_entry_node_can_resume_post_eval_wrapup():
+    decision = workflow_module.get_entry_node({"post_eval_choice": "summarize_wrapup"})
+
+    assert decision == "post_eval_wrapup"

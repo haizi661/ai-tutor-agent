@@ -35,11 +35,11 @@ class WebAnswerProvider(AnswerProvider):
             make_event("session.awaiting_input", "api", message=prompt, data=state)
         )
         if self.on_awaiting_input:
-            self.on_awaiting_input(True)
+            self.on_awaiting_input(True, state or {})
         try:
             return self.q.get(timeout=INPUT_WAIT_TIMEOUT_SECONDS)
         except queue.Empty as exc:
             raise TimeoutError("Timed out while waiting for user input.") from exc
         finally:
             if self.on_awaiting_input:
-                self.on_awaiting_input(False)
+                self.on_awaiting_input(False, None)

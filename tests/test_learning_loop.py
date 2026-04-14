@@ -155,7 +155,7 @@ def test_retry_loop_accumulates_history_then_resets_attempt_on_pass(monkeypatch)
         (58, 60, 55, "第一次反馈"),
         (88, 86, 90, "第二次反馈"),
     ]
-    assert route_after_evaluator(second_eval, 80) == "pass"
+    assert route_after_evaluator(second_eval, 80) == "post_eval_selector"
 
 
 def test_tester_only_uses_coach_content_during_remediate_retry():

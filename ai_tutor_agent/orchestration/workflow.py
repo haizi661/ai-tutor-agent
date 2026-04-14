@@ -9,6 +9,7 @@ from ..infrastructure.checkpoint import create_sqlite_checkpointer
 from ..infrastructure.llm import build_llms
 from ..nodes.assessment import (
     build_assessment_generator_node,
+    build_assessment_dialog_node,
     build_user_profiler_node,
 )
 from ..nodes.evaluator import build_evaluator_node
@@ -21,6 +22,8 @@ from ..nodes.tutor import build_tutor_node
 from ..nodes.greeting import build_greeting_node
 from ..nodes.topic_confirm import build_topic_confirm_node
 from ..nodes.coach import build_coach_node
+from ..nodes.next_step import build_next_step_node
+from ..nodes.post_eval import build_post_eval_selector_node, build_post_eval_wrapup_node
 from .routing import build_route_logic
 
 
@@ -48,12 +51,32 @@ def get_entry_node(state: AgentState) -> str:
 
     if state.get("flow_status") in {"topic_confirmation_pending", "awaiting_topic_confirmation"}:
         return "topic_confirmer"
+    if state.get("flow_status") == "awaiting_next_step_selector":
+        return "next_step_selector"
+    if state.get("flow_status") == "awaiting_post_eval_selector":
+        return "post_eval_selector"
+
+    if state.get("flow_status") == "direct_tutor":
+        return "tutor"
+
+    if state.get("flow_status") == "assessment_dialog":
+        return "assessment_dialog"
     
     if state.get("flow_status") == "profiling":
         return "user_profiler"
 
     if state.get("resume_tester") and state.get("tester_question"):
         return "tester"
+
+    if state.get("next_step_choice") == "practice_now":
+        return "tester"
+
+    if state.get("post_eval_choice") == "same_type_practice":
+        return "tester"
+    if state.get("post_eval_choice") == "continue_advance":
+        return "tutor"
+    if state.get("post_eval_choice") == "summarize_wrapup":
+        return "post_eval_wrapup"
 
     if state.get("is_assessed", False):
         return "tutor"
@@ -69,10 +92,11 @@ def route_after_evaluator(
     state: AgentState,
     pass_score: int,
     runtime_event_sink=None,
+    knowledge_provider=None,
 ) -> str:
-    decision = build_route_logic(pass_score, runtime_event_sink)(state)
+    decision = build_route_logic(pass_score, runtime_event_sink, knowledge_provider)(state)
     if decision == "pass":
-        return "pass"
+        return "post_eval_selector"
     if decision == "remediate":
         return "coach"
     return "fail"
@@ -100,6 +124,8 @@ def route_after_topic_confirmer(state: AgentState) -> str:
         return "pause"
     if state.get("flow_status") == "greeting":
         return "greeter"
+    if state.get("flow_status") == "direct_tutor":
+        return "tutor"
     return "assessment_generator"
 
 
@@ -107,7 +133,43 @@ def route_after_topic_confirmer(state: AgentState) -> str:
 def route_after_assessment_generator(state: AgentState) -> str:
     if state.get("flow_status") == "awaiting_assessment":
         return "pause"
+    if state.get("flow_status") == "assessment_dialog":
+        return "pause"  # 等待用户回答第一道题
     return "user_profiler"
+
+
+# ── assessment_dialog 之后的条件边 ──
+def route_after_assessment_dialog(state: AgentState) -> str:
+    if state.get("flow_status") == "profiling":
+        return "user_profiler"
+    # 还有下一题要等用户回答
+    return "pause"
+
+
+def route_after_tutor(state: AgentState) -> str:
+    if state.get("interrupt_query"):
+        return "interruption"
+    return "next_step_selector"
+
+
+def route_after_next_step_selector(state: AgentState) -> str:
+    if state.get("flow_status") == "awaiting_next_step_selector":
+        return "pause"
+    if state.get("interrupt_query"):
+        return "interruption"
+    if state.get("next_step_choice") == "practice_now":
+        return "tester"
+    return "tutor"
+
+
+def route_after_post_eval_selector(state: AgentState) -> str:
+    if state.get("flow_status") == "awaiting_post_eval_selector":
+        return "pause"
+    if state.get("post_eval_choice") == "same_type_practice":
+        return "tester"
+    if state.get("post_eval_choice") == "summarize_wrapup":
+        return "post_eval_wrapup"
+    return "tutor"
 
 
 def route_after_tester(state: AgentState) -> str:
@@ -121,6 +183,12 @@ def route_after_interruption(state: AgentState) -> str:
         return "pause"
     if state.get("resume_tester"):
         return "tester"
+    # 如果中断问题引发了新话题，允许流转到 tutor 继续讲解
+    if state.get("flow_status") == "direct_tutor":
+        return "tutor"
+    # 如果中断后需要用户选择下一步
+    if state.get("flow_status") == "awaiting_next_step_selector":
+        return "next_step_selector"
     return "pause"
 
 
@@ -147,13 +215,30 @@ def build_workflow(
     # 新增：Coach 助教节点
     workflow.add_node(
         "coach",
-        build_coach_node(tutor_llm, runtime.event_sink)
+        build_coach_node(tutor_llm, runtime.event_sink, runtime.knowledge_provider)
+    )
+    workflow.add_node(
+        "next_step_selector",
+        build_next_step_node(runtime.event_sink, runtime.answer_provider, tutor_llm=tutor_llm, knowledge_provider=runtime.knowledge_provider),
+    )
+    workflow.add_node(
+        "post_eval_selector",
+        build_post_eval_selector_node(runtime.event_sink, runtime.answer_provider),
+    )
+    workflow.add_node(
+        "post_eval_wrapup",
+        build_post_eval_wrapup_node(tutor_llm, runtime.event_sink),
     )
 
-    # 学前测评节点
+    # 学前测评节点：注入图谱节点供 LLM 选概念
+    graph_nodes = getattr(runtime.knowledge_provider, "course_graph_nodes", None) or {}
     workflow.add_node(
         "assessment_generator",
-        build_assessment_generator_node(tutor_llm, runtime.event_sink),
+        build_assessment_generator_node(tutor_llm, runtime.event_sink, graph_nodes=graph_nodes),
+    )
+    workflow.add_node(
+        "assessment_dialog",
+        build_assessment_dialog_node(runtime.event_sink),
     )
     workflow.add_node(
         "user_profiler",
@@ -189,6 +274,7 @@ def build_workflow(
         {
             "pause": END,
             "greeter": "greeter",
+            "tutor": "tutor",
             "assessment_generator": "assessment_generator",
         }
     )
@@ -199,10 +285,43 @@ def build_workflow(
         route_after_assessment_generator,
         {"pause": END, "user_profiler": "user_profiler"},
     )
+    workflow.add_conditional_edges(
+        "assessment_dialog",
+        route_after_assessment_dialog,
+        {"pause": END, "user_profiler": "user_profiler"},
+    )
     workflow.add_edge("user_profiler", "tutor")
 
     # 主教学闭环边
-    workflow.add_edge("tutor", "tester")
+    workflow.add_conditional_edges(
+        "tutor",
+        route_after_tutor,
+        {
+            "interruption": "interruption_tutor",
+            "next_step_selector": "next_step_selector",
+        },
+    )
+    workflow.add_conditional_edges(
+        "next_step_selector",
+        route_after_next_step_selector,
+        {
+            "pause": END,
+            "interruption": "interruption_tutor",
+            "tester": "tester",
+            "tutor": "tutor",
+        },
+    )
+    workflow.add_conditional_edges(
+        "post_eval_selector",
+        route_after_post_eval_selector,
+        {
+            "pause": END,
+            "tester": "tester",
+            "tutor": "tutor",
+            "post_eval_wrapup": "post_eval_wrapup",
+        },
+    )
+    workflow.add_edge("post_eval_wrapup", END)
     workflow.add_conditional_edges(
         "tester",
         route_after_tester,
@@ -216,6 +335,8 @@ def build_workflow(
         route_after_interruption,
         {
             "tester": "tester",
+            "tutor": "tutor",
+            "next_step_selector": "next_step_selector",
             "pause": END,
         },
     )
@@ -223,16 +344,16 @@ def build_workflow(
     # 核心优化：Evaluator 后的分流
     workflow.add_conditional_edges(
         "evaluator",
-        lambda s: route_after_evaluator(s, settings.pass_score, runtime.event_sink),
+        lambda s: route_after_evaluator(s, settings.pass_score, runtime.event_sink, runtime.knowledge_provider),
         {
-            "pass": END,
+            "post_eval_selector": "post_eval_selector",
             "coach": "coach",
             "fail": "tutor",
         },
     )
     
-    # Coach 引导后，回到 Tester 重新考核
-    workflow.add_edge("coach", "tester")
+    # Coach 引导后，不强制立刻再考，交给下一步选择器决定
+    workflow.add_edge("coach", "next_step_selector")
 
     # ========== 条件入口 ==========
     workflow.set_conditional_entry_point(
@@ -244,8 +365,13 @@ def build_workflow(
             "smalltalk": "smalltalk",
             "topic_confirmer": "topic_confirmer",
             "interruption_tutor": "interruption_tutor",
+            "next_step_selector": "next_step_selector",
+            "post_eval_selector": "post_eval_selector",
+            "post_eval_wrapup": "post_eval_wrapup",
             "tutor": "tutor",
+            "tester": "tester",
             "assessment_generator": "assessment_generator",
+            "assessment_dialog": "assessment_dialog",
             "user_profiler": "user_profiler",
         },
     )
