@@ -560,56 +560,79 @@ class LocalFileKnowledgeProvider(KnowledgeProvider):
 
     def _load_course_graph_index(self) -> dict[str, dict[str, Any]]:
         notes_path = self.course_primary_dir.parent / "notes.jsonl"
+        graph_path = self.course_primary_dir.parent / "graph.json"
         index: dict[str, dict[str, Any]] = {}
         self.course_graph_nodes: dict[str, dict[str, Any]] = {}
         self.course_graph_lookup: dict[str, str] = {}
-        if not notes_path.exists():
-            return index
+
+        def ingest_item(item: dict[str, Any]) -> None:
+            source_path = str(item.get("source_path") or item.get("raw_copy_path") or "").strip()
+            file_name = str(item.get("file_name") or "").strip()
+            filename = Path(source_path).name if source_path else file_name
+            title = str(item.get("title") or item.get("name") or Path(filename).stem or "").strip()
+            node_id = str(item.get("id") or title or Path(filename).stem or "").strip()
+
+            node = {
+                "id": node_id,
+                "title": title,
+                "filename": filename,
+                "prerequisites": self._normalize_graph_list(item.get("prerequisites")),
+                "neighbors": self._normalize_graph_list(item.get("neighbors")),
+                "learning_objectives": self._normalize_graph_list(item.get("learning_objectives")),
+                "must_know": self._normalize_graph_list(item.get("must_know")),
+                "common_errors": self._normalize_graph_list(item.get("common_errors")),
+                "teaching_modes": self._normalize_graph_list(item.get("teaching_modes")),
+                "assessment_modes": self._normalize_graph_list(item.get("assessment_modes")),
+                "target_mastery_level": str(item.get("target_mastery_level") or "").strip(),
+                "difficulty": str(item.get("difficulty") or "").strip(),
+            }
+            if title:
+                self.course_graph_nodes[title] = node
+
+            for candidate in [node_id, title, filename, Path(filename).stem if filename else ""]:
+                normalized_candidate = _normalize_lookup_text(candidate)
+                if normalized_candidate and title:
+                    self.course_graph_lookup[normalized_candidate] = title
+
+            enrichment = {
+                field: item.get(field)
+                for field in GRAPH_NOTE_ENRICHMENT_FIELDS
+                if item.get(field) not in (None, "", [], {})
+            }
+            if title:
+                enrichment["title"] = title
+                enrichment["_title"] = title
+            if filename:
+                enrichment["_filename"] = filename
+                index[filename] = enrichment
+            if title:
+                index[title] = enrichment
 
         try:
-            with notes_path.open("r", encoding="utf-8") as file_obj:
-                for line in file_obj:
-                    line = line.strip()
-                    if not line:
-                        continue
-                    item = json.loads(line)
-                    source_path = str(item.get("source_path") or item.get("raw_copy_path") or "").strip()
-                    filename = Path(source_path).name if source_path else ""
-                    title = str(item.get("title") or Path(filename).stem or "").strip()
-                    node_id = str(item.get("id") or title or Path(filename).stem or "").strip()
-                    node = {
-                        "id": node_id,
-                        "title": title,
-                        "filename": filename,
-                        "prerequisites": self._normalize_graph_list(item.get("prerequisites")),
-                        "neighbors": self._normalize_graph_list(item.get("neighbors")),
-                        "learning_objectives": self._normalize_graph_list(item.get("learning_objectives")),
-                        "must_know": self._normalize_graph_list(item.get("must_know")),
-                        "common_errors": self._normalize_graph_list(item.get("common_errors")),
-                        "teaching_modes": self._normalize_graph_list(item.get("teaching_modes")),
-                        "assessment_modes": self._normalize_graph_list(item.get("assessment_modes")),
-                        "target_mastery_level": str(item.get("target_mastery_level") or "").strip(),
-                        "difficulty": str(item.get("difficulty") or "").strip(),
-                    }
-                    if title:
-                        self.course_graph_nodes[title] = node
-                    for candidate in [node_id, title, filename, Path(filename).stem if filename else ""]:
-                        normalized_candidate = _normalize_lookup_text(candidate)
-                        if normalized_candidate and title:
-                            self.course_graph_lookup[normalized_candidate] = title
-                    enrichment = {
-                        field: item.get(field)
-                        for field in GRAPH_NOTE_ENRICHMENT_FIELDS
-                        if item.get(field) not in (None, "", [], {})
-                    }
-                    if title:
-                        enrichment["title"] = title
-                        enrichment["_title"] = title
-                    if filename:
-                        enrichment["_filename"] = filename
-                        index[filename] = enrichment
-                    if title:
-                        index[title] = enrichment
+            if notes_path.exists():
+                with notes_path.open("r", encoding="utf-8") as file_obj:
+                    for line in file_obj:
+                        line = line.strip()
+                        if not line:
+                            continue
+                        ingest_item(json.loads(line))
+                return index
+
+            if graph_path.exists():
+                graph_obj = json.loads(graph_path.read_text(encoding="utf-8"))
+                for item in list(graph_obj.get("nodes") or []):
+                    if isinstance(item, dict):
+                        ingest_item(item)
+                print(
+                    "⚠️ [RAG] 未找到 notes.jsonl，已回退使用 graph.json 加载课程图谱。"
+                )
+                return index
+
+            print(
+                "⚠️ [RAG] 课程图谱文件缺失：未找到 notes.jsonl 或 graph.json。"
+                f"期望路径: {notes_path} 或 {graph_path}"
+            )
+            return index
         except Exception as exc:
             print(f"⚠️ [RAG] 课程图谱精细化字段加载失败，已忽略: {exc}")
             return {}

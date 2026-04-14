@@ -29,6 +29,33 @@ cd /home/haizi/ai-tutor-agent
 python -m pip install -e .
 ```
 
+### 知识图谱解析失败排查（GitHub 拉取后常见）
+
+如果你能启动服务，但提示课程图谱解析失败或课程节点为空，优先检查下面三项：
+
+1. 安装方式是否正确：
+	- 推荐在仓库根目录执行 `python -m pip install -r requirements.txt`。
+	- 仅使用旧的最小依赖或不完整环境，可能缺少 `pymupdf`、`rank-bm25` 等解析依赖。
+2. 图谱数据目录是否存在：
+	- 默认读取 `a2-control-theory/source-notes`，并在同级目录读取 `notes.jsonl` / `graph.json`。
+	- 若目录不在默认位置，请设置 `COURSE_PRIMARY_DIR=/你的路径/source-notes`。
+3. 快速自检：
+
+```bash
+python - <<'PY'
+from ai_tutor_agent.config import get_settings
+from ai_tutor_agent.infrastructure.retriever import LocalFileKnowledgeProvider
+
+s = get_settings()
+kp = LocalFileKnowledgeProvider(s)
+print('course_primary_dir =', s.course_primary_dir)
+print('course_graph_nodes =', len(getattr(kp, 'course_graph_nodes', {}) or {}))
+print('initialization_error =', kp.initialization_error)
+PY
+```
+
+说明：当 `notes.jsonl` 缺失时，系统会自动回退尝试从 `graph.json` 加载节点。
+
 ## 快速启动
 
 1. 复制配置模板
