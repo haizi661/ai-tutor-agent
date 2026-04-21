@@ -67,13 +67,14 @@ class KnowledgeMapPipelineV2:
         nodes_df = pd.DataFrame(nodes)
         edges_df = pd.DataFrame(edges)
 
+        has_source_type = (not nodes_df.empty) and ("source_type" in nodes_df.columns)
         metadata = {
             "course_name": self.config.get("course_name", ""),
             "version": self.config.get("version", "v2"),
             "node_count": len(nodes_df),
             "edge_count": len(edges_df),
-            "level1_count": int((nodes_df["level"] == 1).sum()) if not nodes_df.empty else 0,
-            "level2_count": int((nodes_df["level"] == 2).sum()) if not nodes_df.empty else 0,
+            "chapter_anchor_count": int((nodes_df["source_type"] == "skeleton_chapter_anchor").sum()) if has_source_type else 0,
+            "topic_count": int((nodes_df["source_type"] == "skeleton_topic").sum()) if has_source_type else 0,
             "textbook_pdf": str(DOCUMENT_PATHS.get("textbook_pdf", "")),
             "textbook_pdf_exists": bool(
                 DOCUMENT_PATHS.get("textbook_pdf") and DOCUMENT_PATHS["textbook_pdf"].exists()
@@ -93,31 +94,44 @@ class KnowledgeMapPipelineV2:
         edges: list[dict[str, Any]],
     ) -> list[dict[str, Any]]:
         """
-        根据边信息，回填节点内部的关系属性字段。
-        这样后面节点自身就带有 prerequisite_nodes / next_nodes 等信息。
+        根据统一边关系回填节点内部的兼容字段。
+        说明：
+        1. 新版图谱以边为主，不再依赖 level / part_of / HAS_SUBTOPIC。
+        2. 为兼容后续 learning_path / companion / QA 逻辑，继续回填
+           prerequisite_nodes / next_nodes / related_nodes / recommended_next_nodes。
         """
         node_map = {node["node_id"]: node for node in nodes}
+
+        def _append_unique(node_id: str, field: str, value: str) -> None:
+            if node_id not in node_map:
+                return
+            node = node_map[node_id]
+            node.setdefault(field, [])
+            if value not in node[field]:
+                node[field].append(value)
 
         for edge in edges:
             source = edge["source"]
             target = edge["target"]
-            relation = edge["relation"]
+            relation_type = edge.get("relation_type", edge.get("relation", ""))
+            direction_type = edge.get("direction_type", "undirected")
 
             if source not in node_map or target not in node_map:
                 continue
 
-            if relation == "LEADS_TO":
-                node_map[source]["next_nodes"].append(target)
-                node_map[target]["prerequisite_nodes"].append(source)
+            if relation_type == "prerequisite_of":
+                _append_unique(target, "prerequisite_nodes", source)
+                _append_unique(source, "next_nodes", target)
+                _append_unique(source, "recommended_next_nodes", target)
 
-            elif relation == "PRE_REQUIRES":
-                # 这个关系已经由 LEADS_TO 反向自动补过，这里不重复写
-                pass
-
-            elif relation == "HAS_SUBTOPIC":
-                parent_extra = node_map[source].setdefault("extra", {})
-                parent_extra.setdefault("subtopic_nodes", [])
-                parent_extra["subtopic_nodes"].append(target)
+            elif relation_type in {"related_to", "parallel_to", "extends_to", "easy_to_confuse_with", "weak_related_to"}:
+                _append_unique(source, "related_nodes", target)
+                _append_unique(source, "recommended_next_nodes", target)
+                if direction_type == "undirected":
+                    _append_unique(target, "related_nodes", source)
+                    _append_unique(target, "recommended_next_nodes", source)
+                elif relation_type == "extends_to":
+                    _append_unique(source, "next_nodes", target)
 
         return list(node_map.values())
 

@@ -1,197 +1,191 @@
-# knowledge_map + companion 模块 README（升级版）
+# 🚀 knowledge_map + companion 模块 README（2.0版本）
 
 ## 1. 模块目标
 
-本模块不仅用于构建知识图谱，还扩展为伴学智能体原型系统，包含知识、检索、学生状态三层。
+本模块用于构建自动控制原理知识图谱 + 伴学智能体原型系统，实现：
 
-## 2. 系统结构
+- 知识结构化（教材 → 图谱）
+- 检索增强生成（RAG）
+- 学生建模与学习路径推荐
 
-1.  知识层：章节切分PDF + mineru + 知识图谱
-2.  检索层：Chroma + BM25 + rerank
-3.  学生层：student_state
+最终目标是构建一个：
 
-## 3. 学生状态（核心）
-
-当前结构： - student_id - current_node_id - visited_nodes -
-wrong_nodes - mastery_scores - recommended_queue
-
-持久化: data/student_states/
-
-## 4. debug_companion
-
-用于调试知识、路径、学生状态，不会重新跑MinerU。
-
-## 5. 命令分类
-
-知识类：ask / node / search\
-结构类：path / prereq / next\
-内容类：formulas / examples\
-学生类：student / set_current / mark_visited / mark_wrong / mastery\
-决策类：recommend / review
-
-## 6. 当前能力
-
-✔ 知识图谱\
-✔ RAG\
-✔ 学生模型\
-✔ 个性化推荐
-
-## 7. 当前缺失
-
-
-
-## 8. 下一步
-
-学完自动跳转下一节点
-
-
-## 9. 知识图谱节点属性说明（当前已实现）
-
-当前系统中的每一个知识点节点（Node）已经包含了**结构信息 + 教学内容 + 检索候选 + 学习路径信息**四大类属性。
+👉 图谱驱动 + RAG 支撑 + 个性化学习路径的智能伴学系统
 
 ---
 
-### 一、基础结构属性（Graph Structure）
+## 2. 系统整体架构
 
-用于标识节点本身和图谱结构：
+系统分为三层：
 
-- `node_id`  
-  节点唯一标识，例如 `KM007`
+### 1）知识层（Knowledge Layer）
+- PDF → MinerU → Markdown
+- 构建知识图谱（节点 + 网状关系）
+- 候选池生成（definition / formula / example）
 
-- `name`  
-  知识点名称，例如「控制系统的数学模型」
+### 2）检索层（Retrieval Layer）
+- Chroma 向量检索
+- BM25 关键词检索
+- rerank 重排
+- 节点级 RAG
 
-- `chapter`  
-  所属章节
-
-- `level`  
-  节点层级（一级知识点 / 二级知识点）
-
-- `part_of`  
-  所属上级节点（用于构建层级结构）
-
----
-
-### 二、路径与关系属性（Learning Path）
-
-用于描述知识点之间的学习关系：
-
-- `prerequisite_nodes`  
-  前置知识（学当前节点前需要掌握的内容）
-
-- `next_nodes`  
-  后继知识（学完当前节点之后推荐学习的内容）
-
-- `recommended_next_nodes`  
-  推荐学习路径（用于伴学推荐系统）
+### 3）学生层（Student Layer）
+- student_state
+- 学习记录 / 掌握度
+- 个性化推荐路径
 
 ---
 
-### 三、教材定位属性（Document Grounding）
+## 3. 知识图谱设计（核心升级）
 
-用于把知识点和教材内容绑定：
+### 从树结构 → 网状结构
 
-- `page_refs`  
-  初始页码范围（粗定位）
+旧版本：
+- level + parent-child
 
-- `anchor_page`  
-  锚点页（知识点首次出现位置）
-
-- `page_refs_refined`  
-  精细页码范围（用于后续检索）
-
-- `section_title`  
-  匹配到的教材小节标题
+新版本：
+- 去层级
+- 节点平权
+- 用关系表达结构
 
 ---
 
-### 四、基础教学内容（Raw Content）
+### 关系体系
 
-直接从教材中抽取的内容：
+统一格式：
 
-- `explanation_raw`  
-  原始讲解文本（OCR + 清洗后）
+relation_type + relation_strength + direction_type
 
-- `summary`  
-  知识点摘要
-
-- `core_concepts`  
-  核心概念列表
-
-- `key_points`  
-  关键知识点
+核心关系：
+- prerequisite_of（前置）
+- parallel_to（并列）
+- extends_to（拓展）
+- related_to（关联）
+- weak_related_to（弱关联）
+- easy_to_confuse_with（易混淆）
 
 ---
 
-### 五、候选池（Candidate Pool，用于 RAG）
+## 4. 学生状态
 
-这是系统最关键的一层，用于支撑检索和生成：
+字段：
 
-- `definition_candidates`  
-  定义类候选句
+- student_id
+- current_node_id
+- visited_nodes
+- wrong_nodes
+- mastery_scores
+- recommended_queue
 
-- `key_point_candidates`  
-  重点句候选
+路径：
 
-- `formula_candidates`  
-  公式候选（包含公式或公式描述）
-
-- `example_candidates`  
-  例子候选（案例、应用场景等）
-
-👉 这些字段会被写入向量库（Chroma），用于节点内检索。
+data/student_states/
 
 ---
 
-### 六、生成后的教学内容（LLM Generated）
+## 5. debug_companion
 
-通过向量检索 + DeepSeek 生成：
+用于统一调试系统：
 
-- `explanation_teacher_style`  
-  老师风格讲解（更适合教学）
-
-- `formulas`  
-  筛选后的核心公式
-
-- `examples`  
-  筛选后的典型例子
+知识类：ask / node / search  
+结构类：prereq / next / path  
+内容类：formulas / examples  
+学生类：student / mastery  
+决策类：recommend / review  
 
 ---
 
-### 七、课程与教学属性（部分已预留）
+## 6. 图谱可视化调试工具
 
-（部分已存在，部分正在扩展）
+文件：
 
-- `tags`  
-  知识点标签
+knowledge_graph_debug_viewer.html
 
-- `importance_level`（规划中）  
-  重要程度（一般 / 重点 / 核心）
+功能：
+- 图谱可视化
+- 筛选关系
+- 搜索节点
+- 查看详情
+- 统计孤立点
 
-- `requirement_level`（规划中）  
-  课程要求（了解 / 理解 / 掌握）
+运行：
 
-- `mastery_threshold`（规划中）  
-  掌握阈值（用于判断是否学会）
+cd debug_tools
+python -m http.server 8080
+
+浏览器打开：
+
+http://localhost:8080/knowledge_graph_debug_viewer.html
 
 ---
 
-### 八、总结
+## 7. 当前已实现
 
-当前知识图谱已经不仅仅是“知识点列表”，而是一个：
+✔ 知识图谱（网状结构）  
+✔ 候选池  
+✔ RAG 问答  
+✔ 前置推理  
+✔ 学生模型  
+✔ 可视化调试  
 
-- ✔ 有结构（图谱关系）  
-- ✔ 有内容（教材抽取）  
-- ✔ 有检索（候选池 + 向量库）  
-- ✔ 有生成（老师讲解）  
-- ✔ 有路径（学习顺序）  
+---
 
-的**图谱驱动学习系统基础层**。
+## 8. 当前问题
 
-后续将进一步结合：
+- 推荐路径弱
+- LearningPathBuilder 未完全适配
+- embedding 维度冲突（1536 vs 384）
+- 部分内容缺失
+- 关系强度规则化
 
-- 学生状态（mastery / 错题 / 学习记录）
+---
+
+## 9. 下一步
+
+- 学习路径优化
 - 个性化推荐
-- 题目反馈
+- 向量库统一
+- 图谱前端联动
 
-逐步演进为完整的“伴学智能体”。
+---
+
+## 10. 节点结构
+
+包含：
+
+基础信息：
+- node_id / name / chapter / source_type
+
+路径：
+- prerequisite_nodes / next_nodes / related_nodes / recommended_next_nodes
+
+教材：
+- page_refs / anchor_page / section_title
+
+候选池：
+- definition / key_point / formula / example
+
+生成：
+- explanation / formulas / examples
+
+教学：
+- tags / importance / requirement / mastery_threshold
+
+---
+
+## 11. 总结
+
+系统已从：
+
+静态知识点列表
+
+升级为：
+
+图谱 + RAG + 学生建模的学习系统雏形
+
+---
+
+## 项目亮点
+
+本项目实现了从教材解析 → 知识图谱 → RAG → 学生建模 → 可视化调试的完整闭环，
+并将树状结构升级为支持关系强度的网状知识图谱。

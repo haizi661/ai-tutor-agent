@@ -19,7 +19,6 @@ def main() -> None:
         "node_id",
         "name",
         "chapter",
-        "level",
         "requirement_level",
         "mastery_threshold",
         "importance_level",
@@ -65,7 +64,15 @@ def main() -> None:
 
     print("\n=== edges preview ===")
     print(
-        edges_df[["edge_id", "source", "target", "relation", "relation_label"]]
+        edges_df[[
+            "edge_id",
+            "source",
+            "target",
+            "relation_type",
+            "relation_label",
+            "relation_strength",
+            "direction_type",
+        ]]
         .head(30)
         .to_string(index=False)
     )

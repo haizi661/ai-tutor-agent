@@ -8,11 +8,11 @@ from ai_tutor_agent.knowledge_map.schema.node_schema import normalize_node_recor
 class GraphSkeletonBuilder:
     """
     根据静态课程配置，生成知识图谱骨架节点。
-    当前阶段做：
-    1. 一级节点
-    2. 二级节点（仅重点章节默认展开）
-    3. 大纲规则字段写入
-    4. 基本字段补齐
+
+    改造后：
+    1. 所有节点平权，不再输出 level / part_of
+    2. 章节概览节点与子知识点节点统一作为普通知识点
+    3. 层级痕迹仅保存在 extra 中，便于调试与过渡迁移
     """
 
     def __init__(self, config: dict[str, Any]) -> None:
@@ -27,23 +27,18 @@ class GraphSkeletonBuilder:
             if not chapter_cfg.get("enabled", True):
                 continue
 
-            parent_node = self._build_parent_node(chapter_cfg)
-            nodes.append(parent_node)
-
-            # 只有重点章节才默认展开二级节点
-            should_expand_subtopics = chapter_cfg.get("is_focus", False)
-
-            if not should_expand_subtopics:
-                continue
+            chapter_anchor_node = self._build_chapter_anchor_node(chapter_cfg)
+            nodes.append(chapter_anchor_node)
 
             subtopics = chapter_cfg.get("subtopics", []) or []
-            for subtopic_cfg in subtopics:
-                child_node = self._build_child_node(
+            for order_in_chapter, subtopic_cfg in enumerate(subtopics, start=1):
+                topic_node = self._build_topic_node(
                     chapter_cfg=chapter_cfg,
                     subtopic_cfg=subtopic_cfg,
-                    parent_node=parent_node,
+                    chapter_anchor_node=chapter_anchor_node,
+                    order_in_chapter=order_in_chapter,
                 )
-                nodes.append(child_node)
+                nodes.append(topic_node)
 
         return nodes
 
@@ -51,20 +46,18 @@ class GraphSkeletonBuilder:
         self._node_counter += 1
         return f"KM{self._node_counter:03d}"
 
-    def _build_parent_node(self, chapter_cfg: dict[str, Any]) -> dict[str, Any]:
+    def _build_chapter_anchor_node(self, chapter_cfg: dict[str, Any]) -> dict[str, Any]:
         node = {
             "node_id": self._next_node_id(),
             "name": chapter_cfg["name"],
             "chapter": chapter_cfg["chapter"],
-            "level": chapter_cfg.get("level", 1),
             "summary": chapter_cfg.get("summary", ""),
             "tags": chapter_cfg.get("tags", []),
             "requirement_level": chapter_cfg.get("requirement_level", ""),
             "mastery_threshold": chapter_cfg.get("mastery_threshold", 0.0),
             "importance_level": chapter_cfg.get("importance_level", ""),
             "assessment_focus": chapter_cfg.get("assessment_focus", ""),
-            "part_of": "",
-            "source_type": "skeleton_parent",
+            "source_type": "skeleton_chapter_anchor",
             "extra": {
                 "is_focus": chapter_cfg.get("is_focus", False),
                 "enabled": chapter_cfg.get("enabled", True),
@@ -73,21 +66,24 @@ class GraphSkeletonBuilder:
                 "retrieval_keywords": chapter_cfg.get("retrieval_keywords", []),
                 "syllabus_rule_source": "course_graph_config",
                 "configured_prerequisites": chapter_cfg.get("prerequisites", []),
+                "node_role": "chapter_anchor",
+                "legacy_level": chapter_cfg.get("level", 1),
+                "legacy_part_of": "",
             },
         }
         return normalize_node_record(node)
 
-    def _build_child_node(
+    def _build_topic_node(
         self,
         chapter_cfg: dict[str, Any],
         subtopic_cfg: dict[str, Any],
-        parent_node: dict[str, Any],
+        chapter_anchor_node: dict[str, Any],
+        order_in_chapter: int,
     ) -> dict[str, Any]:
         node = {
             "node_id": self._next_node_id(),
             "name": subtopic_cfg["name"],
             "chapter": chapter_cfg["chapter"],
-            "level": 2,
             "summary": subtopic_cfg.get("summary", ""),
             "tags": subtopic_cfg.get("tags", []),
             "requirement_level": subtopic_cfg.get(
@@ -106,15 +102,19 @@ class GraphSkeletonBuilder:
                 "assessment_focus",
                 chapter_cfg.get("assessment_focus", ""),
             ),
-            "part_of": parent_node["node_id"],
-            "source_type": "skeleton_child",
+            "source_type": "skeleton_topic",
             "extra": {
-                "parent_name": parent_node["name"],
+                "chapter_anchor_node_id": chapter_anchor_node["node_id"],
+                "chapter_anchor_name": chapter_anchor_node["name"],
                 "is_focus_chapter": chapter_cfg.get("is_focus", False),
                 "chapter_page_range": chapter_cfg.get("page_range", []),
                 "retrieval_keywords": chapter_cfg.get("retrieval_keywords", []),
                 "syllabus_rule_source": "chapter_inherited",
                 "configured_prerequisites": subtopic_cfg.get("prerequisites", []),
+                "node_role": "topic",
+                "order_in_chapter": order_in_chapter,
+                "legacy_level": 2,
+                "legacy_part_of": chapter_anchor_node["node_id"],
             },
         }
         return normalize_node_record(node)

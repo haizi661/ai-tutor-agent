@@ -11,12 +11,11 @@ from ai_tutor_agent.config import get_settings
 from ai_tutor_agent.knowledge_map.student_state import StudentStateStore
 
 
-
 class KnowledgeMapDebugger:
     def __init__(
         self,
         nodes_csv_path: str = "data/knowledge_map_outputs/auto_control_knowledge_map_v2_nodes.csv",
-        collection_name: str = "knowledge",
+        collection_name: str = "knowledge_map_text_candidates",
     ) -> None:
         self.settings = get_settings()
         self.nodes_csv_path = Path(nodes_csv_path)
@@ -104,6 +103,7 @@ class KnowledgeMapDebugger:
         print("伴学智能体统一调试台（只读现有图谱 + 现有向量库，不重跑 MinerU）")
         print("=" * 100)
         print(f"当前 student_id: {self.student_state.student_id}")
+        print(f"当前 collection_name: {self.collection_name}")
         self._print_help()
 
         while True:
@@ -222,10 +222,10 @@ class KnowledgeMapDebugger:
                 for idx, (doc, meta) in enumerate(zip(docs, metas), start=1):
                     meta = meta or {}
                     print(f"\n--- Hit {idx} ---")
-                    print(f"block_type: {meta.get('block_type')}")
-                    print(f"filename: {meta.get('filename')}")
-                    print(f"chunk_id: {meta.get('chunk_id')}")
-                    print(f"section: {meta.get('section')}")
+                    print(f"candidate_type: {meta.get('candidate_type')}")
+                    print(f"node_id: {meta.get('node_id')}")
+                    print(f"node_name: {meta.get('node_name')}")
+                    print(f"chapter: {meta.get('chapter')}")
                     print(f"content: {str(doc)[:500]}")
             except Exception as exc:
                 print(f"⚠️ 向量检索失败: {exc}")
@@ -253,7 +253,7 @@ class KnowledgeMapDebugger:
         print("\n" + "=" * 100)
         print(f"[节点] {node['node_id']} | {node['name']}")
         print(f"chapter: {node.get('chapter')}")
-        print(f"level: {node.get('level')}")
+        print(f"source_type: {node.get('source_type')}")
         print(f"summary: {node.get('summary')}")
         print(f"page_refs_refined: {(node.get('extra') or {}).get('page_refs_refined', [])}")
         print(f"matched_block_title: {(node.get('extra') or {}).get('matched_block_title', '')}")
@@ -455,7 +455,6 @@ class KnowledgeMapDebugger:
             self.state_store.save(self.student_state)
             return
 
-        # ✅ 关键：这里必须定义
         queue = []
 
         for idx, (_, node_id, reason) in enumerate(results[:5], start=1):
@@ -463,7 +462,6 @@ class KnowledgeMapDebugger:
             print(f"{idx}. {node_id} | {node['name']} | {reason}")
             queue.append(node_id)
 
-        # ✅ 写回状态
         self.student_state.recommended_queue = queue
         self.state_store.save(self.student_state)
 
@@ -517,15 +515,12 @@ class KnowledgeMapDebugger:
     def _match_node(self, text: str) -> Optional[dict[str, Any]]:
         q = text.strip()
 
-        # 1. 优先按 node_id 直接查
         if q in self.node_map:
             return self.node_map[q]
 
-        # 2. 再按完整名称精确查
         if q in self.name_map:
             return self.name_map[q]
 
-        # 3. 最后走模糊匹配
         best_node = None
         best_score = -1
 
@@ -563,11 +558,9 @@ class KnowledgeMapDebugger:
     def _require_node(self, node_key: str) -> dict[str, Any]:
         node_key = node_key.strip()
 
-        # 1. 先按 node_id 直接查
         if node_key in self.node_map:
             return self.node_map[node_key]
 
-        # 2. 再按 name / 关键词匹配
         node = self._match_node(node_key)
         if node is None:
             raise ValueError(f"未找到节点: {node_key}")
