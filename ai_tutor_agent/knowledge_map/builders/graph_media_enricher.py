@@ -7,15 +7,23 @@ from typing import Any
 
 
 class GraphMediaEnricher:
-    def __init__(self, mineru_cache_root: str | Path = "data/mineru_cache") -> None:
+    def __init__(
+        self,
+        mineru_cache_root: str | Path = "data/mineru_cache",
+        *,
+        visual_analyzer: Any | None = None,
+    ) -> None:
         self.mineru_cache_root = Path(mineru_cache_root)
         self.chapter_docs = self._load_chapter_docs()
+        self.visual_analyzer = visual_analyzer
+        self._visual_cache: dict[str, str] = {}
 
     def collect_for_nodes(
         self,
         *,
         traversed_nodes: list[dict[str, Any]],
         node_map: dict[str, dict[str, Any]],
+        question: str = "",
     ) -> list[dict[str, Any]]:
         media_items: list[dict[str, Any]] = []
         seen_keys: set[tuple[str, str, str]] = set()
@@ -45,6 +53,7 @@ class GraphMediaEnricher:
                     continue
                 seen_keys.add(dedup_key)
                 item["hop"] = traversed.get("hop", 99)
+                self._annotate_media_item(item, question=question)
                 media_items.append(item)
 
         if not media_items:
@@ -65,6 +74,7 @@ class GraphMediaEnricher:
                         continue
                     seen_keys.add(dedup_key)
                     item["hop"] = traversed.get("hop", 99)
+                    self._annotate_media_item(item, question=question)
                     media_items.append(item)
 
         media_items.sort(
@@ -74,7 +84,52 @@ class GraphMediaEnricher:
                 item["reference"],
             )
         )
+        self._assign_display_labels(media_items)
         return media_items[:8]
+
+    def _annotate_media_item(self, item: dict[str, Any], *, question: str) -> None:
+        item["analysis_hint"] = self._build_analysis_hint(item)
+        if item["asset_type"] == "formula":
+            item["visual_summary"] = ""
+            item["placement_hint"] = "analysis"
+            return
+
+        item["visual_summary"] = self._describe_figure(item, question=question)
+        item["placement_hint"] = "analysis"
+
+    def _assign_display_labels(self, media_items: list[dict[str, Any]]) -> None:
+        formula_idx = 1
+        figure_idx = 1
+        for item in media_items:
+            if item["asset_type"] == "formula":
+                item["display_label"] = f"式{self._to_chinese_numeral(formula_idx)}"
+                formula_idx += 1
+            else:
+                item["display_label"] = f"图{self._to_chinese_numeral(figure_idx)}"
+                figure_idx += 1
+
+    def _to_chinese_numeral(self, number: int) -> str:
+        numerals = {
+            0: "零",
+            1: "一",
+            2: "二",
+            3: "三",
+            4: "四",
+            5: "五",
+            6: "六",
+            7: "七",
+            8: "八",
+            9: "九",
+            10: "十",
+        }
+        if number in numerals:
+            return numerals[number]
+        if number < 20:
+            return "十" + numerals[number - 10]
+        tens, ones = divmod(number, 10)
+        if ones == 0:
+            return numerals.get(tens, str(tens)) + "十"
+        return numerals.get(tens, str(tens)) + "十" + numerals.get(ones, str(ones))
 
     def _load_chapter_docs(self) -> list[dict[str, Any]]:
         docs: list[dict[str, Any]] = []
@@ -110,7 +165,7 @@ class GraphMediaEnricher:
                 }
             )
 
-        docs.sort(key=lambda item: item["start_page"])
+        docs.sort(key=lambda doc: doc["start_page"])
         return docs
 
     def _extract_page_range(self, text: str) -> tuple[int, int] | None:
@@ -168,8 +223,7 @@ class GraphMediaEnricher:
         if not scope_text:
             return []
 
-        manifest = doc["manifest"]
-        figures = self._extract_figures_from_block(scope_text, manifest)
+        figures = self._extract_figures_from_block(scope_text, doc["manifest"])
         results: list[dict[str, Any]] = []
         for idx, figure in enumerate(figures[:2], start=1):
             results.append(
@@ -183,6 +237,51 @@ class GraphMediaEnricher:
                 }
             )
         return results
+
+    def _build_analysis_hint(self, item: dict[str, Any]) -> str:
+        node_name = str(item.get("node_name", "")).strip()
+        if item.get("asset_type") == "formula":
+            formula_text = str(item.get("text", "")).strip()
+            if "e^" in formula_text or "e ^" in formula_text:
+                return f"可结合{node_name or '当前节点'}中指数项的衰减或增长特征，解释时间常数、响应快慢或稳定趋势。"
+            if "\\frac" in formula_text or "/" in formula_text:
+                return f"可结合{node_name or '当前节点'}中分子分母的结构，说明系统输入输出关系或参数对性能的影响。"
+            return f"可结合{node_name or '当前节点'}中的符号、变量和公式结构解释概念之间的定量关系。"
+
+        caption = str(item.get("caption", "")).strip()
+        if any(keyword in caption for keyword in ["响应", "曲线", "阶跃", "波形"]):
+            return f"可结合{node_name or '当前节点'}的曲线走势，分析超调量、调节时间、稳态值或动态变化过程。"
+        return f"可结合{node_name or '当前节点'}的图形结构说明系统组成、信号流向或关键现象。"
+
+    def _describe_figure(self, item: dict[str, Any], *, question: str) -> str:
+        paths = item.get("image_paths_abs", []) or []
+        if not paths:
+            return ""
+
+        cache_key = str(Path(paths[0]).resolve())
+        if cache_key in self._visual_cache:
+            return self._visual_cache[cache_key]
+
+        summary = ""
+        if self.visual_analyzer is not None:
+            summary = self.visual_analyzer.describe_image(
+                paths[0],
+                node_name=str(item.get("node_name", "")),
+                caption=str(item.get("caption", "")),
+                question=question,
+            )
+
+        if not summary:
+            caption = str(item.get("caption", "")).strip()
+            node_name = str(item.get("node_name", "")).strip()
+            summary = (
+                f"该图与“{node_name}”相关，图注为“{caption}”。"
+                if caption
+                else f"该图与“{node_name}”相关，可用于补充当前知识点的图形化分析。"
+            )
+
+        self._visual_cache[cache_key] = summary
+        return summary
 
     def _split_md_into_blocks(self, full_md: str) -> list[dict[str, Any]]:
         lines = full_md.splitlines()
@@ -455,8 +554,7 @@ class GraphMediaEnricher:
         return re.sub(r"\s+", " ", (text or "").strip())[:240]
 
     def _clean_caption(self, text: str) -> str:
-        cleaned = re.sub(r"\s+", " ", (text or "").strip())
-        return cleaned[:180]
+        return re.sub(r"\s+", " ", (text or "").strip())[:180]
 
     def _extract_tail_name(self, node_name: str) -> str:
         if "的" in node_name:

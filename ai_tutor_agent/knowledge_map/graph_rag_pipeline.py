@@ -15,6 +15,7 @@ from ai_tutor_agent.knowledge_map.builders.graph_media_enricher import GraphMedi
 from ai_tutor_agent.knowledge_map.builders.graph_query_planner_v2 import GraphQueryPlanner
 from ai_tutor_agent.knowledge_map.builders.graph_traverser import GraphTraverser
 from ai_tutor_agent.knowledge_map.builders.node_selector import NodeSelector
+from ai_tutor_agent.knowledge_map.builders.qwen_visual_analyzer import QwenVisualAnalyzer
 from ai_tutor_agent.knowledge_map.config.graph_rag_config import GraphRAGConfig
 
 
@@ -25,6 +26,7 @@ class GraphRAGPipeline:
         nodes_csv_path: str = "data/knowledge_map_outputs/auto_control_knowledge_map_v2_nodes.csv",
         edges_csv_path: str = "data/knowledge_map_outputs/auto_control_knowledge_map_v2_edges.csv",
         enable_llm: bool = True,
+        enable_visual_llm: bool = False,
         llm_profile: str | None = "qwen",
         config: GraphRAGConfig | None = None,
     ) -> None:
@@ -36,10 +38,14 @@ class GraphRAGPipeline:
         self.node_map = {node["node_id"]: node for node in self.nodes}
         self.node_selector = NodeSelector()
         tutor_llm = self._build_tutor_llm(enable_llm=enable_llm, llm_profile=llm_profile)
+        visual_analyzer = self._build_visual_analyzer(
+            enable_llm=enable_llm and enable_visual_llm,
+            llm_profile=llm_profile,
+        )
         self.query_planner = GraphQueryPlanner(llm=tutor_llm, config=self.config)
         self.graph_traverser = GraphTraverser(self.edges, config=self.config)
         self.context_builder = GraphContextBuilder()
-        self.media_enricher = GraphMediaEnricher()
+        self.media_enricher = GraphMediaEnricher(visual_analyzer=visual_analyzer)
         self.answer_generator = GraphAnswerGeneratorV2(llm=tutor_llm)
 
     def ask(
@@ -83,6 +89,7 @@ class GraphRAGPipeline:
         media_items = self.media_enricher.collect_for_nodes(
             traversed_nodes=traversed_payload,
             node_map=self.node_map,
+            question=question,
         )
         answer = self.answer_generator.generate(
             question=question,
@@ -137,6 +144,17 @@ class GraphRAGPipeline:
             return tutor_llm
         except Exception:
             return None
+
+    def _build_visual_analyzer(self, *, enable_llm: bool, llm_profile: str | None) -> Any | None:
+        if not enable_llm:
+            return None
+        try:
+            settings = get_settings()
+            if llm_profile == "qwen" and settings.qwen_api_key:
+                return QwenVisualAnalyzer(api_key=settings.qwen_api_key)
+        except Exception:
+            return None
+        return None
 
     def _select_anchor_nodes(self, question: str, anchor_terms: list[str]) -> list[dict[str, Any]]:
         queries = [question] + anchor_terms

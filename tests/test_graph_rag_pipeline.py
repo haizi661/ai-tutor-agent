@@ -57,3 +57,9 @@ def test_graph_rag_pipeline_includes_formula_and_figure_assets():
     assert any(item["asset_type"] == "formula" for item in result["media_items"])
     assert any(item["asset_type"] == "figure" for item in result["media_items"])
     assert "相关公式与图表：" not in result["answer"]
+
+
+def test_graph_rag_pipeline_defaults_visual_llm_off():
+    pipeline = GraphRAGPipeline(enable_llm=False)
+
+    assert pipeline.media_enricher.visual_analyzer is None
