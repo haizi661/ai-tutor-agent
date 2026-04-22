@@ -52,7 +52,17 @@ async def upload_file(request: Request, file: UploadFile = File(...)):
 
     try:
         success = knowledge_provider.add_document(file_path)
-        return {"status": "success" if success else "error", "filename": file.filename}
+        if success:
+            return {"status": "success", "filename": file.filename}
+        # File may have been stored even if indexing failed (unsupported type)
+        knowledge_dir = getattr(knowledge_provider, "knowledge_dir", None)
+        stored = knowledge_dir and (Path(knowledge_dir) / Path(file.filename).name).exists()
+        if stored:
+            return {"status": "success", "filename": file.filename,
+                    "message": "已保存到资料库（此格式仅支持查阅，暂不支持内容搜索）"}
+        return {"status": "error", "filename": file.filename, "message": "上传失败，文件未能保存"}
+    except Exception as exc:
+        return {"status": "error", "filename": file.filename, "message": str(exc)}
     finally:
         try:
             if os.path.exists(file_path):
@@ -74,6 +84,28 @@ async def delete_knowledge_file(filename: str, request: Request):
     if not success:
         return {"status": "error", "filename": safe_name, "message": "File not found or delete failed."}
     return {"status": "success", "filename": safe_name}
+
+
+@router.get("/knowledge/file/{filename:path}")
+async def get_knowledge_file(filename: str, request: Request):
+    runtime = get_runtime(request)
+    knowledge_provider = runtime.knowledge_provider
+    if not hasattr(knowledge_provider, "knowledge_dir"):
+        return {"status": "error", "message": "Knowledge provider not available"}
+
+    knowledge_dir = Path(knowledge_provider.knowledge_dir)
+    safe_name = Path(filename).name
+    file_path = knowledge_dir / safe_name
+
+    if not file_path.exists():
+        return {"status": "error", "message": "File not found"}
+
+    from fastapi.responses import FileResponse
+    return FileResponse(
+        file_path,
+        media_type="application/octet-stream",
+        filename=safe_name
+    )
 
 
 @router.delete("/knowledge/files")

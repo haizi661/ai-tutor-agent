@@ -39,7 +39,7 @@
                             <span>新对话</span>
                         </button>
                         <div class="sb-search-row" id="sidebar-search-wrap">
-                            <button type="button" class="sb-nav-item" id="sidebar-search-toggle" onclick="toggleHistorySearch()">
+                            <button type="button" class="sb-nav-item" id="sidebar-search-toggle" onclick="openChatSearch()">
                                 <svg class="sb-nav-icon" width="15" height="15" viewBox="0 0 15 15" fill="none"><circle cx="6.5" cy="6.5" r="4.5" stroke="currentColor" stroke-width="1.3"/><path d="M10 10l3.5 3.5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
                                 <span>搜索</span>
                             </button>
@@ -48,46 +48,29 @@
                     </div>
 
                     <nav class="sb-primary-nav" aria-label="主导航">
-                        <button type="button" class="sb-nav-item" onclick="triggerKnowledgeUpload()">
-                            <svg class="sb-nav-icon" width="15" height="15" viewBox="0 0 15 15" fill="none"><rect x="2.4" y="2.4" width="10.2" height="10.2" rx="2" stroke="currentColor" stroke-width="1.2"/><path d="M4.2 9.2L6.1 7.2L8 8.7L10.8 5.8" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-                            <span>图片</span>
-                        </button>
-                        <button type="button" class="sb-nav-item" onclick="focusKnowledgeShelf()">
+                        <button type="button" class="sb-nav-item" onclick="openLibraryPanel()" aria-label="打开资料库">
                             <svg class="sb-nav-icon" width="15" height="15" viewBox="0 0 15 15" fill="none"><path d="M3.2 3.2H11.8V11.8H3.2V3.2Z" stroke="currentColor" stroke-width="1.2"/><path d="M5.1 5.2H9.9M5.1 7.5H9.9M5.1 9.8H8.2" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
                             <span>资料库</span>
                         </button>
-                        <button type="button" id="open-config-btn" class="sb-nav-item" onclick="openLocalConfigPanel()">
-                            <svg class="sb-nav-icon" width="15" height="15" viewBox="0 0 15 15" fill="none"><path d="M7.5 3.1V1.9M7.5 13.1V11.9M11.1 4.6L12 3.7M3 12.7L3.9 11.8M11.9 7.5H13.1M1.9 7.5H3.1M11.1 10.4L12 11.3M3 2.3L3.9 3.2" stroke="currentColor" stroke-width="1.15" stroke-linecap="round"/><circle cx="7.5" cy="7.5" r="2.2" stroke="currentColor" stroke-width="1.2"/></svg>
-                            <span>应用</span>
-                        </button>
-                        <button type="button" id="open-graph-modal-btn" class="sb-nav-item" onclick="openKnowledgeGraphModal()">
+                        <button type="button" id="open-graph-modal-btn" class="sb-nav-item" onclick="openKnowledgeGraphModal()" aria-label="打开知识图谱">
                             <svg class="sb-nav-icon" width="15" height="15" viewBox="0 0 15 15" fill="none"><circle cx="3.5" cy="3.5" r="1.3" stroke="currentColor" stroke-width="1.2"/><circle cx="11.5" cy="3.5" r="1.3" stroke="currentColor" stroke-width="1.2"/><circle cx="7.5" cy="11.5" r="1.3" stroke="currentColor" stroke-width="1.2"/><path d="M4.7 4.1L6.5 10.5M10.3 4.1L8.5 10.5M4.8 3.5H10.2" stroke="currentColor" stroke-width="1.1" stroke-linecap="round"/></svg>
-                            <span>深度研究</span>
+                            <span>知识图谱</span>
                         </button>
-                        <button type="button" id="open-radar-modal-btn" class="sb-nav-item" onclick="openRadarModal()">
+                        <button type="button" id="open-radar-modal-btn" class="sb-nav-item" onclick="openRadarModal()" aria-label="打开学习进度">
                             <svg class="sb-nav-icon" width="15" height="15" viewBox="0 0 15 15" fill="none"><path d="M7.5 2L11.5 4.2V8.8L7.5 11L3.5 8.8V4.2L7.5 2Z" stroke="currentColor" stroke-width="1.2"/><path d="M7.5 2V11M3.5 4.2L11.5 8.8M11.5 4.2L3.5 8.8" stroke="currentColor" stroke-width="1"/></svg>
-                            <span>学习画像</span>
+                            <span>学习进度</span>
                         </button>
                     </nav>
 
                     <div class="sb-divider"></div>
 
                     <div class="sb-recents">
-                            <div class="sb-section-label">Recents</div>
+                            <div class="sb-section-label">最近</div>
                         <div id="history-list" class="sb-history-list"></div>
                     </div>
 
-                    <div class="sb-divider"></div>
-                    <div class="sb-refs">
-                        <div class="sb-section-label">参考资料</div>
-                        <div id="knowledge-shelf" class="sb-ref-list" aria-live="polite"></div>
-                        <input type="file" id="file-input" hidden>
-                        <button type="button" class="sb-add-ref" onclick="triggerKnowledgeUpload()">
-                            <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M6 2v8M2 6h8" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
-                            <span>添加讲义 / 笔记</span>
-                        </button>
-                        <div id="upload-status" class="status-inline upload-status" aria-live="polite"></div>
-                    </div>
+                        <input type="file" id="file-input" hidden multiple accept=".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt,.md,.png,.jpg,.jpeg">
+                        <div id="upload-status" class="status-inline upload-status" aria-live="polite" hidden></div>
                 </div><!-- /.sb-scroll -->
 
                 <div class="sb-user-slot" id="sb-user-slot">
@@ -206,9 +189,23 @@
                                 <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><circle cx="3.25" cy="8" r="1.15" fill="currentColor"/><circle cx="8" cy="8" r="1.15" fill="currentColor"/><circle cx="12.75" cy="8" r="1.15" fill="currentColor"/></svg>
                             </button>
                             <div class="chat-header-menu" id="header-more-menu" role="menu" hidden>
-                                <button type="button" class="chat-header-menu-item" role="menuitem" onclick="openKnowledgeGraphModal(); toggleHeaderMoreMenu(false)">知识图谱</button>
-                                <button type="button" class="chat-header-menu-item" role="menuitem" onclick="openRadarModal(); toggleHeaderMoreMenu(false)">学习画像</button>
-                                <button type="button" class="chat-header-menu-item" role="menuitem" onclick="openLocalConfigPanel(); toggleHeaderMoreMenu(false)">本地设置</button>
+                                <button type="button" class="chat-header-menu-item" role="menuitem" id="menu-new-session" onclick="menuNewSession(); toggleHeaderMoreMenu(false)">
+                                    <span class="chat-header-menu-icon" aria-hidden="true"><svg width="17" height="17" viewBox="0 0 17 17" fill="none"><circle cx="7" cy="7" r="4.5" stroke="currentColor" stroke-width="1.4"/><path d="M7 5v4M5 7h4" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/><circle cx="12.5" cy="12.5" r="3" fill="currentColor" opacity="0.15"/><path d="M11 12.5h3M12.5 11v3" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg></span>
+                                    <span>开始新对话</span>
+                                </button>
+                                <button type="button" class="chat-header-menu-item" role="menuitem" id="menu-pin-session" onclick="menuPinSession(); toggleHeaderMoreMenu(false)">
+                                    <span class="chat-header-menu-icon" aria-hidden="true"><svg width="17" height="17" viewBox="0 0 17 17" fill="none"><path d="M10.5 2.5L14.5 6.5L11 8.5L9.5 12L8 10.5L5 13.5L3.5 12L6.5 9L5 7.5L8.5 6L10.5 2.5Z" stroke="currentColor" stroke-width="1.35" stroke-linejoin="round"/></svg></span>
+                                    <span id="menu-pin-label">置顶聊天</span>
+                                </button>
+                                <button type="button" class="chat-header-menu-item" role="menuitem" id="menu-archive-session" onclick="menuArchiveSession(); toggleHeaderMoreMenu(false)">
+                                    <span class="chat-header-menu-icon" aria-hidden="true"><svg width="17" height="17" viewBox="0 0 17 17" fill="none"><rect x="2" y="3" width="13" height="3" rx="1" stroke="currentColor" stroke-width="1.35"/><path d="M3 6v7a1 1 0 001 1h9a1 1 0 001-1V6" stroke="currentColor" stroke-width="1.35"/><path d="M6.5 9.5h4" stroke="currentColor" stroke-width="1.35" stroke-linecap="round"/></svg></span>
+                                    <span>归档</span>
+                                </button>
+                                <div class="chat-header-menu-divider"></div>
+                                <button type="button" class="chat-header-menu-item chat-header-menu-item--danger" role="menuitem" id="menu-delete-session" onclick="menuDeleteSession(); toggleHeaderMoreMenu(false)">
+                                    <span class="chat-header-menu-icon" aria-hidden="true"><svg width="17" height="17" viewBox="0 0 17 17" fill="none"><path d="M3 4.5H14M6.5 4.5V3.5H10.5V4.5M5.5 4.5V13H11.5V4.5" stroke="currentColor" stroke-width="1.35" stroke-linecap="round" stroke-linejoin="round"/><path d="M7 7v4M10 7v4" stroke="currentColor" stroke-width="1.35" stroke-linecap="round"/></svg></span>
+                                    <span>删除</span>
+                                </button>
                             </div>
                         </div>
                     </div>
@@ -283,18 +280,40 @@
         </div>
     </div>
 
-    <div id="knowledge-graph-modal" class="insight-modal" aria-hidden="true" onclick="closeKnowledgeGraphModal(event)">
-        <div class="insight-dialog insight-dialog-graph" role="dialog" aria-modal="true" aria-labelledby="knowledge-graph-title" onclick="event.stopPropagation()">
-            <div class="dialog-header">
-                <div class="dialog-header-copy">
-                    <div class="panel-kicker">图谱</div>
-                    <h3 id="knowledge-graph-title" class="dialog-title">A2 控制理论知识图谱</h3>
-                    <p id="knowledge-graph-subtitle" class="dialog-subtitle">定位当前主题。</p>
+    <!-- Chat Search Modal -->
+    <div id="chat-search-modal" class="unified-modal" aria-hidden="true" role="dialog" aria-modal="true" aria-label="搜索聊天" onclick="closeChatSearch(event)">
+        <div class="unified-dialog unified-dialog--search" onclick="event.stopPropagation()">
+            <div class="unified-search-header">
+                <svg class="unified-search-icon" width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><circle cx="7" cy="7" r="4.8" stroke="currentColor" stroke-width="1.4"/><path d="M10.5 10.5L14 14" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
+                <input id="chat-search-input" class="unified-search-input" type="search" placeholder="搜索聊天..." autocomplete="off" aria-label="搜索聊天" oninput="onChatSearchInput(this.value)">
+                <button type="button" class="unified-close-btn" onclick="closeChatSearch()" aria-label="关闭">
+                    <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2 2L12 12M12 2L2 12" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+                </button>
+            </div>
+            <div class="unified-search-body" id="chat-search-body"></div>
+        </div>
+    </div>
+
+    <!-- Knowledge Graph Modal -->
+    <div id="knowledge-graph-modal" class="unified-modal" aria-hidden="true" onclick="closeKnowledgeGraphModal(event)">
+        <div class="unified-dialog unified-dialog--graph" role="dialog" aria-modal="true" aria-labelledby="knowledge-graph-title" onclick="event.stopPropagation()">
+            <div class="unified-dialog-header">
+                <div class="unified-dialog-title-group">
+                    <h3 id="knowledge-graph-title" class="unified-dialog-title">知识图谱</h3>
+                    <span id="knowledge-graph-subtitle" class="unified-dialog-subtitle">A2 控制理论 · 定位当前主题</span>
                 </div>
-                <div class="dialog-header-actions">
-                    <button type="button" class="btn-ghost" onclick="refreshKnowledgeGraphModal()">定位</button>
-                    <button type="button" class="btn-ghost" onclick="openKnowledgeGraphStandalone()">新开页</button>
-                    <button type="button" class="btn-ghost" onclick="closeKnowledgeGraphModal()">关闭</button>
+                <div class="unified-dialog-actions">
+                    <button type="button" class="unified-action-btn" onclick="refreshKnowledgeGraphModal()">
+                        <svg width="15" height="15" viewBox="0 0 15 15" fill="none"><path d="M2 7.5C2 4.46 4.46 2 7.5 2c1.8 0 3.4.85 4.4 2.15M13 7.5c0 3.04-2.46 5.5-5.5 5.5-1.8 0-3.4-.85-4.4-2.15" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/><path d="M11.5 1.5v3h-3" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                        <span>定位</span>
+                    </button>
+                    <button type="button" class="unified-action-btn" onclick="openKnowledgeGraphStandalone()">
+                        <svg width="15" height="15" viewBox="0 0 15 15" fill="none"><path d="M6 2H3a1 1 0 00-1 1v9a1 1 0 001 1h9a1 1 0 001-1V9" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/><path d="M9 2h4v4M13 2L8 7" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                        <span>新开页</span>
+                    </button>
+                    <button type="button" class="unified-close-btn" onclick="closeKnowledgeGraphModal()" aria-label="关闭">
+                        <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2 2L12 12M12 2L2 12" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+                    </button>
                 </div>
             </div>
             <div class="insight-frame-wrap">
@@ -303,16 +322,18 @@
         </div>
     </div>
 
-    <div id="radar-modal" class="insight-modal" aria-hidden="true" onclick="closeRadarModal(event)">
-        <div class="insight-dialog insight-dialog-radar" role="dialog" aria-modal="true" aria-labelledby="radar-modal-title" onclick="event.stopPropagation()">
-            <div class="dialog-header">
-                <div class="dialog-header-copy">
-                    <div class="panel-kicker">画像</div>
-                    <h3 id="radar-modal-title" class="dialog-title">当前学习画像</h3>
-                    <p id="radar-modal-subtitle" class="dialog-subtitle">查看当前状态。</p>
+    <!-- Radar / Learning Progress Modal -->
+    <div id="radar-modal" class="unified-modal" aria-hidden="true" onclick="closeRadarModal(event)">
+        <div class="unified-dialog unified-dialog--radar" role="dialog" aria-modal="true" aria-labelledby="radar-modal-title" onclick="event.stopPropagation()">
+            <div class="unified-dialog-header">
+                <div class="unified-dialog-title-group">
+                    <h3 id="radar-modal-title" class="unified-dialog-title">学习画像</h3>
+                    <span id="radar-modal-subtitle" class="unified-dialog-subtitle">查看当前知识掌握状态</span>
                 </div>
-                <div class="dialog-header-actions">
-                    <button type="button" class="btn-ghost" onclick="closeRadarModal()">关闭</button>
+                <div class="unified-dialog-actions">
+                    <button type="button" class="unified-close-btn" onclick="closeRadarModal()" aria-label="关闭">
+                        <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2 2L12 12M12 2L2 12" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+                    </button>
                 </div>
             </div>
             <div class="radar-modal-body">
@@ -357,18 +378,6 @@
                             </span>
                             <span>应用</span>
                         </button>
-                        <button type="button" class="settings-nav-item" data-config-section-tab="schedule" onclick="switchLocalConfigSection('schedule')">
-                            <span class="settings-nav-icon" aria-hidden="true">
-                                <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><circle cx="9" cy="9" r="7" stroke="currentColor" stroke-width="1.5"/><path d="M9 5V9L11.8 11.2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
-                            </span>
-                            <span>安排</span>
-                        </button>
-                        <button type="button" class="settings-nav-item" data-config-section-tab="billing" onclick="switchLocalConfigSection('billing')">
-                            <span class="settings-nav-icon" aria-hidden="true">
-                                <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M5.1 3.2H12.9C13.4 3.2 13.8 3.6 13.8 4.1V14.8L11.4 13.4L9 14.8L6.6 13.4L4.2 14.8V4.1C4.2 3.6 4.6 3.2 5.1 3.2Z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/><path d="M6.9 6.7H11.1M6.9 9.3H10.1" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
-                            </span>
-                            <span>订单</span>
-                        </button>
                         <button type="button" class="settings-nav-item" data-config-section-tab="data" onclick="switchLocalConfigSection('data')">
                             <span class="settings-nav-icon" aria-hidden="true">
                                 <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><ellipse cx="9" cy="4.6" rx="4.8" ry="2.1" stroke="currentColor" stroke-width="1.5"/><path d="M4.2 4.6V9.1C4.2 10.3 6.35 11.2 9 11.2C11.65 11.2 13.8 10.3 13.8 9.1V4.6" stroke="currentColor" stroke-width="1.5"/><path d="M4.2 9.1V13.4C4.2 14.6 6.35 15.5 9 15.5C11.65 15.5 13.8 14.6 13.8 13.4V9.1" stroke="currentColor" stroke-width="1.5"/></svg>
@@ -380,12 +389,6 @@
                                 <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M9 2.8L13.8 4.6V8.8C13.8 11.8 11.9 14.5 9 15.5C6.1 14.5 4.2 11.8 4.2 8.8V4.6L9 2.8Z" stroke="currentColor" stroke-width="1.5"/><path d="M7.2 8.8L8.4 10L10.9 7.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
                             </span>
                             <span>安全</span>
-                        </button>
-                        <button type="button" class="settings-nav-item" data-config-section-tab="family" onclick="switchLocalConfigSection('family')">
-                            <span class="settings-nav-icon" aria-hidden="true">
-                                <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><circle cx="10.8" cy="5.3" r="2.4" stroke="currentColor" stroke-width="1.5"/><path d="M7.2 14.9C7.8 12.6 9.1 11.4 10.8 11.4C12.5 11.4 13.8 12.6 14.4 14.9" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><path d="M3.7 9.6C4.1 8.3 5 7.6 6.1 7.6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><circle cx="5.7" cy="5.9" r="1.8" stroke="currentColor" stroke-width="1.5"/></svg>
-                            </span>
-                            <span>家长控制</span>
                         </button>
                         <button type="button" class="settings-nav-item" data-config-section-tab="account" onclick="switchLocalConfigSection('account')">
                             <span class="settings-nav-icon" aria-hidden="true">
@@ -535,7 +538,7 @@
 
                         <section class="settings-section is-active" data-config-section="applications">
                             <div class="settings-block">
-                                <div class="settings-block-title">陪读模型</div>
+                                <div class="settings-block-title">AI模型</div>
                                 <div class="config-field">
                                     <label for="local-chat-profile">服务来源 / 档案</label>
                                     <select id="local-chat-profile" onchange="renderVendorModels(this.value, ''); syncLocalConfigAccountSummary()">
@@ -586,31 +589,12 @@
                             </div>
                         </section>
 
-                        <section class="settings-section" data-config-section="schedule">
-                            <div class="settings-empty-state">
-                                <div class="settings-empty-icon" aria-hidden="true">
-                                    <svg width="28" height="28" viewBox="0 0 28 28" fill="none"><circle cx="14" cy="14" r="10" stroke="currentColor" stroke-width="1.8"/><path d="M14 8.6V14L18 17" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
-                                </div>
-                                <div class="settings-empty-title">安排尚未接入</div>
-                                <div class="settings-empty-copy">学习日程、提醒时间和自动复习计划会放在这里。</div>
-                            </div>
-                        </section>
-
-                        <section class="settings-section" data-config-section="billing">
-                            <div class="settings-empty-state settings-empty-state--centered">
-                                <div class="settings-empty-icon" aria-hidden="true">
-                                    <svg width="30" height="30" viewBox="0 0 30 30" fill="none"><path d="M9.5 5.5H20.5C21.2 5.5 21.8 6.1 21.8 6.8V23L18.4 21L15 23L11.6 21L8.2 23V6.8C8.2 6.1 8.8 5.5 9.5 5.5Z" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round"/><path d="M12 10.8H18M12 14.8H16.2" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
-                                </div>
-                                <div class="settings-empty-title">尚无订单</div>
-                                <div class="settings-empty-copy">当前版本没有接入云端订阅与购买系统。</div>
-                            </div>
-                        </section>
 
                         <section class="settings-section" data-config-section="data">
                             <div class="settings-block">
                                 <div class="settings-block-title">资料检索</div>
                                 <div class="config-field">
-                                    <label for="local-embedding-provider">Embedding Provider</label>
+                                    <label for="local-embedding-provider">检索模型</label>
                                     <select id="local-embedding-provider">
                                         <option value="local">local</option>
                                         <option value="google">google</option>
@@ -618,11 +602,11 @@
                                     </select>
                                 </div>
                                 <div class="config-field">
-                                    <label for="local-embedding-model">Embedding Model</label>
+                                    <label for="local-embedding-model">检索模型名称</label>
                                     <input id="local-embedding-model" type="text" placeholder="sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2">
                                 </div>
                                 <div class="config-field">
-                                    <label for="local-pdf-parse-backend">PDF 解析策略</label>
+                                    <label for="local-pdf-parse-backend">PDF解析方式</label>
                                     <select id="local-pdf-parse-backend">
                                         <option value="auto">auto：先试 MinerU，失败回退本地</option>
                                         <option value="mineru">mineru：只用 MinerU</option>
@@ -705,15 +689,6 @@
                             </div>
                         </section>
 
-                        <section class="settings-section" data-config-section="family">
-                            <div class="settings-empty-state">
-                                <div class="settings-empty-icon" aria-hidden="true">
-                                    <svg width="28" height="28" viewBox="0 0 28 28" fill="none"><circle cx="17" cy="8.5" r="3.5" stroke="currentColor" stroke-width="1.8"/><path d="M11.4 23.3C12.2 19.9 14.1 18.1 17 18.1C19.9 18.1 21.8 19.9 22.6 23.3" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><circle cx="8.9" cy="10.2" r="2.7" stroke="currentColor" stroke-width="1.8"/><path d="M4.6 22.6C5.2 20.2 6.4 18.9 8.2 18.7" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
-                                </div>
-                                <div class="settings-empty-title">家长控制尚未启用</div>
-                                <div class="settings-empty-copy">当前没有接入分级权限、时长限制和共享监护设置。</div>
-                            </div>
-                        </section>
 
                         <section class="settings-section" data-config-section="account">
                             <div class="settings-block">
@@ -770,6 +745,105 @@
                             <button type="button" class="chip chip-muted" onclick="closeLocalConfigPanel()">关闭</button>
                         </div>
                         <div id="local-config-status" class="status-inline config-panel-status" aria-live="polite"></div>
+                    </div>
+                </section>
+            </div>
+        </div>
+    </div>
+
+    <!-- Library Modal -->
+    <div id="library-overlay" class="config-overlay library-overlay" aria-hidden="true" onclick="closeLibraryPanel(event)">
+        <div class="config-panel library-panel" role="dialog" aria-modal="true" aria-labelledby="library-title" onclick="event.stopPropagation()">
+            <div class="settings-layout library-layout">
+                <!-- Left sidebar -->
+                <aside class="settings-sidebar library-sidebar" aria-label="资料分类">
+                    <button type="button" class="settings-close-btn" onclick="closeLibraryPanel()" aria-label="关闭资料库">
+                        <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M4 4L14 14M14 4L4 14" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+                    </button>
+                    <nav class="settings-nav library-nav" id="library-nav">
+                        <button type="button" class="settings-nav-item is-active" data-lib-filter="all" onclick="switchLibraryFilter('all')">
+                            <span class="settings-nav-icon" aria-hidden="true">
+                                <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><rect x="2.5" y="2.5" width="13" height="13" rx="2.5" stroke="currentColor" stroke-width="1.5"/><path d="M5.5 6.5H12.5M5.5 9H12.5M5.5 11.5H9.5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
+                            </span>
+                            <span>全部文件</span>
+                            <span class="library-nav-badge" id="lib-count-all">0</span>
+                        </button>
+                        <button type="button" class="settings-nav-item" data-lib-filter="pdf" onclick="switchLibraryFilter('pdf')">
+                            <span class="settings-nav-icon" aria-hidden="true">
+                                <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M4.5 2.5H11.5L13.5 4.5V15.5H4.5V2.5Z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/><path d="M11.5 2.5V4.5H13.5" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/><path d="M6.5 8.5H8.5C9.05 8.5 9.5 8.95 9.5 9.5C9.5 10.05 9.05 10.5 8.5 10.5H6.5V8.5Z" stroke="currentColor" stroke-width="1.2"/><path d="M6.5 12.5H11.5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
+                            </span>
+                            <span>PDF</span>
+                            <span class="library-nav-badge" id="lib-count-pdf">0</span>
+                        </button>
+                        <button type="button" class="settings-nav-item" data-lib-filter="doc" onclick="switchLibraryFilter('doc')">
+                            <span class="settings-nav-icon" aria-hidden="true">
+                                <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M4.5 2.5H11.5L13.5 4.5V15.5H4.5V2.5Z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/><path d="M11.5 2.5V4.5H13.5" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/><path d="M6.5 8H11.5M6.5 10.5H11.5M6.5 13H9.5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
+                            </span>
+                            <span>文档</span>
+                            <span class="library-nav-badge" id="lib-count-doc">0</span>
+                        </button>
+                        <button type="button" class="settings-nav-item" data-lib-filter="excel" onclick="switchLibraryFilter('excel')">
+                            <span class="settings-nav-icon" aria-hidden="true">
+                                <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M4.5 2.5H11.5L13.5 4.5V15.5H4.5V2.5Z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/><path d="M11.5 2.5V4.5H13.5" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/><path d="M6.5 7H11.5V14H6.5V7Z" stroke="currentColor" stroke-width="1.2"/><path d="M9 7V14M6.5 10H11.5" stroke="currentColor" stroke-width="1.1"/></svg>
+                            </span>
+                            <span>表格</span>
+                            <span class="library-nav-badge" id="lib-count-excel">0</span>
+                        </button>
+                        <button type="button" class="settings-nav-item" data-lib-filter="image" onclick="switchLibraryFilter('image')">
+                            <span class="settings-nav-icon" aria-hidden="true">
+                                <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><rect x="2.5" y="3.5" width="13" height="11" rx="2" stroke="currentColor" stroke-width="1.5"/><circle cx="6.5" cy="7.5" r="1.2" stroke="currentColor" stroke-width="1.3"/><path d="M2.5 12L6.5 9L9 11L11.5 8.5L15.5 12" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                            </span>
+                            <span>图片</span>
+                            <span class="library-nav-badge" id="lib-count-image">0</span>
+                        </button>
+                        <button type="button" class="settings-nav-item" data-lib-filter="other" onclick="switchLibraryFilter('other')">
+                            <span class="settings-nav-icon" aria-hidden="true">
+                                <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M4.5 2.5H11.5L13.5 4.5V15.5H4.5V2.5Z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/><path d="M11.5 2.5V4.5H13.5" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/><circle cx="9" cy="10.5" r="1" fill="currentColor"/><circle cx="6.5" cy="10.5" r="1" fill="currentColor"/><circle cx="11.5" cy="10.5" r="1" fill="currentColor"/></svg>
+                            </span>
+                            <span>其他</span>
+                            <span class="library-nav-badge" id="lib-count-other">0</span>
+                        </button>
+                    </nav>
+                    <div class="library-storage-info">
+                        <div class="library-storage-label">
+                            <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><rect x="1.5" y="3" width="11" height="8" rx="1.5" stroke="currentColor" stroke-width="1.3"/><path d="M4.5 6H9.5M4.5 8H7.5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
+                            <span id="library-storage-text">共 0 份文件</span>
+                        </div>
+                    </div>
+                </aside>
+                <!-- Right content -->
+                <section class="settings-content library-content">
+                    <div class="library-content-header">
+                        <div class="library-content-title-row">
+                            <h2 class="settings-content-title" id="library-title">全部文件</h2>
+                            <button type="button" class="library-upload-btn" onclick="triggerKnowledgeUpload()" aria-label="上传文件">
+                                <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M8 3v8M4 7l4-4 4 4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M2.5 13h11" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+                                上传文件
+                            </button>
+                        </div>
+                        <div class="library-search-row">
+                            <svg class="library-search-icon" width="15" height="15" viewBox="0 0 15 15" fill="none"><circle cx="6.5" cy="6.5" r="4.5" stroke="currentColor" stroke-width="1.3"/><path d="M10 10l3.5 3.5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
+                            <input type="text" id="library-search-input" class="library-search-input" placeholder="搜索文件名…" oninput="filterLibrarySearch(this.value)" aria-label="搜索文件">
+                        </div>
+                    </div>
+                    <div class="library-body">
+                        <!-- Drop zone for empty state -->
+                        <div id="library-dropzone" class="library-dropzone" hidden>
+                            <div class="library-dropzone-inner">
+                                <svg width="40" height="40" viewBox="0 0 40 40" fill="none"><rect x="5" y="8" width="30" height="24" rx="4" stroke="currentColor" stroke-width="2"/><path d="M20 18V28M15 22l5-5 5 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M12 34h16" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+                                <div class="library-dropzone-title">还没有文件</div>
+                                <div class="library-dropzone-hint">点击"上传文件"或拖拽文件到这里</div>
+                                <button type="button" class="library-upload-btn library-upload-btn--ghost" onclick="triggerKnowledgeUpload()">选择文件上传</button>
+                            </div>
+                        </div>
+                        <!-- File list -->
+                        <div id="library-file-list" class="library-file-list" role="list" aria-label="文件列表"></div>
+                    </div>
+                    <div class="library-footer">
+                        <div id="library-status" class="library-status" aria-live="polite"></div>
+                        <div class="library-footer-actions">
+                            <button type="button" class="chip chip-danger-ghost" id="library-clear-btn" onclick="clearKnowledgeFiles()" hidden>清空全部</button>
+                        </div>
                     </div>
                 </section>
             </div>

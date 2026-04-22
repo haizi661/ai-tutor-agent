@@ -244,12 +244,13 @@
             const id = entry.thread_id;
             const label = entry.display_title || entry.current_topic || id;
             const customTitle = entry.custom_title || '';
+            const isPinned = Boolean(entry.pinned);
             const timeText = relativeTime(entry.updated_at || entry.updatedAt || entry.created_at || '');
             const stateLabel = label === '未确认主题'
                 ? '待开始'
                 : (label.startsWith('待确认：') ? '待确认' : '学习页');
             const row = document.createElement('div');
-            row.className = `history-item topic-item ${id === state.currentThreadId ? 'active' : ''}`;
+            row.className = `history-item topic-item ${id === state.currentThreadId ? 'active' : ''} ${isPinned ? 'is-pinned' : ''}`;
             row.dataset.threadId = id;
             if (label === '未确认主题') row.dataset.historyState = 'unconfirmed';
             else if (label.startsWith('待确认：')) row.dataset.historyState = 'pending';
@@ -267,6 +268,14 @@
             titleEl.className = 'history-title';
             titleEl.textContent = label;
             textButton.appendChild(titleEl);
+
+            if (isPinned) {
+                const pinBadge = document.createElement('span');
+                pinBadge.className = 'history-pin-badge';
+                pinBadge.setAttribute('aria-label', '已置顶');
+                pinBadge.innerHTML = `<svg width="10" height="10" viewBox="0 0 17 17" fill="none"><path d="M10.5 2.5L14.5 6.5L11 8.5L9.5 12L8 10.5L5 13.5L3.5 12L6.5 9L5 7.5L8.5 6L10.5 2.5Z" fill="currentColor"/></svg>`;
+                titleEl.appendChild(pinBadge);
+            }
 
             if (stateLabel || timeText) {
                 const metaEl = document.createElement('span');
@@ -351,7 +360,28 @@
             `;
             deleteButton.onclick = event => app.deleteSession(id, event, label);
 
+            const pinButton = document.createElement('button');
+            pinButton.type = 'button';
+            pinButton.className = 'history-menu-btn';
+            pinButton.innerHTML = `
+                <span class="history-menu-icon" aria-hidden="true">
+                    <svg width="14" height="14" viewBox="0 0 17 17" fill="none"><path d="M10.5 2.5L14.5 6.5L11 8.5L9.5 12L8 10.5L5 13.5L3.5 12L6.5 9L5 7.5L8.5 6L10.5 2.5Z" stroke="currentColor" stroke-width="1.35" stroke-linejoin="round"/></svg>
+                </span>
+                <span>${isPinned ? '取消置顶' : '置顶聊天'}</span>
+            `;
+            pinButton.onclick = async event => {
+                event.stopPropagation();
+                closeHistoryMenu();
+                await fetch(`/api/history/${id}`, {
+                    method: 'PATCH',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ pinned: !isPinned }),
+                });
+                app.fetchHistory();
+            };
+
             menu.appendChild(renameButton);
+            menu.appendChild(pinButton);
             menu.appendChild(deleteButton);
             actions.appendChild(menuTrigger);
             actions.appendChild(menu);
@@ -394,6 +424,7 @@
         const res = await fetch('/api/history');
         const data = await res.json();
         historyUiState.items = data.items || (data.threads || []).map(id => ({ thread_id: id, current_topic: '' }));
+        window._chatSearchHistoryCache = historyUiState.items;
         if (!historyUiState.searchQuery.trim()) {
             historyUiState.showAll = false;
         }

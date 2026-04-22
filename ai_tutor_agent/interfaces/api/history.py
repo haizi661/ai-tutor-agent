@@ -19,6 +19,67 @@ class ThreadTitlePayload(BaseModel):
     title: str = ""
 
 
+class ThreadMetaPayload(BaseModel):
+    pinned: bool | None = None
+    archived: bool | None = None
+
+
+def _ensure_thread_meta_table(conn: sqlite3.Connection) -> None:
+    conn.execute(
+        """
+        CREATE TABLE IF NOT EXISTS thread_meta (
+            thread_id TEXT PRIMARY KEY,
+            pinned INTEGER NOT NULL DEFAULT 0,
+            archived INTEGER NOT NULL DEFAULT 0,
+            pinned_at TEXT,
+            archived_at TEXT,
+            updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+        )
+        """
+    )
+    conn.commit()
+
+
+def _get_thread_meta(conn: sqlite3.Connection, thread_id: str) -> dict:
+    _ensure_thread_meta_table(conn)
+    row = conn.execute(
+        "SELECT pinned, archived FROM thread_meta WHERE thread_id = ?",
+        (thread_id,),
+    ).fetchone()
+    if row:
+        return {"pinned": bool(row[0]), "archived": bool(row[1])}
+    return {"pinned": False, "archived": False}
+
+
+def _load_thread_metas(conn: sqlite3.Connection) -> dict:
+    _ensure_thread_meta_table(conn)
+    rows = conn.execute("SELECT thread_id, pinned, archived FROM thread_meta").fetchall()
+    return {str(r[0]): {"pinned": bool(r[1]), "archived": bool(r[2])} for r in rows}
+
+
+def _set_thread_meta(conn: sqlite3.Connection, thread_id: str, pinned: bool | None, archived: bool | None) -> dict:
+    _ensure_thread_meta_table(conn)
+    existing = _get_thread_meta(conn, thread_id)
+    new_pinned = pinned if pinned is not None else existing["pinned"]
+    new_archived = archived if archived is not None else existing["archived"]
+    pinned_at = "CURRENT_TIMESTAMP" if (new_pinned and not existing["pinned"]) else None
+    archived_at = "CURRENT_TIMESTAMP" if (new_archived and not existing["archived"]) else None
+    conn.execute(
+        "DELETE FROM thread_meta WHERE thread_id = ?",
+        (thread_id,),
+    )
+    conn.execute(
+        """
+        INSERT INTO thread_meta (thread_id, pinned, archived, pinned_at, archived_at, updated_at)
+        VALUES (?, ?, ?, CASE WHEN ? THEN CURRENT_TIMESTAMP ELSE NULL END,
+                CASE WHEN ? THEN CURRENT_TIMESTAMP ELSE NULL END, CURRENT_TIMESTAMP)
+        """,
+        (thread_id, int(new_pinned), int(new_archived), new_pinned, new_archived),
+    )
+    conn.commit()
+    return {"pinned": new_pinned, "archived": new_archived}
+
+
 def _ensure_custom_title_table(conn: sqlite3.Connection) -> None:
     conn.execute(
         """
@@ -471,17 +532,26 @@ async def get_history(request: Request):
         except sqlite3.OperationalError:
             return {"threads": [], "items": []}
 
+        with sqlite3.connect(db_path) as conn:
+                thread_metas = _load_thread_metas(conn)
+
         items = []
         for (thread_id,) in rows:
+            meta = thread_metas.get(str(thread_id), {"pinned": False, "archived": False})
+            if meta.get("archived"):
+                continue
             checkpoint_tuple = checkpoint_store.get_tuple({"configurable": {"thread_id": thread_id}})
             if checkpoint_tuple:
-                items.append(
-                    _checkpoint_summary(
-                        thread_id,
-                        checkpoint_tuple,
-                        alias_title=alias_by_thread.get(str(thread_id), ""),
-                    )
+                summary = _checkpoint_summary(
+                    thread_id,
+                    checkpoint_tuple,
+                    alias_title=alias_by_thread.get(str(thread_id), ""),
                 )
+                summary["pinned"] = meta.get("pinned", False)
+                summary["archived"] = False
+                items.append(summary)
+
+        items.sort(key=lambda x: (0 if x.get("pinned") else 1, 0))
 
         return {
             "threads": [item["thread_id"] for item in items],
@@ -519,6 +589,15 @@ async def get_history_detail(thread_id: str, request: Request):
         }
     finally:
         saver_conn.close()
+
+
+@router.patch("/{thread_id}")
+async def patch_thread_meta(thread_id: str, payload: ThreadMetaPayload, request: Request):
+    runtime = get_runtime(request)
+    db_path = runtime.settings.memory_db_path
+    with sqlite3.connect(db_path) as conn:
+        meta = _set_thread_meta(conn, thread_id, payload.pinned, payload.archived)
+    return {"status": "success", "thread_id": thread_id, **meta}
 
 
 @router.delete("/{thread_id}")

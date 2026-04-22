@@ -225,6 +225,116 @@
         window.open(buildKnowledgeGraphUrl({ embedded: false }), '_blank', 'noopener,noreferrer');
     };
 
+    function formatGroupLabel(ts) {
+        if (!ts) return '更早';
+        const d = new Date(ts);
+        if (isNaN(d)) return '更早';
+        const now = new Date();
+        const diffDays = Math.floor((now - d) / 86400000);
+        if (diffDays < 1) return '今天';
+        if (diffDays < 2) return '昨天';
+        if (diffDays < 7) return '最近 7 天';
+        if (diffDays < 30) return '最近 30 天';
+        return d.toLocaleDateString('zh-CN', { year: 'numeric', month: 'long' });
+    }
+
+    app.openChatSearch = function openChatSearch() {
+        setModalOpen('chat-search-modal', true);
+        document.body.classList.add('modal-open');
+        const input = document.getElementById('chat-search-input');
+        if (input) { input.value = ''; requestAnimationFrame(() => input.focus()); }
+        app._renderChatSearchResults('');
+    };
+
+    app.closeChatSearch = function closeChatSearch(event) {
+        if (event && event.currentTarget && event.target !== event.currentTarget) return;
+        setModalOpen('chat-search-modal', false);
+        document.body.classList.remove('modal-open');
+    };
+
+    app.onChatSearchInput = function onChatSearchInput(value) {
+        app._renderChatSearchResults(value || '');
+    };
+
+    app._renderChatSearchResults = function _renderChatSearchResults(query) {
+        const body = document.getElementById('chat-search-body');
+        if (!body) return;
+        body.innerHTML = '';
+
+        const q = query.trim().toLowerCase();
+
+        const newBtn = document.createElement('button');
+        newBtn.type = 'button';
+        newBtn.className = 'cs-new-btn';
+        newBtn.innerHTML = `<svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 9.5L10 2.5L13.5 6L6.5 13H3V9.5Z" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/><path d="M8.5 4.5L11.5 7.5" stroke="currentColor" stroke-width="1.3"/></svg><span>新聊天</span>`;
+        newBtn.onclick = () => { app.closeChatSearch(); app.startNewSession?.(); };
+        body.appendChild(newBtn);
+
+        const allItems = (window._chatSearchHistoryCache || []);
+
+        if (!allItems.length) {
+            fetch('/api/history').then(r => r.json()).then(data => {
+                window._chatSearchHistoryCache = data.items || [];
+                app._renderChatSearchResults(query);
+            });
+            return;
+        }
+
+        const filtered = q
+            ? allItems.filter(item => {
+                const label = (item.display_title || item.current_topic || item.thread_id || '').toLowerCase();
+                return label.includes(q);
+            })
+            : allItems;
+
+        if (!filtered.length && q) {
+            const empty = document.createElement('div');
+            empty.className = 'cs-empty';
+            empty.textContent = `没有匹配"${query}"的聊天`;
+            body.appendChild(empty);
+            return;
+        }
+
+        const groups = {};
+        filtered.forEach(item => {
+            const label = formatGroupLabel(item.updated_at || item.created_at || '');
+            if (!groups[label]) groups[label] = [];
+            groups[label].push(item);
+        });
+
+        const groupOrder = ['今天', '昨天', '最近 7 天', '最近 30 天'];
+        const sortedKeys = Object.keys(groups).sort((a, b) => {
+            const ia = groupOrder.indexOf(a);
+            const ib = groupOrder.indexOf(b);
+            if (ia !== -1 && ib !== -1) return ia - ib;
+            if (ia !== -1) return -1;
+            if (ib !== -1) return 1;
+            return a.localeCompare(b);
+        });
+
+        sortedKeys.forEach(groupLabel => {
+            const groupEl = document.createElement('div');
+            groupEl.className = 'cs-group';
+
+            const labelEl = document.createElement('div');
+            labelEl.className = 'cs-group-label';
+            labelEl.textContent = groupLabel;
+            groupEl.appendChild(labelEl);
+
+            groups[groupLabel].forEach(item => {
+                const btn = document.createElement('button');
+                btn.type = 'button';
+                btn.className = `cs-item ${item.thread_id === state.currentThreadId ? 'cs-item--active' : ''}`;
+                const title = item.display_title || item.current_topic || item.thread_id;
+                btn.innerHTML = `<svg class="cs-item-icon" width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2 3a1 1 0 011-1h8a1 1 0 011 1v6a1 1 0 01-1 1H4l-2 2V3Z" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/></svg><span class="cs-item-label">${title.replace(/</g, '&lt;')}</span>${item.pinned ? '<svg class="cs-pin-icon" width="10" height="10" viewBox="0 0 17 17" fill="none"><path d="M10.5 2.5L14.5 6.5L11 8.5L9.5 12L8 10.5L5 13.5L3.5 12L6.5 9L5 7.5L8.5 6L10.5 2.5Z" fill="currentColor"/></svg>' : ''}`;
+                btn.onclick = () => { app.closeChatSearch(); app.loadSession?.(item.thread_id); };
+                groupEl.appendChild(btn);
+            });
+
+            body.appendChild(groupEl);
+        });
+    };
+
     app.openRadarModal = function openRadarModal() {
         setModalOpen('radar-modal', true);
         setButtonActive('open-radar-modal-btn', true);
@@ -442,7 +552,90 @@
         const menu = document.getElementById('header-more-menu');
         if (!menu) return;
         const shouldOpen = typeof force === 'boolean' ? force : menu.hidden;
+        if (shouldOpen) app._syncHeaderMenuState();
         setHeaderMoreMenuOpen(shouldOpen);
+    };
+
+    app._syncHeaderMenuState = function _syncHeaderMenuState() {
+        const threadId = state.currentThreadId;
+        const pinLabel = document.getElementById('menu-pin-label');
+        if (!threadId || !pinLabel) return;
+        fetch(`/api/history/${threadId}`)
+            .then(r => r.json())
+            .then(data => {
+                const isPinned = data?.summary?.pinned;
+                if (pinLabel) pinLabel.textContent = isPinned ? '取消置顶' : '置顶聊天';
+            })
+            .catch(() => {});
+    };
+
+    app.menuNewSession = function menuNewSession() {
+        if (typeof app.startNewSession === 'function') {
+            app.startNewSession();
+        } else {
+            window.location.href = '/';
+        }
+    };
+
+    app.menuPinSession = async function menuPinSession() {
+        const threadId = state.currentThreadId;
+        if (!threadId) { app.setStatusBanner('当前没有活跃的对话', 'warning'); return; }
+        try {
+            const res = await fetch(`/api/history/${threadId}`);
+            const data = await res.json();
+            const isPinned = data?.summary?.pinned;
+            const patchRes = await fetch(`/api/history/${threadId}`, {
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ pinned: !isPinned }),
+            });
+            const patchData = await patchRes.json();
+            if (patchData.status === 'success') {
+                const msg = patchData.pinned ? '已置顶此对话' : '已取消置顶';
+                app.setStatusBanner(msg, 'success');
+                app.loadHistoryList?.();
+            }
+        } catch (e) {
+            app.setStatusBanner('操作失败，请重试', 'danger');
+        }
+    };
+
+    app.menuArchiveSession = async function menuArchiveSession() {
+        const threadId = state.currentThreadId;
+        if (!threadId) { app.setStatusBanner('当前没有活跃的对话', 'warning'); return; }
+        if (!confirm('归档此对话？归档后将不显示在历史记录中，可通过新建对话重新开始。')) return;
+        try {
+            const patchRes = await fetch(`/api/history/${threadId}`, {
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ archived: true }),
+            });
+            const data = await patchRes.json();
+            if (data.status === 'success') {
+                app.setStatusBanner('对话已归档', 'success');
+                app.loadHistoryList?.();
+                app.menuNewSession();
+            }
+        } catch (e) {
+            app.setStatusBanner('操作失败，请重试', 'danger');
+        }
+    };
+
+    app.menuDeleteSession = async function menuDeleteSession() {
+        const threadId = state.currentThreadId;
+        if (!threadId) { app.setStatusBanner('当前没有活跃的对话', 'warning'); return; }
+        if (!confirm('确定删除此对话？此操作不可撤销，所有聊天记录将被永久删除。')) return;
+        try {
+            const res = await fetch(`/api/history/${threadId}`, { method: 'DELETE' });
+            const data = await res.json();
+            if (data.status === 'success') {
+                app.setStatusBanner('对话已删除', 'success');
+                app.loadHistoryList?.();
+                app.menuNewSession();
+            }
+        } catch (e) {
+            app.setStatusBanner('删除失败，请重试', 'danger');
+        }
     };
 
     app.shareCurrentSession = async function shareCurrentSession() {
@@ -481,15 +674,26 @@
         document.getElementById('file-input')?.click();
     };
 
-    app.focusKnowledgeShelf = function focusKnowledgeShelf() {
-        const shelf = document.getElementById('knowledge-shelf');
-        if (!shelf) return;
-        if (document.getElementById('sidebar')?.classList.contains('sidebar--collapsed')) {
-            app.toggleSidebar?.(false);
-        }
-        shelf.scrollIntoView({ behavior: 'smooth', block: 'start' });
-        app.setStatusBanner('已定位到资料区', 'info');
+    app.openLibraryPanel = function openLibraryPanel() {
+        const overlay = document.getElementById('library-overlay');
+        if (!overlay) return;
+        overlay.classList.add('open');
+        overlay.setAttribute('aria-hidden', 'false');
+        document.body.style.overflow = 'hidden';
+        app.switchLibraryFilter?.('all');
+        app.fetchKnowledgeFiles?.();
     };
+
+    app.closeLibraryPanel = function closeLibraryPanel(e) {
+        if (e && e.target !== e.currentTarget) return;
+        const overlay = document.getElementById('library-overlay');
+        if (!overlay) return;
+        overlay.classList.remove('open');
+        overlay.setAttribute('aria-hidden', 'true');
+        document.body.style.overflow = '';
+    };
+
+    app.focusKnowledgeShelf = app.openLibraryPanel;
 
     app.toggleThinkingMode = function toggleThinkingMode(force, { silent = false } = {}) {
         const nextThinkingMode = typeof force === 'boolean' ? force : !Boolean(state.thinkingMode);
@@ -567,6 +771,7 @@
             if (e.key === 'Escape') {
                 app.toggleHeaderMoreMenu(false);
                 app.toggleUserMenu(false);
+                app.closeChatSearch();
             }
             if (e.key === 'Escape' && document.getElementById('config-overlay').classList.contains('open')) {
                 app.closeLocalConfigPanel();
@@ -578,6 +783,9 @@
             }
             if (e.key === 'Escape' && state.radarModalOpen) {
                 app.closeRadarModal();
+            }
+            if (e.key === 'Escape' && document.getElementById('library-overlay')?.classList.contains('open')) {
+                app.closeLibraryPanel();
             }
         });
 
@@ -594,9 +802,33 @@
         const fileInput = document.getElementById('file-input');
         fileInput.addEventListener('change', async function onFileChange() {
             if (!this.files.length) return;
-            await app.uploadKnowledgeFile?.(this.files[0]);
+            const files = Array.from(this.files);
+            for (const file of files) {
+                await app.uploadKnowledgeFile?.(file);
+            }
             this.value = '';
         });
+
+        const libraryBody = document.getElementById('library-file-list')?.closest('.library-body');
+        if (libraryBody) {
+            libraryBody.addEventListener('dragover', e => {
+                e.preventDefault();
+                libraryBody.classList.add('is-drag-over');
+            });
+            libraryBody.addEventListener('dragleave', e => {
+                if (!libraryBody.contains(e.relatedTarget)) {
+                    libraryBody.classList.remove('is-drag-over');
+                }
+            });
+            libraryBody.addEventListener('drop', async e => {
+                e.preventDefault();
+                libraryBody.classList.remove('is-drag-over');
+                const files = Array.from(e.dataTransfer.files);
+                for (const file of files) {
+                    await app.uploadKnowledgeFile?.(file);
+                }
+            });
+        }
 
         document.addEventListener('click', event => {
             const menu = document.getElementById('header-more-menu');
@@ -676,10 +908,22 @@
     window.openKnowledgeGraphStandalone = () => app.openKnowledgeGraphStandalone();
     window.openRadarModal = () => app.openRadarModal();
     window.closeRadarModal = event => app.closeRadarModal(event);
+    window.openLibraryPanel = () => app.openLibraryPanel();
+    window.closeLibraryPanel = event => app.closeLibraryPanel(event);
+    window.switchLibraryFilter = filter => app.switchLibraryFilter(filter);
+    window.filterLibrarySearch = val => app.filterLibrarySearch(val);
+    window.clearKnowledgeFiles = () => app.clearKnowledgeFiles();
     window.submitTopicConfirmation = (confirmed, startMode) => app.submitTopicConfirmation(confirmed, startMode);
     window.submitAwaitingChoice = (answer, visibleText) => app.submitAwaitingChoice(answer, visibleText);
     window.submitInterruptConfirmation = confirmed => app.submitInterruptConfirmation(confirmed);
     window.showTopicEditInput = () => app.showTopicEditInput();
+    window.menuNewSession = () => app.menuNewSession();
+    window.menuPinSession = () => app.menuPinSession();
+    window.menuArchiveSession = () => app.menuArchiveSession();
+    window.menuDeleteSession = () => app.menuDeleteSession();
+    window.openChatSearch = () => app.openChatSearch();
+    window.closeChatSearch = event => app.closeChatSearch(event);
+    window.onChatSearchInput = value => app.onChatSearchInput(value);
 
     window.onload = async () => {
         bindDomEvents();

@@ -28,8 +28,8 @@
             subtitle: '调整界面风格、默认节奏和展示偏好。',
         },
         applications: {
-            title: '应用',
-            subtitle: '管理模型来源、接口连接和本地运行方式。',
+            title: '设置',
+            subtitle: '管理AI模型和连接设置。',
         },
         schedule: {
             title: '安排',
