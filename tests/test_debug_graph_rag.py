@@ -30,7 +30,7 @@ def test_build_html_report_contains_modal_markup():
                 "reference": "KM014.figure_asset[1]",
                 "display_label": "图一",
                 "node_name": "一阶系统的时域分析",
-                "caption": "图 4-3 单位阶跃响应曲线",
+                "caption": "图4-3 单位阶跃响应曲线",
                 "image_paths_abs": [str(Path("tests/sample.png").resolve())],
             },
         ],
@@ -42,7 +42,7 @@ def test_build_html_report_contains_modal_markup():
     assert "mathjax@3/es5/tex-svg.js" in html_text
     assert "formula-math" in html_text
     assert "KM014.formula_asset[1]" in html_text
-    assert "图 4-3 单位阶跃响应曲线" in html_text
+    assert "图4-3 单位阶跃响应曲线" in html_text
     assert "相关公式与图表" in html_text
     assert "式一" in html_text
     assert "图一" in html_text

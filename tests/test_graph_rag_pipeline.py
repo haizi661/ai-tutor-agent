@@ -42,7 +42,7 @@ def test_node_selector_prefers_graph_21_teaching_attributes():
         },
     ]
 
-    selected = selector.select_node("反馈控制系统的组成是什么", nodes)
+    selected = selector.select_node("反馈控制系统的组成是什么？", nodes)
 
     assert selected is not None
     assert selected["node_id"] == "KM001"
@@ -51,7 +51,12 @@ def test_node_selector_prefers_graph_21_teaching_attributes():
 def test_graph_traverser_prefers_graph_21_relations_and_edge_metadata():
     node_map = {
         "KM001": {"node_id": "KM001", "name": "自动控制", "importance_level": "核心"},
-        "KM002": {"node_id": "KM002", "name": "数学模型", "importance_level": "重要", "core_concepts": ["传递函数"]},
+        "KM002": {
+            "node_id": "KM002",
+            "name": "数学模型",
+            "importance_level": "重要",
+            "core_concepts": ["传递函数"],
+        },
         "KM003": {"node_id": "KM003", "name": "时域分析", "assessment_focus": "分析"},
         "KM004": {"node_id": "KM004", "name": "稳态误差"},
     }
@@ -128,12 +133,15 @@ def test_graph_rag_pipeline_runs_on_current_outputs_without_llm():
     assert result["traversed_nodes"]
     assert result["evidence_items"]
     assert result["plan"]["preferred_relations"][0] == "prerequisite_of"
-    assert any(item["relation_direction"] == "reverse" for item in result["traversed_nodes"][1:4])
+    assert any(item["relation_direction"] == "reverse" for item in result["traversed_nodes"][1:6])
     assert any(item["attribute"] == "relation_path" for item in result["evidence_items"])
+    assert result["subgraph_roles"]["primary_nodes"]
+    anchor_id = result["anchor_nodes"][0]["node_id"]
+    assert result["subgraph_roles"]["node_roles"][anchor_id] == "primary"
     assert "依据：" in result["answer"]
 
 
-def test_graph_rag_pipeline_includes_formula_and_figure_assets():
+def test_graph_rag_pipeline_includes_ranked_media_and_roles():
     pipeline = GraphRAGPipeline(enable_llm=False)
 
     result = pipeline.ask("控制系统的复数域数学模型有什么典型公式和图表？", traversal_mode="balanced")
@@ -141,7 +149,9 @@ def test_graph_rag_pipeline_includes_formula_and_figure_assets():
     assert result["media_items"]
     assert any(item["asset_type"] == "formula" for item in result["media_items"])
     assert any(item["asset_type"] == "figure" for item in result["media_items"])
-    assert "相关公式与图表：" not in result["answer"]
+    assert any(item["is_primary"] is True for item in result["media_items"])
+    assert sum(1 for item in result["media_items"] if item["is_primary"]) <= 3
+    assert all(item["display_label"].startswith(("式", "图")) for item in result["media_items"])
 
 
 def test_graph_rag_pipeline_defaults_visual_llm_off():

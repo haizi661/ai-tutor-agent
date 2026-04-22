@@ -70,10 +70,14 @@ class GraphRAGPipeline:
             node_budget=plan.node_budget,
         )
         context_payload = self.context_builder.build(
+            question=question,
+            question_type=plan.question_type,
             traversed_nodes=traversed_nodes,
             node_map=self.node_map,
             target_attributes=plan.target_attributes,
         )
+        subgraph_roles = context_payload["subgraph_roles"]
+        role_map = subgraph_roles.get("node_roles", {})
         traversed_payload = [
             {
                 "node_id": item.node_id,
@@ -88,6 +92,7 @@ class GraphRAGPipeline:
                 "edge_source_type": item.edge_source_type,
                 "relation_reference": item.relation_reference,
                 "name": self.node_map.get(item.node_id, {}).get("name", ""),
+                "node_role": role_map.get(item.node_id, "context"),
             }
             for item in traversed_nodes
         ]
@@ -124,6 +129,7 @@ class GraphRAGPipeline:
             "traversed_nodes": traversed_payload,
             "node_summaries": context_payload["node_summaries"],
             "evidence_items": context_payload["evidence_items"],
+            "subgraph_roles": subgraph_roles,
             "media_items": media_items,
             "context_text": context_payload["context_text"],
             "answer": answer,
