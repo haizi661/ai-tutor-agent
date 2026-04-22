@@ -11,7 +11,6 @@ from ai_tutor_agent.knowledge_map.builders.graph_relation_builder import GraphRe
 from ai_tutor_agent.knowledge_map.builders.graph_skeleton_builder import GraphSkeletonBuilder
 from ai_tutor_agent.knowledge_map.builders.learning_path_builder import LearningPathBuilder
 from ai_tutor_agent.knowledge_map.config.course_graph_config import COURSE_GRAPH_CONFIG, RELATION_TYPES
-
 from ai_tutor_agent.knowledge_map.builders.node_content_enricher import NodeContentEnricher
 from ai_tutor_agent.knowledge_map.config.document_config import DOCUMENT_PATHS
 from ai_tutor_agent.knowledge_map.builders.node_retrieval_builder import NodeRetrievalBuilder
@@ -47,15 +46,10 @@ class KnowledgeMapPipelineV2:
         learning_path_builder = LearningPathBuilder()
         nodes = learning_path_builder.build_learning_paths(nodes, edges)
 
-        # 教材 PDF 内容增强
-        enricher = NodeContentEnricher(
-            textbook_pdf_path=DOCUMENT_PATHS.get("textbook_pdf")
-        )
+        enricher = NodeContentEnricher(textbook_pdf_path=DOCUMENT_PATHS.get("textbook_pdf"))
         nodes = enricher.enrich_nodes(nodes)
 
-        retrieval_builder = NodeRetrievalBuilder(
-            textbook_pdf_path=DOCUMENT_PATHS.get("textbook_pdf")
-        )
+        retrieval_builder = NodeRetrievalBuilder(textbook_pdf_path=DOCUMENT_PATHS.get("textbook_pdf"))
         nodes = retrieval_builder.enrich_nodes(nodes)
 
         vector_index_builder = VectorIndexBuilder()
@@ -67,21 +61,18 @@ class KnowledgeMapPipelineV2:
         nodes_df = pd.DataFrame(nodes)
         edges_df = pd.DataFrame(edges)
 
+        has_source_type = (not nodes_df.empty) and ("source_type" in nodes_df.columns)
         metadata = {
             "course_name": self.config.get("course_name", ""),
             "version": self.config.get("version", "v2"),
             "node_count": len(nodes_df),
             "edge_count": len(edges_df),
-            "level1_count": int((nodes_df["level"] == 1).sum()) if not nodes_df.empty else 0,
-            "level2_count": int((nodes_df["level"] == 2).sum()) if not nodes_df.empty else 0,
+            "chapter_anchor_count": int((nodes_df["source_type"] == "skeleton_chapter_anchor").sum()) if has_source_type else 0,
+            "topic_count": int((nodes_df["source_type"] == "skeleton_topic").sum()) if has_source_type else 0,
             "textbook_pdf": str(DOCUMENT_PATHS.get("textbook_pdf", "")),
-            "textbook_pdf_exists": bool(
-                DOCUMENT_PATHS.get("textbook_pdf") and DOCUMENT_PATHS["textbook_pdf"].exists()
-            ),
+            "textbook_pdf_exists": bool(DOCUMENT_PATHS.get("textbook_pdf") and DOCUMENT_PATHS["textbook_pdf"].exists()),
             "outline_pdf": str(DOCUMENT_PATHS.get("outline_pdf", "")),
-            "outline_pdf_exists": bool(
-                DOCUMENT_PATHS.get("outline_pdf") and DOCUMENT_PATHS["outline_pdf"].exists()
-            ),
+            "outline_pdf_exists": bool(DOCUMENT_PATHS.get("outline_pdf") and DOCUMENT_PATHS["outline_pdf"].exists()),
             "vector_collection_name": index_summary.get("collection_name", ""),
             "vector_document_count": index_summary.get("document_count", 0),
         }
@@ -93,31 +84,43 @@ class KnowledgeMapPipelineV2:
         edges: list[dict[str, Any]],
     ) -> list[dict[str, Any]]:
         """
-        根据边信息，回填节点内部的关系属性字段。
-        这样后面节点自身就带有 prerequisite_nodes / next_nodes 等信息。
+        根据统一边关系回填节点内部的兼容字段。
+        说明：
+        1. 新版图谱以边为主，不再依赖 level / part_of / HAS_SUBTOPIC。
+        2. 为兼容后续 learning_path / companion / QA 逻辑，继续回填
+           prerequisite_nodes / next_nodes / related_nodes / recommended_next_nodes。
         """
         node_map = {node["node_id"]: node for node in nodes}
+
+        def _append_unique(node_id: str, field: str, value: str) -> None:
+            if node_id not in node_map:
+                return
+            node = node_map[node_id]
+            node.setdefault(field, [])
+            if value not in node[field]:
+                node[field].append(value)
 
         for edge in edges:
             source = edge["source"]
             target = edge["target"]
-            relation = edge["relation"]
+            relation_type = edge.get("relation_type", edge.get("relation", ""))
+            direction_type = edge.get("direction_type", "undirected")
 
             if source not in node_map or target not in node_map:
                 continue
 
-            if relation == "LEADS_TO":
-                node_map[source]["next_nodes"].append(target)
-                node_map[target]["prerequisite_nodes"].append(source)
-
-            elif relation == "PRE_REQUIRES":
-                # 这个关系已经由 LEADS_TO 反向自动补过，这里不重复写
-                pass
-
-            elif relation == "HAS_SUBTOPIC":
-                parent_extra = node_map[source].setdefault("extra", {})
-                parent_extra.setdefault("subtopic_nodes", [])
-                parent_extra["subtopic_nodes"].append(target)
+            if relation_type == "prerequisite_of":
+                _append_unique(target, "prerequisite_nodes", source)
+                _append_unique(source, "next_nodes", target)
+                _append_unique(source, "recommended_next_nodes", target)
+            elif relation_type in {"related_to", "parallel_to", "extends_to", "easy_to_confuse_with", "weak_related_to"}:
+                _append_unique(source, "related_nodes", target)
+                _append_unique(source, "recommended_next_nodes", target)
+                if direction_type == "undirected":
+                    _append_unique(target, "related_nodes", source)
+                    _append_unique(target, "recommended_next_nodes", source)
+                elif relation_type == "extends_to":
+                    _append_unique(source, "next_nodes", target)
 
         return list(node_map.values())
 
@@ -184,10 +187,6 @@ class KnowledgeMapPipelineV2:
 
     @staticmethod
     def _sanitize_for_graphml(record: dict[str, Any]) -> dict[str, Any]:
-        """
-        GraphML 不支持 list / dict / None 等复杂类型，
-        所以导出前统一转成可写入的标量或字符串。
-        """
         sanitized: dict[str, Any] = {}
         for key, value in record.items():
             sanitized[key] = KnowledgeMapPipelineV2._to_graphml_value(value)

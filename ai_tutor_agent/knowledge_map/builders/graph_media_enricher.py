@@ -366,13 +366,20 @@ class GraphMediaEnricher:
     def _extract_node_scope_text(self, node: dict[str, Any], doc: dict[str, Any]) -> str:
         full_md = doc["full_md"]
         node_name = str(node.get("name", "")).strip()
-        level = int(node.get("level", 1) or 1)
         lines = full_md.splitlines()
+        extra = node.get("extra", {}) or {}
+        node_role = str(extra.get("node_role", "") or "").strip()
+        is_focus = bool(extra.get("is_focus"))
+        page_refs = node.get("page_refs", []) or []
 
-        if level >= 2 and node_name:
+        if node_role not in {"chapter_anchor", ""} and node_name:
             section_match = self._extract_named_section(lines, node_name)
             if section_match:
                 return section_match
+
+        if is_focus and page_refs:
+            block = self._find_best_block(node, full_md)
+            return block["content"] if block else ""
 
         block = self._find_best_block(node, full_md)
         return block["content"] if block else ""

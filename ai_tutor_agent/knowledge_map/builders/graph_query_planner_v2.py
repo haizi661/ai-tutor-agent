@@ -1,4 +1,4 @@
-﻿from __future__ import annotations
+from __future__ import annotations
 
 import json
 from dataclasses import dataclass
@@ -49,19 +49,20 @@ class GraphQueryPlanner:
 
         llm_payload = self._invoke_llm_plan(question, question_type, selected_mode)
         anchor_terms = self._clean_terms(llm_payload.get("anchor_terms")) or self._heuristic_anchor_terms(question)
-        target_attributes = self._filter_known_values(
+
+        target_attributes = self._filter_known_attributes(
             llm_payload.get("target_attributes"),
             self.config.answer_attribute_defaults.get(question_type, []),
         )
         if not target_attributes:
             target_attributes = list(self.config.answer_attribute_defaults.get(question_type, ["summary"]))
 
-        preferred_relations = self._filter_known_values(
+        preferred_relations = self._filter_known_relations(
             llm_payload.get("preferred_relations"),
             self.config.relation_preferences.get(question_type, []),
         )
         if not preferred_relations:
-            preferred_relations = list(self.config.relation_preferences.get(question_type, ["HAS_SUBTOPIC"]))
+            preferred_relations = list(self.config.relation_preferences.get(question_type, ["related_to"]))
 
         reasoning = str(llm_payload.get("reasoning", "") or "").strip()
         if not reasoning:
@@ -87,8 +88,8 @@ class GraphQueryPlanner:
         system_msg = SystemMessage(
             content=(
                 "You are a knowledge-graph retrieval planner. "
-                "Return JSON only. "
-                "Fields: anchor_terms, target_attributes, preferred_relations, reasoning."
+                "The graph uses graph-2.1 relations such as prerequisite_of, parallel_to, related_to, weak_related_to. "
+                "Return JSON only with fields: anchor_terms, target_attributes, preferred_relations, reasoning."
             )
         )
         human_msg = HumanMessage(
@@ -97,10 +98,11 @@ class GraphQueryPlanner:
                 f"Question type: {question_type}\n"
                 f"Traversal mode: {traversal_mode}\n"
                 "target_attributes must be chosen from: "
-                "summary, key_points, formulas, examples, prerequisite_nodes, next_nodes, "
-                "recommended_next_nodes, requirement_level, mastery_threshold, importance_level, assessment_focus.\n"
+                "summary, core_concepts, key_points, formulas, examples, prerequisite_nodes, next_nodes, "
+                "recommended_next_nodes, related_nodes, application_nodes, explanation_teacher_style, "
+                "requirement_level, mastery_threshold, importance_level, assessment_focus.\n"
                 "preferred_relations must be chosen from: "
-                "HAS_SUBTOPIC, PRE_REQUIRES, LEADS_TO, RECOMMENDED_NEXT, RELATED_TO, APPLIED_IN."
+                "prerequisite_of, parallel_to, related_to, weak_related_to, extends_to, easy_to_confuse_with, tested_together."
             )
         )
         try:
@@ -113,6 +115,8 @@ class GraphQueryPlanner:
 
     def _detect_question_type(self, question: str) -> str:
         normalized = (question or "").strip()
+        if any(token in normalized for token in ["出一道", "命题", "出题", "设计一道题", "综合题"]):
+            return "assessment_generation"
         if any(token in normalized for token in ["区别", "联系", "比较", "对比"]):
             return "comparative_query"
         if any(token in normalized for token in ["关系", "关联", "为什么相关"]):
@@ -145,6 +149,9 @@ class GraphQueryPlanner:
             "什么是",
             "如何",
             "怎么",
+            "请围绕",
+            "给我出一道",
+            "设计一道",
             "之前要先学什么",
             "之前学什么",
             "之前要学什么",
@@ -175,30 +182,37 @@ class GraphQueryPlanner:
                 results.append(item)
         return results[:3]
 
-    def _filter_known_values(self, value: Any, defaults: list[str]) -> list[str]:
+    def _filter_known_attributes(self, value: Any, defaults: list[str]) -> list[str]:
         allowed = set(defaults) | {
             "summary",
+            "core_concepts",
             "key_points",
             "formulas",
             "examples",
             "prerequisite_nodes",
             "next_nodes",
             "recommended_next_nodes",
+            "related_nodes",
+            "application_nodes",
+            "explanation_teacher_style",
             "requirement_level",
             "mastery_threshold",
             "importance_level",
             "assessment_focus",
-            "HAS_SUBTOPIC",
-            "PRE_REQUIRES",
-            "LEADS_TO",
-            "RECOMMENDED_NEXT",
-            "RELATED_TO",
-            "APPLIED_IN",
         }
         results: list[str] = []
         for item in self._clean_terms(value):
             if item in allowed and item not in results:
                 results.append(item)
+        return results
+
+    def _filter_known_relations(self, value: Any, defaults: list[str]) -> list[str]:
+        allowed = set(self.config.relation_weights.keys()) | set(defaults) | set(self.config.relation_aliases.keys())
+        results: list[str] = []
+        for item in self._clean_terms(value):
+            normalized = self.config.normalize_relation(item)
+            if normalized in allowed and normalized not in results:
+                results.append(normalized)
         return results
 
     def _clean_terms(self, value: Any) -> list[str]:
@@ -213,6 +227,7 @@ class GraphQueryPlanner:
 
     def _default_reasoning(self, question_type: str, traversal_mode: str) -> str:
         return (
-            f"Use the {traversal_mode} semantic-neighborhood profile, "
-            f"expand along relations favored by {question_type}, and decay distant nodes."
+            f"Use the {traversal_mode} graph-2.1 retrieval profile, "
+            f"prioritize relation semantics preferred by {question_type}, "
+            "and decay distant nodes while keeping stronger weighted edges."
         )

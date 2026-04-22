@@ -81,14 +81,14 @@ class GraphAnswerGeneratorV2:
         forward_prereqs = [
             item
             for item in node_summaries
-            if item.get("via_relation") == "PRE_REQUIRES" and item.get("hop") == 1
+            if item.get("via_relation") == "prerequisite_of" and item.get("hop") == 1
         ]
         forward_prereq_names = [item["name"] for item in forward_prereqs]
 
         key_evidence: list[dict[str, Any]] = []
         seen_refs: set[str] = set()
         for item in evidence_items:
-            if item["attribute"] not in {"summary", "prerequisite_nodes", "key_points"}:
+            if item["attribute"] not in {"summary", "relation_path", "prerequisite_nodes", "key_points"}:
                 continue
             if item["reference"] in seen_refs:
                 continue

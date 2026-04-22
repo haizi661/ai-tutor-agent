@@ -1,11 +1,15 @@
-﻿from __future__ import annotations
+from __future__ import annotations
 
 from typing import Any
 
 from ai_tutor_agent.knowledge_map.builders.graph_traverser import TraversedNode
+from ai_tutor_agent.knowledge_map.config.graph_rag_config import GraphRAGConfig
 
 
 class GraphContextBuilder:
+    def __init__(self, config: GraphRAGConfig | None = None) -> None:
+        self.config = config or GraphRAGConfig()
+
     def build(
         self,
         *,
@@ -16,6 +20,7 @@ class GraphContextBuilder:
         evidence_items: list[dict[str, Any]] = []
         node_summaries: list[dict[str, Any]] = []
         traversed_meta: dict[str, dict[str, Any]] = {}
+        seen_references: set[str] = set()
 
         for traversed in traversed_nodes:
             node = node_map.get(traversed.node_id)
@@ -34,16 +39,30 @@ class GraphContextBuilder:
                     "score": traversed.score,
                     "via_relation": traversed.via_relation,
                     "parent_node_id": traversed.parent_node_id,
+                    "relation_direction": traversed.relation_direction,
+                    "importance_level": node.get("importance_level", ""),
+                    "assessment_focus": node.get("assessment_focus", ""),
+                    "relation_reference": traversed.relation_reference,
+                    "relation_note": traversed.relation_note,
                 }
             )
+
+            for item in self._collect_relation_evidence(traversed=traversed, node_map=node_map):
+                if item["reference"] in seen_references:
+                    continue
+                seen_references.add(item["reference"])
+                evidence_items.append(item)
+
             for attribute in target_attributes:
-                evidence_items.extend(
-                    self._collect_attribute_evidence(
-                        node=node,
-                        attribute=attribute,
-                        node_map=node_map,
-                    )
-                )
+                for item in self._collect_attribute_evidence(
+                    node=node,
+                    attribute=attribute,
+                    node_map=node_map,
+                ):
+                    if item["reference"] in seen_references:
+                        continue
+                    seen_references.add(item["reference"])
+                    evidence_items.append(item)
 
         evidence_items.sort(
             key=lambda item: (
@@ -58,6 +77,43 @@ class GraphContextBuilder:
             "evidence_items": evidence_items,
             "context_text": self._render_context_text(node_summaries, evidence_items),
         }
+
+    def _collect_relation_evidence(
+        self,
+        *,
+        traversed: TraversedNode,
+        node_map: dict[str, dict[str, Any]],
+    ) -> list[dict[str, Any]]:
+        if traversed.hop == 0 or traversed.via_relation == "ANCHOR":
+            return []
+
+        node_name = str(node_map.get(traversed.node_id, {}).get("name", "") or "").strip()
+        parent_name = traversed.parent_name or str(
+            node_map.get(traversed.parent_node_id or "", {}).get("name", "") or ""
+        ).strip()
+        direction_cn = "正向扩展" if traversed.relation_direction == "forward" else "逆向追溯"
+        relation_text = (
+            f"{parent_name or traversed.parent_node_id} --[{traversed.via_relation}]--> "
+            f"{node_name or traversed.node_id}；方向：{direction_cn}；"
+            f"关系强度={traversed.relation_strength:.2f}；边权重={traversed.edge_weight:.2f}"
+        )
+        if traversed.relation_note:
+            relation_text += f"；说明：{traversed.relation_note}"
+        if traversed.relation_evidence:
+            relation_text += f"；证据：{self._normalize_text(traversed.relation_evidence, max_len=120)}"
+
+        reference = traversed.relation_reference or (
+            f"{traversed.parent_node_id or 'ROOT'}->{traversed.node_id}.{traversed.via_relation}"
+        )
+        return [
+            {
+                "node_id": traversed.node_id,
+                "node_name": node_name,
+                "attribute": "relation_path",
+                "reference": reference,
+                "text": relation_text,
+            }
+        ]
 
     def _collect_attribute_evidence(
         self,
@@ -90,13 +146,16 @@ class GraphContextBuilder:
                 )
             return results
 
+        text = self._format_scalar_attribute(attribute, value)
+        if not text:
+            return []
         return [
             {
                 "node_id": node_id,
                 "node_name": name,
                 "attribute": attribute,
                 "reference": f"{node_id}.{attribute}",
-                "text": self._normalize_text(str(value).strip()),
+                "text": text,
             }
         ]
 
@@ -107,11 +166,27 @@ class GraphContextBuilder:
         node_map: dict[str, dict[str, Any]],
     ) -> str:
         text = str(item).strip()
-        if attribute in {"prerequisite_nodes", "next_nodes", "recommended_next_nodes"}:
+        if not text:
+            return ""
+        if attribute in {
+            "prerequisite_nodes",
+            "next_nodes",
+            "recommended_next_nodes",
+            "related_nodes",
+            "application_nodes",
+        }:
             target = node_map.get(text)
             if target:
                 return f"{text} | {target.get('name', '')}"
-        return self._normalize_text(text)
+        return self._normalize_text(text, max_len=220)
+
+    def _format_scalar_attribute(self, attribute: str, value: Any) -> str:
+        if attribute == "mastery_threshold":
+            try:
+                return f"{float(value):.2f}"
+            except (TypeError, ValueError):
+                return self._normalize_text(str(value).strip(), max_len=220)
+        return self._normalize_text(str(value).strip(), max_len=220)
 
     def _normalize_text(self, text: str, max_len: int = 180) -> str:
         compact = " ".join(text.split())
@@ -120,16 +195,9 @@ class GraphContextBuilder:
         return compact[: max_len - 1].rstrip() + "..."
 
     def _attribute_priority(self, attribute: str) -> int:
-        priority = {
-            "summary": 0,
-            "prerequisite_nodes": 1,
-            "next_nodes": 1,
-            "recommended_next_nodes": 1,
-            "key_points": 2,
-            "formulas": 3,
-            "examples": 4,
-        }
-        return priority.get(attribute, 9)
+        if attribute == "relation_path":
+            return 1
+        return self.config.evidence_attribute_priority.get(attribute, 9)
 
     def _render_context_text(
         self,
@@ -138,14 +206,22 @@ class GraphContextBuilder:
     ) -> str:
         lines = ["[Subgraph Nodes]"]
         for item in node_summaries:
+            focus = str(item.get("assessment_focus", "") or "").strip()
+            importance = str(item.get("importance_level", "") or "").strip()
+            extras = []
+            if importance:
+                extras.append(f"importance={importance}")
+            if focus:
+                extras.append(f"assessment_focus={focus}")
+            extras_blob = f" | {' | '.join(extras)}" if extras else ""
             lines.append(
                 f"- {item['node_id']} | {item['name']} | hop={item['hop']} | "
-                f"score={item['score']} | via={item['via_relation']}"
+                f"score={item['score']} | via={item['via_relation']}{extras_blob}"
             )
 
         lines.append("")
         lines.append("[Node Evidence]")
-        for item in evidence_items[:12]:
+        for item in evidence_items[:18]:
             lines.append(f"- [{item['reference']}] {item['text']}")
 
         return "\n".join(lines).strip()

@@ -43,8 +43,8 @@ class GraphRAGPipeline:
             llm_profile=llm_profile,
         )
         self.query_planner = GraphQueryPlanner(llm=tutor_llm, config=self.config)
-        self.graph_traverser = GraphTraverser(self.edges, config=self.config)
-        self.context_builder = GraphContextBuilder()
+        self.graph_traverser = GraphTraverser(self.edges, node_map=self.node_map, config=self.config)
+        self.context_builder = GraphContextBuilder(config=self.config)
         self.media_enricher = GraphMediaEnricher(visual_analyzer=visual_analyzer)
         self.answer_generator = GraphAnswerGeneratorV2(llm=tutor_llm)
 
@@ -82,6 +82,11 @@ class GraphRAGPipeline:
                 "via_relation": item.via_relation,
                 "parent_node_id": item.parent_node_id,
                 "relation_direction": item.relation_direction,
+                "relation_strength": item.relation_strength,
+                "edge_weight": item.edge_weight,
+                "relation_note": item.relation_note,
+                "edge_source_type": item.edge_source_type,
+                "relation_reference": item.relation_reference,
                 "name": self.node_map.get(item.node_id, {}).get("name", ""),
             }
             for item in traversed_nodes
