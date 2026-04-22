@@ -134,6 +134,9 @@ class KnowledgeMapDebugger:
         print("  examples 自动控制系统示例")
         print("  search 根轨迹")
         print("  student")
+        print("  homework")
+        print("  add_hw 1-1")
+        print("  remove_hw 1-1")
         print("  set_current KM007")
         print("  mark_visited KM007")
         print("  mark_wrong KM012")
@@ -158,6 +161,9 @@ class KnowledgeMapDebugger:
                 return
             if cmd == "help":
                 self._print_help()
+                return
+            if cmd == "homework":
+                self._show_homework()
                 return
 
             print("⚠️ 请输入“命令 + 内容”，例如：node 自动控制的基本原理与方式")
@@ -193,6 +199,10 @@ class KnowledgeMapDebugger:
             self._mark_wrong(arg)
         elif cmd == "mastery":
             self._set_mastery(arg)
+        elif cmd == "add_hw":
+            self._add_homework(arg)
+        elif cmd == "remove_hw":
+            self._remove_homework(arg)
         else:
             print(f"⚠️ 未知命令: {cmd}")
 
@@ -373,10 +383,51 @@ class KnowledgeMapDebugger:
         print(f"wrong_nodes: {self.student_state.wrong_nodes}")
         print(f"recommended_queue: {self.student_state.recommended_queue}")
         print(f"mastery_scores: {self.student_state.mastery_scores}")
+        print(f"homework: {self.student_state.homework}")
 
+        print("\n[node_learning_records]")
+        if not self.student_state.node_learning_records:
+            print("(空)")
+        else:
+            for node_id, record in self.student_state.node_learning_records.items():
+                node_name = self.node_map.get(node_id, {}).get("name", node_id)
+                print(f"- {node_id} | {node_name} | {record}")
+    def _show_homework(self) -> None:
+        print("\n" + "=" * 100)
+        print("[当前作业列表]")
+        if not self.student_state.homework:
+            print("(空)")
+            return
+
+        for idx, qid in enumerate(self.student_state.homework, start=1):
+            print(f"{idx}. {qid}")
+
+
+    def _add_homework(self, arg: str) -> None:
+        question_id = arg.strip()
+        if not question_id:
+            print("⚠️ 用法: add_hw 1-1")
+            return
+
+        self.student_state.add_homework(question_id)
+        self.state_store.save(self.student_state)
+        print(f"✅ 已添加作业题目: {question_id}")
+
+
+    def _remove_homework(self, arg: str) -> None:
+        question_id = arg.strip()
+        if not question_id:
+            print("⚠️ 用法: remove_hw 1-1")
+            return
+
+        self.student_state.remove_homework(question_id)
+        self.state_store.save(self.student_state)
+        print(f"✅ 已移除作业题目: {question_id}")
     def _set_current(self, arg: str) -> None:
         node = self._require_node(arg)
         self.student_state.current_node_id = node["node_id"]
+        # 新增：记录开始学习时间
+        self.student_state.mark_node_started(node["node_id"])
         self.state_store.save(self.student_state)
         print(f"✅ 当前学习节点已设置为: {node['node_id']} | {node['name']}")
 
@@ -384,6 +435,8 @@ class KnowledgeMapDebugger:
         node = self._require_node(arg)
         if node["node_id"] not in self.student_state.visited_nodes:
             self.student_state.visited_nodes.append(node["node_id"])
+        # 新增：记录完成时间
+        self.student_state.mark_node_completed(node["node_id"])
         self.state_store.save(self.student_state)
         print(f"✅ 已标记学过: {node['node_id']} | {node['name']}")
 
@@ -409,7 +462,7 @@ class KnowledgeMapDebugger:
             print("⚠️ 掌握度必须是数字，比如 0.75")
             return
 
-        self.student_state.mastery_scores[node["node_id"]] = score
+        self.student_state.update_mastery(node["node_id"], score)
         self.state_store.save(self.student_state)
         print(f"✅ 已设置掌握度: {node['node_id']} | {node['name']} = {score:.2f}")
 
