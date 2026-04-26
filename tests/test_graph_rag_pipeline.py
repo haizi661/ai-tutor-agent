@@ -174,3 +174,18 @@ def test_graph_rag_pipeline_prefers_chapter03_annotated_assets_for_time_domain_q
         item["asset_type"] == "formula" and item.get("analysis_hint")
         for item in result["media_items"]
     )
+
+
+def test_graph_rag_pipeline_prefers_precise_second_order_media_for_overshoot_question():
+    pipeline = GraphRAGPipeline(enable_llm=False)
+
+    result = pipeline.ask("二阶系统的超调量与阻尼比有什么关系？", traversal_mode="balanced")
+
+    references = [str(item["reference"]) for item in result["media_items"]]
+    assert "chapter_03_p082-159_线性系统的时域分析法__082fadd0:formula:14b9ffe1d2e7" in references
+    assert "chapter_03_p082-159_线性系统的时域分析法__082fadd0:figure:d38d2fe6da5d" in references
+
+    primary_items = [item for item in result["media_items"] if item.get("is_primary")]
+    primary_refs = {str(item["reference"]) for item in primary_items}
+    assert "chapter_03_p082-159_线性系统的时域分析法__082fadd0:formula:14b9ffe1d2e7" in primary_refs
+    assert "chapter_03_p082-159_线性系统的时域分析法__082fadd0:figure:d38d2fe6da5d" in primary_refs

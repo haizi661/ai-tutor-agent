@@ -98,6 +98,7 @@ class NodeSelector:
         extra = node.get("extra", {}) or {}
 
         retrieval_keywords = self._collect_extra_keywords(extra)
+        query_tokens = self._extract_query_tokens(query)
         score = 0.0
 
         if name and name in query:
@@ -132,6 +133,25 @@ class NodeSelector:
         for keyword in self._split_keywords(explanation_teacher_style)[:12]:
             if keyword in query:
                 score += 0.2
+
+        evidence_terms: list[str] = []
+        evidence_terms.extend(self._extract_name_keywords(name))
+        evidence_terms.extend(tags)
+        evidence_terms.extend(core_concepts)
+        evidence_terms.extend(retrieval_keywords)
+        evidence_terms.extend(self._split_keywords(summary))
+        overlap_count = 0
+        for token in query_tokens:
+            if any(token and token in term for term in evidence_terms):
+                overlap_count += 1
+                score += 1.35
+
+        if overlap_count:
+            score += min(overlap_count * 0.55, 3.0)
+        if any(token in name for token in query_tokens):
+            score += 1.2
+        if any(token in concept for token in query_tokens for concept in core_concepts):
+            score += 1.0
 
         score += self._importance_bonus(node)
         score += self._role_bonus(extra)
@@ -230,3 +250,14 @@ class NodeSelector:
         cleaned = re.sub(r"[，。？！；：、“”‘’（）()【】\[\],.;:!?]", " ", text or "")
         parts = [item.strip() for item in cleaned.split() if item.strip()]
         return [item for item in parts if len(item) >= 2]
+
+    def _extract_query_tokens(self, text: str) -> list[str]:
+        parts = re.findall(r"[A-Za-z][A-Za-z0-9_%-]*|[\u4e00-\u9fff]{2,}|[0-9]+(?:\.[0-9]+)?", text or "")
+        stop_words = {"什么", "关系", "如何", "为什么", "请问", "一个", "系统"}
+        results: list[str] = []
+        for part in parts:
+            token = part.strip()
+            if len(token) < 2 or token in stop_words or token in results:
+                continue
+            results.append(token)
+        return results[:10]

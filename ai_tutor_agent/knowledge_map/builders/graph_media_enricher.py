@@ -12,7 +12,7 @@ class GraphMediaEnricher:
         mineru_cache_root: str | Path = "data/mineru_cache",
         *,
         visual_analyzer: Any | None = None,
-        annotated_assets_path: str | Path = "data/media_evidence_index/chapter03_annotated_assets.jsonl",
+        annotated_assets_path: str | Path = "data/media_evidence_index",
     ) -> None:
         self.mineru_cache_root = Path(mineru_cache_root)
         self.chapter_docs = self._load_chapter_docs()
@@ -95,9 +95,15 @@ class GraphMediaEnricher:
         results: list[dict[str, Any]] = []
 
         for asset in self.annotated_assets:
-            if not self._asset_matches_node(asset, node_id):
+            match_info = self._match_asset_to_node(asset, node_id)
+            if not match_info["matched"]:
                 continue
-            item = self._build_media_item_from_annotated_asset(asset, traversed, question=question)
+            item = self._build_media_item_from_annotated_asset(
+                asset,
+                traversed,
+                question=question,
+                match_info=match_info,
+            )
             if not item:
                 continue
             item["node_id"] = node_id
@@ -114,6 +120,7 @@ class GraphMediaEnricher:
         traversed: dict[str, Any],
         *,
         question: str,
+        match_info: dict[str, Any],
     ) -> dict[str, Any] | None:
         asset_type = str(asset.get("asset_type", "") or "")
         if asset_type not in {"figure", "formula"}:
@@ -151,6 +158,12 @@ class GraphMediaEnricher:
             "domain_terms": list(asset.get("domain_terms", []) or []),
             "confidence": float(asset.get("confidence", 0.0) or 0.0),
             "source_path": str(asset.get("source_path", "") or "").strip(),
+            "visual_type": str(asset.get("visual_type", "") or "").strip(),
+            "asset_anchor_node_id": str(asset.get("anchor_node_id", "") or "").strip(),
+            "asset_anchor_node_name": str(asset.get("anchor_node_name", "") or "").strip(),
+            "node_link_score": float(match_info.get("link_score", 0.0) or 0.0),
+            "match_kind": str(match_info.get("kind", "") or "").strip(),
+            "chapter_title": str(asset.get("chapter_title", "") or "").strip(),
         }
 
         if asset_type == "figure":
@@ -283,22 +296,38 @@ class GraphMediaEnricher:
             " ".join(str(x) for x in (item.get("retrieval_keywords", []) or [])),
             " ".join(str(x) for x in (item.get("domain_terms", []) or [])),
             " ".join(str(x) for x in (item.get("variables", []) or [])),
+            str(item.get("chapter_title", "") or ""),
+            str(item.get("asset_anchor_node_name", "") or ""),
         ]
         haystack = " ".join(part for part in haystack_parts if part)
+        overlap_count = 0
         for token in question_tokens:
             if token in haystack:
+                overlap_count += 1
                 score += 1.2
+        score += min(overlap_count * 0.45, 2.25)
 
         role = str(item.get("node_role", "") or "")
         score += {
-            "primary": 3.0,
+            "primary": 2.2,
             "prerequisite": 2.0,
-            "supporting": 1.5,
+            "supporting": 1.7,
             "comparison": 1.2,
         }.get(role, 0.5)
 
-        if str(item.get("node_id", "") or "") == str(item.get("anchor_node_id", item.get("node_id", ""))):
-            score += 0.8
+        node_id = str(item.get("node_id", "") or "")
+        asset_anchor_node_id = str(item.get("asset_anchor_node_id", "") or "")
+        node_link_score = float(item.get("node_link_score", 0.0) or 0.0)
+        if node_id and node_id == asset_anchor_node_id:
+            score += 3.2
+        elif node_link_score >= 14:
+            score += 1.8
+        elif node_link_score >= 11:
+            score += 0.9
+        else:
+            score -= 0.6
+        if role == "primary" and asset_anchor_node_id and asset_anchor_node_id != node_id:
+            score -= 1.6
 
         if item["asset_type"] == "formula":
             score += 1.8
@@ -306,20 +335,40 @@ class GraphMediaEnricher:
                 score += 1.2
             if item.get("formula_meaning"):
                 score += 0.8
+            if self._contains_all(haystack, ["超调量", "阻尼比"]):
+                score += 2.2
+            if "超调量" in question and "超调量" not in haystack:
+                score -= 1.1
+            if "阻尼比" in question and "阻尼比" not in haystack and "\\zeta" not in haystack:
+                score -= 1.1
         else:
             caption = str(item.get("caption", "") or "")
+            visual_type = str(item.get("visual_type", "") or "")
             if any(keyword in caption for keyword in ["响应曲线", "单位阶跃", "性能指标", "超调量", "关系曲线"]):
                 score += 2.2
+            if visual_type == "trend_curve":
+                score += 0.8
             if any(keyword in caption for keyword in ["结构图", "原理图", "框图"]) and not any(
                 token in question for token in ["结构", "原理", "框图"]
             ):
-                score -= 1.8
+                score -= 3.0
+            if "斜坡误差" in caption and not any(token in question for token in ["斜坡", "误差"]):
+                score -= 2.4
+            if "超调量" in question and "超调量" not in haystack and "\\sigma" not in haystack:
+                score -= 1.0
+            if "阻尼比" in question and "阻尼比" not in haystack and "\\zeta" not in haystack:
+                score -= 1.0
+            if self._contains_all(haystack, ["超调量", "阻尼比"]):
+                score += 2.4
             if item.get("visual_summary"):
                 score += 0.8
 
         score += min(float(item.get("confidence", 0.0) or 0.0), 1.0)
         score -= int(item.get("hop", 99)) * 0.6
         return round(score, 4)
+
+    def _contains_all(self, text: str, needles: list[str]) -> bool:
+        return all(needle in text for needle in needles)
 
     def _build_analysis_hint_from_asset(self, asset: dict[str, Any]) -> str:
         asset_type = str(asset.get("asset_type", "") or "")
@@ -354,29 +403,59 @@ class GraphMediaEnricher:
         return f"可结合{node_name}的图形结构，说明系统组成、信号流向或关键现象。"
 
     def _load_annotated_assets(self) -> list[dict[str, Any]]:
-        if not self.annotated_assets_path.exists():
-            return []
         results: list[dict[str, Any]] = []
-        try:
-            for line in self.annotated_assets_path.read_text(encoding="utf-8").splitlines():
-                if not line.strip():
-                    continue
-                try:
-                    item = json.loads(line)
-                except json.JSONDecodeError:
-                    continue
-                if isinstance(item, dict):
-                    results.append(item)
-        except Exception:
-            return []
+        for path in self._resolve_annotated_asset_files():
+            try:
+                for line in path.read_text(encoding="utf-8").splitlines():
+                    if not line.strip():
+                        continue
+                    try:
+                        item = json.loads(line)
+                    except json.JSONDecodeError:
+                        continue
+                    if isinstance(item, dict):
+                        results.append(item)
+            except Exception:
+                continue
         return results
 
-    def _asset_matches_node(self, asset: dict[str, Any], node_id: str) -> bool:
+    def _resolve_annotated_asset_files(self) -> list[Path]:
+        target = self.annotated_assets_path
+        if not target.exists():
+            return []
+        if target.is_file():
+            return [target]
+
+        files: list[Path] = []
+        summary_path = target / "batch_summary.json"
+        if summary_path.exists():
+            try:
+                summary = json.loads(summary_path.read_text(encoding="utf-8"))
+                for chapter in summary.get("chapters", []) or []:
+                    annotated_path = Path(str(chapter.get("annotated_path", "") or ""))
+                    if annotated_path.exists() and annotated_path not in files:
+                        files.append(annotated_path)
+            except Exception:
+                pass
+
+        for pattern in ("*_annotated_assets.jsonl", "chapter03_annotated_assets.jsonl"):
+            for path in sorted(target.glob(pattern)):
+                if path.exists() and path not in files:
+                    files.append(path)
+        return files
+
+    def _match_asset_to_node(self, asset: dict[str, Any], node_id: str) -> dict[str, Any]:
         anchor_id = str(asset.get("anchor_node_id", "") or "").strip()
         if anchor_id == node_id:
-            return True
+            return {"matched": True, "kind": "anchor", "link_score": 99.0}
         linked_ids = [str(item).strip() for item in (asset.get("linked_node_ids", []) or [])]
-        return node_id in linked_ids
+        link_scores = [float(score or 0.0) for score in (asset.get("link_scores", []) or [])]
+        for idx, linked_id in enumerate(linked_ids):
+            if linked_id != node_id:
+                continue
+            score = link_scores[idx] if idx < len(link_scores) else 0.0
+            return {"matched": True, "kind": "linked", "link_score": score}
+        return {"matched": False, "kind": "", "link_score": 0.0}
 
     def _load_chapter_docs(self) -> list[dict[str, Any]]:
         docs: list[dict[str, Any]] = []

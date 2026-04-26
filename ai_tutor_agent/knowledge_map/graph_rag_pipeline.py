@@ -25,7 +25,7 @@ class GraphRAGPipeline:
         *,
         nodes_csv_path: str = "data/knowledge_map_outputs/auto_control_knowledge_map_v2_nodes.csv",
         edges_csv_path: str = "data/knowledge_map_outputs/auto_control_knowledge_map_v2_edges.csv",
-        annotated_assets_path: str = "data/media_evidence_index/chapter03_annotated_assets.jsonl",
+        annotated_assets_path: str = "data/media_evidence_index",
         enable_llm: bool = True,
         enable_visual_llm: bool = False,
         llm_profile: str | None = "qwen",

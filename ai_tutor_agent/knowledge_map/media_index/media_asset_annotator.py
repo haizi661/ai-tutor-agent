@@ -9,6 +9,71 @@ from ai_tutor_agent.knowledge_map.config.media_index_config import MediaIndexCon
 from ai_tutor_agent.knowledge_map.schema.media_asset_schema import normalize_annotated_media_asset
 
 
+LATEX_VARIABLE_STOPWORDS = {
+    "\\left",
+    "\\right",
+    "\\begin",
+    "\\end",
+    "\\mathrm",
+    "\\mathbf",
+    "\\boldsymbol",
+    "\\bar",
+    "\\hat",
+    "\\tilde",
+    "\\tag",
+    "\\quad",
+    "\\qquad",
+    "\\cdots",
+    "\\dots",
+    "\\displaystyle",
+    "\\scriptstyle",
+    "\\textstyle",
+    "\\array",
+    "\\bmatrix",
+    "\\pmatrix",
+    "\\matrix",
+    "\\to",
+    "\\rightarrow",
+    "\\longrightarrow",
+    "\\infty",
+    "\\limits",
+}
+
+LATEX_VARIABLE_ALLOWLIST = {
+    "\\sigma",
+    "\\zeta",
+    "\\omega",
+    "\\phi",
+    "\\Phi",
+    "\\lambda",
+    "\\theta",
+    "\\tau",
+    "\\mu",
+    "\\nu",
+    "\\rho",
+    "\\eta",
+    "\\alpha",
+    "\\beta",
+    "\\gamma",
+    "\\delta",
+    "\\psi",
+    "\\xi",
+    "\\dot",
+    "\\frac",
+    "\\sum",
+    "\\prod",
+    "\\int",
+    "\\angle",
+    "\\sin",
+    "\\cos",
+    "\\tan",
+    "\\lg",
+    "\\sqrt",
+    "\\approx",
+    "\\partial",
+}
+
+
 class MediaAssetAnnotator:
     def __init__(
         self,
@@ -52,7 +117,7 @@ class MediaAssetAnnotator:
         evidence_role = self._infer_evidence_role(asset, base_text, visual_type)
         affordances = self._infer_question_affordances(asset, visual_type, direct_claims, variables)
         formula_meaning = self._infer_formula_meaning(asset, base_text, variables)
-        relation_statement = self._infer_relation_statement(asset, base_text, direct_claims, formula_meaning)
+        relation_statement = self._infer_relation_statement(asset, direct_claims, formula_meaning)
         retrieval_keywords = self._build_retrieval_keywords(asset, title_text, domain_terms, variables, direct_claims)
         layout_features = self._infer_layout_features(asset, title_text, base_text)
 
@@ -90,6 +155,7 @@ class MediaAssetAnnotator:
         if asset.get("asset_type") == "table":
             text = str(asset.get("nearby_text", "") or "").strip()
             return text[:80]
+
         raw_text = str(asset.get("raw_text", "") or "").strip()
         nearby_text = str(asset.get("nearby_text", "") or "").strip()
         tag_match = re.search(r"\\tag\s*\{([^}]{1,20})\}", raw_text)
@@ -123,7 +189,7 @@ class MediaAssetAnnotator:
         title = str(asset.get("caption_text", "") or "")
         if any(keyword in title for keyword in ["响应曲线", "关系曲线", "波形图", "特性曲线"]):
             return "trend_curve"
-        if any(keyword in title for keyword in ["结构图", "原理图", "框图", "方框图"]):
+        if any(keyword in title for keyword in ["结构图", "原理图", "框图", "方框图", "状态变量图"]):
             return "structure_diagram"
         if any(keyword in text for keyword in ["横坐标", "纵坐标", "曲线", "随", "关系"]):
             return "trend_curve"
@@ -144,13 +210,13 @@ class MediaAssetAnnotator:
             features.append("axes_or_curve")
         if any(token in text for token in ["ζ", "\\zeta", "σ", "\\sigma", "ω", "\\omega"]):
             features.append("parameter_symbols")
-        if any(keyword in title_text for keyword in ["结构图", "原理图", "框图"]):
+        if any(keyword in title_text for keyword in ["结构图", "原理图", "框图", "方框图", "状态变量图"]):
             features.append("block_or_structure")
         return features
 
     def _infer_evidence_role(self, asset: dict[str, Any], text: str, visual_type: str) -> str:
         if asset.get("asset_type") == "formula":
-            if any(token in text for token in ["仅是", "无关", "关系", "函数"]):
+            if any(token in text for token in ["仅是", "无关", "关系", "函数", "取决于", "满足"]):
                 return "quantitative_relation"
             return "formula_definition"
         if visual_type == "trend_curve":
@@ -188,14 +254,17 @@ class MediaAssetAnnotator:
             return "给出超调量与阻尼比之间的定量关系。"
         if any(token in text for token in ["t _ {s}", "t_s", "调节时间"]) and any(token in text for token in ["\\zeta", "ζ", "\\omega", "自然频率"]):
             return "给出调节时间与阻尼比、自然频率之间的近似关系。"
+        if any(token in text for token in ["z变换", "Z变换", "\\Phi", "脉冲传递函数"]):
+            return "给出离散系统变换域中的定量表达关系。"
+        if any(token in text for token in ["哈密顿", "最优", "\\lambda", "性能指标"]):
+            return "给出最优控制问题中的性能指标或协态变量关系。"
         if variables:
-            return f"给出变量 { '、'.join(variables[:4]) } 之间的定量关系。"
+            return f"给出变量 {'、'.join(variables[:4])} 之间的定量关系。"
         return "给出相关物理量之间的定量关系。"
 
     def _infer_relation_statement(
         self,
         asset: dict[str, Any],
-        text: str,
         direct_claims: list[str],
         formula_meaning: str,
     ) -> str:
@@ -222,7 +291,6 @@ class MediaAssetAnnotator:
             " ".join(str(x) for x in (asset.get("linked_node_names", []) or [])),
         ]:
             keywords.extend(self._extract_keywords_from_text(source, max_count=8))
-
         keywords.extend(domain_terms[:10])
         keywords.extend(variables[:8])
         for claim in direct_claims[:2]:
@@ -232,17 +300,7 @@ class MediaAssetAnnotator:
     def _extract_domain_terms(self, asset: dict[str, Any], text: str) -> list[str]:
         terms: list[str] = []
         for candidate in re.findall(r"[\u4e00-\u9fff]{2,12}", text):
-            if candidate in {
-                "图",
-                "公式",
-                "可见",
-                "一般",
-                "所示",
-                "关系",
-                "系统",
-                "函数",
-                "曲线",
-            }:
+            if candidate in {"图表", "公式", "可见", "一般", "所示", "关系", "系统", "函数", "曲线"}:
                 continue
             terms.append(candidate)
         anchor = str(asset.get("anchor_node_name", "") or "").strip()
@@ -253,7 +311,7 @@ class MediaAssetAnnotator:
     def _extract_variables(self, text: str) -> list[str]:
         patterns = [
             r"\\[a-zA-Z]+(?:_\s*\{[^}]+\})?",
-            r"[ζσωξη]",
+            r"[ζσωξηλφθτμνρβαγδψ]",
             r"[A-Za-z]+_\s*\{[^}]+\}",
             r"\b[A-Za-z](?:_[A-Za-z0-9]+)?\b",
         ]
@@ -261,14 +319,29 @@ class MediaAssetAnnotator:
         for pattern in patterns:
             for match in re.findall(pattern, text):
                 cleaned = re.sub(r"\s+", "", str(match))
-                if len(cleaned) <= 20 and cleaned not in variables:
-                    variables.append(cleaned)
-        keep = []
+                cleaned = self._normalize_variable(cleaned)
+                if not cleaned or cleaned in variables:
+                    continue
+                variables.append(cleaned)
+
+        keep: list[str] = []
         for item in variables:
             if item in {"e", "t", "s", "k"} and len(variables) > 6:
                 continue
             keep.append(item)
         return keep[:12]
+
+    def _normalize_variable(self, text: str) -> str:
+        cleaned = text.strip()
+        if not cleaned:
+            return ""
+        if cleaned in LATEX_VARIABLE_STOPWORDS:
+            return ""
+        if cleaned.startswith("\\") and cleaned not in LATEX_VARIABLE_ALLOWLIST and not re.match(r"\\[A-Za-z]+_\{[^}]+\}$", cleaned):
+            return ""
+        if re.fullmatch(r"[A-Za-z]", cleaned) and cleaned.lower() in {"d", "j", "i"}:
+            return ""
+        return cleaned
 
     def _extract_direct_claims(self, text: str) -> list[str]:
         claims: list[str] = []
@@ -292,6 +365,10 @@ class MediaAssetAnnotator:
                     "增大",
                     "下降",
                     "上升",
+                    "趋于",
+                    "接近",
+                    "满足",
+                    "取决于",
                 ]
             ):
                 claims.append(cleaned)
@@ -336,8 +413,13 @@ class MediaAssetAnnotator:
         return min(round(score, 4), 1.0)
 
     def _extract_keywords_from_text(self, text: str, *, max_count: int) -> list[str]:
-        items = re.findall(r"[\u4e00-\u9fff]{2,12}|\\[a-zA-Z]+|[ζσωξη]|[A-Za-z]{2,12}", str(text or ""))
-        return self._dedup_list(items)[:max_count]
+        items = re.findall(r"[\u4e00-\u9fff]{2,12}|\\[a-zA-Z]+|[ζσωξηλφθτμνρβαγδψ]|[A-Za-z]{2,12}", str(text or ""))
+        filtered: list[str] = []
+        for item in items:
+            if item.startswith("\\") and item in LATEX_VARIABLE_STOPWORDS:
+                continue
+            filtered.append(item)
+        return self._dedup_list(filtered)[:max_count]
 
     def _dedup_list(self, values: list[str]) -> list[str]:
         seen: set[str] = set()

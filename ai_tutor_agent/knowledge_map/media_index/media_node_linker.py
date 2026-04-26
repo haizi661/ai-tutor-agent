@@ -95,13 +95,16 @@ class MediaNodeLinker:
             str(node_extra.get("retrieval_matched_block_title", "") or "").strip(),
             str(node.get("name", "") or "").strip(),
         ]
+        title_match_score = 0.0
         for title in block_titles:
             if not title:
                 continue
             title_variants = [title, self._strip_leading_section_number(title)]
             for variant in title_variants:
                 if len(variant) >= 2 and variant in candidate_text:
-                    score += 4.0
+                    current_score = 4.0 if variant == title else 3.2
+                    title_match_score = max(title_match_score, current_score)
+                    score += current_score
                     break
 
         node_terms = self._extract_node_terms(node)
@@ -120,8 +123,7 @@ class MediaNodeLinker:
             score += min(len(overlap) * 0.45, 3.0)
 
         role = str(node_extra.get("node_role", "") or "").strip()
-        if role in {"topic", "chapter_anchor"}:
-            score += 0.3
+        score += self._role_adjustment(role, title_match_score=title_match_score, overlap_count=len(overlap))
         importance = str(node.get("importance_level", "") or "").strip()
         if importance == "核心":
             score += 0.35
@@ -194,17 +196,30 @@ class MediaNodeLinker:
         add_terms(node.get("name"), 4.5)
         add_terms(self._strip_leading_section_number(str(node.get("name", "") or "")), 3.2)
         add_terms(node.get("summary"), 1.6)
-        add_terms(node.get("core_concepts", []), 2.5)
-        add_terms(node.get("key_points", [])[:2], 0.9)
+        add_terms(node.get("core_concepts", []), 2.8)
+        add_terms(node.get("key_points", [])[:2], 1.2)
         add_terms(node.get("formulas", [])[:2], 1.6)
         add_terms(extra.get("retrieval_keywords", []), 2.3)
-        add_terms(extra.get("matched_block_title"), 3.6)
-        add_terms(self._strip_leading_section_number(str(extra.get("matched_block_title", "") or "")), 3.0)
-        add_terms(extra.get("retrieval_matched_block_title"), 3.2)
-        add_terms(self._strip_leading_section_number(str(extra.get("retrieval_matched_block_title", "") or "")), 2.8)
+        add_terms(extra.get("matched_block_title"), 4.2)
+        add_terms(self._strip_leading_section_number(str(extra.get("matched_block_title", "") or "")), 3.6)
+        add_terms(extra.get("retrieval_matched_block_title"), 3.8)
+        add_terms(self._strip_leading_section_number(str(extra.get("retrieval_matched_block_title", "") or "")), 3.2)
         add_terms(extra.get("resolved_related_names", []), 1.0)
         add_terms(extra.get("resolved_prerequisite_names", []), 0.8)
         return weighted_terms
+
+    def _role_adjustment(self, role: str, *, title_match_score: float, overlap_count: int) -> float:
+        if role == "topic":
+            return 1.0 + min(title_match_score * 0.15, 0.8)
+        if role == "chapter_anchor":
+            if title_match_score > 0:
+                return 0.25
+            if overlap_count >= 4:
+                return -0.2
+            return -1.35
+        if role:
+            return 0.15
+        return 0.0
 
     def _parse_node_record(self, record: dict[str, Any]) -> dict[str, Any]:
         parsed = dict(record)
