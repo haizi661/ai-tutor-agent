@@ -25,6 +25,7 @@ class GraphRAGPipeline:
         *,
         nodes_csv_path: str = "data/knowledge_map_outputs/auto_control_knowledge_map_v2_nodes.csv",
         edges_csv_path: str = "data/knowledge_map_outputs/auto_control_knowledge_map_v2_edges.csv",
+        annotated_assets_path: str = "data/media_evidence_index/chapter03_annotated_assets.jsonl",
         enable_llm: bool = True,
         enable_visual_llm: bool = False,
         llm_profile: str | None = "qwen",
@@ -45,7 +46,10 @@ class GraphRAGPipeline:
         self.query_planner = GraphQueryPlanner(llm=tutor_llm, config=self.config)
         self.graph_traverser = GraphTraverser(self.edges, node_map=self.node_map, config=self.config)
         self.context_builder = GraphContextBuilder(config=self.config)
-        self.media_enricher = GraphMediaEnricher(visual_analyzer=visual_analyzer)
+        self.media_enricher = GraphMediaEnricher(
+            visual_analyzer=visual_analyzer,
+            annotated_assets_path=annotated_assets_path,
+        )
         self.answer_generator = GraphAnswerGeneratorV2(llm=tutor_llm)
 
     def ask(

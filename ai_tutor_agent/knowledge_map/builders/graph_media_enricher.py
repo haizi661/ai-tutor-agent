@@ -12,10 +12,13 @@ class GraphMediaEnricher:
         mineru_cache_root: str | Path = "data/mineru_cache",
         *,
         visual_analyzer: Any | None = None,
+        annotated_assets_path: str | Path = "data/media_evidence_index/chapter03_annotated_assets.jsonl",
     ) -> None:
         self.mineru_cache_root = Path(mineru_cache_root)
         self.chapter_docs = self._load_chapter_docs()
         self.visual_analyzer = visual_analyzer
+        self.annotated_assets_path = Path(annotated_assets_path)
+        self.annotated_assets = self._load_annotated_assets()
         self._visual_cache: dict[str, str] = {}
 
     def collect_for_nodes(
@@ -25,52 +28,47 @@ class GraphMediaEnricher:
         node_map: dict[str, dict[str, Any]],
         question: str = "",
     ) -> list[dict[str, Any]]:
-        media_items: list[dict[str, Any]] = []
-        seen_keys: set[tuple[str, str, str]] = set()
+        media_by_ref: dict[str, dict[str, Any]] = {}
         prioritized_nodes = sorted(
             traversed_nodes,
             key=lambda item: (
                 self._role_priority(item.get("node_role", "")),
                 item.get("hop", 99),
-                -item.get("score", 0.0),
+                -float(item.get("score", 0.0)),
             ),
         )
 
         for traversed in prioritized_nodes:
             if traversed.get("hop", 99) > 1:
                 continue
+
             node = node_map.get(traversed["node_id"])
             if not node:
                 continue
 
-            doc = self._find_matching_doc(node)
-            formulas = self._collect_formula_items(node, doc)
-            figures = self._collect_figure_items(node, doc)
+            candidates = self._collect_annotated_media_items(traversed, question=question)
+            if not candidates:
+                doc = self._find_matching_doc(node)
+                candidates = self._collect_fallback_media_items(node, doc, traversed, question=question)
 
-            for item in formulas + figures:
-                dedup_key = (
-                    item["node_id"],
-                    item["asset_type"],
-                    item.get("text", "") or item.get("caption", ""),
-                )
-                if dedup_key in seen_keys:
+            for item in candidates:
+                ref = str(item.get("reference", "") or "").strip()
+                if not ref:
                     continue
-                seen_keys.add(dedup_key)
-                item["hop"] = traversed.get("hop", 99)
-                item["node_role"] = traversed.get("node_role", "context")
-                self._annotate_media_item(item, question=question)
-                item["media_score"] = self._score_media_item(item, question=question)
-                media_items.append(item)
+                existing = media_by_ref.get(ref)
+                if existing is None or float(item.get("media_score", 0.0)) > float(existing.get("media_score", 0.0)):
+                    media_by_ref[ref] = item
 
+        media_items = list(media_by_ref.values())
         if not media_items:
             return []
 
         media_items.sort(
             key=lambda item: (
-                -item.get("media_score", 0.0),
-                item.get("hop", 99),
-                0 if item["asset_type"] == "formula" else 1,
-                item["reference"],
+                -float(item.get("media_score", 0.0)),
+                int(item.get("hop", 99)),
+                0 if item.get("asset_type") == "formula" else 1,
+                str(item.get("reference", "")),
             )
         )
 
@@ -82,8 +80,118 @@ class GraphMediaEnricher:
             item["is_primary"] = True
         for item in supplementary_items:
             item["is_primary"] = False
-
         return primary_items + supplementary_items
+
+    def _collect_annotated_media_items(
+        self,
+        traversed: dict[str, Any],
+        *,
+        question: str,
+    ) -> list[dict[str, Any]]:
+        node_id = str(traversed.get("node_id", "") or "")
+        node_name = str(traversed.get("name", "") or "")
+        hop = int(traversed.get("hop", 99))
+        node_role = str(traversed.get("node_role", "context") or "context")
+        results: list[dict[str, Any]] = []
+
+        for asset in self.annotated_assets:
+            if not self._asset_matches_node(asset, node_id):
+                continue
+            item = self._build_media_item_from_annotated_asset(asset, traversed, question=question)
+            if not item:
+                continue
+            item["node_id"] = node_id
+            item["node_name"] = node_name
+            item["hop"] = hop
+            item["node_role"] = node_role
+            item["media_score"] = self._score_media_item(item, question=question)
+            results.append(item)
+        return results
+
+    def _build_media_item_from_annotated_asset(
+        self,
+        asset: dict[str, Any],
+        traversed: dict[str, Any],
+        *,
+        question: str,
+    ) -> dict[str, Any] | None:
+        asset_type = str(asset.get("asset_type", "") or "")
+        if asset_type not in {"figure", "formula"}:
+            return None
+
+        reference = str(asset.get("asset_id", "") or "").strip()
+        if not reference:
+            return None
+
+        visual_summary = str((asset.get("extra", {}) or {}).get("visual_summary", "") or "").strip()
+        relation_statement = str(asset.get("relation_statement", "") or "").strip()
+        direct_claims = [str(item).strip() for item in (asset.get("direct_readable_claims", []) or []) if str(item).strip()]
+        formula_meaning = str(asset.get("formula_meaning", "") or "").strip()
+        analysis_hint = (
+            relation_statement
+            or formula_meaning
+            or (direct_claims[0] if direct_claims else "")
+            or self._build_analysis_hint_from_asset(asset)
+        )
+
+        item: dict[str, Any] = {
+            "reference": reference,
+            "asset_type": asset_type,
+            "caption": str(asset.get("caption_text", "") or asset.get("title_text", "") or "").strip(),
+            "text": str(asset.get("raw_text", "") or "").strip(),
+            "analysis_hint": analysis_hint,
+            "visual_summary": visual_summary or (direct_claims[0] if direct_claims and asset_type == "figure" else ""),
+            "placement_hint": "analysis",
+            "evidence_role": str(asset.get("evidence_role", "") or ""),
+            "question_affordances": list(asset.get("question_affordances", []) or []),
+            "retrieval_keywords": list(asset.get("retrieval_keywords", []) or []),
+            "relation_statement": relation_statement,
+            "formula_meaning": formula_meaning,
+            "variables": list(asset.get("variables", []) or []),
+            "domain_terms": list(asset.get("domain_terms", []) or []),
+            "confidence": float(asset.get("confidence", 0.0) or 0.0),
+            "source_path": str(asset.get("source_path", "") or "").strip(),
+        }
+
+        if asset_type == "figure":
+            source_path = str(asset.get("source_path", "") or "").strip()
+            image_paths_abs = [source_path] if source_path else []
+            if not image_paths_abs:
+                return None
+            item["image_paths_abs"] = image_paths_abs
+            if self.visual_analyzer is not None and not item["visual_summary"]:
+                item["visual_summary"] = self._describe_figure(item, question=question)
+        else:
+            if not item["text"]:
+                return None
+            item["caption"] = str(asset.get("title_text", "") or "").strip()
+
+        return item
+
+    def _collect_fallback_media_items(
+        self,
+        node: dict[str, Any],
+        doc: dict[str, Any] | None,
+        traversed: dict[str, Any],
+        *,
+        question: str,
+    ) -> list[dict[str, Any]]:
+        results: list[dict[str, Any]] = []
+        formulas = self._collect_formula_items(node, doc)
+        figures = self._collect_figure_items(node, doc)
+
+        for item in formulas + figures:
+            item["hop"] = traversed.get("hop", 99)
+            item["node_role"] = traversed.get("node_role", "context")
+            item["analysis_hint"] = self._build_analysis_hint_from_media_item(item)
+            item["placement_hint"] = "analysis"
+            if item["asset_type"] == "figure":
+                item["visual_summary"] = self._describe_figure(item, question=question)
+            else:
+                item["visual_summary"] = ""
+            item["media_score"] = self._score_media_item(item, question=question)
+            results.append(item)
+        return results
 
     def _select_primary_media_items(self, media_items: list[dict[str, Any]]) -> list[dict[str, Any]]:
         selected: list[dict[str, Any]] = []
@@ -108,65 +216,15 @@ class GraphMediaEnricher:
         media_items: list[dict[str, Any]],
         primary_items: list[dict[str, Any]],
     ) -> list[dict[str, Any]]:
-        primary_refs = {item["reference"] for item in primary_items}
+        primary_refs = {str(item.get("reference", "")) for item in primary_items}
         supplementary: list[dict[str, Any]] = []
         for item in media_items:
-            if item["reference"] in primary_refs:
+            if str(item.get("reference", "")) in primary_refs:
                 continue
             supplementary.append(item)
             if len(supplementary) >= 3:
                 break
         return supplementary
-
-    def _annotate_media_item(self, item: dict[str, Any], *, question: str) -> None:
-        item["analysis_hint"] = self._build_analysis_hint(item)
-        if item["asset_type"] == "formula":
-            item["visual_summary"] = ""
-            item["placement_hint"] = "analysis"
-            return
-
-        item["visual_summary"] = self._describe_figure(item, question=question)
-        item["placement_hint"] = "analysis"
-
-    def _score_media_item(self, item: dict[str, Any], *, question: str) -> float:
-        score = 10.0
-        question_tokens = self._extract_query_tokens(question)
-        haystack = " ".join(
-            [
-                str(item.get("text", "") or ""),
-                str(item.get("caption", "") or ""),
-                str(item.get("analysis_hint", "") or ""),
-                str(item.get("visual_summary", "") or ""),
-                str(item.get("node_name", "") or ""),
-            ]
-        )
-        for token in question_tokens:
-            if token in haystack:
-                score += 1.2
-
-        role = str(item.get("node_role", "") or "")
-        score += {
-            "primary": 3.0,
-            "prerequisite": 2.0,
-            "supporting": 1.5,
-            "comparison": 1.2,
-        }.get(role, 0.5)
-
-        if item["asset_type"] == "formula":
-            score += 1.8
-            if any(token in question for token in ["公式", "关系", "阻尼比", "超调量", "时间", "峰值"]):
-                score += 1.2
-        else:
-            caption = str(item.get("caption", "") or "")
-            if any(keyword in caption for keyword in ["响应曲线", "单位阶跃", "性能指标", "超调量", "曲线"]):
-                score += 2.2
-            if any(keyword in caption for keyword in ["结构图", "原理图", "框图"]) and not any(
-                token in question for token in ["结构", "原理", "框图"]
-            ):
-                score -= 1.8
-
-        score -= item.get("hop", 99) * 0.6
-        return score
 
     def _assign_display_labels(self, media_items: list[dict[str, Any]]) -> None:
         formula_idx = 1
@@ -211,6 +269,115 @@ class GraphMediaEnricher:
         }
         return order.get(role, 3)
 
+    def _score_media_item(self, item: dict[str, Any], *, question: str) -> float:
+        score = 10.0
+        question_tokens = self._extract_query_tokens(question)
+        haystack_parts = [
+            str(item.get("text", "") or ""),
+            str(item.get("caption", "") or ""),
+            str(item.get("analysis_hint", "") or ""),
+            str(item.get("visual_summary", "") or ""),
+            str(item.get("node_name", "") or ""),
+            str(item.get("relation_statement", "") or ""),
+            str(item.get("formula_meaning", "") or ""),
+            " ".join(str(x) for x in (item.get("retrieval_keywords", []) or [])),
+            " ".join(str(x) for x in (item.get("domain_terms", []) or [])),
+            " ".join(str(x) for x in (item.get("variables", []) or [])),
+        ]
+        haystack = " ".join(part for part in haystack_parts if part)
+        for token in question_tokens:
+            if token in haystack:
+                score += 1.2
+
+        role = str(item.get("node_role", "") or "")
+        score += {
+            "primary": 3.0,
+            "prerequisite": 2.0,
+            "supporting": 1.5,
+            "comparison": 1.2,
+        }.get(role, 0.5)
+
+        if str(item.get("node_id", "") or "") == str(item.get("anchor_node_id", item.get("node_id", ""))):
+            score += 0.8
+
+        if item["asset_type"] == "formula":
+            score += 1.8
+            if any(token in question for token in ["公式", "关系", "阻尼比", "超调量", "时间", "峰值"]):
+                score += 1.2
+            if item.get("formula_meaning"):
+                score += 0.8
+        else:
+            caption = str(item.get("caption", "") or "")
+            if any(keyword in caption for keyword in ["响应曲线", "单位阶跃", "性能指标", "超调量", "关系曲线"]):
+                score += 2.2
+            if any(keyword in caption for keyword in ["结构图", "原理图", "框图"]) and not any(
+                token in question for token in ["结构", "原理", "框图"]
+            ):
+                score -= 1.8
+            if item.get("visual_summary"):
+                score += 0.8
+
+        score += min(float(item.get("confidence", 0.0) or 0.0), 1.0)
+        score -= int(item.get("hop", 99)) * 0.6
+        return round(score, 4)
+
+    def _build_analysis_hint_from_asset(self, asset: dict[str, Any]) -> str:
+        asset_type = str(asset.get("asset_type", "") or "")
+        title = str(asset.get("title_text", "") or asset.get("caption_text", "") or "").strip()
+        if asset_type == "formula":
+            meaning = str(asset.get("formula_meaning", "") or "").strip()
+            if meaning:
+                return meaning
+            if title:
+                return f"可结合{title}中的变量关系解释系统特性。"
+            return "可结合公式中的变量关系解释系统特性。"
+        relation_statement = str(asset.get("relation_statement", "") or "").strip()
+        if relation_statement:
+            return relation_statement
+        if title:
+            return f"可结合{title}中的曲线走势、关键拐点或结构特征进行分析。"
+        return "可结合图形走势、关键拐点或结构特征进行分析。"
+
+    def _build_analysis_hint_from_media_item(self, item: dict[str, Any]) -> str:
+        node_name = str(item.get("node_name", "")).strip() or "当前知识点"
+        if item.get("asset_type") == "formula":
+            formula_text = str(item.get("text", "")).strip()
+            if "e^" in formula_text or "e ^" in formula_text:
+                return f"可结合{node_name}中的指数衰减关系，解释响应快慢、超调或衰减趋势。"
+            if "\\frac" in formula_text or "/" in formula_text:
+                return f"可结合{node_name}中的分子分母结构，说明参数如何影响系统性能。"
+            return f"可结合{node_name}中的变量关系，解释概念之间的定量联系。"
+
+        caption = str(item.get("caption", "")).strip()
+        if any(keyword in caption for keyword in ["响应", "曲线", "阶跃", "波形"]):
+            return f"可结合{node_name}的曲线走势，分析超调量、峰值时间、调节时间或稳态值。"
+        return f"可结合{node_name}的图形结构，说明系统组成、信号流向或关键现象。"
+
+    def _load_annotated_assets(self) -> list[dict[str, Any]]:
+        if not self.annotated_assets_path.exists():
+            return []
+        results: list[dict[str, Any]] = []
+        try:
+            for line in self.annotated_assets_path.read_text(encoding="utf-8").splitlines():
+                if not line.strip():
+                    continue
+                try:
+                    item = json.loads(line)
+                except json.JSONDecodeError:
+                    continue
+                if isinstance(item, dict):
+                    results.append(item)
+        except Exception:
+            return []
+        return results
+
+    def _asset_matches_node(self, asset: dict[str, Any], node_id: str) -> bool:
+        anchor_id = str(asset.get("anchor_node_id", "") or "").strip()
+        if anchor_id == node_id:
+            return True
+        linked_ids = [str(item).strip() for item in (asset.get("linked_node_ids", []) or [])]
+        return node_id in linked_ids
+
     def _load_chapter_docs(self) -> list[dict[str, Any]]:
         docs: list[dict[str, Any]] = []
         if not self.mineru_cache_root.exists():
@@ -219,22 +386,20 @@ class GraphMediaEnricher:
         for item in self.mineru_cache_root.iterdir():
             if not item.is_dir():
                 continue
-
             manifest_path = item / "manifest.json"
             full_md_path = item / "full.md"
             if not manifest_path.exists() or not full_md_path.exists():
                 continue
-
             try:
                 manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
                 full_md = full_md_path.read_text(encoding="utf-8")
             except Exception:
                 continue
 
-            page_range = self._extract_page_range(manifest.get("pdf_name", "") or item.name)
+            page_range = self._extract_page_range(str(manifest.get("pdf_name", "") or item.name))
             if page_range is None:
                 continue
-
+            manifest["cache_dir"] = str(item.resolve())
             docs.append(
                 {
                     "cache_dir": item,
@@ -244,7 +409,6 @@ class GraphMediaEnricher:
                     "end_page": page_range[1],
                 }
             )
-
         docs.sort(key=lambda doc: doc["start_page"])
         return docs
 
@@ -259,7 +423,6 @@ class GraphMediaEnricher:
         page_range = extra.get("chapter_page_range", []) or []
         if not isinstance(page_range, list) or len(page_range) != 2:
             return None
-
         start_page, end_page = page_range
         for doc in self.chapter_docs:
             if doc["start_page"] == start_page and doc["end_page"] == end_page:
@@ -291,6 +454,7 @@ class GraphMediaEnricher:
                     "asset_type": "formula",
                     "reference": f"{node.get('node_id', '')}.formula_asset[{idx}]",
                     "text": formula,
+                    "caption": "",
                 }
             )
         return results
@@ -314,30 +478,15 @@ class GraphMediaEnricher:
                     "reference": f"{node.get('node_id', '')}.figure_asset[{idx}]",
                     "caption": figure["caption"],
                     "image_paths_abs": figure["image_paths_abs"],
+                    "text": "",
                 }
             )
         return results
-
-    def _build_analysis_hint(self, item: dict[str, Any]) -> str:
-        node_name = str(item.get("node_name", "")).strip() or "当前节点"
-        if item.get("asset_type") == "formula":
-            formula_text = str(item.get("text", "")).strip()
-            if "e^" in formula_text or "e ^" in formula_text:
-                return f"可结合{node_name}中的指数衰减关系，解释响应快慢、超调或衰减趋势。"
-            if "\\frac" in formula_text or "/" in formula_text:
-                return f"可结合{node_name}中的分子分母结构，说明参数如何影响系统性能。"
-            return f"可结合{node_name}中的变量关系，解释概念之间的定量联系。"
-
-        caption = str(item.get("caption", "")).strip()
-        if any(keyword in caption for keyword in ["响应", "曲线", "阶跃", "波形"]):
-            return f"可结合{node_name}的曲线走势，分析超调量、峰值时间、调节时间或稳态值。"
-        return f"可结合{node_name}的图形结构，说明系统组成、信号流向或关键现象。"
 
     def _describe_figure(self, item: dict[str, Any], *, question: str) -> str:
         paths = item.get("image_paths_abs", []) or []
         if not paths:
             return ""
-
         cache_key = str(Path(paths[0]).resolve())
         if cache_key in self._visual_cache:
             return self._visual_cache[cache_key]
@@ -403,11 +552,7 @@ class GraphMediaEnricher:
         node_name = str(node.get("name", "")).strip()
         tags = [str(tag).strip() for tag in (node.get("tags", []) or []) if str(tag).strip()]
         extra = node.get("extra", {}) or {}
-        retrieval_keywords = [
-            str(keyword).strip()
-            for keyword in (extra.get("retrieval_keywords", []) or [])
-            if str(keyword).strip()
-        ]
+        retrieval_keywords = [str(keyword).strip() for keyword in (extra.get("retrieval_keywords", []) or []) if str(keyword).strip()]
         tail_name = self._extract_tail_name(node_name)
 
         best_block: dict[str, Any] | None = None
@@ -438,7 +583,6 @@ class GraphMediaEnricher:
             if score > best_score:
                 best_score = score
                 best_block = dict(block)
-
         return best_block
 
     def _extract_node_scope_text(self, node: dict[str, Any], doc: dict[str, Any]) -> str:
@@ -446,7 +590,6 @@ class GraphMediaEnricher:
         node_name = str(node.get("name", "")).strip()
         extra = node.get("extra", {}) or {}
         node_role = str(extra.get("node_role", "") or "").strip()
-        is_focus = bool(extra.get("is_focus"))
         page_refs = node.get("page_refs", []) or []
         lines = full_md.splitlines()
 
@@ -455,7 +598,7 @@ class GraphMediaEnricher:
             if section_match:
                 return section_match
 
-        if is_focus and page_refs:
+        if page_refs:
             block = self._find_best_block(node, full_md)
             return block["content"] if block else ""
 
@@ -469,7 +612,6 @@ class GraphMediaEnricher:
             if stripped.startswith("#") and node_name in stripped:
                 start_idx = idx
                 break
-
         if start_idx is None:
             return ""
 
@@ -481,14 +623,12 @@ class GraphMediaEnricher:
             if re.match(r"^#\s+\d+-\d+\b", stripped):
                 end_idx = idx
                 break
-
         return "\n".join(lines[start_idx + 1 : end_idx]).strip()
 
     def _extract_formulas_from_block(self, block_text: str) -> list[str]:
         formulas: list[str] = []
         lines = block_text.splitlines()
         index = 0
-
         while index < len(lines):
             stripped = (lines[index] or "").strip()
 
@@ -534,7 +674,6 @@ class GraphMediaEnricher:
             if self._looks_like_formula(cleaned) and cleaned not in formulas:
                 formulas.append(cleaned)
             index += 1
-
         return formulas[:4]
 
     def _extract_figures_from_block(self, block_text: str, manifest: dict[str, Any]) -> list[dict[str, Any]]:
@@ -561,12 +700,7 @@ class GraphMediaEnricher:
             if pending_paths and self._looks_like_figure_caption(line):
                 resolved = self._resolve_image_paths(pending_paths, manifest)
                 if resolved:
-                    figures.append(
-                        {
-                            "caption": self._clean_caption(line),
-                            "image_paths_abs": resolved,
-                        }
-                    )
+                    figures.append({"caption": self._clean_caption(line), "image_paths_abs": resolved})
                 pending_paths = []
                 continue
 
@@ -574,26 +708,19 @@ class GraphMediaEnricher:
                 next_text = " ".join(part.strip() for part in lines[idx : idx + 2] if part.strip())
                 resolved = self._resolve_image_paths(pending_paths, manifest)
                 if resolved:
-                    figures.append(
-                        {
-                            "caption": self._clean_caption(next_text) or "相关图表",
-                            "image_paths_abs": resolved,
-                        }
-                    )
+                    figures.append({"caption": self._clean_caption(next_text) or "相关图表", "image_paths_abs": resolved})
                 pending_paths = []
-
         return figures
 
     def _resolve_image_paths(self, image_paths: list[str], manifest: dict[str, Any]) -> list[str]:
         resolved: list[str] = []
         images = manifest.get("images", {}) or {}
-        cache_dir = Path(manifest.get("cache_dir", self.mineru_cache_root))
+        cache_dir = Path(str(manifest.get("cache_dir", self.mineru_cache_root)))
 
         for image_path in image_paths:
             normalized = str(image_path).replace("\\", "/").strip()
             trimmed = normalized.replace("images/", "", 1)
             abs_path = None
-
             if normalized in images:
                 abs_path = images[normalized].get("abs_path")
             elif trimmed in images:
@@ -610,9 +737,8 @@ class GraphMediaEnricher:
             else:
                 abs_path = str(Path(abs_path).resolve())
 
-            if abs_path not in resolved:
+            if abs_path not in resolved and Path(abs_path).exists():
                 resolved.append(abs_path)
-
         return resolved
 
     def _looks_like_formula(self, text: str) -> bool:
@@ -623,7 +749,7 @@ class GraphMediaEnricher:
             return False
         patterns = [
             r"\\tag",
-            r"\\frac|\\dot|\\sum|\\omega|\\sigma|\\Phi",
+            r"\\frac|\\dot|\\sum|\\omega|\\sigma|\\Phi|\\zeta",
             r"[A-Za-z]\s*\(.*?\)\s*=",
             r"[A-Za-z]\s*=",
             r"\b[eEsSzZ]\b",
@@ -652,7 +778,7 @@ class GraphMediaEnricher:
         text = " ".join((question or "").split())
         stop_words = {"什么", "关系", "如何", "为什么", "请问", "一个", "系统"}
         tokens: list[str] = []
-        current = []
+        current: list[str] = []
         for ch in text:
             if ch.isalnum() or ("\u4e00" <= ch <= "\u9fff"):
                 current.append(ch)

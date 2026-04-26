@@ -158,3 +158,19 @@ def test_graph_rag_pipeline_defaults_visual_llm_off():
     pipeline = GraphRAGPipeline(enable_llm=False)
 
     assert pipeline.media_enricher.visual_analyzer is None
+
+
+def test_graph_rag_pipeline_prefers_chapter03_annotated_assets_for_time_domain_question():
+    pipeline = GraphRAGPipeline(enable_llm=False)
+
+    result = pipeline.ask("二阶系统的超调量与阻尼比有什么关系？", traversal_mode="balanced")
+
+    assert result["media_items"]
+    assert any(
+        str(item["reference"]).startswith("chapter_03_p082-159_线性系统的时域分析法__082fadd0")
+        for item in result["media_items"]
+    )
+    assert any(
+        item["asset_type"] == "formula" and item.get("analysis_hint")
+        for item in result["media_items"]
+    )
