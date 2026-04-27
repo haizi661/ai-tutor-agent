@@ -1,0 +1,27 @@
+{
+  "student_id": "haizi_master_01",
+  "current_node_id": "KM007",
+  "last_question": "自动控制的基本原理是什么",
+  "mastery_scores": {
+    "KM007": 0.75
+  },
+  "visited_nodes": [
+    "KM007"
+  ],
+  "wrong_nodes": [
+    "KM012"
+  ],
+  "recommended_queue": [],
+  "notes": {},
+  "node_learning_records": {
+    "KM007": {
+      "started_at": "2026-04-22T15:40:29",
+      "completed_at": "2026-04-22T15:40:39",
+      "mastery_score": 0.75
+    }
+  },
+  "homework": [
+    "1-1",
+    "1-2"
+  ]
+}

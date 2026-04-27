@@ -1,0 +1,2158 @@
+{
+  "pdf_name": "chapter_02_p033-081_控制系统的数学模型.pdf",
+  "pdf_md5": "9294ff3fd2e4cf722b76f50f60723e57",
+  "cache_dir": "data/mineru_cache\\chapter_02_p033-081_控制系统的数学模型__9294ff3f",
+  "full_md_path": "data/mineru_cache\\chapter_02_p033-081_控制系统的数学模型__9294ff3f\\full.md",
+  "images_dir": "data/mineru_cache\\chapter_02_p033-081_控制系统的数学模型__9294ff3f\\images",
+  "json_dir": "data/mineru_cache\\chapter_02_p033-081_控制系统的数学模型__9294ff3f\\json",
+  "images": {
+    "011f5b7efde52df6c5b7abc7f6b2a8e2068cd8e175dceb43feeaaae52e896de8.jpg": {
+      "original_name": "011f5b7efde52df6c5b7abc7f6b2a8e2068cd8e175dceb43feeaaae52e896de8.jpg",
+      "original_rel_path": "011f5b7efde52df6c5b7abc7f6b2a8e2068cd8e175dceb43feeaaae52e896de8.jpg",
+      "friendly_name": "figure_01.jpg",
+      "abs_path": "data/mineru_cache\\chapter_02_p033-081_控制系统的数学模型__9294ff3f\\images\\figure_01.jpg",
+      "index": 1
+    },
+    "03de4ea963ec976f0584a8dd8778370893327d73b918e3d9c4b63add495b13bc.jpg": {
+      "original_name": "03de4ea963ec976f0584a8dd8778370893327d73b918e3d9c4b63add495b13bc.jpg",
+      "original_rel_path": "03de4ea963ec976f0584a8dd8778370893327d73b918e3d9c4b63add495b13bc.jpg",
+      "friendly_name": "figure_02.jpg",
+      "abs_path": "data/mineru_cache\\chapter_02_p033-081_控制系统的数学模型__9294ff3f\\images\\figure_02.jpg",
+      "index": 2
+    },
+    "047e9376f626654e949a4783aea9726ccf93016cd187e4381c25eabf725b78f5.jpg": {
+      "original_name": "047e9376f626654e949a4783aea9726ccf93016cd187e4381c25eabf725b78f5.jpg",
+      "original_rel_path": "047e9376f626654e949a4783aea9726ccf93016cd187e4381c25eabf725b78f5.jpg",
+      "friendly_name": "figure_03.jpg",
+      "abs_path": "data/mineru_cache\\chapter_02_p033-081_控制系统的数学模型__9294ff3f\\images\\figure_03.jpg",
+      "index": 3
+    },
+    "05f35fd0302ee10b65c73a6226093d5afabbd8e84cc8355a0691e09b5561b341.jpg": {
+      "original_name": "05f35fd0302ee10b65c73a6226093d5afabbd8e84cc8355a0691e09b5561b341.jpg",
+      "original_rel_path": "05f35fd0302ee10b65c73a6226093d5afabbd8e84cc8355a0691e09b5561b341.jpg",
+      "friendly_name": "figure_04.jpg",
+      "abs_path": "data/mineru_cache\\chapter_02_p033-081_控制系统的数学模型__9294ff3f\\images\\figure_04.jpg",
+      "index": 4
+    },
+    "068ceb600a1a20527d8eaa049c7e8e2546c06de1df3d7cf2a17a2259aaf8e79c.jpg": {
+      "original_name": "068ceb600a1a20527d8eaa049c7e8e2546c06de1df3d7cf2a17a2259aaf8e79c.jpg",
+      "original_rel_path": "068ceb600a1a20527d8eaa049c7e8e2546c06de1df3d7cf2a17a2259aaf8e79c.jpg",
+      "friendly_name": "figure_05.jpg",
+      "abs_path": "data/mineru_cache\\chapter_02_p033-081_控制系统的数学模型__9294ff3f\\images\\figure_05.jpg",
+      "index": 5
+    },
+    "06ce61d4b996a133511764656185324633f35a210817a4f207fd352db9d0dcc4.jpg": {
+      "original_name": "06ce61d4b996a133511764656185324633f35a210817a4f207fd352db9d0dcc4.jpg",
+      "original_rel_path": "06ce61d4b996a133511764656185324633f35a210817a4f207fd352db9d0dcc4.jpg",
+      "friendly_name": "figure_06.jpg",
+      "abs_path": "data/mineru_cache\\chapter_02_p033-081_控制系统的数学模型__9294ff3f\\images\\figure_06.jpg",
+      "index": 6
+    },
+    "075d439abb979557063b8d8af42d056d9871e0106ea489a0b2b8f729de5cb1cd.jpg": {
+      "original_name": "075d439abb979557063b8d8af42d056d9871e0106ea489a0b2b8f729de5cb1cd.jpg",
+      "original_rel_path": "075d439abb979557063b8d8af42d056d9871e0106ea489a0b2b8f729de5cb1cd.jpg",
+      "friendly_name": "figure_07.jpg",
+      "abs_path": "data/mineru_cache\\chapter_02_p033-081_控制系统的数学模型__9294ff3f\\images\\figure_07.jpg",
+      "index": 7
+    },
+    "080027f7966e442ea6a31d7893019057a0d3ab8a9ab162eb6229c0ad0db08725.jpg": {
+      "original_name": "080027f7966e442ea6a31d7893019057a0d3ab8a9ab162eb6229c0ad0db08725.jpg",
+      "original_rel_path": "080027f7966e442ea6a31d7893019057a0d3ab8a9ab162eb6229c0ad0db08725.jpg",
+      "friendly_name": "figure_08.jpg",
+      "abs_path": "data/mineru_cache\\chapter_02_p033-081_控制系统的数学模型__9294ff3f\\images\\figure_08.jpg",
+      "index": 8
+    },
+    "0858c4eed8babe95470fb98745472cde8b8e32c6d845494a29509e6fc5ee4e06.jpg": {
+      "original_name": "0858c4eed8babe95470fb98745472cde8b8e32c6d845494a29509e6fc5ee4e06.jpg",
+      "original_rel_path": "0858c4eed8babe95470fb98745472cde8b8e32c6d845494a29509e6fc5ee4e06.jpg",
+      "friendly_name": "figure_09.jpg",
+      "abs_path": "data/mineru_cache\\chapter_02_p033-081_控制系统的数学模型__9294ff3f\\images\\figure_09.jpg",
+      "index": 9
+    },
+    "090546e590d7331e641ada544b4e256d2a2e5272e2656c9b02684bd22b6ab5a9.jpg": {
+      "original_name": "090546e590d7331e641ada544b4e256d2a2e5272e2656c9b02684bd22b6ab5a9.jpg",
+      "original_rel_path": "090546e590d7331e641ada544b4e256d2a2e5272e2656c9b02684bd22b6ab5a9.jpg",
+      "friendly_name": "figure_10.jpg",
+      "abs_path": "data/mineru_cache\\chapter_02_p033-081_控制系统的数学模型__9294ff3f\\images\\figure_10.jpg",
+      "index": 10
+    },
+    "09fd2f585201206e14d0fe69a38628e9e4a5219a1dee0bf8cf1f11e90f2b686b.jpg": {
+      "original_name": "09fd2f585201206e14d0fe69a38628e9e4a5219a1dee0bf8cf1f11e90f2b686b.jpg",
+      "original_rel_path": "09fd2f585201206e14d0fe69a38628e9e4a5219a1dee0bf8cf1f11e90f2b686b.jpg",
+      "friendly_name": "figure_11.jpg",
+      "abs_path": "data/mineru_cache\\chapter_02_p033-081_控制系统的数学模型__9294ff3f\\images\\figure_11.jpg",
+      "index": 11
+    },
+    "0a18b81e05d22eb5102520c5ddea09fefe243a1c1c92828d1896aad9f9f40e92.jpg": {
+      "original_name": "0a18b81e05d22eb5102520c5ddea09fefe243a1c1c92828d1896aad9f9f40e92.jpg",
+      "original_rel_path": "0a18b81e05d22eb5102520c5ddea09fefe243a1c1c92828d1896aad9f9f40e92.jpg",
+      "friendly_name": "figure_12.jpg",
+      "abs_path": "data/mineru_cache\\chapter_02_p033-081_控制系统的数学模型__9294ff3f\\images\\figure_12.jpg",
+      "index": 12
+    },
+    "0a6bca6a2d6e1ef7154a6451c23fc08f5014e7cda3d65615abc2f4953e079544.jpg": {
+      "original_name": "0a6bca6a2d6e1ef7154a6451c23fc08f5014e7cda3d65615abc2f4953e079544.jpg",
+      "original_rel_path": "0a6bca6a2d6e1ef7154a6451c23fc08f5014e7cda3d65615abc2f4953e079544.jpg",
+      "friendly_name": "figure_13.jpg",
+      "abs_path": "data/mineru_cache\\chapter_02_p033-081_控制系统的数学模型__9294ff3f\\images\\figure_13.jpg",
+      "index": 13
+    },
+    "0ec0e707caaf48acbc640b6da5aa10b49d8dcfb1be3202c4d556fd1da11b102e.jpg": {
+      "original_name": "0ec0e707caaf48acbc640b6da5aa10b49d8dcfb1be3202c4d556fd1da11b102e.jpg",
+      "original_rel_path": "0ec0e707caaf48acbc640b6da5aa10b49d8dcfb1be3202c4d556fd1da11b102e.jpg",
+      "friendly_name": "figure_14.jpg",
+      "abs_path": "data/mineru_cache\\chapter_02_p033-081_控制系统的数学模型__9294ff3f\\images\\figure_14.jpg",
+      "index": 14
+    },
+    "0f1eb8807a521c652fa305000aff6ea705c5c490c098a11f0243a7d6327c9f77.jpg": {
+      "original_name": "0f1eb8807a521c652fa305000aff6ea705c5c490c098a11f0243a7d6327c9f77.jpg",
+      "original_rel_path": "0f1eb8807a521c652fa305000aff6ea705c5c490c098a11f0243a7d6327c9f77.jpg",
+      "friendly_name": "figure_15.jpg",
+      "abs_path": "data/mineru_cache\\chapter_02_p033-081_控制系统的数学模型__9294ff3f\\images\\figure_15.jpg",
+      "index": 15
+    },
+    "0faacf17df65fa36b4e97d273400cd1d4be31cd9e7f6feec0ee076c0d812df6f.jpg": {
+      "original_name": "0faacf17df65fa36b4e97d273400cd1d4be31cd9e7f6feec0ee076c0d812df6f.jpg",
+      "original_rel_path": "0faacf17df65fa36b4e97d273400cd1d4be31cd9e7f6feec0ee076c0d812df6f.jpg",
+      "friendly_name": "figure_16.jpg",
+      "abs_path": "data/mineru_cache\\chapter_02_p033-081_控制系统的数学模型__9294ff3f\\images\\figure_16.jpg",
+      "index": 16
+    },
+    "0fd1f0ba64e2cee8a1371bb245b87ba590d4be7721b1cbfefe9c72d4d441e42d.jpg": {
+      "original_name": "0fd1f0ba64e2cee8a1371bb245b87ba590d4be7721b1cbfefe9c72d4d441e42d.jpg",
+      "original_rel_path": "0fd1f0ba64e2cee8a1371bb245b87ba590d4be7721b1cbfefe9c72d4d441e42d.jpg",
+      "friendly_name": "figure_17.jpg",
+      "abs_path": "data/mineru_cache\\chapter_02_p033-081_控制系统的数学模型__9294ff3f\\images\\figure_17.jpg",
+      "index": 17
+    },
+    "1196511ad7e01a89f33813fbc7e2fc521b7482436144eb63cbdfee69813703c8.jpg": {
+      "original_name": "1196511ad7e01a89f33813fbc7e2fc521b7482436144eb63cbdfee69813703c8.jpg",
+      "original_rel_path": "1196511ad7e01a89f33813fbc7e2fc521b7482436144eb63cbdfee69813703c8.jpg",
+      "friendly_name": "figure_18.jpg",
+      "abs_path": "data/mineru_cache\\chapter_02_p033-081_控制系统的数学模型__9294ff3f\\images\\figure_18.jpg",
+      "index": 18
+    },
+    "11d8ad57c70e04f0479915eb2241bef4cf31101f35676d808ff92c87c2738f39.jpg": {
+      "original_name": "11d8ad57c70e04f0479915eb2241bef4cf31101f35676d808ff92c87c2738f39.jpg",
+      "original_rel_path": "11d8ad57c70e04f0479915eb2241bef4cf31101f35676d808ff92c87c2738f39.jpg",
+      "friendly_name": "figure_19.jpg",
+      "abs_path": "data/mineru_cache\\chapter_02_p033-081_控制系统的数学模型__9294ff3f\\images\\figure_19.jpg",
+      "index": 19
+    },
+    "124e55bd6e3d6b21c361042db911ca2984d1cb39c5567bd1c4cdcf220cf25047.jpg": {
+      "original_name": "124e55bd6e3d6b21c361042db911ca2984d1cb39c5567bd1c4cdcf220cf25047.jpg",
+      "original_rel_path": "124e55bd6e3d6b21c361042db911ca2984d1cb39c5567bd1c4cdcf220cf25047.jpg",
+      "friendly_name": "figure_20.jpg",
+      "abs_path": "data/mineru_cache\\chapter_02_p033-081_控制系统的数学模型__9294ff3f\\images\\figure_20.jpg",
+      "index": 20
+    },
+    "12827214162f8423f683566e30ac977e99e961d4e6039a815c9443293c2ba71a.jpg": {
+      "original_name": "12827214162f8423f683566e30ac977e99e961d4e6039a815c9443293c2ba71a.jpg",
+      "original_rel_path": "12827214162f8423f683566e30ac977e99e961d4e6039a815c9443293c2ba71a.jpg",
+      "friendly_name": "figure_21.jpg",
+      "abs_path": "data/mineru_cache\\chapter_02_p033-081_控制系统的数学模型__9294ff3f\\images\\figure_21.jpg",
+      "index": 21
+    },
+    "1334a5fc6d6f6b3b27572c09c62346606492f15752467769b06910d4edfe3497.jpg": {
+      "original_name": "1334a5fc6d6f6b3b27572c09c62346606492f15752467769b06910d4edfe3497.jpg",
+      "original_rel_path": "1334a5fc6d6f6b3b27572c09c62346606492f15752467769b06910d4edfe3497.jpg",
+      "friendly_name": "figure_22.jpg",
+      "abs_path": "data/mineru_cache\\chapter_02_p033-081_控制系统的数学模型__9294ff3f\\images\\figure_22.jpg",
+      "index": 22
+    },
+    "134a1da5c81ed9525a9c6a7309ffde62086a2a5b564e82b65db3432fdd2d17d3.jpg": {
+      "original_name": "134a1da5c81ed9525a9c6a7309ffde62086a2a5b564e82b65db3432fdd2d17d3.jpg",
+      "original_rel_path": "134a1da5c81ed9525a9c6a7309ffde62086a2a5b564e82b65db3432fdd2d17d3.jpg",
+      "friendly_name": "figure_23.jpg",
+      "abs_path": "data/mineru_cache\\chapter_02_p033-081_控制系统的数学模型__9294ff3f\\images\\figure_23.jpg",
+      "index": 23
+    },
+    "1397b54f31020bdeddf4c3ccdf303c952254fe7979710d55cf3846c59179a873.jpg": {
+      "original_name": "1397b54f31020bdeddf4c3ccdf303c952254fe7979710d55cf3846c59179a873.jpg",
+      "original_rel_path": "1397b54f31020bdeddf4c3ccdf303c952254fe7979710d55cf3846c59179a873.jpg",
+      "friendly_name": "figure_24.jpg",
+      "abs_path": "data/mineru_cache\\chapter_02_p033-081_控制系统的数学模型__9294ff3f\\images\\figure_24.jpg",
+      "index": 24
+    },
+    "13d3171b6607a9d2b448f8a75a4e58b87df5fb3c6b8df2eae348b294bcbbc61f.jpg": {
+      "original_name": "13d3171b6607a9d2b448f8a75a4e58b87df5fb3c6b8df2eae348b294bcbbc61f.jpg",
+      "original_rel_path": "13d3171b6607a9d2b448f8a75a4e58b87df5fb3c6b8df2eae348b294bcbbc61f.jpg",
+      "friendly_name": "figure_25.jpg",
+      "abs_path": "data/mineru_cache\\chapter_02_p033-081_控制系统的数学模型__9294ff3f\\images\\figure_25.jpg",
+      "index": 25
+    },
+    "13fc4240a508a447a68b0414f42f70006a6023fde334927072de5d0da40eb001.jpg": {
+      "original_name": "13fc4240a508a447a68b0414f42f70006a6023fde334927072de5d0da40eb001.jpg",
+      "original_rel_path": "13fc4240a508a447a68b0414f42f70006a6023fde334927072de5d0da40eb001.jpg",
+      "friendly_name": "figure_26.jpg",
+      "abs_path": "data/mineru_cache\\chapter_02_p033-081_控制系统的数学模型__9294ff3f\\images\\figure_26.jpg",
+      "index": 26
+    },
+    "140e876621fe57f695d603c4dbc1724f5d6e40665425dce4611a694cd9404b56.jpg": {
+      "original_name": "140e876621fe57f695d603c4dbc1724f5d6e40665425dce4611a694cd9404b56.jpg",
+      "original_rel_path": "140e876621fe57f695d603c4dbc1724f5d6e40665425dce4611a694cd9404b56.jpg",
+      "friendly_name": "figure_27.jpg",
+      "abs_path": "data/mineru_cache\\chapter_02_p033-081_控制系统的数学模型__9294ff3f\\images\\figure_27.jpg",
+      "index": 27
+    },
+    "14362e50bc6141d46d7f376df93d924ab0296ecf00f68d9268d8b401bee1d4db.jpg": {
+      "original_name": "14362e50bc6141d46d7f376df93d924ab0296ecf00f68d9268d8b401bee1d4db.jpg",
+      "original_rel_path": "14362e50bc6141d46d7f376df93d924ab0296ecf00f68d9268d8b401bee1d4db.jpg",
+      "friendly_name": "figure_28.jpg",
+      "abs_path": "data/mineru_cache\\chapter_02_p033-081_控制系统的数学模型__9294ff3f\\images\\figure_28.jpg",
+      "index": 28
+    },
+    "14412ba3d8657b6ecc31804b1d427010cec0b340bc5358484dc608d8a1b5352e.jpg": {
+      "original_name": "14412ba3d8657b6ecc31804b1d427010cec0b340bc5358484dc608d8a1b5352e.jpg",
+      "original_rel_path": "14412ba3d8657b6ecc31804b1d427010cec0b340bc5358484dc608d8a1b5352e.jpg",
+      "friendly_name": "figure_29.jpg",
+      "abs_path": "data/mineru_cache\\chapter_02_p033-081_控制系统的数学模型__9294ff3f\\images\\figure_29.jpg",
+      "index": 29
+    },
+    "14c815cac8d0ae73e4a5a4f3cd4ce00b86226d02804d484d691444544cfcca3c.jpg": {
+      "original_name": "14c815cac8d0ae73e4a5a4f3cd4ce00b86226d02804d484d691444544cfcca3c.jpg",
+      "original_rel_path": "14c815cac8d0ae73e4a5a4f3cd4ce00b86226d02804d484d691444544cfcca3c.jpg",
+      "friendly_name": "figure_30.jpg",
+      "abs_path": "data/mineru_cache\\chapter_02_p033-081_控制系统的数学模型__9294ff3f\\images\\figure_30.jpg",
+      "index": 30
+    },
+    "151ce00b65f68082fffb99600e8aafc4c850fbb191fc4166c8c15ba772374d60.jpg": {
+      "original_name": "151ce00b65f68082fffb99600e8aafc4c850fbb191fc4166c8c15ba772374d60.jpg",
+      "original_rel_path": "151ce00b65f68082fffb99600e8aafc4c850fbb191fc4166c8c15ba772374d60.jpg",
+      "friendly_name": "figure_31.jpg",
+      "abs_path": "data/mineru_cache\\chapter_02_p033-081_控制系统的数学模型__9294ff3f\\images\\figure_31.jpg",
+      "index": 31
+    },
+    "1790034f158c1718e0a85e05842d9bba682d943926690bae5760e45b6a87102d.jpg": {
+      "original_name": "1790034f158c1718e0a85e05842d9bba682d943926690bae5760e45b6a87102d.jpg",
+      "original_rel_path": "1790034f158c1718e0a85e05842d9bba682d943926690bae5760e45b6a87102d.jpg",
+      "friendly_name": "figure_32.jpg",
+      "abs_path": "data/mineru_cache\\chapter_02_p033-081_控制系统的数学模型__9294ff3f\\images\\figure_32.jpg",
+      "index": 32
+    },
+    "17cfcdc49c11cb1a8bb8ca9d65a4a77208f34596d39d1bfc2dd5ccfd6002f27b.jpg": {
+      "original_name": "17cfcdc49c11cb1a8bb8ca9d65a4a77208f34596d39d1bfc2dd5ccfd6002f27b.jpg",
+      "original_rel_path": "17cfcdc49c11cb1a8bb8ca9d65a4a77208f34596d39d1bfc2dd5ccfd6002f27b.jpg",
+      "friendly_name": "figure_33.jpg",
+      "abs_path": "data/mineru_cache\\chapter_02_p033-081_控制系统的数学模型__9294ff3f\\images\\figure_33.jpg",
+      "index": 33
+    },
+    "186c59e3bf4b00b34bafc09207fec2b43a835f7219f405ea940414f4667dd30c.jpg": {
+      "original_name": "186c59e3bf4b00b34bafc09207fec2b43a835f7219f405ea940414f4667dd30c.jpg",
+      "original_rel_path": "186c59e3bf4b00b34bafc09207fec2b43a835f7219f405ea940414f4667dd30c.jpg",
+      "friendly_name": "figure_34.jpg",
+      "abs_path": "data/mineru_cache\\chapter_02_p033-081_控制系统的数学模型__9294ff3f\\images\\figure_34.jpg",
+      "index": 34
+    },
+    "19a84ebdfde935116e6fe8a31ad4a80e800724c68d059f94e9f880e57ddd3a92.jpg": {
+      "original_name": "19a84ebdfde935116e6fe8a31ad4a80e800724c68d059f94e9f880e57ddd3a92.jpg",
+      "original_rel_path": "19a84ebdfde935116e6fe8a31ad4a80e800724c68d059f94e9f880e57ddd3a92.jpg",
+      "friendly_name": "figure_35.jpg",
+      "abs_path": "data/mineru_cache\\chapter_02_p033-081_控制系统的数学模型__9294ff3f\\images\\figure_35.jpg",
+      "index": 35
+    },
+    "19efd38a4dbd5b761bda83d69f04355a67cf22efb38b39230e5b667bd73824b6.jpg": {
+      "original_name": "19efd38a4dbd5b761bda83d69f04355a67cf22efb38b39230e5b667bd73824b6.jpg",
+      "original_rel_path": "19efd38a4dbd5b761bda83d69f04355a67cf22efb38b39230e5b667bd73824b6.jpg",
+      "friendly_name": "figure_36.jpg",
+      "abs_path": "data/mineru_cache\\chapter_02_p033-081_控制系统的数学模型__9294ff3f\\images\\figure_36.jpg",
+      "index": 36
+    },
+    "1a2fcae5a816fa174c6aafa5f3aa76d08a2e8da27a6ceb0d8401179f59338284.jpg": {
+      "original_name": "1a2fcae5a816fa174c6aafa5f3aa76d08a2e8da27a6ceb0d8401179f59338284.jpg",
+      "original_rel_path": "1a2fcae5a816fa174c6aafa5f3aa76d08a2e8da27a6ceb0d8401179f59338284.jpg",
+      "friendly_name": "figure_37.jpg",
+      "abs_path": "data/mineru_cache\\chapter_02_p033-081_控制系统的数学模型__9294ff3f\\images\\figure_37.jpg",
+      "index": 37
+    },
+    "1ad43f5c87a711fc12474f4e37d1a4c042c81fcab9588f32c44b7923f8cf1553.jpg": {
+      "original_name": "1ad43f5c87a711fc12474f4e37d1a4c042c81fcab9588f32c44b7923f8cf1553.jpg",
+      "original_rel_path": "1ad43f5c87a711fc12474f4e37d1a4c042c81fcab9588f32c44b7923f8cf1553.jpg",
+      "friendly_name": "figure_38.jpg",
+      "abs_path": "data/mineru_cache\\chapter_02_p033-081_控制系统的数学模型__9294ff3f\\images\\figure_38.jpg",
+      "index": 38
+    },
+    "1af5ed6a31e56026f1c127b7d6edcf96bd8d156e484faef0a443014a66d0d638.jpg": {
+      "original_name": "1af5ed6a31e56026f1c127b7d6edcf96bd8d156e484faef0a443014a66d0d638.jpg",
+      "original_rel_path": "1af5ed6a31e56026f1c127b7d6edcf96bd8d156e484faef0a443014a66d0d638.jpg",
+      "friendly_name": "figure_39.jpg",
+      "abs_path": "data/mineru_cache\\chapter_02_p033-081_控制系统的数学模型__9294ff3f\\images\\figure_39.jpg",
+      "index": 39
+    },
+    "1b1335ab86bd8305aea022aa84b8ffa5c4f7238b80c74331e9849490fd752cac.jpg": {
+      "original_name": "1b1335ab86bd8305aea022aa84b8ffa5c4f7238b80c74331e9849490fd752cac.jpg",
+      "original_rel_path": "1b1335ab86bd8305aea022aa84b8ffa5c4f7238b80c74331e9849490fd752cac.jpg",
+      "friendly_name": "figure_40.jpg",
+      "abs_path": "data/mineru_cache\\chapter_02_p033-081_控制系统的数学模型__9294ff3f\\images\\figure_40.jpg",
+      "index": 40
+    },
+    "1b75ef7aaf2eae12ccd4a44d84b915f5994f69c7e4c83b70f422a99b207e3438.jpg": {
+      "original_name": "1b75ef7aaf2eae12ccd4a44d84b915f5994f69c7e4c83b70f422a99b207e3438.jpg",
+      "original_rel_path": "1b75ef7aaf2eae12ccd4a44d84b915f5994f69c7e4c83b70f422a99b207e3438.jpg",
+      "friendly_name": "figure_41.jpg",
+      "abs_path": "data/mineru_cache\\chapter_02_p033-081_控制系统的数学模型__9294ff3f\\images\\figure_41.jpg",
+      "index": 41
+    },
+    "1bb2d28179e53f93daa160e759b188f7b1cfb49e640a3f57e3867721a5679052.jpg": {
+      "original_name": "1bb2d28179e53f93daa160e759b188f7b1cfb49e640a3f57e3867721a5679052.jpg",
+      "original_rel_path": "1bb2d28179e53f93daa160e759b188f7b1cfb49e640a3f57e3867721a5679052.jpg",
+      "friendly_name": "figure_42.jpg",
+      "abs_path": "data/mineru_cache\\chapter_02_p033-081_控制系统的数学模型__9294ff3f\\images\\figure_42.jpg",
+      "index": 42
+    },
+    "1e66b3db073450192209f0d9dce6bf9cab5e49bda787287da018910b98487a0f.jpg": {
+      "original_name": "1e66b3db073450192209f0d9dce6bf9cab5e49bda787287da018910b98487a0f.jpg",
+      "original_rel_path": "1e66b3db073450192209f0d9dce6bf9cab5e49bda787287da018910b98487a0f.jpg",
+      "friendly_name": "figure_43.jpg",
+      "abs_path": "data/mineru_cache\\chapter_02_p033-081_控制系统的数学模型__9294ff3f\\images\\figure_43.jpg",
+      "index": 43
+    },
+    "1e8da7f25f5dbfdf5caac5e54519c9b47229c97e8ced740821acdb8174c9eddf.jpg": {
+      "original_name": "1e8da7f25f5dbfdf5caac5e54519c9b47229c97e8ced740821acdb8174c9eddf.jpg",
+      "original_rel_path": "1e8da7f25f5dbfdf5caac5e54519c9b47229c97e8ced740821acdb8174c9eddf.jpg",
+      "friendly_name": "figure_44.jpg",
+      "abs_path": "data/mineru_cache\\chapter_02_p033-081_控制系统的数学模型__9294ff3f\\images\\figure_44.jpg",
+      "index": 44
+    },
+    "1f45812e4d163fefb43af062eef2cb658726403b801465dfb0ff86ff52ca9108.jpg": {
+      "original_name": "1f45812e4d163fefb43af062eef2cb658726403b801465dfb0ff86ff52ca9108.jpg",
+      "original_rel_path": "1f45812e4d163fefb43af062eef2cb658726403b801465dfb0ff86ff52ca9108.jpg",
+      "friendly_name": "figure_45.jpg",
+      "abs_path": "data/mineru_cache\\chapter_02_p033-081_控制系统的数学模型__9294ff3f\\images\\figure_45.jpg",
+      "index": 45
+    },
+    "1faac765c071a51c53c4c51444112b175f1562418d14ac5af563da3aaa3753e0.jpg": {
+      "original_name": "1faac765c071a51c53c4c51444112b175f1562418d14ac5af563da3aaa3753e0.jpg",
+      "original_rel_path": "1faac765c071a51c53c4c51444112b175f1562418d14ac5af563da3aaa3753e0.jpg",
+      "friendly_name": "figure_46.jpg",
+      "abs_path": "data/mineru_cache\\chapter_02_p033-081_控制系统的数学模型__9294ff3f\\images\\figure_46.jpg",
+      "index": 46
+    },
+    "204a219a8725f782679b66e256e3aa0bb6e533f4e7ca280c4ab0b9a6d62b8ee6.jpg": {
+      "original_name": "204a219a8725f782679b66e256e3aa0bb6e533f4e7ca280c4ab0b9a6d62b8ee6.jpg",
+      "original_rel_path": "204a219a8725f782679b66e256e3aa0bb6e533f4e7ca280c4ab0b9a6d62b8ee6.jpg",
+      "friendly_name": "figure_47.jpg",
+      "abs_path": "data/mineru_cache\\chapter_02_p033-081_控制系统的数学模型__9294ff3f\\images\\figure_47.jpg",
+      "index": 47
+    },
+    "20a4c1a494cddc1cbec03a44a2c0e9b8aa195c3d25feb76b02ea59c76263e053.jpg": {
+      "original_name": "20a4c1a494cddc1cbec03a44a2c0e9b8aa195c3d25feb76b02ea59c76263e053.jpg",
+      "original_rel_path": "20a4c1a494cddc1cbec03a44a2c0e9b8aa195c3d25feb76b02ea59c76263e053.jpg",
+      "friendly_name": "figure_48.jpg",
+      "abs_path": "data/mineru_cache\\chapter_02_p033-081_控制系统的数学模型__9294ff3f\\images\\figure_48.jpg",
+      "index": 48
+    },
+    "20c73ca8ae1dd945cbc657905bc1417c2ef4daad407021007ca3967356016d8c.jpg": {
+      "original_name": "20c73ca8ae1dd945cbc657905bc1417c2ef4daad407021007ca3967356016d8c.jpg",
+      "original_rel_path": "20c73ca8ae1dd945cbc657905bc1417c2ef4daad407021007ca3967356016d8c.jpg",
+      "friendly_name": "figure_49.jpg",
+      "abs_path": "data/mineru_cache\\chapter_02_p033-081_控制系统的数学模型__9294ff3f\\images\\figure_49.jpg",
+      "index": 49
+    },
+    "2188f905faeff3b9c09efac95af5e17df25a049dd4aeda45daf2ef37afc27302.jpg": {
+      "original_name": "2188f905faeff3b9c09efac95af5e17df25a049dd4aeda45daf2ef37afc27302.jpg",
+      "original_rel_path": "2188f905faeff3b9c09efac95af5e17df25a049dd4aeda45daf2ef37afc27302.jpg",
+      "friendly_name": "figure_50.jpg",
+      "abs_path": "data/mineru_cache\\chapter_02_p033-081_控制系统的数学模型__9294ff3f\\images\\figure_50.jpg",
+      "index": 50
+    },
+    "21ba14471e55131d5d9e69f9bc25c8a0e690c52c4fbe2c48ac2d6b7d2d631cc0.jpg": {
+      "original_name": "21ba14471e55131d5d9e69f9bc25c8a0e690c52c4fbe2c48ac2d6b7d2d631cc0.jpg",
+      "original_rel_path": "21ba14471e55131d5d9e69f9bc25c8a0e690c52c4fbe2c48ac2d6b7d2d631cc0.jpg",
+      "friendly_name": "figure_51.jpg",
+      "abs_path": "data/mineru_cache\\chapter_02_p033-081_控制系统的数学模型__9294ff3f\\images\\figure_51.jpg",
+      "index": 51
+    },
+    "23a8764634a262173ca9814b928a1ac59ad292f444d1ea675acf5bfe7e14070b.jpg": {
+      "original_name": "23a8764634a262173ca9814b928a1ac59ad292f444d1ea675acf5bfe7e14070b.jpg",
+      "original_rel_path": "23a8764634a262173ca9814b928a1ac59ad292f444d1ea675acf5bfe7e14070b.jpg",
+      "friendly_name": "figure_52.jpg",
+      "abs_path": "data/mineru_cache\\chapter_02_p033-081_控制系统的数学模型__9294ff3f\\images\\figure_52.jpg",
+      "index": 52
+    },
+    "240e8884ee7d7531a715593e2e6ae500a5a015f1c1987fb672ed8b0f01c6f477.jpg": {
+      "original_name": "240e8884ee7d7531a715593e2e6ae500a5a015f1c1987fb672ed8b0f01c6f477.jpg",
+      "original_rel_path": "240e8884ee7d7531a715593e2e6ae500a5a015f1c1987fb672ed8b0f01c6f477.jpg",
+      "friendly_name": "figure_53.jpg",
+      "abs_path": "data/mineru_cache\\chapter_02_p033-081_控制系统的数学模型__9294ff3f\\images\\figure_53.jpg",
+      "index": 53
+    },
+    "246c7a35c4b7be74fd48d6e9af79b8df5367183caba00c973289899a2562daa1.jpg": {
+      "original_name": "246c7a35c4b7be74fd48d6e9af79b8df5367183caba00c973289899a2562daa1.jpg",
+      "original_rel_path": "246c7a35c4b7be74fd48d6e9af79b8df5367183caba00c973289899a2562daa1.jpg",
+      "friendly_name": "figure_54.jpg",
+      "abs_path": "data/mineru_cache\\chapter_02_p033-081_控制系统的数学模型__9294ff3f\\images\\figure_54.jpg",
+      "index": 54
+    },
+    "24da76fb8a284393ad529bdc9fe496a62a2e21b8b61fbb0dc9fe60eab055361d.jpg": {
+      "original_name": "24da76fb8a284393ad529bdc9fe496a62a2e21b8b61fbb0dc9fe60eab055361d.jpg",
+      "original_rel_path": "24da76fb8a284393ad529bdc9fe496a62a2e21b8b61fbb0dc9fe60eab055361d.jpg",
+      "friendly_name": "figure_55.jpg",
+      "abs_path": "data/mineru_cache\\chapter_02_p033-081_控制系统的数学模型__9294ff3f\\images\\figure_55.jpg",
+      "index": 55
+    },
+    "25a311a31a6315dfe1bb0d5f432c9962020d7b867008cec83da05246f18c0adc.jpg": {
+      "original_name": "25a311a31a6315dfe1bb0d5f432c9962020d7b867008cec83da05246f18c0adc.jpg",
+      "original_rel_path": "25a311a31a6315dfe1bb0d5f432c9962020d7b867008cec83da05246f18c0adc.jpg",
+      "friendly_name": "figure_56.jpg",
+      "abs_path": "data/mineru_cache\\chapter_02_p033-081_控制系统的数学模型__9294ff3f\\images\\figure_56.jpg",
+      "index": 56
+    },
+    "25ad43b9f41a50bb490f3fa209e8e88321da9f9c32de7b23a82ce24c05fac857.jpg": {
+      "original_name": "25ad43b9f41a50bb490f3fa209e8e88321da9f9c32de7b23a82ce24c05fac857.jpg",
+      "original_rel_path": "25ad43b9f41a50bb490f3fa209e8e88321da9f9c32de7b23a82ce24c05fac857.jpg",
+      "friendly_name": "figure_57.jpg",
+      "abs_path": "data/mineru_cache\\chapter_02_p033-081_控制系统的数学模型__9294ff3f\\images\\figure_57.jpg",
+      "index": 57
+    },
+    "268e5ef9793bf3545900afa840dc69f76a8b750284f5dd35c28cdaa43abd1f02.jpg": {
+      "original_name": "268e5ef9793bf3545900afa840dc69f76a8b750284f5dd35c28cdaa43abd1f02.jpg",
+      "original_rel_path": "268e5ef9793bf3545900afa840dc69f76a8b750284f5dd35c28cdaa43abd1f02.jpg",
+      "friendly_name": "figure_58.jpg",
+      "abs_path": "data/mineru_cache\\chapter_02_p033-081_控制系统的数学模型__9294ff3f\\images\\figure_58.jpg",
+      "index": 58
+    },
+    "27b6c7b15d66bbf9674e0703c281208dee647cbcb62a829646da2c4d19191307.jpg": {
+      "original_name": "27b6c7b15d66bbf9674e0703c281208dee647cbcb62a829646da2c4d19191307.jpg",
+      "original_rel_path": "27b6c7b15d66bbf9674e0703c281208dee647cbcb62a829646da2c4d19191307.jpg",
+      "friendly_name": "figure_59.jpg",
+      "abs_path": "data/mineru_cache\\chapter_02_p033-081_控制系统的数学模型__9294ff3f\\images\\figure_59.jpg",
+      "index": 59
+    },
+    "27fa59ee62cd1342633d2d14e23eceeac264703625ce2b17c4505fca8d7011f7.jpg": {
+      "original_name": "27fa59ee62cd1342633d2d14e23eceeac264703625ce2b17c4505fca8d7011f7.jpg",
+      "original_rel_path": "27fa59ee62cd1342633d2d14e23eceeac264703625ce2b17c4505fca8d7011f7.jpg",
+      "friendly_name": "figure_60.jpg",
+      "abs_path": "data/mineru_cache\\chapter_02_p033-081_控制系统的数学模型__9294ff3f\\images\\figure_60.jpg",
+      "index": 60
+    },
+    "28e5b8c7c8c48ff883aff826500eb2b27ae6814a66f8b248b7e07944fd4664c6.jpg": {
+      "original_name": "28e5b8c7c8c48ff883aff826500eb2b27ae6814a66f8b248b7e07944fd4664c6.jpg",
+      "original_rel_path": "28e5b8c7c8c48ff883aff826500eb2b27ae6814a66f8b248b7e07944fd4664c6.jpg",
+      "friendly_name": "figure_61.jpg",
+      "abs_path": "data/mineru_cache\\chapter_02_p033-081_控制系统的数学模型__9294ff3f\\images\\figure_61.jpg",
+      "index": 61
+    },
+    "29145a29493e8ba7974cb85d52c9f68b42c32d4e5fffdcd203972ea416f745c2.jpg": {
+      "original_name": "29145a29493e8ba7974cb85d52c9f68b42c32d4e5fffdcd203972ea416f745c2.jpg",
+      "original_rel_path": "29145a29493e8ba7974cb85d52c9f68b42c32d4e5fffdcd203972ea416f745c2.jpg",
+      "friendly_name": "figure_62.jpg",
+      "abs_path": "data/mineru_cache\\chapter_02_p033-081_控制系统的数学模型__9294ff3f\\images\\figure_62.jpg",
+      "index": 62
+    },
+    "2941b05df03665c2a59553843f9fe282f6338b14fa7d8df4df20a6768f94f430.jpg": {
+      "original_name": "2941b05df03665c2a59553843f9fe282f6338b14fa7d8df4df20a6768f94f430.jpg",
+      "original_rel_path": "2941b05df03665c2a59553843f9fe282f6338b14fa7d8df4df20a6768f94f430.jpg",
+      "friendly_name": "figure_63.jpg",
+      "abs_path": "data/mineru_cache\\chapter_02_p033-081_控制系统的数学模型__9294ff3f\\images\\figure_63.jpg",
+      "index": 63
+    },
+    "2956764b3d905e15d066abd487c904f2ab5362ae5805aa075db25f58bfd2a731.jpg": {
+      "original_name": "2956764b3d905e15d066abd487c904f2ab5362ae5805aa075db25f58bfd2a731.jpg",
+      "original_rel_path": "2956764b3d905e15d066abd487c904f2ab5362ae5805aa075db25f58bfd2a731.jpg",
+      "friendly_name": "figure_64.jpg",
+      "abs_path": "data/mineru_cache\\chapter_02_p033-081_控制系统的数学模型__9294ff3f\\images\\figure_64.jpg",
+      "index": 64
+    },
+    "29dadcf4334d47b0b4cdda608e68ce0e116e3d07d85887ee01be2210f7e95ae9.jpg": {
+      "original_name": "29dadcf4334d47b0b4cdda608e68ce0e116e3d07d85887ee01be2210f7e95ae9.jpg",
+      "original_rel_path": "29dadcf4334d47b0b4cdda608e68ce0e116e3d07d85887ee01be2210f7e95ae9.jpg",
+      "friendly_name": "figure_65.jpg",
+      "abs_path": "data/mineru_cache\\chapter_02_p033-081_控制系统的数学模型__9294ff3f\\images\\figure_65.jpg",
+      "index": 65
+    },
+    "29fcda53885dc5671a7bddbecb8fb3b3d3e4184397dcfd9edbe587d422f2944b.jpg": {
+      "original_name": "29fcda53885dc5671a7bddbecb8fb3b3d3e4184397dcfd9edbe587d422f2944b.jpg",
+      "original_rel_path": "29fcda53885dc5671a7bddbecb8fb3b3d3e4184397dcfd9edbe587d422f2944b.jpg",
+      "friendly_name": "figure_66.jpg",
+      "abs_path": "data/mineru_cache\\chapter_02_p033-081_控制系统的数学模型__9294ff3f\\images\\figure_66.jpg",
+      "index": 66
+    },
+    "2baad91c879fc17eec9142fe9ac9df6f2289b5c819fc900d4618ec2cc8dce590.jpg": {
+      "original_name": "2baad91c879fc17eec9142fe9ac9df6f2289b5c819fc900d4618ec2cc8dce590.jpg",
+      "original_rel_path": "2baad91c879fc17eec9142fe9ac9df6f2289b5c819fc900d4618ec2cc8dce590.jpg",
+      "friendly_name": "figure_67.jpg",
+      "abs_path": "data/mineru_cache\\chapter_02_p033-081_控制系统的数学模型__9294ff3f\\images\\figure_67.jpg",
+      "index": 67
+    },
+    "2c21dfa5f4f18dcedd8725c8066f67ddf472aa0101a054fd9e1ccc775484b45a.jpg": {
+      "original_name": "2c21dfa5f4f18dcedd8725c8066f67ddf472aa0101a054fd9e1ccc775484b45a.jpg",
+      "original_rel_path": "2c21dfa5f4f18dcedd8725c8066f67ddf472aa0101a054fd9e1ccc775484b45a.jpg",
+      "friendly_name": "figure_68.jpg",
+      "abs_path": "data/mineru_cache\\chapter_02_p033-081_控制系统的数学模型__9294ff3f\\images\\figure_68.jpg",
+      "index": 68
+    },
+    "2c35ba171d5d834721890b5694e7665d634817dd53a179644945b87d0fa55a4e.jpg": {
+      "original_name": "2c35ba171d5d834721890b5694e7665d634817dd53a179644945b87d0fa55a4e.jpg",
+      "original_rel_path": "2c35ba171d5d834721890b5694e7665d634817dd53a179644945b87d0fa55a4e.jpg",
+      "friendly_name": "figure_69.jpg",
+      "abs_path": "data/mineru_cache\\chapter_02_p033-081_控制系统的数学模型__9294ff3f\\images\\figure_69.jpg",
+      "index": 69
+    },
+    "2c6cb060b8d64ea1b61edbd0ad82f5edf009cf7ed1b5c46c15446c977718e139.jpg": {
+      "original_name": "2c6cb060b8d64ea1b61edbd0ad82f5edf009cf7ed1b5c46c15446c977718e139.jpg",
+      "original_rel_path": "2c6cb060b8d64ea1b61edbd0ad82f5edf009cf7ed1b5c46c15446c977718e139.jpg",
+      "friendly_name": "figure_70.jpg",
+      "abs_path": "data/mineru_cache\\chapter_02_p033-081_控制系统的数学模型__9294ff3f\\images\\figure_70.jpg",
+      "index": 70
+    },
+    "2d4bf1887b400e7d2a54ef33909b765e98d1383449bd65d1dcbfbc513ea79430.jpg": {
+      "original_name": "2d4bf1887b400e7d2a54ef33909b765e98d1383449bd65d1dcbfbc513ea79430.jpg",
+      "original_rel_path": "2d4bf1887b400e7d2a54ef33909b765e98d1383449bd65d1dcbfbc513ea79430.jpg",
+      "friendly_name": "figure_71.jpg",
+      "abs_path": "data/mineru_cache\\chapter_02_p033-081_控制系统的数学模型__9294ff3f\\images\\figure_71.jpg",
+      "index": 71
+    },
+    "3091792ae6ee7b3383b3eb3c4a94aa0e5f7c3003784984a43bb9d339cde06f87.jpg": {
+      "original_name": "3091792ae6ee7b3383b3eb3c4a94aa0e5f7c3003784984a43bb9d339cde06f87.jpg",
+      "original_rel_path": "3091792ae6ee7b3383b3eb3c4a94aa0e5f7c3003784984a43bb9d339cde06f87.jpg",
+      "friendly_name": "figure_72.jpg",
+      "abs_path": "data/mineru_cache\\chapter_02_p033-081_控制系统的数学模型__9294ff3f\\images\\figure_72.jpg",
+      "index": 72
+    },
+    "30adb1b8efb50c58ce527e35f1bc661e54d112894a78aa2742a30f807b526ac7.jpg": {
+      "original_name": "30adb1b8efb50c58ce527e35f1bc661e54d112894a78aa2742a30f807b526ac7.jpg",
+      "original_rel_path": "30adb1b8efb50c58ce527e35f1bc661e54d112894a78aa2742a30f807b526ac7.jpg",
+      "friendly_name": "figure_73.jpg",
+      "abs_path": "data/mineru_cache\\chapter_02_p033-081_控制系统的数学模型__9294ff3f\\images\\figure_73.jpg",
+      "index": 73
+    },
+    "313dee5e05a8de572bed92ab5f2148c778e751bf60142a1e4aad44bd065c7cb1.jpg": {
+      "original_name": "313dee5e05a8de572bed92ab5f2148c778e751bf60142a1e4aad44bd065c7cb1.jpg",
+      "original_rel_path": "313dee5e05a8de572bed92ab5f2148c778e751bf60142a1e4aad44bd065c7cb1.jpg",
+      "friendly_name": "figure_74.jpg",
+      "abs_path": "data/mineru_cache\\chapter_02_p033-081_控制系统的数学模型__9294ff3f\\images\\figure_74.jpg",
+      "index": 74
+    },
+    "32d83107618ef4b0445f2eb0a1245faae71cb3e2bb61a8290a1b0e6a09b81b0a.jpg": {
+      "original_name": "32d83107618ef4b0445f2eb0a1245faae71cb3e2bb61a8290a1b0e6a09b81b0a.jpg",
+      "original_rel_path": "32d83107618ef4b0445f2eb0a1245faae71cb3e2bb61a8290a1b0e6a09b81b0a.jpg",
+      "friendly_name": "figure_75.jpg",
+      "abs_path": "data/mineru_cache\\chapter_02_p033-081_控制系统的数学模型__9294ff3f\\images\\figure_75.jpg",
+      "index": 75
+    },
+    "336f2f6b941a6caaad76349c2ccb9fd06d9b0bc352ff047fd0ca2ee54480291b.jpg": {
+      "original_name": "336f2f6b941a6caaad76349c2ccb9fd06d9b0bc352ff047fd0ca2ee54480291b.jpg",
+      "original_rel_path": "336f2f6b941a6caaad76349c2ccb9fd06d9b0bc352ff047fd0ca2ee54480291b.jpg",
+      "friendly_name": "figure_76.jpg",
+      "abs_path": "data/mineru_cache\\chapter_02_p033-081_控制系统的数学模型__9294ff3f\\images\\figure_76.jpg",
+      "index": 76
+    },
+    "3460f1a986ccb88f6ad2eb5be432bd44d19f0ee8c0df471526bef8b59e4adee4.jpg": {
+      "original_name": "3460f1a986ccb88f6ad2eb5be432bd44d19f0ee8c0df471526bef8b59e4adee4.jpg",
+      "original_rel_path": "3460f1a986ccb88f6ad2eb5be432bd44d19f0ee8c0df471526bef8b59e4adee4.jpg",
+      "friendly_name": "figure_77.jpg",
+      "abs_path": "data/mineru_cache\\chapter_02_p033-081_控制系统的数学模型__9294ff3f\\images\\figure_77.jpg",
+      "index": 77
+    },
+    "34767e29ac4502a5883e48df5ff82ad1cb23f7b3b911f238e13751d9c0bc04dc.jpg": {
+      "original_name": "34767e29ac4502a5883e48df5ff82ad1cb23f7b3b911f238e13751d9c0bc04dc.jpg",
+      "original_rel_path": "34767e29ac4502a5883e48df5ff82ad1cb23f7b3b911f238e13751d9c0bc04dc.jpg",
+      "friendly_name": "figure_78.jpg",
+      "abs_path": "data/mineru_cache\\chapter_02_p033-081_控制系统的数学模型__9294ff3f\\images\\figure_78.jpg",
+      "index": 78
+    },
+    "3538b1bf31748e683c2dd629d55439cdf1ed1b8a68d5aabddd4c9d817e67dac1.jpg": {
+      "original_name": "3538b1bf31748e683c2dd629d55439cdf1ed1b8a68d5aabddd4c9d817e67dac1.jpg",
+      "original_rel_path": "3538b1bf31748e683c2dd629d55439cdf1ed1b8a68d5aabddd4c9d817e67dac1.jpg",
+      "friendly_name": "figure_79.jpg",
+      "abs_path": "data/mineru_cache\\chapter_02_p033-081_控制系统的数学模型__9294ff3f\\images\\figure_79.jpg",
+      "index": 79
+    },
+    "356cfed953c28c6cbdf6886d06635f2145c3d20ba01027fdbb7c1d4775fda540.jpg": {
+      "original_name": "356cfed953c28c6cbdf6886d06635f2145c3d20ba01027fdbb7c1d4775fda540.jpg",
+      "original_rel_path": "356cfed953c28c6cbdf6886d06635f2145c3d20ba01027fdbb7c1d4775fda540.jpg",
+      "friendly_name": "figure_80.jpg",
+      "abs_path": "data/mineru_cache\\chapter_02_p033-081_控制系统的数学模型__9294ff3f\\images\\figure_80.jpg",
+      "index": 80
+    },
+    "3697c9507084db4c1b62656908d74c126bafca02197086fce627a6bd0de529c2.jpg": {
+      "original_name": "3697c9507084db4c1b62656908d74c126bafca02197086fce627a6bd0de529c2.jpg",
+      "original_rel_path": "3697c9507084db4c1b62656908d74c126bafca02197086fce627a6bd0de529c2.jpg",
+      "friendly_name": "figure_81.jpg",
+      "abs_path": "data/mineru_cache\\chapter_02_p033-081_控制系统的数学模型__9294ff3f\\images\\figure_81.jpg",
+      "index": 81
+    },
+    "37ec962aedbcdfa5a91fa1ad80a76f6e9360f0f202bf6ab5fd574b60b12d40bc.jpg": {
+      "original_name": "37ec962aedbcdfa5a91fa1ad80a76f6e9360f0f202bf6ab5fd574b60b12d40bc.jpg",
+      "original_rel_path": "37ec962aedbcdfa5a91fa1ad80a76f6e9360f0f202bf6ab5fd574b60b12d40bc.jpg",
+      "friendly_name": "figure_82.jpg",
+      "abs_path": "data/mineru_cache\\chapter_02_p033-081_控制系统的数学模型__9294ff3f\\images\\figure_82.jpg",
+      "index": 82
+    },
+    "38482c798e3607a924882ea595aeb77e0b32912bfbcc73e24804419444a09bb7.jpg": {
+      "original_name": "38482c798e3607a924882ea595aeb77e0b32912bfbcc73e24804419444a09bb7.jpg",
+      "original_rel_path": "38482c798e3607a924882ea595aeb77e0b32912bfbcc73e24804419444a09bb7.jpg",
+      "friendly_name": "figure_83.jpg",
+      "abs_path": "data/mineru_cache\\chapter_02_p033-081_控制系统的数学模型__9294ff3f\\images\\figure_83.jpg",
+      "index": 83
+    },
+    "38e2dfa2390834bd093f63710aff8754e1f6ffd27391bdd488a064d87c939dbe.jpg": {
+      "original_name": "38e2dfa2390834bd093f63710aff8754e1f6ffd27391bdd488a064d87c939dbe.jpg",
+      "original_rel_path": "38e2dfa2390834bd093f63710aff8754e1f6ffd27391bdd488a064d87c939dbe.jpg",
+      "friendly_name": "figure_84.jpg",
+      "abs_path": "data/mineru_cache\\chapter_02_p033-081_控制系统的数学模型__9294ff3f\\images\\figure_84.jpg",
+      "index": 84
+    },
+    "3acfc95f3d722fea52b71f49c6a27381bed21b18c566863c3b1f2d260185d065.jpg": {
+      "original_name": "3acfc95f3d722fea52b71f49c6a27381bed21b18c566863c3b1f2d260185d065.jpg",
+      "original_rel_path": "3acfc95f3d722fea52b71f49c6a27381bed21b18c566863c3b1f2d260185d065.jpg",
+      "friendly_name": "figure_85.jpg",
+      "abs_path": "data/mineru_cache\\chapter_02_p033-081_控制系统的数学模型__9294ff3f\\images\\figure_85.jpg",
+      "index": 85
+    },
+    "3af467d61b2b3459b6d68890fe3633ab591f8750970addf9e2f18762f4513a4d.jpg": {
+      "original_name": "3af467d61b2b3459b6d68890fe3633ab591f8750970addf9e2f18762f4513a4d.jpg",
+      "original_rel_path": "3af467d61b2b3459b6d68890fe3633ab591f8750970addf9e2f18762f4513a4d.jpg",
+      "friendly_name": "figure_86.jpg",
+      "abs_path": "data/mineru_cache\\chapter_02_p033-081_控制系统的数学模型__9294ff3f\\images\\figure_86.jpg",
+      "index": 86
+    },
+    "3c148354c53f9891a103f5dd8e2b12beaa69b21765691bf397f7c8e8235e811f.jpg": {
+      "original_name": "3c148354c53f9891a103f5dd8e2b12beaa69b21765691bf397f7c8e8235e811f.jpg",
+      "original_rel_path": "3c148354c53f9891a103f5dd8e2b12beaa69b21765691bf397f7c8e8235e811f.jpg",
+      "friendly_name": "figure_87.jpg",
+      "abs_path": "data/mineru_cache\\chapter_02_p033-081_控制系统的数学模型__9294ff3f\\images\\figure_87.jpg",
+      "index": 87
+    },
+    "3c7450938fbf88c804936fda1813e048d05473f5314d36811bddb556609b8a6e.jpg": {
+      "original_name": "3c7450938fbf88c804936fda1813e048d05473f5314d36811bddb556609b8a6e.jpg",
+      "original_rel_path": "3c7450938fbf88c804936fda1813e048d05473f5314d36811bddb556609b8a6e.jpg",
+      "friendly_name": "figure_88.jpg",
+      "abs_path": "data/mineru_cache\\chapter_02_p033-081_控制系统的数学模型__9294ff3f\\images\\figure_88.jpg",
+      "index": 88
+    },
+    "3cd82b1eef495b6839caafd17eb94514e43afa7e76e6b807d4da52829800f47c.jpg": {
+      "original_name": "3cd82b1eef495b6839caafd17eb94514e43afa7e76e6b807d4da52829800f47c.jpg",
+      "original_rel_path": "3cd82b1eef495b6839caafd17eb94514e43afa7e76e6b807d4da52829800f47c.jpg",
+      "friendly_name": "figure_89.jpg",
+      "abs_path": "data/mineru_cache\\chapter_02_p033-081_控制系统的数学模型__9294ff3f\\images\\figure_89.jpg",
+      "index": 89
+    },
+    "3e4de3e162d7cc7171491ff56cac00d1f2812238fb6e01440345401b9c2e528e.jpg": {
+      "original_name": "3e4de3e162d7cc7171491ff56cac00d1f2812238fb6e01440345401b9c2e528e.jpg",
+      "original_rel_path": "3e4de3e162d7cc7171491ff56cac00d1f2812238fb6e01440345401b9c2e528e.jpg",
+      "friendly_name": "figure_90.jpg",
+      "abs_path": "data/mineru_cache\\chapter_02_p033-081_控制系统的数学模型__9294ff3f\\images\\figure_90.jpg",
+      "index": 90
+    },
+    "3e864aeb5cfad969ac446114e009cf5f25873126fb7c9e1e5b1dc1ec3f99145e.jpg": {
+      "original_name": "3e864aeb5cfad969ac446114e009cf5f25873126fb7c9e1e5b1dc1ec3f99145e.jpg",
+      "original_rel_path": "3e864aeb5cfad969ac446114e009cf5f25873126fb7c9e1e5b1dc1ec3f99145e.jpg",
+      "friendly_name": "figure_91.jpg",
+      "abs_path": "data/mineru_cache\\chapter_02_p033-081_控制系统的数学模型__9294ff3f\\images\\figure_91.jpg",
+      "index": 91
+    },
+    "3f4b0094c9af4589dbeb998f83280d30cffb56a20d814064b1de86f336ae68dd.jpg": {
+      "original_name": "3f4b0094c9af4589dbeb998f83280d30cffb56a20d814064b1de86f336ae68dd.jpg",
+      "original_rel_path": "3f4b0094c9af4589dbeb998f83280d30cffb56a20d814064b1de86f336ae68dd.jpg",
+      "friendly_name": "figure_92.jpg",
+      "abs_path": "data/mineru_cache\\chapter_02_p033-081_控制系统的数学模型__9294ff3f\\images\\figure_92.jpg",
+      "index": 92
+    },
+    "3ffca2fdb6b77fe9c5e2b505522cd83de9ea79e10d2b65a3b721a466fc0ad3ad.jpg": {
+      "original_name": "3ffca2fdb6b77fe9c5e2b505522cd83de9ea79e10d2b65a3b721a466fc0ad3ad.jpg",
+      "original_rel_path": "3ffca2fdb6b77fe9c5e2b505522cd83de9ea79e10d2b65a3b721a466fc0ad3ad.jpg",
+      "friendly_name": "figure_93.jpg",
+      "abs_path": "data/mineru_cache\\chapter_02_p033-081_控制系统的数学模型__9294ff3f\\images\\figure_93.jpg",
+      "index": 93
+    },
+    "4046b55b1acde350454fc5c458b13d4e48f9d49fb7eae4aabccaa2e35f23faf9.jpg": {
+      "original_name": "4046b55b1acde350454fc5c458b13d4e48f9d49fb7eae4aabccaa2e35f23faf9.jpg",
+      "original_rel_path": "4046b55b1acde350454fc5c458b13d4e48f9d49fb7eae4aabccaa2e35f23faf9.jpg",
+      "friendly_name": "figure_94.jpg",
+      "abs_path": "data/mineru_cache\\chapter_02_p033-081_控制系统的数学模型__9294ff3f\\images\\figure_94.jpg",
+      "index": 94
+    },
+    "40cde49be225a28a834fd329d0079bdec68c38fd9df25e3dc0aa1c9cbfc1473f.jpg": {
+      "original_name": "40cde49be225a28a834fd329d0079bdec68c38fd9df25e3dc0aa1c9cbfc1473f.jpg",
+      "original_rel_path": "40cde49be225a28a834fd329d0079bdec68c38fd9df25e3dc0aa1c9cbfc1473f.jpg",
+      "friendly_name": "figure_95.jpg",
+      "abs_path": "data/mineru_cache\\chapter_02_p033-081_控制系统的数学模型__9294ff3f\\images\\figure_95.jpg",
+      "index": 95
+    },
+    "40eb50fe247db88e29c915414ffc88f367a1bab1b5a0ad46ee5d68c85dedfddc.jpg": {
+      "original_name": "40eb50fe247db88e29c915414ffc88f367a1bab1b5a0ad46ee5d68c85dedfddc.jpg",
+      "original_rel_path": "40eb50fe247db88e29c915414ffc88f367a1bab1b5a0ad46ee5d68c85dedfddc.jpg",
+      "friendly_name": "figure_96.jpg",
+      "abs_path": "data/mineru_cache\\chapter_02_p033-081_控制系统的数学模型__9294ff3f\\images\\figure_96.jpg",
+      "index": 96
+    },
+    "427e63d93a5ec79a0100831c67e6ac9af6e69dd43769d54d6b5c4031ecfa3cf9.jpg": {
+      "original_name": "427e63d93a5ec79a0100831c67e6ac9af6e69dd43769d54d6b5c4031ecfa3cf9.jpg",
+      "original_rel_path": "427e63d93a5ec79a0100831c67e6ac9af6e69dd43769d54d6b5c4031ecfa3cf9.jpg",
+      "friendly_name": "figure_97.jpg",
+      "abs_path": "data/mineru_cache\\chapter_02_p033-081_控制系统的数学模型__9294ff3f\\images\\figure_97.jpg",
+      "index": 97
+    },
+    "428276ab323c13698ca38e35c1c14e2b60ff12f30b7d462dd20d8f279a51a500.jpg": {
+      "original_name": "428276ab323c13698ca38e35c1c14e2b60ff12f30b7d462dd20d8f279a51a500.jpg",
+      "original_rel_path": "428276ab323c13698ca38e35c1c14e2b60ff12f30b7d462dd20d8f279a51a500.jpg",
+      "friendly_name": "figure_98.jpg",
+      "abs_path": "data/mineru_cache\\chapter_02_p033-081_控制系统的数学模型__9294ff3f\\images\\figure_98.jpg",
+      "index": 98
+    },
+    "42d529960684e7a0bf8e6c641c4c4a1d1551cb6369a697f0110c7c33f6ed1741.jpg": {
+      "original_name": "42d529960684e7a0bf8e6c641c4c4a1d1551cb6369a697f0110c7c33f6ed1741.jpg",
+      "original_rel_path": "42d529960684e7a0bf8e6c641c4c4a1d1551cb6369a697f0110c7c33f6ed1741.jpg",
+      "friendly_name": "figure_99.jpg",
+      "abs_path": "data/mineru_cache\\chapter_02_p033-081_控制系统的数学模型__9294ff3f\\images\\figure_99.jpg",
+      "index": 99
+    },
+    "43392015ceb38c9fa7edca72669d0ffba1c826a82f6643724f7460d3f1b0bfcc.jpg": {
+      "original_name": "43392015ceb38c9fa7edca72669d0ffba1c826a82f6643724f7460d3f1b0bfcc.jpg",
+      "original_rel_path": "43392015ceb38c9fa7edca72669d0ffba1c826a82f6643724f7460d3f1b0bfcc.jpg",
+      "friendly_name": "figure_100.jpg",
+      "abs_path": "data/mineru_cache\\chapter_02_p033-081_控制系统的数学模型__9294ff3f\\images\\figure_100.jpg",
+      "index": 100
+    },
+    "447f5147835b192c0a4779a2afb50bda20f082edd66b8c47cb8ad781d92c5bbc.jpg": {
+      "original_name": "447f5147835b192c0a4779a2afb50bda20f082edd66b8c47cb8ad781d92c5bbc.jpg",
+      "original_rel_path": "447f5147835b192c0a4779a2afb50bda20f082edd66b8c47cb8ad781d92c5bbc.jpg",
+      "friendly_name": "figure_101.jpg",
+      "abs_path": "data/mineru_cache\\chapter_02_p033-081_控制系统的数学模型__9294ff3f\\images\\figure_101.jpg",
+      "index": 101
+    },
+    "44a2d4eb7cea979ce7b8bd3325057258a74c73506d106415217cac9acae484ca.jpg": {
+      "original_name": "44a2d4eb7cea979ce7b8bd3325057258a74c73506d106415217cac9acae484ca.jpg",
+      "original_rel_path": "44a2d4eb7cea979ce7b8bd3325057258a74c73506d106415217cac9acae484ca.jpg",
+      "friendly_name": "figure_102.jpg",
+      "abs_path": "data/mineru_cache\\chapter_02_p033-081_控制系统的数学模型__9294ff3f\\images\\figure_102.jpg",
+      "index": 102
+    },
+    "452b279c3c042d15be771e60aa6b78aa2bf136cff5e1e8bc841242b9984bfeb5.jpg": {
+      "original_name": "452b279c3c042d15be771e60aa6b78aa2bf136cff5e1e8bc841242b9984bfeb5.jpg",
+      "original_rel_path": "452b279c3c042d15be771e60aa6b78aa2bf136cff5e1e8bc841242b9984bfeb5.jpg",
+      "friendly_name": "figure_103.jpg",
+      "abs_path": "data/mineru_cache\\chapter_02_p033-081_控制系统的数学模型__9294ff3f\\images\\figure_103.jpg",
+      "index": 103
+    },
+    "45dbdd8ca96538ade0278034fb3789cdac29d15218c9b0ad33830ca64b83f4af.jpg": {
+      "original_name": "45dbdd8ca96538ade0278034fb3789cdac29d15218c9b0ad33830ca64b83f4af.jpg",
+      "original_rel_path": "45dbdd8ca96538ade0278034fb3789cdac29d15218c9b0ad33830ca64b83f4af.jpg",
+      "friendly_name": "figure_104.jpg",
+      "abs_path": "data/mineru_cache\\chapter_02_p033-081_控制系统的数学模型__9294ff3f\\images\\figure_104.jpg",
+      "index": 104
+    },
+    "462ffb702d16bfd82372f31d856f654152b68245b0d7969d8253f1cbd5e183d9.jpg": {
+      "original_name": "462ffb702d16bfd82372f31d856f654152b68245b0d7969d8253f1cbd5e183d9.jpg",
+      "original_rel_path": "462ffb702d16bfd82372f31d856f654152b68245b0d7969d8253f1cbd5e183d9.jpg",
+      "friendly_name": "figure_105.jpg",
+      "abs_path": "data/mineru_cache\\chapter_02_p033-081_控制系统的数学模型__9294ff3f\\images\\figure_105.jpg",
+      "index": 105
+    },
+    "46553dc2dbe5d80d9511220339de8252f9bcc017d0d5ffedc70859551f905065.jpg": {
+      "original_name": "46553dc2dbe5d80d9511220339de8252f9bcc017d0d5ffedc70859551f905065.jpg",
+      "original_rel_path": "46553dc2dbe5d80d9511220339de8252f9bcc017d0d5ffedc70859551f905065.jpg",
+      "friendly_name": "figure_106.jpg",
+      "abs_path": "data/mineru_cache\\chapter_02_p033-081_控制系统的数学模型__9294ff3f\\images\\figure_106.jpg",
+      "index": 106
+    },
+    "46af7cb840b0870fb774334868de04c564851fb5a254e7935a629b797a66cc79.jpg": {
+      "original_name": "46af7cb840b0870fb774334868de04c564851fb5a254e7935a629b797a66cc79.jpg",
+      "original_rel_path": "46af7cb840b0870fb774334868de04c564851fb5a254e7935a629b797a66cc79.jpg",
+      "friendly_name": "figure_107.jpg",
+      "abs_path": "data/mineru_cache\\chapter_02_p033-081_控制系统的数学模型__9294ff3f\\images\\figure_107.jpg",
+      "index": 107
+    },
+    "480ae4a81a1561eda5de00cf83e669d8bd5045edfebd8fd1fcd642bb26049163.jpg": {
+      "original_name": "480ae4a81a1561eda5de00cf83e669d8bd5045edfebd8fd1fcd642bb26049163.jpg",
+      "original_rel_path": "480ae4a81a1561eda5de00cf83e669d8bd5045edfebd8fd1fcd642bb26049163.jpg",
+      "friendly_name": "figure_108.jpg",
+      "abs_path": "data/mineru_cache\\chapter_02_p033-081_控制系统的数学模型__9294ff3f\\images\\figure_108.jpg",
+      "index": 108
+    },
+    "48c8108ceccff42d3ee6b81d15620e2e95e64342b98c9d6a9f1f60cfcce547cc.jpg": {
+      "original_name": "48c8108ceccff42d3ee6b81d15620e2e95e64342b98c9d6a9f1f60cfcce547cc.jpg",
+      "original_rel_path": "48c8108ceccff42d3ee6b81d15620e2e95e64342b98c9d6a9f1f60cfcce547cc.jpg",
+      "friendly_name": "figure_109.jpg",
+      "abs_path": "data/mineru_cache\\chapter_02_p033-081_控制系统的数学模型__9294ff3f\\images\\figure_109.jpg",
+      "index": 109
+    },
+    "49c432a16263ee0d2c57d285fd339fb3827908b9fd03b9692d5d6efa81d31a6f.jpg": {
+      "original_name": "49c432a16263ee0d2c57d285fd339fb3827908b9fd03b9692d5d6efa81d31a6f.jpg",
+      "original_rel_path": "49c432a16263ee0d2c57d285fd339fb3827908b9fd03b9692d5d6efa81d31a6f.jpg",
+      "friendly_name": "figure_110.jpg",
+      "abs_path": "data/mineru_cache\\chapter_02_p033-081_控制系统的数学模型__9294ff3f\\images\\figure_110.jpg",
+      "index": 110
+    },
+    "4ccf48d1b08a34484405b7fa8a53ca170f7f073d89ed31c5cf1923c6673f74b7.jpg": {
+      "original_name": "4ccf48d1b08a34484405b7fa8a53ca170f7f073d89ed31c5cf1923c6673f74b7.jpg",
+      "original_rel_path": "4ccf48d1b08a34484405b7fa8a53ca170f7f073d89ed31c5cf1923c6673f74b7.jpg",
+      "friendly_name": "figure_111.jpg",
+      "abs_path": "data/mineru_cache\\chapter_02_p033-081_控制系统的数学模型__9294ff3f\\images\\figure_111.jpg",
+      "index": 111
+    },
+    "4debbd810d8b399a16090633c129ff82c8105523f309df7e2ed3351c2376e7ca.jpg": {
+      "original_name": "4debbd810d8b399a16090633c129ff82c8105523f309df7e2ed3351c2376e7ca.jpg",
+      "original_rel_path": "4debbd810d8b399a16090633c129ff82c8105523f309df7e2ed3351c2376e7ca.jpg",
+      "friendly_name": "figure_112.jpg",
+      "abs_path": "data/mineru_cache\\chapter_02_p033-081_控制系统的数学模型__9294ff3f\\images\\figure_112.jpg",
+      "index": 112
+    },
+    "4f7140c5e4c146845863eb9d12230a2bd2f88900fc56dd73a6f00c824353353b.jpg": {
+      "original_name": "4f7140c5e4c146845863eb9d12230a2bd2f88900fc56dd73a6f00c824353353b.jpg",
+      "original_rel_path": "4f7140c5e4c146845863eb9d12230a2bd2f88900fc56dd73a6f00c824353353b.jpg",
+      "friendly_name": "figure_113.jpg",
+      "abs_path": "data/mineru_cache\\chapter_02_p033-081_控制系统的数学模型__9294ff3f\\images\\figure_113.jpg",
+      "index": 113
+    },
+    "5078792ef1089747019e78b2323c3df51466f43fd3941c22157df2cb224944f4.jpg": {
+      "original_name": "5078792ef1089747019e78b2323c3df51466f43fd3941c22157df2cb224944f4.jpg",
+      "original_rel_path": "5078792ef1089747019e78b2323c3df51466f43fd3941c22157df2cb224944f4.jpg",
+      "friendly_name": "figure_114.jpg",
+      "abs_path": "data/mineru_cache\\chapter_02_p033-081_控制系统的数学模型__9294ff3f\\images\\figure_114.jpg",
+      "index": 114
+    },
+    "508455a4bcaedbd064867db56eb3bc65cc5673f40715938f62f78e9b6ddb8160.jpg": {
+      "original_name": "508455a4bcaedbd064867db56eb3bc65cc5673f40715938f62f78e9b6ddb8160.jpg",
+      "original_rel_path": "508455a4bcaedbd064867db56eb3bc65cc5673f40715938f62f78e9b6ddb8160.jpg",
+      "friendly_name": "figure_115.jpg",
+      "abs_path": "data/mineru_cache\\chapter_02_p033-081_控制系统的数学模型__9294ff3f\\images\\figure_115.jpg",
+      "index": 115
+    },
+    "50981dd2e6f650f5801353a828d59b9c6920854895424eed1fb6f859eb9d6202.jpg": {
+      "original_name": "50981dd2e6f650f5801353a828d59b9c6920854895424eed1fb6f859eb9d6202.jpg",
+      "original_rel_path": "50981dd2e6f650f5801353a828d59b9c6920854895424eed1fb6f859eb9d6202.jpg",
+      "friendly_name": "figure_116.jpg",
+      "abs_path": "data/mineru_cache\\chapter_02_p033-081_控制系统的数学模型__9294ff3f\\images\\figure_116.jpg",
+      "index": 116
+    },
+    "50b603a242d3f290348b59db5e32654a14820afcf1f2c6ee153b42252c769939.jpg": {
+      "original_name": "50b603a242d3f290348b59db5e32654a14820afcf1f2c6ee153b42252c769939.jpg",
+      "original_rel_path": "50b603a242d3f290348b59db5e32654a14820afcf1f2c6ee153b42252c769939.jpg",
+      "friendly_name": "figure_117.jpg",
+      "abs_path": "data/mineru_cache\\chapter_02_p033-081_控制系统的数学模型__9294ff3f\\images\\figure_117.jpg",
+      "index": 117
+    },
+    "5280ed2077abe6845b51d703235826b599fd376762b21a674f6d39efb875ac4d.jpg": {
+      "original_name": "5280ed2077abe6845b51d703235826b599fd376762b21a674f6d39efb875ac4d.jpg",
+      "original_rel_path": "5280ed2077abe6845b51d703235826b599fd376762b21a674f6d39efb875ac4d.jpg",
+      "friendly_name": "figure_118.jpg",
+      "abs_path": "data/mineru_cache\\chapter_02_p033-081_控制系统的数学模型__9294ff3f\\images\\figure_118.jpg",
+      "index": 118
+    },
+    "553bd9dadea1c5cccf6e6a5d29271d155e2f52e32cf1e0af1417126c44cada20.jpg": {
+      "original_name": "553bd9dadea1c5cccf6e6a5d29271d155e2f52e32cf1e0af1417126c44cada20.jpg",
+      "original_rel_path": "553bd9dadea1c5cccf6e6a5d29271d155e2f52e32cf1e0af1417126c44cada20.jpg",
+      "friendly_name": "figure_119.jpg",
+      "abs_path": "data/mineru_cache\\chapter_02_p033-081_控制系统的数学模型__9294ff3f\\images\\figure_119.jpg",
+      "index": 119
+    },
+    "55dfc799b676042fe52d78faacff105400a2f198c895f5789bcc04b95c63459b.jpg": {
+      "original_name": "55dfc799b676042fe52d78faacff105400a2f198c895f5789bcc04b95c63459b.jpg",
+      "original_rel_path": "55dfc799b676042fe52d78faacff105400a2f198c895f5789bcc04b95c63459b.jpg",
+      "friendly_name": "figure_120.jpg",
+      "abs_path": "data/mineru_cache\\chapter_02_p033-081_控制系统的数学模型__9294ff3f\\images\\figure_120.jpg",
+      "index": 120
+    },
+    "5687065cb374d8ac0ea7a138afa812b718ca35279b3915bee3f748b4a7c66721.jpg": {
+      "original_name": "5687065cb374d8ac0ea7a138afa812b718ca35279b3915bee3f748b4a7c66721.jpg",
+      "original_rel_path": "5687065cb374d8ac0ea7a138afa812b718ca35279b3915bee3f748b4a7c66721.jpg",
+      "friendly_name": "figure_121.jpg",
+      "abs_path": "data/mineru_cache\\chapter_02_p033-081_控制系统的数学模型__9294ff3f\\images\\figure_121.jpg",
+      "index": 121
+    },
+    "56bd0feba1631b905dfbb62520f550b0e5b44ee8d1ca48ddc030b19ed54330cd.jpg": {
+      "original_name": "56bd0feba1631b905dfbb62520f550b0e5b44ee8d1ca48ddc030b19ed54330cd.jpg",
+      "original_rel_path": "56bd0feba1631b905dfbb62520f550b0e5b44ee8d1ca48ddc030b19ed54330cd.jpg",
+      "friendly_name": "figure_122.jpg",
+      "abs_path": "data/mineru_cache\\chapter_02_p033-081_控制系统的数学模型__9294ff3f\\images\\figure_122.jpg",
+      "index": 122
+    },
+    "56e9b43e05be5c69e9f92aab285acec93e99735b3bc978d13a4098f1f9aad62f.jpg": {
+      "original_name": "56e9b43e05be5c69e9f92aab285acec93e99735b3bc978d13a4098f1f9aad62f.jpg",
+      "original_rel_path": "56e9b43e05be5c69e9f92aab285acec93e99735b3bc978d13a4098f1f9aad62f.jpg",
+      "friendly_name": "figure_123.jpg",
+      "abs_path": "data/mineru_cache\\chapter_02_p033-081_控制系统的数学模型__9294ff3f\\images\\figure_123.jpg",
+      "index": 123
+    },
+    "5722f174b6e7e33e446bf0d207dcec7efb9a5ab351277aa7f150a17f3a02b127.jpg": {
+      "original_name": "5722f174b6e7e33e446bf0d207dcec7efb9a5ab351277aa7f150a17f3a02b127.jpg",
+      "original_rel_path": "5722f174b6e7e33e446bf0d207dcec7efb9a5ab351277aa7f150a17f3a02b127.jpg",
+      "friendly_name": "figure_124.jpg",
+      "abs_path": "data/mineru_cache\\chapter_02_p033-081_控制系统的数学模型__9294ff3f\\images\\figure_124.jpg",
+      "index": 124
+    },
+    "595af8124039f900df38c32087fb9f7e952c0d83f88b865cfd9b73bef9c5b91a.jpg": {
+      "original_name": "595af8124039f900df38c32087fb9f7e952c0d83f88b865cfd9b73bef9c5b91a.jpg",
+      "original_rel_path": "595af8124039f900df38c32087fb9f7e952c0d83f88b865cfd9b73bef9c5b91a.jpg",
+      "friendly_name": "figure_125.jpg",
+      "abs_path": "data/mineru_cache\\chapter_02_p033-081_控制系统的数学模型__9294ff3f\\images\\figure_125.jpg",
+      "index": 125
+    },
+    "59de84d6efd986abacc113fddad6abfd15660a6536b3dc3b1031e7e1accaf222.jpg": {
+      "original_name": "59de84d6efd986abacc113fddad6abfd15660a6536b3dc3b1031e7e1accaf222.jpg",
+      "original_rel_path": "59de84d6efd986abacc113fddad6abfd15660a6536b3dc3b1031e7e1accaf222.jpg",
+      "friendly_name": "figure_126.jpg",
+      "abs_path": "data/mineru_cache\\chapter_02_p033-081_控制系统的数学模型__9294ff3f\\images\\figure_126.jpg",
+      "index": 126
+    },
+    "59f6b23470bc4f05feb58fd284e99143b5149b5cf5e64faa6c30d8331b638e25.jpg": {
+      "original_name": "59f6b23470bc4f05feb58fd284e99143b5149b5cf5e64faa6c30d8331b638e25.jpg",
+      "original_rel_path": "59f6b23470bc4f05feb58fd284e99143b5149b5cf5e64faa6c30d8331b638e25.jpg",
+      "friendly_name": "figure_127.jpg",
+      "abs_path": "data/mineru_cache\\chapter_02_p033-081_控制系统的数学模型__9294ff3f\\images\\figure_127.jpg",
+      "index": 127
+    },
+    "5ab6ad4f592ed179432a9d164292cd5dd446bca8015aa14eb8a7d9025972e8ed.jpg": {
+      "original_name": "5ab6ad4f592ed179432a9d164292cd5dd446bca8015aa14eb8a7d9025972e8ed.jpg",
+      "original_rel_path": "5ab6ad4f592ed179432a9d164292cd5dd446bca8015aa14eb8a7d9025972e8ed.jpg",
+      "friendly_name": "figure_128.jpg",
+      "abs_path": "data/mineru_cache\\chapter_02_p033-081_控制系统的数学模型__9294ff3f\\images\\figure_128.jpg",
+      "index": 128
+    },
+    "5df2acbe87ba617cfa61095a772d4892526256db73b0dd583f87363e2619ed1c.jpg": {
+      "original_name": "5df2acbe87ba617cfa61095a772d4892526256db73b0dd583f87363e2619ed1c.jpg",
+      "original_rel_path": "5df2acbe87ba617cfa61095a772d4892526256db73b0dd583f87363e2619ed1c.jpg",
+      "friendly_name": "figure_129.jpg",
+      "abs_path": "data/mineru_cache\\chapter_02_p033-081_控制系统的数学模型__9294ff3f\\images\\figure_129.jpg",
+      "index": 129
+    },
+    "5f17b484b0813b052b94daa490e506b9904ef091634b74addb276253f4281bc9.jpg": {
+      "original_name": "5f17b484b0813b052b94daa490e506b9904ef091634b74addb276253f4281bc9.jpg",
+      "original_rel_path": "5f17b484b0813b052b94daa490e506b9904ef091634b74addb276253f4281bc9.jpg",
+      "friendly_name": "figure_130.jpg",
+      "abs_path": "data/mineru_cache\\chapter_02_p033-081_控制系统的数学模型__9294ff3f\\images\\figure_130.jpg",
+      "index": 130
+    },
+    "60b8c33a304818807f7f798da5d81a3547342bbacd6356e65f601380f7501a91.jpg": {
+      "original_name": "60b8c33a304818807f7f798da5d81a3547342bbacd6356e65f601380f7501a91.jpg",
+      "original_rel_path": "60b8c33a304818807f7f798da5d81a3547342bbacd6356e65f601380f7501a91.jpg",
+      "friendly_name": "figure_131.jpg",
+      "abs_path": "data/mineru_cache\\chapter_02_p033-081_控制系统的数学模型__9294ff3f\\images\\figure_131.jpg",
+      "index": 131
+    },
+    "61cace2d8fa0c214e240f8bcf3692cbf650e915a4b8eb5be4826bd5c60aa19e6.jpg": {
+      "original_name": "61cace2d8fa0c214e240f8bcf3692cbf650e915a4b8eb5be4826bd5c60aa19e6.jpg",
+      "original_rel_path": "61cace2d8fa0c214e240f8bcf3692cbf650e915a4b8eb5be4826bd5c60aa19e6.jpg",
+      "friendly_name": "figure_132.jpg",
+      "abs_path": "data/mineru_cache\\chapter_02_p033-081_控制系统的数学模型__9294ff3f\\images\\figure_132.jpg",
+      "index": 132
+    },
+    "63be0823303ad7552f906816f76e8dbb1bf298c2c807bf6973e343dec6f154dd.jpg": {
+      "original_name": "63be0823303ad7552f906816f76e8dbb1bf298c2c807bf6973e343dec6f154dd.jpg",
+      "original_rel_path": "63be0823303ad7552f906816f76e8dbb1bf298c2c807bf6973e343dec6f154dd.jpg",
+      "friendly_name": "figure_133.jpg",
+      "abs_path": "data/mineru_cache\\chapter_02_p033-081_控制系统的数学模型__9294ff3f\\images\\figure_133.jpg",
+      "index": 133
+    },
+    "643609ea8cadbf5706096a210fb3c556872f09415b96a47c49a4fbd1eebf713d.jpg": {
+      "original_name": "643609ea8cadbf5706096a210fb3c556872f09415b96a47c49a4fbd1eebf713d.jpg",
+      "original_rel_path": "643609ea8cadbf5706096a210fb3c556872f09415b96a47c49a4fbd1eebf713d.jpg",
+      "friendly_name": "figure_134.jpg",
+      "abs_path": "data/mineru_cache\\chapter_02_p033-081_控制系统的数学模型__9294ff3f\\images\\figure_134.jpg",
+      "index": 134
+    },
+    "64a350afc646f3b8a8335db975d69707ac8023547eb346b72005265f09829369.jpg": {
+      "original_name": "64a350afc646f3b8a8335db975d69707ac8023547eb346b72005265f09829369.jpg",
+      "original_rel_path": "64a350afc646f3b8a8335db975d69707ac8023547eb346b72005265f09829369.jpg",
+      "friendly_name": "figure_135.jpg",
+      "abs_path": "data/mineru_cache\\chapter_02_p033-081_控制系统的数学模型__9294ff3f\\images\\figure_135.jpg",
+      "index": 135
+    },
+    "64f3c9c1d553bb1f5ead66da7e191669d8092bf9256e5a7dc560ed258f5bc043.jpg": {
+      "original_name": "64f3c9c1d553bb1f5ead66da7e191669d8092bf9256e5a7dc560ed258f5bc043.jpg",
+      "original_rel_path": "64f3c9c1d553bb1f5ead66da7e191669d8092bf9256e5a7dc560ed258f5bc043.jpg",
+      "friendly_name": "figure_136.jpg",
+      "abs_path": "data/mineru_cache\\chapter_02_p033-081_控制系统的数学模型__9294ff3f\\images\\figure_136.jpg",
+      "index": 136
+    },
+    "672573e3d100f5a7ea657881b8a89fbc7c6e733698fabaae7e6f194e56115ab7.jpg": {
+      "original_name": "672573e3d100f5a7ea657881b8a89fbc7c6e733698fabaae7e6f194e56115ab7.jpg",
+      "original_rel_path": "672573e3d100f5a7ea657881b8a89fbc7c6e733698fabaae7e6f194e56115ab7.jpg",
+      "friendly_name": "figure_137.jpg",
+      "abs_path": "data/mineru_cache\\chapter_02_p033-081_控制系统的数学模型__9294ff3f\\images\\figure_137.jpg",
+      "index": 137
+    },
+    "677a931f6acf5c9b5e0d9ac799e7cb94e7f1477060e9ac44239017a4a3dc094c.jpg": {
+      "original_name": "677a931f6acf5c9b5e0d9ac799e7cb94e7f1477060e9ac44239017a4a3dc094c.jpg",
+      "original_rel_path": "677a931f6acf5c9b5e0d9ac799e7cb94e7f1477060e9ac44239017a4a3dc094c.jpg",
+      "friendly_name": "figure_138.jpg",
+      "abs_path": "data/mineru_cache\\chapter_02_p033-081_控制系统的数学模型__9294ff3f\\images\\figure_138.jpg",
+      "index": 138
+    },
+    "695e1aaa84c8e231405ffe0030cc8937f450d3b34272019f0ecce479b24518fe.jpg": {
+      "original_name": "695e1aaa84c8e231405ffe0030cc8937f450d3b34272019f0ecce479b24518fe.jpg",
+      "original_rel_path": "695e1aaa84c8e231405ffe0030cc8937f450d3b34272019f0ecce479b24518fe.jpg",
+      "friendly_name": "figure_139.jpg",
+      "abs_path": "data/mineru_cache\\chapter_02_p033-081_控制系统的数学模型__9294ff3f\\images\\figure_139.jpg",
+      "index": 139
+    },
+    "69a63f7d6ba93aa04fa935d470923dedf303ec10ef600fd2b90e9be1ef438e32.jpg": {
+      "original_name": "69a63f7d6ba93aa04fa935d470923dedf303ec10ef600fd2b90e9be1ef438e32.jpg",
+      "original_rel_path": "69a63f7d6ba93aa04fa935d470923dedf303ec10ef600fd2b90e9be1ef438e32.jpg",
+      "friendly_name": "figure_140.jpg",
+      "abs_path": "data/mineru_cache\\chapter_02_p033-081_控制系统的数学模型__9294ff3f\\images\\figure_140.jpg",
+      "index": 140
+    },
+    "69ee26ada6aa32bcdc683d8e07188317cb167c3f22be9ba70289531396e22506.jpg": {
+      "original_name": "69ee26ada6aa32bcdc683d8e07188317cb167c3f22be9ba70289531396e22506.jpg",
+      "original_rel_path": "69ee26ada6aa32bcdc683d8e07188317cb167c3f22be9ba70289531396e22506.jpg",
+      "friendly_name": "figure_141.jpg",
+      "abs_path": "data/mineru_cache\\chapter_02_p033-081_控制系统的数学模型__9294ff3f\\images\\figure_141.jpg",
+      "index": 141
+    },
+    "6cf89d80c3de06a0e40d39b684be23073cb79c3e34187c82051a6eb0939bc2fd.jpg": {
+      "original_name": "6cf89d80c3de06a0e40d39b684be23073cb79c3e34187c82051a6eb0939bc2fd.jpg",
+      "original_rel_path": "6cf89d80c3de06a0e40d39b684be23073cb79c3e34187c82051a6eb0939bc2fd.jpg",
+      "friendly_name": "figure_142.jpg",
+      "abs_path": "data/mineru_cache\\chapter_02_p033-081_控制系统的数学模型__9294ff3f\\images\\figure_142.jpg",
+      "index": 142
+    },
+    "6f0cb857067673875e16c003869a9ff020887c0a60e721cad1de6f198cbdcccb.jpg": {
+      "original_name": "6f0cb857067673875e16c003869a9ff020887c0a60e721cad1de6f198cbdcccb.jpg",
+      "original_rel_path": "6f0cb857067673875e16c003869a9ff020887c0a60e721cad1de6f198cbdcccb.jpg",
+      "friendly_name": "figure_143.jpg",
+      "abs_path": "data/mineru_cache\\chapter_02_p033-081_控制系统的数学模型__9294ff3f\\images\\figure_143.jpg",
+      "index": 143
+    },
+    "73836247592fd8963fe1f72e77fd685c64611b8f90e9022c22f88db04ff481b3.jpg": {
+      "original_name": "73836247592fd8963fe1f72e77fd685c64611b8f90e9022c22f88db04ff481b3.jpg",
+      "original_rel_path": "73836247592fd8963fe1f72e77fd685c64611b8f90e9022c22f88db04ff481b3.jpg",
+      "friendly_name": "figure_144.jpg",
+      "abs_path": "data/mineru_cache\\chapter_02_p033-081_控制系统的数学模型__9294ff3f\\images\\figure_144.jpg",
+      "index": 144
+    },
+    "73d08f2a684678706c2d6dceb0adef5b2af363ffe55793fc2f7309f99976cf8c.jpg": {
+      "original_name": "73d08f2a684678706c2d6dceb0adef5b2af363ffe55793fc2f7309f99976cf8c.jpg",
+      "original_rel_path": "73d08f2a684678706c2d6dceb0adef5b2af363ffe55793fc2f7309f99976cf8c.jpg",
+      "friendly_name": "figure_145.jpg",
+      "abs_path": "data/mineru_cache\\chapter_02_p033-081_控制系统的数学模型__9294ff3f\\images\\figure_145.jpg",
+      "index": 145
+    },
+    "75ec3114fef7919864b01e07632e3759e953c361e297af3745a34829384a7519.jpg": {
+      "original_name": "75ec3114fef7919864b01e07632e3759e953c361e297af3745a34829384a7519.jpg",
+      "original_rel_path": "75ec3114fef7919864b01e07632e3759e953c361e297af3745a34829384a7519.jpg",
+      "friendly_name": "figure_146.jpg",
+      "abs_path": "data/mineru_cache\\chapter_02_p033-081_控制系统的数学模型__9294ff3f\\images\\figure_146.jpg",
+      "index": 146
+    },
+    "76011e83080e359c5818f4ac6b970d01d4c0b278065b50623d5882aa2d92f30e.jpg": {
+      "original_name": "76011e83080e359c5818f4ac6b970d01d4c0b278065b50623d5882aa2d92f30e.jpg",
+      "original_rel_path": "76011e83080e359c5818f4ac6b970d01d4c0b278065b50623d5882aa2d92f30e.jpg",
+      "friendly_name": "figure_147.jpg",
+      "abs_path": "data/mineru_cache\\chapter_02_p033-081_控制系统的数学模型__9294ff3f\\images\\figure_147.jpg",
+      "index": 147
+    },
+    "760c6255cf8fd53f5ecea7a73d522d3c383f9b78fd4b3b8c506ea4a824b63aff.jpg": {
+      "original_name": "760c6255cf8fd53f5ecea7a73d522d3c383f9b78fd4b3b8c506ea4a824b63aff.jpg",
+      "original_rel_path": "760c6255cf8fd53f5ecea7a73d522d3c383f9b78fd4b3b8c506ea4a824b63aff.jpg",
+      "friendly_name": "figure_148.jpg",
+      "abs_path": "data/mineru_cache\\chapter_02_p033-081_控制系统的数学模型__9294ff3f\\images\\figure_148.jpg",
+      "index": 148
+    },
+    "78f3e851717cb60a550b4a8683d25e51e653e190915d5a04b9331ca3b0e4ae09.jpg": {
+      "original_name": "78f3e851717cb60a550b4a8683d25e51e653e190915d5a04b9331ca3b0e4ae09.jpg",
+      "original_rel_path": "78f3e851717cb60a550b4a8683d25e51e653e190915d5a04b9331ca3b0e4ae09.jpg",
+      "friendly_name": "figure_149.jpg",
+      "abs_path": "data/mineru_cache\\chapter_02_p033-081_控制系统的数学模型__9294ff3f\\images\\figure_149.jpg",
+      "index": 149
+    },
+    "79be8a7493ab6d1c950e7cb833e1491cf23b614dd5d0c907e7284f8e9737d06d.jpg": {
+      "original_name": "79be8a7493ab6d1c950e7cb833e1491cf23b614dd5d0c907e7284f8e9737d06d.jpg",
+      "original_rel_path": "79be8a7493ab6d1c950e7cb833e1491cf23b614dd5d0c907e7284f8e9737d06d.jpg",
+      "friendly_name": "figure_150.jpg",
+      "abs_path": "data/mineru_cache\\chapter_02_p033-081_控制系统的数学模型__9294ff3f\\images\\figure_150.jpg",
+      "index": 150
+    },
+    "7a402d2512de77e6be927f502322525d30bcafb2a0d317b0b54e79e45a0266e4.jpg": {
+      "original_name": "7a402d2512de77e6be927f502322525d30bcafb2a0d317b0b54e79e45a0266e4.jpg",
+      "original_rel_path": "7a402d2512de77e6be927f502322525d30bcafb2a0d317b0b54e79e45a0266e4.jpg",
+      "friendly_name": "figure_151.jpg",
+      "abs_path": "data/mineru_cache\\chapter_02_p033-081_控制系统的数学模型__9294ff3f\\images\\figure_151.jpg",
+      "index": 151
+    },
+    "7a672dc8cc4bf475be2451831db3b2d9878c494890a04831fb9e47eb0035f63b.jpg": {
+      "original_name": "7a672dc8cc4bf475be2451831db3b2d9878c494890a04831fb9e47eb0035f63b.jpg",
+      "original_rel_path": "7a672dc8cc4bf475be2451831db3b2d9878c494890a04831fb9e47eb0035f63b.jpg",
+      "friendly_name": "figure_152.jpg",
+      "abs_path": "data/mineru_cache\\chapter_02_p033-081_控制系统的数学模型__9294ff3f\\images\\figure_152.jpg",
+      "index": 152
+    },
+    "7a6d141dfd749acad47a0d2d35f51c6e2492ab8607b5dc971452b24237b5b215.jpg": {
+      "original_name": "7a6d141dfd749acad47a0d2d35f51c6e2492ab8607b5dc971452b24237b5b215.jpg",
+      "original_rel_path": "7a6d141dfd749acad47a0d2d35f51c6e2492ab8607b5dc971452b24237b5b215.jpg",
+      "friendly_name": "figure_153.jpg",
+      "abs_path": "data/mineru_cache\\chapter_02_p033-081_控制系统的数学模型__9294ff3f\\images\\figure_153.jpg",
+      "index": 153
+    },
+    "7b579f018fc15f5401bad14d0b632d40ef69fe9ebab0486b692fe414c0bc5ca8.jpg": {
+      "original_name": "7b579f018fc15f5401bad14d0b632d40ef69fe9ebab0486b692fe414c0bc5ca8.jpg",
+      "original_rel_path": "7b579f018fc15f5401bad14d0b632d40ef69fe9ebab0486b692fe414c0bc5ca8.jpg",
+      "friendly_name": "figure_154.jpg",
+      "abs_path": "data/mineru_cache\\chapter_02_p033-081_控制系统的数学模型__9294ff3f\\images\\figure_154.jpg",
+      "index": 154
+    },
+    "7c149aae2277fdaf2c06ed93e180d5df111123043deefab961a8fccb4a0d4273.jpg": {
+      "original_name": "7c149aae2277fdaf2c06ed93e180d5df111123043deefab961a8fccb4a0d4273.jpg",
+      "original_rel_path": "7c149aae2277fdaf2c06ed93e180d5df111123043deefab961a8fccb4a0d4273.jpg",
+      "friendly_name": "figure_155.jpg",
+      "abs_path": "data/mineru_cache\\chapter_02_p033-081_控制系统的数学模型__9294ff3f\\images\\figure_155.jpg",
+      "index": 155
+    },
+    "7d02c1199b864b96a5c29c553b30b297507632edee667a038c62967b99b68201.jpg": {
+      "original_name": "7d02c1199b864b96a5c29c553b30b297507632edee667a038c62967b99b68201.jpg",
+      "original_rel_path": "7d02c1199b864b96a5c29c553b30b297507632edee667a038c62967b99b68201.jpg",
+      "friendly_name": "figure_156.jpg",
+      "abs_path": "data/mineru_cache\\chapter_02_p033-081_控制系统的数学模型__9294ff3f\\images\\figure_156.jpg",
+      "index": 156
+    },
+    "7d08e5af781d525581166cd105e73acf869e8852550bb30ffac09d6b257a043b.jpg": {
+      "original_name": "7d08e5af781d525581166cd105e73acf869e8852550bb30ffac09d6b257a043b.jpg",
+      "original_rel_path": "7d08e5af781d525581166cd105e73acf869e8852550bb30ffac09d6b257a043b.jpg",
+      "friendly_name": "figure_157.jpg",
+      "abs_path": "data/mineru_cache\\chapter_02_p033-081_控制系统的数学模型__9294ff3f\\images\\figure_157.jpg",
+      "index": 157
+    },
+    "7d33694da5dac229739587c7f92e6edfa46d22f315274f084f080c6211ecefde.jpg": {
+      "original_name": "7d33694da5dac229739587c7f92e6edfa46d22f315274f084f080c6211ecefde.jpg",
+      "original_rel_path": "7d33694da5dac229739587c7f92e6edfa46d22f315274f084f080c6211ecefde.jpg",
+      "friendly_name": "figure_158.jpg",
+      "abs_path": "data/mineru_cache\\chapter_02_p033-081_控制系统的数学模型__9294ff3f\\images\\figure_158.jpg",
+      "index": 158
+    },
+    "7eb2c899a51249143b660cb7fcb131f2bdfbbf1d2fe13dae52fcd3b6e302c356.jpg": {
+      "original_name": "7eb2c899a51249143b660cb7fcb131f2bdfbbf1d2fe13dae52fcd3b6e302c356.jpg",
+      "original_rel_path": "7eb2c899a51249143b660cb7fcb131f2bdfbbf1d2fe13dae52fcd3b6e302c356.jpg",
+      "friendly_name": "figure_159.jpg",
+      "abs_path": "data/mineru_cache\\chapter_02_p033-081_控制系统的数学模型__9294ff3f\\images\\figure_159.jpg",
+      "index": 159
+    },
+    "7f320abd6719fc8f0aecee802120215ea44cf46163051cd2b0a41007bba9fd8e.jpg": {
+      "original_name": "7f320abd6719fc8f0aecee802120215ea44cf46163051cd2b0a41007bba9fd8e.jpg",
+      "original_rel_path": "7f320abd6719fc8f0aecee802120215ea44cf46163051cd2b0a41007bba9fd8e.jpg",
+      "friendly_name": "figure_160.jpg",
+      "abs_path": "data/mineru_cache\\chapter_02_p033-081_控制系统的数学模型__9294ff3f\\images\\figure_160.jpg",
+      "index": 160
+    },
+    "8061a147a1310794dd128f1bdc75d791a194f8260ed2a7978b95fb7496ab14ca.jpg": {
+      "original_name": "8061a147a1310794dd128f1bdc75d791a194f8260ed2a7978b95fb7496ab14ca.jpg",
+      "original_rel_path": "8061a147a1310794dd128f1bdc75d791a194f8260ed2a7978b95fb7496ab14ca.jpg",
+      "friendly_name": "figure_161.jpg",
+      "abs_path": "data/mineru_cache\\chapter_02_p033-081_控制系统的数学模型__9294ff3f\\images\\figure_161.jpg",
+      "index": 161
+    },
+    "819e4424ce4c79d87adc7a3a8b69f2b875e880e28003def4071d0e5dc181663a.jpg": {
+      "original_name": "819e4424ce4c79d87adc7a3a8b69f2b875e880e28003def4071d0e5dc181663a.jpg",
+      "original_rel_path": "819e4424ce4c79d87adc7a3a8b69f2b875e880e28003def4071d0e5dc181663a.jpg",
+      "friendly_name": "figure_162.jpg",
+      "abs_path": "data/mineru_cache\\chapter_02_p033-081_控制系统的数学模型__9294ff3f\\images\\figure_162.jpg",
+      "index": 162
+    },
+    "82b438c5d2ec48a65fdbbeadc4146cff233f6df2218f6d6ecb6871890821e32f.jpg": {
+      "original_name": "82b438c5d2ec48a65fdbbeadc4146cff233f6df2218f6d6ecb6871890821e32f.jpg",
+      "original_rel_path": "82b438c5d2ec48a65fdbbeadc4146cff233f6df2218f6d6ecb6871890821e32f.jpg",
+      "friendly_name": "figure_163.jpg",
+      "abs_path": "data/mineru_cache\\chapter_02_p033-081_控制系统的数学模型__9294ff3f\\images\\figure_163.jpg",
+      "index": 163
+    },
+    "83a742ba183caf4c4478cc16047d9d820367750a5900c243b69d6dadeff449b4.jpg": {
+      "original_name": "83a742ba183caf4c4478cc16047d9d820367750a5900c243b69d6dadeff449b4.jpg",
+      "original_rel_path": "83a742ba183caf4c4478cc16047d9d820367750a5900c243b69d6dadeff449b4.jpg",
+      "friendly_name": "figure_164.jpg",
+      "abs_path": "data/mineru_cache\\chapter_02_p033-081_控制系统的数学模型__9294ff3f\\images\\figure_164.jpg",
+      "index": 164
+    },
+    "843b5603ade72f7fcb9d7daae2f4b59fa91d21d7df405dbb4a7e35a515d22d47.jpg": {
+      "original_name": "843b5603ade72f7fcb9d7daae2f4b59fa91d21d7df405dbb4a7e35a515d22d47.jpg",
+      "original_rel_path": "843b5603ade72f7fcb9d7daae2f4b59fa91d21d7df405dbb4a7e35a515d22d47.jpg",
+      "friendly_name": "figure_165.jpg",
+      "abs_path": "data/mineru_cache\\chapter_02_p033-081_控制系统的数学模型__9294ff3f\\images\\figure_165.jpg",
+      "index": 165
+    },
+    "8579afd5a3d32939b1ddfc235d98bba879211a1a8dbd06efc5d5d8906b65f2ac.jpg": {
+      "original_name": "8579afd5a3d32939b1ddfc235d98bba879211a1a8dbd06efc5d5d8906b65f2ac.jpg",
+      "original_rel_path": "8579afd5a3d32939b1ddfc235d98bba879211a1a8dbd06efc5d5d8906b65f2ac.jpg",
+      "friendly_name": "figure_166.jpg",
+      "abs_path": "data/mineru_cache\\chapter_02_p033-081_控制系统的数学模型__9294ff3f\\images\\figure_166.jpg",
+      "index": 166
+    },
+    "89a44825c35a0602ae385a8c79e81252e920febf06f7e887591850f5a396a56f.jpg": {
+      "original_name": "89a44825c35a0602ae385a8c79e81252e920febf06f7e887591850f5a396a56f.jpg",
+      "original_rel_path": "89a44825c35a0602ae385a8c79e81252e920febf06f7e887591850f5a396a56f.jpg",
+      "friendly_name": "figure_167.jpg",
+      "abs_path": "data/mineru_cache\\chapter_02_p033-081_控制系统的数学模型__9294ff3f\\images\\figure_167.jpg",
+      "index": 167
+    },
+    "8c6de2c4c8d111faed6da0bdc8861f116d360ea051a709b4aeac4beacd06e4fa.jpg": {
+      "original_name": "8c6de2c4c8d111faed6da0bdc8861f116d360ea051a709b4aeac4beacd06e4fa.jpg",
+      "original_rel_path": "8c6de2c4c8d111faed6da0bdc8861f116d360ea051a709b4aeac4beacd06e4fa.jpg",
+      "friendly_name": "figure_168.jpg",
+      "abs_path": "data/mineru_cache\\chapter_02_p033-081_控制系统的数学模型__9294ff3f\\images\\figure_168.jpg",
+      "index": 168
+    },
+    "8d5bce8c05f529f06fcd9f2597b3c9a0203ff872b95317a6cb633cbd602f8ddd.jpg": {
+      "original_name": "8d5bce8c05f529f06fcd9f2597b3c9a0203ff872b95317a6cb633cbd602f8ddd.jpg",
+      "original_rel_path": "8d5bce8c05f529f06fcd9f2597b3c9a0203ff872b95317a6cb633cbd602f8ddd.jpg",
+      "friendly_name": "figure_169.jpg",
+      "abs_path": "data/mineru_cache\\chapter_02_p033-081_控制系统的数学模型__9294ff3f\\images\\figure_169.jpg",
+      "index": 169
+    },
+    "8df3ce80c30ad428c8fa07941e5f4bd2aedd2e8576f80da680f7ebc87f653056.jpg": {
+      "original_name": "8df3ce80c30ad428c8fa07941e5f4bd2aedd2e8576f80da680f7ebc87f653056.jpg",
+      "original_rel_path": "8df3ce80c30ad428c8fa07941e5f4bd2aedd2e8576f80da680f7ebc87f653056.jpg",
+      "friendly_name": "figure_170.jpg",
+      "abs_path": "data/mineru_cache\\chapter_02_p033-081_控制系统的数学模型__9294ff3f\\images\\figure_170.jpg",
+      "index": 170
+    },
+    "8e7e843eeb1564f136ce5770a4119103014596ef6df983e04790d2927df6334e.jpg": {
+      "original_name": "8e7e843eeb1564f136ce5770a4119103014596ef6df983e04790d2927df6334e.jpg",
+      "original_rel_path": "8e7e843eeb1564f136ce5770a4119103014596ef6df983e04790d2927df6334e.jpg",
+      "friendly_name": "figure_171.jpg",
+      "abs_path": "data/mineru_cache\\chapter_02_p033-081_控制系统的数学模型__9294ff3f\\images\\figure_171.jpg",
+      "index": 171
+    },
+    "8f20d4ce1e0bd0103aefc4f1c4290072c6656ef150dc3a9aa31278fb8c44f6ee.jpg": {
+      "original_name": "8f20d4ce1e0bd0103aefc4f1c4290072c6656ef150dc3a9aa31278fb8c44f6ee.jpg",
+      "original_rel_path": "8f20d4ce1e0bd0103aefc4f1c4290072c6656ef150dc3a9aa31278fb8c44f6ee.jpg",
+      "friendly_name": "figure_172.jpg",
+      "abs_path": "data/mineru_cache\\chapter_02_p033-081_控制系统的数学模型__9294ff3f\\images\\figure_172.jpg",
+      "index": 172
+    },
+    "8faa370caca62a241a7f1488bf56ad31c034869c31a8452333cdc7d82b7ef919.jpg": {
+      "original_name": "8faa370caca62a241a7f1488bf56ad31c034869c31a8452333cdc7d82b7ef919.jpg",
+      "original_rel_path": "8faa370caca62a241a7f1488bf56ad31c034869c31a8452333cdc7d82b7ef919.jpg",
+      "friendly_name": "figure_173.jpg",
+      "abs_path": "data/mineru_cache\\chapter_02_p033-081_控制系统的数学模型__9294ff3f\\images\\figure_173.jpg",
+      "index": 173
+    },
+    "909ffbcd54c5f9ff5b801cd82ef1b9cceb7dd63c2b42aa4418a6c88a42b94e8c.jpg": {
+      "original_name": "909ffbcd54c5f9ff5b801cd82ef1b9cceb7dd63c2b42aa4418a6c88a42b94e8c.jpg",
+      "original_rel_path": "909ffbcd54c5f9ff5b801cd82ef1b9cceb7dd63c2b42aa4418a6c88a42b94e8c.jpg",
+      "friendly_name": "figure_174.jpg",
+      "abs_path": "data/mineru_cache\\chapter_02_p033-081_控制系统的数学模型__9294ff3f\\images\\figure_174.jpg",
+      "index": 174
+    },
+    "90c626f212c03550413957c48253ed74446ca75e24ff8aa820527381c8adfd49.jpg": {
+      "original_name": "90c626f212c03550413957c48253ed74446ca75e24ff8aa820527381c8adfd49.jpg",
+      "original_rel_path": "90c626f212c03550413957c48253ed74446ca75e24ff8aa820527381c8adfd49.jpg",
+      "friendly_name": "figure_175.jpg",
+      "abs_path": "data/mineru_cache\\chapter_02_p033-081_控制系统的数学模型__9294ff3f\\images\\figure_175.jpg",
+      "index": 175
+    },
+    "911730af225db5551e6d4030432a41436ae9596b866df26127e9fb39565903ab.jpg": {
+      "original_name": "911730af225db5551e6d4030432a41436ae9596b866df26127e9fb39565903ab.jpg",
+      "original_rel_path": "911730af225db5551e6d4030432a41436ae9596b866df26127e9fb39565903ab.jpg",
+      "friendly_name": "figure_176.jpg",
+      "abs_path": "data/mineru_cache\\chapter_02_p033-081_控制系统的数学模型__9294ff3f\\images\\figure_176.jpg",
+      "index": 176
+    },
+    "919d7245fdf3ef33bed0960f80dd10229adf62d10220bbf1bc84f602500b0b52.jpg": {
+      "original_name": "919d7245fdf3ef33bed0960f80dd10229adf62d10220bbf1bc84f602500b0b52.jpg",
+      "original_rel_path": "919d7245fdf3ef33bed0960f80dd10229adf62d10220bbf1bc84f602500b0b52.jpg",
+      "friendly_name": "figure_177.jpg",
+      "abs_path": "data/mineru_cache\\chapter_02_p033-081_控制系统的数学模型__9294ff3f\\images\\figure_177.jpg",
+      "index": 177
+    },
+    "91fc8f67659d460479ecfa20473985eb43066ea2716d613934d31a3635020bbc.jpg": {
+      "original_name": "91fc8f67659d460479ecfa20473985eb43066ea2716d613934d31a3635020bbc.jpg",
+      "original_rel_path": "91fc8f67659d460479ecfa20473985eb43066ea2716d613934d31a3635020bbc.jpg",
+      "friendly_name": "figure_178.jpg",
+      "abs_path": "data/mineru_cache\\chapter_02_p033-081_控制系统的数学模型__9294ff3f\\images\\figure_178.jpg",
+      "index": 178
+    },
+    "927545090f16cdfab9db1c54b8a9166358433264005b34e07e475599b593d6e8.jpg": {
+      "original_name": "927545090f16cdfab9db1c54b8a9166358433264005b34e07e475599b593d6e8.jpg",
+      "original_rel_path": "927545090f16cdfab9db1c54b8a9166358433264005b34e07e475599b593d6e8.jpg",
+      "friendly_name": "figure_179.jpg",
+      "abs_path": "data/mineru_cache\\chapter_02_p033-081_控制系统的数学模型__9294ff3f\\images\\figure_179.jpg",
+      "index": 179
+    },
+    "92880494b6f62780782d704a874ea569cbd90f8bba8b69659d87006816edd276.jpg": {
+      "original_name": "92880494b6f62780782d704a874ea569cbd90f8bba8b69659d87006816edd276.jpg",
+      "original_rel_path": "92880494b6f62780782d704a874ea569cbd90f8bba8b69659d87006816edd276.jpg",
+      "friendly_name": "figure_180.jpg",
+      "abs_path": "data/mineru_cache\\chapter_02_p033-081_控制系统的数学模型__9294ff3f\\images\\figure_180.jpg",
+      "index": 180
+    },
+    "950a764281220ddd3fe6391681ee1e04a10ac4adec719aabff3641aa2584bb84.jpg": {
+      "original_name": "950a764281220ddd3fe6391681ee1e04a10ac4adec719aabff3641aa2584bb84.jpg",
+      "original_rel_path": "950a764281220ddd3fe6391681ee1e04a10ac4adec719aabff3641aa2584bb84.jpg",
+      "friendly_name": "figure_181.jpg",
+      "abs_path": "data/mineru_cache\\chapter_02_p033-081_控制系统的数学模型__9294ff3f\\images\\figure_181.jpg",
+      "index": 181
+    },
+    "97aa7b3368e16f603829df8af4fc7eef3f5641ffed9c5257de5423cf6da64f45.jpg": {
+      "original_name": "97aa7b3368e16f603829df8af4fc7eef3f5641ffed9c5257de5423cf6da64f45.jpg",
+      "original_rel_path": "97aa7b3368e16f603829df8af4fc7eef3f5641ffed9c5257de5423cf6da64f45.jpg",
+      "friendly_name": "figure_182.jpg",
+      "abs_path": "data/mineru_cache\\chapter_02_p033-081_控制系统的数学模型__9294ff3f\\images\\figure_182.jpg",
+      "index": 182
+    },
+    "97ff4f35233da84f7b1adcb93cc2447efc25f4ca3c28ee0cbce258225bd2fa20.jpg": {
+      "original_name": "97ff4f35233da84f7b1adcb93cc2447efc25f4ca3c28ee0cbce258225bd2fa20.jpg",
+      "original_rel_path": "97ff4f35233da84f7b1adcb93cc2447efc25f4ca3c28ee0cbce258225bd2fa20.jpg",
+      "friendly_name": "figure_183.jpg",
+      "abs_path": "data/mineru_cache\\chapter_02_p033-081_控制系统的数学模型__9294ff3f\\images\\figure_183.jpg",
+      "index": 183
+    },
+    "9949a1d4f8b99594ce75043f885e16f916f4630e023e8fc781be5e0c10497032.jpg": {
+      "original_name": "9949a1d4f8b99594ce75043f885e16f916f4630e023e8fc781be5e0c10497032.jpg",
+      "original_rel_path": "9949a1d4f8b99594ce75043f885e16f916f4630e023e8fc781be5e0c10497032.jpg",
+      "friendly_name": "figure_184.jpg",
+      "abs_path": "data/mineru_cache\\chapter_02_p033-081_控制系统的数学模型__9294ff3f\\images\\figure_184.jpg",
+      "index": 184
+    },
+    "9a49e51b86cffebf1c7c3ccaf022748432dc0ce243b9cd25188483f561e23a5a.jpg": {
+      "original_name": "9a49e51b86cffebf1c7c3ccaf022748432dc0ce243b9cd25188483f561e23a5a.jpg",
+      "original_rel_path": "9a49e51b86cffebf1c7c3ccaf022748432dc0ce243b9cd25188483f561e23a5a.jpg",
+      "friendly_name": "figure_185.jpg",
+      "abs_path": "data/mineru_cache\\chapter_02_p033-081_控制系统的数学模型__9294ff3f\\images\\figure_185.jpg",
+      "index": 185
+    },
+    "9ab094e3cb06f29bd09ea05ecaa984bb08e476d9f598ffa176d21fd922980180.jpg": {
+      "original_name": "9ab094e3cb06f29bd09ea05ecaa984bb08e476d9f598ffa176d21fd922980180.jpg",
+      "original_rel_path": "9ab094e3cb06f29bd09ea05ecaa984bb08e476d9f598ffa176d21fd922980180.jpg",
+      "friendly_name": "figure_186.jpg",
+      "abs_path": "data/mineru_cache\\chapter_02_p033-081_控制系统的数学模型__9294ff3f\\images\\figure_186.jpg",
+      "index": 186
+    },
+    "9bf5128cc149520b5a2e3e50835a40cd2c797e3537b7fa99000bcce0dbe36f45.jpg": {
+      "original_name": "9bf5128cc149520b5a2e3e50835a40cd2c797e3537b7fa99000bcce0dbe36f45.jpg",
+      "original_rel_path": "9bf5128cc149520b5a2e3e50835a40cd2c797e3537b7fa99000bcce0dbe36f45.jpg",
+      "friendly_name": "figure_187.jpg",
+      "abs_path": "data/mineru_cache\\chapter_02_p033-081_控制系统的数学模型__9294ff3f\\images\\figure_187.jpg",
+      "index": 187
+    },
+    "9c338ace083dd9a9accd7f88894f9c8b8244e185bfa2939c45acce1fc208152a.jpg": {
+      "original_name": "9c338ace083dd9a9accd7f88894f9c8b8244e185bfa2939c45acce1fc208152a.jpg",
+      "original_rel_path": "9c338ace083dd9a9accd7f88894f9c8b8244e185bfa2939c45acce1fc208152a.jpg",
+      "friendly_name": "figure_188.jpg",
+      "abs_path": "data/mineru_cache\\chapter_02_p033-081_控制系统的数学模型__9294ff3f\\images\\figure_188.jpg",
+      "index": 188
+    },
+    "9cf74ce41612dce60a48b583df43316d3d6112f06f91bca39f632714acd1af2a.jpg": {
+      "original_name": "9cf74ce41612dce60a48b583df43316d3d6112f06f91bca39f632714acd1af2a.jpg",
+      "original_rel_path": "9cf74ce41612dce60a48b583df43316d3d6112f06f91bca39f632714acd1af2a.jpg",
+      "friendly_name": "figure_189.jpg",
+      "abs_path": "data/mineru_cache\\chapter_02_p033-081_控制系统的数学模型__9294ff3f\\images\\figure_189.jpg",
+      "index": 189
+    },
+    "9f366c06463eb2ca23c8640bd7c7c848f66d3680f47dd8a80ac1615a3a17d53a.jpg": {
+      "original_name": "9f366c06463eb2ca23c8640bd7c7c848f66d3680f47dd8a80ac1615a3a17d53a.jpg",
+      "original_rel_path": "9f366c06463eb2ca23c8640bd7c7c848f66d3680f47dd8a80ac1615a3a17d53a.jpg",
+      "friendly_name": "figure_190.jpg",
+      "abs_path": "data/mineru_cache\\chapter_02_p033-081_控制系统的数学模型__9294ff3f\\images\\figure_190.jpg",
+      "index": 190
+    },
+    "a079ef6cc0e8e041b8bd3c15fc7f030a98cc26b0392224f12a409b91da12ce9c.jpg": {
+      "original_name": "a079ef6cc0e8e041b8bd3c15fc7f030a98cc26b0392224f12a409b91da12ce9c.jpg",
+      "original_rel_path": "a079ef6cc0e8e041b8bd3c15fc7f030a98cc26b0392224f12a409b91da12ce9c.jpg",
+      "friendly_name": "figure_191.jpg",
+      "abs_path": "data/mineru_cache\\chapter_02_p033-081_控制系统的数学模型__9294ff3f\\images\\figure_191.jpg",
+      "index": 191
+    },
+    "a0daf9d5fc8a1645145462003a045e3e12213c68b5a8b7f43891582371477611.jpg": {
+      "original_name": "a0daf9d5fc8a1645145462003a045e3e12213c68b5a8b7f43891582371477611.jpg",
+      "original_rel_path": "a0daf9d5fc8a1645145462003a045e3e12213c68b5a8b7f43891582371477611.jpg",
+      "friendly_name": "figure_192.jpg",
+      "abs_path": "data/mineru_cache\\chapter_02_p033-081_控制系统的数学模型__9294ff3f\\images\\figure_192.jpg",
+      "index": 192
+    },
+    "a12fcce00987891e74148ca6e7bcd3bb4e35dc2dbef0593f8cb3d5a04dcb2176.jpg": {
+      "original_name": "a12fcce00987891e74148ca6e7bcd3bb4e35dc2dbef0593f8cb3d5a04dcb2176.jpg",
+      "original_rel_path": "a12fcce00987891e74148ca6e7bcd3bb4e35dc2dbef0593f8cb3d5a04dcb2176.jpg",
+      "friendly_name": "figure_193.jpg",
+      "abs_path": "data/mineru_cache\\chapter_02_p033-081_控制系统的数学模型__9294ff3f\\images\\figure_193.jpg",
+      "index": 193
+    },
+    "a1ecb0a1ea608232066531717b2547b00add1062eb1986635532046d5977cdd3.jpg": {
+      "original_name": "a1ecb0a1ea608232066531717b2547b00add1062eb1986635532046d5977cdd3.jpg",
+      "original_rel_path": "a1ecb0a1ea608232066531717b2547b00add1062eb1986635532046d5977cdd3.jpg",
+      "friendly_name": "figure_194.jpg",
+      "abs_path": "data/mineru_cache\\chapter_02_p033-081_控制系统的数学模型__9294ff3f\\images\\figure_194.jpg",
+      "index": 194
+    },
+    "a25d5140c67e1e5e25d87d92c2bffa8762ffe96970c85d09434308700b77b7b4.jpg": {
+      "original_name": "a25d5140c67e1e5e25d87d92c2bffa8762ffe96970c85d09434308700b77b7b4.jpg",
+      "original_rel_path": "a25d5140c67e1e5e25d87d92c2bffa8762ffe96970c85d09434308700b77b7b4.jpg",
+      "friendly_name": "figure_195.jpg",
+      "abs_path": "data/mineru_cache\\chapter_02_p033-081_控制系统的数学模型__9294ff3f\\images\\figure_195.jpg",
+      "index": 195
+    },
+    "a3731a47c5600d2d74cf4fddcdf907198e2deaf7e854eb0f6448d7521467a46f.jpg": {
+      "original_name": "a3731a47c5600d2d74cf4fddcdf907198e2deaf7e854eb0f6448d7521467a46f.jpg",
+      "original_rel_path": "a3731a47c5600d2d74cf4fddcdf907198e2deaf7e854eb0f6448d7521467a46f.jpg",
+      "friendly_name": "figure_196.jpg",
+      "abs_path": "data/mineru_cache\\chapter_02_p033-081_控制系统的数学模型__9294ff3f\\images\\figure_196.jpg",
+      "index": 196
+    },
+    "a491c00e4ed224b5ec9679162b797805e4ae096c615f9f73255e987629cdae69.jpg": {
+      "original_name": "a491c00e4ed224b5ec9679162b797805e4ae096c615f9f73255e987629cdae69.jpg",
+      "original_rel_path": "a491c00e4ed224b5ec9679162b797805e4ae096c615f9f73255e987629cdae69.jpg",
+      "friendly_name": "figure_197.jpg",
+      "abs_path": "data/mineru_cache\\chapter_02_p033-081_控制系统的数学模型__9294ff3f\\images\\figure_197.jpg",
+      "index": 197
+    },
+    "a5060336ac3fac30569508d8ac4f17472b684b8cb0c3801f20108887936c9d6c.jpg": {
+      "original_name": "a5060336ac3fac30569508d8ac4f17472b684b8cb0c3801f20108887936c9d6c.jpg",
+      "original_rel_path": "a5060336ac3fac30569508d8ac4f17472b684b8cb0c3801f20108887936c9d6c.jpg",
+      "friendly_name": "figure_198.jpg",
+      "abs_path": "data/mineru_cache\\chapter_02_p033-081_控制系统的数学模型__9294ff3f\\images\\figure_198.jpg",
+      "index": 198
+    },
+    "a5523846d840c1eb6df88e9fdac9e1f6b939b8d5f4f73ffd97b7256b71cbc476.jpg": {
+      "original_name": "a5523846d840c1eb6df88e9fdac9e1f6b939b8d5f4f73ffd97b7256b71cbc476.jpg",
+      "original_rel_path": "a5523846d840c1eb6df88e9fdac9e1f6b939b8d5f4f73ffd97b7256b71cbc476.jpg",
+      "friendly_name": "figure_199.jpg",
+      "abs_path": "data/mineru_cache\\chapter_02_p033-081_控制系统的数学模型__9294ff3f\\images\\figure_199.jpg",
+      "index": 199
+    },
+    "a5a641634ad8979021ef53a069201a16776d10b329198289b175ec01b221e9d3.jpg": {
+      "original_name": "a5a641634ad8979021ef53a069201a16776d10b329198289b175ec01b221e9d3.jpg",
+      "original_rel_path": "a5a641634ad8979021ef53a069201a16776d10b329198289b175ec01b221e9d3.jpg",
+      "friendly_name": "figure_200.jpg",
+      "abs_path": "data/mineru_cache\\chapter_02_p033-081_控制系统的数学模型__9294ff3f\\images\\figure_200.jpg",
+      "index": 200
+    },
+    "a5d52cd27e8668e3116b6b6b35f93cec603066dcbaae0abdc29f7a71592f5574.jpg": {
+      "original_name": "a5d52cd27e8668e3116b6b6b35f93cec603066dcbaae0abdc29f7a71592f5574.jpg",
+      "original_rel_path": "a5d52cd27e8668e3116b6b6b35f93cec603066dcbaae0abdc29f7a71592f5574.jpg",
+      "friendly_name": "figure_201.jpg",
+      "abs_path": "data/mineru_cache\\chapter_02_p033-081_控制系统的数学模型__9294ff3f\\images\\figure_201.jpg",
+      "index": 201
+    },
+    "a5e66e94c92ad9020f3c113fcd8e40581e3bd18fad4cc939c2a9f5c2f5a745fc.jpg": {
+      "original_name": "a5e66e94c92ad9020f3c113fcd8e40581e3bd18fad4cc939c2a9f5c2f5a745fc.jpg",
+      "original_rel_path": "a5e66e94c92ad9020f3c113fcd8e40581e3bd18fad4cc939c2a9f5c2f5a745fc.jpg",
+      "friendly_name": "figure_202.jpg",
+      "abs_path": "data/mineru_cache\\chapter_02_p033-081_控制系统的数学模型__9294ff3f\\images\\figure_202.jpg",
+      "index": 202
+    },
+    "a5ebc7952f91a6761dd2e1304e79a7b2d16a447c30fdd10f5e42762a852d969e.jpg": {
+      "original_name": "a5ebc7952f91a6761dd2e1304e79a7b2d16a447c30fdd10f5e42762a852d969e.jpg",
+      "original_rel_path": "a5ebc7952f91a6761dd2e1304e79a7b2d16a447c30fdd10f5e42762a852d969e.jpg",
+      "friendly_name": "figure_203.jpg",
+      "abs_path": "data/mineru_cache\\chapter_02_p033-081_控制系统的数学模型__9294ff3f\\images\\figure_203.jpg",
+      "index": 203
+    },
+    "a690df2f23f54195e64e19d21228c3d6237b8fe7c63c7ce0775cf939ea1ba31e.jpg": {
+      "original_name": "a690df2f23f54195e64e19d21228c3d6237b8fe7c63c7ce0775cf939ea1ba31e.jpg",
+      "original_rel_path": "a690df2f23f54195e64e19d21228c3d6237b8fe7c63c7ce0775cf939ea1ba31e.jpg",
+      "friendly_name": "figure_204.jpg",
+      "abs_path": "data/mineru_cache\\chapter_02_p033-081_控制系统的数学模型__9294ff3f\\images\\figure_204.jpg",
+      "index": 204
+    },
+    "a7af63fc27da6da181076dc81b8c526ca7e5adb8e50faef873d745c1c57936a9.jpg": {
+      "original_name": "a7af63fc27da6da181076dc81b8c526ca7e5adb8e50faef873d745c1c57936a9.jpg",
+      "original_rel_path": "a7af63fc27da6da181076dc81b8c526ca7e5adb8e50faef873d745c1c57936a9.jpg",
+      "friendly_name": "figure_205.jpg",
+      "abs_path": "data/mineru_cache\\chapter_02_p033-081_控制系统的数学模型__9294ff3f\\images\\figure_205.jpg",
+      "index": 205
+    },
+    "aa0e4d21677171039c1b899278a3864f801d2837e5120dc814aca25fa84f0eda.jpg": {
+      "original_name": "aa0e4d21677171039c1b899278a3864f801d2837e5120dc814aca25fa84f0eda.jpg",
+      "original_rel_path": "aa0e4d21677171039c1b899278a3864f801d2837e5120dc814aca25fa84f0eda.jpg",
+      "friendly_name": "figure_206.jpg",
+      "abs_path": "data/mineru_cache\\chapter_02_p033-081_控制系统的数学模型__9294ff3f\\images\\figure_206.jpg",
+      "index": 206
+    },
+    "aac6dd76a391c712a38febdb3efa55fb514fa820a1a7fa531da64bf2c0fcfa56.jpg": {
+      "original_name": "aac6dd76a391c712a38febdb3efa55fb514fa820a1a7fa531da64bf2c0fcfa56.jpg",
+      "original_rel_path": "aac6dd76a391c712a38febdb3efa55fb514fa820a1a7fa531da64bf2c0fcfa56.jpg",
+      "friendly_name": "figure_207.jpg",
+      "abs_path": "data/mineru_cache\\chapter_02_p033-081_控制系统的数学模型__9294ff3f\\images\\figure_207.jpg",
+      "index": 207
+    },
+    "ab68582b0dc895721445018a7aad09eeb212e537cef15b6bfa37abf48127b546.jpg": {
+      "original_name": "ab68582b0dc895721445018a7aad09eeb212e537cef15b6bfa37abf48127b546.jpg",
+      "original_rel_path": "ab68582b0dc895721445018a7aad09eeb212e537cef15b6bfa37abf48127b546.jpg",
+      "friendly_name": "figure_208.jpg",
+      "abs_path": "data/mineru_cache\\chapter_02_p033-081_控制系统的数学模型__9294ff3f\\images\\figure_208.jpg",
+      "index": 208
+    },
+    "ae3ac245d241871662216a715f8cfd5acae7558df628e606ea953fae4a84b815.jpg": {
+      "original_name": "ae3ac245d241871662216a715f8cfd5acae7558df628e606ea953fae4a84b815.jpg",
+      "original_rel_path": "ae3ac245d241871662216a715f8cfd5acae7558df628e606ea953fae4a84b815.jpg",
+      "friendly_name": "figure_209.jpg",
+      "abs_path": "data/mineru_cache\\chapter_02_p033-081_控制系统的数学模型__9294ff3f\\images\\figure_209.jpg",
+      "index": 209
+    },
+    "ae7b997e56231e05a7dd931e9652a9e5b03cff9544617024170a47f8c310b5b0.jpg": {
+      "original_name": "ae7b997e56231e05a7dd931e9652a9e5b03cff9544617024170a47f8c310b5b0.jpg",
+      "original_rel_path": "ae7b997e56231e05a7dd931e9652a9e5b03cff9544617024170a47f8c310b5b0.jpg",
+      "friendly_name": "figure_210.jpg",
+      "abs_path": "data/mineru_cache\\chapter_02_p033-081_控制系统的数学模型__9294ff3f\\images\\figure_210.jpg",
+      "index": 210
+    },
+    "b010c770e38019e3e720cd1def9d85080d25617b9d17f0e964a6e50fe19fcc9b.jpg": {
+      "original_name": "b010c770e38019e3e720cd1def9d85080d25617b9d17f0e964a6e50fe19fcc9b.jpg",
+      "original_rel_path": "b010c770e38019e3e720cd1def9d85080d25617b9d17f0e964a6e50fe19fcc9b.jpg",
+      "friendly_name": "figure_211.jpg",
+      "abs_path": "data/mineru_cache\\chapter_02_p033-081_控制系统的数学模型__9294ff3f\\images\\figure_211.jpg",
+      "index": 211
+    },
+    "b0be1a2c1ae4a0e5611f5bb74d26beeeba648486be2ecad0c524b13dfef0232a.jpg": {
+      "original_name": "b0be1a2c1ae4a0e5611f5bb74d26beeeba648486be2ecad0c524b13dfef0232a.jpg",
+      "original_rel_path": "b0be1a2c1ae4a0e5611f5bb74d26beeeba648486be2ecad0c524b13dfef0232a.jpg",
+      "friendly_name": "figure_212.jpg",
+      "abs_path": "data/mineru_cache\\chapter_02_p033-081_控制系统的数学模型__9294ff3f\\images\\figure_212.jpg",
+      "index": 212
+    },
+    "b11c81cec5458ab41bd34c3fa6fc3a3f34c1097d41ad8b8ba28a9bfe16353fe4.jpg": {
+      "original_name": "b11c81cec5458ab41bd34c3fa6fc3a3f34c1097d41ad8b8ba28a9bfe16353fe4.jpg",
+      "original_rel_path": "b11c81cec5458ab41bd34c3fa6fc3a3f34c1097d41ad8b8ba28a9bfe16353fe4.jpg",
+      "friendly_name": "figure_213.jpg",
+      "abs_path": "data/mineru_cache\\chapter_02_p033-081_控制系统的数学模型__9294ff3f\\images\\figure_213.jpg",
+      "index": 213
+    },
+    "b1654bea40b7af424ab5bcee12243dea4c9172040035887bcaeecba45659dbea.jpg": {
+      "original_name": "b1654bea40b7af424ab5bcee12243dea4c9172040035887bcaeecba45659dbea.jpg",
+      "original_rel_path": "b1654bea40b7af424ab5bcee12243dea4c9172040035887bcaeecba45659dbea.jpg",
+      "friendly_name": "figure_214.jpg",
+      "abs_path": "data/mineru_cache\\chapter_02_p033-081_控制系统的数学模型__9294ff3f\\images\\figure_214.jpg",
+      "index": 214
+    },
+    "b2587b434343730709df1befdcda1ac043d1109984b8ab71b9f604c5f60c438c.jpg": {
+      "original_name": "b2587b434343730709df1befdcda1ac043d1109984b8ab71b9f604c5f60c438c.jpg",
+      "original_rel_path": "b2587b434343730709df1befdcda1ac043d1109984b8ab71b9f604c5f60c438c.jpg",
+      "friendly_name": "figure_215.jpg",
+      "abs_path": "data/mineru_cache\\chapter_02_p033-081_控制系统的数学模型__9294ff3f\\images\\figure_215.jpg",
+      "index": 215
+    },
+    "b26623d6a011aae2cc5e32dd4c5e23015387b96ef1e2db702c7d65a03eade879.jpg": {
+      "original_name": "b26623d6a011aae2cc5e32dd4c5e23015387b96ef1e2db702c7d65a03eade879.jpg",
+      "original_rel_path": "b26623d6a011aae2cc5e32dd4c5e23015387b96ef1e2db702c7d65a03eade879.jpg",
+      "friendly_name": "figure_216.jpg",
+      "abs_path": "data/mineru_cache\\chapter_02_p033-081_控制系统的数学模型__9294ff3f\\images\\figure_216.jpg",
+      "index": 216
+    },
+    "b459757bcd7b975926877e9517803836adf975a6917611980254f269db8dfce3.jpg": {
+      "original_name": "b459757bcd7b975926877e9517803836adf975a6917611980254f269db8dfce3.jpg",
+      "original_rel_path": "b459757bcd7b975926877e9517803836adf975a6917611980254f269db8dfce3.jpg",
+      "friendly_name": "figure_217.jpg",
+      "abs_path": "data/mineru_cache\\chapter_02_p033-081_控制系统的数学模型__9294ff3f\\images\\figure_217.jpg",
+      "index": 217
+    },
+    "b516ab6ffbc05f85c85bf872f17decbc7477bd8f5a28e1fe1d1576d919eb2811.jpg": {
+      "original_name": "b516ab6ffbc05f85c85bf872f17decbc7477bd8f5a28e1fe1d1576d919eb2811.jpg",
+      "original_rel_path": "b516ab6ffbc05f85c85bf872f17decbc7477bd8f5a28e1fe1d1576d919eb2811.jpg",
+      "friendly_name": "figure_218.jpg",
+      "abs_path": "data/mineru_cache\\chapter_02_p033-081_控制系统的数学模型__9294ff3f\\images\\figure_218.jpg",
+      "index": 218
+    },
+    "b5c2cb6020aea3a72e5f5717114bdcb39bd1bcebd7dab9352bd51ed0061d4f00.jpg": {
+      "original_name": "b5c2cb6020aea3a72e5f5717114bdcb39bd1bcebd7dab9352bd51ed0061d4f00.jpg",
+      "original_rel_path": "b5c2cb6020aea3a72e5f5717114bdcb39bd1bcebd7dab9352bd51ed0061d4f00.jpg",
+      "friendly_name": "figure_219.jpg",
+      "abs_path": "data/mineru_cache\\chapter_02_p033-081_控制系统的数学模型__9294ff3f\\images\\figure_219.jpg",
+      "index": 219
+    },
+    "b63b8020b36bb8841e419384b34f38f5c781a37df1e076747283eea2d809a95e.jpg": {
+      "original_name": "b63b8020b36bb8841e419384b34f38f5c781a37df1e076747283eea2d809a95e.jpg",
+      "original_rel_path": "b63b8020b36bb8841e419384b34f38f5c781a37df1e076747283eea2d809a95e.jpg",
+      "friendly_name": "figure_220.jpg",
+      "abs_path": "data/mineru_cache\\chapter_02_p033-081_控制系统的数学模型__9294ff3f\\images\\figure_220.jpg",
+      "index": 220
+    },
+    "b685b822519e257b4c7bd59808e271288bd477f1bc2e714644a5f0967bcf55cc.jpg": {
+      "original_name": "b685b822519e257b4c7bd59808e271288bd477f1bc2e714644a5f0967bcf55cc.jpg",
+      "original_rel_path": "b685b822519e257b4c7bd59808e271288bd477f1bc2e714644a5f0967bcf55cc.jpg",
+      "friendly_name": "figure_221.jpg",
+      "abs_path": "data/mineru_cache\\chapter_02_p033-081_控制系统的数学模型__9294ff3f\\images\\figure_221.jpg",
+      "index": 221
+    },
+    "b70d59f051c45d2db38261471c3e4c9dbd113c00b26198bdd3309398bdbbf12b.jpg": {
+      "original_name": "b70d59f051c45d2db38261471c3e4c9dbd113c00b26198bdd3309398bdbbf12b.jpg",
+      "original_rel_path": "b70d59f051c45d2db38261471c3e4c9dbd113c00b26198bdd3309398bdbbf12b.jpg",
+      "friendly_name": "figure_222.jpg",
+      "abs_path": "data/mineru_cache\\chapter_02_p033-081_控制系统的数学模型__9294ff3f\\images\\figure_222.jpg",
+      "index": 222
+    },
+    "b713838a20d07e43c905cd0d53c47841228c94a4de4f979886ea6c57d0715d4b.jpg": {
+      "original_name": "b713838a20d07e43c905cd0d53c47841228c94a4de4f979886ea6c57d0715d4b.jpg",
+      "original_rel_path": "b713838a20d07e43c905cd0d53c47841228c94a4de4f979886ea6c57d0715d4b.jpg",
+      "friendly_name": "figure_223.jpg",
+      "abs_path": "data/mineru_cache\\chapter_02_p033-081_控制系统的数学模型__9294ff3f\\images\\figure_223.jpg",
+      "index": 223
+    },
+    "b77883fb4b8715624ac1d9c695c1e332afe1fe2a74e489464a61d701841e08c3.jpg": {
+      "original_name": "b77883fb4b8715624ac1d9c695c1e332afe1fe2a74e489464a61d701841e08c3.jpg",
+      "original_rel_path": "b77883fb4b8715624ac1d9c695c1e332afe1fe2a74e489464a61d701841e08c3.jpg",
+      "friendly_name": "figure_224.jpg",
+      "abs_path": "data/mineru_cache\\chapter_02_p033-081_控制系统的数学模型__9294ff3f\\images\\figure_224.jpg",
+      "index": 224
+    },
+    "b8008e4da56b9f4e5ef25bd8655a4a605afdce90bbd0892af3ed4996612c1b1a.jpg": {
+      "original_name": "b8008e4da56b9f4e5ef25bd8655a4a605afdce90bbd0892af3ed4996612c1b1a.jpg",
+      "original_rel_path": "b8008e4da56b9f4e5ef25bd8655a4a605afdce90bbd0892af3ed4996612c1b1a.jpg",
+      "friendly_name": "figure_225.jpg",
+      "abs_path": "data/mineru_cache\\chapter_02_p033-081_控制系统的数学模型__9294ff3f\\images\\figure_225.jpg",
+      "index": 225
+    },
+    "b8ce6a92202664f4788d158e390ae6081734edde716f06346e778851246a5153.jpg": {
+      "original_name": "b8ce6a92202664f4788d158e390ae6081734edde716f06346e778851246a5153.jpg",
+      "original_rel_path": "b8ce6a92202664f4788d158e390ae6081734edde716f06346e778851246a5153.jpg",
+      "friendly_name": "figure_226.jpg",
+      "abs_path": "data/mineru_cache\\chapter_02_p033-081_控制系统的数学模型__9294ff3f\\images\\figure_226.jpg",
+      "index": 226
+    },
+    "ba2ac7584198fd1c7f3eaa8eab2a53422cfd70e923090c53b0b1ba040a5169f5.jpg": {
+      "original_name": "ba2ac7584198fd1c7f3eaa8eab2a53422cfd70e923090c53b0b1ba040a5169f5.jpg",
+      "original_rel_path": "ba2ac7584198fd1c7f3eaa8eab2a53422cfd70e923090c53b0b1ba040a5169f5.jpg",
+      "friendly_name": "figure_227.jpg",
+      "abs_path": "data/mineru_cache\\chapter_02_p033-081_控制系统的数学模型__9294ff3f\\images\\figure_227.jpg",
+      "index": 227
+    },
+    "ba70e7b001cd1d6c15e096e31d4deec07ad2d415783eeeef78dca8bc2f3b8f8c.jpg": {
+      "original_name": "ba70e7b001cd1d6c15e096e31d4deec07ad2d415783eeeef78dca8bc2f3b8f8c.jpg",
+      "original_rel_path": "ba70e7b001cd1d6c15e096e31d4deec07ad2d415783eeeef78dca8bc2f3b8f8c.jpg",
+      "friendly_name": "figure_228.jpg",
+      "abs_path": "data/mineru_cache\\chapter_02_p033-081_控制系统的数学模型__9294ff3f\\images\\figure_228.jpg",
+      "index": 228
+    },
+    "bb8d27fc7a37c25adc5bf05d453a43e92553db04a3d99db9dfcebc9289c9532c.jpg": {
+      "original_name": "bb8d27fc7a37c25adc5bf05d453a43e92553db04a3d99db9dfcebc9289c9532c.jpg",
+      "original_rel_path": "bb8d27fc7a37c25adc5bf05d453a43e92553db04a3d99db9dfcebc9289c9532c.jpg",
+      "friendly_name": "figure_229.jpg",
+      "abs_path": "data/mineru_cache\\chapter_02_p033-081_控制系统的数学模型__9294ff3f\\images\\figure_229.jpg",
+      "index": 229
+    },
+    "bd40bf7df2bb1468420a0e834a8316ff6de55059099f5de5339284de169f871a.jpg": {
+      "original_name": "bd40bf7df2bb1468420a0e834a8316ff6de55059099f5de5339284de169f871a.jpg",
+      "original_rel_path": "bd40bf7df2bb1468420a0e834a8316ff6de55059099f5de5339284de169f871a.jpg",
+      "friendly_name": "figure_230.jpg",
+      "abs_path": "data/mineru_cache\\chapter_02_p033-081_控制系统的数学模型__9294ff3f\\images\\figure_230.jpg",
+      "index": 230
+    },
+    "bd4fbd1f0a507d88751e47c05d29a424a2f2bd38250d7b02393c81497221455b.jpg": {
+      "original_name": "bd4fbd1f0a507d88751e47c05d29a424a2f2bd38250d7b02393c81497221455b.jpg",
+      "original_rel_path": "bd4fbd1f0a507d88751e47c05d29a424a2f2bd38250d7b02393c81497221455b.jpg",
+      "friendly_name": "figure_231.jpg",
+      "abs_path": "data/mineru_cache\\chapter_02_p033-081_控制系统的数学模型__9294ff3f\\images\\figure_231.jpg",
+      "index": 231
+    },
+    "be4e5cd0b2b078be4378bca4d6f4c8b20161c62add2d4aa46c93b99364daa653.jpg": {
+      "original_name": "be4e5cd0b2b078be4378bca4d6f4c8b20161c62add2d4aa46c93b99364daa653.jpg",
+      "original_rel_path": "be4e5cd0b2b078be4378bca4d6f4c8b20161c62add2d4aa46c93b99364daa653.jpg",
+      "friendly_name": "figure_232.jpg",
+      "abs_path": "data/mineru_cache\\chapter_02_p033-081_控制系统的数学模型__9294ff3f\\images\\figure_232.jpg",
+      "index": 232
+    },
+    "bf953b089a140c3bcfb56055012d124ab53b5589460b62652423004abfc3cffa.jpg": {
+      "original_name": "bf953b089a140c3bcfb56055012d124ab53b5589460b62652423004abfc3cffa.jpg",
+      "original_rel_path": "bf953b089a140c3bcfb56055012d124ab53b5589460b62652423004abfc3cffa.jpg",
+      "friendly_name": "figure_233.jpg",
+      "abs_path": "data/mineru_cache\\chapter_02_p033-081_控制系统的数学模型__9294ff3f\\images\\figure_233.jpg",
+      "index": 233
+    },
+    "c187a97e45929afbe1c4710a30e5495f489498a69655adb92f420c9418402c4b.jpg": {
+      "original_name": "c187a97e45929afbe1c4710a30e5495f489498a69655adb92f420c9418402c4b.jpg",
+      "original_rel_path": "c187a97e45929afbe1c4710a30e5495f489498a69655adb92f420c9418402c4b.jpg",
+      "friendly_name": "figure_234.jpg",
+      "abs_path": "data/mineru_cache\\chapter_02_p033-081_控制系统的数学模型__9294ff3f\\images\\figure_234.jpg",
+      "index": 234
+    },
+    "c300f2595d393aa9d967c7c083e20d2f62d912cf4eb654027a31eb71171fa10d.jpg": {
+      "original_name": "c300f2595d393aa9d967c7c083e20d2f62d912cf4eb654027a31eb71171fa10d.jpg",
+      "original_rel_path": "c300f2595d393aa9d967c7c083e20d2f62d912cf4eb654027a31eb71171fa10d.jpg",
+      "friendly_name": "figure_235.jpg",
+      "abs_path": "data/mineru_cache\\chapter_02_p033-081_控制系统的数学模型__9294ff3f\\images\\figure_235.jpg",
+      "index": 235
+    },
+    "c348c803f2bfc30dc1b58493259f74c34b5761f3e87c31d0c1c7ea4c85680e32.jpg": {
+      "original_name": "c348c803f2bfc30dc1b58493259f74c34b5761f3e87c31d0c1c7ea4c85680e32.jpg",
+      "original_rel_path": "c348c803f2bfc30dc1b58493259f74c34b5761f3e87c31d0c1c7ea4c85680e32.jpg",
+      "friendly_name": "figure_236.jpg",
+      "abs_path": "data/mineru_cache\\chapter_02_p033-081_控制系统的数学模型__9294ff3f\\images\\figure_236.jpg",
+      "index": 236
+    },
+    "c3feb372fedb0f20a4445637bec2be230a5096584862ac090840d97515b5dd5b.jpg": {
+      "original_name": "c3feb372fedb0f20a4445637bec2be230a5096584862ac090840d97515b5dd5b.jpg",
+      "original_rel_path": "c3feb372fedb0f20a4445637bec2be230a5096584862ac090840d97515b5dd5b.jpg",
+      "friendly_name": "figure_237.jpg",
+      "abs_path": "data/mineru_cache\\chapter_02_p033-081_控制系统的数学模型__9294ff3f\\images\\figure_237.jpg",
+      "index": 237
+    },
+    "c671bb75fce4cb616100a5651c916c65e1dee82a52fdbe8ecfc2de8854d24792.jpg": {
+      "original_name": "c671bb75fce4cb616100a5651c916c65e1dee82a52fdbe8ecfc2de8854d24792.jpg",
+      "original_rel_path": "c671bb75fce4cb616100a5651c916c65e1dee82a52fdbe8ecfc2de8854d24792.jpg",
+      "friendly_name": "figure_238.jpg",
+      "abs_path": "data/mineru_cache\\chapter_02_p033-081_控制系统的数学模型__9294ff3f\\images\\figure_238.jpg",
+      "index": 238
+    },
+    "c6becb66023e9b9e50d0defede1e6ee9199b2d0b85e98562937f9465daa00d33.jpg": {
+      "original_name": "c6becb66023e9b9e50d0defede1e6ee9199b2d0b85e98562937f9465daa00d33.jpg",
+      "original_rel_path": "c6becb66023e9b9e50d0defede1e6ee9199b2d0b85e98562937f9465daa00d33.jpg",
+      "friendly_name": "figure_239.jpg",
+      "abs_path": "data/mineru_cache\\chapter_02_p033-081_控制系统的数学模型__9294ff3f\\images\\figure_239.jpg",
+      "index": 239
+    },
+    "c73d037e6f966bfacded8889cd2104104040b43a3e71ca724d39737357145e20.jpg": {
+      "original_name": "c73d037e6f966bfacded8889cd2104104040b43a3e71ca724d39737357145e20.jpg",
+      "original_rel_path": "c73d037e6f966bfacded8889cd2104104040b43a3e71ca724d39737357145e20.jpg",
+      "friendly_name": "figure_240.jpg",
+      "abs_path": "data/mineru_cache\\chapter_02_p033-081_控制系统的数学模型__9294ff3f\\images\\figure_240.jpg",
+      "index": 240
+    },
+    "c7c7a1126c5c62bfa1aa10b9cf95ef4162ebbc72f928b30e5f41cd1b53bd9d3c.jpg": {
+      "original_name": "c7c7a1126c5c62bfa1aa10b9cf95ef4162ebbc72f928b30e5f41cd1b53bd9d3c.jpg",
+      "original_rel_path": "c7c7a1126c5c62bfa1aa10b9cf95ef4162ebbc72f928b30e5f41cd1b53bd9d3c.jpg",
+      "friendly_name": "figure_241.jpg",
+      "abs_path": "data/mineru_cache\\chapter_02_p033-081_控制系统的数学模型__9294ff3f\\images\\figure_241.jpg",
+      "index": 241
+    },
+    "c7e2bbd93eff0b2267125740327effa6db192e80ad29cc21eab7a61304696205.jpg": {
+      "original_name": "c7e2bbd93eff0b2267125740327effa6db192e80ad29cc21eab7a61304696205.jpg",
+      "original_rel_path": "c7e2bbd93eff0b2267125740327effa6db192e80ad29cc21eab7a61304696205.jpg",
+      "friendly_name": "figure_242.jpg",
+      "abs_path": "data/mineru_cache\\chapter_02_p033-081_控制系统的数学模型__9294ff3f\\images\\figure_242.jpg",
+      "index": 242
+    },
+    "c8454ea09a70a4f7e9662c0f02cb7f72f5b0d47ffb70596db1ff65bdf1931ffd.jpg": {
+      "original_name": "c8454ea09a70a4f7e9662c0f02cb7f72f5b0d47ffb70596db1ff65bdf1931ffd.jpg",
+      "original_rel_path": "c8454ea09a70a4f7e9662c0f02cb7f72f5b0d47ffb70596db1ff65bdf1931ffd.jpg",
+      "friendly_name": "figure_243.jpg",
+      "abs_path": "data/mineru_cache\\chapter_02_p033-081_控制系统的数学模型__9294ff3f\\images\\figure_243.jpg",
+      "index": 243
+    },
+    "c9034ed90e5efe9868611fd2c46cfb8b2ee4f0e386d207f6da299b041fcd5da5.jpg": {
+      "original_name": "c9034ed90e5efe9868611fd2c46cfb8b2ee4f0e386d207f6da299b041fcd5da5.jpg",
+      "original_rel_path": "c9034ed90e5efe9868611fd2c46cfb8b2ee4f0e386d207f6da299b041fcd5da5.jpg",
+      "friendly_name": "figure_244.jpg",
+      "abs_path": "data/mineru_cache\\chapter_02_p033-081_控制系统的数学模型__9294ff3f\\images\\figure_244.jpg",
+      "index": 244
+    },
+    "c9351ade5b0436ca20c67807c5456a8c13c435d311ba7b42c80ecfb18063e94a.jpg": {
+      "original_name": "c9351ade5b0436ca20c67807c5456a8c13c435d311ba7b42c80ecfb18063e94a.jpg",
+      "original_rel_path": "c9351ade5b0436ca20c67807c5456a8c13c435d311ba7b42c80ecfb18063e94a.jpg",
+      "friendly_name": "figure_245.jpg",
+      "abs_path": "data/mineru_cache\\chapter_02_p033-081_控制系统的数学模型__9294ff3f\\images\\figure_245.jpg",
+      "index": 245
+    },
+    "c96efad09b9e47e63a78ff30ed6c727de22e08bc4248ec7e7bcd6ade5bb2722f.jpg": {
+      "original_name": "c96efad09b9e47e63a78ff30ed6c727de22e08bc4248ec7e7bcd6ade5bb2722f.jpg",
+      "original_rel_path": "c96efad09b9e47e63a78ff30ed6c727de22e08bc4248ec7e7bcd6ade5bb2722f.jpg",
+      "friendly_name": "figure_246.jpg",
+      "abs_path": "data/mineru_cache\\chapter_02_p033-081_控制系统的数学模型__9294ff3f\\images\\figure_246.jpg",
+      "index": 246
+    },
+    "ca4508e421e08b1febf0a16e5f2af15a30eb4cf14375e0d960a94a9a9576aa18.jpg": {
+      "original_name": "ca4508e421e08b1febf0a16e5f2af15a30eb4cf14375e0d960a94a9a9576aa18.jpg",
+      "original_rel_path": "ca4508e421e08b1febf0a16e5f2af15a30eb4cf14375e0d960a94a9a9576aa18.jpg",
+      "friendly_name": "figure_247.jpg",
+      "abs_path": "data/mineru_cache\\chapter_02_p033-081_控制系统的数学模型__9294ff3f\\images\\figure_247.jpg",
+      "index": 247
+    },
+    "cb4ef7e531b95ee82842191c77fa2b2f252d1fa687d4cce5423a85ed61448ee8.jpg": {
+      "original_name": "cb4ef7e531b95ee82842191c77fa2b2f252d1fa687d4cce5423a85ed61448ee8.jpg",
+      "original_rel_path": "cb4ef7e531b95ee82842191c77fa2b2f252d1fa687d4cce5423a85ed61448ee8.jpg",
+      "friendly_name": "figure_248.jpg",
+      "abs_path": "data/mineru_cache\\chapter_02_p033-081_控制系统的数学模型__9294ff3f\\images\\figure_248.jpg",
+      "index": 248
+    },
+    "cc17766bb33f3764e09b08005b1f32669c501dbae3105851a4e1a233a532d038.jpg": {
+      "original_name": "cc17766bb33f3764e09b08005b1f32669c501dbae3105851a4e1a233a532d038.jpg",
+      "original_rel_path": "cc17766bb33f3764e09b08005b1f32669c501dbae3105851a4e1a233a532d038.jpg",
+      "friendly_name": "figure_249.jpg",
+      "abs_path": "data/mineru_cache\\chapter_02_p033-081_控制系统的数学模型__9294ff3f\\images\\figure_249.jpg",
+      "index": 249
+    },
+    "cceecac314365d48608db8ca8aef27e7219a22817a0b5f749aa688388f40471c.jpg": {
+      "original_name": "cceecac314365d48608db8ca8aef27e7219a22817a0b5f749aa688388f40471c.jpg",
+      "original_rel_path": "cceecac314365d48608db8ca8aef27e7219a22817a0b5f749aa688388f40471c.jpg",
+      "friendly_name": "figure_250.jpg",
+      "abs_path": "data/mineru_cache\\chapter_02_p033-081_控制系统的数学模型__9294ff3f\\images\\figure_250.jpg",
+      "index": 250
+    },
+    "cd62574cd3045e09a37be0fc30eb0c4f2d3f76d4f5ec894439ae7bb98fb7bbbe.jpg": {
+      "original_name": "cd62574cd3045e09a37be0fc30eb0c4f2d3f76d4f5ec894439ae7bb98fb7bbbe.jpg",
+      "original_rel_path": "cd62574cd3045e09a37be0fc30eb0c4f2d3f76d4f5ec894439ae7bb98fb7bbbe.jpg",
+      "friendly_name": "figure_251.jpg",
+      "abs_path": "data/mineru_cache\\chapter_02_p033-081_控制系统的数学模型__9294ff3f\\images\\figure_251.jpg",
+      "index": 251
+    },
+    "ceae053ef60d64b523cab84ba3d1360c77a240afef7b1389c92d0f6425ea8bee.jpg": {
+      "original_name": "ceae053ef60d64b523cab84ba3d1360c77a240afef7b1389c92d0f6425ea8bee.jpg",
+      "original_rel_path": "ceae053ef60d64b523cab84ba3d1360c77a240afef7b1389c92d0f6425ea8bee.jpg",
+      "friendly_name": "figure_252.jpg",
+      "abs_path": "data/mineru_cache\\chapter_02_p033-081_控制系统的数学模型__9294ff3f\\images\\figure_252.jpg",
+      "index": 252
+    },
+    "d1146f54b55dc48715ad516dfbd23127e82f41504a46b9c03d8f4ca9bcf6242a.jpg": {
+      "original_name": "d1146f54b55dc48715ad516dfbd23127e82f41504a46b9c03d8f4ca9bcf6242a.jpg",
+      "original_rel_path": "d1146f54b55dc48715ad516dfbd23127e82f41504a46b9c03d8f4ca9bcf6242a.jpg",
+      "friendly_name": "figure_253.jpg",
+      "abs_path": "data/mineru_cache\\chapter_02_p033-081_控制系统的数学模型__9294ff3f\\images\\figure_253.jpg",
+      "index": 253
+    },
+    "d1aa8e18cc91070eb985b4c97ef7c6c981c1ccf83d0ef10c33efba927f9a6287.jpg": {
+      "original_name": "d1aa8e18cc91070eb985b4c97ef7c6c981c1ccf83d0ef10c33efba927f9a6287.jpg",
+      "original_rel_path": "d1aa8e18cc91070eb985b4c97ef7c6c981c1ccf83d0ef10c33efba927f9a6287.jpg",
+      "friendly_name": "figure_254.jpg",
+      "abs_path": "data/mineru_cache\\chapter_02_p033-081_控制系统的数学模型__9294ff3f\\images\\figure_254.jpg",
+      "index": 254
+    },
+    "d2f9f216a9f681be2dcb13a13c9dc2a748a47cd87a34c883e6b5e12a2448cbef.jpg": {
+      "original_name": "d2f9f216a9f681be2dcb13a13c9dc2a748a47cd87a34c883e6b5e12a2448cbef.jpg",
+      "original_rel_path": "d2f9f216a9f681be2dcb13a13c9dc2a748a47cd87a34c883e6b5e12a2448cbef.jpg",
+      "friendly_name": "figure_255.jpg",
+      "abs_path": "data/mineru_cache\\chapter_02_p033-081_控制系统的数学模型__9294ff3f\\images\\figure_255.jpg",
+      "index": 255
+    },
+    "d3bf782a097f965dd8204d040b9e3d9c00bf28dff7ecb5760a33ca197f862472.jpg": {
+      "original_name": "d3bf782a097f965dd8204d040b9e3d9c00bf28dff7ecb5760a33ca197f862472.jpg",
+      "original_rel_path": "d3bf782a097f965dd8204d040b9e3d9c00bf28dff7ecb5760a33ca197f862472.jpg",
+      "friendly_name": "figure_256.jpg",
+      "abs_path": "data/mineru_cache\\chapter_02_p033-081_控制系统的数学模型__9294ff3f\\images\\figure_256.jpg",
+      "index": 256
+    },
+    "d3ef5fd392d201613a3385500ca08cd8071ac961711191c557804277f53b7551.jpg": {
+      "original_name": "d3ef5fd392d201613a3385500ca08cd8071ac961711191c557804277f53b7551.jpg",
+      "original_rel_path": "d3ef5fd392d201613a3385500ca08cd8071ac961711191c557804277f53b7551.jpg",
+      "friendly_name": "figure_257.jpg",
+      "abs_path": "data/mineru_cache\\chapter_02_p033-081_控制系统的数学模型__9294ff3f\\images\\figure_257.jpg",
+      "index": 257
+    },
+    "d5df10ad4250ae7eae8bb8138b9d75e45fceea5df8f54f15aa048edb9df092ac.jpg": {
+      "original_name": "d5df10ad4250ae7eae8bb8138b9d75e45fceea5df8f54f15aa048edb9df092ac.jpg",
+      "original_rel_path": "d5df10ad4250ae7eae8bb8138b9d75e45fceea5df8f54f15aa048edb9df092ac.jpg",
+      "friendly_name": "figure_258.jpg",
+      "abs_path": "data/mineru_cache\\chapter_02_p033-081_控制系统的数学模型__9294ff3f\\images\\figure_258.jpg",
+      "index": 258
+    },
+    "d68cdd3892819699ac9caef830762d5361dc4ba8fe7253299b0288c7afbdae74.jpg": {
+      "original_name": "d68cdd3892819699ac9caef830762d5361dc4ba8fe7253299b0288c7afbdae74.jpg",
+      "original_rel_path": "d68cdd3892819699ac9caef830762d5361dc4ba8fe7253299b0288c7afbdae74.jpg",
+      "friendly_name": "figure_259.jpg",
+      "abs_path": "data/mineru_cache\\chapter_02_p033-081_控制系统的数学模型__9294ff3f\\images\\figure_259.jpg",
+      "index": 259
+    },
+    "da0557bf5515a612225a31945897e4e90a76aab6b2ab623b9801bf43bb59df75.jpg": {
+      "original_name": "da0557bf5515a612225a31945897e4e90a76aab6b2ab623b9801bf43bb59df75.jpg",
+      "original_rel_path": "da0557bf5515a612225a31945897e4e90a76aab6b2ab623b9801bf43bb59df75.jpg",
+      "friendly_name": "figure_260.jpg",
+      "abs_path": "data/mineru_cache\\chapter_02_p033-081_控制系统的数学模型__9294ff3f\\images\\figure_260.jpg",
+      "index": 260
+    },
+    "db31f00cd3c1ca388daf94a0d1570abb8f0233e032f5198fc2d08341e0bda57d.jpg": {
+      "original_name": "db31f00cd3c1ca388daf94a0d1570abb8f0233e032f5198fc2d08341e0bda57d.jpg",
+      "original_rel_path": "db31f00cd3c1ca388daf94a0d1570abb8f0233e032f5198fc2d08341e0bda57d.jpg",
+      "friendly_name": "figure_261.jpg",
+      "abs_path": "data/mineru_cache\\chapter_02_p033-081_控制系统的数学模型__9294ff3f\\images\\figure_261.jpg",
+      "index": 261
+    },
+    "db6194a4252cbcb7472b2961f2a46f0cd30d1978d32e1ac432ef899efbcce186.jpg": {
+      "original_name": "db6194a4252cbcb7472b2961f2a46f0cd30d1978d32e1ac432ef899efbcce186.jpg",
+      "original_rel_path": "db6194a4252cbcb7472b2961f2a46f0cd30d1978d32e1ac432ef899efbcce186.jpg",
+      "friendly_name": "figure_262.jpg",
+      "abs_path": "data/mineru_cache\\chapter_02_p033-081_控制系统的数学模型__9294ff3f\\images\\figure_262.jpg",
+      "index": 262
+    },
+    "db69090be69c3219650a4ae8933dd76bd15d4d89b3b61ee573b0c99f0e66b928.jpg": {
+      "original_name": "db69090be69c3219650a4ae8933dd76bd15d4d89b3b61ee573b0c99f0e66b928.jpg",
+      "original_rel_path": "db69090be69c3219650a4ae8933dd76bd15d4d89b3b61ee573b0c99f0e66b928.jpg",
+      "friendly_name": "figure_263.jpg",
+      "abs_path": "data/mineru_cache\\chapter_02_p033-081_控制系统的数学模型__9294ff3f\\images\\figure_263.jpg",
+      "index": 263
+    },
+    "db963ed2930b78be682b488a7c8774c8432ff11d0ecfb81aa423aee1c67ab883.jpg": {
+      "original_name": "db963ed2930b78be682b488a7c8774c8432ff11d0ecfb81aa423aee1c67ab883.jpg",
+      "original_rel_path": "db963ed2930b78be682b488a7c8774c8432ff11d0ecfb81aa423aee1c67ab883.jpg",
+      "friendly_name": "figure_264.jpg",
+      "abs_path": "data/mineru_cache\\chapter_02_p033-081_控制系统的数学模型__9294ff3f\\images\\figure_264.jpg",
+      "index": 264
+    },
+    "dca20e123a2b026f224d1ebcb40f5c88840d948551f763cafd02fe8337e3d237.jpg": {
+      "original_name": "dca20e123a2b026f224d1ebcb40f5c88840d948551f763cafd02fe8337e3d237.jpg",
+      "original_rel_path": "dca20e123a2b026f224d1ebcb40f5c88840d948551f763cafd02fe8337e3d237.jpg",
+      "friendly_name": "figure_265.jpg",
+      "abs_path": "data/mineru_cache\\chapter_02_p033-081_控制系统的数学模型__9294ff3f\\images\\figure_265.jpg",
+      "index": 265
+    },
+    "ded176640a6f86eff6e50d42d12a33f869b6af11093d858d51a86f5c3096c6e3.jpg": {
+      "original_name": "ded176640a6f86eff6e50d42d12a33f869b6af11093d858d51a86f5c3096c6e3.jpg",
+      "original_rel_path": "ded176640a6f86eff6e50d42d12a33f869b6af11093d858d51a86f5c3096c6e3.jpg",
+      "friendly_name": "figure_266.jpg",
+      "abs_path": "data/mineru_cache\\chapter_02_p033-081_控制系统的数学模型__9294ff3f\\images\\figure_266.jpg",
+      "index": 266
+    },
+    "df7252e637731a25cbb41a41431f0d153660b2376caab85470cd71fd5a4db841.jpg": {
+      "original_name": "df7252e637731a25cbb41a41431f0d153660b2376caab85470cd71fd5a4db841.jpg",
+      "original_rel_path": "df7252e637731a25cbb41a41431f0d153660b2376caab85470cd71fd5a4db841.jpg",
+      "friendly_name": "figure_267.jpg",
+      "abs_path": "data/mineru_cache\\chapter_02_p033-081_控制系统的数学模型__9294ff3f\\images\\figure_267.jpg",
+      "index": 267
+    },
+    "e14a86718ac89e278c94f5d87a324e5ff338afce56383d631b3743db86f5743a.jpg": {
+      "original_name": "e14a86718ac89e278c94f5d87a324e5ff338afce56383d631b3743db86f5743a.jpg",
+      "original_rel_path": "e14a86718ac89e278c94f5d87a324e5ff338afce56383d631b3743db86f5743a.jpg",
+      "friendly_name": "figure_268.jpg",
+      "abs_path": "data/mineru_cache\\chapter_02_p033-081_控制系统的数学模型__9294ff3f\\images\\figure_268.jpg",
+      "index": 268
+    },
+    "e180bf30a5ad26cdfed8aa2abbdbfa00b0ab4bf5310582fab72df199e5dc388b.jpg": {
+      "original_name": "e180bf30a5ad26cdfed8aa2abbdbfa00b0ab4bf5310582fab72df199e5dc388b.jpg",
+      "original_rel_path": "e180bf30a5ad26cdfed8aa2abbdbfa00b0ab4bf5310582fab72df199e5dc388b.jpg",
+      "friendly_name": "figure_269.jpg",
+      "abs_path": "data/mineru_cache\\chapter_02_p033-081_控制系统的数学模型__9294ff3f\\images\\figure_269.jpg",
+      "index": 269
+    },
+    "e18ad8375deeb24de389e83ce892b4f87b51ee20dfecc266a70d4f5822430edc.jpg": {
+      "original_name": "e18ad8375deeb24de389e83ce892b4f87b51ee20dfecc266a70d4f5822430edc.jpg",
+      "original_rel_path": "e18ad8375deeb24de389e83ce892b4f87b51ee20dfecc266a70d4f5822430edc.jpg",
+      "friendly_name": "figure_270.jpg",
+      "abs_path": "data/mineru_cache\\chapter_02_p033-081_控制系统的数学模型__9294ff3f\\images\\figure_270.jpg",
+      "index": 270
+    },
+    "e1f2524c6901c27aed6d03dd8fa0371c805b620722282ea3ea3795007fdae84c.jpg": {
+      "original_name": "e1f2524c6901c27aed6d03dd8fa0371c805b620722282ea3ea3795007fdae84c.jpg",
+      "original_rel_path": "e1f2524c6901c27aed6d03dd8fa0371c805b620722282ea3ea3795007fdae84c.jpg",
+      "friendly_name": "figure_271.jpg",
+      "abs_path": "data/mineru_cache\\chapter_02_p033-081_控制系统的数学模型__9294ff3f\\images\\figure_271.jpg",
+      "index": 271
+    },
+    "e262d21c02634c5623763bce165e383781ff14a8c03b693cd38eb7c393514c7f.jpg": {
+      "original_name": "e262d21c02634c5623763bce165e383781ff14a8c03b693cd38eb7c393514c7f.jpg",
+      "original_rel_path": "e262d21c02634c5623763bce165e383781ff14a8c03b693cd38eb7c393514c7f.jpg",
+      "friendly_name": "figure_272.jpg",
+      "abs_path": "data/mineru_cache\\chapter_02_p033-081_控制系统的数学模型__9294ff3f\\images\\figure_272.jpg",
+      "index": 272
+    },
+    "e32b1fde8bbe56095ae276730ad5256e5cf042e82a98982cc80213334e5d8610.jpg": {
+      "original_name": "e32b1fde8bbe56095ae276730ad5256e5cf042e82a98982cc80213334e5d8610.jpg",
+      "original_rel_path": "e32b1fde8bbe56095ae276730ad5256e5cf042e82a98982cc80213334e5d8610.jpg",
+      "friendly_name": "figure_273.jpg",
+      "abs_path": "data/mineru_cache\\chapter_02_p033-081_控制系统的数学模型__9294ff3f\\images\\figure_273.jpg",
+      "index": 273
+    },
+    "e51705cf119220374e7339a500ed86060cbabbdd860e9a5e55e206e00a8c398b.jpg": {
+      "original_name": "e51705cf119220374e7339a500ed86060cbabbdd860e9a5e55e206e00a8c398b.jpg",
+      "original_rel_path": "e51705cf119220374e7339a500ed86060cbabbdd860e9a5e55e206e00a8c398b.jpg",
+      "friendly_name": "figure_274.jpg",
+      "abs_path": "data/mineru_cache\\chapter_02_p033-081_控制系统的数学模型__9294ff3f\\images\\figure_274.jpg",
+      "index": 274
+    },
+    "e55b2506de68880e27de063220c0eb2fbb174961b95e9c4d36c53377112aea54.jpg": {
+      "original_name": "e55b2506de68880e27de063220c0eb2fbb174961b95e9c4d36c53377112aea54.jpg",
+      "original_rel_path": "e55b2506de68880e27de063220c0eb2fbb174961b95e9c4d36c53377112aea54.jpg",
+      "friendly_name": "figure_275.jpg",
+      "abs_path": "data/mineru_cache\\chapter_02_p033-081_控制系统的数学模型__9294ff3f\\images\\figure_275.jpg",
+      "index": 275
+    },
+    "e5cc31d6740b4dcb1d2addc780977b31ab6689e5d61132cee567eec29cdc4ce4.jpg": {
+      "original_name": "e5cc31d6740b4dcb1d2addc780977b31ab6689e5d61132cee567eec29cdc4ce4.jpg",
+      "original_rel_path": "e5cc31d6740b4dcb1d2addc780977b31ab6689e5d61132cee567eec29cdc4ce4.jpg",
+      "friendly_name": "figure_276.jpg",
+      "abs_path": "data/mineru_cache\\chapter_02_p033-081_控制系统的数学模型__9294ff3f\\images\\figure_276.jpg",
+      "index": 276
+    },
+    "e618be669cc642035fb81442a48031ac64f417fb810956b586733c7c9ca71c43.jpg": {
+      "original_name": "e618be669cc642035fb81442a48031ac64f417fb810956b586733c7c9ca71c43.jpg",
+      "original_rel_path": "e618be669cc642035fb81442a48031ac64f417fb810956b586733c7c9ca71c43.jpg",
+      "friendly_name": "figure_277.jpg",
+      "abs_path": "data/mineru_cache\\chapter_02_p033-081_控制系统的数学模型__9294ff3f\\images\\figure_277.jpg",
+      "index": 277
+    },
+    "e6ded5acf0cdea88920dfb9ce150f004e0694c65dc045ed780b6f34cff15fff0.jpg": {
+      "original_name": "e6ded5acf0cdea88920dfb9ce150f004e0694c65dc045ed780b6f34cff15fff0.jpg",
+      "original_rel_path": "e6ded5acf0cdea88920dfb9ce150f004e0694c65dc045ed780b6f34cff15fff0.jpg",
+      "friendly_name": "figure_278.jpg",
+      "abs_path": "data/mineru_cache\\chapter_02_p033-081_控制系统的数学模型__9294ff3f\\images\\figure_278.jpg",
+      "index": 278
+    },
+    "e72c2afe064f2d5e768e5b4cacca71e77bef0ebcbafc3662c6c48839671fb08d.jpg": {
+      "original_name": "e72c2afe064f2d5e768e5b4cacca71e77bef0ebcbafc3662c6c48839671fb08d.jpg",
+      "original_rel_path": "e72c2afe064f2d5e768e5b4cacca71e77bef0ebcbafc3662c6c48839671fb08d.jpg",
+      "friendly_name": "figure_279.jpg",
+      "abs_path": "data/mineru_cache\\chapter_02_p033-081_控制系统的数学模型__9294ff3f\\images\\figure_279.jpg",
+      "index": 279
+    },
+    "e767c4f445ca9e722dd7112a228fb2e8b7e61845d9b9946dbdfa3e606a89cbd6.jpg": {
+      "original_name": "e767c4f445ca9e722dd7112a228fb2e8b7e61845d9b9946dbdfa3e606a89cbd6.jpg",
+      "original_rel_path": "e767c4f445ca9e722dd7112a228fb2e8b7e61845d9b9946dbdfa3e606a89cbd6.jpg",
+      "friendly_name": "figure_280.jpg",
+      "abs_path": "data/mineru_cache\\chapter_02_p033-081_控制系统的数学模型__9294ff3f\\images\\figure_280.jpg",
+      "index": 280
+    },
+    "e79bdffc9f47aff56cf76a738b32dcf1a4c6deac3a73fb8fc322cfe001e29188.jpg": {
+      "original_name": "e79bdffc9f47aff56cf76a738b32dcf1a4c6deac3a73fb8fc322cfe001e29188.jpg",
+      "original_rel_path": "e79bdffc9f47aff56cf76a738b32dcf1a4c6deac3a73fb8fc322cfe001e29188.jpg",
+      "friendly_name": "figure_281.jpg",
+      "abs_path": "data/mineru_cache\\chapter_02_p033-081_控制系统的数学模型__9294ff3f\\images\\figure_281.jpg",
+      "index": 281
+    },
+    "e92b97e29b88943d1f282c8ada01a0590df999266defdf6bbf20dd7a7c645b2d.jpg": {
+      "original_name": "e92b97e29b88943d1f282c8ada01a0590df999266defdf6bbf20dd7a7c645b2d.jpg",
+      "original_rel_path": "e92b97e29b88943d1f282c8ada01a0590df999266defdf6bbf20dd7a7c645b2d.jpg",
+      "friendly_name": "figure_282.jpg",
+      "abs_path": "data/mineru_cache\\chapter_02_p033-081_控制系统的数学模型__9294ff3f\\images\\figure_282.jpg",
+      "index": 282
+    },
+    "ec3986f25cb0b38a0270f1a0c86e03879a8311dc650cf3aeb18cc8d03d4c9f0d.jpg": {
+      "original_name": "ec3986f25cb0b38a0270f1a0c86e03879a8311dc650cf3aeb18cc8d03d4c9f0d.jpg",
+      "original_rel_path": "ec3986f25cb0b38a0270f1a0c86e03879a8311dc650cf3aeb18cc8d03d4c9f0d.jpg",
+      "friendly_name": "figure_283.jpg",
+      "abs_path": "data/mineru_cache\\chapter_02_p033-081_控制系统的数学模型__9294ff3f\\images\\figure_283.jpg",
+      "index": 283
+    },
+    "ec3ad16a7cc18635d44398282af8e26613908499cadf3a4895bfd5c3e7bb80d2.jpg": {
+      "original_name": "ec3ad16a7cc18635d44398282af8e26613908499cadf3a4895bfd5c3e7bb80d2.jpg",
+      "original_rel_path": "ec3ad16a7cc18635d44398282af8e26613908499cadf3a4895bfd5c3e7bb80d2.jpg",
+      "friendly_name": "figure_284.jpg",
+      "abs_path": "data/mineru_cache\\chapter_02_p033-081_控制系统的数学模型__9294ff3f\\images\\figure_284.jpg",
+      "index": 284
+    },
+    "ecb36789b278e4357f6175f05e00a7f787d555ab8b3e63371cd3d50e728d8766.jpg": {
+      "original_name": "ecb36789b278e4357f6175f05e00a7f787d555ab8b3e63371cd3d50e728d8766.jpg",
+      "original_rel_path": "ecb36789b278e4357f6175f05e00a7f787d555ab8b3e63371cd3d50e728d8766.jpg",
+      "friendly_name": "figure_285.jpg",
+      "abs_path": "data/mineru_cache\\chapter_02_p033-081_控制系统的数学模型__9294ff3f\\images\\figure_285.jpg",
+      "index": 285
+    },
+    "ed235d7c96c8c60666000b664535c18f43d5baeaf6830fc2b82281b8d48a10f4.jpg": {
+      "original_name": "ed235d7c96c8c60666000b664535c18f43d5baeaf6830fc2b82281b8d48a10f4.jpg",
+      "original_rel_path": "ed235d7c96c8c60666000b664535c18f43d5baeaf6830fc2b82281b8d48a10f4.jpg",
+      "friendly_name": "figure_286.jpg",
+      "abs_path": "data/mineru_cache\\chapter_02_p033-081_控制系统的数学模型__9294ff3f\\images\\figure_286.jpg",
+      "index": 286
+    },
+    "edf789314441697160807d85674e3b8c8cbe47c02c3caebcd6178f631ca28c10.jpg": {
+      "original_name": "edf789314441697160807d85674e3b8c8cbe47c02c3caebcd6178f631ca28c10.jpg",
+      "original_rel_path": "edf789314441697160807d85674e3b8c8cbe47c02c3caebcd6178f631ca28c10.jpg",
+      "friendly_name": "figure_287.jpg",
+      "abs_path": "data/mineru_cache\\chapter_02_p033-081_控制系统的数学模型__9294ff3f\\images\\figure_287.jpg",
+      "index": 287
+    },
+    "ee3d423d1bbe4c68223ff4111562edb70408926480228f1ec110e79fb840b41f.jpg": {
+      "original_name": "ee3d423d1bbe4c68223ff4111562edb70408926480228f1ec110e79fb840b41f.jpg",
+      "original_rel_path": "ee3d423d1bbe4c68223ff4111562edb70408926480228f1ec110e79fb840b41f.jpg",
+      "friendly_name": "figure_288.jpg",
+      "abs_path": "data/mineru_cache\\chapter_02_p033-081_控制系统的数学模型__9294ff3f\\images\\figure_288.jpg",
+      "index": 288
+    },
+    "ee814538021ab405d5f0f429248a951a4b4011ac0c984012c7cd666ef758ce70.jpg": {
+      "original_name": "ee814538021ab405d5f0f429248a951a4b4011ac0c984012c7cd666ef758ce70.jpg",
+      "original_rel_path": "ee814538021ab405d5f0f429248a951a4b4011ac0c984012c7cd666ef758ce70.jpg",
+      "friendly_name": "figure_289.jpg",
+      "abs_path": "data/mineru_cache\\chapter_02_p033-081_控制系统的数学模型__9294ff3f\\images\\figure_289.jpg",
+      "index": 289
+    },
+    "f120ed356c84aae711c188b84ccc63e9c7994572dabe44d559955101ef90f37b.jpg": {
+      "original_name": "f120ed356c84aae711c188b84ccc63e9c7994572dabe44d559955101ef90f37b.jpg",
+      "original_rel_path": "f120ed356c84aae711c188b84ccc63e9c7994572dabe44d559955101ef90f37b.jpg",
+      "friendly_name": "figure_290.jpg",
+      "abs_path": "data/mineru_cache\\chapter_02_p033-081_控制系统的数学模型__9294ff3f\\images\\figure_290.jpg",
+      "index": 290
+    },
+    "f1b1ef7b324514c23e26fc8bad62f1276c01ef69b702ed31af1ebab4d7e7249d.jpg": {
+      "original_name": "f1b1ef7b324514c23e26fc8bad62f1276c01ef69b702ed31af1ebab4d7e7249d.jpg",
+      "original_rel_path": "f1b1ef7b324514c23e26fc8bad62f1276c01ef69b702ed31af1ebab4d7e7249d.jpg",
+      "friendly_name": "figure_291.jpg",
+      "abs_path": "data/mineru_cache\\chapter_02_p033-081_控制系统的数学模型__9294ff3f\\images\\figure_291.jpg",
+      "index": 291
+    },
+    "f224b7fe7663da1786a804e07befe2dc6bffd3c636f3cef32f054c78e7e3ac0a.jpg": {
+      "original_name": "f224b7fe7663da1786a804e07befe2dc6bffd3c636f3cef32f054c78e7e3ac0a.jpg",
+      "original_rel_path": "f224b7fe7663da1786a804e07befe2dc6bffd3c636f3cef32f054c78e7e3ac0a.jpg",
+      "friendly_name": "figure_292.jpg",
+      "abs_path": "data/mineru_cache\\chapter_02_p033-081_控制系统的数学模型__9294ff3f\\images\\figure_292.jpg",
+      "index": 292
+    },
+    "f3a8df6f70692897f6818781750f0588db76a0456b76fd5921a121b0c9696d5c.jpg": {
+      "original_name": "f3a8df6f70692897f6818781750f0588db76a0456b76fd5921a121b0c9696d5c.jpg",
+      "original_rel_path": "f3a8df6f70692897f6818781750f0588db76a0456b76fd5921a121b0c9696d5c.jpg",
+      "friendly_name": "figure_293.jpg",
+      "abs_path": "data/mineru_cache\\chapter_02_p033-081_控制系统的数学模型__9294ff3f\\images\\figure_293.jpg",
+      "index": 293
+    },
+    "f5671a7afb7670fd3dfe09ed560485c80650b7572aa196e6557e36e8145e08df.jpg": {
+      "original_name": "f5671a7afb7670fd3dfe09ed560485c80650b7572aa196e6557e36e8145e08df.jpg",
+      "original_rel_path": "f5671a7afb7670fd3dfe09ed560485c80650b7572aa196e6557e36e8145e08df.jpg",
+      "friendly_name": "figure_294.jpg",
+      "abs_path": "data/mineru_cache\\chapter_02_p033-081_控制系统的数学模型__9294ff3f\\images\\figure_294.jpg",
+      "index": 294
+    },
+    "f5d26addfcae438824b99c42ea4bb8b32609de35d61e1042a3476433c265a2b1.jpg": {
+      "original_name": "f5d26addfcae438824b99c42ea4bb8b32609de35d61e1042a3476433c265a2b1.jpg",
+      "original_rel_path": "f5d26addfcae438824b99c42ea4bb8b32609de35d61e1042a3476433c265a2b1.jpg",
+      "friendly_name": "figure_295.jpg",
+      "abs_path": "data/mineru_cache\\chapter_02_p033-081_控制系统的数学模型__9294ff3f\\images\\figure_295.jpg",
+      "index": 295
+    },
+    "f63ce2276d9733b51b5ac6cc9dd12b7fad9ef374bc9bd06dd405b45ada091a57.jpg": {
+      "original_name": "f63ce2276d9733b51b5ac6cc9dd12b7fad9ef374bc9bd06dd405b45ada091a57.jpg",
+      "original_rel_path": "f63ce2276d9733b51b5ac6cc9dd12b7fad9ef374bc9bd06dd405b45ada091a57.jpg",
+      "friendly_name": "figure_296.jpg",
+      "abs_path": "data/mineru_cache\\chapter_02_p033-081_控制系统的数学模型__9294ff3f\\images\\figure_296.jpg",
+      "index": 296
+    },
+    "f6a443ef793c37df75e593757d8fcaf6553002aae6f1bb18b0947df893f9d19a.jpg": {
+      "original_name": "f6a443ef793c37df75e593757d8fcaf6553002aae6f1bb18b0947df893f9d19a.jpg",
+      "original_rel_path": "f6a443ef793c37df75e593757d8fcaf6553002aae6f1bb18b0947df893f9d19a.jpg",
+      "friendly_name": "figure_297.jpg",
+      "abs_path": "data/mineru_cache\\chapter_02_p033-081_控制系统的数学模型__9294ff3f\\images\\figure_297.jpg",
+      "index": 297
+    },
+    "f71b5d721a48fa9d139b955bfab35ab73577ef3892e6d2a7ccb874d26de6f1cb.jpg": {
+      "original_name": "f71b5d721a48fa9d139b955bfab35ab73577ef3892e6d2a7ccb874d26de6f1cb.jpg",
+      "original_rel_path": "f71b5d721a48fa9d139b955bfab35ab73577ef3892e6d2a7ccb874d26de6f1cb.jpg",
+      "friendly_name": "figure_298.jpg",
+      "abs_path": "data/mineru_cache\\chapter_02_p033-081_控制系统的数学模型__9294ff3f\\images\\figure_298.jpg",
+      "index": 298
+    },
+    "f7cf0c78eb332ac40f4d0700620823d10eca3bfcdb2c63037a7cbc24364a53c6.jpg": {
+      "original_name": "f7cf0c78eb332ac40f4d0700620823d10eca3bfcdb2c63037a7cbc24364a53c6.jpg",
+      "original_rel_path": "f7cf0c78eb332ac40f4d0700620823d10eca3bfcdb2c63037a7cbc24364a53c6.jpg",
+      "friendly_name": "figure_299.jpg",
+      "abs_path": "data/mineru_cache\\chapter_02_p033-081_控制系统的数学模型__9294ff3f\\images\\figure_299.jpg",
+      "index": 299
+    },
+    "f7fa6abcda4e1793899290218b53d388356bed9839c132ba3542f4e5cf759976.jpg": {
+      "original_name": "f7fa6abcda4e1793899290218b53d388356bed9839c132ba3542f4e5cf759976.jpg",
+      "original_rel_path": "f7fa6abcda4e1793899290218b53d388356bed9839c132ba3542f4e5cf759976.jpg",
+      "friendly_name": "figure_300.jpg",
+      "abs_path": "data/mineru_cache\\chapter_02_p033-081_控制系统的数学模型__9294ff3f\\images\\figure_300.jpg",
+      "index": 300
+    },
+    "f92e9d8dc9eb4222998f518eed0991b94822da37927844448b4e85ceb476358a.jpg": {
+      "original_name": "f92e9d8dc9eb4222998f518eed0991b94822da37927844448b4e85ceb476358a.jpg",
+      "original_rel_path": "f92e9d8dc9eb4222998f518eed0991b94822da37927844448b4e85ceb476358a.jpg",
+      "friendly_name": "figure_301.jpg",
+      "abs_path": "data/mineru_cache\\chapter_02_p033-081_控制系统的数学模型__9294ff3f\\images\\figure_301.jpg",
+      "index": 301
+    },
+    "fc6ab45e2115170361ee9856d61c63ae57b27bc1c7222cc6402ad0b578a8f169.jpg": {
+      "original_name": "fc6ab45e2115170361ee9856d61c63ae57b27bc1c7222cc6402ad0b578a8f169.jpg",
+      "original_rel_path": "fc6ab45e2115170361ee9856d61c63ae57b27bc1c7222cc6402ad0b578a8f169.jpg",
+      "friendly_name": "figure_302.jpg",
+      "abs_path": "data/mineru_cache\\chapter_02_p033-081_控制系统的数学模型__9294ff3f\\images\\figure_302.jpg",
+      "index": 302
+    },
+    "fc7b714a895a85c56822fd69806a0a7e256782b66f6b5dee50169eac21315a15.jpg": {
+      "original_name": "fc7b714a895a85c56822fd69806a0a7e256782b66f6b5dee50169eac21315a15.jpg",
+      "original_rel_path": "fc7b714a895a85c56822fd69806a0a7e256782b66f6b5dee50169eac21315a15.jpg",
+      "friendly_name": "figure_303.jpg",
+      "abs_path": "data/mineru_cache\\chapter_02_p033-081_控制系统的数学模型__9294ff3f\\images\\figure_303.jpg",
+      "index": 303
+    },
+    "fdea7090db7bbaea1d8654c87f929ee16cc5098b27d78a1e276defd9af902798.jpg": {
+      "original_name": "fdea7090db7bbaea1d8654c87f929ee16cc5098b27d78a1e276defd9af902798.jpg",
+      "original_rel_path": "fdea7090db7bbaea1d8654c87f929ee16cc5098b27d78a1e276defd9af902798.jpg",
+      "friendly_name": "figure_304.jpg",
+      "abs_path": "data/mineru_cache\\chapter_02_p033-081_控制系统的数学模型__9294ff3f\\images\\figure_304.jpg",
+      "index": 304
+    },
+    "ff172bf9fa031c896371caed36b35d51f0bfc2a7f15935c793d121764cf19bda.jpg": {
+      "original_name": "ff172bf9fa031c896371caed36b35d51f0bfc2a7f15935c793d121764cf19bda.jpg",
+      "original_rel_path": "ff172bf9fa031c896371caed36b35d51f0bfc2a7f15935c793d121764cf19bda.jpg",
+      "friendly_name": "figure_305.jpg",
+      "abs_path": "data/mineru_cache\\chapter_02_p033-081_控制系统的数学模型__9294ff3f\\images\\figure_305.jpg",
+      "index": 305
+    },
+    "ffa5156305c35b139eb3bb75c4ffd8ad034565c498ab23136d5679bcbacd4c8e.jpg": {
+      "original_name": "ffa5156305c35b139eb3bb75c4ffd8ad034565c498ab23136d5679bcbacd4c8e.jpg",
+      "original_rel_path": "ffa5156305c35b139eb3bb75c4ffd8ad034565c498ab23136d5679bcbacd4c8e.jpg",
+      "friendly_name": "figure_306.jpg",
+      "abs_path": "data/mineru_cache\\chapter_02_p033-081_控制系统的数学模型__9294ff3f\\images\\figure_306.jpg",
+      "index": 306
+    }
+  },
+  "json_files": {
+    "c7520a5c-7875-4027-a690-6d34ed02df30_content_list.json": "data/mineru_cache\\chapter_02_p033-081_控制系统的数学模型__9294ff3f\\json\\c7520a5c-7875-4027-a690-6d34ed02df30_content_list.json",
+    "c7520a5c-7875-4027-a690-6d34ed02df30_model.json": "data/mineru_cache\\chapter_02_p033-081_控制系统的数学模型__9294ff3f\\json\\c7520a5c-7875-4027-a690-6d34ed02df30_model.json",
+    "content_list_v2.json": "data/mineru_cache\\chapter_02_p033-081_控制系统的数学模型__9294ff3f\\json\\content_list_v2.json",
+    "layout.json": "data/mineru_cache\\chapter_02_p033-081_控制系统的数学模型__9294ff3f\\json\\layout.json"
+  }
+}

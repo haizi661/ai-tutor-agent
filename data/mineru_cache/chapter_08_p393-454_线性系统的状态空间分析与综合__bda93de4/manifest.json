@@ -1,0 +1,2319 @@
+{
+  "pdf_name": "chapter_08_p393-454_线性系统的状态空间分析与综合.pdf",
+  "pdf_md5": "bda93de40ae51437a7a89ff542072052",
+  "cache_dir": "data/mineru_cache\\chapter_08_p393-454_线性系统的状态空间分析与综合__bda93de4",
+  "full_md_path": "data/mineru_cache\\chapter_08_p393-454_线性系统的状态空间分析与综合__bda93de4\\full.md",
+  "images_dir": "data/mineru_cache\\chapter_08_p393-454_线性系统的状态空间分析与综合__bda93de4\\images",
+  "json_dir": "data/mineru_cache\\chapter_08_p393-454_线性系统的状态空间分析与综合__bda93de4\\json",
+  "images": {
+    "0077688944c3306dc59029614d60dc7e21ab9a1d48a324da4b1d04fbbbf1dbfa.jpg": {
+      "original_name": "0077688944c3306dc59029614d60dc7e21ab9a1d48a324da4b1d04fbbbf1dbfa.jpg",
+      "original_rel_path": "0077688944c3306dc59029614d60dc7e21ab9a1d48a324da4b1d04fbbbf1dbfa.jpg",
+      "friendly_name": "figure_01.jpg",
+      "abs_path": "data/mineru_cache\\chapter_08_p393-454_线性系统的状态空间分析与综合__bda93de4\\images\\figure_01.jpg",
+      "index": 1
+    },
+    "030ef22523f1dfb20b4166d2e6bbb7b3639024cd13de6eea553f81721f387cec.jpg": {
+      "original_name": "030ef22523f1dfb20b4166d2e6bbb7b3639024cd13de6eea553f81721f387cec.jpg",
+      "original_rel_path": "030ef22523f1dfb20b4166d2e6bbb7b3639024cd13de6eea553f81721f387cec.jpg",
+      "friendly_name": "figure_02.jpg",
+      "abs_path": "data/mineru_cache\\chapter_08_p393-454_线性系统的状态空间分析与综合__bda93de4\\images\\figure_02.jpg",
+      "index": 2
+    },
+    "03ec1137832243182bd8e1366f72368769097aecbfa304e08309a02bd4699a4e.jpg": {
+      "original_name": "03ec1137832243182bd8e1366f72368769097aecbfa304e08309a02bd4699a4e.jpg",
+      "original_rel_path": "03ec1137832243182bd8e1366f72368769097aecbfa304e08309a02bd4699a4e.jpg",
+      "friendly_name": "figure_03.jpg",
+      "abs_path": "data/mineru_cache\\chapter_08_p393-454_线性系统的状态空间分析与综合__bda93de4\\images\\figure_03.jpg",
+      "index": 3
+    },
+    "05e263030eb10c2ab4771d74324b737028c75d0c5a850bf57e6a90168f72052c.jpg": {
+      "original_name": "05e263030eb10c2ab4771d74324b737028c75d0c5a850bf57e6a90168f72052c.jpg",
+      "original_rel_path": "05e263030eb10c2ab4771d74324b737028c75d0c5a850bf57e6a90168f72052c.jpg",
+      "friendly_name": "figure_04.jpg",
+      "abs_path": "data/mineru_cache\\chapter_08_p393-454_线性系统的状态空间分析与综合__bda93de4\\images\\figure_04.jpg",
+      "index": 4
+    },
+    "064ee5c86077852aac377edee7af4bddb94aafa1c9817cb67c9897288f78b50b.jpg": {
+      "original_name": "064ee5c86077852aac377edee7af4bddb94aafa1c9817cb67c9897288f78b50b.jpg",
+      "original_rel_path": "064ee5c86077852aac377edee7af4bddb94aafa1c9817cb67c9897288f78b50b.jpg",
+      "friendly_name": "figure_05.jpg",
+      "abs_path": "data/mineru_cache\\chapter_08_p393-454_线性系统的状态空间分析与综合__bda93de4\\images\\figure_05.jpg",
+      "index": 5
+    },
+    "072eed22257a8214deaeeeaaf236d54b95aa3d10d3f46847646f053f44e7caa3.jpg": {
+      "original_name": "072eed22257a8214deaeeeaaf236d54b95aa3d10d3f46847646f053f44e7caa3.jpg",
+      "original_rel_path": "072eed22257a8214deaeeeaaf236d54b95aa3d10d3f46847646f053f44e7caa3.jpg",
+      "friendly_name": "figure_06.jpg",
+      "abs_path": "data/mineru_cache\\chapter_08_p393-454_线性系统的状态空间分析与综合__bda93de4\\images\\figure_06.jpg",
+      "index": 6
+    },
+    "0840d785a02dc74336692e2c9280a464ade07b4a91151734e60c7384b702fe2e.jpg": {
+      "original_name": "0840d785a02dc74336692e2c9280a464ade07b4a91151734e60c7384b702fe2e.jpg",
+      "original_rel_path": "0840d785a02dc74336692e2c9280a464ade07b4a91151734e60c7384b702fe2e.jpg",
+      "friendly_name": "figure_07.jpg",
+      "abs_path": "data/mineru_cache\\chapter_08_p393-454_线性系统的状态空间分析与综合__bda93de4\\images\\figure_07.jpg",
+      "index": 7
+    },
+    "091e6c2641afb95864f44f0d41c4ad9936d9a2a822bdaa96b68cbf9232be9585.jpg": {
+      "original_name": "091e6c2641afb95864f44f0d41c4ad9936d9a2a822bdaa96b68cbf9232be9585.jpg",
+      "original_rel_path": "091e6c2641afb95864f44f0d41c4ad9936d9a2a822bdaa96b68cbf9232be9585.jpg",
+      "friendly_name": "figure_08.jpg",
+      "abs_path": "data/mineru_cache\\chapter_08_p393-454_线性系统的状态空间分析与综合__bda93de4\\images\\figure_08.jpg",
+      "index": 8
+    },
+    "099f10b5b34e224d6caea65225977ed7575833f6c8bb9dd7864b4ec8b1c3ad9c.jpg": {
+      "original_name": "099f10b5b34e224d6caea65225977ed7575833f6c8bb9dd7864b4ec8b1c3ad9c.jpg",
+      "original_rel_path": "099f10b5b34e224d6caea65225977ed7575833f6c8bb9dd7864b4ec8b1c3ad9c.jpg",
+      "friendly_name": "figure_09.jpg",
+      "abs_path": "data/mineru_cache\\chapter_08_p393-454_线性系统的状态空间分析与综合__bda93de4\\images\\figure_09.jpg",
+      "index": 9
+    },
+    "09a2b8f528fa2f229cbaad2dbb1036fc5bcb63f872334879544b47808c65fcfc.jpg": {
+      "original_name": "09a2b8f528fa2f229cbaad2dbb1036fc5bcb63f872334879544b47808c65fcfc.jpg",
+      "original_rel_path": "09a2b8f528fa2f229cbaad2dbb1036fc5bcb63f872334879544b47808c65fcfc.jpg",
+      "friendly_name": "figure_10.jpg",
+      "abs_path": "data/mineru_cache\\chapter_08_p393-454_线性系统的状态空间分析与综合__bda93de4\\images\\figure_10.jpg",
+      "index": 10
+    },
+    "0b6e77758834f98a6ee039300e8ecc73c2610be8c093e3c02e9cf7771a3dca91.jpg": {
+      "original_name": "0b6e77758834f98a6ee039300e8ecc73c2610be8c093e3c02e9cf7771a3dca91.jpg",
+      "original_rel_path": "0b6e77758834f98a6ee039300e8ecc73c2610be8c093e3c02e9cf7771a3dca91.jpg",
+      "friendly_name": "figure_11.jpg",
+      "abs_path": "data/mineru_cache\\chapter_08_p393-454_线性系统的状态空间分析与综合__bda93de4\\images\\figure_11.jpg",
+      "index": 11
+    },
+    "0b78ece9c7e66b4b429874834aee768f9dcaac7b6383e291f6b079762b21f208.jpg": {
+      "original_name": "0b78ece9c7e66b4b429874834aee768f9dcaac7b6383e291f6b079762b21f208.jpg",
+      "original_rel_path": "0b78ece9c7e66b4b429874834aee768f9dcaac7b6383e291f6b079762b21f208.jpg",
+      "friendly_name": "figure_12.jpg",
+      "abs_path": "data/mineru_cache\\chapter_08_p393-454_线性系统的状态空间分析与综合__bda93de4\\images\\figure_12.jpg",
+      "index": 12
+    },
+    "0c74d98f7e11ef14134fe50b27e75efddb2a66f6c020848efce00a0321ea7f4d.jpg": {
+      "original_name": "0c74d98f7e11ef14134fe50b27e75efddb2a66f6c020848efce00a0321ea7f4d.jpg",
+      "original_rel_path": "0c74d98f7e11ef14134fe50b27e75efddb2a66f6c020848efce00a0321ea7f4d.jpg",
+      "friendly_name": "figure_13.jpg",
+      "abs_path": "data/mineru_cache\\chapter_08_p393-454_线性系统的状态空间分析与综合__bda93de4\\images\\figure_13.jpg",
+      "index": 13
+    },
+    "0d05521a4a3aa3f271b605b6a88b6649c39430fd61d74943ae7541c0a90f2eba.jpg": {
+      "original_name": "0d05521a4a3aa3f271b605b6a88b6649c39430fd61d74943ae7541c0a90f2eba.jpg",
+      "original_rel_path": "0d05521a4a3aa3f271b605b6a88b6649c39430fd61d74943ae7541c0a90f2eba.jpg",
+      "friendly_name": "figure_14.jpg",
+      "abs_path": "data/mineru_cache\\chapter_08_p393-454_线性系统的状态空间分析与综合__bda93de4\\images\\figure_14.jpg",
+      "index": 14
+    },
+    "0df329732e07969f82a77559dbe247ae66c0f0a571d37d979a1ca12b36ed6704.jpg": {
+      "original_name": "0df329732e07969f82a77559dbe247ae66c0f0a571d37d979a1ca12b36ed6704.jpg",
+      "original_rel_path": "0df329732e07969f82a77559dbe247ae66c0f0a571d37d979a1ca12b36ed6704.jpg",
+      "friendly_name": "figure_15.jpg",
+      "abs_path": "data/mineru_cache\\chapter_08_p393-454_线性系统的状态空间分析与综合__bda93de4\\images\\figure_15.jpg",
+      "index": 15
+    },
+    "0e44e6040274a976d4ad99fc7d7785b23f5ed7f2332aabe2efc4c5365481063c.jpg": {
+      "original_name": "0e44e6040274a976d4ad99fc7d7785b23f5ed7f2332aabe2efc4c5365481063c.jpg",
+      "original_rel_path": "0e44e6040274a976d4ad99fc7d7785b23f5ed7f2332aabe2efc4c5365481063c.jpg",
+      "friendly_name": "figure_16.jpg",
+      "abs_path": "data/mineru_cache\\chapter_08_p393-454_线性系统的状态空间分析与综合__bda93de4\\images\\figure_16.jpg",
+      "index": 16
+    },
+    "0e47d2451a866986e01c1bf22c81f6d366c2363e75813d4357d28faf6ffb932b.jpg": {
+      "original_name": "0e47d2451a866986e01c1bf22c81f6d366c2363e75813d4357d28faf6ffb932b.jpg",
+      "original_rel_path": "0e47d2451a866986e01c1bf22c81f6d366c2363e75813d4357d28faf6ffb932b.jpg",
+      "friendly_name": "figure_17.jpg",
+      "abs_path": "data/mineru_cache\\chapter_08_p393-454_线性系统的状态空间分析与综合__bda93de4\\images\\figure_17.jpg",
+      "index": 17
+    },
+    "0f42be30e925ddb8e9722573431576dc8c223d574997620c436684a55f74bb3d.jpg": {
+      "original_name": "0f42be30e925ddb8e9722573431576dc8c223d574997620c436684a55f74bb3d.jpg",
+      "original_rel_path": "0f42be30e925ddb8e9722573431576dc8c223d574997620c436684a55f74bb3d.jpg",
+      "friendly_name": "figure_18.jpg",
+      "abs_path": "data/mineru_cache\\chapter_08_p393-454_线性系统的状态空间分析与综合__bda93de4\\images\\figure_18.jpg",
+      "index": 18
+    },
+    "0f652f3ff743bebd23e2fad79c9577ce46d054e2c4df80061d4cb36ad2e97ddf.jpg": {
+      "original_name": "0f652f3ff743bebd23e2fad79c9577ce46d054e2c4df80061d4cb36ad2e97ddf.jpg",
+      "original_rel_path": "0f652f3ff743bebd23e2fad79c9577ce46d054e2c4df80061d4cb36ad2e97ddf.jpg",
+      "friendly_name": "figure_19.jpg",
+      "abs_path": "data/mineru_cache\\chapter_08_p393-454_线性系统的状态空间分析与综合__bda93de4\\images\\figure_19.jpg",
+      "index": 19
+    },
+    "0f9478383121bfc19edd229470b895395daa57fd89eb0d9eb12d21727396e92a.jpg": {
+      "original_name": "0f9478383121bfc19edd229470b895395daa57fd89eb0d9eb12d21727396e92a.jpg",
+      "original_rel_path": "0f9478383121bfc19edd229470b895395daa57fd89eb0d9eb12d21727396e92a.jpg",
+      "friendly_name": "figure_20.jpg",
+      "abs_path": "data/mineru_cache\\chapter_08_p393-454_线性系统的状态空间分析与综合__bda93de4\\images\\figure_20.jpg",
+      "index": 20
+    },
+    "10eaa19d70178406af034d2ec50128cce7242a7d4a29554830024b273f346a25.jpg": {
+      "original_name": "10eaa19d70178406af034d2ec50128cce7242a7d4a29554830024b273f346a25.jpg",
+      "original_rel_path": "10eaa19d70178406af034d2ec50128cce7242a7d4a29554830024b273f346a25.jpg",
+      "friendly_name": "figure_21.jpg",
+      "abs_path": "data/mineru_cache\\chapter_08_p393-454_线性系统的状态空间分析与综合__bda93de4\\images\\figure_21.jpg",
+      "index": 21
+    },
+    "130a53239cdbdf92600f163d2ed7052129a0184b1ba2af2eafef0b2bc81f34f0.jpg": {
+      "original_name": "130a53239cdbdf92600f163d2ed7052129a0184b1ba2af2eafef0b2bc81f34f0.jpg",
+      "original_rel_path": "130a53239cdbdf92600f163d2ed7052129a0184b1ba2af2eafef0b2bc81f34f0.jpg",
+      "friendly_name": "figure_22.jpg",
+      "abs_path": "data/mineru_cache\\chapter_08_p393-454_线性系统的状态空间分析与综合__bda93de4\\images\\figure_22.jpg",
+      "index": 22
+    },
+    "13ca5e0de81c13b65a3586693dc6d5ea991d2d517e3a6ca53d818890a4e54adc.jpg": {
+      "original_name": "13ca5e0de81c13b65a3586693dc6d5ea991d2d517e3a6ca53d818890a4e54adc.jpg",
+      "original_rel_path": "13ca5e0de81c13b65a3586693dc6d5ea991d2d517e3a6ca53d818890a4e54adc.jpg",
+      "friendly_name": "figure_23.jpg",
+      "abs_path": "data/mineru_cache\\chapter_08_p393-454_线性系统的状态空间分析与综合__bda93de4\\images\\figure_23.jpg",
+      "index": 23
+    },
+    "142009cb4c117402513987e8d5807d4dc353ca5c059788f607657b5ae829e7d0.jpg": {
+      "original_name": "142009cb4c117402513987e8d5807d4dc353ca5c059788f607657b5ae829e7d0.jpg",
+      "original_rel_path": "142009cb4c117402513987e8d5807d4dc353ca5c059788f607657b5ae829e7d0.jpg",
+      "friendly_name": "figure_24.jpg",
+      "abs_path": "data/mineru_cache\\chapter_08_p393-454_线性系统的状态空间分析与综合__bda93de4\\images\\figure_24.jpg",
+      "index": 24
+    },
+    "15a20fe8fa3970c66227cacbfb8a5d50bddeccf9c0c52a3e9a84d19899f380f4.jpg": {
+      "original_name": "15a20fe8fa3970c66227cacbfb8a5d50bddeccf9c0c52a3e9a84d19899f380f4.jpg",
+      "original_rel_path": "15a20fe8fa3970c66227cacbfb8a5d50bddeccf9c0c52a3e9a84d19899f380f4.jpg",
+      "friendly_name": "figure_25.jpg",
+      "abs_path": "data/mineru_cache\\chapter_08_p393-454_线性系统的状态空间分析与综合__bda93de4\\images\\figure_25.jpg",
+      "index": 25
+    },
+    "1648b26da7e535b043b6febee172d2fc57cd2107627c48e51d4c53e2bc6ce486.jpg": {
+      "original_name": "1648b26da7e535b043b6febee172d2fc57cd2107627c48e51d4c53e2bc6ce486.jpg",
+      "original_rel_path": "1648b26da7e535b043b6febee172d2fc57cd2107627c48e51d4c53e2bc6ce486.jpg",
+      "friendly_name": "figure_26.jpg",
+      "abs_path": "data/mineru_cache\\chapter_08_p393-454_线性系统的状态空间分析与综合__bda93de4\\images\\figure_26.jpg",
+      "index": 26
+    },
+    "1660e2880d75c78ea619b53253ab56620ef2963935e91a04a983f15eac74c218.jpg": {
+      "original_name": "1660e2880d75c78ea619b53253ab56620ef2963935e91a04a983f15eac74c218.jpg",
+      "original_rel_path": "1660e2880d75c78ea619b53253ab56620ef2963935e91a04a983f15eac74c218.jpg",
+      "friendly_name": "figure_27.jpg",
+      "abs_path": "data/mineru_cache\\chapter_08_p393-454_线性系统的状态空间分析与综合__bda93de4\\images\\figure_27.jpg",
+      "index": 27
+    },
+    "16e0b4d379ef194602be2c0bda62e580baad2b2607577dd4e11adde97ea9b15b.jpg": {
+      "original_name": "16e0b4d379ef194602be2c0bda62e580baad2b2607577dd4e11adde97ea9b15b.jpg",
+      "original_rel_path": "16e0b4d379ef194602be2c0bda62e580baad2b2607577dd4e11adde97ea9b15b.jpg",
+      "friendly_name": "figure_28.jpg",
+      "abs_path": "data/mineru_cache\\chapter_08_p393-454_线性系统的状态空间分析与综合__bda93de4\\images\\figure_28.jpg",
+      "index": 28
+    },
+    "1722058f91310c93dc73058ded1da394f7d0125f1b01ae31f7f10f17635e44da.jpg": {
+      "original_name": "1722058f91310c93dc73058ded1da394f7d0125f1b01ae31f7f10f17635e44da.jpg",
+      "original_rel_path": "1722058f91310c93dc73058ded1da394f7d0125f1b01ae31f7f10f17635e44da.jpg",
+      "friendly_name": "figure_29.jpg",
+      "abs_path": "data/mineru_cache\\chapter_08_p393-454_线性系统的状态空间分析与综合__bda93de4\\images\\figure_29.jpg",
+      "index": 29
+    },
+    "1855cd4b668d8978b18d5cc32bd9b29a554b4a076e78f69859ccebbf85d9ceab.jpg": {
+      "original_name": "1855cd4b668d8978b18d5cc32bd9b29a554b4a076e78f69859ccebbf85d9ceab.jpg",
+      "original_rel_path": "1855cd4b668d8978b18d5cc32bd9b29a554b4a076e78f69859ccebbf85d9ceab.jpg",
+      "friendly_name": "figure_30.jpg",
+      "abs_path": "data/mineru_cache\\chapter_08_p393-454_线性系统的状态空间分析与综合__bda93de4\\images\\figure_30.jpg",
+      "index": 30
+    },
+    "198f8d8362d3c771470fd014f817de917df3ee3884543ab54dfc9a2c25a438b1.jpg": {
+      "original_name": "198f8d8362d3c771470fd014f817de917df3ee3884543ab54dfc9a2c25a438b1.jpg",
+      "original_rel_path": "198f8d8362d3c771470fd014f817de917df3ee3884543ab54dfc9a2c25a438b1.jpg",
+      "friendly_name": "figure_31.jpg",
+      "abs_path": "data/mineru_cache\\chapter_08_p393-454_线性系统的状态空间分析与综合__bda93de4\\images\\figure_31.jpg",
+      "index": 31
+    },
+    "19af20c980302164a41700a063102de89d85b85ef6e6f093507816064c2c89c6.jpg": {
+      "original_name": "19af20c980302164a41700a063102de89d85b85ef6e6f093507816064c2c89c6.jpg",
+      "original_rel_path": "19af20c980302164a41700a063102de89d85b85ef6e6f093507816064c2c89c6.jpg",
+      "friendly_name": "figure_32.jpg",
+      "abs_path": "data/mineru_cache\\chapter_08_p393-454_线性系统的状态空间分析与综合__bda93de4\\images\\figure_32.jpg",
+      "index": 32
+    },
+    "1a3ebb298be2c25dedb404bf48ecbef25e80c2c8f8d3426c8ae8deb7bd149fe6.jpg": {
+      "original_name": "1a3ebb298be2c25dedb404bf48ecbef25e80c2c8f8d3426c8ae8deb7bd149fe6.jpg",
+      "original_rel_path": "1a3ebb298be2c25dedb404bf48ecbef25e80c2c8f8d3426c8ae8deb7bd149fe6.jpg",
+      "friendly_name": "figure_33.jpg",
+      "abs_path": "data/mineru_cache\\chapter_08_p393-454_线性系统的状态空间分析与综合__bda93de4\\images\\figure_33.jpg",
+      "index": 33
+    },
+    "1b48301b4b3a35e78ae490c0a2938f7eb86259fc3ba788dbca9b3cd2b1b69751.jpg": {
+      "original_name": "1b48301b4b3a35e78ae490c0a2938f7eb86259fc3ba788dbca9b3cd2b1b69751.jpg",
+      "original_rel_path": "1b48301b4b3a35e78ae490c0a2938f7eb86259fc3ba788dbca9b3cd2b1b69751.jpg",
+      "friendly_name": "figure_34.jpg",
+      "abs_path": "data/mineru_cache\\chapter_08_p393-454_线性系统的状态空间分析与综合__bda93de4\\images\\figure_34.jpg",
+      "index": 34
+    },
+    "1b61ec165f11fdbdd9aeba233193eb8aa6218036a2fba83772cdba82772ad444.jpg": {
+      "original_name": "1b61ec165f11fdbdd9aeba233193eb8aa6218036a2fba83772cdba82772ad444.jpg",
+      "original_rel_path": "1b61ec165f11fdbdd9aeba233193eb8aa6218036a2fba83772cdba82772ad444.jpg",
+      "friendly_name": "figure_35.jpg",
+      "abs_path": "data/mineru_cache\\chapter_08_p393-454_线性系统的状态空间分析与综合__bda93de4\\images\\figure_35.jpg",
+      "index": 35
+    },
+    "1c7ecb30b2c33b99d1d8daf8bb016ed62bfcc8f3d66d62f9632a0770f6fc7eea.jpg": {
+      "original_name": "1c7ecb30b2c33b99d1d8daf8bb016ed62bfcc8f3d66d62f9632a0770f6fc7eea.jpg",
+      "original_rel_path": "1c7ecb30b2c33b99d1d8daf8bb016ed62bfcc8f3d66d62f9632a0770f6fc7eea.jpg",
+      "friendly_name": "figure_36.jpg",
+      "abs_path": "data/mineru_cache\\chapter_08_p393-454_线性系统的状态空间分析与综合__bda93de4\\images\\figure_36.jpg",
+      "index": 36
+    },
+    "1d0f9adae1b59d4926cdf00c83c4c459e1c8384d3253b320c2d4f5dcb1c3a527.jpg": {
+      "original_name": "1d0f9adae1b59d4926cdf00c83c4c459e1c8384d3253b320c2d4f5dcb1c3a527.jpg",
+      "original_rel_path": "1d0f9adae1b59d4926cdf00c83c4c459e1c8384d3253b320c2d4f5dcb1c3a527.jpg",
+      "friendly_name": "figure_37.jpg",
+      "abs_path": "data/mineru_cache\\chapter_08_p393-454_线性系统的状态空间分析与综合__bda93de4\\images\\figure_37.jpg",
+      "index": 37
+    },
+    "1d25fb3ca65b0958d2fc93204df113981ff9308c151e0d00a01377bfa7058759.jpg": {
+      "original_name": "1d25fb3ca65b0958d2fc93204df113981ff9308c151e0d00a01377bfa7058759.jpg",
+      "original_rel_path": "1d25fb3ca65b0958d2fc93204df113981ff9308c151e0d00a01377bfa7058759.jpg",
+      "friendly_name": "figure_38.jpg",
+      "abs_path": "data/mineru_cache\\chapter_08_p393-454_线性系统的状态空间分析与综合__bda93de4\\images\\figure_38.jpg",
+      "index": 38
+    },
+    "1d4550cfca9b80439acc2ab7b34d70c2e543a6b6e9a6d88224f85bcf61ee32bf.jpg": {
+      "original_name": "1d4550cfca9b80439acc2ab7b34d70c2e543a6b6e9a6d88224f85bcf61ee32bf.jpg",
+      "original_rel_path": "1d4550cfca9b80439acc2ab7b34d70c2e543a6b6e9a6d88224f85bcf61ee32bf.jpg",
+      "friendly_name": "figure_39.jpg",
+      "abs_path": "data/mineru_cache\\chapter_08_p393-454_线性系统的状态空间分析与综合__bda93de4\\images\\figure_39.jpg",
+      "index": 39
+    },
+    "1e9f4a809b732af2fd3af88d5b3a66e69b6927077d55558ef18d9f84482d57ba.jpg": {
+      "original_name": "1e9f4a809b732af2fd3af88d5b3a66e69b6927077d55558ef18d9f84482d57ba.jpg",
+      "original_rel_path": "1e9f4a809b732af2fd3af88d5b3a66e69b6927077d55558ef18d9f84482d57ba.jpg",
+      "friendly_name": "figure_40.jpg",
+      "abs_path": "data/mineru_cache\\chapter_08_p393-454_线性系统的状态空间分析与综合__bda93de4\\images\\figure_40.jpg",
+      "index": 40
+    },
+    "1edc51879c707895e9e9506d01b9d78400bdd9a9310d0792ce58304bf96898d6.jpg": {
+      "original_name": "1edc51879c707895e9e9506d01b9d78400bdd9a9310d0792ce58304bf96898d6.jpg",
+      "original_rel_path": "1edc51879c707895e9e9506d01b9d78400bdd9a9310d0792ce58304bf96898d6.jpg",
+      "friendly_name": "figure_41.jpg",
+      "abs_path": "data/mineru_cache\\chapter_08_p393-454_线性系统的状态空间分析与综合__bda93de4\\images\\figure_41.jpg",
+      "index": 41
+    },
+    "1f6f341cd2f98e69f95bd03059392267cf40cb1f10641be51a2574a8a7c303a8.jpg": {
+      "original_name": "1f6f341cd2f98e69f95bd03059392267cf40cb1f10641be51a2574a8a7c303a8.jpg",
+      "original_rel_path": "1f6f341cd2f98e69f95bd03059392267cf40cb1f10641be51a2574a8a7c303a8.jpg",
+      "friendly_name": "figure_42.jpg",
+      "abs_path": "data/mineru_cache\\chapter_08_p393-454_线性系统的状态空间分析与综合__bda93de4\\images\\figure_42.jpg",
+      "index": 42
+    },
+    "1f915bce9e3ed73dac1e86df28609cf364fd1e17c897a946d164e21239b94120.jpg": {
+      "original_name": "1f915bce9e3ed73dac1e86df28609cf364fd1e17c897a946d164e21239b94120.jpg",
+      "original_rel_path": "1f915bce9e3ed73dac1e86df28609cf364fd1e17c897a946d164e21239b94120.jpg",
+      "friendly_name": "figure_43.jpg",
+      "abs_path": "data/mineru_cache\\chapter_08_p393-454_线性系统的状态空间分析与综合__bda93de4\\images\\figure_43.jpg",
+      "index": 43
+    },
+    "1fe505f8ac1916947223db5af7206f4df5190000aeae7b9703523018900525e1.jpg": {
+      "original_name": "1fe505f8ac1916947223db5af7206f4df5190000aeae7b9703523018900525e1.jpg",
+      "original_rel_path": "1fe505f8ac1916947223db5af7206f4df5190000aeae7b9703523018900525e1.jpg",
+      "friendly_name": "figure_44.jpg",
+      "abs_path": "data/mineru_cache\\chapter_08_p393-454_线性系统的状态空间分析与综合__bda93de4\\images\\figure_44.jpg",
+      "index": 44
+    },
+    "203d722fd85b2e45f64dcb3a085cccf8767cdf4e3f99cfc3ce6ebeccc71e0314.jpg": {
+      "original_name": "203d722fd85b2e45f64dcb3a085cccf8767cdf4e3f99cfc3ce6ebeccc71e0314.jpg",
+      "original_rel_path": "203d722fd85b2e45f64dcb3a085cccf8767cdf4e3f99cfc3ce6ebeccc71e0314.jpg",
+      "friendly_name": "figure_45.jpg",
+      "abs_path": "data/mineru_cache\\chapter_08_p393-454_线性系统的状态空间分析与综合__bda93de4\\images\\figure_45.jpg",
+      "index": 45
+    },
+    "2086f09103b705556bb1873a917a9ac94c9dc7424b91b64e225a80ef442b59df.jpg": {
+      "original_name": "2086f09103b705556bb1873a917a9ac94c9dc7424b91b64e225a80ef442b59df.jpg",
+      "original_rel_path": "2086f09103b705556bb1873a917a9ac94c9dc7424b91b64e225a80ef442b59df.jpg",
+      "friendly_name": "figure_46.jpg",
+      "abs_path": "data/mineru_cache\\chapter_08_p393-454_线性系统的状态空间分析与综合__bda93de4\\images\\figure_46.jpg",
+      "index": 46
+    },
+    "20f304a87a64bce0f46e0bc6ae0da03a0c7f287ea06c1d63c15ae6ef3a0599e5.jpg": {
+      "original_name": "20f304a87a64bce0f46e0bc6ae0da03a0c7f287ea06c1d63c15ae6ef3a0599e5.jpg",
+      "original_rel_path": "20f304a87a64bce0f46e0bc6ae0da03a0c7f287ea06c1d63c15ae6ef3a0599e5.jpg",
+      "friendly_name": "figure_47.jpg",
+      "abs_path": "data/mineru_cache\\chapter_08_p393-454_线性系统的状态空间分析与综合__bda93de4\\images\\figure_47.jpg",
+      "index": 47
+    },
+    "214dc09adf8d321aff9493073bda62b87fa5ea8e6f609b9aed195c28947daeec.jpg": {
+      "original_name": "214dc09adf8d321aff9493073bda62b87fa5ea8e6f609b9aed195c28947daeec.jpg",
+      "original_rel_path": "214dc09adf8d321aff9493073bda62b87fa5ea8e6f609b9aed195c28947daeec.jpg",
+      "friendly_name": "figure_48.jpg",
+      "abs_path": "data/mineru_cache\\chapter_08_p393-454_线性系统的状态空间分析与综合__bda93de4\\images\\figure_48.jpg",
+      "index": 48
+    },
+    "227e8061b136ba3da8d1bdfd4992131f7bdc0b79bb7faf98ca4df225c86d9537.jpg": {
+      "original_name": "227e8061b136ba3da8d1bdfd4992131f7bdc0b79bb7faf98ca4df225c86d9537.jpg",
+      "original_rel_path": "227e8061b136ba3da8d1bdfd4992131f7bdc0b79bb7faf98ca4df225c86d9537.jpg",
+      "friendly_name": "figure_49.jpg",
+      "abs_path": "data/mineru_cache\\chapter_08_p393-454_线性系统的状态空间分析与综合__bda93de4\\images\\figure_49.jpg",
+      "index": 49
+    },
+    "22de89e66c07bdf727d74985630c079fac7ef0b6fa3dc1848438e0cc5fbe822b.jpg": {
+      "original_name": "22de89e66c07bdf727d74985630c079fac7ef0b6fa3dc1848438e0cc5fbe822b.jpg",
+      "original_rel_path": "22de89e66c07bdf727d74985630c079fac7ef0b6fa3dc1848438e0cc5fbe822b.jpg",
+      "friendly_name": "figure_50.jpg",
+      "abs_path": "data/mineru_cache\\chapter_08_p393-454_线性系统的状态空间分析与综合__bda93de4\\images\\figure_50.jpg",
+      "index": 50
+    },
+    "22fd252fc6f7637af5e8a0197226c33baba0d5cda57d7089ce8187e4711b2ed9.jpg": {
+      "original_name": "22fd252fc6f7637af5e8a0197226c33baba0d5cda57d7089ce8187e4711b2ed9.jpg",
+      "original_rel_path": "22fd252fc6f7637af5e8a0197226c33baba0d5cda57d7089ce8187e4711b2ed9.jpg",
+      "friendly_name": "figure_51.jpg",
+      "abs_path": "data/mineru_cache\\chapter_08_p393-454_线性系统的状态空间分析与综合__bda93de4\\images\\figure_51.jpg",
+      "index": 51
+    },
+    "2339df66bbf20a1a5bf4906f637e23c96782fb24071b8035499491f29c701532.jpg": {
+      "original_name": "2339df66bbf20a1a5bf4906f637e23c96782fb24071b8035499491f29c701532.jpg",
+      "original_rel_path": "2339df66bbf20a1a5bf4906f637e23c96782fb24071b8035499491f29c701532.jpg",
+      "friendly_name": "figure_52.jpg",
+      "abs_path": "data/mineru_cache\\chapter_08_p393-454_线性系统的状态空间分析与综合__bda93de4\\images\\figure_52.jpg",
+      "index": 52
+    },
+    "24977cdb6fdc7f0564dd5b5b4c5959ccc0409b37f2715b946112249823a5538c.jpg": {
+      "original_name": "24977cdb6fdc7f0564dd5b5b4c5959ccc0409b37f2715b946112249823a5538c.jpg",
+      "original_rel_path": "24977cdb6fdc7f0564dd5b5b4c5959ccc0409b37f2715b946112249823a5538c.jpg",
+      "friendly_name": "figure_53.jpg",
+      "abs_path": "data/mineru_cache\\chapter_08_p393-454_线性系统的状态空间分析与综合__bda93de4\\images\\figure_53.jpg",
+      "index": 53
+    },
+    "2523a1367b3194a310b0ea512f7b8153f2a09906e27afd5b2fd6a7498f9c8d44.jpg": {
+      "original_name": "2523a1367b3194a310b0ea512f7b8153f2a09906e27afd5b2fd6a7498f9c8d44.jpg",
+      "original_rel_path": "2523a1367b3194a310b0ea512f7b8153f2a09906e27afd5b2fd6a7498f9c8d44.jpg",
+      "friendly_name": "figure_54.jpg",
+      "abs_path": "data/mineru_cache\\chapter_08_p393-454_线性系统的状态空间分析与综合__bda93de4\\images\\figure_54.jpg",
+      "index": 54
+    },
+    "25b39278fa25d52e6635dcbd567fbc4806482d9e78098c10f46587744efe98d8.jpg": {
+      "original_name": "25b39278fa25d52e6635dcbd567fbc4806482d9e78098c10f46587744efe98d8.jpg",
+      "original_rel_path": "25b39278fa25d52e6635dcbd567fbc4806482d9e78098c10f46587744efe98d8.jpg",
+      "friendly_name": "figure_55.jpg",
+      "abs_path": "data/mineru_cache\\chapter_08_p393-454_线性系统的状态空间分析与综合__bda93de4\\images\\figure_55.jpg",
+      "index": 55
+    },
+    "26f9428fd89575535626725df04fa2aa0e6022db3b498000a3e3df5a08215464.jpg": {
+      "original_name": "26f9428fd89575535626725df04fa2aa0e6022db3b498000a3e3df5a08215464.jpg",
+      "original_rel_path": "26f9428fd89575535626725df04fa2aa0e6022db3b498000a3e3df5a08215464.jpg",
+      "friendly_name": "figure_56.jpg",
+      "abs_path": "data/mineru_cache\\chapter_08_p393-454_线性系统的状态空间分析与综合__bda93de4\\images\\figure_56.jpg",
+      "index": 56
+    },
+    "293a7a05dfb79f9e82c722b686052e165456b71c2d68f820dc0db224c48add8c.jpg": {
+      "original_name": "293a7a05dfb79f9e82c722b686052e165456b71c2d68f820dc0db224c48add8c.jpg",
+      "original_rel_path": "293a7a05dfb79f9e82c722b686052e165456b71c2d68f820dc0db224c48add8c.jpg",
+      "friendly_name": "figure_57.jpg",
+      "abs_path": "data/mineru_cache\\chapter_08_p393-454_线性系统的状态空间分析与综合__bda93de4\\images\\figure_57.jpg",
+      "index": 57
+    },
+    "2a5cadaf780deaec9bd7d28249f557ad83d6fca0cdf08af895d4cbb7688c660b.jpg": {
+      "original_name": "2a5cadaf780deaec9bd7d28249f557ad83d6fca0cdf08af895d4cbb7688c660b.jpg",
+      "original_rel_path": "2a5cadaf780deaec9bd7d28249f557ad83d6fca0cdf08af895d4cbb7688c660b.jpg",
+      "friendly_name": "figure_58.jpg",
+      "abs_path": "data/mineru_cache\\chapter_08_p393-454_线性系统的状态空间分析与综合__bda93de4\\images\\figure_58.jpg",
+      "index": 58
+    },
+    "2abde4fec9be71af8c07f1f70d45a270b572031d4c4d6ccbe6c234e2552690dc.jpg": {
+      "original_name": "2abde4fec9be71af8c07f1f70d45a270b572031d4c4d6ccbe6c234e2552690dc.jpg",
+      "original_rel_path": "2abde4fec9be71af8c07f1f70d45a270b572031d4c4d6ccbe6c234e2552690dc.jpg",
+      "friendly_name": "figure_59.jpg",
+      "abs_path": "data/mineru_cache\\chapter_08_p393-454_线性系统的状态空间分析与综合__bda93de4\\images\\figure_59.jpg",
+      "index": 59
+    },
+    "2b6e9eb2bab6017df595e30456dffb6abf149c1d340b392295d5c92f8954cbbf.jpg": {
+      "original_name": "2b6e9eb2bab6017df595e30456dffb6abf149c1d340b392295d5c92f8954cbbf.jpg",
+      "original_rel_path": "2b6e9eb2bab6017df595e30456dffb6abf149c1d340b392295d5c92f8954cbbf.jpg",
+      "friendly_name": "figure_60.jpg",
+      "abs_path": "data/mineru_cache\\chapter_08_p393-454_线性系统的状态空间分析与综合__bda93de4\\images\\figure_60.jpg",
+      "index": 60
+    },
+    "2bda4fbdcc283128d8d7016b9fe67449507d36090cbead50d95413bca7e23c39.jpg": {
+      "original_name": "2bda4fbdcc283128d8d7016b9fe67449507d36090cbead50d95413bca7e23c39.jpg",
+      "original_rel_path": "2bda4fbdcc283128d8d7016b9fe67449507d36090cbead50d95413bca7e23c39.jpg",
+      "friendly_name": "figure_61.jpg",
+      "abs_path": "data/mineru_cache\\chapter_08_p393-454_线性系统的状态空间分析与综合__bda93de4\\images\\figure_61.jpg",
+      "index": 61
+    },
+    "2c060d8261593bdc0c4f78f85c0ae0ac0f8c4412e97e8a3ef0810cd29cffab9a.jpg": {
+      "original_name": "2c060d8261593bdc0c4f78f85c0ae0ac0f8c4412e97e8a3ef0810cd29cffab9a.jpg",
+      "original_rel_path": "2c060d8261593bdc0c4f78f85c0ae0ac0f8c4412e97e8a3ef0810cd29cffab9a.jpg",
+      "friendly_name": "figure_62.jpg",
+      "abs_path": "data/mineru_cache\\chapter_08_p393-454_线性系统的状态空间分析与综合__bda93de4\\images\\figure_62.jpg",
+      "index": 62
+    },
+    "2c8b9b28858f8d7a82258cdeb0db4b1d68af0b6971fc1b002f7d3569fcee2b9a.jpg": {
+      "original_name": "2c8b9b28858f8d7a82258cdeb0db4b1d68af0b6971fc1b002f7d3569fcee2b9a.jpg",
+      "original_rel_path": "2c8b9b28858f8d7a82258cdeb0db4b1d68af0b6971fc1b002f7d3569fcee2b9a.jpg",
+      "friendly_name": "figure_63.jpg",
+      "abs_path": "data/mineru_cache\\chapter_08_p393-454_线性系统的状态空间分析与综合__bda93de4\\images\\figure_63.jpg",
+      "index": 63
+    },
+    "2cc4c70a91c2b9d4012561000573630a187c391ebb260991506929875795078b.jpg": {
+      "original_name": "2cc4c70a91c2b9d4012561000573630a187c391ebb260991506929875795078b.jpg",
+      "original_rel_path": "2cc4c70a91c2b9d4012561000573630a187c391ebb260991506929875795078b.jpg",
+      "friendly_name": "figure_64.jpg",
+      "abs_path": "data/mineru_cache\\chapter_08_p393-454_线性系统的状态空间分析与综合__bda93de4\\images\\figure_64.jpg",
+      "index": 64
+    },
+    "2fc29ce6088132b0aac0df4d0b37b38da3887df5aa779404982e6fa581fd0924.jpg": {
+      "original_name": "2fc29ce6088132b0aac0df4d0b37b38da3887df5aa779404982e6fa581fd0924.jpg",
+      "original_rel_path": "2fc29ce6088132b0aac0df4d0b37b38da3887df5aa779404982e6fa581fd0924.jpg",
+      "friendly_name": "figure_65.jpg",
+      "abs_path": "data/mineru_cache\\chapter_08_p393-454_线性系统的状态空间分析与综合__bda93de4\\images\\figure_65.jpg",
+      "index": 65
+    },
+    "303efed060def031873c2cbfea1f56dac4ca22c25b0d5983da4a6a6a2f0216c4.jpg": {
+      "original_name": "303efed060def031873c2cbfea1f56dac4ca22c25b0d5983da4a6a6a2f0216c4.jpg",
+      "original_rel_path": "303efed060def031873c2cbfea1f56dac4ca22c25b0d5983da4a6a6a2f0216c4.jpg",
+      "friendly_name": "figure_66.jpg",
+      "abs_path": "data/mineru_cache\\chapter_08_p393-454_线性系统的状态空间分析与综合__bda93de4\\images\\figure_66.jpg",
+      "index": 66
+    },
+    "3240d3ef576a314110cf931d1947a81ea6a8fba5a120c8df6057f046bacc64ba.jpg": {
+      "original_name": "3240d3ef576a314110cf931d1947a81ea6a8fba5a120c8df6057f046bacc64ba.jpg",
+      "original_rel_path": "3240d3ef576a314110cf931d1947a81ea6a8fba5a120c8df6057f046bacc64ba.jpg",
+      "friendly_name": "figure_67.jpg",
+      "abs_path": "data/mineru_cache\\chapter_08_p393-454_线性系统的状态空间分析与综合__bda93de4\\images\\figure_67.jpg",
+      "index": 67
+    },
+    "32db9040a02620c6da58989c47ba9acac92de0fc58cdffd260e135d9132aa9eb.jpg": {
+      "original_name": "32db9040a02620c6da58989c47ba9acac92de0fc58cdffd260e135d9132aa9eb.jpg",
+      "original_rel_path": "32db9040a02620c6da58989c47ba9acac92de0fc58cdffd260e135d9132aa9eb.jpg",
+      "friendly_name": "figure_68.jpg",
+      "abs_path": "data/mineru_cache\\chapter_08_p393-454_线性系统的状态空间分析与综合__bda93de4\\images\\figure_68.jpg",
+      "index": 68
+    },
+    "32f7f3ac3607d8be851731a12d5d136408cbe48f4373d5a5778a9ab2b821e361.jpg": {
+      "original_name": "32f7f3ac3607d8be851731a12d5d136408cbe48f4373d5a5778a9ab2b821e361.jpg",
+      "original_rel_path": "32f7f3ac3607d8be851731a12d5d136408cbe48f4373d5a5778a9ab2b821e361.jpg",
+      "friendly_name": "figure_69.jpg",
+      "abs_path": "data/mineru_cache\\chapter_08_p393-454_线性系统的状态空间分析与综合__bda93de4\\images\\figure_69.jpg",
+      "index": 69
+    },
+    "3366bb678c7a7739ff951430498e034e6820f76421f67ee0b94ba003fe82ca5c.jpg": {
+      "original_name": "3366bb678c7a7739ff951430498e034e6820f76421f67ee0b94ba003fe82ca5c.jpg",
+      "original_rel_path": "3366bb678c7a7739ff951430498e034e6820f76421f67ee0b94ba003fe82ca5c.jpg",
+      "friendly_name": "figure_70.jpg",
+      "abs_path": "data/mineru_cache\\chapter_08_p393-454_线性系统的状态空间分析与综合__bda93de4\\images\\figure_70.jpg",
+      "index": 70
+    },
+    "35b76cdb42e2c3c22ef2cf88de9089736ca8af55ce880de942c1c6f242130122.jpg": {
+      "original_name": "35b76cdb42e2c3c22ef2cf88de9089736ca8af55ce880de942c1c6f242130122.jpg",
+      "original_rel_path": "35b76cdb42e2c3c22ef2cf88de9089736ca8af55ce880de942c1c6f242130122.jpg",
+      "friendly_name": "figure_71.jpg",
+      "abs_path": "data/mineru_cache\\chapter_08_p393-454_线性系统的状态空间分析与综合__bda93de4\\images\\figure_71.jpg",
+      "index": 71
+    },
+    "360e7221bd9c6cd8a3b7a7f4a996ce188e747b570b8ef3fdc4142b1f2c11f82d.jpg": {
+      "original_name": "360e7221bd9c6cd8a3b7a7f4a996ce188e747b570b8ef3fdc4142b1f2c11f82d.jpg",
+      "original_rel_path": "360e7221bd9c6cd8a3b7a7f4a996ce188e747b570b8ef3fdc4142b1f2c11f82d.jpg",
+      "friendly_name": "figure_72.jpg",
+      "abs_path": "data/mineru_cache\\chapter_08_p393-454_线性系统的状态空间分析与综合__bda93de4\\images\\figure_72.jpg",
+      "index": 72
+    },
+    "364dd6fa031fb0b335e5a63ed52e1cf1d3d72dc1da5b8777ff277be701b99f35.jpg": {
+      "original_name": "364dd6fa031fb0b335e5a63ed52e1cf1d3d72dc1da5b8777ff277be701b99f35.jpg",
+      "original_rel_path": "364dd6fa031fb0b335e5a63ed52e1cf1d3d72dc1da5b8777ff277be701b99f35.jpg",
+      "friendly_name": "figure_73.jpg",
+      "abs_path": "data/mineru_cache\\chapter_08_p393-454_线性系统的状态空间分析与综合__bda93de4\\images\\figure_73.jpg",
+      "index": 73
+    },
+    "373c9089aed60a76228208197e66ae57b59b992177ee231fa91d781b1eb02eec.jpg": {
+      "original_name": "373c9089aed60a76228208197e66ae57b59b992177ee231fa91d781b1eb02eec.jpg",
+      "original_rel_path": "373c9089aed60a76228208197e66ae57b59b992177ee231fa91d781b1eb02eec.jpg",
+      "friendly_name": "figure_74.jpg",
+      "abs_path": "data/mineru_cache\\chapter_08_p393-454_线性系统的状态空间分析与综合__bda93de4\\images\\figure_74.jpg",
+      "index": 74
+    },
+    "37dc2d0a39e49b06c8e3e24e733c35e966183fb4b45946923b8e036dbacd5945.jpg": {
+      "original_name": "37dc2d0a39e49b06c8e3e24e733c35e966183fb4b45946923b8e036dbacd5945.jpg",
+      "original_rel_path": "37dc2d0a39e49b06c8e3e24e733c35e966183fb4b45946923b8e036dbacd5945.jpg",
+      "friendly_name": "figure_75.jpg",
+      "abs_path": "data/mineru_cache\\chapter_08_p393-454_线性系统的状态空间分析与综合__bda93de4\\images\\figure_75.jpg",
+      "index": 75
+    },
+    "38648a12a549c90c1c006eb2d5b02585e897dd623a40c0266482702f2d881e5b.jpg": {
+      "original_name": "38648a12a549c90c1c006eb2d5b02585e897dd623a40c0266482702f2d881e5b.jpg",
+      "original_rel_path": "38648a12a549c90c1c006eb2d5b02585e897dd623a40c0266482702f2d881e5b.jpg",
+      "friendly_name": "figure_76.jpg",
+      "abs_path": "data/mineru_cache\\chapter_08_p393-454_线性系统的状态空间分析与综合__bda93de4\\images\\figure_76.jpg",
+      "index": 76
+    },
+    "389f3c3bb8114850fb7f6170dc8a44569e01d0bbc22b362bb4c9eb13ac6b2a0a.jpg": {
+      "original_name": "389f3c3bb8114850fb7f6170dc8a44569e01d0bbc22b362bb4c9eb13ac6b2a0a.jpg",
+      "original_rel_path": "389f3c3bb8114850fb7f6170dc8a44569e01d0bbc22b362bb4c9eb13ac6b2a0a.jpg",
+      "friendly_name": "figure_77.jpg",
+      "abs_path": "data/mineru_cache\\chapter_08_p393-454_线性系统的状态空间分析与综合__bda93de4\\images\\figure_77.jpg",
+      "index": 77
+    },
+    "3a56611cb191ffc6f7cf2a50e691a03004eac253a37e182b580c709881eff857.jpg": {
+      "original_name": "3a56611cb191ffc6f7cf2a50e691a03004eac253a37e182b580c709881eff857.jpg",
+      "original_rel_path": "3a56611cb191ffc6f7cf2a50e691a03004eac253a37e182b580c709881eff857.jpg",
+      "friendly_name": "figure_78.jpg",
+      "abs_path": "data/mineru_cache\\chapter_08_p393-454_线性系统的状态空间分析与综合__bda93de4\\images\\figure_78.jpg",
+      "index": 78
+    },
+    "3ae6361672e867f3c8c95c9031e66bc7984b6c2a30cf08c29309dda62f3599b1.jpg": {
+      "original_name": "3ae6361672e867f3c8c95c9031e66bc7984b6c2a30cf08c29309dda62f3599b1.jpg",
+      "original_rel_path": "3ae6361672e867f3c8c95c9031e66bc7984b6c2a30cf08c29309dda62f3599b1.jpg",
+      "friendly_name": "figure_79.jpg",
+      "abs_path": "data/mineru_cache\\chapter_08_p393-454_线性系统的状态空间分析与综合__bda93de4\\images\\figure_79.jpg",
+      "index": 79
+    },
+    "3c82d333553f525bf6f78315a3259b1657d99f08796a8e464aa7ed835d8a2df0.jpg": {
+      "original_name": "3c82d333553f525bf6f78315a3259b1657d99f08796a8e464aa7ed835d8a2df0.jpg",
+      "original_rel_path": "3c82d333553f525bf6f78315a3259b1657d99f08796a8e464aa7ed835d8a2df0.jpg",
+      "friendly_name": "figure_80.jpg",
+      "abs_path": "data/mineru_cache\\chapter_08_p393-454_线性系统的状态空间分析与综合__bda93de4\\images\\figure_80.jpg",
+      "index": 80
+    },
+    "3df704a8087c7b637ad69681189acac454f66c1f56b3df2856c8f942cbf7b885.jpg": {
+      "original_name": "3df704a8087c7b637ad69681189acac454f66c1f56b3df2856c8f942cbf7b885.jpg",
+      "original_rel_path": "3df704a8087c7b637ad69681189acac454f66c1f56b3df2856c8f942cbf7b885.jpg",
+      "friendly_name": "figure_81.jpg",
+      "abs_path": "data/mineru_cache\\chapter_08_p393-454_线性系统的状态空间分析与综合__bda93de4\\images\\figure_81.jpg",
+      "index": 81
+    },
+    "3eb5e8e338da24056a04f4f7ffafdc0efd906105a277326b90e9ae7be94689ba.jpg": {
+      "original_name": "3eb5e8e338da24056a04f4f7ffafdc0efd906105a277326b90e9ae7be94689ba.jpg",
+      "original_rel_path": "3eb5e8e338da24056a04f4f7ffafdc0efd906105a277326b90e9ae7be94689ba.jpg",
+      "friendly_name": "figure_82.jpg",
+      "abs_path": "data/mineru_cache\\chapter_08_p393-454_线性系统的状态空间分析与综合__bda93de4\\images\\figure_82.jpg",
+      "index": 82
+    },
+    "3ee7024f9b953c2c7dc5b07bd9348c759d5c88a58483e725c83a42facb1feb83.jpg": {
+      "original_name": "3ee7024f9b953c2c7dc5b07bd9348c759d5c88a58483e725c83a42facb1feb83.jpg",
+      "original_rel_path": "3ee7024f9b953c2c7dc5b07bd9348c759d5c88a58483e725c83a42facb1feb83.jpg",
+      "friendly_name": "figure_83.jpg",
+      "abs_path": "data/mineru_cache\\chapter_08_p393-454_线性系统的状态空间分析与综合__bda93de4\\images\\figure_83.jpg",
+      "index": 83
+    },
+    "4080061f4ab53a25d886fa6a0504a1cbb5f5ee93000434fd266fec1a83643a67.jpg": {
+      "original_name": "4080061f4ab53a25d886fa6a0504a1cbb5f5ee93000434fd266fec1a83643a67.jpg",
+      "original_rel_path": "4080061f4ab53a25d886fa6a0504a1cbb5f5ee93000434fd266fec1a83643a67.jpg",
+      "friendly_name": "figure_84.jpg",
+      "abs_path": "data/mineru_cache\\chapter_08_p393-454_线性系统的状态空间分析与综合__bda93de4\\images\\figure_84.jpg",
+      "index": 84
+    },
+    "40a9d04bacf1df99d07bc88f65b90b6283a3e9ce307ad4256efc71cd3e31205d.jpg": {
+      "original_name": "40a9d04bacf1df99d07bc88f65b90b6283a3e9ce307ad4256efc71cd3e31205d.jpg",
+      "original_rel_path": "40a9d04bacf1df99d07bc88f65b90b6283a3e9ce307ad4256efc71cd3e31205d.jpg",
+      "friendly_name": "figure_85.jpg",
+      "abs_path": "data/mineru_cache\\chapter_08_p393-454_线性系统的状态空间分析与综合__bda93de4\\images\\figure_85.jpg",
+      "index": 85
+    },
+    "416dad3b4dc8e331ebdf72279016d1bacbccdf7c2bcf051b37b1bd8421a8bf22.jpg": {
+      "original_name": "416dad3b4dc8e331ebdf72279016d1bacbccdf7c2bcf051b37b1bd8421a8bf22.jpg",
+      "original_rel_path": "416dad3b4dc8e331ebdf72279016d1bacbccdf7c2bcf051b37b1bd8421a8bf22.jpg",
+      "friendly_name": "figure_86.jpg",
+      "abs_path": "data/mineru_cache\\chapter_08_p393-454_线性系统的状态空间分析与综合__bda93de4\\images\\figure_86.jpg",
+      "index": 86
+    },
+    "423316b53f030d534fccb7c05e1814167383f13cac4b63b0519c9eb93e1cb135.jpg": {
+      "original_name": "423316b53f030d534fccb7c05e1814167383f13cac4b63b0519c9eb93e1cb135.jpg",
+      "original_rel_path": "423316b53f030d534fccb7c05e1814167383f13cac4b63b0519c9eb93e1cb135.jpg",
+      "friendly_name": "figure_87.jpg",
+      "abs_path": "data/mineru_cache\\chapter_08_p393-454_线性系统的状态空间分析与综合__bda93de4\\images\\figure_87.jpg",
+      "index": 87
+    },
+    "42a7985253c8872d8c320303a39d1684fe271d94e7134d979437c5b62bfcd0f1.jpg": {
+      "original_name": "42a7985253c8872d8c320303a39d1684fe271d94e7134d979437c5b62bfcd0f1.jpg",
+      "original_rel_path": "42a7985253c8872d8c320303a39d1684fe271d94e7134d979437c5b62bfcd0f1.jpg",
+      "friendly_name": "figure_88.jpg",
+      "abs_path": "data/mineru_cache\\chapter_08_p393-454_线性系统的状态空间分析与综合__bda93de4\\images\\figure_88.jpg",
+      "index": 88
+    },
+    "4409e3798d8477a168ca570dd98e54eb0a554beab025b3919782b424df0ea3ab.jpg": {
+      "original_name": "4409e3798d8477a168ca570dd98e54eb0a554beab025b3919782b424df0ea3ab.jpg",
+      "original_rel_path": "4409e3798d8477a168ca570dd98e54eb0a554beab025b3919782b424df0ea3ab.jpg",
+      "friendly_name": "figure_89.jpg",
+      "abs_path": "data/mineru_cache\\chapter_08_p393-454_线性系统的状态空间分析与综合__bda93de4\\images\\figure_89.jpg",
+      "index": 89
+    },
+    "44764460e7f4c3d32192ca50fc6bd2804d3862eea1a845c6f5a3f02f96ceef6f.jpg": {
+      "original_name": "44764460e7f4c3d32192ca50fc6bd2804d3862eea1a845c6f5a3f02f96ceef6f.jpg",
+      "original_rel_path": "44764460e7f4c3d32192ca50fc6bd2804d3862eea1a845c6f5a3f02f96ceef6f.jpg",
+      "friendly_name": "figure_90.jpg",
+      "abs_path": "data/mineru_cache\\chapter_08_p393-454_线性系统的状态空间分析与综合__bda93de4\\images\\figure_90.jpg",
+      "index": 90
+    },
+    "454514b7de9f8b11c7a491a6078f7173f436a5e892c10c0d3e1f547c26f8c456.jpg": {
+      "original_name": "454514b7de9f8b11c7a491a6078f7173f436a5e892c10c0d3e1f547c26f8c456.jpg",
+      "original_rel_path": "454514b7de9f8b11c7a491a6078f7173f436a5e892c10c0d3e1f547c26f8c456.jpg",
+      "friendly_name": "figure_91.jpg",
+      "abs_path": "data/mineru_cache\\chapter_08_p393-454_线性系统的状态空间分析与综合__bda93de4\\images\\figure_91.jpg",
+      "index": 91
+    },
+    "455e2d7bafb000ac4454a298f19c5887a28eb463010973f31a0950b2c1536541.jpg": {
+      "original_name": "455e2d7bafb000ac4454a298f19c5887a28eb463010973f31a0950b2c1536541.jpg",
+      "original_rel_path": "455e2d7bafb000ac4454a298f19c5887a28eb463010973f31a0950b2c1536541.jpg",
+      "friendly_name": "figure_92.jpg",
+      "abs_path": "data/mineru_cache\\chapter_08_p393-454_线性系统的状态空间分析与综合__bda93de4\\images\\figure_92.jpg",
+      "index": 92
+    },
+    "45ba4b8b2d647c0d530380e17cb6929055a34ac65e9c4214b4c059a8c430ccd8.jpg": {
+      "original_name": "45ba4b8b2d647c0d530380e17cb6929055a34ac65e9c4214b4c059a8c430ccd8.jpg",
+      "original_rel_path": "45ba4b8b2d647c0d530380e17cb6929055a34ac65e9c4214b4c059a8c430ccd8.jpg",
+      "friendly_name": "figure_93.jpg",
+      "abs_path": "data/mineru_cache\\chapter_08_p393-454_线性系统的状态空间分析与综合__bda93de4\\images\\figure_93.jpg",
+      "index": 93
+    },
+    "4629e0776282bca7d78fa452387326ddf513c01682384b6c75148c4c3a13ef4d.jpg": {
+      "original_name": "4629e0776282bca7d78fa452387326ddf513c01682384b6c75148c4c3a13ef4d.jpg",
+      "original_rel_path": "4629e0776282bca7d78fa452387326ddf513c01682384b6c75148c4c3a13ef4d.jpg",
+      "friendly_name": "figure_94.jpg",
+      "abs_path": "data/mineru_cache\\chapter_08_p393-454_线性系统的状态空间分析与综合__bda93de4\\images\\figure_94.jpg",
+      "index": 94
+    },
+    "46ddcd93f7e4cefcba19260e02def04f7fb3709783568ca4867d1a9c64ff869d.jpg": {
+      "original_name": "46ddcd93f7e4cefcba19260e02def04f7fb3709783568ca4867d1a9c64ff869d.jpg",
+      "original_rel_path": "46ddcd93f7e4cefcba19260e02def04f7fb3709783568ca4867d1a9c64ff869d.jpg",
+      "friendly_name": "figure_95.jpg",
+      "abs_path": "data/mineru_cache\\chapter_08_p393-454_线性系统的状态空间分析与综合__bda93de4\\images\\figure_95.jpg",
+      "index": 95
+    },
+    "48666ed7734bbef0f4f504be87eea2ec42ed49d55a9cb0417fa1fb52a14e316d.jpg": {
+      "original_name": "48666ed7734bbef0f4f504be87eea2ec42ed49d55a9cb0417fa1fb52a14e316d.jpg",
+      "original_rel_path": "48666ed7734bbef0f4f504be87eea2ec42ed49d55a9cb0417fa1fb52a14e316d.jpg",
+      "friendly_name": "figure_96.jpg",
+      "abs_path": "data/mineru_cache\\chapter_08_p393-454_线性系统的状态空间分析与综合__bda93de4\\images\\figure_96.jpg",
+      "index": 96
+    },
+    "48c51d60fb22a5325b6d1646397d40d634b0a5cd3d6cb2e0777717aecde7e841.jpg": {
+      "original_name": "48c51d60fb22a5325b6d1646397d40d634b0a5cd3d6cb2e0777717aecde7e841.jpg",
+      "original_rel_path": "48c51d60fb22a5325b6d1646397d40d634b0a5cd3d6cb2e0777717aecde7e841.jpg",
+      "friendly_name": "figure_97.jpg",
+      "abs_path": "data/mineru_cache\\chapter_08_p393-454_线性系统的状态空间分析与综合__bda93de4\\images\\figure_97.jpg",
+      "index": 97
+    },
+    "4ab13ae87c2526b46297f6441edb238dc0e6820f364836d3051d9ae4d16d53ef.jpg": {
+      "original_name": "4ab13ae87c2526b46297f6441edb238dc0e6820f364836d3051d9ae4d16d53ef.jpg",
+      "original_rel_path": "4ab13ae87c2526b46297f6441edb238dc0e6820f364836d3051d9ae4d16d53ef.jpg",
+      "friendly_name": "figure_98.jpg",
+      "abs_path": "data/mineru_cache\\chapter_08_p393-454_线性系统的状态空间分析与综合__bda93de4\\images\\figure_98.jpg",
+      "index": 98
+    },
+    "4c899b8fc09415d2b82240e8ebadb6f0910ee5256c0ab56897757a23342f7a1c.jpg": {
+      "original_name": "4c899b8fc09415d2b82240e8ebadb6f0910ee5256c0ab56897757a23342f7a1c.jpg",
+      "original_rel_path": "4c899b8fc09415d2b82240e8ebadb6f0910ee5256c0ab56897757a23342f7a1c.jpg",
+      "friendly_name": "figure_99.jpg",
+      "abs_path": "data/mineru_cache\\chapter_08_p393-454_线性系统的状态空间分析与综合__bda93de4\\images\\figure_99.jpg",
+      "index": 99
+    },
+    "4c986271c51c7e8b46e4f7681decdbefc467f245b484cbde212a77f0750adbfa.jpg": {
+      "original_name": "4c986271c51c7e8b46e4f7681decdbefc467f245b484cbde212a77f0750adbfa.jpg",
+      "original_rel_path": "4c986271c51c7e8b46e4f7681decdbefc467f245b484cbde212a77f0750adbfa.jpg",
+      "friendly_name": "figure_100.jpg",
+      "abs_path": "data/mineru_cache\\chapter_08_p393-454_线性系统的状态空间分析与综合__bda93de4\\images\\figure_100.jpg",
+      "index": 100
+    },
+    "4d17eaf0b0215393f3bf39cc88ccdda5d1dd5e9ea154a9ba1dbb631a4b0ed028.jpg": {
+      "original_name": "4d17eaf0b0215393f3bf39cc88ccdda5d1dd5e9ea154a9ba1dbb631a4b0ed028.jpg",
+      "original_rel_path": "4d17eaf0b0215393f3bf39cc88ccdda5d1dd5e9ea154a9ba1dbb631a4b0ed028.jpg",
+      "friendly_name": "figure_101.jpg",
+      "abs_path": "data/mineru_cache\\chapter_08_p393-454_线性系统的状态空间分析与综合__bda93de4\\images\\figure_101.jpg",
+      "index": 101
+    },
+    "4f646ae96437a37504dcb5799318655c229a8c62806a117b7ce465f8e8c4f56b.jpg": {
+      "original_name": "4f646ae96437a37504dcb5799318655c229a8c62806a117b7ce465f8e8c4f56b.jpg",
+      "original_rel_path": "4f646ae96437a37504dcb5799318655c229a8c62806a117b7ce465f8e8c4f56b.jpg",
+      "friendly_name": "figure_102.jpg",
+      "abs_path": "data/mineru_cache\\chapter_08_p393-454_线性系统的状态空间分析与综合__bda93de4\\images\\figure_102.jpg",
+      "index": 102
+    },
+    "50175b896105dd18c0d01d77861a7a84e3cc86f446b2d400d75d3721c8b566c0.jpg": {
+      "original_name": "50175b896105dd18c0d01d77861a7a84e3cc86f446b2d400d75d3721c8b566c0.jpg",
+      "original_rel_path": "50175b896105dd18c0d01d77861a7a84e3cc86f446b2d400d75d3721c8b566c0.jpg",
+      "friendly_name": "figure_103.jpg",
+      "abs_path": "data/mineru_cache\\chapter_08_p393-454_线性系统的状态空间分析与综合__bda93de4\\images\\figure_103.jpg",
+      "index": 103
+    },
+    "54346580cf069cb8ba90e7ff7772067ba2e557dc884ca03f90235d53270f1af7.jpg": {
+      "original_name": "54346580cf069cb8ba90e7ff7772067ba2e557dc884ca03f90235d53270f1af7.jpg",
+      "original_rel_path": "54346580cf069cb8ba90e7ff7772067ba2e557dc884ca03f90235d53270f1af7.jpg",
+      "friendly_name": "figure_104.jpg",
+      "abs_path": "data/mineru_cache\\chapter_08_p393-454_线性系统的状态空间分析与综合__bda93de4\\images\\figure_104.jpg",
+      "index": 104
+    },
+    "5439c7e264473391c483c5258d44f3262a3e04ee040aa0be4c52de3dd63bd200.jpg": {
+      "original_name": "5439c7e264473391c483c5258d44f3262a3e04ee040aa0be4c52de3dd63bd200.jpg",
+      "original_rel_path": "5439c7e264473391c483c5258d44f3262a3e04ee040aa0be4c52de3dd63bd200.jpg",
+      "friendly_name": "figure_105.jpg",
+      "abs_path": "data/mineru_cache\\chapter_08_p393-454_线性系统的状态空间分析与综合__bda93de4\\images\\figure_105.jpg",
+      "index": 105
+    },
+    "543fba287735afd2cfa5668ad9d7e840d87b2ee118eef67d1e65cd1271b4006e.jpg": {
+      "original_name": "543fba287735afd2cfa5668ad9d7e840d87b2ee118eef67d1e65cd1271b4006e.jpg",
+      "original_rel_path": "543fba287735afd2cfa5668ad9d7e840d87b2ee118eef67d1e65cd1271b4006e.jpg",
+      "friendly_name": "figure_106.jpg",
+      "abs_path": "data/mineru_cache\\chapter_08_p393-454_线性系统的状态空间分析与综合__bda93de4\\images\\figure_106.jpg",
+      "index": 106
+    },
+    "544488905d67069e684dc6332d35000776f2ad965fe5c551254baf1a2927cbe7.jpg": {
+      "original_name": "544488905d67069e684dc6332d35000776f2ad965fe5c551254baf1a2927cbe7.jpg",
+      "original_rel_path": "544488905d67069e684dc6332d35000776f2ad965fe5c551254baf1a2927cbe7.jpg",
+      "friendly_name": "figure_107.jpg",
+      "abs_path": "data/mineru_cache\\chapter_08_p393-454_线性系统的状态空间分析与综合__bda93de4\\images\\figure_107.jpg",
+      "index": 107
+    },
+    "549f84cdc32ceb8312e1fb2416d144210fe2778cab7c5430640c36cabd1f8b5f.jpg": {
+      "original_name": "549f84cdc32ceb8312e1fb2416d144210fe2778cab7c5430640c36cabd1f8b5f.jpg",
+      "original_rel_path": "549f84cdc32ceb8312e1fb2416d144210fe2778cab7c5430640c36cabd1f8b5f.jpg",
+      "friendly_name": "figure_108.jpg",
+      "abs_path": "data/mineru_cache\\chapter_08_p393-454_线性系统的状态空间分析与综合__bda93de4\\images\\figure_108.jpg",
+      "index": 108
+    },
+    "54d6e4ffdcc2d8f60389a38789f3b3e51308f49558f60a6698b4e9c7a3efe2ca.jpg": {
+      "original_name": "54d6e4ffdcc2d8f60389a38789f3b3e51308f49558f60a6698b4e9c7a3efe2ca.jpg",
+      "original_rel_path": "54d6e4ffdcc2d8f60389a38789f3b3e51308f49558f60a6698b4e9c7a3efe2ca.jpg",
+      "friendly_name": "figure_109.jpg",
+      "abs_path": "data/mineru_cache\\chapter_08_p393-454_线性系统的状态空间分析与综合__bda93de4\\images\\figure_109.jpg",
+      "index": 109
+    },
+    "551dec8b489be5f5e7ab8b921848aef2b250aadeda607ec161ef72c3e1d1b6a3.jpg": {
+      "original_name": "551dec8b489be5f5e7ab8b921848aef2b250aadeda607ec161ef72c3e1d1b6a3.jpg",
+      "original_rel_path": "551dec8b489be5f5e7ab8b921848aef2b250aadeda607ec161ef72c3e1d1b6a3.jpg",
+      "friendly_name": "figure_110.jpg",
+      "abs_path": "data/mineru_cache\\chapter_08_p393-454_线性系统的状态空间分析与综合__bda93de4\\images\\figure_110.jpg",
+      "index": 110
+    },
+    "56787686bb6393f8d29f0f0e609786d2c6bd3905b03f685c52521d695a51e721.jpg": {
+      "original_name": "56787686bb6393f8d29f0f0e609786d2c6bd3905b03f685c52521d695a51e721.jpg",
+      "original_rel_path": "56787686bb6393f8d29f0f0e609786d2c6bd3905b03f685c52521d695a51e721.jpg",
+      "friendly_name": "figure_111.jpg",
+      "abs_path": "data/mineru_cache\\chapter_08_p393-454_线性系统的状态空间分析与综合__bda93de4\\images\\figure_111.jpg",
+      "index": 111
+    },
+    "5728e49dd55476fe57adf24099db6a6b8fa3414fc821d507a6709ddab3c377a0.jpg": {
+      "original_name": "5728e49dd55476fe57adf24099db6a6b8fa3414fc821d507a6709ddab3c377a0.jpg",
+      "original_rel_path": "5728e49dd55476fe57adf24099db6a6b8fa3414fc821d507a6709ddab3c377a0.jpg",
+      "friendly_name": "figure_112.jpg",
+      "abs_path": "data/mineru_cache\\chapter_08_p393-454_线性系统的状态空间分析与综合__bda93de4\\images\\figure_112.jpg",
+      "index": 112
+    },
+    "58519c313717b2f9db2ef6785751b24053841168c4675bdcddc50fb08cc3d1aa.jpg": {
+      "original_name": "58519c313717b2f9db2ef6785751b24053841168c4675bdcddc50fb08cc3d1aa.jpg",
+      "original_rel_path": "58519c313717b2f9db2ef6785751b24053841168c4675bdcddc50fb08cc3d1aa.jpg",
+      "friendly_name": "figure_113.jpg",
+      "abs_path": "data/mineru_cache\\chapter_08_p393-454_线性系统的状态空间分析与综合__bda93de4\\images\\figure_113.jpg",
+      "index": 113
+    },
+    "5858177dcf47484b1dd7c1a14f796db7be987b24e65eb77439e626037278af7c.jpg": {
+      "original_name": "5858177dcf47484b1dd7c1a14f796db7be987b24e65eb77439e626037278af7c.jpg",
+      "original_rel_path": "5858177dcf47484b1dd7c1a14f796db7be987b24e65eb77439e626037278af7c.jpg",
+      "friendly_name": "figure_114.jpg",
+      "abs_path": "data/mineru_cache\\chapter_08_p393-454_线性系统的状态空间分析与综合__bda93de4\\images\\figure_114.jpg",
+      "index": 114
+    },
+    "59392031d8b78aa0e2e3aaa66613fc1697b905f8b2f5b20a0c6dbb3458254f60.jpg": {
+      "original_name": "59392031d8b78aa0e2e3aaa66613fc1697b905f8b2f5b20a0c6dbb3458254f60.jpg",
+      "original_rel_path": "59392031d8b78aa0e2e3aaa66613fc1697b905f8b2f5b20a0c6dbb3458254f60.jpg",
+      "friendly_name": "figure_115.jpg",
+      "abs_path": "data/mineru_cache\\chapter_08_p393-454_线性系统的状态空间分析与综合__bda93de4\\images\\figure_115.jpg",
+      "index": 115
+    },
+    "597e6560e61e1db1ece1fd355c3ca1c6f349eb696af7973ceef92ed86ba5cd82.jpg": {
+      "original_name": "597e6560e61e1db1ece1fd355c3ca1c6f349eb696af7973ceef92ed86ba5cd82.jpg",
+      "original_rel_path": "597e6560e61e1db1ece1fd355c3ca1c6f349eb696af7973ceef92ed86ba5cd82.jpg",
+      "friendly_name": "figure_116.jpg",
+      "abs_path": "data/mineru_cache\\chapter_08_p393-454_线性系统的状态空间分析与综合__bda93de4\\images\\figure_116.jpg",
+      "index": 116
+    },
+    "5a43ccbd1f89634acaee39a812310548dc56538e8681d53da00bd4e19e2ac530.jpg": {
+      "original_name": "5a43ccbd1f89634acaee39a812310548dc56538e8681d53da00bd4e19e2ac530.jpg",
+      "original_rel_path": "5a43ccbd1f89634acaee39a812310548dc56538e8681d53da00bd4e19e2ac530.jpg",
+      "friendly_name": "figure_117.jpg",
+      "abs_path": "data/mineru_cache\\chapter_08_p393-454_线性系统的状态空间分析与综合__bda93de4\\images\\figure_117.jpg",
+      "index": 117
+    },
+    "5a61437397da8fa7218cec1782bf0641bf99ad490ef7d318872901f467c3818e.jpg": {
+      "original_name": "5a61437397da8fa7218cec1782bf0641bf99ad490ef7d318872901f467c3818e.jpg",
+      "original_rel_path": "5a61437397da8fa7218cec1782bf0641bf99ad490ef7d318872901f467c3818e.jpg",
+      "friendly_name": "figure_118.jpg",
+      "abs_path": "data/mineru_cache\\chapter_08_p393-454_线性系统的状态空间分析与综合__bda93de4\\images\\figure_118.jpg",
+      "index": 118
+    },
+    "5ae19bd086b8bfcf6d7451e868212c011c3c28786b2da9916a33fc87867a203b.jpg": {
+      "original_name": "5ae19bd086b8bfcf6d7451e868212c011c3c28786b2da9916a33fc87867a203b.jpg",
+      "original_rel_path": "5ae19bd086b8bfcf6d7451e868212c011c3c28786b2da9916a33fc87867a203b.jpg",
+      "friendly_name": "figure_119.jpg",
+      "abs_path": "data/mineru_cache\\chapter_08_p393-454_线性系统的状态空间分析与综合__bda93de4\\images\\figure_119.jpg",
+      "index": 119
+    },
+    "5bcac5fb7fc0e5f9fd17a08bce26b699038ad88fa5e16e2b56b8154189dab210.jpg": {
+      "original_name": "5bcac5fb7fc0e5f9fd17a08bce26b699038ad88fa5e16e2b56b8154189dab210.jpg",
+      "original_rel_path": "5bcac5fb7fc0e5f9fd17a08bce26b699038ad88fa5e16e2b56b8154189dab210.jpg",
+      "friendly_name": "figure_120.jpg",
+      "abs_path": "data/mineru_cache\\chapter_08_p393-454_线性系统的状态空间分析与综合__bda93de4\\images\\figure_120.jpg",
+      "index": 120
+    },
+    "5d0138a54ec50c44881786b13d55baba0012f26cc328a1899b7cfd8f233f0063.jpg": {
+      "original_name": "5d0138a54ec50c44881786b13d55baba0012f26cc328a1899b7cfd8f233f0063.jpg",
+      "original_rel_path": "5d0138a54ec50c44881786b13d55baba0012f26cc328a1899b7cfd8f233f0063.jpg",
+      "friendly_name": "figure_121.jpg",
+      "abs_path": "data/mineru_cache\\chapter_08_p393-454_线性系统的状态空间分析与综合__bda93de4\\images\\figure_121.jpg",
+      "index": 121
+    },
+    "5d3cad4a9d2487891976cbe02a9c333e7a7589d44bd8a56361fc8f41dd46b7ea.jpg": {
+      "original_name": "5d3cad4a9d2487891976cbe02a9c333e7a7589d44bd8a56361fc8f41dd46b7ea.jpg",
+      "original_rel_path": "5d3cad4a9d2487891976cbe02a9c333e7a7589d44bd8a56361fc8f41dd46b7ea.jpg",
+      "friendly_name": "figure_122.jpg",
+      "abs_path": "data/mineru_cache\\chapter_08_p393-454_线性系统的状态空间分析与综合__bda93de4\\images\\figure_122.jpg",
+      "index": 122
+    },
+    "5da449f85c5952909636e6e130008750f07ab0ee10f6231f6b9b7d9d634277e7.jpg": {
+      "original_name": "5da449f85c5952909636e6e130008750f07ab0ee10f6231f6b9b7d9d634277e7.jpg",
+      "original_rel_path": "5da449f85c5952909636e6e130008750f07ab0ee10f6231f6b9b7d9d634277e7.jpg",
+      "friendly_name": "figure_123.jpg",
+      "abs_path": "data/mineru_cache\\chapter_08_p393-454_线性系统的状态空间分析与综合__bda93de4\\images\\figure_123.jpg",
+      "index": 123
+    },
+    "5f4da2ad92cb53740bff8f83e08a840a13600a3c5f9448a0b959c4c514f9d4ae.jpg": {
+      "original_name": "5f4da2ad92cb53740bff8f83e08a840a13600a3c5f9448a0b959c4c514f9d4ae.jpg",
+      "original_rel_path": "5f4da2ad92cb53740bff8f83e08a840a13600a3c5f9448a0b959c4c514f9d4ae.jpg",
+      "friendly_name": "figure_124.jpg",
+      "abs_path": "data/mineru_cache\\chapter_08_p393-454_线性系统的状态空间分析与综合__bda93de4\\images\\figure_124.jpg",
+      "index": 124
+    },
+    "60bbae1b3e8cb28166b66b13b2657aabf3523c1a1f43292bf9bc26c16a5b4fb4.jpg": {
+      "original_name": "60bbae1b3e8cb28166b66b13b2657aabf3523c1a1f43292bf9bc26c16a5b4fb4.jpg",
+      "original_rel_path": "60bbae1b3e8cb28166b66b13b2657aabf3523c1a1f43292bf9bc26c16a5b4fb4.jpg",
+      "friendly_name": "figure_125.jpg",
+      "abs_path": "data/mineru_cache\\chapter_08_p393-454_线性系统的状态空间分析与综合__bda93de4\\images\\figure_125.jpg",
+      "index": 125
+    },
+    "60fa1d617c1de54390beea32d364f82ab08d16b372eab5dd7ead44613bd4f1a5.jpg": {
+      "original_name": "60fa1d617c1de54390beea32d364f82ab08d16b372eab5dd7ead44613bd4f1a5.jpg",
+      "original_rel_path": "60fa1d617c1de54390beea32d364f82ab08d16b372eab5dd7ead44613bd4f1a5.jpg",
+      "friendly_name": "figure_126.jpg",
+      "abs_path": "data/mineru_cache\\chapter_08_p393-454_线性系统的状态空间分析与综合__bda93de4\\images\\figure_126.jpg",
+      "index": 126
+    },
+    "625c09b45e96639abb7b23a5d5f2898299db93b8b5667611d98d97a0c73df249.jpg": {
+      "original_name": "625c09b45e96639abb7b23a5d5f2898299db93b8b5667611d98d97a0c73df249.jpg",
+      "original_rel_path": "625c09b45e96639abb7b23a5d5f2898299db93b8b5667611d98d97a0c73df249.jpg",
+      "friendly_name": "figure_127.jpg",
+      "abs_path": "data/mineru_cache\\chapter_08_p393-454_线性系统的状态空间分析与综合__bda93de4\\images\\figure_127.jpg",
+      "index": 127
+    },
+    "6368d14b5050109331a76703fca0317be7729b89531830f150aee8fc834aeeb3.jpg": {
+      "original_name": "6368d14b5050109331a76703fca0317be7729b89531830f150aee8fc834aeeb3.jpg",
+      "original_rel_path": "6368d14b5050109331a76703fca0317be7729b89531830f150aee8fc834aeeb3.jpg",
+      "friendly_name": "figure_128.jpg",
+      "abs_path": "data/mineru_cache\\chapter_08_p393-454_线性系统的状态空间分析与综合__bda93de4\\images\\figure_128.jpg",
+      "index": 128
+    },
+    "646d3fd722f8d924388220021d77a7777278511ce01129b76667bcac13024a31.jpg": {
+      "original_name": "646d3fd722f8d924388220021d77a7777278511ce01129b76667bcac13024a31.jpg",
+      "original_rel_path": "646d3fd722f8d924388220021d77a7777278511ce01129b76667bcac13024a31.jpg",
+      "friendly_name": "figure_129.jpg",
+      "abs_path": "data/mineru_cache\\chapter_08_p393-454_线性系统的状态空间分析与综合__bda93de4\\images\\figure_129.jpg",
+      "index": 129
+    },
+    "64944f7370f506395d892b487d4227aeb09afb88f87aeb4921b2364e992407ae.jpg": {
+      "original_name": "64944f7370f506395d892b487d4227aeb09afb88f87aeb4921b2364e992407ae.jpg",
+      "original_rel_path": "64944f7370f506395d892b487d4227aeb09afb88f87aeb4921b2364e992407ae.jpg",
+      "friendly_name": "figure_130.jpg",
+      "abs_path": "data/mineru_cache\\chapter_08_p393-454_线性系统的状态空间分析与综合__bda93de4\\images\\figure_130.jpg",
+      "index": 130
+    },
+    "655a191bd46d94de3aa272cc4d7fae1f784807989ad6f78835103a9cbe8d9f4b.jpg": {
+      "original_name": "655a191bd46d94de3aa272cc4d7fae1f784807989ad6f78835103a9cbe8d9f4b.jpg",
+      "original_rel_path": "655a191bd46d94de3aa272cc4d7fae1f784807989ad6f78835103a9cbe8d9f4b.jpg",
+      "friendly_name": "figure_131.jpg",
+      "abs_path": "data/mineru_cache\\chapter_08_p393-454_线性系统的状态空间分析与综合__bda93de4\\images\\figure_131.jpg",
+      "index": 131
+    },
+    "65c90e12d80fc731738ac9ddb3ed3130b1f33b7a36754213f89655aa00d61c9e.jpg": {
+      "original_name": "65c90e12d80fc731738ac9ddb3ed3130b1f33b7a36754213f89655aa00d61c9e.jpg",
+      "original_rel_path": "65c90e12d80fc731738ac9ddb3ed3130b1f33b7a36754213f89655aa00d61c9e.jpg",
+      "friendly_name": "figure_132.jpg",
+      "abs_path": "data/mineru_cache\\chapter_08_p393-454_线性系统的状态空间分析与综合__bda93de4\\images\\figure_132.jpg",
+      "index": 132
+    },
+    "66852425827e9d702fdda9900de304e6bd2ebf464f1c49f79b76aff2b157deb7.jpg": {
+      "original_name": "66852425827e9d702fdda9900de304e6bd2ebf464f1c49f79b76aff2b157deb7.jpg",
+      "original_rel_path": "66852425827e9d702fdda9900de304e6bd2ebf464f1c49f79b76aff2b157deb7.jpg",
+      "friendly_name": "figure_133.jpg",
+      "abs_path": "data/mineru_cache\\chapter_08_p393-454_线性系统的状态空间分析与综合__bda93de4\\images\\figure_133.jpg",
+      "index": 133
+    },
+    "66980aa4c4d258dc4872133f0c51acb30dade173cb1c4cf9313d18e3c694a39c.jpg": {
+      "original_name": "66980aa4c4d258dc4872133f0c51acb30dade173cb1c4cf9313d18e3c694a39c.jpg",
+      "original_rel_path": "66980aa4c4d258dc4872133f0c51acb30dade173cb1c4cf9313d18e3c694a39c.jpg",
+      "friendly_name": "figure_134.jpg",
+      "abs_path": "data/mineru_cache\\chapter_08_p393-454_线性系统的状态空间分析与综合__bda93de4\\images\\figure_134.jpg",
+      "index": 134
+    },
+    "691d481493df4a1d2cb68a15476422be6837077fd57593b1bab12d3b59ae4b6e.jpg": {
+      "original_name": "691d481493df4a1d2cb68a15476422be6837077fd57593b1bab12d3b59ae4b6e.jpg",
+      "original_rel_path": "691d481493df4a1d2cb68a15476422be6837077fd57593b1bab12d3b59ae4b6e.jpg",
+      "friendly_name": "figure_135.jpg",
+      "abs_path": "data/mineru_cache\\chapter_08_p393-454_线性系统的状态空间分析与综合__bda93de4\\images\\figure_135.jpg",
+      "index": 135
+    },
+    "699fe21ca0ec615c8ffb6acc1bee0bdfbfdfa74505a5f0c411de2aa6bed25e9c.jpg": {
+      "original_name": "699fe21ca0ec615c8ffb6acc1bee0bdfbfdfa74505a5f0c411de2aa6bed25e9c.jpg",
+      "original_rel_path": "699fe21ca0ec615c8ffb6acc1bee0bdfbfdfa74505a5f0c411de2aa6bed25e9c.jpg",
+      "friendly_name": "figure_136.jpg",
+      "abs_path": "data/mineru_cache\\chapter_08_p393-454_线性系统的状态空间分析与综合__bda93de4\\images\\figure_136.jpg",
+      "index": 136
+    },
+    "6a5c22b547da2fcd40ad722cdd8ec550ae1d61e76d07a499c5bb3fbf9828e4c7.jpg": {
+      "original_name": "6a5c22b547da2fcd40ad722cdd8ec550ae1d61e76d07a499c5bb3fbf9828e4c7.jpg",
+      "original_rel_path": "6a5c22b547da2fcd40ad722cdd8ec550ae1d61e76d07a499c5bb3fbf9828e4c7.jpg",
+      "friendly_name": "figure_137.jpg",
+      "abs_path": "data/mineru_cache\\chapter_08_p393-454_线性系统的状态空间分析与综合__bda93de4\\images\\figure_137.jpg",
+      "index": 137
+    },
+    "6bbd5ed0e02746e6a7f3feea08f9b6cc47946bb29e573b773cc1be101a8c28d5.jpg": {
+      "original_name": "6bbd5ed0e02746e6a7f3feea08f9b6cc47946bb29e573b773cc1be101a8c28d5.jpg",
+      "original_rel_path": "6bbd5ed0e02746e6a7f3feea08f9b6cc47946bb29e573b773cc1be101a8c28d5.jpg",
+      "friendly_name": "figure_138.jpg",
+      "abs_path": "data/mineru_cache\\chapter_08_p393-454_线性系统的状态空间分析与综合__bda93de4\\images\\figure_138.jpg",
+      "index": 138
+    },
+    "6c7c457371ec2d11073ba56769a6b857b24a6a1bebb832164a32a488039d7107.jpg": {
+      "original_name": "6c7c457371ec2d11073ba56769a6b857b24a6a1bebb832164a32a488039d7107.jpg",
+      "original_rel_path": "6c7c457371ec2d11073ba56769a6b857b24a6a1bebb832164a32a488039d7107.jpg",
+      "friendly_name": "figure_139.jpg",
+      "abs_path": "data/mineru_cache\\chapter_08_p393-454_线性系统的状态空间分析与综合__bda93de4\\images\\figure_139.jpg",
+      "index": 139
+    },
+    "6d484b58523004273677fb163ed7119b7c5c8fd155cab527641f7e0a2a0a02b0.jpg": {
+      "original_name": "6d484b58523004273677fb163ed7119b7c5c8fd155cab527641f7e0a2a0a02b0.jpg",
+      "original_rel_path": "6d484b58523004273677fb163ed7119b7c5c8fd155cab527641f7e0a2a0a02b0.jpg",
+      "friendly_name": "figure_140.jpg",
+      "abs_path": "data/mineru_cache\\chapter_08_p393-454_线性系统的状态空间分析与综合__bda93de4\\images\\figure_140.jpg",
+      "index": 140
+    },
+    "6dfcad18cf888afa080586fe792e1409f371a93fe0f9acdc944225b65ddab2b7.jpg": {
+      "original_name": "6dfcad18cf888afa080586fe792e1409f371a93fe0f9acdc944225b65ddab2b7.jpg",
+      "original_rel_path": "6dfcad18cf888afa080586fe792e1409f371a93fe0f9acdc944225b65ddab2b7.jpg",
+      "friendly_name": "figure_141.jpg",
+      "abs_path": "data/mineru_cache\\chapter_08_p393-454_线性系统的状态空间分析与综合__bda93de4\\images\\figure_141.jpg",
+      "index": 141
+    },
+    "6eecdd86996c65c9fd2588400735d62fa0f254a11f6f55f6366cc380908b3f33.jpg": {
+      "original_name": "6eecdd86996c65c9fd2588400735d62fa0f254a11f6f55f6366cc380908b3f33.jpg",
+      "original_rel_path": "6eecdd86996c65c9fd2588400735d62fa0f254a11f6f55f6366cc380908b3f33.jpg",
+      "friendly_name": "figure_142.jpg",
+      "abs_path": "data/mineru_cache\\chapter_08_p393-454_线性系统的状态空间分析与综合__bda93de4\\images\\figure_142.jpg",
+      "index": 142
+    },
+    "6efa8797669d4d602e70b53420c30b6f3fe18bccdbae6ea70035b97c7e3df7a1.jpg": {
+      "original_name": "6efa8797669d4d602e70b53420c30b6f3fe18bccdbae6ea70035b97c7e3df7a1.jpg",
+      "original_rel_path": "6efa8797669d4d602e70b53420c30b6f3fe18bccdbae6ea70035b97c7e3df7a1.jpg",
+      "friendly_name": "figure_143.jpg",
+      "abs_path": "data/mineru_cache\\chapter_08_p393-454_线性系统的状态空间分析与综合__bda93de4\\images\\figure_143.jpg",
+      "index": 143
+    },
+    "6f123887275ae94a99641249e98316aebd7b7da9c5f704f17619770fdc551a93.jpg": {
+      "original_name": "6f123887275ae94a99641249e98316aebd7b7da9c5f704f17619770fdc551a93.jpg",
+      "original_rel_path": "6f123887275ae94a99641249e98316aebd7b7da9c5f704f17619770fdc551a93.jpg",
+      "friendly_name": "figure_144.jpg",
+      "abs_path": "data/mineru_cache\\chapter_08_p393-454_线性系统的状态空间分析与综合__bda93de4\\images\\figure_144.jpg",
+      "index": 144
+    },
+    "6f244e79e38ec28f2c322943219034c66a04153bfdb76460e6ce32745817c287.jpg": {
+      "original_name": "6f244e79e38ec28f2c322943219034c66a04153bfdb76460e6ce32745817c287.jpg",
+      "original_rel_path": "6f244e79e38ec28f2c322943219034c66a04153bfdb76460e6ce32745817c287.jpg",
+      "friendly_name": "figure_145.jpg",
+      "abs_path": "data/mineru_cache\\chapter_08_p393-454_线性系统的状态空间分析与综合__bda93de4\\images\\figure_145.jpg",
+      "index": 145
+    },
+    "6f3137a5bb9a5c5de5291aa6e55ffaa58f2c87f51aba68414391c3f6080dff45.jpg": {
+      "original_name": "6f3137a5bb9a5c5de5291aa6e55ffaa58f2c87f51aba68414391c3f6080dff45.jpg",
+      "original_rel_path": "6f3137a5bb9a5c5de5291aa6e55ffaa58f2c87f51aba68414391c3f6080dff45.jpg",
+      "friendly_name": "figure_146.jpg",
+      "abs_path": "data/mineru_cache\\chapter_08_p393-454_线性系统的状态空间分析与综合__bda93de4\\images\\figure_146.jpg",
+      "index": 146
+    },
+    "6f7f1b909f8981509d6c625173ecfb94552e70f266124f7b1201a2939bee463b.jpg": {
+      "original_name": "6f7f1b909f8981509d6c625173ecfb94552e70f266124f7b1201a2939bee463b.jpg",
+      "original_rel_path": "6f7f1b909f8981509d6c625173ecfb94552e70f266124f7b1201a2939bee463b.jpg",
+      "friendly_name": "figure_147.jpg",
+      "abs_path": "data/mineru_cache\\chapter_08_p393-454_线性系统的状态空间分析与综合__bda93de4\\images\\figure_147.jpg",
+      "index": 147
+    },
+    "729b3d206e8ccbe91af35d562537a217ab86169e39c67024ac952b575215efdb.jpg": {
+      "original_name": "729b3d206e8ccbe91af35d562537a217ab86169e39c67024ac952b575215efdb.jpg",
+      "original_rel_path": "729b3d206e8ccbe91af35d562537a217ab86169e39c67024ac952b575215efdb.jpg",
+      "friendly_name": "figure_148.jpg",
+      "abs_path": "data/mineru_cache\\chapter_08_p393-454_线性系统的状态空间分析与综合__bda93de4\\images\\figure_148.jpg",
+      "index": 148
+    },
+    "7474ee2dc762ccf286dc8a88746e87a967b5f723f7d2e888ee543074fc407304.jpg": {
+      "original_name": "7474ee2dc762ccf286dc8a88746e87a967b5f723f7d2e888ee543074fc407304.jpg",
+      "original_rel_path": "7474ee2dc762ccf286dc8a88746e87a967b5f723f7d2e888ee543074fc407304.jpg",
+      "friendly_name": "figure_149.jpg",
+      "abs_path": "data/mineru_cache\\chapter_08_p393-454_线性系统的状态空间分析与综合__bda93de4\\images\\figure_149.jpg",
+      "index": 149
+    },
+    "756ddc71aaad230048858337d5ac0242ad715292ebc99649604c4b3d1dbf7d49.jpg": {
+      "original_name": "756ddc71aaad230048858337d5ac0242ad715292ebc99649604c4b3d1dbf7d49.jpg",
+      "original_rel_path": "756ddc71aaad230048858337d5ac0242ad715292ebc99649604c4b3d1dbf7d49.jpg",
+      "friendly_name": "figure_150.jpg",
+      "abs_path": "data/mineru_cache\\chapter_08_p393-454_线性系统的状态空间分析与综合__bda93de4\\images\\figure_150.jpg",
+      "index": 150
+    },
+    "7574fbb8bc3a5c6a410cc29f7334f53b2db99fb88eb112902849389195412901.jpg": {
+      "original_name": "7574fbb8bc3a5c6a410cc29f7334f53b2db99fb88eb112902849389195412901.jpg",
+      "original_rel_path": "7574fbb8bc3a5c6a410cc29f7334f53b2db99fb88eb112902849389195412901.jpg",
+      "friendly_name": "figure_151.jpg",
+      "abs_path": "data/mineru_cache\\chapter_08_p393-454_线性系统的状态空间分析与综合__bda93de4\\images\\figure_151.jpg",
+      "index": 151
+    },
+    "759bdfb85c55eb560b2fbd5415fb576908fd870fdce1d6e74e927f351ac5dc91.jpg": {
+      "original_name": "759bdfb85c55eb560b2fbd5415fb576908fd870fdce1d6e74e927f351ac5dc91.jpg",
+      "original_rel_path": "759bdfb85c55eb560b2fbd5415fb576908fd870fdce1d6e74e927f351ac5dc91.jpg",
+      "friendly_name": "figure_152.jpg",
+      "abs_path": "data/mineru_cache\\chapter_08_p393-454_线性系统的状态空间分析与综合__bda93de4\\images\\figure_152.jpg",
+      "index": 152
+    },
+    "76e36965d6bb2384a4c7b28ceffe0ef01d2ae619b45fcf5135437e52fa46e83d.jpg": {
+      "original_name": "76e36965d6bb2384a4c7b28ceffe0ef01d2ae619b45fcf5135437e52fa46e83d.jpg",
+      "original_rel_path": "76e36965d6bb2384a4c7b28ceffe0ef01d2ae619b45fcf5135437e52fa46e83d.jpg",
+      "friendly_name": "figure_153.jpg",
+      "abs_path": "data/mineru_cache\\chapter_08_p393-454_线性系统的状态空间分析与综合__bda93de4\\images\\figure_153.jpg",
+      "index": 153
+    },
+    "773986d87f65c28e8ddcb84502901a5ec9e6d340cd5e0923993ca6c490e99ed0.jpg": {
+      "original_name": "773986d87f65c28e8ddcb84502901a5ec9e6d340cd5e0923993ca6c490e99ed0.jpg",
+      "original_rel_path": "773986d87f65c28e8ddcb84502901a5ec9e6d340cd5e0923993ca6c490e99ed0.jpg",
+      "friendly_name": "figure_154.jpg",
+      "abs_path": "data/mineru_cache\\chapter_08_p393-454_线性系统的状态空间分析与综合__bda93de4\\images\\figure_154.jpg",
+      "index": 154
+    },
+    "779d09344b70952727c630d064b7d1ed02bee1541eb7854e02d45561dafe2cce.jpg": {
+      "original_name": "779d09344b70952727c630d064b7d1ed02bee1541eb7854e02d45561dafe2cce.jpg",
+      "original_rel_path": "779d09344b70952727c630d064b7d1ed02bee1541eb7854e02d45561dafe2cce.jpg",
+      "friendly_name": "figure_155.jpg",
+      "abs_path": "data/mineru_cache\\chapter_08_p393-454_线性系统的状态空间分析与综合__bda93de4\\images\\figure_155.jpg",
+      "index": 155
+    },
+    "77a37c97e0d017294f1111d2c94621e91057fb8b92151747e020f9cb2ac6f185.jpg": {
+      "original_name": "77a37c97e0d017294f1111d2c94621e91057fb8b92151747e020f9cb2ac6f185.jpg",
+      "original_rel_path": "77a37c97e0d017294f1111d2c94621e91057fb8b92151747e020f9cb2ac6f185.jpg",
+      "friendly_name": "figure_156.jpg",
+      "abs_path": "data/mineru_cache\\chapter_08_p393-454_线性系统的状态空间分析与综合__bda93de4\\images\\figure_156.jpg",
+      "index": 156
+    },
+    "77abfdab2a170fa194017986463817a2e77785dfa3253023d54aac7628f46710.jpg": {
+      "original_name": "77abfdab2a170fa194017986463817a2e77785dfa3253023d54aac7628f46710.jpg",
+      "original_rel_path": "77abfdab2a170fa194017986463817a2e77785dfa3253023d54aac7628f46710.jpg",
+      "friendly_name": "figure_157.jpg",
+      "abs_path": "data/mineru_cache\\chapter_08_p393-454_线性系统的状态空间分析与综合__bda93de4\\images\\figure_157.jpg",
+      "index": 157
+    },
+    "77c7762931039ccd2aa88d25e3ae54d777ff2875eb8413a5e61033072f98e1c2.jpg": {
+      "original_name": "77c7762931039ccd2aa88d25e3ae54d777ff2875eb8413a5e61033072f98e1c2.jpg",
+      "original_rel_path": "77c7762931039ccd2aa88d25e3ae54d777ff2875eb8413a5e61033072f98e1c2.jpg",
+      "friendly_name": "figure_158.jpg",
+      "abs_path": "data/mineru_cache\\chapter_08_p393-454_线性系统的状态空间分析与综合__bda93de4\\images\\figure_158.jpg",
+      "index": 158
+    },
+    "77cc58032883903351ade73d701233da3f5140f85c602d063b576b39a02da19d.jpg": {
+      "original_name": "77cc58032883903351ade73d701233da3f5140f85c602d063b576b39a02da19d.jpg",
+      "original_rel_path": "77cc58032883903351ade73d701233da3f5140f85c602d063b576b39a02da19d.jpg",
+      "friendly_name": "figure_159.jpg",
+      "abs_path": "data/mineru_cache\\chapter_08_p393-454_线性系统的状态空间分析与综合__bda93de4\\images\\figure_159.jpg",
+      "index": 159
+    },
+    "7941db439aeebb3b6a0c41d4ef692f9b245e4c4674d9f7160f299a3809557c14.jpg": {
+      "original_name": "7941db439aeebb3b6a0c41d4ef692f9b245e4c4674d9f7160f299a3809557c14.jpg",
+      "original_rel_path": "7941db439aeebb3b6a0c41d4ef692f9b245e4c4674d9f7160f299a3809557c14.jpg",
+      "friendly_name": "figure_160.jpg",
+      "abs_path": "data/mineru_cache\\chapter_08_p393-454_线性系统的状态空间分析与综合__bda93de4\\images\\figure_160.jpg",
+      "index": 160
+    },
+    "7bad5dfaf5395159ca981c04e262fde678821a52b5c3b300e24e1500f9a5c535.jpg": {
+      "original_name": "7bad5dfaf5395159ca981c04e262fde678821a52b5c3b300e24e1500f9a5c535.jpg",
+      "original_rel_path": "7bad5dfaf5395159ca981c04e262fde678821a52b5c3b300e24e1500f9a5c535.jpg",
+      "friendly_name": "figure_161.jpg",
+      "abs_path": "data/mineru_cache\\chapter_08_p393-454_线性系统的状态空间分析与综合__bda93de4\\images\\figure_161.jpg",
+      "index": 161
+    },
+    "7ce588b63ec4af7f88efb6dc9b2b409f42a8b2021c6f7f55be9e385e78eccc4a.jpg": {
+      "original_name": "7ce588b63ec4af7f88efb6dc9b2b409f42a8b2021c6f7f55be9e385e78eccc4a.jpg",
+      "original_rel_path": "7ce588b63ec4af7f88efb6dc9b2b409f42a8b2021c6f7f55be9e385e78eccc4a.jpg",
+      "friendly_name": "figure_162.jpg",
+      "abs_path": "data/mineru_cache\\chapter_08_p393-454_线性系统的状态空间分析与综合__bda93de4\\images\\figure_162.jpg",
+      "index": 162
+    },
+    "7d5a79138fd0dbfde9c6db74d9b134f2a2e51a1412dc61ca18b0a6286e2824e9.jpg": {
+      "original_name": "7d5a79138fd0dbfde9c6db74d9b134f2a2e51a1412dc61ca18b0a6286e2824e9.jpg",
+      "original_rel_path": "7d5a79138fd0dbfde9c6db74d9b134f2a2e51a1412dc61ca18b0a6286e2824e9.jpg",
+      "friendly_name": "figure_163.jpg",
+      "abs_path": "data/mineru_cache\\chapter_08_p393-454_线性系统的状态空间分析与综合__bda93de4\\images\\figure_163.jpg",
+      "index": 163
+    },
+    "7e00f229c1b657f9a6543f9ac933473d79132f70779753d378ee0a200ad010c5.jpg": {
+      "original_name": "7e00f229c1b657f9a6543f9ac933473d79132f70779753d378ee0a200ad010c5.jpg",
+      "original_rel_path": "7e00f229c1b657f9a6543f9ac933473d79132f70779753d378ee0a200ad010c5.jpg",
+      "friendly_name": "figure_164.jpg",
+      "abs_path": "data/mineru_cache\\chapter_08_p393-454_线性系统的状态空间分析与综合__bda93de4\\images\\figure_164.jpg",
+      "index": 164
+    },
+    "7e762c0fb3b95265db21725abb0e315b3843f2814d6dd1d2924237280c044e78.jpg": {
+      "original_name": "7e762c0fb3b95265db21725abb0e315b3843f2814d6dd1d2924237280c044e78.jpg",
+      "original_rel_path": "7e762c0fb3b95265db21725abb0e315b3843f2814d6dd1d2924237280c044e78.jpg",
+      "friendly_name": "figure_165.jpg",
+      "abs_path": "data/mineru_cache\\chapter_08_p393-454_线性系统的状态空间分析与综合__bda93de4\\images\\figure_165.jpg",
+      "index": 165
+    },
+    "7f75397976f0308837856daa6ace0d5dfdba23136e7147662fe25ba28d495072.jpg": {
+      "original_name": "7f75397976f0308837856daa6ace0d5dfdba23136e7147662fe25ba28d495072.jpg",
+      "original_rel_path": "7f75397976f0308837856daa6ace0d5dfdba23136e7147662fe25ba28d495072.jpg",
+      "friendly_name": "figure_166.jpg",
+      "abs_path": "data/mineru_cache\\chapter_08_p393-454_线性系统的状态空间分析与综合__bda93de4\\images\\figure_166.jpg",
+      "index": 166
+    },
+    "809c06ab1ff1fe2b47d4e9d6e52ab00d50574dfe754ed4cc700cdd0f9dc9506a.jpg": {
+      "original_name": "809c06ab1ff1fe2b47d4e9d6e52ab00d50574dfe754ed4cc700cdd0f9dc9506a.jpg",
+      "original_rel_path": "809c06ab1ff1fe2b47d4e9d6e52ab00d50574dfe754ed4cc700cdd0f9dc9506a.jpg",
+      "friendly_name": "figure_167.jpg",
+      "abs_path": "data/mineru_cache\\chapter_08_p393-454_线性系统的状态空间分析与综合__bda93de4\\images\\figure_167.jpg",
+      "index": 167
+    },
+    "81544e51215bd9ae2813be57a665c17728ba0d4cb04ceeae712926164a1c60a6.jpg": {
+      "original_name": "81544e51215bd9ae2813be57a665c17728ba0d4cb04ceeae712926164a1c60a6.jpg",
+      "original_rel_path": "81544e51215bd9ae2813be57a665c17728ba0d4cb04ceeae712926164a1c60a6.jpg",
+      "friendly_name": "figure_168.jpg",
+      "abs_path": "data/mineru_cache\\chapter_08_p393-454_线性系统的状态空间分析与综合__bda93de4\\images\\figure_168.jpg",
+      "index": 168
+    },
+    "8191e4708bbf09d078e1a7e883a8a1765eeb8842f87083fdcb58901c6f26ec9d.jpg": {
+      "original_name": "8191e4708bbf09d078e1a7e883a8a1765eeb8842f87083fdcb58901c6f26ec9d.jpg",
+      "original_rel_path": "8191e4708bbf09d078e1a7e883a8a1765eeb8842f87083fdcb58901c6f26ec9d.jpg",
+      "friendly_name": "figure_169.jpg",
+      "abs_path": "data/mineru_cache\\chapter_08_p393-454_线性系统的状态空间分析与综合__bda93de4\\images\\figure_169.jpg",
+      "index": 169
+    },
+    "81f1aac2c833cd49cb0bba56ba9f377f5f589c1b4549120161622ec83286d0f1.jpg": {
+      "original_name": "81f1aac2c833cd49cb0bba56ba9f377f5f589c1b4549120161622ec83286d0f1.jpg",
+      "original_rel_path": "81f1aac2c833cd49cb0bba56ba9f377f5f589c1b4549120161622ec83286d0f1.jpg",
+      "friendly_name": "figure_170.jpg",
+      "abs_path": "data/mineru_cache\\chapter_08_p393-454_线性系统的状态空间分析与综合__bda93de4\\images\\figure_170.jpg",
+      "index": 170
+    },
+    "838958ef5339d7a1fdf8def40465778bf5b551574b6ca7a8f4c5c663807e59ba.jpg": {
+      "original_name": "838958ef5339d7a1fdf8def40465778bf5b551574b6ca7a8f4c5c663807e59ba.jpg",
+      "original_rel_path": "838958ef5339d7a1fdf8def40465778bf5b551574b6ca7a8f4c5c663807e59ba.jpg",
+      "friendly_name": "figure_171.jpg",
+      "abs_path": "data/mineru_cache\\chapter_08_p393-454_线性系统的状态空间分析与综合__bda93de4\\images\\figure_171.jpg",
+      "index": 171
+    },
+    "8421167651dfa703a0bc182922988e869e4d108df6fd1fcd7f1d5d1421c1a878.jpg": {
+      "original_name": "8421167651dfa703a0bc182922988e869e4d108df6fd1fcd7f1d5d1421c1a878.jpg",
+      "original_rel_path": "8421167651dfa703a0bc182922988e869e4d108df6fd1fcd7f1d5d1421c1a878.jpg",
+      "friendly_name": "figure_172.jpg",
+      "abs_path": "data/mineru_cache\\chapter_08_p393-454_线性系统的状态空间分析与综合__bda93de4\\images\\figure_172.jpg",
+      "index": 172
+    },
+    "859362882d1fc24f402124fb6a00e842a8b196f0b30072765573947fd994703f.jpg": {
+      "original_name": "859362882d1fc24f402124fb6a00e842a8b196f0b30072765573947fd994703f.jpg",
+      "original_rel_path": "859362882d1fc24f402124fb6a00e842a8b196f0b30072765573947fd994703f.jpg",
+      "friendly_name": "figure_173.jpg",
+      "abs_path": "data/mineru_cache\\chapter_08_p393-454_线性系统的状态空间分析与综合__bda93de4\\images\\figure_173.jpg",
+      "index": 173
+    },
+    "876905c08ab375dfa778cfcb1c60a6796db2cd39aa567cc5a9fdc1561411c3c1.jpg": {
+      "original_name": "876905c08ab375dfa778cfcb1c60a6796db2cd39aa567cc5a9fdc1561411c3c1.jpg",
+      "original_rel_path": "876905c08ab375dfa778cfcb1c60a6796db2cd39aa567cc5a9fdc1561411c3c1.jpg",
+      "friendly_name": "figure_174.jpg",
+      "abs_path": "data/mineru_cache\\chapter_08_p393-454_线性系统的状态空间分析与综合__bda93de4\\images\\figure_174.jpg",
+      "index": 174
+    },
+    "8810117a781e9fac6d45e7f2dee5068ed6a6625745afb6d6f1081bb238009579.jpg": {
+      "original_name": "8810117a781e9fac6d45e7f2dee5068ed6a6625745afb6d6f1081bb238009579.jpg",
+      "original_rel_path": "8810117a781e9fac6d45e7f2dee5068ed6a6625745afb6d6f1081bb238009579.jpg",
+      "friendly_name": "figure_175.jpg",
+      "abs_path": "data/mineru_cache\\chapter_08_p393-454_线性系统的状态空间分析与综合__bda93de4\\images\\figure_175.jpg",
+      "index": 175
+    },
+    "88320401a451380d512084d5d76455f2e99d4663ca7591a51743f91753f0c1e6.jpg": {
+      "original_name": "88320401a451380d512084d5d76455f2e99d4663ca7591a51743f91753f0c1e6.jpg",
+      "original_rel_path": "88320401a451380d512084d5d76455f2e99d4663ca7591a51743f91753f0c1e6.jpg",
+      "friendly_name": "figure_176.jpg",
+      "abs_path": "data/mineru_cache\\chapter_08_p393-454_线性系统的状态空间分析与综合__bda93de4\\images\\figure_176.jpg",
+      "index": 176
+    },
+    "88d95757f76d11bcea9187c10071bb689be4573eb5acbe6647ff82f5f5310b05.jpg": {
+      "original_name": "88d95757f76d11bcea9187c10071bb689be4573eb5acbe6647ff82f5f5310b05.jpg",
+      "original_rel_path": "88d95757f76d11bcea9187c10071bb689be4573eb5acbe6647ff82f5f5310b05.jpg",
+      "friendly_name": "figure_177.jpg",
+      "abs_path": "data/mineru_cache\\chapter_08_p393-454_线性系统的状态空间分析与综合__bda93de4\\images\\figure_177.jpg",
+      "index": 177
+    },
+    "89a49432b323337fa7eef3c5195a3d5bfc90a9b23c9f921c2fb2fe0a3990cbbb.jpg": {
+      "original_name": "89a49432b323337fa7eef3c5195a3d5bfc90a9b23c9f921c2fb2fe0a3990cbbb.jpg",
+      "original_rel_path": "89a49432b323337fa7eef3c5195a3d5bfc90a9b23c9f921c2fb2fe0a3990cbbb.jpg",
+      "friendly_name": "figure_178.jpg",
+      "abs_path": "data/mineru_cache\\chapter_08_p393-454_线性系统的状态空间分析与综合__bda93de4\\images\\figure_178.jpg",
+      "index": 178
+    },
+    "8aa94453ccf84fe48768aea90ce1c92f68b080cc258a93d0a4bbcc97bc2eff86.jpg": {
+      "original_name": "8aa94453ccf84fe48768aea90ce1c92f68b080cc258a93d0a4bbcc97bc2eff86.jpg",
+      "original_rel_path": "8aa94453ccf84fe48768aea90ce1c92f68b080cc258a93d0a4bbcc97bc2eff86.jpg",
+      "friendly_name": "figure_179.jpg",
+      "abs_path": "data/mineru_cache\\chapter_08_p393-454_线性系统的状态空间分析与综合__bda93de4\\images\\figure_179.jpg",
+      "index": 179
+    },
+    "8b14b1feb447c081b5a8050b3247e34a7d8c6495d4a82214dc5513e6d4476f0f.jpg": {
+      "original_name": "8b14b1feb447c081b5a8050b3247e34a7d8c6495d4a82214dc5513e6d4476f0f.jpg",
+      "original_rel_path": "8b14b1feb447c081b5a8050b3247e34a7d8c6495d4a82214dc5513e6d4476f0f.jpg",
+      "friendly_name": "figure_180.jpg",
+      "abs_path": "data/mineru_cache\\chapter_08_p393-454_线性系统的状态空间分析与综合__bda93de4\\images\\figure_180.jpg",
+      "index": 180
+    },
+    "8b9129ae55c61345c000137a0790d83706122aad4d81188a4b0d4fcf8166306d.jpg": {
+      "original_name": "8b9129ae55c61345c000137a0790d83706122aad4d81188a4b0d4fcf8166306d.jpg",
+      "original_rel_path": "8b9129ae55c61345c000137a0790d83706122aad4d81188a4b0d4fcf8166306d.jpg",
+      "friendly_name": "figure_181.jpg",
+      "abs_path": "data/mineru_cache\\chapter_08_p393-454_线性系统的状态空间分析与综合__bda93de4\\images\\figure_181.jpg",
+      "index": 181
+    },
+    "8cc08fd1f51f96eff8543806dc125f270394e84a95e8a8ffb5830d12680b9195.jpg": {
+      "original_name": "8cc08fd1f51f96eff8543806dc125f270394e84a95e8a8ffb5830d12680b9195.jpg",
+      "original_rel_path": "8cc08fd1f51f96eff8543806dc125f270394e84a95e8a8ffb5830d12680b9195.jpg",
+      "friendly_name": "figure_182.jpg",
+      "abs_path": "data/mineru_cache\\chapter_08_p393-454_线性系统的状态空间分析与综合__bda93de4\\images\\figure_182.jpg",
+      "index": 182
+    },
+    "8dd80e3d761c9ae6845a299d126b4e279cf9ae967adff6dc3b3a68709d81ad4c.jpg": {
+      "original_name": "8dd80e3d761c9ae6845a299d126b4e279cf9ae967adff6dc3b3a68709d81ad4c.jpg",
+      "original_rel_path": "8dd80e3d761c9ae6845a299d126b4e279cf9ae967adff6dc3b3a68709d81ad4c.jpg",
+      "friendly_name": "figure_183.jpg",
+      "abs_path": "data/mineru_cache\\chapter_08_p393-454_线性系统的状态空间分析与综合__bda93de4\\images\\figure_183.jpg",
+      "index": 183
+    },
+    "8e26821a0be7b6cba3c7975965e52b245cc58c15134514cda364681952fb95f8.jpg": {
+      "original_name": "8e26821a0be7b6cba3c7975965e52b245cc58c15134514cda364681952fb95f8.jpg",
+      "original_rel_path": "8e26821a0be7b6cba3c7975965e52b245cc58c15134514cda364681952fb95f8.jpg",
+      "friendly_name": "figure_184.jpg",
+      "abs_path": "data/mineru_cache\\chapter_08_p393-454_线性系统的状态空间分析与综合__bda93de4\\images\\figure_184.jpg",
+      "index": 184
+    },
+    "8e7bb32814d5e05303a8c42278f530d98b99876ae168fac9e9512f8966e20306.jpg": {
+      "original_name": "8e7bb32814d5e05303a8c42278f530d98b99876ae168fac9e9512f8966e20306.jpg",
+      "original_rel_path": "8e7bb32814d5e05303a8c42278f530d98b99876ae168fac9e9512f8966e20306.jpg",
+      "friendly_name": "figure_185.jpg",
+      "abs_path": "data/mineru_cache\\chapter_08_p393-454_线性系统的状态空间分析与综合__bda93de4\\images\\figure_185.jpg",
+      "index": 185
+    },
+    "8ff39829c231a88fb4e8060b1d547ba6893bf1a006cb02bb520893e20a328025.jpg": {
+      "original_name": "8ff39829c231a88fb4e8060b1d547ba6893bf1a006cb02bb520893e20a328025.jpg",
+      "original_rel_path": "8ff39829c231a88fb4e8060b1d547ba6893bf1a006cb02bb520893e20a328025.jpg",
+      "friendly_name": "figure_186.jpg",
+      "abs_path": "data/mineru_cache\\chapter_08_p393-454_线性系统的状态空间分析与综合__bda93de4\\images\\figure_186.jpg",
+      "index": 186
+    },
+    "90de4f5d92df7269df29c081e886c5f601b7013494de9da85dcbd1447016599e.jpg": {
+      "original_name": "90de4f5d92df7269df29c081e886c5f601b7013494de9da85dcbd1447016599e.jpg",
+      "original_rel_path": "90de4f5d92df7269df29c081e886c5f601b7013494de9da85dcbd1447016599e.jpg",
+      "friendly_name": "figure_187.jpg",
+      "abs_path": "data/mineru_cache\\chapter_08_p393-454_线性系统的状态空间分析与综合__bda93de4\\images\\figure_187.jpg",
+      "index": 187
+    },
+    "9104d6593b68eba2968877f903cc0702108bd2fe918bb85e6c58d3a7a028d374.jpg": {
+      "original_name": "9104d6593b68eba2968877f903cc0702108bd2fe918bb85e6c58d3a7a028d374.jpg",
+      "original_rel_path": "9104d6593b68eba2968877f903cc0702108bd2fe918bb85e6c58d3a7a028d374.jpg",
+      "friendly_name": "figure_188.jpg",
+      "abs_path": "data/mineru_cache\\chapter_08_p393-454_线性系统的状态空间分析与综合__bda93de4\\images\\figure_188.jpg",
+      "index": 188
+    },
+    "914340e6edf8038fe47b1097d7461035dbcf94d5a5a2436e03bc2f15c6b3ba2f.jpg": {
+      "original_name": "914340e6edf8038fe47b1097d7461035dbcf94d5a5a2436e03bc2f15c6b3ba2f.jpg",
+      "original_rel_path": "914340e6edf8038fe47b1097d7461035dbcf94d5a5a2436e03bc2f15c6b3ba2f.jpg",
+      "friendly_name": "figure_189.jpg",
+      "abs_path": "data/mineru_cache\\chapter_08_p393-454_线性系统的状态空间分析与综合__bda93de4\\images\\figure_189.jpg",
+      "index": 189
+    },
+    "916c2667f8058cccc2ce4dd4dc938b2d18c3346b0c5dfc8707472a7ef182c3e8.jpg": {
+      "original_name": "916c2667f8058cccc2ce4dd4dc938b2d18c3346b0c5dfc8707472a7ef182c3e8.jpg",
+      "original_rel_path": "916c2667f8058cccc2ce4dd4dc938b2d18c3346b0c5dfc8707472a7ef182c3e8.jpg",
+      "friendly_name": "figure_190.jpg",
+      "abs_path": "data/mineru_cache\\chapter_08_p393-454_线性系统的状态空间分析与综合__bda93de4\\images\\figure_190.jpg",
+      "index": 190
+    },
+    "91f4cf870622d3f7c9a186c1d51e110d1fc07c03552dd57165358d78fdb4b008.jpg": {
+      "original_name": "91f4cf870622d3f7c9a186c1d51e110d1fc07c03552dd57165358d78fdb4b008.jpg",
+      "original_rel_path": "91f4cf870622d3f7c9a186c1d51e110d1fc07c03552dd57165358d78fdb4b008.jpg",
+      "friendly_name": "figure_191.jpg",
+      "abs_path": "data/mineru_cache\\chapter_08_p393-454_线性系统的状态空间分析与综合__bda93de4\\images\\figure_191.jpg",
+      "index": 191
+    },
+    "9269fe9be157a7ed36290781e8c3e73a477aa6280050fe9bd361858b96dfff42.jpg": {
+      "original_name": "9269fe9be157a7ed36290781e8c3e73a477aa6280050fe9bd361858b96dfff42.jpg",
+      "original_rel_path": "9269fe9be157a7ed36290781e8c3e73a477aa6280050fe9bd361858b96dfff42.jpg",
+      "friendly_name": "figure_192.jpg",
+      "abs_path": "data/mineru_cache\\chapter_08_p393-454_线性系统的状态空间分析与综合__bda93de4\\images\\figure_192.jpg",
+      "index": 192
+    },
+    "92ebbaea9fd26a284cdab45d5e89a8f6fb639a0b12795d8c88927e0f13f17658.jpg": {
+      "original_name": "92ebbaea9fd26a284cdab45d5e89a8f6fb639a0b12795d8c88927e0f13f17658.jpg",
+      "original_rel_path": "92ebbaea9fd26a284cdab45d5e89a8f6fb639a0b12795d8c88927e0f13f17658.jpg",
+      "friendly_name": "figure_193.jpg",
+      "abs_path": "data/mineru_cache\\chapter_08_p393-454_线性系统的状态空间分析与综合__bda93de4\\images\\figure_193.jpg",
+      "index": 193
+    },
+    "948343fb94b9087d82a179c289ddc91ebba621ff1e4d8f2446aa5c4de072cead.jpg": {
+      "original_name": "948343fb94b9087d82a179c289ddc91ebba621ff1e4d8f2446aa5c4de072cead.jpg",
+      "original_rel_path": "948343fb94b9087d82a179c289ddc91ebba621ff1e4d8f2446aa5c4de072cead.jpg",
+      "friendly_name": "figure_194.jpg",
+      "abs_path": "data/mineru_cache\\chapter_08_p393-454_线性系统的状态空间分析与综合__bda93de4\\images\\figure_194.jpg",
+      "index": 194
+    },
+    "95568d7204eed2b048a2ae053e061b590d4344c15838e110803a549a8804d3c7.jpg": {
+      "original_name": "95568d7204eed2b048a2ae053e061b590d4344c15838e110803a549a8804d3c7.jpg",
+      "original_rel_path": "95568d7204eed2b048a2ae053e061b590d4344c15838e110803a549a8804d3c7.jpg",
+      "friendly_name": "figure_195.jpg",
+      "abs_path": "data/mineru_cache\\chapter_08_p393-454_线性系统的状态空间分析与综合__bda93de4\\images\\figure_195.jpg",
+      "index": 195
+    },
+    "9578848a1024a71289956813bead4f249bf274b6dd2537b311025d19adf3a4bb.jpg": {
+      "original_name": "9578848a1024a71289956813bead4f249bf274b6dd2537b311025d19adf3a4bb.jpg",
+      "original_rel_path": "9578848a1024a71289956813bead4f249bf274b6dd2537b311025d19adf3a4bb.jpg",
+      "friendly_name": "figure_196.jpg",
+      "abs_path": "data/mineru_cache\\chapter_08_p393-454_线性系统的状态空间分析与综合__bda93de4\\images\\figure_196.jpg",
+      "index": 196
+    },
+    "95fd091ddcf6c7cb5818358b34237f2e038e4f75968b9d193d82bad656f91166.jpg": {
+      "original_name": "95fd091ddcf6c7cb5818358b34237f2e038e4f75968b9d193d82bad656f91166.jpg",
+      "original_rel_path": "95fd091ddcf6c7cb5818358b34237f2e038e4f75968b9d193d82bad656f91166.jpg",
+      "friendly_name": "figure_197.jpg",
+      "abs_path": "data/mineru_cache\\chapter_08_p393-454_线性系统的状态空间分析与综合__bda93de4\\images\\figure_197.jpg",
+      "index": 197
+    },
+    "963e636e86564a508117c3ed87a75de9a6c16309025529c12194d35d588ba03c.jpg": {
+      "original_name": "963e636e86564a508117c3ed87a75de9a6c16309025529c12194d35d588ba03c.jpg",
+      "original_rel_path": "963e636e86564a508117c3ed87a75de9a6c16309025529c12194d35d588ba03c.jpg",
+      "friendly_name": "figure_198.jpg",
+      "abs_path": "data/mineru_cache\\chapter_08_p393-454_线性系统的状态空间分析与综合__bda93de4\\images\\figure_198.jpg",
+      "index": 198
+    },
+    "9676c4dd4ba2b7ee3481539b95554f23add084b8a43f46a12ad34306d7002d8c.jpg": {
+      "original_name": "9676c4dd4ba2b7ee3481539b95554f23add084b8a43f46a12ad34306d7002d8c.jpg",
+      "original_rel_path": "9676c4dd4ba2b7ee3481539b95554f23add084b8a43f46a12ad34306d7002d8c.jpg",
+      "friendly_name": "figure_199.jpg",
+      "abs_path": "data/mineru_cache\\chapter_08_p393-454_线性系统的状态空间分析与综合__bda93de4\\images\\figure_199.jpg",
+      "index": 199
+    },
+    "977484f28e262385c2002308a117af0258047ca5aeeb8a514d997b727052e894.jpg": {
+      "original_name": "977484f28e262385c2002308a117af0258047ca5aeeb8a514d997b727052e894.jpg",
+      "original_rel_path": "977484f28e262385c2002308a117af0258047ca5aeeb8a514d997b727052e894.jpg",
+      "friendly_name": "figure_200.jpg",
+      "abs_path": "data/mineru_cache\\chapter_08_p393-454_线性系统的状态空间分析与综合__bda93de4\\images\\figure_200.jpg",
+      "index": 200
+    },
+    "979685b3acb47d0749e66654070d88e54bdbb66ce91029c7ef66a32e0866c2fa.jpg": {
+      "original_name": "979685b3acb47d0749e66654070d88e54bdbb66ce91029c7ef66a32e0866c2fa.jpg",
+      "original_rel_path": "979685b3acb47d0749e66654070d88e54bdbb66ce91029c7ef66a32e0866c2fa.jpg",
+      "friendly_name": "figure_201.jpg",
+      "abs_path": "data/mineru_cache\\chapter_08_p393-454_线性系统的状态空间分析与综合__bda93de4\\images\\figure_201.jpg",
+      "index": 201
+    },
+    "9aa1665adf4b46cdcb27890c33dcc15c48290c0ce804fdcb75a2d6c2954b0f2c.jpg": {
+      "original_name": "9aa1665adf4b46cdcb27890c33dcc15c48290c0ce804fdcb75a2d6c2954b0f2c.jpg",
+      "original_rel_path": "9aa1665adf4b46cdcb27890c33dcc15c48290c0ce804fdcb75a2d6c2954b0f2c.jpg",
+      "friendly_name": "figure_202.jpg",
+      "abs_path": "data/mineru_cache\\chapter_08_p393-454_线性系统的状态空间分析与综合__bda93de4\\images\\figure_202.jpg",
+      "index": 202
+    },
+    "9aa7e9e30b2172dff15404f187c53a88100b39d1eabd07d90fd2999166e6e9d0.jpg": {
+      "original_name": "9aa7e9e30b2172dff15404f187c53a88100b39d1eabd07d90fd2999166e6e9d0.jpg",
+      "original_rel_path": "9aa7e9e30b2172dff15404f187c53a88100b39d1eabd07d90fd2999166e6e9d0.jpg",
+      "friendly_name": "figure_203.jpg",
+      "abs_path": "data/mineru_cache\\chapter_08_p393-454_线性系统的状态空间分析与综合__bda93de4\\images\\figure_203.jpg",
+      "index": 203
+    },
+    "9b22cfeba7b499d3f3b8815e6bc52af6bcd2efe5a789778b35bbcafab1ad2488.jpg": {
+      "original_name": "9b22cfeba7b499d3f3b8815e6bc52af6bcd2efe5a789778b35bbcafab1ad2488.jpg",
+      "original_rel_path": "9b22cfeba7b499d3f3b8815e6bc52af6bcd2efe5a789778b35bbcafab1ad2488.jpg",
+      "friendly_name": "figure_204.jpg",
+      "abs_path": "data/mineru_cache\\chapter_08_p393-454_线性系统的状态空间分析与综合__bda93de4\\images\\figure_204.jpg",
+      "index": 204
+    },
+    "9b92d26346e342ae787e57238371b3c9d8d01c3ba34e0ac29b02860b720cdd14.jpg": {
+      "original_name": "9b92d26346e342ae787e57238371b3c9d8d01c3ba34e0ac29b02860b720cdd14.jpg",
+      "original_rel_path": "9b92d26346e342ae787e57238371b3c9d8d01c3ba34e0ac29b02860b720cdd14.jpg",
+      "friendly_name": "figure_205.jpg",
+      "abs_path": "data/mineru_cache\\chapter_08_p393-454_线性系统的状态空间分析与综合__bda93de4\\images\\figure_205.jpg",
+      "index": 205
+    },
+    "9d3c6280ebc8f025b11dce5c8ef409181a81156debadee0275041113e1658831.jpg": {
+      "original_name": "9d3c6280ebc8f025b11dce5c8ef409181a81156debadee0275041113e1658831.jpg",
+      "original_rel_path": "9d3c6280ebc8f025b11dce5c8ef409181a81156debadee0275041113e1658831.jpg",
+      "friendly_name": "figure_206.jpg",
+      "abs_path": "data/mineru_cache\\chapter_08_p393-454_线性系统的状态空间分析与综合__bda93de4\\images\\figure_206.jpg",
+      "index": 206
+    },
+    "9ead527b2d61f4c542d899d4bf10e695b8ae707464d0c80f498201ae1149fc27.jpg": {
+      "original_name": "9ead527b2d61f4c542d899d4bf10e695b8ae707464d0c80f498201ae1149fc27.jpg",
+      "original_rel_path": "9ead527b2d61f4c542d899d4bf10e695b8ae707464d0c80f498201ae1149fc27.jpg",
+      "friendly_name": "figure_207.jpg",
+      "abs_path": "data/mineru_cache\\chapter_08_p393-454_线性系统的状态空间分析与综合__bda93de4\\images\\figure_207.jpg",
+      "index": 207
+    },
+    "9eef85e2941da41343baa47ed672a08fe5fe3ab39e2f20a44d7a1801cb5a5531.jpg": {
+      "original_name": "9eef85e2941da41343baa47ed672a08fe5fe3ab39e2f20a44d7a1801cb5a5531.jpg",
+      "original_rel_path": "9eef85e2941da41343baa47ed672a08fe5fe3ab39e2f20a44d7a1801cb5a5531.jpg",
+      "friendly_name": "figure_208.jpg",
+      "abs_path": "data/mineru_cache\\chapter_08_p393-454_线性系统的状态空间分析与综合__bda93de4\\images\\figure_208.jpg",
+      "index": 208
+    },
+    "a0d13a151470d44f6fd73f5a73205f6ad3c7d5e85c5e09264c22c376b0f2bd03.jpg": {
+      "original_name": "a0d13a151470d44f6fd73f5a73205f6ad3c7d5e85c5e09264c22c376b0f2bd03.jpg",
+      "original_rel_path": "a0d13a151470d44f6fd73f5a73205f6ad3c7d5e85c5e09264c22c376b0f2bd03.jpg",
+      "friendly_name": "figure_209.jpg",
+      "abs_path": "data/mineru_cache\\chapter_08_p393-454_线性系统的状态空间分析与综合__bda93de4\\images\\figure_209.jpg",
+      "index": 209
+    },
+    "a2b6dc0c2d0296c88ceb9de02d2a31f54f480969bdddd05c041263ca31ef5fa0.jpg": {
+      "original_name": "a2b6dc0c2d0296c88ceb9de02d2a31f54f480969bdddd05c041263ca31ef5fa0.jpg",
+      "original_rel_path": "a2b6dc0c2d0296c88ceb9de02d2a31f54f480969bdddd05c041263ca31ef5fa0.jpg",
+      "friendly_name": "figure_210.jpg",
+      "abs_path": "data/mineru_cache\\chapter_08_p393-454_线性系统的状态空间分析与综合__bda93de4\\images\\figure_210.jpg",
+      "index": 210
+    },
+    "a31d9d4d1b88146a9fa2bbd8fb89150f2bda354523811ab046f4fa30cf2f1941.jpg": {
+      "original_name": "a31d9d4d1b88146a9fa2bbd8fb89150f2bda354523811ab046f4fa30cf2f1941.jpg",
+      "original_rel_path": "a31d9d4d1b88146a9fa2bbd8fb89150f2bda354523811ab046f4fa30cf2f1941.jpg",
+      "friendly_name": "figure_211.jpg",
+      "abs_path": "data/mineru_cache\\chapter_08_p393-454_线性系统的状态空间分析与综合__bda93de4\\images\\figure_211.jpg",
+      "index": 211
+    },
+    "a3cf43c3b706622c4f790874119913129628dad18d31d5327ab19d03d61dd593.jpg": {
+      "original_name": "a3cf43c3b706622c4f790874119913129628dad18d31d5327ab19d03d61dd593.jpg",
+      "original_rel_path": "a3cf43c3b706622c4f790874119913129628dad18d31d5327ab19d03d61dd593.jpg",
+      "friendly_name": "figure_212.jpg",
+      "abs_path": "data/mineru_cache\\chapter_08_p393-454_线性系统的状态空间分析与综合__bda93de4\\images\\figure_212.jpg",
+      "index": 212
+    },
+    "a43335185001cdc4854a170f463b9cd441644494df659b87086d313307852f49.jpg": {
+      "original_name": "a43335185001cdc4854a170f463b9cd441644494df659b87086d313307852f49.jpg",
+      "original_rel_path": "a43335185001cdc4854a170f463b9cd441644494df659b87086d313307852f49.jpg",
+      "friendly_name": "figure_213.jpg",
+      "abs_path": "data/mineru_cache\\chapter_08_p393-454_线性系统的状态空间分析与综合__bda93de4\\images\\figure_213.jpg",
+      "index": 213
+    },
+    "a4c8ccf4d5a0424ab1a357903152ac39cac661fc9ba0896dcae23b0cbf9b6827.jpg": {
+      "original_name": "a4c8ccf4d5a0424ab1a357903152ac39cac661fc9ba0896dcae23b0cbf9b6827.jpg",
+      "original_rel_path": "a4c8ccf4d5a0424ab1a357903152ac39cac661fc9ba0896dcae23b0cbf9b6827.jpg",
+      "friendly_name": "figure_214.jpg",
+      "abs_path": "data/mineru_cache\\chapter_08_p393-454_线性系统的状态空间分析与综合__bda93de4\\images\\figure_214.jpg",
+      "index": 214
+    },
+    "a51791fbb8477d21a52a118fb3a9917f089696c88d2709d5f6b249dd9fd8a9ab.jpg": {
+      "original_name": "a51791fbb8477d21a52a118fb3a9917f089696c88d2709d5f6b249dd9fd8a9ab.jpg",
+      "original_rel_path": "a51791fbb8477d21a52a118fb3a9917f089696c88d2709d5f6b249dd9fd8a9ab.jpg",
+      "friendly_name": "figure_215.jpg",
+      "abs_path": "data/mineru_cache\\chapter_08_p393-454_线性系统的状态空间分析与综合__bda93de4\\images\\figure_215.jpg",
+      "index": 215
+    },
+    "a678d350ff5a9136114c25dae0c9ac29295b4f0edea1ac71a3cbc538b03aed0c.jpg": {
+      "original_name": "a678d350ff5a9136114c25dae0c9ac29295b4f0edea1ac71a3cbc538b03aed0c.jpg",
+      "original_rel_path": "a678d350ff5a9136114c25dae0c9ac29295b4f0edea1ac71a3cbc538b03aed0c.jpg",
+      "friendly_name": "figure_216.jpg",
+      "abs_path": "data/mineru_cache\\chapter_08_p393-454_线性系统的状态空间分析与综合__bda93de4\\images\\figure_216.jpg",
+      "index": 216
+    },
+    "a74aeff3083914d05409197fc022794481d7f8be58eba55b12fc1adca780c8bd.jpg": {
+      "original_name": "a74aeff3083914d05409197fc022794481d7f8be58eba55b12fc1adca780c8bd.jpg",
+      "original_rel_path": "a74aeff3083914d05409197fc022794481d7f8be58eba55b12fc1adca780c8bd.jpg",
+      "friendly_name": "figure_217.jpg",
+      "abs_path": "data/mineru_cache\\chapter_08_p393-454_线性系统的状态空间分析与综合__bda93de4\\images\\figure_217.jpg",
+      "index": 217
+    },
+    "a7fc254e3be749799627eeb3b947a7499190bcab1a9e086c531cbaaa18cd8bc2.jpg": {
+      "original_name": "a7fc254e3be749799627eeb3b947a7499190bcab1a9e086c531cbaaa18cd8bc2.jpg",
+      "original_rel_path": "a7fc254e3be749799627eeb3b947a7499190bcab1a9e086c531cbaaa18cd8bc2.jpg",
+      "friendly_name": "figure_218.jpg",
+      "abs_path": "data/mineru_cache\\chapter_08_p393-454_线性系统的状态空间分析与综合__bda93de4\\images\\figure_218.jpg",
+      "index": 218
+    },
+    "aadca56d8b3b549af95d2cfc37a79b9f16fb9dc2c5d713c8bfd2206749722de1.jpg": {
+      "original_name": "aadca56d8b3b549af95d2cfc37a79b9f16fb9dc2c5d713c8bfd2206749722de1.jpg",
+      "original_rel_path": "aadca56d8b3b549af95d2cfc37a79b9f16fb9dc2c5d713c8bfd2206749722de1.jpg",
+      "friendly_name": "figure_219.jpg",
+      "abs_path": "data/mineru_cache\\chapter_08_p393-454_线性系统的状态空间分析与综合__bda93de4\\images\\figure_219.jpg",
+      "index": 219
+    },
+    "ab09aab3486de8f9367c030cb3f00ad44e0952241c8df104054487544afefc48.jpg": {
+      "original_name": "ab09aab3486de8f9367c030cb3f00ad44e0952241c8df104054487544afefc48.jpg",
+      "original_rel_path": "ab09aab3486de8f9367c030cb3f00ad44e0952241c8df104054487544afefc48.jpg",
+      "friendly_name": "figure_220.jpg",
+      "abs_path": "data/mineru_cache\\chapter_08_p393-454_线性系统的状态空间分析与综合__bda93de4\\images\\figure_220.jpg",
+      "index": 220
+    },
+    "ab4cf7c006ff8ffaae20b85db5c8ef2aae23d600f23e16c3a11f232c61d4ed36.jpg": {
+      "original_name": "ab4cf7c006ff8ffaae20b85db5c8ef2aae23d600f23e16c3a11f232c61d4ed36.jpg",
+      "original_rel_path": "ab4cf7c006ff8ffaae20b85db5c8ef2aae23d600f23e16c3a11f232c61d4ed36.jpg",
+      "friendly_name": "figure_221.jpg",
+      "abs_path": "data/mineru_cache\\chapter_08_p393-454_线性系统的状态空间分析与综合__bda93de4\\images\\figure_221.jpg",
+      "index": 221
+    },
+    "abff426a80322fd07be8f9a322586d29654b25a2337b5955419060d6b0c80558.jpg": {
+      "original_name": "abff426a80322fd07be8f9a322586d29654b25a2337b5955419060d6b0c80558.jpg",
+      "original_rel_path": "abff426a80322fd07be8f9a322586d29654b25a2337b5955419060d6b0c80558.jpg",
+      "friendly_name": "figure_222.jpg",
+      "abs_path": "data/mineru_cache\\chapter_08_p393-454_线性系统的状态空间分析与综合__bda93de4\\images\\figure_222.jpg",
+      "index": 222
+    },
+    "ac691e175f26bf26cae1da260a7edc7201c5a328e4a39aaf8c7ca631977fe409.jpg": {
+      "original_name": "ac691e175f26bf26cae1da260a7edc7201c5a328e4a39aaf8c7ca631977fe409.jpg",
+      "original_rel_path": "ac691e175f26bf26cae1da260a7edc7201c5a328e4a39aaf8c7ca631977fe409.jpg",
+      "friendly_name": "figure_223.jpg",
+      "abs_path": "data/mineru_cache\\chapter_08_p393-454_线性系统的状态空间分析与综合__bda93de4\\images\\figure_223.jpg",
+      "index": 223
+    },
+    "aea3298b1e31a0f20100b054a68bf5a26c4906559d6905488b64ffd3b6b685dd.jpg": {
+      "original_name": "aea3298b1e31a0f20100b054a68bf5a26c4906559d6905488b64ffd3b6b685dd.jpg",
+      "original_rel_path": "aea3298b1e31a0f20100b054a68bf5a26c4906559d6905488b64ffd3b6b685dd.jpg",
+      "friendly_name": "figure_224.jpg",
+      "abs_path": "data/mineru_cache\\chapter_08_p393-454_线性系统的状态空间分析与综合__bda93de4\\images\\figure_224.jpg",
+      "index": 224
+    },
+    "af1c4b3ec8260efbadc1288082cd28223b730634ecc347c51f2c483632c2c9be.jpg": {
+      "original_name": "af1c4b3ec8260efbadc1288082cd28223b730634ecc347c51f2c483632c2c9be.jpg",
+      "original_rel_path": "af1c4b3ec8260efbadc1288082cd28223b730634ecc347c51f2c483632c2c9be.jpg",
+      "friendly_name": "figure_225.jpg",
+      "abs_path": "data/mineru_cache\\chapter_08_p393-454_线性系统的状态空间分析与综合__bda93de4\\images\\figure_225.jpg",
+      "index": 225
+    },
+    "af7bf134aa697337dd2155d593af7bb73b8845154de3f80634100a841a8f92b7.jpg": {
+      "original_name": "af7bf134aa697337dd2155d593af7bb73b8845154de3f80634100a841a8f92b7.jpg",
+      "original_rel_path": "af7bf134aa697337dd2155d593af7bb73b8845154de3f80634100a841a8f92b7.jpg",
+      "friendly_name": "figure_226.jpg",
+      "abs_path": "data/mineru_cache\\chapter_08_p393-454_线性系统的状态空间分析与综合__bda93de4\\images\\figure_226.jpg",
+      "index": 226
+    },
+    "afa5e8e584c068e7ce889f3431d8f95f9b7806560ec4953bd02daeacc043b295.jpg": {
+      "original_name": "afa5e8e584c068e7ce889f3431d8f95f9b7806560ec4953bd02daeacc043b295.jpg",
+      "original_rel_path": "afa5e8e584c068e7ce889f3431d8f95f9b7806560ec4953bd02daeacc043b295.jpg",
+      "friendly_name": "figure_227.jpg",
+      "abs_path": "data/mineru_cache\\chapter_08_p393-454_线性系统的状态空间分析与综合__bda93de4\\images\\figure_227.jpg",
+      "index": 227
+    },
+    "afb0c7d2ff55ddea854b37701b8f7c55ff0a0a5c396d9fb3b6a3b0411b3cd57d.jpg": {
+      "original_name": "afb0c7d2ff55ddea854b37701b8f7c55ff0a0a5c396d9fb3b6a3b0411b3cd57d.jpg",
+      "original_rel_path": "afb0c7d2ff55ddea854b37701b8f7c55ff0a0a5c396d9fb3b6a3b0411b3cd57d.jpg",
+      "friendly_name": "figure_228.jpg",
+      "abs_path": "data/mineru_cache\\chapter_08_p393-454_线性系统的状态空间分析与综合__bda93de4\\images\\figure_228.jpg",
+      "index": 228
+    },
+    "b0385f4019c1a0e4ab55601fccee9c5605294deb9800078699c298a0adad978b.jpg": {
+      "original_name": "b0385f4019c1a0e4ab55601fccee9c5605294deb9800078699c298a0adad978b.jpg",
+      "original_rel_path": "b0385f4019c1a0e4ab55601fccee9c5605294deb9800078699c298a0adad978b.jpg",
+      "friendly_name": "figure_229.jpg",
+      "abs_path": "data/mineru_cache\\chapter_08_p393-454_线性系统的状态空间分析与综合__bda93de4\\images\\figure_229.jpg",
+      "index": 229
+    },
+    "b0c3e59317c13668f08a08e61b12443b7601f38a44066ee40a4d5ed96a4eb61f.jpg": {
+      "original_name": "b0c3e59317c13668f08a08e61b12443b7601f38a44066ee40a4d5ed96a4eb61f.jpg",
+      "original_rel_path": "b0c3e59317c13668f08a08e61b12443b7601f38a44066ee40a4d5ed96a4eb61f.jpg",
+      "friendly_name": "figure_230.jpg",
+      "abs_path": "data/mineru_cache\\chapter_08_p393-454_线性系统的状态空间分析与综合__bda93de4\\images\\figure_230.jpg",
+      "index": 230
+    },
+    "b16cd291cf0f13d028b16b55fbd2978367c99b8e356a47fa8b092514439aceb8.jpg": {
+      "original_name": "b16cd291cf0f13d028b16b55fbd2978367c99b8e356a47fa8b092514439aceb8.jpg",
+      "original_rel_path": "b16cd291cf0f13d028b16b55fbd2978367c99b8e356a47fa8b092514439aceb8.jpg",
+      "friendly_name": "figure_231.jpg",
+      "abs_path": "data/mineru_cache\\chapter_08_p393-454_线性系统的状态空间分析与综合__bda93de4\\images\\figure_231.jpg",
+      "index": 231
+    },
+    "b224c4503436b869e094379de8d699cab40de94cb1b13a436e734980ae2a5456.jpg": {
+      "original_name": "b224c4503436b869e094379de8d699cab40de94cb1b13a436e734980ae2a5456.jpg",
+      "original_rel_path": "b224c4503436b869e094379de8d699cab40de94cb1b13a436e734980ae2a5456.jpg",
+      "friendly_name": "figure_232.jpg",
+      "abs_path": "data/mineru_cache\\chapter_08_p393-454_线性系统的状态空间分析与综合__bda93de4\\images\\figure_232.jpg",
+      "index": 232
+    },
+    "b2f31da4e2ffb44312883c54495724ebf1273cdcb3a70dc0c0274b193fe6f25c.jpg": {
+      "original_name": "b2f31da4e2ffb44312883c54495724ebf1273cdcb3a70dc0c0274b193fe6f25c.jpg",
+      "original_rel_path": "b2f31da4e2ffb44312883c54495724ebf1273cdcb3a70dc0c0274b193fe6f25c.jpg",
+      "friendly_name": "figure_233.jpg",
+      "abs_path": "data/mineru_cache\\chapter_08_p393-454_线性系统的状态空间分析与综合__bda93de4\\images\\figure_233.jpg",
+      "index": 233
+    },
+    "b30979b78e4b033e5676e9d1cf6ab720f9a53fe36a85cfa0e3ce1cf9f343d010.jpg": {
+      "original_name": "b30979b78e4b033e5676e9d1cf6ab720f9a53fe36a85cfa0e3ce1cf9f343d010.jpg",
+      "original_rel_path": "b30979b78e4b033e5676e9d1cf6ab720f9a53fe36a85cfa0e3ce1cf9f343d010.jpg",
+      "friendly_name": "figure_234.jpg",
+      "abs_path": "data/mineru_cache\\chapter_08_p393-454_线性系统的状态空间分析与综合__bda93de4\\images\\figure_234.jpg",
+      "index": 234
+    },
+    "b31d33a2c545a47e3f1592e767b6d1c0a50e62a01d85d1a0d7740bc5d9fa8db6.jpg": {
+      "original_name": "b31d33a2c545a47e3f1592e767b6d1c0a50e62a01d85d1a0d7740bc5d9fa8db6.jpg",
+      "original_rel_path": "b31d33a2c545a47e3f1592e767b6d1c0a50e62a01d85d1a0d7740bc5d9fa8db6.jpg",
+      "friendly_name": "figure_235.jpg",
+      "abs_path": "data/mineru_cache\\chapter_08_p393-454_线性系统的状态空间分析与综合__bda93de4\\images\\figure_235.jpg",
+      "index": 235
+    },
+    "b34cf9280fe1eaa993e384d681602135dd70b2e870f61a133063e937b290d6f8.jpg": {
+      "original_name": "b34cf9280fe1eaa993e384d681602135dd70b2e870f61a133063e937b290d6f8.jpg",
+      "original_rel_path": "b34cf9280fe1eaa993e384d681602135dd70b2e870f61a133063e937b290d6f8.jpg",
+      "friendly_name": "figure_236.jpg",
+      "abs_path": "data/mineru_cache\\chapter_08_p393-454_线性系统的状态空间分析与综合__bda93de4\\images\\figure_236.jpg",
+      "index": 236
+    },
+    "b353d1468b023db2131c145496e204310b6f730a0de56c27593fe9fc5f099b45.jpg": {
+      "original_name": "b353d1468b023db2131c145496e204310b6f730a0de56c27593fe9fc5f099b45.jpg",
+      "original_rel_path": "b353d1468b023db2131c145496e204310b6f730a0de56c27593fe9fc5f099b45.jpg",
+      "friendly_name": "figure_237.jpg",
+      "abs_path": "data/mineru_cache\\chapter_08_p393-454_线性系统的状态空间分析与综合__bda93de4\\images\\figure_237.jpg",
+      "index": 237
+    },
+    "b3e5b7e247187771ed598a9c64b74ccbc718d41cadceb6e3f8193c340d79ef05.jpg": {
+      "original_name": "b3e5b7e247187771ed598a9c64b74ccbc718d41cadceb6e3f8193c340d79ef05.jpg",
+      "original_rel_path": "b3e5b7e247187771ed598a9c64b74ccbc718d41cadceb6e3f8193c340d79ef05.jpg",
+      "friendly_name": "figure_238.jpg",
+      "abs_path": "data/mineru_cache\\chapter_08_p393-454_线性系统的状态空间分析与综合__bda93de4\\images\\figure_238.jpg",
+      "index": 238
+    },
+    "b588c7bb1e9af936db411cd2a3d6a107bf1713115b7421128c5023c0ed2338e5.jpg": {
+      "original_name": "b588c7bb1e9af936db411cd2a3d6a107bf1713115b7421128c5023c0ed2338e5.jpg",
+      "original_rel_path": "b588c7bb1e9af936db411cd2a3d6a107bf1713115b7421128c5023c0ed2338e5.jpg",
+      "friendly_name": "figure_239.jpg",
+      "abs_path": "data/mineru_cache\\chapter_08_p393-454_线性系统的状态空间分析与综合__bda93de4\\images\\figure_239.jpg",
+      "index": 239
+    },
+    "b654e065afefd971e345f851ceaf6ccfc43da12bd59f1726e60b8cb05aaad172.jpg": {
+      "original_name": "b654e065afefd971e345f851ceaf6ccfc43da12bd59f1726e60b8cb05aaad172.jpg",
+      "original_rel_path": "b654e065afefd971e345f851ceaf6ccfc43da12bd59f1726e60b8cb05aaad172.jpg",
+      "friendly_name": "figure_240.jpg",
+      "abs_path": "data/mineru_cache\\chapter_08_p393-454_线性系统的状态空间分析与综合__bda93de4\\images\\figure_240.jpg",
+      "index": 240
+    },
+    "b7a0874a51190a52a892a714f0161bb1c372156b7672be5f0f74e945972927b6.jpg": {
+      "original_name": "b7a0874a51190a52a892a714f0161bb1c372156b7672be5f0f74e945972927b6.jpg",
+      "original_rel_path": "b7a0874a51190a52a892a714f0161bb1c372156b7672be5f0f74e945972927b6.jpg",
+      "friendly_name": "figure_241.jpg",
+      "abs_path": "data/mineru_cache\\chapter_08_p393-454_线性系统的状态空间分析与综合__bda93de4\\images\\figure_241.jpg",
+      "index": 241
+    },
+    "b866b4d0e3323767fb3a14c966252a9572da2b218a37798fad8b2fca3694815e.jpg": {
+      "original_name": "b866b4d0e3323767fb3a14c966252a9572da2b218a37798fad8b2fca3694815e.jpg",
+      "original_rel_path": "b866b4d0e3323767fb3a14c966252a9572da2b218a37798fad8b2fca3694815e.jpg",
+      "friendly_name": "figure_242.jpg",
+      "abs_path": "data/mineru_cache\\chapter_08_p393-454_线性系统的状态空间分析与综合__bda93de4\\images\\figure_242.jpg",
+      "index": 242
+    },
+    "b8787f59b3cfd92006b832c3a007912ab931153240b806070f432a970aa2b79e.jpg": {
+      "original_name": "b8787f59b3cfd92006b832c3a007912ab931153240b806070f432a970aa2b79e.jpg",
+      "original_rel_path": "b8787f59b3cfd92006b832c3a007912ab931153240b806070f432a970aa2b79e.jpg",
+      "friendly_name": "figure_243.jpg",
+      "abs_path": "data/mineru_cache\\chapter_08_p393-454_线性系统的状态空间分析与综合__bda93de4\\images\\figure_243.jpg",
+      "index": 243
+    },
+    "b8e3d98a678a94e116e69fe0f52a6383e845df8f833f7a8dd4bb28bd62fee189.jpg": {
+      "original_name": "b8e3d98a678a94e116e69fe0f52a6383e845df8f833f7a8dd4bb28bd62fee189.jpg",
+      "original_rel_path": "b8e3d98a678a94e116e69fe0f52a6383e845df8f833f7a8dd4bb28bd62fee189.jpg",
+      "friendly_name": "figure_244.jpg",
+      "abs_path": "data/mineru_cache\\chapter_08_p393-454_线性系统的状态空间分析与综合__bda93de4\\images\\figure_244.jpg",
+      "index": 244
+    },
+    "bb52e678deeb1ff56c38eecbb651ee0728e7eebddd0913d411ccc61656615954.jpg": {
+      "original_name": "bb52e678deeb1ff56c38eecbb651ee0728e7eebddd0913d411ccc61656615954.jpg",
+      "original_rel_path": "bb52e678deeb1ff56c38eecbb651ee0728e7eebddd0913d411ccc61656615954.jpg",
+      "friendly_name": "figure_245.jpg",
+      "abs_path": "data/mineru_cache\\chapter_08_p393-454_线性系统的状态空间分析与综合__bda93de4\\images\\figure_245.jpg",
+      "index": 245
+    },
+    "bc26a5cc6bedd3998f981e7b0a293a762869c5cd93f68067950f6b861503e5d1.jpg": {
+      "original_name": "bc26a5cc6bedd3998f981e7b0a293a762869c5cd93f68067950f6b861503e5d1.jpg",
+      "original_rel_path": "bc26a5cc6bedd3998f981e7b0a293a762869c5cd93f68067950f6b861503e5d1.jpg",
+      "friendly_name": "figure_246.jpg",
+      "abs_path": "data/mineru_cache\\chapter_08_p393-454_线性系统的状态空间分析与综合__bda93de4\\images\\figure_246.jpg",
+      "index": 246
+    },
+    "bcd23574959d759bafa6b28028d4a6af77b1caadbd3471a8c8580b0bd49b2e50.jpg": {
+      "original_name": "bcd23574959d759bafa6b28028d4a6af77b1caadbd3471a8c8580b0bd49b2e50.jpg",
+      "original_rel_path": "bcd23574959d759bafa6b28028d4a6af77b1caadbd3471a8c8580b0bd49b2e50.jpg",
+      "friendly_name": "figure_247.jpg",
+      "abs_path": "data/mineru_cache\\chapter_08_p393-454_线性系统的状态空间分析与综合__bda93de4\\images\\figure_247.jpg",
+      "index": 247
+    },
+    "bd9a21d4be8ccae5e14671f50a498afac263fd07f1a6de179015f590c0f53c21.jpg": {
+      "original_name": "bd9a21d4be8ccae5e14671f50a498afac263fd07f1a6de179015f590c0f53c21.jpg",
+      "original_rel_path": "bd9a21d4be8ccae5e14671f50a498afac263fd07f1a6de179015f590c0f53c21.jpg",
+      "friendly_name": "figure_248.jpg",
+      "abs_path": "data/mineru_cache\\chapter_08_p393-454_线性系统的状态空间分析与综合__bda93de4\\images\\figure_248.jpg",
+      "index": 248
+    },
+    "bdef1467954455ae44a975264806a6afe62592efb5c78a56486e91968b8aca19.jpg": {
+      "original_name": "bdef1467954455ae44a975264806a6afe62592efb5c78a56486e91968b8aca19.jpg",
+      "original_rel_path": "bdef1467954455ae44a975264806a6afe62592efb5c78a56486e91968b8aca19.jpg",
+      "friendly_name": "figure_249.jpg",
+      "abs_path": "data/mineru_cache\\chapter_08_p393-454_线性系统的状态空间分析与综合__bda93de4\\images\\figure_249.jpg",
+      "index": 249
+    },
+    "bee6e4250febd25be9fb35d965526c9ea725f84313fdf52db0b9cd0579245c23.jpg": {
+      "original_name": "bee6e4250febd25be9fb35d965526c9ea725f84313fdf52db0b9cd0579245c23.jpg",
+      "original_rel_path": "bee6e4250febd25be9fb35d965526c9ea725f84313fdf52db0b9cd0579245c23.jpg",
+      "friendly_name": "figure_250.jpg",
+      "abs_path": "data/mineru_cache\\chapter_08_p393-454_线性系统的状态空间分析与综合__bda93de4\\images\\figure_250.jpg",
+      "index": 250
+    },
+    "beec8eb6eba25d75525dec082187f64e461b66707aec9f63c0e868b287119d8f.jpg": {
+      "original_name": "beec8eb6eba25d75525dec082187f64e461b66707aec9f63c0e868b287119d8f.jpg",
+      "original_rel_path": "beec8eb6eba25d75525dec082187f64e461b66707aec9f63c0e868b287119d8f.jpg",
+      "friendly_name": "figure_251.jpg",
+      "abs_path": "data/mineru_cache\\chapter_08_p393-454_线性系统的状态空间分析与综合__bda93de4\\images\\figure_251.jpg",
+      "index": 251
+    },
+    "c232e45bb0d68c78a9210e9f5d642d14091bd47cf1308a08909c442b567a56a4.jpg": {
+      "original_name": "c232e45bb0d68c78a9210e9f5d642d14091bd47cf1308a08909c442b567a56a4.jpg",
+      "original_rel_path": "c232e45bb0d68c78a9210e9f5d642d14091bd47cf1308a08909c442b567a56a4.jpg",
+      "friendly_name": "figure_252.jpg",
+      "abs_path": "data/mineru_cache\\chapter_08_p393-454_线性系统的状态空间分析与综合__bda93de4\\images\\figure_252.jpg",
+      "index": 252
+    },
+    "c27e1bddc37bb90a61b9875c435cfb9be2257e8dd5c213b065559c498c2a9069.jpg": {
+      "original_name": "c27e1bddc37bb90a61b9875c435cfb9be2257e8dd5c213b065559c498c2a9069.jpg",
+      "original_rel_path": "c27e1bddc37bb90a61b9875c435cfb9be2257e8dd5c213b065559c498c2a9069.jpg",
+      "friendly_name": "figure_253.jpg",
+      "abs_path": "data/mineru_cache\\chapter_08_p393-454_线性系统的状态空间分析与综合__bda93de4\\images\\figure_253.jpg",
+      "index": 253
+    },
+    "c309d4cffbcb519b43cf9474512285e9725a63e309727f696659c1c9ff1c0ccc.jpg": {
+      "original_name": "c309d4cffbcb519b43cf9474512285e9725a63e309727f696659c1c9ff1c0ccc.jpg",
+      "original_rel_path": "c309d4cffbcb519b43cf9474512285e9725a63e309727f696659c1c9ff1c0ccc.jpg",
+      "friendly_name": "figure_254.jpg",
+      "abs_path": "data/mineru_cache\\chapter_08_p393-454_线性系统的状态空间分析与综合__bda93de4\\images\\figure_254.jpg",
+      "index": 254
+    },
+    "c3595d33f322f13f528b74df15a5ac864e5a668c22c185e707d3288ac7e109df.jpg": {
+      "original_name": "c3595d33f322f13f528b74df15a5ac864e5a668c22c185e707d3288ac7e109df.jpg",
+      "original_rel_path": "c3595d33f322f13f528b74df15a5ac864e5a668c22c185e707d3288ac7e109df.jpg",
+      "friendly_name": "figure_255.jpg",
+      "abs_path": "data/mineru_cache\\chapter_08_p393-454_线性系统的状态空间分析与综合__bda93de4\\images\\figure_255.jpg",
+      "index": 255
+    },
+    "c4a0f377582f70e485e24fc40314b0c2d45b16f9872966e51d551ddab21674e3.jpg": {
+      "original_name": "c4a0f377582f70e485e24fc40314b0c2d45b16f9872966e51d551ddab21674e3.jpg",
+      "original_rel_path": "c4a0f377582f70e485e24fc40314b0c2d45b16f9872966e51d551ddab21674e3.jpg",
+      "friendly_name": "figure_256.jpg",
+      "abs_path": "data/mineru_cache\\chapter_08_p393-454_线性系统的状态空间分析与综合__bda93de4\\images\\figure_256.jpg",
+      "index": 256
+    },
+    "c4fe5316c39463d454abe5bc482afd4347f73e37a331c40ddad6d6830ebe4bad.jpg": {
+      "original_name": "c4fe5316c39463d454abe5bc482afd4347f73e37a331c40ddad6d6830ebe4bad.jpg",
+      "original_rel_path": "c4fe5316c39463d454abe5bc482afd4347f73e37a331c40ddad6d6830ebe4bad.jpg",
+      "friendly_name": "figure_257.jpg",
+      "abs_path": "data/mineru_cache\\chapter_08_p393-454_线性系统的状态空间分析与综合__bda93de4\\images\\figure_257.jpg",
+      "index": 257
+    },
+    "c504f61f243c6f1df464016f0fedfbbd70c23f112043a32d0c76746ef2ca2d65.jpg": {
+      "original_name": "c504f61f243c6f1df464016f0fedfbbd70c23f112043a32d0c76746ef2ca2d65.jpg",
+      "original_rel_path": "c504f61f243c6f1df464016f0fedfbbd70c23f112043a32d0c76746ef2ca2d65.jpg",
+      "friendly_name": "figure_258.jpg",
+      "abs_path": "data/mineru_cache\\chapter_08_p393-454_线性系统的状态空间分析与综合__bda93de4\\images\\figure_258.jpg",
+      "index": 258
+    },
+    "c5520b430ce8b0790bc63959847cc9d88f7d022e52c6064bf85a4c6d3e250427.jpg": {
+      "original_name": "c5520b430ce8b0790bc63959847cc9d88f7d022e52c6064bf85a4c6d3e250427.jpg",
+      "original_rel_path": "c5520b430ce8b0790bc63959847cc9d88f7d022e52c6064bf85a4c6d3e250427.jpg",
+      "friendly_name": "figure_259.jpg",
+      "abs_path": "data/mineru_cache\\chapter_08_p393-454_线性系统的状态空间分析与综合__bda93de4\\images\\figure_259.jpg",
+      "index": 259
+    },
+    "c55dd36156db8fc1674871f9e06e91c7a3e5be0b858fbacfce3b8b3a59d9277f.jpg": {
+      "original_name": "c55dd36156db8fc1674871f9e06e91c7a3e5be0b858fbacfce3b8b3a59d9277f.jpg",
+      "original_rel_path": "c55dd36156db8fc1674871f9e06e91c7a3e5be0b858fbacfce3b8b3a59d9277f.jpg",
+      "friendly_name": "figure_260.jpg",
+      "abs_path": "data/mineru_cache\\chapter_08_p393-454_线性系统的状态空间分析与综合__bda93de4\\images\\figure_260.jpg",
+      "index": 260
+    },
+    "c6e638b8918e5982f127b0471c7d62ca84dbba901e24b658a3045bc222e843cd.jpg": {
+      "original_name": "c6e638b8918e5982f127b0471c7d62ca84dbba901e24b658a3045bc222e843cd.jpg",
+      "original_rel_path": "c6e638b8918e5982f127b0471c7d62ca84dbba901e24b658a3045bc222e843cd.jpg",
+      "friendly_name": "figure_261.jpg",
+      "abs_path": "data/mineru_cache\\chapter_08_p393-454_线性系统的状态空间分析与综合__bda93de4\\images\\figure_261.jpg",
+      "index": 261
+    },
+    "c70fda873f76075ce96d981ca68a19bcfb31beadc656fc13a8d83dee509d0424.jpg": {
+      "original_name": "c70fda873f76075ce96d981ca68a19bcfb31beadc656fc13a8d83dee509d0424.jpg",
+      "original_rel_path": "c70fda873f76075ce96d981ca68a19bcfb31beadc656fc13a8d83dee509d0424.jpg",
+      "friendly_name": "figure_262.jpg",
+      "abs_path": "data/mineru_cache\\chapter_08_p393-454_线性系统的状态空间分析与综合__bda93de4\\images\\figure_262.jpg",
+      "index": 262
+    },
+    "c8f8e6dd1320627c25634c35bc88c9fba9857486e4e219dc34cb120fafce4dc6.jpg": {
+      "original_name": "c8f8e6dd1320627c25634c35bc88c9fba9857486e4e219dc34cb120fafce4dc6.jpg",
+      "original_rel_path": "c8f8e6dd1320627c25634c35bc88c9fba9857486e4e219dc34cb120fafce4dc6.jpg",
+      "friendly_name": "figure_263.jpg",
+      "abs_path": "data/mineru_cache\\chapter_08_p393-454_线性系统的状态空间分析与综合__bda93de4\\images\\figure_263.jpg",
+      "index": 263
+    },
+    "c9b54ee37a770efb2aa484651e1a86dba0661051c323dfb431393eaa3fad8bc4.jpg": {
+      "original_name": "c9b54ee37a770efb2aa484651e1a86dba0661051c323dfb431393eaa3fad8bc4.jpg",
+      "original_rel_path": "c9b54ee37a770efb2aa484651e1a86dba0661051c323dfb431393eaa3fad8bc4.jpg",
+      "friendly_name": "figure_264.jpg",
+      "abs_path": "data/mineru_cache\\chapter_08_p393-454_线性系统的状态空间分析与综合__bda93de4\\images\\figure_264.jpg",
+      "index": 264
+    },
+    "cad5f27e05f92e79df5f332c47e828cbbb7f2f5c7daea592f32e76d4276cd3f2.jpg": {
+      "original_name": "cad5f27e05f92e79df5f332c47e828cbbb7f2f5c7daea592f32e76d4276cd3f2.jpg",
+      "original_rel_path": "cad5f27e05f92e79df5f332c47e828cbbb7f2f5c7daea592f32e76d4276cd3f2.jpg",
+      "friendly_name": "figure_265.jpg",
+      "abs_path": "data/mineru_cache\\chapter_08_p393-454_线性系统的状态空间分析与综合__bda93de4\\images\\figure_265.jpg",
+      "index": 265
+    },
+    "cbadf1be5d4c2ca9fdeedcd311d00546fd7a7e391f653b0f3daad39d750e6503.jpg": {
+      "original_name": "cbadf1be5d4c2ca9fdeedcd311d00546fd7a7e391f653b0f3daad39d750e6503.jpg",
+      "original_rel_path": "cbadf1be5d4c2ca9fdeedcd311d00546fd7a7e391f653b0f3daad39d750e6503.jpg",
+      "friendly_name": "figure_266.jpg",
+      "abs_path": "data/mineru_cache\\chapter_08_p393-454_线性系统的状态空间分析与综合__bda93de4\\images\\figure_266.jpg",
+      "index": 266
+    },
+    "cd15d1a23b9319ac31e0a66cb0bf2c658e8bd3ab802cf0f038e9819507ea8fc7.jpg": {
+      "original_name": "cd15d1a23b9319ac31e0a66cb0bf2c658e8bd3ab802cf0f038e9819507ea8fc7.jpg",
+      "original_rel_path": "cd15d1a23b9319ac31e0a66cb0bf2c658e8bd3ab802cf0f038e9819507ea8fc7.jpg",
+      "friendly_name": "figure_267.jpg",
+      "abs_path": "data/mineru_cache\\chapter_08_p393-454_线性系统的状态空间分析与综合__bda93de4\\images\\figure_267.jpg",
+      "index": 267
+    },
+    "cd67ac161d20a5b95cecf1ad283d2bebfacd27ef357c6215366b4771bd3210eb.jpg": {
+      "original_name": "cd67ac161d20a5b95cecf1ad283d2bebfacd27ef357c6215366b4771bd3210eb.jpg",
+      "original_rel_path": "cd67ac161d20a5b95cecf1ad283d2bebfacd27ef357c6215366b4771bd3210eb.jpg",
+      "friendly_name": "figure_268.jpg",
+      "abs_path": "data/mineru_cache\\chapter_08_p393-454_线性系统的状态空间分析与综合__bda93de4\\images\\figure_268.jpg",
+      "index": 268
+    },
+    "cf497ec6c171b205e0ad3bd4f085f0ee19a82fcc56cff1afe39ff42310ea0fb4.jpg": {
+      "original_name": "cf497ec6c171b205e0ad3bd4f085f0ee19a82fcc56cff1afe39ff42310ea0fb4.jpg",
+      "original_rel_path": "cf497ec6c171b205e0ad3bd4f085f0ee19a82fcc56cff1afe39ff42310ea0fb4.jpg",
+      "friendly_name": "figure_269.jpg",
+      "abs_path": "data/mineru_cache\\chapter_08_p393-454_线性系统的状态空间分析与综合__bda93de4\\images\\figure_269.jpg",
+      "index": 269
+    },
+    "d014e4941c80f49e9f878552352e1d91a2c29233530ab06932b4a9ca5c5c986e.jpg": {
+      "original_name": "d014e4941c80f49e9f878552352e1d91a2c29233530ab06932b4a9ca5c5c986e.jpg",
+      "original_rel_path": "d014e4941c80f49e9f878552352e1d91a2c29233530ab06932b4a9ca5c5c986e.jpg",
+      "friendly_name": "figure_270.jpg",
+      "abs_path": "data/mineru_cache\\chapter_08_p393-454_线性系统的状态空间分析与综合__bda93de4\\images\\figure_270.jpg",
+      "index": 270
+    },
+    "d0f157bb11aedd25c29e0f9291579d162a9675edbbfe06a932565964e819f656.jpg": {
+      "original_name": "d0f157bb11aedd25c29e0f9291579d162a9675edbbfe06a932565964e819f656.jpg",
+      "original_rel_path": "d0f157bb11aedd25c29e0f9291579d162a9675edbbfe06a932565964e819f656.jpg",
+      "friendly_name": "figure_271.jpg",
+      "abs_path": "data/mineru_cache\\chapter_08_p393-454_线性系统的状态空间分析与综合__bda93de4\\images\\figure_271.jpg",
+      "index": 271
+    },
+    "d109527b57f67da0cb58a11b8fdc10faa7f724d85f415e8d17adf2a20f725436.jpg": {
+      "original_name": "d109527b57f67da0cb58a11b8fdc10faa7f724d85f415e8d17adf2a20f725436.jpg",
+      "original_rel_path": "d109527b57f67da0cb58a11b8fdc10faa7f724d85f415e8d17adf2a20f725436.jpg",
+      "friendly_name": "figure_272.jpg",
+      "abs_path": "data/mineru_cache\\chapter_08_p393-454_线性系统的状态空间分析与综合__bda93de4\\images\\figure_272.jpg",
+      "index": 272
+    },
+    "d14bb14008d4c61d74408f47480f1632e4f7cffc296956c214d4ad3a8e8df00b.jpg": {
+      "original_name": "d14bb14008d4c61d74408f47480f1632e4f7cffc296956c214d4ad3a8e8df00b.jpg",
+      "original_rel_path": "d14bb14008d4c61d74408f47480f1632e4f7cffc296956c214d4ad3a8e8df00b.jpg",
+      "friendly_name": "figure_273.jpg",
+      "abs_path": "data/mineru_cache\\chapter_08_p393-454_线性系统的状态空间分析与综合__bda93de4\\images\\figure_273.jpg",
+      "index": 273
+    },
+    "d195f1c450663b5378afbd438eb2f250d2d7e53069b751d7ac932de893d394fb.jpg": {
+      "original_name": "d195f1c450663b5378afbd438eb2f250d2d7e53069b751d7ac932de893d394fb.jpg",
+      "original_rel_path": "d195f1c450663b5378afbd438eb2f250d2d7e53069b751d7ac932de893d394fb.jpg",
+      "friendly_name": "figure_274.jpg",
+      "abs_path": "data/mineru_cache\\chapter_08_p393-454_线性系统的状态空间分析与综合__bda93de4\\images\\figure_274.jpg",
+      "index": 274
+    },
+    "d517755f9244f38540394d2d93962311f9c4df96534c35cd0d6f65e134f342fd.jpg": {
+      "original_name": "d517755f9244f38540394d2d93962311f9c4df96534c35cd0d6f65e134f342fd.jpg",
+      "original_rel_path": "d517755f9244f38540394d2d93962311f9c4df96534c35cd0d6f65e134f342fd.jpg",
+      "friendly_name": "figure_275.jpg",
+      "abs_path": "data/mineru_cache\\chapter_08_p393-454_线性系统的状态空间分析与综合__bda93de4\\images\\figure_275.jpg",
+      "index": 275
+    },
+    "d553be04304ce8ba393010dc18b3863b971e412478f9a17a5b6cbd16a5cb0909.jpg": {
+      "original_name": "d553be04304ce8ba393010dc18b3863b971e412478f9a17a5b6cbd16a5cb0909.jpg",
+      "original_rel_path": "d553be04304ce8ba393010dc18b3863b971e412478f9a17a5b6cbd16a5cb0909.jpg",
+      "friendly_name": "figure_276.jpg",
+      "abs_path": "data/mineru_cache\\chapter_08_p393-454_线性系统的状态空间分析与综合__bda93de4\\images\\figure_276.jpg",
+      "index": 276
+    },
+    "d5e03f71ded3e1e833024604a178f7f9f4da01d995e3a043ba7bddf4b5c6625f.jpg": {
+      "original_name": "d5e03f71ded3e1e833024604a178f7f9f4da01d995e3a043ba7bddf4b5c6625f.jpg",
+      "original_rel_path": "d5e03f71ded3e1e833024604a178f7f9f4da01d995e3a043ba7bddf4b5c6625f.jpg",
+      "friendly_name": "figure_277.jpg",
+      "abs_path": "data/mineru_cache\\chapter_08_p393-454_线性系统的状态空间分析与综合__bda93de4\\images\\figure_277.jpg",
+      "index": 277
+    },
+    "d663ddf5d5fcadadf882f059d885d4c91777c1ca1c5ead88b4fe31c5a07f0f7b.jpg": {
+      "original_name": "d663ddf5d5fcadadf882f059d885d4c91777c1ca1c5ead88b4fe31c5a07f0f7b.jpg",
+      "original_rel_path": "d663ddf5d5fcadadf882f059d885d4c91777c1ca1c5ead88b4fe31c5a07f0f7b.jpg",
+      "friendly_name": "figure_278.jpg",
+      "abs_path": "data/mineru_cache\\chapter_08_p393-454_线性系统的状态空间分析与综合__bda93de4\\images\\figure_278.jpg",
+      "index": 278
+    },
+    "d668dc86327bca1b4e7c2043cdc53a6a22667c2a215d47a9738ff80dc8c0a202.jpg": {
+      "original_name": "d668dc86327bca1b4e7c2043cdc53a6a22667c2a215d47a9738ff80dc8c0a202.jpg",
+      "original_rel_path": "d668dc86327bca1b4e7c2043cdc53a6a22667c2a215d47a9738ff80dc8c0a202.jpg",
+      "friendly_name": "figure_279.jpg",
+      "abs_path": "data/mineru_cache\\chapter_08_p393-454_线性系统的状态空间分析与综合__bda93de4\\images\\figure_279.jpg",
+      "index": 279
+    },
+    "d8016d03269b72c8613220fe42a9a42fc854763ee97184486ab7cdcd9188c783.jpg": {
+      "original_name": "d8016d03269b72c8613220fe42a9a42fc854763ee97184486ab7cdcd9188c783.jpg",
+      "original_rel_path": "d8016d03269b72c8613220fe42a9a42fc854763ee97184486ab7cdcd9188c783.jpg",
+      "friendly_name": "figure_280.jpg",
+      "abs_path": "data/mineru_cache\\chapter_08_p393-454_线性系统的状态空间分析与综合__bda93de4\\images\\figure_280.jpg",
+      "index": 280
+    },
+    "d952fa4fedd5516e569d5ad31eed460f1cb0346ab55a8da04cba9edea71115bb.jpg": {
+      "original_name": "d952fa4fedd5516e569d5ad31eed460f1cb0346ab55a8da04cba9edea71115bb.jpg",
+      "original_rel_path": "d952fa4fedd5516e569d5ad31eed460f1cb0346ab55a8da04cba9edea71115bb.jpg",
+      "friendly_name": "figure_281.jpg",
+      "abs_path": "data/mineru_cache\\chapter_08_p393-454_线性系统的状态空间分析与综合__bda93de4\\images\\figure_281.jpg",
+      "index": 281
+    },
+    "d97c931a223cf596bb7bbcde48544a4cb1ea4bb756bd909ddfe8ac6e46f86b3a.jpg": {
+      "original_name": "d97c931a223cf596bb7bbcde48544a4cb1ea4bb756bd909ddfe8ac6e46f86b3a.jpg",
+      "original_rel_path": "d97c931a223cf596bb7bbcde48544a4cb1ea4bb756bd909ddfe8ac6e46f86b3a.jpg",
+      "friendly_name": "figure_282.jpg",
+      "abs_path": "data/mineru_cache\\chapter_08_p393-454_线性系统的状态空间分析与综合__bda93de4\\images\\figure_282.jpg",
+      "index": 282
+    },
+    "dbb55917fc9cb302743645fe915c84c7329692a8fcca9b55d29fc3ab396d0c88.jpg": {
+      "original_name": "dbb55917fc9cb302743645fe915c84c7329692a8fcca9b55d29fc3ab396d0c88.jpg",
+      "original_rel_path": "dbb55917fc9cb302743645fe915c84c7329692a8fcca9b55d29fc3ab396d0c88.jpg",
+      "friendly_name": "figure_283.jpg",
+      "abs_path": "data/mineru_cache\\chapter_08_p393-454_线性系统的状态空间分析与综合__bda93de4\\images\\figure_283.jpg",
+      "index": 283
+    },
+    "dd47df14ae43a38670680d6179d683485f204547b7d13adedbcac7da42c4bbde.jpg": {
+      "original_name": "dd47df14ae43a38670680d6179d683485f204547b7d13adedbcac7da42c4bbde.jpg",
+      "original_rel_path": "dd47df14ae43a38670680d6179d683485f204547b7d13adedbcac7da42c4bbde.jpg",
+      "friendly_name": "figure_284.jpg",
+      "abs_path": "data/mineru_cache\\chapter_08_p393-454_线性系统的状态空间分析与综合__bda93de4\\images\\figure_284.jpg",
+      "index": 284
+    },
+    "df5d071d34d6d2bc6db209d4dffd58aca94023adf714034e6ca9f4d229b4c732.jpg": {
+      "original_name": "df5d071d34d6d2bc6db209d4dffd58aca94023adf714034e6ca9f4d229b4c732.jpg",
+      "original_rel_path": "df5d071d34d6d2bc6db209d4dffd58aca94023adf714034e6ca9f4d229b4c732.jpg",
+      "friendly_name": "figure_285.jpg",
+      "abs_path": "data/mineru_cache\\chapter_08_p393-454_线性系统的状态空间分析与综合__bda93de4\\images\\figure_285.jpg",
+      "index": 285
+    },
+    "df9fdc03f7ebe2086aeec6265cb49c4862ebbcebcfd3e5379c09750d899afbf8.jpg": {
+      "original_name": "df9fdc03f7ebe2086aeec6265cb49c4862ebbcebcfd3e5379c09750d899afbf8.jpg",
+      "original_rel_path": "df9fdc03f7ebe2086aeec6265cb49c4862ebbcebcfd3e5379c09750d899afbf8.jpg",
+      "friendly_name": "figure_286.jpg",
+      "abs_path": "data/mineru_cache\\chapter_08_p393-454_线性系统的状态空间分析与综合__bda93de4\\images\\figure_286.jpg",
+      "index": 286
+    },
+    "dfc2be2192f30c91bf4b80e09b4d0f1db5a83cc9931d572a3726a38958b95dc0.jpg": {
+      "original_name": "dfc2be2192f30c91bf4b80e09b4d0f1db5a83cc9931d572a3726a38958b95dc0.jpg",
+      "original_rel_path": "dfc2be2192f30c91bf4b80e09b4d0f1db5a83cc9931d572a3726a38958b95dc0.jpg",
+      "friendly_name": "figure_287.jpg",
+      "abs_path": "data/mineru_cache\\chapter_08_p393-454_线性系统的状态空间分析与综合__bda93de4\\images\\figure_287.jpg",
+      "index": 287
+    },
+    "e004f43631205bd9eb5284642be11bf5e7af112967e83bca0593ae5db4debcc9.jpg": {
+      "original_name": "e004f43631205bd9eb5284642be11bf5e7af112967e83bca0593ae5db4debcc9.jpg",
+      "original_rel_path": "e004f43631205bd9eb5284642be11bf5e7af112967e83bca0593ae5db4debcc9.jpg",
+      "friendly_name": "figure_288.jpg",
+      "abs_path": "data/mineru_cache\\chapter_08_p393-454_线性系统的状态空间分析与综合__bda93de4\\images\\figure_288.jpg",
+      "index": 288
+    },
+    "e1002c2cb0f9b61aa21b8fb101182aa5ece73547a03f1dafe45257d852e1267f.jpg": {
+      "original_name": "e1002c2cb0f9b61aa21b8fb101182aa5ece73547a03f1dafe45257d852e1267f.jpg",
+      "original_rel_path": "e1002c2cb0f9b61aa21b8fb101182aa5ece73547a03f1dafe45257d852e1267f.jpg",
+      "friendly_name": "figure_289.jpg",
+      "abs_path": "data/mineru_cache\\chapter_08_p393-454_线性系统的状态空间分析与综合__bda93de4\\images\\figure_289.jpg",
+      "index": 289
+    },
+    "e2d4e3b4ce73e27c33b26ddf1a19a749e0d7889161768df88701790cfe03cdb9.jpg": {
+      "original_name": "e2d4e3b4ce73e27c33b26ddf1a19a749e0d7889161768df88701790cfe03cdb9.jpg",
+      "original_rel_path": "e2d4e3b4ce73e27c33b26ddf1a19a749e0d7889161768df88701790cfe03cdb9.jpg",
+      "friendly_name": "figure_290.jpg",
+      "abs_path": "data/mineru_cache\\chapter_08_p393-454_线性系统的状态空间分析与综合__bda93de4\\images\\figure_290.jpg",
+      "index": 290
+    },
+    "e31b3e511751a1c4b670a6e0f99b8b874d53ea28a01d905bfa7a1caae476ab82.jpg": {
+      "original_name": "e31b3e511751a1c4b670a6e0f99b8b874d53ea28a01d905bfa7a1caae476ab82.jpg",
+      "original_rel_path": "e31b3e511751a1c4b670a6e0f99b8b874d53ea28a01d905bfa7a1caae476ab82.jpg",
+      "friendly_name": "figure_291.jpg",
+      "abs_path": "data/mineru_cache\\chapter_08_p393-454_线性系统的状态空间分析与综合__bda93de4\\images\\figure_291.jpg",
+      "index": 291
+    },
+    "e45343e680cc9db0196a8435df928c5e43d499a757237f4648a99e72dd4ca899.jpg": {
+      "original_name": "e45343e680cc9db0196a8435df928c5e43d499a757237f4648a99e72dd4ca899.jpg",
+      "original_rel_path": "e45343e680cc9db0196a8435df928c5e43d499a757237f4648a99e72dd4ca899.jpg",
+      "friendly_name": "figure_292.jpg",
+      "abs_path": "data/mineru_cache\\chapter_08_p393-454_线性系统的状态空间分析与综合__bda93de4\\images\\figure_292.jpg",
+      "index": 292
+    },
+    "e46b04f9c4b9170da06f5f5f3c9b90dfc3de4d24ebc9a11d5186a2b0d35652d9.jpg": {
+      "original_name": "e46b04f9c4b9170da06f5f5f3c9b90dfc3de4d24ebc9a11d5186a2b0d35652d9.jpg",
+      "original_rel_path": "e46b04f9c4b9170da06f5f5f3c9b90dfc3de4d24ebc9a11d5186a2b0d35652d9.jpg",
+      "friendly_name": "figure_293.jpg",
+      "abs_path": "data/mineru_cache\\chapter_08_p393-454_线性系统的状态空间分析与综合__bda93de4\\images\\figure_293.jpg",
+      "index": 293
+    },
+    "e4ee0bf10f8ae7f2307530a16b728a9fd13cdcb22f77c8d104a718e3b0a308a6.jpg": {
+      "original_name": "e4ee0bf10f8ae7f2307530a16b728a9fd13cdcb22f77c8d104a718e3b0a308a6.jpg",
+      "original_rel_path": "e4ee0bf10f8ae7f2307530a16b728a9fd13cdcb22f77c8d104a718e3b0a308a6.jpg",
+      "friendly_name": "figure_294.jpg",
+      "abs_path": "data/mineru_cache\\chapter_08_p393-454_线性系统的状态空间分析与综合__bda93de4\\images\\figure_294.jpg",
+      "index": 294
+    },
+    "e535d32e75a86d7629ba5cec174efc9e2ec8934b6432a00c7b8748cca7ce5186.jpg": {
+      "original_name": "e535d32e75a86d7629ba5cec174efc9e2ec8934b6432a00c7b8748cca7ce5186.jpg",
+      "original_rel_path": "e535d32e75a86d7629ba5cec174efc9e2ec8934b6432a00c7b8748cca7ce5186.jpg",
+      "friendly_name": "figure_295.jpg",
+      "abs_path": "data/mineru_cache\\chapter_08_p393-454_线性系统的状态空间分析与综合__bda93de4\\images\\figure_295.jpg",
+      "index": 295
+    },
+    "e53ceed6b745727d85ffa19f44699a8eda19cacfc7bd049513d77273b51bd902.jpg": {
+      "original_name": "e53ceed6b745727d85ffa19f44699a8eda19cacfc7bd049513d77273b51bd902.jpg",
+      "original_rel_path": "e53ceed6b745727d85ffa19f44699a8eda19cacfc7bd049513d77273b51bd902.jpg",
+      "friendly_name": "figure_296.jpg",
+      "abs_path": "data/mineru_cache\\chapter_08_p393-454_线性系统的状态空间分析与综合__bda93de4\\images\\figure_296.jpg",
+      "index": 296
+    },
+    "e588f496aa467d24ba4e1c2d02e3d7e915d5eac7bac6308410ce2b4f0376625f.jpg": {
+      "original_name": "e588f496aa467d24ba4e1c2d02e3d7e915d5eac7bac6308410ce2b4f0376625f.jpg",
+      "original_rel_path": "e588f496aa467d24ba4e1c2d02e3d7e915d5eac7bac6308410ce2b4f0376625f.jpg",
+      "friendly_name": "figure_297.jpg",
+      "abs_path": "data/mineru_cache\\chapter_08_p393-454_线性系统的状态空间分析与综合__bda93de4\\images\\figure_297.jpg",
+      "index": 297
+    },
+    "e6c52d35129916e86fe0e40e0d4430e8f3ca4940e6faa762b14f45364a18035e.jpg": {
+      "original_name": "e6c52d35129916e86fe0e40e0d4430e8f3ca4940e6faa762b14f45364a18035e.jpg",
+      "original_rel_path": "e6c52d35129916e86fe0e40e0d4430e8f3ca4940e6faa762b14f45364a18035e.jpg",
+      "friendly_name": "figure_298.jpg",
+      "abs_path": "data/mineru_cache\\chapter_08_p393-454_线性系统的状态空间分析与综合__bda93de4\\images\\figure_298.jpg",
+      "index": 298
+    },
+    "e6f05f1057ccfe0f57ddda599765e49659de1c56f599456daf431f5b112fba75.jpg": {
+      "original_name": "e6f05f1057ccfe0f57ddda599765e49659de1c56f599456daf431f5b112fba75.jpg",
+      "original_rel_path": "e6f05f1057ccfe0f57ddda599765e49659de1c56f599456daf431f5b112fba75.jpg",
+      "friendly_name": "figure_299.jpg",
+      "abs_path": "data/mineru_cache\\chapter_08_p393-454_线性系统的状态空间分析与综合__bda93de4\\images\\figure_299.jpg",
+      "index": 299
+    },
+    "e7c2f2cb03f1cbcc227e4cfe7e285515c65c57c2b213275d7a2a276195adff00.jpg": {
+      "original_name": "e7c2f2cb03f1cbcc227e4cfe7e285515c65c57c2b213275d7a2a276195adff00.jpg",
+      "original_rel_path": "e7c2f2cb03f1cbcc227e4cfe7e285515c65c57c2b213275d7a2a276195adff00.jpg",
+      "friendly_name": "figure_300.jpg",
+      "abs_path": "data/mineru_cache\\chapter_08_p393-454_线性系统的状态空间分析与综合__bda93de4\\images\\figure_300.jpg",
+      "index": 300
+    },
+    "e847092cb55a9755c713a86bea77a43156406a10b5804d8fc5f8c370a5ebba7c.jpg": {
+      "original_name": "e847092cb55a9755c713a86bea77a43156406a10b5804d8fc5f8c370a5ebba7c.jpg",
+      "original_rel_path": "e847092cb55a9755c713a86bea77a43156406a10b5804d8fc5f8c370a5ebba7c.jpg",
+      "friendly_name": "figure_301.jpg",
+      "abs_path": "data/mineru_cache\\chapter_08_p393-454_线性系统的状态空间分析与综合__bda93de4\\images\\figure_301.jpg",
+      "index": 301
+    },
+    "e9175b15f2c75a11677ed8877a5ba867c22da42a514506a3cb1ee1e14cd727fd.jpg": {
+      "original_name": "e9175b15f2c75a11677ed8877a5ba867c22da42a514506a3cb1ee1e14cd727fd.jpg",
+      "original_rel_path": "e9175b15f2c75a11677ed8877a5ba867c22da42a514506a3cb1ee1e14cd727fd.jpg",
+      "friendly_name": "figure_302.jpg",
+      "abs_path": "data/mineru_cache\\chapter_08_p393-454_线性系统的状态空间分析与综合__bda93de4\\images\\figure_302.jpg",
+      "index": 302
+    },
+    "e93925d02877a07008f19add2d66da514bb841fa339d85ff7a028878ab5c2dd3.jpg": {
+      "original_name": "e93925d02877a07008f19add2d66da514bb841fa339d85ff7a028878ab5c2dd3.jpg",
+      "original_rel_path": "e93925d02877a07008f19add2d66da514bb841fa339d85ff7a028878ab5c2dd3.jpg",
+      "friendly_name": "figure_303.jpg",
+      "abs_path": "data/mineru_cache\\chapter_08_p393-454_线性系统的状态空间分析与综合__bda93de4\\images\\figure_303.jpg",
+      "index": 303
+    },
+    "e94618febcb7c2bea6a572c667764b536bf08d9a3f486e2ee6b49e223f4649d9.jpg": {
+      "original_name": "e94618febcb7c2bea6a572c667764b536bf08d9a3f486e2ee6b49e223f4649d9.jpg",
+      "original_rel_path": "e94618febcb7c2bea6a572c667764b536bf08d9a3f486e2ee6b49e223f4649d9.jpg",
+      "friendly_name": "figure_304.jpg",
+      "abs_path": "data/mineru_cache\\chapter_08_p393-454_线性系统的状态空间分析与综合__bda93de4\\images\\figure_304.jpg",
+      "index": 304
+    },
+    "ea5d8da7ebc8d876e6f95d88b2bcbafde9bd48dbeb19dec52b13eaa35933c826.jpg": {
+      "original_name": "ea5d8da7ebc8d876e6f95d88b2bcbafde9bd48dbeb19dec52b13eaa35933c826.jpg",
+      "original_rel_path": "ea5d8da7ebc8d876e6f95d88b2bcbafde9bd48dbeb19dec52b13eaa35933c826.jpg",
+      "friendly_name": "figure_305.jpg",
+      "abs_path": "data/mineru_cache\\chapter_08_p393-454_线性系统的状态空间分析与综合__bda93de4\\images\\figure_305.jpg",
+      "index": 305
+    },
+    "ea7f0da011b72af2d0fa0e0cf7ab249d1c510d56417de4133b93efd116d9aa57.jpg": {
+      "original_name": "ea7f0da011b72af2d0fa0e0cf7ab249d1c510d56417de4133b93efd116d9aa57.jpg",
+      "original_rel_path": "ea7f0da011b72af2d0fa0e0cf7ab249d1c510d56417de4133b93efd116d9aa57.jpg",
+      "friendly_name": "figure_306.jpg",
+      "abs_path": "data/mineru_cache\\chapter_08_p393-454_线性系统的状态空间分析与综合__bda93de4\\images\\figure_306.jpg",
+      "index": 306
+    },
+    "eae371baa9c46a8945c9505fe184200f08ebe5c61013e75960438366eff6aed5.jpg": {
+      "original_name": "eae371baa9c46a8945c9505fe184200f08ebe5c61013e75960438366eff6aed5.jpg",
+      "original_rel_path": "eae371baa9c46a8945c9505fe184200f08ebe5c61013e75960438366eff6aed5.jpg",
+      "friendly_name": "figure_307.jpg",
+      "abs_path": "data/mineru_cache\\chapter_08_p393-454_线性系统的状态空间分析与综合__bda93de4\\images\\figure_307.jpg",
+      "index": 307
+    },
+    "eb145bf98090d98ccf684252eb76590f6f5a51cf22498efc5d1902d4e77417d4.jpg": {
+      "original_name": "eb145bf98090d98ccf684252eb76590f6f5a51cf22498efc5d1902d4e77417d4.jpg",
+      "original_rel_path": "eb145bf98090d98ccf684252eb76590f6f5a51cf22498efc5d1902d4e77417d4.jpg",
+      "friendly_name": "figure_308.jpg",
+      "abs_path": "data/mineru_cache\\chapter_08_p393-454_线性系统的状态空间分析与综合__bda93de4\\images\\figure_308.jpg",
+      "index": 308
+    },
+    "ebbb212cc567c8dc52d350c8d5cd201e50e1931b9ecc41505401d33484551a6c.jpg": {
+      "original_name": "ebbb212cc567c8dc52d350c8d5cd201e50e1931b9ecc41505401d33484551a6c.jpg",
+      "original_rel_path": "ebbb212cc567c8dc52d350c8d5cd201e50e1931b9ecc41505401d33484551a6c.jpg",
+      "friendly_name": "figure_309.jpg",
+      "abs_path": "data/mineru_cache\\chapter_08_p393-454_线性系统的状态空间分析与综合__bda93de4\\images\\figure_309.jpg",
+      "index": 309
+    },
+    "ebed869c28ff3d51b3b5c5bee54e4d7a0cc9dcc0b520bf3c112d61c2f0a14bb8.jpg": {
+      "original_name": "ebed869c28ff3d51b3b5c5bee54e4d7a0cc9dcc0b520bf3c112d61c2f0a14bb8.jpg",
+      "original_rel_path": "ebed869c28ff3d51b3b5c5bee54e4d7a0cc9dcc0b520bf3c112d61c2f0a14bb8.jpg",
+      "friendly_name": "figure_310.jpg",
+      "abs_path": "data/mineru_cache\\chapter_08_p393-454_线性系统的状态空间分析与综合__bda93de4\\images\\figure_310.jpg",
+      "index": 310
+    },
+    "ecf8f0701c4ccc10bf02e9d9fe30514dc81ca938d1171d69e099dd321106a10c.jpg": {
+      "original_name": "ecf8f0701c4ccc10bf02e9d9fe30514dc81ca938d1171d69e099dd321106a10c.jpg",
+      "original_rel_path": "ecf8f0701c4ccc10bf02e9d9fe30514dc81ca938d1171d69e099dd321106a10c.jpg",
+      "friendly_name": "figure_311.jpg",
+      "abs_path": "data/mineru_cache\\chapter_08_p393-454_线性系统的状态空间分析与综合__bda93de4\\images\\figure_311.jpg",
+      "index": 311
+    },
+    "ef4d9bbf90537c049ef67173e337abf8262e9b0391c6f001fd208faa29433b1e.jpg": {
+      "original_name": "ef4d9bbf90537c049ef67173e337abf8262e9b0391c6f001fd208faa29433b1e.jpg",
+      "original_rel_path": "ef4d9bbf90537c049ef67173e337abf8262e9b0391c6f001fd208faa29433b1e.jpg",
+      "friendly_name": "figure_312.jpg",
+      "abs_path": "data/mineru_cache\\chapter_08_p393-454_线性系统的状态空间分析与综合__bda93de4\\images\\figure_312.jpg",
+      "index": 312
+    },
+    "f154e5dcf17e6bd444662b040e615734a6396bad3d2d237a0cb3c55a90a1b2ea.jpg": {
+      "original_name": "f154e5dcf17e6bd444662b040e615734a6396bad3d2d237a0cb3c55a90a1b2ea.jpg",
+      "original_rel_path": "f154e5dcf17e6bd444662b040e615734a6396bad3d2d237a0cb3c55a90a1b2ea.jpg",
+      "friendly_name": "figure_313.jpg",
+      "abs_path": "data/mineru_cache\\chapter_08_p393-454_线性系统的状态空间分析与综合__bda93de4\\images\\figure_313.jpg",
+      "index": 313
+    },
+    "f1c36278d5506bd4b2c421e45d7ffcb86a8cbbb043a1197f4f7ee6102b4d7d38.jpg": {
+      "original_name": "f1c36278d5506bd4b2c421e45d7ffcb86a8cbbb043a1197f4f7ee6102b4d7d38.jpg",
+      "original_rel_path": "f1c36278d5506bd4b2c421e45d7ffcb86a8cbbb043a1197f4f7ee6102b4d7d38.jpg",
+      "friendly_name": "figure_314.jpg",
+      "abs_path": "data/mineru_cache\\chapter_08_p393-454_线性系统的状态空间分析与综合__bda93de4\\images\\figure_314.jpg",
+      "index": 314
+    },
+    "f2eed3e9404772196beda9a84720c1ad4890c303796ce2ffbde6eb0eb7ee83eb.jpg": {
+      "original_name": "f2eed3e9404772196beda9a84720c1ad4890c303796ce2ffbde6eb0eb7ee83eb.jpg",
+      "original_rel_path": "f2eed3e9404772196beda9a84720c1ad4890c303796ce2ffbde6eb0eb7ee83eb.jpg",
+      "friendly_name": "figure_315.jpg",
+      "abs_path": "data/mineru_cache\\chapter_08_p393-454_线性系统的状态空间分析与综合__bda93de4\\images\\figure_315.jpg",
+      "index": 315
+    },
+    "f3df4115b7cc1444a5f2d8cfb31f090295d11adfeca9a0bc3b41f6a5d91b6d9f.jpg": {
+      "original_name": "f3df4115b7cc1444a5f2d8cfb31f090295d11adfeca9a0bc3b41f6a5d91b6d9f.jpg",
+      "original_rel_path": "f3df4115b7cc1444a5f2d8cfb31f090295d11adfeca9a0bc3b41f6a5d91b6d9f.jpg",
+      "friendly_name": "figure_316.jpg",
+      "abs_path": "data/mineru_cache\\chapter_08_p393-454_线性系统的状态空间分析与综合__bda93de4\\images\\figure_316.jpg",
+      "index": 316
+    },
+    "f472fad968a1d9466dd771233f5c87582a5a0f1004e852b9cb6afcf4563c39aa.jpg": {
+      "original_name": "f472fad968a1d9466dd771233f5c87582a5a0f1004e852b9cb6afcf4563c39aa.jpg",
+      "original_rel_path": "f472fad968a1d9466dd771233f5c87582a5a0f1004e852b9cb6afcf4563c39aa.jpg",
+      "friendly_name": "figure_317.jpg",
+      "abs_path": "data/mineru_cache\\chapter_08_p393-454_线性系统的状态空间分析与综合__bda93de4\\images\\figure_317.jpg",
+      "index": 317
+    },
+    "f4bfb5aad7ca69ef219bff8dd17e7f57cc338ece69e8b20de5cb5b64c1b1dc3a.jpg": {
+      "original_name": "f4bfb5aad7ca69ef219bff8dd17e7f57cc338ece69e8b20de5cb5b64c1b1dc3a.jpg",
+      "original_rel_path": "f4bfb5aad7ca69ef219bff8dd17e7f57cc338ece69e8b20de5cb5b64c1b1dc3a.jpg",
+      "friendly_name": "figure_318.jpg",
+      "abs_path": "data/mineru_cache\\chapter_08_p393-454_线性系统的状态空间分析与综合__bda93de4\\images\\figure_318.jpg",
+      "index": 318
+    },
+    "f509a7aad44a848443f3356af9977a00881e86d91798df996524f3a8b40636c4.jpg": {
+      "original_name": "f509a7aad44a848443f3356af9977a00881e86d91798df996524f3a8b40636c4.jpg",
+      "original_rel_path": "f509a7aad44a848443f3356af9977a00881e86d91798df996524f3a8b40636c4.jpg",
+      "friendly_name": "figure_319.jpg",
+      "abs_path": "data/mineru_cache\\chapter_08_p393-454_线性系统的状态空间分析与综合__bda93de4\\images\\figure_319.jpg",
+      "index": 319
+    },
+    "f6990b4e3cbddd5d4451fbda689e499d17f4a53e81c88f62c99e32186edce9e0.jpg": {
+      "original_name": "f6990b4e3cbddd5d4451fbda689e499d17f4a53e81c88f62c99e32186edce9e0.jpg",
+      "original_rel_path": "f6990b4e3cbddd5d4451fbda689e499d17f4a53e81c88f62c99e32186edce9e0.jpg",
+      "friendly_name": "figure_320.jpg",
+      "abs_path": "data/mineru_cache\\chapter_08_p393-454_线性系统的状态空间分析与综合__bda93de4\\images\\figure_320.jpg",
+      "index": 320
+    },
+    "f94caceefb657ece7d4c308238045c933561074846c3d825a7bf0702986f568b.jpg": {
+      "original_name": "f94caceefb657ece7d4c308238045c933561074846c3d825a7bf0702986f568b.jpg",
+      "original_rel_path": "f94caceefb657ece7d4c308238045c933561074846c3d825a7bf0702986f568b.jpg",
+      "friendly_name": "figure_321.jpg",
+      "abs_path": "data/mineru_cache\\chapter_08_p393-454_线性系统的状态空间分析与综合__bda93de4\\images\\figure_321.jpg",
+      "index": 321
+    },
+    "f9727f7d6a289c252e1f085999dc08b63f9be61e3d2a210b9b0eb0b61772943e.jpg": {
+      "original_name": "f9727f7d6a289c252e1f085999dc08b63f9be61e3d2a210b9b0eb0b61772943e.jpg",
+      "original_rel_path": "f9727f7d6a289c252e1f085999dc08b63f9be61e3d2a210b9b0eb0b61772943e.jpg",
+      "friendly_name": "figure_322.jpg",
+      "abs_path": "data/mineru_cache\\chapter_08_p393-454_线性系统的状态空间分析与综合__bda93de4\\images\\figure_322.jpg",
+      "index": 322
+    },
+    "f97a7ac78d7f94788b2ac79569a9a1b9d1d302e190d7a1c9885b87ee01e26dba.jpg": {
+      "original_name": "f97a7ac78d7f94788b2ac79569a9a1b9d1d302e190d7a1c9885b87ee01e26dba.jpg",
+      "original_rel_path": "f97a7ac78d7f94788b2ac79569a9a1b9d1d302e190d7a1c9885b87ee01e26dba.jpg",
+      "friendly_name": "figure_323.jpg",
+      "abs_path": "data/mineru_cache\\chapter_08_p393-454_线性系统的状态空间分析与综合__bda93de4\\images\\figure_323.jpg",
+      "index": 323
+    },
+    "fb07411ac7bddfb536997d5d2c4da1698e0c43beb98f4eb90daad86ab8e4dccd.jpg": {
+      "original_name": "fb07411ac7bddfb536997d5d2c4da1698e0c43beb98f4eb90daad86ab8e4dccd.jpg",
+      "original_rel_path": "fb07411ac7bddfb536997d5d2c4da1698e0c43beb98f4eb90daad86ab8e4dccd.jpg",
+      "friendly_name": "figure_324.jpg",
+      "abs_path": "data/mineru_cache\\chapter_08_p393-454_线性系统的状态空间分析与综合__bda93de4\\images\\figure_324.jpg",
+      "index": 324
+    },
+    "fc4e0cb9650ef00f716d3b4ec871d3f088d218317160788ef593a9d9b252fad6.jpg": {
+      "original_name": "fc4e0cb9650ef00f716d3b4ec871d3f088d218317160788ef593a9d9b252fad6.jpg",
+      "original_rel_path": "fc4e0cb9650ef00f716d3b4ec871d3f088d218317160788ef593a9d9b252fad6.jpg",
+      "friendly_name": "figure_325.jpg",
+      "abs_path": "data/mineru_cache\\chapter_08_p393-454_线性系统的状态空间分析与综合__bda93de4\\images\\figure_325.jpg",
+      "index": 325
+    },
+    "fc60b3bf19c4105bc772c322844d56edae4fcaf4c36065773e271c4e3d7baf12.jpg": {
+      "original_name": "fc60b3bf19c4105bc772c322844d56edae4fcaf4c36065773e271c4e3d7baf12.jpg",
+      "original_rel_path": "fc60b3bf19c4105bc772c322844d56edae4fcaf4c36065773e271c4e3d7baf12.jpg",
+      "friendly_name": "figure_326.jpg",
+      "abs_path": "data/mineru_cache\\chapter_08_p393-454_线性系统的状态空间分析与综合__bda93de4\\images\\figure_326.jpg",
+      "index": 326
+    },
+    "fd0dff491c11e4f15957001a311d54c0e7511a7d0554a93968504bf52a6bcf04.jpg": {
+      "original_name": "fd0dff491c11e4f15957001a311d54c0e7511a7d0554a93968504bf52a6bcf04.jpg",
+      "original_rel_path": "fd0dff491c11e4f15957001a311d54c0e7511a7d0554a93968504bf52a6bcf04.jpg",
+      "friendly_name": "figure_327.jpg",
+      "abs_path": "data/mineru_cache\\chapter_08_p393-454_线性系统的状态空间分析与综合__bda93de4\\images\\figure_327.jpg",
+      "index": 327
+    },
+    "fdc4b5e3e43e70d70e9b1c726d700a56f748601dd427ec7435014e28b53b3039.jpg": {
+      "original_name": "fdc4b5e3e43e70d70e9b1c726d700a56f748601dd427ec7435014e28b53b3039.jpg",
+      "original_rel_path": "fdc4b5e3e43e70d70e9b1c726d700a56f748601dd427ec7435014e28b53b3039.jpg",
+      "friendly_name": "figure_328.jpg",
+      "abs_path": "data/mineru_cache\\chapter_08_p393-454_线性系统的状态空间分析与综合__bda93de4\\images\\figure_328.jpg",
+      "index": 328
+    },
+    "feae35ca55e7ad3e59b37d73a024e432f6949e2b7a317d3de98540ef6192d2bf.jpg": {
+      "original_name": "feae35ca55e7ad3e59b37d73a024e432f6949e2b7a317d3de98540ef6192d2bf.jpg",
+      "original_rel_path": "feae35ca55e7ad3e59b37d73a024e432f6949e2b7a317d3de98540ef6192d2bf.jpg",
+      "friendly_name": "figure_329.jpg",
+      "abs_path": "data/mineru_cache\\chapter_08_p393-454_线性系统的状态空间分析与综合__bda93de4\\images\\figure_329.jpg",
+      "index": 329
+    }
+  },
+  "json_files": {
+    "ca894551-2fb4-4c41-abc5-124030a583a4_content_list.json": "data/mineru_cache\\chapter_08_p393-454_线性系统的状态空间分析与综合__bda93de4\\json\\ca894551-2fb4-4c41-abc5-124030a583a4_content_list.json",
+    "ca894551-2fb4-4c41-abc5-124030a583a4_model.json": "data/mineru_cache\\chapter_08_p393-454_线性系统的状态空间分析与综合__bda93de4\\json\\ca894551-2fb4-4c41-abc5-124030a583a4_model.json",
+    "content_list_v2.json": "data/mineru_cache\\chapter_08_p393-454_线性系统的状态空间分析与综合__bda93de4\\json\\content_list_v2.json",
+    "layout.json": "data/mineru_cache\\chapter_08_p393-454_线性系统的状态空间分析与综合__bda93de4\\json\\layout.json"
+  }
+}

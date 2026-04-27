@@ -1,0 +1,1871 @@
+{
+  "pdf_name": "chapter_06_p263-311_线性系统的校正方法.pdf",
+  "pdf_md5": "7c23f6ecd21b92c03f3f4c4782a60a11",
+  "cache_dir": "data/mineru_cache\\chapter_06_p263-311_线性系统的校正方法__7c23f6ec",
+  "full_md_path": "data/mineru_cache\\chapter_06_p263-311_线性系统的校正方法__7c23f6ec\\full.md",
+  "images_dir": "data/mineru_cache\\chapter_06_p263-311_线性系统的校正方法__7c23f6ec\\images",
+  "json_dir": "data/mineru_cache\\chapter_06_p263-311_线性系统的校正方法__7c23f6ec\\json",
+  "images": {
+    "00593651bc6d5c753dd7084ac2b9ed51de9acbc528057cadb8b4aab9c900a051.jpg": {
+      "original_name": "00593651bc6d5c753dd7084ac2b9ed51de9acbc528057cadb8b4aab9c900a051.jpg",
+      "original_rel_path": "00593651bc6d5c753dd7084ac2b9ed51de9acbc528057cadb8b4aab9c900a051.jpg",
+      "friendly_name": "figure_01.jpg",
+      "abs_path": "data/mineru_cache\\chapter_06_p263-311_线性系统的校正方法__7c23f6ec\\images\\figure_01.jpg",
+      "index": 1
+    },
+    "01302d96274c59f210552154dff14e006a9e9bbd224fc299f855e46a81888e5e.jpg": {
+      "original_name": "01302d96274c59f210552154dff14e006a9e9bbd224fc299f855e46a81888e5e.jpg",
+      "original_rel_path": "01302d96274c59f210552154dff14e006a9e9bbd224fc299f855e46a81888e5e.jpg",
+      "friendly_name": "figure_02.jpg",
+      "abs_path": "data/mineru_cache\\chapter_06_p263-311_线性系统的校正方法__7c23f6ec\\images\\figure_02.jpg",
+      "index": 2
+    },
+    "02931722458fa56c948ec740266870de4fafe85eda063f70fdddcdcf40f4e5a0.jpg": {
+      "original_name": "02931722458fa56c948ec740266870de4fafe85eda063f70fdddcdcf40f4e5a0.jpg",
+      "original_rel_path": "02931722458fa56c948ec740266870de4fafe85eda063f70fdddcdcf40f4e5a0.jpg",
+      "friendly_name": "figure_03.jpg",
+      "abs_path": "data/mineru_cache\\chapter_06_p263-311_线性系统的校正方法__7c23f6ec\\images\\figure_03.jpg",
+      "index": 3
+    },
+    "029e360a7222481f1fc343d5b51b44ab4ba5f3b3ca7a12f29f97759e0cc724f3.jpg": {
+      "original_name": "029e360a7222481f1fc343d5b51b44ab4ba5f3b3ca7a12f29f97759e0cc724f3.jpg",
+      "original_rel_path": "029e360a7222481f1fc343d5b51b44ab4ba5f3b3ca7a12f29f97759e0cc724f3.jpg",
+      "friendly_name": "figure_04.jpg",
+      "abs_path": "data/mineru_cache\\chapter_06_p263-311_线性系统的校正方法__7c23f6ec\\images\\figure_04.jpg",
+      "index": 4
+    },
+    "02c1b141e8059600f68d42680be90504cc3b5f865dd7e6f2edcc8c531a6c0643.jpg": {
+      "original_name": "02c1b141e8059600f68d42680be90504cc3b5f865dd7e6f2edcc8c531a6c0643.jpg",
+      "original_rel_path": "02c1b141e8059600f68d42680be90504cc3b5f865dd7e6f2edcc8c531a6c0643.jpg",
+      "friendly_name": "figure_05.jpg",
+      "abs_path": "data/mineru_cache\\chapter_06_p263-311_线性系统的校正方法__7c23f6ec\\images\\figure_05.jpg",
+      "index": 5
+    },
+    "03195f484fa069f04b00b250392586c4fdddd21e284e9fcc4fe0660fe222bc70.jpg": {
+      "original_name": "03195f484fa069f04b00b250392586c4fdddd21e284e9fcc4fe0660fe222bc70.jpg",
+      "original_rel_path": "03195f484fa069f04b00b250392586c4fdddd21e284e9fcc4fe0660fe222bc70.jpg",
+      "friendly_name": "figure_06.jpg",
+      "abs_path": "data/mineru_cache\\chapter_06_p263-311_线性系统的校正方法__7c23f6ec\\images\\figure_06.jpg",
+      "index": 6
+    },
+    "03ba02c963241f1c6c4a0b0cd3487ed8784161692fea5247b3915c084cf15c17.jpg": {
+      "original_name": "03ba02c963241f1c6c4a0b0cd3487ed8784161692fea5247b3915c084cf15c17.jpg",
+      "original_rel_path": "03ba02c963241f1c6c4a0b0cd3487ed8784161692fea5247b3915c084cf15c17.jpg",
+      "friendly_name": "figure_07.jpg",
+      "abs_path": "data/mineru_cache\\chapter_06_p263-311_线性系统的校正方法__7c23f6ec\\images\\figure_07.jpg",
+      "index": 7
+    },
+    "06003e871c0ff707aa484657b8ea54128a9eb305e739504a4638a9a03cf5ec37.jpg": {
+      "original_name": "06003e871c0ff707aa484657b8ea54128a9eb305e739504a4638a9a03cf5ec37.jpg",
+      "original_rel_path": "06003e871c0ff707aa484657b8ea54128a9eb305e739504a4638a9a03cf5ec37.jpg",
+      "friendly_name": "figure_08.jpg",
+      "abs_path": "data/mineru_cache\\chapter_06_p263-311_线性系统的校正方法__7c23f6ec\\images\\figure_08.jpg",
+      "index": 8
+    },
+    "070e01c648e622cbcf90078e82c39e67732380f55982b3599114653055cd8473.jpg": {
+      "original_name": "070e01c648e622cbcf90078e82c39e67732380f55982b3599114653055cd8473.jpg",
+      "original_rel_path": "070e01c648e622cbcf90078e82c39e67732380f55982b3599114653055cd8473.jpg",
+      "friendly_name": "figure_09.jpg",
+      "abs_path": "data/mineru_cache\\chapter_06_p263-311_线性系统的校正方法__7c23f6ec\\images\\figure_09.jpg",
+      "index": 9
+    },
+    "0756dadb7cb9978ae313cd228285cdad34eaa7baaf421b1e26bcfc1871ce25b0.jpg": {
+      "original_name": "0756dadb7cb9978ae313cd228285cdad34eaa7baaf421b1e26bcfc1871ce25b0.jpg",
+      "original_rel_path": "0756dadb7cb9978ae313cd228285cdad34eaa7baaf421b1e26bcfc1871ce25b0.jpg",
+      "friendly_name": "figure_10.jpg",
+      "abs_path": "data/mineru_cache\\chapter_06_p263-311_线性系统的校正方法__7c23f6ec\\images\\figure_10.jpg",
+      "index": 10
+    },
+    "0921b9eb03f9750f158d4840c80c257e6a308875c88df7b6cc25f07bdaae256f.jpg": {
+      "original_name": "0921b9eb03f9750f158d4840c80c257e6a308875c88df7b6cc25f07bdaae256f.jpg",
+      "original_rel_path": "0921b9eb03f9750f158d4840c80c257e6a308875c88df7b6cc25f07bdaae256f.jpg",
+      "friendly_name": "figure_11.jpg",
+      "abs_path": "data/mineru_cache\\chapter_06_p263-311_线性系统的校正方法__7c23f6ec\\images\\figure_11.jpg",
+      "index": 11
+    },
+    "0983f6a9f5cc8ba7027916aa5b7f530336e3b9f236acb66192ee6010695952b5.jpg": {
+      "original_name": "0983f6a9f5cc8ba7027916aa5b7f530336e3b9f236acb66192ee6010695952b5.jpg",
+      "original_rel_path": "0983f6a9f5cc8ba7027916aa5b7f530336e3b9f236acb66192ee6010695952b5.jpg",
+      "friendly_name": "figure_12.jpg",
+      "abs_path": "data/mineru_cache\\chapter_06_p263-311_线性系统的校正方法__7c23f6ec\\images\\figure_12.jpg",
+      "index": 12
+    },
+    "09c65320886a582ae21969dbf50cf26f48eae8fb7dab50aed8eab45bcf25064b.jpg": {
+      "original_name": "09c65320886a582ae21969dbf50cf26f48eae8fb7dab50aed8eab45bcf25064b.jpg",
+      "original_rel_path": "09c65320886a582ae21969dbf50cf26f48eae8fb7dab50aed8eab45bcf25064b.jpg",
+      "friendly_name": "figure_13.jpg",
+      "abs_path": "data/mineru_cache\\chapter_06_p263-311_线性系统的校正方法__7c23f6ec\\images\\figure_13.jpg",
+      "index": 13
+    },
+    "09eebefc2dc308f032289528a75157c32ac6c1bff501d49885a24d34c2785ac8.jpg": {
+      "original_name": "09eebefc2dc308f032289528a75157c32ac6c1bff501d49885a24d34c2785ac8.jpg",
+      "original_rel_path": "09eebefc2dc308f032289528a75157c32ac6c1bff501d49885a24d34c2785ac8.jpg",
+      "friendly_name": "figure_14.jpg",
+      "abs_path": "data/mineru_cache\\chapter_06_p263-311_线性系统的校正方法__7c23f6ec\\images\\figure_14.jpg",
+      "index": 14
+    },
+    "0e0a48de99d470648f7c57806248144fe3336038d7192530b2cf5b8213eb3ac0.jpg": {
+      "original_name": "0e0a48de99d470648f7c57806248144fe3336038d7192530b2cf5b8213eb3ac0.jpg",
+      "original_rel_path": "0e0a48de99d470648f7c57806248144fe3336038d7192530b2cf5b8213eb3ac0.jpg",
+      "friendly_name": "figure_15.jpg",
+      "abs_path": "data/mineru_cache\\chapter_06_p263-311_线性系统的校正方法__7c23f6ec\\images\\figure_15.jpg",
+      "index": 15
+    },
+    "0e55ce40d45fb1c3888d0b990ae35c2f33d97ac110165b61b0ce718e9f02dc5f.jpg": {
+      "original_name": "0e55ce40d45fb1c3888d0b990ae35c2f33d97ac110165b61b0ce718e9f02dc5f.jpg",
+      "original_rel_path": "0e55ce40d45fb1c3888d0b990ae35c2f33d97ac110165b61b0ce718e9f02dc5f.jpg",
+      "friendly_name": "figure_16.jpg",
+      "abs_path": "data/mineru_cache\\chapter_06_p263-311_线性系统的校正方法__7c23f6ec\\images\\figure_16.jpg",
+      "index": 16
+    },
+    "0e6d033f09203adcd5d2f6ee8e81edb37ab19acb4abfe7211467a17dd2963dd2.jpg": {
+      "original_name": "0e6d033f09203adcd5d2f6ee8e81edb37ab19acb4abfe7211467a17dd2963dd2.jpg",
+      "original_rel_path": "0e6d033f09203adcd5d2f6ee8e81edb37ab19acb4abfe7211467a17dd2963dd2.jpg",
+      "friendly_name": "figure_17.jpg",
+      "abs_path": "data/mineru_cache\\chapter_06_p263-311_线性系统的校正方法__7c23f6ec\\images\\figure_17.jpg",
+      "index": 17
+    },
+    "0f00d48b1ad47c4cce6d38556db6ac332966b38ed22f2580c412b3cf4204b12d.jpg": {
+      "original_name": "0f00d48b1ad47c4cce6d38556db6ac332966b38ed22f2580c412b3cf4204b12d.jpg",
+      "original_rel_path": "0f00d48b1ad47c4cce6d38556db6ac332966b38ed22f2580c412b3cf4204b12d.jpg",
+      "friendly_name": "figure_18.jpg",
+      "abs_path": "data/mineru_cache\\chapter_06_p263-311_线性系统的校正方法__7c23f6ec\\images\\figure_18.jpg",
+      "index": 18
+    },
+    "10274cef88e543b93d0e8ad795fae17d2f30db233198f662c183ca9a5e86e610.jpg": {
+      "original_name": "10274cef88e543b93d0e8ad795fae17d2f30db233198f662c183ca9a5e86e610.jpg",
+      "original_rel_path": "10274cef88e543b93d0e8ad795fae17d2f30db233198f662c183ca9a5e86e610.jpg",
+      "friendly_name": "figure_19.jpg",
+      "abs_path": "data/mineru_cache\\chapter_06_p263-311_线性系统的校正方法__7c23f6ec\\images\\figure_19.jpg",
+      "index": 19
+    },
+    "103b4cf7188c2fd17cd79264d99b5d1c03a88e8ed55c44c3f2a9753763b46b8d.jpg": {
+      "original_name": "103b4cf7188c2fd17cd79264d99b5d1c03a88e8ed55c44c3f2a9753763b46b8d.jpg",
+      "original_rel_path": "103b4cf7188c2fd17cd79264d99b5d1c03a88e8ed55c44c3f2a9753763b46b8d.jpg",
+      "friendly_name": "figure_20.jpg",
+      "abs_path": "data/mineru_cache\\chapter_06_p263-311_线性系统的校正方法__7c23f6ec\\images\\figure_20.jpg",
+      "index": 20
+    },
+    "10412101a5f8a71f69e14cf91737aa3d08a326f0db8c7cab967f4d3075c6a52a.jpg": {
+      "original_name": "10412101a5f8a71f69e14cf91737aa3d08a326f0db8c7cab967f4d3075c6a52a.jpg",
+      "original_rel_path": "10412101a5f8a71f69e14cf91737aa3d08a326f0db8c7cab967f4d3075c6a52a.jpg",
+      "friendly_name": "figure_21.jpg",
+      "abs_path": "data/mineru_cache\\chapter_06_p263-311_线性系统的校正方法__7c23f6ec\\images\\figure_21.jpg",
+      "index": 21
+    },
+    "10bd51aff4d3a0173894b06d2a5471427df64f0c4812415c78f048948382ea95.jpg": {
+      "original_name": "10bd51aff4d3a0173894b06d2a5471427df64f0c4812415c78f048948382ea95.jpg",
+      "original_rel_path": "10bd51aff4d3a0173894b06d2a5471427df64f0c4812415c78f048948382ea95.jpg",
+      "friendly_name": "figure_22.jpg",
+      "abs_path": "data/mineru_cache\\chapter_06_p263-311_线性系统的校正方法__7c23f6ec\\images\\figure_22.jpg",
+      "index": 22
+    },
+    "11e756adadcac2f04fe0afb649ad8f332f12717e18bffa52568661096b949e23.jpg": {
+      "original_name": "11e756adadcac2f04fe0afb649ad8f332f12717e18bffa52568661096b949e23.jpg",
+      "original_rel_path": "11e756adadcac2f04fe0afb649ad8f332f12717e18bffa52568661096b949e23.jpg",
+      "friendly_name": "figure_23.jpg",
+      "abs_path": "data/mineru_cache\\chapter_06_p263-311_线性系统的校正方法__7c23f6ec\\images\\figure_23.jpg",
+      "index": 23
+    },
+    "128c6b08d3aeb7c314618b60fbf7bcd9a0f73cb7951632115462352946ed0418.jpg": {
+      "original_name": "128c6b08d3aeb7c314618b60fbf7bcd9a0f73cb7951632115462352946ed0418.jpg",
+      "original_rel_path": "128c6b08d3aeb7c314618b60fbf7bcd9a0f73cb7951632115462352946ed0418.jpg",
+      "friendly_name": "figure_24.jpg",
+      "abs_path": "data/mineru_cache\\chapter_06_p263-311_线性系统的校正方法__7c23f6ec\\images\\figure_24.jpg",
+      "index": 24
+    },
+    "14577f5bef3662e3c654898ab6e9f351886d122afa08167abf90e7e8a0474440.jpg": {
+      "original_name": "14577f5bef3662e3c654898ab6e9f351886d122afa08167abf90e7e8a0474440.jpg",
+      "original_rel_path": "14577f5bef3662e3c654898ab6e9f351886d122afa08167abf90e7e8a0474440.jpg",
+      "friendly_name": "figure_25.jpg",
+      "abs_path": "data/mineru_cache\\chapter_06_p263-311_线性系统的校正方法__7c23f6ec\\images\\figure_25.jpg",
+      "index": 25
+    },
+    "152b5e452d6a8424a73a24829cabed3fd818e6fb5a3261dd3c04ea30226377c5.jpg": {
+      "original_name": "152b5e452d6a8424a73a24829cabed3fd818e6fb5a3261dd3c04ea30226377c5.jpg",
+      "original_rel_path": "152b5e452d6a8424a73a24829cabed3fd818e6fb5a3261dd3c04ea30226377c5.jpg",
+      "friendly_name": "figure_26.jpg",
+      "abs_path": "data/mineru_cache\\chapter_06_p263-311_线性系统的校正方法__7c23f6ec\\images\\figure_26.jpg",
+      "index": 26
+    },
+    "15deb0d9b53e93cd8c291bd3751ec80b7855ea400b62802064c0970c653dfd6d.jpg": {
+      "original_name": "15deb0d9b53e93cd8c291bd3751ec80b7855ea400b62802064c0970c653dfd6d.jpg",
+      "original_rel_path": "15deb0d9b53e93cd8c291bd3751ec80b7855ea400b62802064c0970c653dfd6d.jpg",
+      "friendly_name": "figure_27.jpg",
+      "abs_path": "data/mineru_cache\\chapter_06_p263-311_线性系统的校正方法__7c23f6ec\\images\\figure_27.jpg",
+      "index": 27
+    },
+    "16dd9f6dff058b54cefb4fd416cc99bbfce832150491b95527d16c1e99ecf0a9.jpg": {
+      "original_name": "16dd9f6dff058b54cefb4fd416cc99bbfce832150491b95527d16c1e99ecf0a9.jpg",
+      "original_rel_path": "16dd9f6dff058b54cefb4fd416cc99bbfce832150491b95527d16c1e99ecf0a9.jpg",
+      "friendly_name": "figure_28.jpg",
+      "abs_path": "data/mineru_cache\\chapter_06_p263-311_线性系统的校正方法__7c23f6ec\\images\\figure_28.jpg",
+      "index": 28
+    },
+    "1718de99ba55fe566fb37205dddf7755629c14b2055f4f365a9d01cf4008d83d.jpg": {
+      "original_name": "1718de99ba55fe566fb37205dddf7755629c14b2055f4f365a9d01cf4008d83d.jpg",
+      "original_rel_path": "1718de99ba55fe566fb37205dddf7755629c14b2055f4f365a9d01cf4008d83d.jpg",
+      "friendly_name": "figure_29.jpg",
+      "abs_path": "data/mineru_cache\\chapter_06_p263-311_线性系统的校正方法__7c23f6ec\\images\\figure_29.jpg",
+      "index": 29
+    },
+    "18c4f98308de38457684340caa7b0f64e425ebaff77eac47d522e92f097c83f6.jpg": {
+      "original_name": "18c4f98308de38457684340caa7b0f64e425ebaff77eac47d522e92f097c83f6.jpg",
+      "original_rel_path": "18c4f98308de38457684340caa7b0f64e425ebaff77eac47d522e92f097c83f6.jpg",
+      "friendly_name": "figure_30.jpg",
+      "abs_path": "data/mineru_cache\\chapter_06_p263-311_线性系统的校正方法__7c23f6ec\\images\\figure_30.jpg",
+      "index": 30
+    },
+    "19cfe068cf1896e75b6ec9f6bf2fefeaad8dd470677b70f815913b4e2e7fd6ca.jpg": {
+      "original_name": "19cfe068cf1896e75b6ec9f6bf2fefeaad8dd470677b70f815913b4e2e7fd6ca.jpg",
+      "original_rel_path": "19cfe068cf1896e75b6ec9f6bf2fefeaad8dd470677b70f815913b4e2e7fd6ca.jpg",
+      "friendly_name": "figure_31.jpg",
+      "abs_path": "data/mineru_cache\\chapter_06_p263-311_线性系统的校正方法__7c23f6ec\\images\\figure_31.jpg",
+      "index": 31
+    },
+    "1a0e60269ce0fac5a25d350380bb4760d4dff139dff8c0bca79fbc21e79aaff0.jpg": {
+      "original_name": "1a0e60269ce0fac5a25d350380bb4760d4dff139dff8c0bca79fbc21e79aaff0.jpg",
+      "original_rel_path": "1a0e60269ce0fac5a25d350380bb4760d4dff139dff8c0bca79fbc21e79aaff0.jpg",
+      "friendly_name": "figure_32.jpg",
+      "abs_path": "data/mineru_cache\\chapter_06_p263-311_线性系统的校正方法__7c23f6ec\\images\\figure_32.jpg",
+      "index": 32
+    },
+    "1ba3ba91ba125cc0169028a453ef2d646e4f777ffe2e50fb04b25188d22dd720.jpg": {
+      "original_name": "1ba3ba91ba125cc0169028a453ef2d646e4f777ffe2e50fb04b25188d22dd720.jpg",
+      "original_rel_path": "1ba3ba91ba125cc0169028a453ef2d646e4f777ffe2e50fb04b25188d22dd720.jpg",
+      "friendly_name": "figure_33.jpg",
+      "abs_path": "data/mineru_cache\\chapter_06_p263-311_线性系统的校正方法__7c23f6ec\\images\\figure_33.jpg",
+      "index": 33
+    },
+    "1bbfbac0504ba8969aab17e7a53fe7cdb320c6d6e437121a4d18c83ab26ceedc.jpg": {
+      "original_name": "1bbfbac0504ba8969aab17e7a53fe7cdb320c6d6e437121a4d18c83ab26ceedc.jpg",
+      "original_rel_path": "1bbfbac0504ba8969aab17e7a53fe7cdb320c6d6e437121a4d18c83ab26ceedc.jpg",
+      "friendly_name": "figure_34.jpg",
+      "abs_path": "data/mineru_cache\\chapter_06_p263-311_线性系统的校正方法__7c23f6ec\\images\\figure_34.jpg",
+      "index": 34
+    },
+    "1c5c075e70816cb81f7c0f1751a56edc94525fe6b8c64c2acbb1b9687517c704.jpg": {
+      "original_name": "1c5c075e70816cb81f7c0f1751a56edc94525fe6b8c64c2acbb1b9687517c704.jpg",
+      "original_rel_path": "1c5c075e70816cb81f7c0f1751a56edc94525fe6b8c64c2acbb1b9687517c704.jpg",
+      "friendly_name": "figure_35.jpg",
+      "abs_path": "data/mineru_cache\\chapter_06_p263-311_线性系统的校正方法__7c23f6ec\\images\\figure_35.jpg",
+      "index": 35
+    },
+    "1dba8b8fd6d72861af3cbcedae6761a7ba9c1dac4d7050c91be0a14bd566aea3.jpg": {
+      "original_name": "1dba8b8fd6d72861af3cbcedae6761a7ba9c1dac4d7050c91be0a14bd566aea3.jpg",
+      "original_rel_path": "1dba8b8fd6d72861af3cbcedae6761a7ba9c1dac4d7050c91be0a14bd566aea3.jpg",
+      "friendly_name": "figure_36.jpg",
+      "abs_path": "data/mineru_cache\\chapter_06_p263-311_线性系统的校正方法__7c23f6ec\\images\\figure_36.jpg",
+      "index": 36
+    },
+    "1ec86459e68dc9b6853df4ea016529673e08cae1ecfa88cf03d85b992b38d531.jpg": {
+      "original_name": "1ec86459e68dc9b6853df4ea016529673e08cae1ecfa88cf03d85b992b38d531.jpg",
+      "original_rel_path": "1ec86459e68dc9b6853df4ea016529673e08cae1ecfa88cf03d85b992b38d531.jpg",
+      "friendly_name": "figure_37.jpg",
+      "abs_path": "data/mineru_cache\\chapter_06_p263-311_线性系统的校正方法__7c23f6ec\\images\\figure_37.jpg",
+      "index": 37
+    },
+    "20651c272cd9bbe32a015a53af2c173095b807c4df1c123c633a788f3a05ea19.jpg": {
+      "original_name": "20651c272cd9bbe32a015a53af2c173095b807c4df1c123c633a788f3a05ea19.jpg",
+      "original_rel_path": "20651c272cd9bbe32a015a53af2c173095b807c4df1c123c633a788f3a05ea19.jpg",
+      "friendly_name": "figure_38.jpg",
+      "abs_path": "data/mineru_cache\\chapter_06_p263-311_线性系统的校正方法__7c23f6ec\\images\\figure_38.jpg",
+      "index": 38
+    },
+    "2445fa810ebb69c09af99ffac0b26ed88364ad28bf9cc0bc531dead8aa5c6842.jpg": {
+      "original_name": "2445fa810ebb69c09af99ffac0b26ed88364ad28bf9cc0bc531dead8aa5c6842.jpg",
+      "original_rel_path": "2445fa810ebb69c09af99ffac0b26ed88364ad28bf9cc0bc531dead8aa5c6842.jpg",
+      "friendly_name": "figure_39.jpg",
+      "abs_path": "data/mineru_cache\\chapter_06_p263-311_线性系统的校正方法__7c23f6ec\\images\\figure_39.jpg",
+      "index": 39
+    },
+    "263bff52083958b9586adc7f69c8de67206f9a8faf8723c150c8bf3ba62c8854.jpg": {
+      "original_name": "263bff52083958b9586adc7f69c8de67206f9a8faf8723c150c8bf3ba62c8854.jpg",
+      "original_rel_path": "263bff52083958b9586adc7f69c8de67206f9a8faf8723c150c8bf3ba62c8854.jpg",
+      "friendly_name": "figure_40.jpg",
+      "abs_path": "data/mineru_cache\\chapter_06_p263-311_线性系统的校正方法__7c23f6ec\\images\\figure_40.jpg",
+      "index": 40
+    },
+    "26c4c2c96630bc233598ed57b23db695eaa6efe16aacd8ffd9279eea25ade7c8.jpg": {
+      "original_name": "26c4c2c96630bc233598ed57b23db695eaa6efe16aacd8ffd9279eea25ade7c8.jpg",
+      "original_rel_path": "26c4c2c96630bc233598ed57b23db695eaa6efe16aacd8ffd9279eea25ade7c8.jpg",
+      "friendly_name": "figure_41.jpg",
+      "abs_path": "data/mineru_cache\\chapter_06_p263-311_线性系统的校正方法__7c23f6ec\\images\\figure_41.jpg",
+      "index": 41
+    },
+    "299c58db1593eabb4d923263af80d4050fafbacc71d18f117ff36d7ecf855b60.jpg": {
+      "original_name": "299c58db1593eabb4d923263af80d4050fafbacc71d18f117ff36d7ecf855b60.jpg",
+      "original_rel_path": "299c58db1593eabb4d923263af80d4050fafbacc71d18f117ff36d7ecf855b60.jpg",
+      "friendly_name": "figure_42.jpg",
+      "abs_path": "data/mineru_cache\\chapter_06_p263-311_线性系统的校正方法__7c23f6ec\\images\\figure_42.jpg",
+      "index": 42
+    },
+    "2a87757c286007135b285fee9caa25b93860957c658024e84b043caa95cd0305.jpg": {
+      "original_name": "2a87757c286007135b285fee9caa25b93860957c658024e84b043caa95cd0305.jpg",
+      "original_rel_path": "2a87757c286007135b285fee9caa25b93860957c658024e84b043caa95cd0305.jpg",
+      "friendly_name": "figure_43.jpg",
+      "abs_path": "data/mineru_cache\\chapter_06_p263-311_线性系统的校正方法__7c23f6ec\\images\\figure_43.jpg",
+      "index": 43
+    },
+    "2b607440e1542375fd7ff33dc99c69ea98e8307ef35c30d8474514c75f64b8c0.jpg": {
+      "original_name": "2b607440e1542375fd7ff33dc99c69ea98e8307ef35c30d8474514c75f64b8c0.jpg",
+      "original_rel_path": "2b607440e1542375fd7ff33dc99c69ea98e8307ef35c30d8474514c75f64b8c0.jpg",
+      "friendly_name": "figure_44.jpg",
+      "abs_path": "data/mineru_cache\\chapter_06_p263-311_线性系统的校正方法__7c23f6ec\\images\\figure_44.jpg",
+      "index": 44
+    },
+    "2b8264bb5271040a085eb74ede3e1cfa89978379f97db6f24c49f0455c05a5c1.jpg": {
+      "original_name": "2b8264bb5271040a085eb74ede3e1cfa89978379f97db6f24c49f0455c05a5c1.jpg",
+      "original_rel_path": "2b8264bb5271040a085eb74ede3e1cfa89978379f97db6f24c49f0455c05a5c1.jpg",
+      "friendly_name": "figure_45.jpg",
+      "abs_path": "data/mineru_cache\\chapter_06_p263-311_线性系统的校正方法__7c23f6ec\\images\\figure_45.jpg",
+      "index": 45
+    },
+    "2dd8e278920279999e3e4c7a89c63076f7bb177f7f81ea953f28ad877cfe9739.jpg": {
+      "original_name": "2dd8e278920279999e3e4c7a89c63076f7bb177f7f81ea953f28ad877cfe9739.jpg",
+      "original_rel_path": "2dd8e278920279999e3e4c7a89c63076f7bb177f7f81ea953f28ad877cfe9739.jpg",
+      "friendly_name": "figure_46.jpg",
+      "abs_path": "data/mineru_cache\\chapter_06_p263-311_线性系统的校正方法__7c23f6ec\\images\\figure_46.jpg",
+      "index": 46
+    },
+    "2df8598c61b410ba382f3980a52c5960669d785e63589e0625aad5ef0243de82.jpg": {
+      "original_name": "2df8598c61b410ba382f3980a52c5960669d785e63589e0625aad5ef0243de82.jpg",
+      "original_rel_path": "2df8598c61b410ba382f3980a52c5960669d785e63589e0625aad5ef0243de82.jpg",
+      "friendly_name": "figure_47.jpg",
+      "abs_path": "data/mineru_cache\\chapter_06_p263-311_线性系统的校正方法__7c23f6ec\\images\\figure_47.jpg",
+      "index": 47
+    },
+    "3014cca6b6df7082ffd3fc10062fab5c4b399dd34e8d55d2fe31c768cc05562a.jpg": {
+      "original_name": "3014cca6b6df7082ffd3fc10062fab5c4b399dd34e8d55d2fe31c768cc05562a.jpg",
+      "original_rel_path": "3014cca6b6df7082ffd3fc10062fab5c4b399dd34e8d55d2fe31c768cc05562a.jpg",
+      "friendly_name": "figure_48.jpg",
+      "abs_path": "data/mineru_cache\\chapter_06_p263-311_线性系统的校正方法__7c23f6ec\\images\\figure_48.jpg",
+      "index": 48
+    },
+    "31bbcfa02d8fa8cbe0efac7156bcab8115157f9d7ad755009c4839f387d2239b.jpg": {
+      "original_name": "31bbcfa02d8fa8cbe0efac7156bcab8115157f9d7ad755009c4839f387d2239b.jpg",
+      "original_rel_path": "31bbcfa02d8fa8cbe0efac7156bcab8115157f9d7ad755009c4839f387d2239b.jpg",
+      "friendly_name": "figure_49.jpg",
+      "abs_path": "data/mineru_cache\\chapter_06_p263-311_线性系统的校正方法__7c23f6ec\\images\\figure_49.jpg",
+      "index": 49
+    },
+    "322b18fc796b869bed3f9352fe3442e1c2f0c2f8b87ff30ce9fb57a5af13264a.jpg": {
+      "original_name": "322b18fc796b869bed3f9352fe3442e1c2f0c2f8b87ff30ce9fb57a5af13264a.jpg",
+      "original_rel_path": "322b18fc796b869bed3f9352fe3442e1c2f0c2f8b87ff30ce9fb57a5af13264a.jpg",
+      "friendly_name": "figure_50.jpg",
+      "abs_path": "data/mineru_cache\\chapter_06_p263-311_线性系统的校正方法__7c23f6ec\\images\\figure_50.jpg",
+      "index": 50
+    },
+    "32562b5fee5b6da112e396da2dd8a79b59a8cb009f339629067f7feae9d5b6ba.jpg": {
+      "original_name": "32562b5fee5b6da112e396da2dd8a79b59a8cb009f339629067f7feae9d5b6ba.jpg",
+      "original_rel_path": "32562b5fee5b6da112e396da2dd8a79b59a8cb009f339629067f7feae9d5b6ba.jpg",
+      "friendly_name": "figure_51.jpg",
+      "abs_path": "data/mineru_cache\\chapter_06_p263-311_线性系统的校正方法__7c23f6ec\\images\\figure_51.jpg",
+      "index": 51
+    },
+    "329188b35731c8a36e187d162c6d74d74ffe4fa85c08262ed163557be3ea26fb.jpg": {
+      "original_name": "329188b35731c8a36e187d162c6d74d74ffe4fa85c08262ed163557be3ea26fb.jpg",
+      "original_rel_path": "329188b35731c8a36e187d162c6d74d74ffe4fa85c08262ed163557be3ea26fb.jpg",
+      "friendly_name": "figure_52.jpg",
+      "abs_path": "data/mineru_cache\\chapter_06_p263-311_线性系统的校正方法__7c23f6ec\\images\\figure_52.jpg",
+      "index": 52
+    },
+    "32b33db9069ecd59efebb1cd2f52760799d33fcaa7689c0577b6533f5d39c2fb.jpg": {
+      "original_name": "32b33db9069ecd59efebb1cd2f52760799d33fcaa7689c0577b6533f5d39c2fb.jpg",
+      "original_rel_path": "32b33db9069ecd59efebb1cd2f52760799d33fcaa7689c0577b6533f5d39c2fb.jpg",
+      "friendly_name": "figure_53.jpg",
+      "abs_path": "data/mineru_cache\\chapter_06_p263-311_线性系统的校正方法__7c23f6ec\\images\\figure_53.jpg",
+      "index": 53
+    },
+    "3306e22f447be289af383deaf3bb5429768f8d73e01989531dccdd99d7cfe208.jpg": {
+      "original_name": "3306e22f447be289af383deaf3bb5429768f8d73e01989531dccdd99d7cfe208.jpg",
+      "original_rel_path": "3306e22f447be289af383deaf3bb5429768f8d73e01989531dccdd99d7cfe208.jpg",
+      "friendly_name": "figure_54.jpg",
+      "abs_path": "data/mineru_cache\\chapter_06_p263-311_线性系统的校正方法__7c23f6ec\\images\\figure_54.jpg",
+      "index": 54
+    },
+    "33ff0d6f6b2015606d93a7567df3f8fe1885282efa7b3a8b0f3fecf376725f3f.jpg": {
+      "original_name": "33ff0d6f6b2015606d93a7567df3f8fe1885282efa7b3a8b0f3fecf376725f3f.jpg",
+      "original_rel_path": "33ff0d6f6b2015606d93a7567df3f8fe1885282efa7b3a8b0f3fecf376725f3f.jpg",
+      "friendly_name": "figure_55.jpg",
+      "abs_path": "data/mineru_cache\\chapter_06_p263-311_线性系统的校正方法__7c23f6ec\\images\\figure_55.jpg",
+      "index": 55
+    },
+    "34fbf271e098d2ac2edb9838c6965c874936033c972d28075b71cbfa0be27c14.jpg": {
+      "original_name": "34fbf271e098d2ac2edb9838c6965c874936033c972d28075b71cbfa0be27c14.jpg",
+      "original_rel_path": "34fbf271e098d2ac2edb9838c6965c874936033c972d28075b71cbfa0be27c14.jpg",
+      "friendly_name": "figure_56.jpg",
+      "abs_path": "data/mineru_cache\\chapter_06_p263-311_线性系统的校正方法__7c23f6ec\\images\\figure_56.jpg",
+      "index": 56
+    },
+    "36124edc4b278e4e3a194f38a7264cc6c8839620210a3521624ebdc9a74d97d6.jpg": {
+      "original_name": "36124edc4b278e4e3a194f38a7264cc6c8839620210a3521624ebdc9a74d97d6.jpg",
+      "original_rel_path": "36124edc4b278e4e3a194f38a7264cc6c8839620210a3521624ebdc9a74d97d6.jpg",
+      "friendly_name": "figure_57.jpg",
+      "abs_path": "data/mineru_cache\\chapter_06_p263-311_线性系统的校正方法__7c23f6ec\\images\\figure_57.jpg",
+      "index": 57
+    },
+    "37755744707771ad36b8f6ff6441ea5b9d77397fcbee4d94ba05240099b7c355.jpg": {
+      "original_name": "37755744707771ad36b8f6ff6441ea5b9d77397fcbee4d94ba05240099b7c355.jpg",
+      "original_rel_path": "37755744707771ad36b8f6ff6441ea5b9d77397fcbee4d94ba05240099b7c355.jpg",
+      "friendly_name": "figure_58.jpg",
+      "abs_path": "data/mineru_cache\\chapter_06_p263-311_线性系统的校正方法__7c23f6ec\\images\\figure_58.jpg",
+      "index": 58
+    },
+    "37cbb06744bbfd5865d8e899f2053a722da32b2d960802668b94cc2ba507cbc7.jpg": {
+      "original_name": "37cbb06744bbfd5865d8e899f2053a722da32b2d960802668b94cc2ba507cbc7.jpg",
+      "original_rel_path": "37cbb06744bbfd5865d8e899f2053a722da32b2d960802668b94cc2ba507cbc7.jpg",
+      "friendly_name": "figure_59.jpg",
+      "abs_path": "data/mineru_cache\\chapter_06_p263-311_线性系统的校正方法__7c23f6ec\\images\\figure_59.jpg",
+      "index": 59
+    },
+    "391461b501ae8b497b95e9bc647e53a1289912c313df5a3e2427dafe4c6ebdce.jpg": {
+      "original_name": "391461b501ae8b497b95e9bc647e53a1289912c313df5a3e2427dafe4c6ebdce.jpg",
+      "original_rel_path": "391461b501ae8b497b95e9bc647e53a1289912c313df5a3e2427dafe4c6ebdce.jpg",
+      "friendly_name": "figure_60.jpg",
+      "abs_path": "data/mineru_cache\\chapter_06_p263-311_线性系统的校正方法__7c23f6ec\\images\\figure_60.jpg",
+      "index": 60
+    },
+    "391add8bc31446e50f721128c5f7ce5424cd19785bd5f166a9b2d7b270733afc.jpg": {
+      "original_name": "391add8bc31446e50f721128c5f7ce5424cd19785bd5f166a9b2d7b270733afc.jpg",
+      "original_rel_path": "391add8bc31446e50f721128c5f7ce5424cd19785bd5f166a9b2d7b270733afc.jpg",
+      "friendly_name": "figure_61.jpg",
+      "abs_path": "data/mineru_cache\\chapter_06_p263-311_线性系统的校正方法__7c23f6ec\\images\\figure_61.jpg",
+      "index": 61
+    },
+    "398a075a2870a333e0014ef599fbf75662958a946751a0c8806d370b0314770d.jpg": {
+      "original_name": "398a075a2870a333e0014ef599fbf75662958a946751a0c8806d370b0314770d.jpg",
+      "original_rel_path": "398a075a2870a333e0014ef599fbf75662958a946751a0c8806d370b0314770d.jpg",
+      "friendly_name": "figure_62.jpg",
+      "abs_path": "data/mineru_cache\\chapter_06_p263-311_线性系统的校正方法__7c23f6ec\\images\\figure_62.jpg",
+      "index": 62
+    },
+    "3a43d9e49cb8e1b39fa0c03ce2dbdd205108db5444b2ca2590e00759d2e39fb8.jpg": {
+      "original_name": "3a43d9e49cb8e1b39fa0c03ce2dbdd205108db5444b2ca2590e00759d2e39fb8.jpg",
+      "original_rel_path": "3a43d9e49cb8e1b39fa0c03ce2dbdd205108db5444b2ca2590e00759d2e39fb8.jpg",
+      "friendly_name": "figure_63.jpg",
+      "abs_path": "data/mineru_cache\\chapter_06_p263-311_线性系统的校正方法__7c23f6ec\\images\\figure_63.jpg",
+      "index": 63
+    },
+    "3b870977d06058374febc1cf4d20d542017c4ddd4bbe8dd0d0aff99be391a26e.jpg": {
+      "original_name": "3b870977d06058374febc1cf4d20d542017c4ddd4bbe8dd0d0aff99be391a26e.jpg",
+      "original_rel_path": "3b870977d06058374febc1cf4d20d542017c4ddd4bbe8dd0d0aff99be391a26e.jpg",
+      "friendly_name": "figure_64.jpg",
+      "abs_path": "data/mineru_cache\\chapter_06_p263-311_线性系统的校正方法__7c23f6ec\\images\\figure_64.jpg",
+      "index": 64
+    },
+    "3c42e51ddafb49d8697765ed840a58dfb23220008e3712587460dcb31dbb1b2a.jpg": {
+      "original_name": "3c42e51ddafb49d8697765ed840a58dfb23220008e3712587460dcb31dbb1b2a.jpg",
+      "original_rel_path": "3c42e51ddafb49d8697765ed840a58dfb23220008e3712587460dcb31dbb1b2a.jpg",
+      "friendly_name": "figure_65.jpg",
+      "abs_path": "data/mineru_cache\\chapter_06_p263-311_线性系统的校正方法__7c23f6ec\\images\\figure_65.jpg",
+      "index": 65
+    },
+    "3c9a43fe227eb0b49e015ecf9b2b366e16f6fe5a9da9854c257823e64fb0bdad.jpg": {
+      "original_name": "3c9a43fe227eb0b49e015ecf9b2b366e16f6fe5a9da9854c257823e64fb0bdad.jpg",
+      "original_rel_path": "3c9a43fe227eb0b49e015ecf9b2b366e16f6fe5a9da9854c257823e64fb0bdad.jpg",
+      "friendly_name": "figure_66.jpg",
+      "abs_path": "data/mineru_cache\\chapter_06_p263-311_线性系统的校正方法__7c23f6ec\\images\\figure_66.jpg",
+      "index": 66
+    },
+    "3d3c79677b1a3279d607a794055a898c46c3396117256af137f78bab77f85dfd.jpg": {
+      "original_name": "3d3c79677b1a3279d607a794055a898c46c3396117256af137f78bab77f85dfd.jpg",
+      "original_rel_path": "3d3c79677b1a3279d607a794055a898c46c3396117256af137f78bab77f85dfd.jpg",
+      "friendly_name": "figure_67.jpg",
+      "abs_path": "data/mineru_cache\\chapter_06_p263-311_线性系统的校正方法__7c23f6ec\\images\\figure_67.jpg",
+      "index": 67
+    },
+    "3e9690ac5b0dd0f011f3968126872c0132910927dc7cd8f5e7ee7c3b15a1637c.jpg": {
+      "original_name": "3e9690ac5b0dd0f011f3968126872c0132910927dc7cd8f5e7ee7c3b15a1637c.jpg",
+      "original_rel_path": "3e9690ac5b0dd0f011f3968126872c0132910927dc7cd8f5e7ee7c3b15a1637c.jpg",
+      "friendly_name": "figure_68.jpg",
+      "abs_path": "data/mineru_cache\\chapter_06_p263-311_线性系统的校正方法__7c23f6ec\\images\\figure_68.jpg",
+      "index": 68
+    },
+    "3f5ad94febf43637ce0724715f208cafca7af97cfa14363f0b231fc30c5ae2d1.jpg": {
+      "original_name": "3f5ad94febf43637ce0724715f208cafca7af97cfa14363f0b231fc30c5ae2d1.jpg",
+      "original_rel_path": "3f5ad94febf43637ce0724715f208cafca7af97cfa14363f0b231fc30c5ae2d1.jpg",
+      "friendly_name": "figure_69.jpg",
+      "abs_path": "data/mineru_cache\\chapter_06_p263-311_线性系统的校正方法__7c23f6ec\\images\\figure_69.jpg",
+      "index": 69
+    },
+    "3fdbaadeed4ddf60b6368da5414cfc3d7346481cb68f7707fdcf5f0cc7509c85.jpg": {
+      "original_name": "3fdbaadeed4ddf60b6368da5414cfc3d7346481cb68f7707fdcf5f0cc7509c85.jpg",
+      "original_rel_path": "3fdbaadeed4ddf60b6368da5414cfc3d7346481cb68f7707fdcf5f0cc7509c85.jpg",
+      "friendly_name": "figure_70.jpg",
+      "abs_path": "data/mineru_cache\\chapter_06_p263-311_线性系统的校正方法__7c23f6ec\\images\\figure_70.jpg",
+      "index": 70
+    },
+    "432f39ab3d9963dec7a3917ea7839e5abbc6807fe7599d4b9b03065a8475e4a2.jpg": {
+      "original_name": "432f39ab3d9963dec7a3917ea7839e5abbc6807fe7599d4b9b03065a8475e4a2.jpg",
+      "original_rel_path": "432f39ab3d9963dec7a3917ea7839e5abbc6807fe7599d4b9b03065a8475e4a2.jpg",
+      "friendly_name": "figure_71.jpg",
+      "abs_path": "data/mineru_cache\\chapter_06_p263-311_线性系统的校正方法__7c23f6ec\\images\\figure_71.jpg",
+      "index": 71
+    },
+    "43a76caa99e72e7b81f02c54488d8c77046a8375c222380b804538406db94dc5.jpg": {
+      "original_name": "43a76caa99e72e7b81f02c54488d8c77046a8375c222380b804538406db94dc5.jpg",
+      "original_rel_path": "43a76caa99e72e7b81f02c54488d8c77046a8375c222380b804538406db94dc5.jpg",
+      "friendly_name": "figure_72.jpg",
+      "abs_path": "data/mineru_cache\\chapter_06_p263-311_线性系统的校正方法__7c23f6ec\\images\\figure_72.jpg",
+      "index": 72
+    },
+    "46020645ad0f127537488062d7c7006a786346fab63cf4118f25a02b71f8d6ac.jpg": {
+      "original_name": "46020645ad0f127537488062d7c7006a786346fab63cf4118f25a02b71f8d6ac.jpg",
+      "original_rel_path": "46020645ad0f127537488062d7c7006a786346fab63cf4118f25a02b71f8d6ac.jpg",
+      "friendly_name": "figure_73.jpg",
+      "abs_path": "data/mineru_cache\\chapter_06_p263-311_线性系统的校正方法__7c23f6ec\\images\\figure_73.jpg",
+      "index": 73
+    },
+    "4680d6d6edfb3e6fe2f2f99e1b892dc46fe6bab6060eae874216451710b3bea9.jpg": {
+      "original_name": "4680d6d6edfb3e6fe2f2f99e1b892dc46fe6bab6060eae874216451710b3bea9.jpg",
+      "original_rel_path": "4680d6d6edfb3e6fe2f2f99e1b892dc46fe6bab6060eae874216451710b3bea9.jpg",
+      "friendly_name": "figure_74.jpg",
+      "abs_path": "data/mineru_cache\\chapter_06_p263-311_线性系统的校正方法__7c23f6ec\\images\\figure_74.jpg",
+      "index": 74
+    },
+    "477a7e0c3cafdf84828143601ce634cf479a4abe6f7e5da199c4acdcbb8115c6.jpg": {
+      "original_name": "477a7e0c3cafdf84828143601ce634cf479a4abe6f7e5da199c4acdcbb8115c6.jpg",
+      "original_rel_path": "477a7e0c3cafdf84828143601ce634cf479a4abe6f7e5da199c4acdcbb8115c6.jpg",
+      "friendly_name": "figure_75.jpg",
+      "abs_path": "data/mineru_cache\\chapter_06_p263-311_线性系统的校正方法__7c23f6ec\\images\\figure_75.jpg",
+      "index": 75
+    },
+    "4828cb150e314a182b0f7318488b4ca2c9a4e535763529c83d63bc6e002a1ae8.jpg": {
+      "original_name": "4828cb150e314a182b0f7318488b4ca2c9a4e535763529c83d63bc6e002a1ae8.jpg",
+      "original_rel_path": "4828cb150e314a182b0f7318488b4ca2c9a4e535763529c83d63bc6e002a1ae8.jpg",
+      "friendly_name": "figure_76.jpg",
+      "abs_path": "data/mineru_cache\\chapter_06_p263-311_线性系统的校正方法__7c23f6ec\\images\\figure_76.jpg",
+      "index": 76
+    },
+    "486f97caf919b6a559f78aa924d13e39ed0ed1dafbddc0bb52d60ed57489d5b7.jpg": {
+      "original_name": "486f97caf919b6a559f78aa924d13e39ed0ed1dafbddc0bb52d60ed57489d5b7.jpg",
+      "original_rel_path": "486f97caf919b6a559f78aa924d13e39ed0ed1dafbddc0bb52d60ed57489d5b7.jpg",
+      "friendly_name": "figure_77.jpg",
+      "abs_path": "data/mineru_cache\\chapter_06_p263-311_线性系统的校正方法__7c23f6ec\\images\\figure_77.jpg",
+      "index": 77
+    },
+    "48a4878043d4a9c6ae5c32b6df2af74821ae00783b6e9351d345f23be5d1ce39.jpg": {
+      "original_name": "48a4878043d4a9c6ae5c32b6df2af74821ae00783b6e9351d345f23be5d1ce39.jpg",
+      "original_rel_path": "48a4878043d4a9c6ae5c32b6df2af74821ae00783b6e9351d345f23be5d1ce39.jpg",
+      "friendly_name": "figure_78.jpg",
+      "abs_path": "data/mineru_cache\\chapter_06_p263-311_线性系统的校正方法__7c23f6ec\\images\\figure_78.jpg",
+      "index": 78
+    },
+    "4bebe4195f96fa5a9a1054cc0b6af6f0e6f187e856119f305fb03f865e64ecc8.jpg": {
+      "original_name": "4bebe4195f96fa5a9a1054cc0b6af6f0e6f187e856119f305fb03f865e64ecc8.jpg",
+      "original_rel_path": "4bebe4195f96fa5a9a1054cc0b6af6f0e6f187e856119f305fb03f865e64ecc8.jpg",
+      "friendly_name": "figure_79.jpg",
+      "abs_path": "data/mineru_cache\\chapter_06_p263-311_线性系统的校正方法__7c23f6ec\\images\\figure_79.jpg",
+      "index": 79
+    },
+    "4d62ea1db4f1d6a2705486acc3b074db2b8db6b4a9212fcb833df3ce8aa165c8.jpg": {
+      "original_name": "4d62ea1db4f1d6a2705486acc3b074db2b8db6b4a9212fcb833df3ce8aa165c8.jpg",
+      "original_rel_path": "4d62ea1db4f1d6a2705486acc3b074db2b8db6b4a9212fcb833df3ce8aa165c8.jpg",
+      "friendly_name": "figure_80.jpg",
+      "abs_path": "data/mineru_cache\\chapter_06_p263-311_线性系统的校正方法__7c23f6ec\\images\\figure_80.jpg",
+      "index": 80
+    },
+    "4ff07cd2b017c2d57daed4ec4cb8729e2314871f365eef0b8fc74f0870f4158a.jpg": {
+      "original_name": "4ff07cd2b017c2d57daed4ec4cb8729e2314871f365eef0b8fc74f0870f4158a.jpg",
+      "original_rel_path": "4ff07cd2b017c2d57daed4ec4cb8729e2314871f365eef0b8fc74f0870f4158a.jpg",
+      "friendly_name": "figure_81.jpg",
+      "abs_path": "data/mineru_cache\\chapter_06_p263-311_线性系统的校正方法__7c23f6ec\\images\\figure_81.jpg",
+      "index": 81
+    },
+    "5330834c704887908ef4d6fc9541dcb012c1c11847c70df0ed217b0acbd7f2e8.jpg": {
+      "original_name": "5330834c704887908ef4d6fc9541dcb012c1c11847c70df0ed217b0acbd7f2e8.jpg",
+      "original_rel_path": "5330834c704887908ef4d6fc9541dcb012c1c11847c70df0ed217b0acbd7f2e8.jpg",
+      "friendly_name": "figure_82.jpg",
+      "abs_path": "data/mineru_cache\\chapter_06_p263-311_线性系统的校正方法__7c23f6ec\\images\\figure_82.jpg",
+      "index": 82
+    },
+    "53989ef60810b88af376584fe742ad6b0bbe16a69fc5336e8624bb8a620058c3.jpg": {
+      "original_name": "53989ef60810b88af376584fe742ad6b0bbe16a69fc5336e8624bb8a620058c3.jpg",
+      "original_rel_path": "53989ef60810b88af376584fe742ad6b0bbe16a69fc5336e8624bb8a620058c3.jpg",
+      "friendly_name": "figure_83.jpg",
+      "abs_path": "data/mineru_cache\\chapter_06_p263-311_线性系统的校正方法__7c23f6ec\\images\\figure_83.jpg",
+      "index": 83
+    },
+    "54403e059a092ceab53b1154cc02d7c6520aadf8bb4686a9bceb90e7a4746729.jpg": {
+      "original_name": "54403e059a092ceab53b1154cc02d7c6520aadf8bb4686a9bceb90e7a4746729.jpg",
+      "original_rel_path": "54403e059a092ceab53b1154cc02d7c6520aadf8bb4686a9bceb90e7a4746729.jpg",
+      "friendly_name": "figure_84.jpg",
+      "abs_path": "data/mineru_cache\\chapter_06_p263-311_线性系统的校正方法__7c23f6ec\\images\\figure_84.jpg",
+      "index": 84
+    },
+    "54e04f7dbe9537be558e5f365c19af73aee728af77b6e0a0aa3c16395fa6061e.jpg": {
+      "original_name": "54e04f7dbe9537be558e5f365c19af73aee728af77b6e0a0aa3c16395fa6061e.jpg",
+      "original_rel_path": "54e04f7dbe9537be558e5f365c19af73aee728af77b6e0a0aa3c16395fa6061e.jpg",
+      "friendly_name": "figure_85.jpg",
+      "abs_path": "data/mineru_cache\\chapter_06_p263-311_线性系统的校正方法__7c23f6ec\\images\\figure_85.jpg",
+      "index": 85
+    },
+    "556fd9be1aca8f69df5311bfc8e5f82d46ffc8ed7570d54e186cc7f5060ece66.jpg": {
+      "original_name": "556fd9be1aca8f69df5311bfc8e5f82d46ffc8ed7570d54e186cc7f5060ece66.jpg",
+      "original_rel_path": "556fd9be1aca8f69df5311bfc8e5f82d46ffc8ed7570d54e186cc7f5060ece66.jpg",
+      "friendly_name": "figure_86.jpg",
+      "abs_path": "data/mineru_cache\\chapter_06_p263-311_线性系统的校正方法__7c23f6ec\\images\\figure_86.jpg",
+      "index": 86
+    },
+    "5579592ddb568054668ba0e8dc498abc3ab6598df441c0df85787975c8e095ca.jpg": {
+      "original_name": "5579592ddb568054668ba0e8dc498abc3ab6598df441c0df85787975c8e095ca.jpg",
+      "original_rel_path": "5579592ddb568054668ba0e8dc498abc3ab6598df441c0df85787975c8e095ca.jpg",
+      "friendly_name": "figure_87.jpg",
+      "abs_path": "data/mineru_cache\\chapter_06_p263-311_线性系统的校正方法__7c23f6ec\\images\\figure_87.jpg",
+      "index": 87
+    },
+    "558ce7f64f9fd28bc564f0af26211e0de36ba837c7e080f1d2fa5f769ca39513.jpg": {
+      "original_name": "558ce7f64f9fd28bc564f0af26211e0de36ba837c7e080f1d2fa5f769ca39513.jpg",
+      "original_rel_path": "558ce7f64f9fd28bc564f0af26211e0de36ba837c7e080f1d2fa5f769ca39513.jpg",
+      "friendly_name": "figure_88.jpg",
+      "abs_path": "data/mineru_cache\\chapter_06_p263-311_线性系统的校正方法__7c23f6ec\\images\\figure_88.jpg",
+      "index": 88
+    },
+    "56af0eefa73a9a7a94f0b9d19934daf9d248b93d711a4808d8dcfcb6d51c733a.jpg": {
+      "original_name": "56af0eefa73a9a7a94f0b9d19934daf9d248b93d711a4808d8dcfcb6d51c733a.jpg",
+      "original_rel_path": "56af0eefa73a9a7a94f0b9d19934daf9d248b93d711a4808d8dcfcb6d51c733a.jpg",
+      "friendly_name": "figure_89.jpg",
+      "abs_path": "data/mineru_cache\\chapter_06_p263-311_线性系统的校正方法__7c23f6ec\\images\\figure_89.jpg",
+      "index": 89
+    },
+    "573dab046bd579c0980276f5fb6069c851ea5f528eab16c7d4bb0d18af8f083a.jpg": {
+      "original_name": "573dab046bd579c0980276f5fb6069c851ea5f528eab16c7d4bb0d18af8f083a.jpg",
+      "original_rel_path": "573dab046bd579c0980276f5fb6069c851ea5f528eab16c7d4bb0d18af8f083a.jpg",
+      "friendly_name": "figure_90.jpg",
+      "abs_path": "data/mineru_cache\\chapter_06_p263-311_线性系统的校正方法__7c23f6ec\\images\\figure_90.jpg",
+      "index": 90
+    },
+    "592847512a1645101d21d37b61ad6e5d19352e28e172accaf2119fd339cc643a.jpg": {
+      "original_name": "592847512a1645101d21d37b61ad6e5d19352e28e172accaf2119fd339cc643a.jpg",
+      "original_rel_path": "592847512a1645101d21d37b61ad6e5d19352e28e172accaf2119fd339cc643a.jpg",
+      "friendly_name": "figure_91.jpg",
+      "abs_path": "data/mineru_cache\\chapter_06_p263-311_线性系统的校正方法__7c23f6ec\\images\\figure_91.jpg",
+      "index": 91
+    },
+    "59aad8bfeefc519bcf960583731516d583b8273c05ec86d397ce95b19d2b84a9.jpg": {
+      "original_name": "59aad8bfeefc519bcf960583731516d583b8273c05ec86d397ce95b19d2b84a9.jpg",
+      "original_rel_path": "59aad8bfeefc519bcf960583731516d583b8273c05ec86d397ce95b19d2b84a9.jpg",
+      "friendly_name": "figure_92.jpg",
+      "abs_path": "data/mineru_cache\\chapter_06_p263-311_线性系统的校正方法__7c23f6ec\\images\\figure_92.jpg",
+      "index": 92
+    },
+    "5a1a4370a81f46f939e098e61d1a10c8d6cd334fb9056348fb39e23f30d5455b.jpg": {
+      "original_name": "5a1a4370a81f46f939e098e61d1a10c8d6cd334fb9056348fb39e23f30d5455b.jpg",
+      "original_rel_path": "5a1a4370a81f46f939e098e61d1a10c8d6cd334fb9056348fb39e23f30d5455b.jpg",
+      "friendly_name": "figure_93.jpg",
+      "abs_path": "data/mineru_cache\\chapter_06_p263-311_线性系统的校正方法__7c23f6ec\\images\\figure_93.jpg",
+      "index": 93
+    },
+    "5bd93082e8d7465c40a407a8a796a916ab797b1812bb7c1a5923907e095e86dd.jpg": {
+      "original_name": "5bd93082e8d7465c40a407a8a796a916ab797b1812bb7c1a5923907e095e86dd.jpg",
+      "original_rel_path": "5bd93082e8d7465c40a407a8a796a916ab797b1812bb7c1a5923907e095e86dd.jpg",
+      "friendly_name": "figure_94.jpg",
+      "abs_path": "data/mineru_cache\\chapter_06_p263-311_线性系统的校正方法__7c23f6ec\\images\\figure_94.jpg",
+      "index": 94
+    },
+    "5d7c44d7c936b939e628f74603a73c74b50fb4f5a549b7b1dd387fd485e80de9.jpg": {
+      "original_name": "5d7c44d7c936b939e628f74603a73c74b50fb4f5a549b7b1dd387fd485e80de9.jpg",
+      "original_rel_path": "5d7c44d7c936b939e628f74603a73c74b50fb4f5a549b7b1dd387fd485e80de9.jpg",
+      "friendly_name": "figure_95.jpg",
+      "abs_path": "data/mineru_cache\\chapter_06_p263-311_线性系统的校正方法__7c23f6ec\\images\\figure_95.jpg",
+      "index": 95
+    },
+    "5ef1fe5baa6ccac16e3da0ad5959a8bf23caadeab6333b1d149ba52b7d55ac76.jpg": {
+      "original_name": "5ef1fe5baa6ccac16e3da0ad5959a8bf23caadeab6333b1d149ba52b7d55ac76.jpg",
+      "original_rel_path": "5ef1fe5baa6ccac16e3da0ad5959a8bf23caadeab6333b1d149ba52b7d55ac76.jpg",
+      "friendly_name": "figure_96.jpg",
+      "abs_path": "data/mineru_cache\\chapter_06_p263-311_线性系统的校正方法__7c23f6ec\\images\\figure_96.jpg",
+      "index": 96
+    },
+    "5f362549a2fe72ab81b9e438529ead4698b49eb4c4de1ea2dad8ca74662477be.jpg": {
+      "original_name": "5f362549a2fe72ab81b9e438529ead4698b49eb4c4de1ea2dad8ca74662477be.jpg",
+      "original_rel_path": "5f362549a2fe72ab81b9e438529ead4698b49eb4c4de1ea2dad8ca74662477be.jpg",
+      "friendly_name": "figure_97.jpg",
+      "abs_path": "data/mineru_cache\\chapter_06_p263-311_线性系统的校正方法__7c23f6ec\\images\\figure_97.jpg",
+      "index": 97
+    },
+    "60359320f57e14f37fca3efd48b7095cd2e5a65998dd9e29b3880130081d1716.jpg": {
+      "original_name": "60359320f57e14f37fca3efd48b7095cd2e5a65998dd9e29b3880130081d1716.jpg",
+      "original_rel_path": "60359320f57e14f37fca3efd48b7095cd2e5a65998dd9e29b3880130081d1716.jpg",
+      "friendly_name": "figure_98.jpg",
+      "abs_path": "data/mineru_cache\\chapter_06_p263-311_线性系统的校正方法__7c23f6ec\\images\\figure_98.jpg",
+      "index": 98
+    },
+    "60427f57f50d494c6a44aa7bb41ec0eedd71b7778f165a1bc2d40c7a5f853585.jpg": {
+      "original_name": "60427f57f50d494c6a44aa7bb41ec0eedd71b7778f165a1bc2d40c7a5f853585.jpg",
+      "original_rel_path": "60427f57f50d494c6a44aa7bb41ec0eedd71b7778f165a1bc2d40c7a5f853585.jpg",
+      "friendly_name": "figure_99.jpg",
+      "abs_path": "data/mineru_cache\\chapter_06_p263-311_线性系统的校正方法__7c23f6ec\\images\\figure_99.jpg",
+      "index": 99
+    },
+    "61057cb84721d00c6746217f27618aac39e86e4bbc88e677af2caff09503542b.jpg": {
+      "original_name": "61057cb84721d00c6746217f27618aac39e86e4bbc88e677af2caff09503542b.jpg",
+      "original_rel_path": "61057cb84721d00c6746217f27618aac39e86e4bbc88e677af2caff09503542b.jpg",
+      "friendly_name": "figure_100.jpg",
+      "abs_path": "data/mineru_cache\\chapter_06_p263-311_线性系统的校正方法__7c23f6ec\\images\\figure_100.jpg",
+      "index": 100
+    },
+    "62d722c6306a8e34d315f5d111cc94a1a2f4797b867c9c092bbdd3f19f1d92ee.jpg": {
+      "original_name": "62d722c6306a8e34d315f5d111cc94a1a2f4797b867c9c092bbdd3f19f1d92ee.jpg",
+      "original_rel_path": "62d722c6306a8e34d315f5d111cc94a1a2f4797b867c9c092bbdd3f19f1d92ee.jpg",
+      "friendly_name": "figure_101.jpg",
+      "abs_path": "data/mineru_cache\\chapter_06_p263-311_线性系统的校正方法__7c23f6ec\\images\\figure_101.jpg",
+      "index": 101
+    },
+    "65624e3909d7a267f40c741824207e6cf42c10ca74a42905c234c04bc4ede545.jpg": {
+      "original_name": "65624e3909d7a267f40c741824207e6cf42c10ca74a42905c234c04bc4ede545.jpg",
+      "original_rel_path": "65624e3909d7a267f40c741824207e6cf42c10ca74a42905c234c04bc4ede545.jpg",
+      "friendly_name": "figure_102.jpg",
+      "abs_path": "data/mineru_cache\\chapter_06_p263-311_线性系统的校正方法__7c23f6ec\\images\\figure_102.jpg",
+      "index": 102
+    },
+    "65e184e54943a8a2a2ed38b2f6924b4871ae7d167b7cf77283e8c5f36e1b520c.jpg": {
+      "original_name": "65e184e54943a8a2a2ed38b2f6924b4871ae7d167b7cf77283e8c5f36e1b520c.jpg",
+      "original_rel_path": "65e184e54943a8a2a2ed38b2f6924b4871ae7d167b7cf77283e8c5f36e1b520c.jpg",
+      "friendly_name": "figure_103.jpg",
+      "abs_path": "data/mineru_cache\\chapter_06_p263-311_线性系统的校正方法__7c23f6ec\\images\\figure_103.jpg",
+      "index": 103
+    },
+    "66ff39fe7f17729abca16342d04647e80c0e4fb7991303bdf561467855698a2c.jpg": {
+      "original_name": "66ff39fe7f17729abca16342d04647e80c0e4fb7991303bdf561467855698a2c.jpg",
+      "original_rel_path": "66ff39fe7f17729abca16342d04647e80c0e4fb7991303bdf561467855698a2c.jpg",
+      "friendly_name": "figure_104.jpg",
+      "abs_path": "data/mineru_cache\\chapter_06_p263-311_线性系统的校正方法__7c23f6ec\\images\\figure_104.jpg",
+      "index": 104
+    },
+    "6773d0e39c6e73f460e8a22d6060197ac57ca307563380f9e40521afc7a22b99.jpg": {
+      "original_name": "6773d0e39c6e73f460e8a22d6060197ac57ca307563380f9e40521afc7a22b99.jpg",
+      "original_rel_path": "6773d0e39c6e73f460e8a22d6060197ac57ca307563380f9e40521afc7a22b99.jpg",
+      "friendly_name": "figure_105.jpg",
+      "abs_path": "data/mineru_cache\\chapter_06_p263-311_线性系统的校正方法__7c23f6ec\\images\\figure_105.jpg",
+      "index": 105
+    },
+    "6852da2fb156c67e4e4642706941ee1e8e0c900f64017dd8dfea8b93285bf98e.jpg": {
+      "original_name": "6852da2fb156c67e4e4642706941ee1e8e0c900f64017dd8dfea8b93285bf98e.jpg",
+      "original_rel_path": "6852da2fb156c67e4e4642706941ee1e8e0c900f64017dd8dfea8b93285bf98e.jpg",
+      "friendly_name": "figure_106.jpg",
+      "abs_path": "data/mineru_cache\\chapter_06_p263-311_线性系统的校正方法__7c23f6ec\\images\\figure_106.jpg",
+      "index": 106
+    },
+    "6adffc74c10a4a715d9b0082ac6107a9ebf16e41d5946042a531d07115274140.jpg": {
+      "original_name": "6adffc74c10a4a715d9b0082ac6107a9ebf16e41d5946042a531d07115274140.jpg",
+      "original_rel_path": "6adffc74c10a4a715d9b0082ac6107a9ebf16e41d5946042a531d07115274140.jpg",
+      "friendly_name": "figure_107.jpg",
+      "abs_path": "data/mineru_cache\\chapter_06_p263-311_线性系统的校正方法__7c23f6ec\\images\\figure_107.jpg",
+      "index": 107
+    },
+    "6ccbd81b8474768cd45269290b59ea2cfda979e96c98eec91e40bd57d52672c3.jpg": {
+      "original_name": "6ccbd81b8474768cd45269290b59ea2cfda979e96c98eec91e40bd57d52672c3.jpg",
+      "original_rel_path": "6ccbd81b8474768cd45269290b59ea2cfda979e96c98eec91e40bd57d52672c3.jpg",
+      "friendly_name": "figure_108.jpg",
+      "abs_path": "data/mineru_cache\\chapter_06_p263-311_线性系统的校正方法__7c23f6ec\\images\\figure_108.jpg",
+      "index": 108
+    },
+    "6e2d2df92de9d5efe91e7837971a02873e8a8eccb450b557e03abc67a9b62d35.jpg": {
+      "original_name": "6e2d2df92de9d5efe91e7837971a02873e8a8eccb450b557e03abc67a9b62d35.jpg",
+      "original_rel_path": "6e2d2df92de9d5efe91e7837971a02873e8a8eccb450b557e03abc67a9b62d35.jpg",
+      "friendly_name": "figure_109.jpg",
+      "abs_path": "data/mineru_cache\\chapter_06_p263-311_线性系统的校正方法__7c23f6ec\\images\\figure_109.jpg",
+      "index": 109
+    },
+    "6ec7287248b4f596fd5b9670a885f8b6fd3ad6577fd4cbe6c43eebbfdc30db0a.jpg": {
+      "original_name": "6ec7287248b4f596fd5b9670a885f8b6fd3ad6577fd4cbe6c43eebbfdc30db0a.jpg",
+      "original_rel_path": "6ec7287248b4f596fd5b9670a885f8b6fd3ad6577fd4cbe6c43eebbfdc30db0a.jpg",
+      "friendly_name": "figure_110.jpg",
+      "abs_path": "data/mineru_cache\\chapter_06_p263-311_线性系统的校正方法__7c23f6ec\\images\\figure_110.jpg",
+      "index": 110
+    },
+    "6eeddc8b4e455116b0becd54dbe2accd968db879d1abc2f146e2a458d022e39d.jpg": {
+      "original_name": "6eeddc8b4e455116b0becd54dbe2accd968db879d1abc2f146e2a458d022e39d.jpg",
+      "original_rel_path": "6eeddc8b4e455116b0becd54dbe2accd968db879d1abc2f146e2a458d022e39d.jpg",
+      "friendly_name": "figure_111.jpg",
+      "abs_path": "data/mineru_cache\\chapter_06_p263-311_线性系统的校正方法__7c23f6ec\\images\\figure_111.jpg",
+      "index": 111
+    },
+    "6fcea2f4df7946e1d65926bd0b422256057aec3921ac3e7077ec3bf48ae8cef3.jpg": {
+      "original_name": "6fcea2f4df7946e1d65926bd0b422256057aec3921ac3e7077ec3bf48ae8cef3.jpg",
+      "original_rel_path": "6fcea2f4df7946e1d65926bd0b422256057aec3921ac3e7077ec3bf48ae8cef3.jpg",
+      "friendly_name": "figure_112.jpg",
+      "abs_path": "data/mineru_cache\\chapter_06_p263-311_线性系统的校正方法__7c23f6ec\\images\\figure_112.jpg",
+      "index": 112
+    },
+    "6fdcdd9fdd6268ed76098ed7d7c1af7cdd732ba920b073b3781cc20d40c12cf8.jpg": {
+      "original_name": "6fdcdd9fdd6268ed76098ed7d7c1af7cdd732ba920b073b3781cc20d40c12cf8.jpg",
+      "original_rel_path": "6fdcdd9fdd6268ed76098ed7d7c1af7cdd732ba920b073b3781cc20d40c12cf8.jpg",
+      "friendly_name": "figure_113.jpg",
+      "abs_path": "data/mineru_cache\\chapter_06_p263-311_线性系统的校正方法__7c23f6ec\\images\\figure_113.jpg",
+      "index": 113
+    },
+    "711126a056012667757f223a1dd1c29448dc88ea14b654caf44285f455074b24.jpg": {
+      "original_name": "711126a056012667757f223a1dd1c29448dc88ea14b654caf44285f455074b24.jpg",
+      "original_rel_path": "711126a056012667757f223a1dd1c29448dc88ea14b654caf44285f455074b24.jpg",
+      "friendly_name": "figure_114.jpg",
+      "abs_path": "data/mineru_cache\\chapter_06_p263-311_线性系统的校正方法__7c23f6ec\\images\\figure_114.jpg",
+      "index": 114
+    },
+    "77507b991f6c10f6813b813e163bec5537f7379fc586c989152436ce95baab47.jpg": {
+      "original_name": "77507b991f6c10f6813b813e163bec5537f7379fc586c989152436ce95baab47.jpg",
+      "original_rel_path": "77507b991f6c10f6813b813e163bec5537f7379fc586c989152436ce95baab47.jpg",
+      "friendly_name": "figure_115.jpg",
+      "abs_path": "data/mineru_cache\\chapter_06_p263-311_线性系统的校正方法__7c23f6ec\\images\\figure_115.jpg",
+      "index": 115
+    },
+    "775cab31c39b4fdc4aa057c2b1bb410116fcbf83dae13cfa1046c1bc94b578a5.jpg": {
+      "original_name": "775cab31c39b4fdc4aa057c2b1bb410116fcbf83dae13cfa1046c1bc94b578a5.jpg",
+      "original_rel_path": "775cab31c39b4fdc4aa057c2b1bb410116fcbf83dae13cfa1046c1bc94b578a5.jpg",
+      "friendly_name": "figure_116.jpg",
+      "abs_path": "data/mineru_cache\\chapter_06_p263-311_线性系统的校正方法__7c23f6ec\\images\\figure_116.jpg",
+      "index": 116
+    },
+    "78210983b48e86e06afe3d570afb22c568517927950d07cb624556ef4d968eeb.jpg": {
+      "original_name": "78210983b48e86e06afe3d570afb22c568517927950d07cb624556ef4d968eeb.jpg",
+      "original_rel_path": "78210983b48e86e06afe3d570afb22c568517927950d07cb624556ef4d968eeb.jpg",
+      "friendly_name": "figure_117.jpg",
+      "abs_path": "data/mineru_cache\\chapter_06_p263-311_线性系统的校正方法__7c23f6ec\\images\\figure_117.jpg",
+      "index": 117
+    },
+    "785ab1068b6852ad2a8675645cde31cf2138d84bccfb739cd7a9be21ce1a26a0.jpg": {
+      "original_name": "785ab1068b6852ad2a8675645cde31cf2138d84bccfb739cd7a9be21ce1a26a0.jpg",
+      "original_rel_path": "785ab1068b6852ad2a8675645cde31cf2138d84bccfb739cd7a9be21ce1a26a0.jpg",
+      "friendly_name": "figure_118.jpg",
+      "abs_path": "data/mineru_cache\\chapter_06_p263-311_线性系统的校正方法__7c23f6ec\\images\\figure_118.jpg",
+      "index": 118
+    },
+    "7a76ac566d85133f8f7238957c6c61638d6beb79dada3e50a19d45bf14569de4.jpg": {
+      "original_name": "7a76ac566d85133f8f7238957c6c61638d6beb79dada3e50a19d45bf14569de4.jpg",
+      "original_rel_path": "7a76ac566d85133f8f7238957c6c61638d6beb79dada3e50a19d45bf14569de4.jpg",
+      "friendly_name": "figure_119.jpg",
+      "abs_path": "data/mineru_cache\\chapter_06_p263-311_线性系统的校正方法__7c23f6ec\\images\\figure_119.jpg",
+      "index": 119
+    },
+    "7ca3673db8b29c55dc8e4e693761d265a2479d3e955b1a36b26dcd8dfd80236e.jpg": {
+      "original_name": "7ca3673db8b29c55dc8e4e693761d265a2479d3e955b1a36b26dcd8dfd80236e.jpg",
+      "original_rel_path": "7ca3673db8b29c55dc8e4e693761d265a2479d3e955b1a36b26dcd8dfd80236e.jpg",
+      "friendly_name": "figure_120.jpg",
+      "abs_path": "data/mineru_cache\\chapter_06_p263-311_线性系统的校正方法__7c23f6ec\\images\\figure_120.jpg",
+      "index": 120
+    },
+    "7eeef93dd0510e04805b1773964f1aaea89856f89baa16490159b31145af0e95.jpg": {
+      "original_name": "7eeef93dd0510e04805b1773964f1aaea89856f89baa16490159b31145af0e95.jpg",
+      "original_rel_path": "7eeef93dd0510e04805b1773964f1aaea89856f89baa16490159b31145af0e95.jpg",
+      "friendly_name": "figure_121.jpg",
+      "abs_path": "data/mineru_cache\\chapter_06_p263-311_线性系统的校正方法__7c23f6ec\\images\\figure_121.jpg",
+      "index": 121
+    },
+    "802bf5067baaca53f3237e0df3cfbee16921d711ae64b48cd18171266f0d9272.jpg": {
+      "original_name": "802bf5067baaca53f3237e0df3cfbee16921d711ae64b48cd18171266f0d9272.jpg",
+      "original_rel_path": "802bf5067baaca53f3237e0df3cfbee16921d711ae64b48cd18171266f0d9272.jpg",
+      "friendly_name": "figure_122.jpg",
+      "abs_path": "data/mineru_cache\\chapter_06_p263-311_线性系统的校正方法__7c23f6ec\\images\\figure_122.jpg",
+      "index": 122
+    },
+    "80cc3446fd731069f2f9dee6c483e8a1038a2e3f6e81309a2007b4bbadaeccf8.jpg": {
+      "original_name": "80cc3446fd731069f2f9dee6c483e8a1038a2e3f6e81309a2007b4bbadaeccf8.jpg",
+      "original_rel_path": "80cc3446fd731069f2f9dee6c483e8a1038a2e3f6e81309a2007b4bbadaeccf8.jpg",
+      "friendly_name": "figure_123.jpg",
+      "abs_path": "data/mineru_cache\\chapter_06_p263-311_线性系统的校正方法__7c23f6ec\\images\\figure_123.jpg",
+      "index": 123
+    },
+    "80cf590f51b4e4b8fadbade00e7cf868f80e58b53fb33dd489ebedb16d499c1a.jpg": {
+      "original_name": "80cf590f51b4e4b8fadbade00e7cf868f80e58b53fb33dd489ebedb16d499c1a.jpg",
+      "original_rel_path": "80cf590f51b4e4b8fadbade00e7cf868f80e58b53fb33dd489ebedb16d499c1a.jpg",
+      "friendly_name": "figure_124.jpg",
+      "abs_path": "data/mineru_cache\\chapter_06_p263-311_线性系统的校正方法__7c23f6ec\\images\\figure_124.jpg",
+      "index": 124
+    },
+    "817475beca437175e03d48897150d81952176fa06f487a2315a7b0b30a4e3eb6.jpg": {
+      "original_name": "817475beca437175e03d48897150d81952176fa06f487a2315a7b0b30a4e3eb6.jpg",
+      "original_rel_path": "817475beca437175e03d48897150d81952176fa06f487a2315a7b0b30a4e3eb6.jpg",
+      "friendly_name": "figure_125.jpg",
+      "abs_path": "data/mineru_cache\\chapter_06_p263-311_线性系统的校正方法__7c23f6ec\\images\\figure_125.jpg",
+      "index": 125
+    },
+    "81e763c837739049a3af21adee2d7e78ff0b0c03dafc3eb8355e8fa1d62d9f01.jpg": {
+      "original_name": "81e763c837739049a3af21adee2d7e78ff0b0c03dafc3eb8355e8fa1d62d9f01.jpg",
+      "original_rel_path": "81e763c837739049a3af21adee2d7e78ff0b0c03dafc3eb8355e8fa1d62d9f01.jpg",
+      "friendly_name": "figure_126.jpg",
+      "abs_path": "data/mineru_cache\\chapter_06_p263-311_线性系统的校正方法__7c23f6ec\\images\\figure_126.jpg",
+      "index": 126
+    },
+    "820f161c93e403dd47cbb0e75d7a94d0f19dfc7c6ac9b666e20c8e4144d95f12.jpg": {
+      "original_name": "820f161c93e403dd47cbb0e75d7a94d0f19dfc7c6ac9b666e20c8e4144d95f12.jpg",
+      "original_rel_path": "820f161c93e403dd47cbb0e75d7a94d0f19dfc7c6ac9b666e20c8e4144d95f12.jpg",
+      "friendly_name": "figure_127.jpg",
+      "abs_path": "data/mineru_cache\\chapter_06_p263-311_线性系统的校正方法__7c23f6ec\\images\\figure_127.jpg",
+      "index": 127
+    },
+    "82f6be2ce5ab3e32e05094b10c05fd222399a2bcb0e0d8779219b22f17ce2df1.jpg": {
+      "original_name": "82f6be2ce5ab3e32e05094b10c05fd222399a2bcb0e0d8779219b22f17ce2df1.jpg",
+      "original_rel_path": "82f6be2ce5ab3e32e05094b10c05fd222399a2bcb0e0d8779219b22f17ce2df1.jpg",
+      "friendly_name": "figure_128.jpg",
+      "abs_path": "data/mineru_cache\\chapter_06_p263-311_线性系统的校正方法__7c23f6ec\\images\\figure_128.jpg",
+      "index": 128
+    },
+    "83380e177aad4a29e0325d19c5a4bd4e9b01db980072594202d72bd9b53bcc01.jpg": {
+      "original_name": "83380e177aad4a29e0325d19c5a4bd4e9b01db980072594202d72bd9b53bcc01.jpg",
+      "original_rel_path": "83380e177aad4a29e0325d19c5a4bd4e9b01db980072594202d72bd9b53bcc01.jpg",
+      "friendly_name": "figure_129.jpg",
+      "abs_path": "data/mineru_cache\\chapter_06_p263-311_线性系统的校正方法__7c23f6ec\\images\\figure_129.jpg",
+      "index": 129
+    },
+    "83a6548ed969239ec38abe60824481c51e6967f6296d04a7336aeba159b27f96.jpg": {
+      "original_name": "83a6548ed969239ec38abe60824481c51e6967f6296d04a7336aeba159b27f96.jpg",
+      "original_rel_path": "83a6548ed969239ec38abe60824481c51e6967f6296d04a7336aeba159b27f96.jpg",
+      "friendly_name": "figure_130.jpg",
+      "abs_path": "data/mineru_cache\\chapter_06_p263-311_线性系统的校正方法__7c23f6ec\\images\\figure_130.jpg",
+      "index": 130
+    },
+    "83c488e179be0ec4c4eece5be3124dda53cac8617a7cab3a72428b9ca1c3db5a.jpg": {
+      "original_name": "83c488e179be0ec4c4eece5be3124dda53cac8617a7cab3a72428b9ca1c3db5a.jpg",
+      "original_rel_path": "83c488e179be0ec4c4eece5be3124dda53cac8617a7cab3a72428b9ca1c3db5a.jpg",
+      "friendly_name": "figure_131.jpg",
+      "abs_path": "data/mineru_cache\\chapter_06_p263-311_线性系统的校正方法__7c23f6ec\\images\\figure_131.jpg",
+      "index": 131
+    },
+    "84bfb7ee3c8995dc311ee3d52be6f3a7dedcdebfe76bf1e79e014e97c0875565.jpg": {
+      "original_name": "84bfb7ee3c8995dc311ee3d52be6f3a7dedcdebfe76bf1e79e014e97c0875565.jpg",
+      "original_rel_path": "84bfb7ee3c8995dc311ee3d52be6f3a7dedcdebfe76bf1e79e014e97c0875565.jpg",
+      "friendly_name": "figure_132.jpg",
+      "abs_path": "data/mineru_cache\\chapter_06_p263-311_线性系统的校正方法__7c23f6ec\\images\\figure_132.jpg",
+      "index": 132
+    },
+    "86bb4b8cea53e5f687dd52e7ff7d67f88413f3307f16a0de3de70603d29ba88e.jpg": {
+      "original_name": "86bb4b8cea53e5f687dd52e7ff7d67f88413f3307f16a0de3de70603d29ba88e.jpg",
+      "original_rel_path": "86bb4b8cea53e5f687dd52e7ff7d67f88413f3307f16a0de3de70603d29ba88e.jpg",
+      "friendly_name": "figure_133.jpg",
+      "abs_path": "data/mineru_cache\\chapter_06_p263-311_线性系统的校正方法__7c23f6ec\\images\\figure_133.jpg",
+      "index": 133
+    },
+    "86f4e17886a53d122b3fd00e82fa0b22f0c1dfa2af547899825ed45304543d3d.jpg": {
+      "original_name": "86f4e17886a53d122b3fd00e82fa0b22f0c1dfa2af547899825ed45304543d3d.jpg",
+      "original_rel_path": "86f4e17886a53d122b3fd00e82fa0b22f0c1dfa2af547899825ed45304543d3d.jpg",
+      "friendly_name": "figure_134.jpg",
+      "abs_path": "data/mineru_cache\\chapter_06_p263-311_线性系统的校正方法__7c23f6ec\\images\\figure_134.jpg",
+      "index": 134
+    },
+    "8853a07e67f82bd7533f08fb54a9a75c82169261c47a600cbebe6730eba61314.jpg": {
+      "original_name": "8853a07e67f82bd7533f08fb54a9a75c82169261c47a600cbebe6730eba61314.jpg",
+      "original_rel_path": "8853a07e67f82bd7533f08fb54a9a75c82169261c47a600cbebe6730eba61314.jpg",
+      "friendly_name": "figure_135.jpg",
+      "abs_path": "data/mineru_cache\\chapter_06_p263-311_线性系统的校正方法__7c23f6ec\\images\\figure_135.jpg",
+      "index": 135
+    },
+    "88ff75e55cfb314f76fedb57b4ee02de874e1065b8dd259a6db3150232d943f9.jpg": {
+      "original_name": "88ff75e55cfb314f76fedb57b4ee02de874e1065b8dd259a6db3150232d943f9.jpg",
+      "original_rel_path": "88ff75e55cfb314f76fedb57b4ee02de874e1065b8dd259a6db3150232d943f9.jpg",
+      "friendly_name": "figure_136.jpg",
+      "abs_path": "data/mineru_cache\\chapter_06_p263-311_线性系统的校正方法__7c23f6ec\\images\\figure_136.jpg",
+      "index": 136
+    },
+    "893c511efabb386b490a9d286238bc53faaaf4527cd5e297446781ced597bd13.jpg": {
+      "original_name": "893c511efabb386b490a9d286238bc53faaaf4527cd5e297446781ced597bd13.jpg",
+      "original_rel_path": "893c511efabb386b490a9d286238bc53faaaf4527cd5e297446781ced597bd13.jpg",
+      "friendly_name": "figure_137.jpg",
+      "abs_path": "data/mineru_cache\\chapter_06_p263-311_线性系统的校正方法__7c23f6ec\\images\\figure_137.jpg",
+      "index": 137
+    },
+    "89662dcbb6e0c1b3467f9418b3c192df010a96036589191b1bf6a62c9049d2a0.jpg": {
+      "original_name": "89662dcbb6e0c1b3467f9418b3c192df010a96036589191b1bf6a62c9049d2a0.jpg",
+      "original_rel_path": "89662dcbb6e0c1b3467f9418b3c192df010a96036589191b1bf6a62c9049d2a0.jpg",
+      "friendly_name": "figure_138.jpg",
+      "abs_path": "data/mineru_cache\\chapter_06_p263-311_线性系统的校正方法__7c23f6ec\\images\\figure_138.jpg",
+      "index": 138
+    },
+    "89e61f1867f4475a4853efe357cf5f7100b7f0cb057dbf02f2016d8ee9a6d307.jpg": {
+      "original_name": "89e61f1867f4475a4853efe357cf5f7100b7f0cb057dbf02f2016d8ee9a6d307.jpg",
+      "original_rel_path": "89e61f1867f4475a4853efe357cf5f7100b7f0cb057dbf02f2016d8ee9a6d307.jpg",
+      "friendly_name": "figure_139.jpg",
+      "abs_path": "data/mineru_cache\\chapter_06_p263-311_线性系统的校正方法__7c23f6ec\\images\\figure_139.jpg",
+      "index": 139
+    },
+    "8ae0907fd1f72d6cfd47209518c1637c7818da75e995f5d1a460261862fe2caf.jpg": {
+      "original_name": "8ae0907fd1f72d6cfd47209518c1637c7818da75e995f5d1a460261862fe2caf.jpg",
+      "original_rel_path": "8ae0907fd1f72d6cfd47209518c1637c7818da75e995f5d1a460261862fe2caf.jpg",
+      "friendly_name": "figure_140.jpg",
+      "abs_path": "data/mineru_cache\\chapter_06_p263-311_线性系统的校正方法__7c23f6ec\\images\\figure_140.jpg",
+      "index": 140
+    },
+    "8c342c87fe2c4f31c7c6f40405be343b796e448811076269b25c8ffc5a9c47ab.jpg": {
+      "original_name": "8c342c87fe2c4f31c7c6f40405be343b796e448811076269b25c8ffc5a9c47ab.jpg",
+      "original_rel_path": "8c342c87fe2c4f31c7c6f40405be343b796e448811076269b25c8ffc5a9c47ab.jpg",
+      "friendly_name": "figure_141.jpg",
+      "abs_path": "data/mineru_cache\\chapter_06_p263-311_线性系统的校正方法__7c23f6ec\\images\\figure_141.jpg",
+      "index": 141
+    },
+    "8d2fef740aca4dbf6828de69f23f96903dcfd7fbd8cb3cc0a23ee9d0ca63a00c.jpg": {
+      "original_name": "8d2fef740aca4dbf6828de69f23f96903dcfd7fbd8cb3cc0a23ee9d0ca63a00c.jpg",
+      "original_rel_path": "8d2fef740aca4dbf6828de69f23f96903dcfd7fbd8cb3cc0a23ee9d0ca63a00c.jpg",
+      "friendly_name": "figure_142.jpg",
+      "abs_path": "data/mineru_cache\\chapter_06_p263-311_线性系统的校正方法__7c23f6ec\\images\\figure_142.jpg",
+      "index": 142
+    },
+    "8d3c22e1380cc7b8fd4fdd5b3d5314dcb7e68d999df0f0f9ae7d3d3f72372ac9.jpg": {
+      "original_name": "8d3c22e1380cc7b8fd4fdd5b3d5314dcb7e68d999df0f0f9ae7d3d3f72372ac9.jpg",
+      "original_rel_path": "8d3c22e1380cc7b8fd4fdd5b3d5314dcb7e68d999df0f0f9ae7d3d3f72372ac9.jpg",
+      "friendly_name": "figure_143.jpg",
+      "abs_path": "data/mineru_cache\\chapter_06_p263-311_线性系统的校正方法__7c23f6ec\\images\\figure_143.jpg",
+      "index": 143
+    },
+    "8d94109087cf84d1967f07fccb5e8d7597723b179093ab00f5a3d51298e9932e.jpg": {
+      "original_name": "8d94109087cf84d1967f07fccb5e8d7597723b179093ab00f5a3d51298e9932e.jpg",
+      "original_rel_path": "8d94109087cf84d1967f07fccb5e8d7597723b179093ab00f5a3d51298e9932e.jpg",
+      "friendly_name": "figure_144.jpg",
+      "abs_path": "data/mineru_cache\\chapter_06_p263-311_线性系统的校正方法__7c23f6ec\\images\\figure_144.jpg",
+      "index": 144
+    },
+    "8dc5f00733af0b1c0e7ecde89a5594b2291ab97c08851c1863e21ed1bb1b404a.jpg": {
+      "original_name": "8dc5f00733af0b1c0e7ecde89a5594b2291ab97c08851c1863e21ed1bb1b404a.jpg",
+      "original_rel_path": "8dc5f00733af0b1c0e7ecde89a5594b2291ab97c08851c1863e21ed1bb1b404a.jpg",
+      "friendly_name": "figure_145.jpg",
+      "abs_path": "data/mineru_cache\\chapter_06_p263-311_线性系统的校正方法__7c23f6ec\\images\\figure_145.jpg",
+      "index": 145
+    },
+    "901931d7cb73da28538af663e07521874cdf080b7201902d0003b2ad8581357c.jpg": {
+      "original_name": "901931d7cb73da28538af663e07521874cdf080b7201902d0003b2ad8581357c.jpg",
+      "original_rel_path": "901931d7cb73da28538af663e07521874cdf080b7201902d0003b2ad8581357c.jpg",
+      "friendly_name": "figure_146.jpg",
+      "abs_path": "data/mineru_cache\\chapter_06_p263-311_线性系统的校正方法__7c23f6ec\\images\\figure_146.jpg",
+      "index": 146
+    },
+    "915ce357026e1769f303fdb174c9736931ccfa6553d46754244ccc86a11ebf5b.jpg": {
+      "original_name": "915ce357026e1769f303fdb174c9736931ccfa6553d46754244ccc86a11ebf5b.jpg",
+      "original_rel_path": "915ce357026e1769f303fdb174c9736931ccfa6553d46754244ccc86a11ebf5b.jpg",
+      "friendly_name": "figure_147.jpg",
+      "abs_path": "data/mineru_cache\\chapter_06_p263-311_线性系统的校正方法__7c23f6ec\\images\\figure_147.jpg",
+      "index": 147
+    },
+    "9200c7525a513e183031750c1c4290d8b9f27e1d914301c2fb702f22b0855c0c.jpg": {
+      "original_name": "9200c7525a513e183031750c1c4290d8b9f27e1d914301c2fb702f22b0855c0c.jpg",
+      "original_rel_path": "9200c7525a513e183031750c1c4290d8b9f27e1d914301c2fb702f22b0855c0c.jpg",
+      "friendly_name": "figure_148.jpg",
+      "abs_path": "data/mineru_cache\\chapter_06_p263-311_线性系统的校正方法__7c23f6ec\\images\\figure_148.jpg",
+      "index": 148
+    },
+    "938c7fc457ed6b4098e4145d0abe7c1ac2fe1df31f75e52a8fa4c67fa094001a.jpg": {
+      "original_name": "938c7fc457ed6b4098e4145d0abe7c1ac2fe1df31f75e52a8fa4c67fa094001a.jpg",
+      "original_rel_path": "938c7fc457ed6b4098e4145d0abe7c1ac2fe1df31f75e52a8fa4c67fa094001a.jpg",
+      "friendly_name": "figure_149.jpg",
+      "abs_path": "data/mineru_cache\\chapter_06_p263-311_线性系统的校正方法__7c23f6ec\\images\\figure_149.jpg",
+      "index": 149
+    },
+    "9591269dbb4a2ecda5ed4dc60bbb48323ec973f859748941d36d406f5c5f1368.jpg": {
+      "original_name": "9591269dbb4a2ecda5ed4dc60bbb48323ec973f859748941d36d406f5c5f1368.jpg",
+      "original_rel_path": "9591269dbb4a2ecda5ed4dc60bbb48323ec973f859748941d36d406f5c5f1368.jpg",
+      "friendly_name": "figure_150.jpg",
+      "abs_path": "data/mineru_cache\\chapter_06_p263-311_线性系统的校正方法__7c23f6ec\\images\\figure_150.jpg",
+      "index": 150
+    },
+    "9629539fbf31507000a2c63d4d9bfd4bf9380c33fc2ffa0cbf70de7cbda5bddb.jpg": {
+      "original_name": "9629539fbf31507000a2c63d4d9bfd4bf9380c33fc2ffa0cbf70de7cbda5bddb.jpg",
+      "original_rel_path": "9629539fbf31507000a2c63d4d9bfd4bf9380c33fc2ffa0cbf70de7cbda5bddb.jpg",
+      "friendly_name": "figure_151.jpg",
+      "abs_path": "data/mineru_cache\\chapter_06_p263-311_线性系统的校正方法__7c23f6ec\\images\\figure_151.jpg",
+      "index": 151
+    },
+    "96ea7d3cdfabd94d719f7ed5f3dfe977cb766b11ea2a70f53328004973af02ce.jpg": {
+      "original_name": "96ea7d3cdfabd94d719f7ed5f3dfe977cb766b11ea2a70f53328004973af02ce.jpg",
+      "original_rel_path": "96ea7d3cdfabd94d719f7ed5f3dfe977cb766b11ea2a70f53328004973af02ce.jpg",
+      "friendly_name": "figure_152.jpg",
+      "abs_path": "data/mineru_cache\\chapter_06_p263-311_线性系统的校正方法__7c23f6ec\\images\\figure_152.jpg",
+      "index": 152
+    },
+    "9a27020443dec97f1266e6665ad1b5dc6b064aa2c79af10e49cab0dc1d44e4b2.jpg": {
+      "original_name": "9a27020443dec97f1266e6665ad1b5dc6b064aa2c79af10e49cab0dc1d44e4b2.jpg",
+      "original_rel_path": "9a27020443dec97f1266e6665ad1b5dc6b064aa2c79af10e49cab0dc1d44e4b2.jpg",
+      "friendly_name": "figure_153.jpg",
+      "abs_path": "data/mineru_cache\\chapter_06_p263-311_线性系统的校正方法__7c23f6ec\\images\\figure_153.jpg",
+      "index": 153
+    },
+    "9acf160430e6d60b88098a97c93e3a5ba021bdcb4d0cb81f7498bc0be92e7f00.jpg": {
+      "original_name": "9acf160430e6d60b88098a97c93e3a5ba021bdcb4d0cb81f7498bc0be92e7f00.jpg",
+      "original_rel_path": "9acf160430e6d60b88098a97c93e3a5ba021bdcb4d0cb81f7498bc0be92e7f00.jpg",
+      "friendly_name": "figure_154.jpg",
+      "abs_path": "data/mineru_cache\\chapter_06_p263-311_线性系统的校正方法__7c23f6ec\\images\\figure_154.jpg",
+      "index": 154
+    },
+    "9c3d00e7228f54857de3a641bf2b8d47bc8e598d474e0c183d5e134d1c52a1eb.jpg": {
+      "original_name": "9c3d00e7228f54857de3a641bf2b8d47bc8e598d474e0c183d5e134d1c52a1eb.jpg",
+      "original_rel_path": "9c3d00e7228f54857de3a641bf2b8d47bc8e598d474e0c183d5e134d1c52a1eb.jpg",
+      "friendly_name": "figure_155.jpg",
+      "abs_path": "data/mineru_cache\\chapter_06_p263-311_线性系统的校正方法__7c23f6ec\\images\\figure_155.jpg",
+      "index": 155
+    },
+    "9cbd43ac9655a3fa4b32bd6624338a1b3effc3d67157b3da003cf47bb609acf3.jpg": {
+      "original_name": "9cbd43ac9655a3fa4b32bd6624338a1b3effc3d67157b3da003cf47bb609acf3.jpg",
+      "original_rel_path": "9cbd43ac9655a3fa4b32bd6624338a1b3effc3d67157b3da003cf47bb609acf3.jpg",
+      "friendly_name": "figure_156.jpg",
+      "abs_path": "data/mineru_cache\\chapter_06_p263-311_线性系统的校正方法__7c23f6ec\\images\\figure_156.jpg",
+      "index": 156
+    },
+    "9d22c6a9cb81482977464ce22fd0a87ba323b076f88ebe0a9e10ad2c8f0c061a.jpg": {
+      "original_name": "9d22c6a9cb81482977464ce22fd0a87ba323b076f88ebe0a9e10ad2c8f0c061a.jpg",
+      "original_rel_path": "9d22c6a9cb81482977464ce22fd0a87ba323b076f88ebe0a9e10ad2c8f0c061a.jpg",
+      "friendly_name": "figure_157.jpg",
+      "abs_path": "data/mineru_cache\\chapter_06_p263-311_线性系统的校正方法__7c23f6ec\\images\\figure_157.jpg",
+      "index": 157
+    },
+    "9df9c0a99f43b585a2bcb8064b248433846bf55a04ed3d166db6f4c92313f20d.jpg": {
+      "original_name": "9df9c0a99f43b585a2bcb8064b248433846bf55a04ed3d166db6f4c92313f20d.jpg",
+      "original_rel_path": "9df9c0a99f43b585a2bcb8064b248433846bf55a04ed3d166db6f4c92313f20d.jpg",
+      "friendly_name": "figure_158.jpg",
+      "abs_path": "data/mineru_cache\\chapter_06_p263-311_线性系统的校正方法__7c23f6ec\\images\\figure_158.jpg",
+      "index": 158
+    },
+    "9fee95a9b9df5ec8e48653c788cb28cde572249364df57222b07c3c715371076.jpg": {
+      "original_name": "9fee95a9b9df5ec8e48653c788cb28cde572249364df57222b07c3c715371076.jpg",
+      "original_rel_path": "9fee95a9b9df5ec8e48653c788cb28cde572249364df57222b07c3c715371076.jpg",
+      "friendly_name": "figure_159.jpg",
+      "abs_path": "data/mineru_cache\\chapter_06_p263-311_线性系统的校正方法__7c23f6ec\\images\\figure_159.jpg",
+      "index": 159
+    },
+    "a0595da9bf695b7df2d98b4ff13f28feaf371f58adfb1186ac09fd86d4707bca.jpg": {
+      "original_name": "a0595da9bf695b7df2d98b4ff13f28feaf371f58adfb1186ac09fd86d4707bca.jpg",
+      "original_rel_path": "a0595da9bf695b7df2d98b4ff13f28feaf371f58adfb1186ac09fd86d4707bca.jpg",
+      "friendly_name": "figure_160.jpg",
+      "abs_path": "data/mineru_cache\\chapter_06_p263-311_线性系统的校正方法__7c23f6ec\\images\\figure_160.jpg",
+      "index": 160
+    },
+    "a25a58755f8c3fa68ab3433c12b9cc59faed39468271a4e5295f32462ca8548b.jpg": {
+      "original_name": "a25a58755f8c3fa68ab3433c12b9cc59faed39468271a4e5295f32462ca8548b.jpg",
+      "original_rel_path": "a25a58755f8c3fa68ab3433c12b9cc59faed39468271a4e5295f32462ca8548b.jpg",
+      "friendly_name": "figure_161.jpg",
+      "abs_path": "data/mineru_cache\\chapter_06_p263-311_线性系统的校正方法__7c23f6ec\\images\\figure_161.jpg",
+      "index": 161
+    },
+    "a315965599ed478b73197fbe50e361fd5f379f9702282d77cdacaead22820be4.jpg": {
+      "original_name": "a315965599ed478b73197fbe50e361fd5f379f9702282d77cdacaead22820be4.jpg",
+      "original_rel_path": "a315965599ed478b73197fbe50e361fd5f379f9702282d77cdacaead22820be4.jpg",
+      "friendly_name": "figure_162.jpg",
+      "abs_path": "data/mineru_cache\\chapter_06_p263-311_线性系统的校正方法__7c23f6ec\\images\\figure_162.jpg",
+      "index": 162
+    },
+    "a385cfcdd126bf6dc23199189edf4df1a53b7956f125b8608aeedd13dcbfcb69.jpg": {
+      "original_name": "a385cfcdd126bf6dc23199189edf4df1a53b7956f125b8608aeedd13dcbfcb69.jpg",
+      "original_rel_path": "a385cfcdd126bf6dc23199189edf4df1a53b7956f125b8608aeedd13dcbfcb69.jpg",
+      "friendly_name": "figure_163.jpg",
+      "abs_path": "data/mineru_cache\\chapter_06_p263-311_线性系统的校正方法__7c23f6ec\\images\\figure_163.jpg",
+      "index": 163
+    },
+    "a417e78a5dd29ae8117ab8a0f40d5d7609ee63f70d9100422f4292fa226bbeca.jpg": {
+      "original_name": "a417e78a5dd29ae8117ab8a0f40d5d7609ee63f70d9100422f4292fa226bbeca.jpg",
+      "original_rel_path": "a417e78a5dd29ae8117ab8a0f40d5d7609ee63f70d9100422f4292fa226bbeca.jpg",
+      "friendly_name": "figure_164.jpg",
+      "abs_path": "data/mineru_cache\\chapter_06_p263-311_线性系统的校正方法__7c23f6ec\\images\\figure_164.jpg",
+      "index": 164
+    },
+    "a4ef5abc7e904e3b723f6424b0700f68aeee17e49b0a6c6c685fd62e4173afae.jpg": {
+      "original_name": "a4ef5abc7e904e3b723f6424b0700f68aeee17e49b0a6c6c685fd62e4173afae.jpg",
+      "original_rel_path": "a4ef5abc7e904e3b723f6424b0700f68aeee17e49b0a6c6c685fd62e4173afae.jpg",
+      "friendly_name": "figure_165.jpg",
+      "abs_path": "data/mineru_cache\\chapter_06_p263-311_线性系统的校正方法__7c23f6ec\\images\\figure_165.jpg",
+      "index": 165
+    },
+    "a589d40c4c9bf8691aae2f79be4716c331737541ca20a5c024f64aa122078a6f.jpg": {
+      "original_name": "a589d40c4c9bf8691aae2f79be4716c331737541ca20a5c024f64aa122078a6f.jpg",
+      "original_rel_path": "a589d40c4c9bf8691aae2f79be4716c331737541ca20a5c024f64aa122078a6f.jpg",
+      "friendly_name": "figure_166.jpg",
+      "abs_path": "data/mineru_cache\\chapter_06_p263-311_线性系统的校正方法__7c23f6ec\\images\\figure_166.jpg",
+      "index": 166
+    },
+    "a5e9475a758e425dcdb99cd74a3895f8558536b1d33e4284dcdc0215a4a84e47.jpg": {
+      "original_name": "a5e9475a758e425dcdb99cd74a3895f8558536b1d33e4284dcdc0215a4a84e47.jpg",
+      "original_rel_path": "a5e9475a758e425dcdb99cd74a3895f8558536b1d33e4284dcdc0215a4a84e47.jpg",
+      "friendly_name": "figure_167.jpg",
+      "abs_path": "data/mineru_cache\\chapter_06_p263-311_线性系统的校正方法__7c23f6ec\\images\\figure_167.jpg",
+      "index": 167
+    },
+    "a76781b6eeb84b0d4cd57537cd2adec320ba15a7a9f5da9b95886815fb3ef2ad.jpg": {
+      "original_name": "a76781b6eeb84b0d4cd57537cd2adec320ba15a7a9f5da9b95886815fb3ef2ad.jpg",
+      "original_rel_path": "a76781b6eeb84b0d4cd57537cd2adec320ba15a7a9f5da9b95886815fb3ef2ad.jpg",
+      "friendly_name": "figure_168.jpg",
+      "abs_path": "data/mineru_cache\\chapter_06_p263-311_线性系统的校正方法__7c23f6ec\\images\\figure_168.jpg",
+      "index": 168
+    },
+    "a927668a5a740c4ca6613ab64c5e20e72746a0eac8af7a094f783d757a3d84c8.jpg": {
+      "original_name": "a927668a5a740c4ca6613ab64c5e20e72746a0eac8af7a094f783d757a3d84c8.jpg",
+      "original_rel_path": "a927668a5a740c4ca6613ab64c5e20e72746a0eac8af7a094f783d757a3d84c8.jpg",
+      "friendly_name": "figure_169.jpg",
+      "abs_path": "data/mineru_cache\\chapter_06_p263-311_线性系统的校正方法__7c23f6ec\\images\\figure_169.jpg",
+      "index": 169
+    },
+    "a9d22446a0ce032484eeba412da0eb82f036fd81356c63ff96e513fbdd97fa52.jpg": {
+      "original_name": "a9d22446a0ce032484eeba412da0eb82f036fd81356c63ff96e513fbdd97fa52.jpg",
+      "original_rel_path": "a9d22446a0ce032484eeba412da0eb82f036fd81356c63ff96e513fbdd97fa52.jpg",
+      "friendly_name": "figure_170.jpg",
+      "abs_path": "data/mineru_cache\\chapter_06_p263-311_线性系统的校正方法__7c23f6ec\\images\\figure_170.jpg",
+      "index": 170
+    },
+    "a9d554747b4f371fd651a40a0cb6712bf661c7b5a3a867d2ba6d4baad7fc3cb3.jpg": {
+      "original_name": "a9d554747b4f371fd651a40a0cb6712bf661c7b5a3a867d2ba6d4baad7fc3cb3.jpg",
+      "original_rel_path": "a9d554747b4f371fd651a40a0cb6712bf661c7b5a3a867d2ba6d4baad7fc3cb3.jpg",
+      "friendly_name": "figure_171.jpg",
+      "abs_path": "data/mineru_cache\\chapter_06_p263-311_线性系统的校正方法__7c23f6ec\\images\\figure_171.jpg",
+      "index": 171
+    },
+    "ac07cd5783d8eb5d821848f90a457e95c7433d13408884e6f0cd7088b014a497.jpg": {
+      "original_name": "ac07cd5783d8eb5d821848f90a457e95c7433d13408884e6f0cd7088b014a497.jpg",
+      "original_rel_path": "ac07cd5783d8eb5d821848f90a457e95c7433d13408884e6f0cd7088b014a497.jpg",
+      "friendly_name": "figure_172.jpg",
+      "abs_path": "data/mineru_cache\\chapter_06_p263-311_线性系统的校正方法__7c23f6ec\\images\\figure_172.jpg",
+      "index": 172
+    },
+    "ac0a5d88aff08d3da3dce2c3f9db03b4327474203c1d7c489f1de5c386f03f50.jpg": {
+      "original_name": "ac0a5d88aff08d3da3dce2c3f9db03b4327474203c1d7c489f1de5c386f03f50.jpg",
+      "original_rel_path": "ac0a5d88aff08d3da3dce2c3f9db03b4327474203c1d7c489f1de5c386f03f50.jpg",
+      "friendly_name": "figure_173.jpg",
+      "abs_path": "data/mineru_cache\\chapter_06_p263-311_线性系统的校正方法__7c23f6ec\\images\\figure_173.jpg",
+      "index": 173
+    },
+    "accc68a5288506d792448a00271e80a7376b5e8b961d90f2b8555cbee976fe85.jpg": {
+      "original_name": "accc68a5288506d792448a00271e80a7376b5e8b961d90f2b8555cbee976fe85.jpg",
+      "original_rel_path": "accc68a5288506d792448a00271e80a7376b5e8b961d90f2b8555cbee976fe85.jpg",
+      "friendly_name": "figure_174.jpg",
+      "abs_path": "data/mineru_cache\\chapter_06_p263-311_线性系统的校正方法__7c23f6ec\\images\\figure_174.jpg",
+      "index": 174
+    },
+    "adc34594df0d8e61b6717c24626da9309d76235e1873e3753ad1d9b880ddb336.jpg": {
+      "original_name": "adc34594df0d8e61b6717c24626da9309d76235e1873e3753ad1d9b880ddb336.jpg",
+      "original_rel_path": "adc34594df0d8e61b6717c24626da9309d76235e1873e3753ad1d9b880ddb336.jpg",
+      "friendly_name": "figure_175.jpg",
+      "abs_path": "data/mineru_cache\\chapter_06_p263-311_线性系统的校正方法__7c23f6ec\\images\\figure_175.jpg",
+      "index": 175
+    },
+    "adc520daf9b6a6c27930ff764de210ef13ddfa1b32d8a9a1fdebf1437156cd5b.jpg": {
+      "original_name": "adc520daf9b6a6c27930ff764de210ef13ddfa1b32d8a9a1fdebf1437156cd5b.jpg",
+      "original_rel_path": "adc520daf9b6a6c27930ff764de210ef13ddfa1b32d8a9a1fdebf1437156cd5b.jpg",
+      "friendly_name": "figure_176.jpg",
+      "abs_path": "data/mineru_cache\\chapter_06_p263-311_线性系统的校正方法__7c23f6ec\\images\\figure_176.jpg",
+      "index": 176
+    },
+    "add76479c1fdc2bf75204cf5654d357ef6ff642030606eda9356ff8772d4e11f.jpg": {
+      "original_name": "add76479c1fdc2bf75204cf5654d357ef6ff642030606eda9356ff8772d4e11f.jpg",
+      "original_rel_path": "add76479c1fdc2bf75204cf5654d357ef6ff642030606eda9356ff8772d4e11f.jpg",
+      "friendly_name": "figure_177.jpg",
+      "abs_path": "data/mineru_cache\\chapter_06_p263-311_线性系统的校正方法__7c23f6ec\\images\\figure_177.jpg",
+      "index": 177
+    },
+    "ae42fd834e0e6640d243f8fb446ce49b4695a5f56fdbced4aef1bbc06110d3d6.jpg": {
+      "original_name": "ae42fd834e0e6640d243f8fb446ce49b4695a5f56fdbced4aef1bbc06110d3d6.jpg",
+      "original_rel_path": "ae42fd834e0e6640d243f8fb446ce49b4695a5f56fdbced4aef1bbc06110d3d6.jpg",
+      "friendly_name": "figure_178.jpg",
+      "abs_path": "data/mineru_cache\\chapter_06_p263-311_线性系统的校正方法__7c23f6ec\\images\\figure_178.jpg",
+      "index": 178
+    },
+    "ae4329f5cd61b57d4ade28089a88f0c2506aaf56c0e431eda7b60f9d4a8d37ee.jpg": {
+      "original_name": "ae4329f5cd61b57d4ade28089a88f0c2506aaf56c0e431eda7b60f9d4a8d37ee.jpg",
+      "original_rel_path": "ae4329f5cd61b57d4ade28089a88f0c2506aaf56c0e431eda7b60f9d4a8d37ee.jpg",
+      "friendly_name": "figure_179.jpg",
+      "abs_path": "data/mineru_cache\\chapter_06_p263-311_线性系统的校正方法__7c23f6ec\\images\\figure_179.jpg",
+      "index": 179
+    },
+    "ae5d416b920a609e75611d8e52df485eaf38be22eb4dec6d02bc841a851f4838.jpg": {
+      "original_name": "ae5d416b920a609e75611d8e52df485eaf38be22eb4dec6d02bc841a851f4838.jpg",
+      "original_rel_path": "ae5d416b920a609e75611d8e52df485eaf38be22eb4dec6d02bc841a851f4838.jpg",
+      "friendly_name": "figure_180.jpg",
+      "abs_path": "data/mineru_cache\\chapter_06_p263-311_线性系统的校正方法__7c23f6ec\\images\\figure_180.jpg",
+      "index": 180
+    },
+    "b054fc466dfaded5cabdf47447a38cbf9486d4173050ea1e8f76a9b37a1b1c60.jpg": {
+      "original_name": "b054fc466dfaded5cabdf47447a38cbf9486d4173050ea1e8f76a9b37a1b1c60.jpg",
+      "original_rel_path": "b054fc466dfaded5cabdf47447a38cbf9486d4173050ea1e8f76a9b37a1b1c60.jpg",
+      "friendly_name": "figure_181.jpg",
+      "abs_path": "data/mineru_cache\\chapter_06_p263-311_线性系统的校正方法__7c23f6ec\\images\\figure_181.jpg",
+      "index": 181
+    },
+    "b0b3b0e9822357df73047d2ba36974da73b99fc86508b537e3b9c1b8374eaaa0.jpg": {
+      "original_name": "b0b3b0e9822357df73047d2ba36974da73b99fc86508b537e3b9c1b8374eaaa0.jpg",
+      "original_rel_path": "b0b3b0e9822357df73047d2ba36974da73b99fc86508b537e3b9c1b8374eaaa0.jpg",
+      "friendly_name": "figure_182.jpg",
+      "abs_path": "data/mineru_cache\\chapter_06_p263-311_线性系统的校正方法__7c23f6ec\\images\\figure_182.jpg",
+      "index": 182
+    },
+    "b14654652f8f33a8e673cac3ff6c2c4d01534490086a893039b7c7c0162786e2.jpg": {
+      "original_name": "b14654652f8f33a8e673cac3ff6c2c4d01534490086a893039b7c7c0162786e2.jpg",
+      "original_rel_path": "b14654652f8f33a8e673cac3ff6c2c4d01534490086a893039b7c7c0162786e2.jpg",
+      "friendly_name": "figure_183.jpg",
+      "abs_path": "data/mineru_cache\\chapter_06_p263-311_线性系统的校正方法__7c23f6ec\\images\\figure_183.jpg",
+      "index": 183
+    },
+    "b2802021a4408a43260667fff4fef5e91c3dfffb3dac630a14bf6f5d6280d675.jpg": {
+      "original_name": "b2802021a4408a43260667fff4fef5e91c3dfffb3dac630a14bf6f5d6280d675.jpg",
+      "original_rel_path": "b2802021a4408a43260667fff4fef5e91c3dfffb3dac630a14bf6f5d6280d675.jpg",
+      "friendly_name": "figure_184.jpg",
+      "abs_path": "data/mineru_cache\\chapter_06_p263-311_线性系统的校正方法__7c23f6ec\\images\\figure_184.jpg",
+      "index": 184
+    },
+    "b3f53cee4225483f9b86bd87614fd36a0062777831870ace4a6fe71b3a5d2a27.jpg": {
+      "original_name": "b3f53cee4225483f9b86bd87614fd36a0062777831870ace4a6fe71b3a5d2a27.jpg",
+      "original_rel_path": "b3f53cee4225483f9b86bd87614fd36a0062777831870ace4a6fe71b3a5d2a27.jpg",
+      "friendly_name": "figure_185.jpg",
+      "abs_path": "data/mineru_cache\\chapter_06_p263-311_线性系统的校正方法__7c23f6ec\\images\\figure_185.jpg",
+      "index": 185
+    },
+    "b4f622830ff445e67f320f25846251300b2fcc872a13c9e735f3484f519568aa.jpg": {
+      "original_name": "b4f622830ff445e67f320f25846251300b2fcc872a13c9e735f3484f519568aa.jpg",
+      "original_rel_path": "b4f622830ff445e67f320f25846251300b2fcc872a13c9e735f3484f519568aa.jpg",
+      "friendly_name": "figure_186.jpg",
+      "abs_path": "data/mineru_cache\\chapter_06_p263-311_线性系统的校正方法__7c23f6ec\\images\\figure_186.jpg",
+      "index": 186
+    },
+    "b6c4705811aad5e1d33ceac4058702b1c67c2d13aedef03302406fe76e8f71d3.jpg": {
+      "original_name": "b6c4705811aad5e1d33ceac4058702b1c67c2d13aedef03302406fe76e8f71d3.jpg",
+      "original_rel_path": "b6c4705811aad5e1d33ceac4058702b1c67c2d13aedef03302406fe76e8f71d3.jpg",
+      "friendly_name": "figure_187.jpg",
+      "abs_path": "data/mineru_cache\\chapter_06_p263-311_线性系统的校正方法__7c23f6ec\\images\\figure_187.jpg",
+      "index": 187
+    },
+    "b87f8d2ed3e3ce03ed4ed520f0fc216b163a8bac34362eee7d973f3d9b67514e.jpg": {
+      "original_name": "b87f8d2ed3e3ce03ed4ed520f0fc216b163a8bac34362eee7d973f3d9b67514e.jpg",
+      "original_rel_path": "b87f8d2ed3e3ce03ed4ed520f0fc216b163a8bac34362eee7d973f3d9b67514e.jpg",
+      "friendly_name": "figure_188.jpg",
+      "abs_path": "data/mineru_cache\\chapter_06_p263-311_线性系统的校正方法__7c23f6ec\\images\\figure_188.jpg",
+      "index": 188
+    },
+    "ba63f93067bf5dbd90f4aad8a1ed959b99287b826f8266307ac39e21e2cedc20.jpg": {
+      "original_name": "ba63f93067bf5dbd90f4aad8a1ed959b99287b826f8266307ac39e21e2cedc20.jpg",
+      "original_rel_path": "ba63f93067bf5dbd90f4aad8a1ed959b99287b826f8266307ac39e21e2cedc20.jpg",
+      "friendly_name": "figure_189.jpg",
+      "abs_path": "data/mineru_cache\\chapter_06_p263-311_线性系统的校正方法__7c23f6ec\\images\\figure_189.jpg",
+      "index": 189
+    },
+    "baaf5e170c4aea534d737d8f9ba96e57a42d332d22425d3b422a65c12a0f78a2.jpg": {
+      "original_name": "baaf5e170c4aea534d737d8f9ba96e57a42d332d22425d3b422a65c12a0f78a2.jpg",
+      "original_rel_path": "baaf5e170c4aea534d737d8f9ba96e57a42d332d22425d3b422a65c12a0f78a2.jpg",
+      "friendly_name": "figure_190.jpg",
+      "abs_path": "data/mineru_cache\\chapter_06_p263-311_线性系统的校正方法__7c23f6ec\\images\\figure_190.jpg",
+      "index": 190
+    },
+    "bdc124b9353de5d7af1db5bb497ee963173852de47083d1555979bf1b6d644ba.jpg": {
+      "original_name": "bdc124b9353de5d7af1db5bb497ee963173852de47083d1555979bf1b6d644ba.jpg",
+      "original_rel_path": "bdc124b9353de5d7af1db5bb497ee963173852de47083d1555979bf1b6d644ba.jpg",
+      "friendly_name": "figure_191.jpg",
+      "abs_path": "data/mineru_cache\\chapter_06_p263-311_线性系统的校正方法__7c23f6ec\\images\\figure_191.jpg",
+      "index": 191
+    },
+    "bf32762d3c21227a9f85b9c0bfd04cb6c1cca9b3d64a61f61b65fb83341d060e.jpg": {
+      "original_name": "bf32762d3c21227a9f85b9c0bfd04cb6c1cca9b3d64a61f61b65fb83341d060e.jpg",
+      "original_rel_path": "bf32762d3c21227a9f85b9c0bfd04cb6c1cca9b3d64a61f61b65fb83341d060e.jpg",
+      "friendly_name": "figure_192.jpg",
+      "abs_path": "data/mineru_cache\\chapter_06_p263-311_线性系统的校正方法__7c23f6ec\\images\\figure_192.jpg",
+      "index": 192
+    },
+    "c1343c80b01c6a76b9a00b86ac0cf3d92835f088ace3c5c702c4f44e2afbf1fb.jpg": {
+      "original_name": "c1343c80b01c6a76b9a00b86ac0cf3d92835f088ace3c5c702c4f44e2afbf1fb.jpg",
+      "original_rel_path": "c1343c80b01c6a76b9a00b86ac0cf3d92835f088ace3c5c702c4f44e2afbf1fb.jpg",
+      "friendly_name": "figure_193.jpg",
+      "abs_path": "data/mineru_cache\\chapter_06_p263-311_线性系统的校正方法__7c23f6ec\\images\\figure_193.jpg",
+      "index": 193
+    },
+    "c1d378f47fe59641e624e35234208b167c9ff73a1b6c2b22492a01723aab07cd.jpg": {
+      "original_name": "c1d378f47fe59641e624e35234208b167c9ff73a1b6c2b22492a01723aab07cd.jpg",
+      "original_rel_path": "c1d378f47fe59641e624e35234208b167c9ff73a1b6c2b22492a01723aab07cd.jpg",
+      "friendly_name": "figure_194.jpg",
+      "abs_path": "data/mineru_cache\\chapter_06_p263-311_线性系统的校正方法__7c23f6ec\\images\\figure_194.jpg",
+      "index": 194
+    },
+    "c410ff38ddd380d7b42751e162c33d270471ca8ea9afa6122feaaf536e65874d.jpg": {
+      "original_name": "c410ff38ddd380d7b42751e162c33d270471ca8ea9afa6122feaaf536e65874d.jpg",
+      "original_rel_path": "c410ff38ddd380d7b42751e162c33d270471ca8ea9afa6122feaaf536e65874d.jpg",
+      "friendly_name": "figure_195.jpg",
+      "abs_path": "data/mineru_cache\\chapter_06_p263-311_线性系统的校正方法__7c23f6ec\\images\\figure_195.jpg",
+      "index": 195
+    },
+    "c413bd58740cf61239661d432b1834263cfc0c7104fe86e83e603836796489f8.jpg": {
+      "original_name": "c413bd58740cf61239661d432b1834263cfc0c7104fe86e83e603836796489f8.jpg",
+      "original_rel_path": "c413bd58740cf61239661d432b1834263cfc0c7104fe86e83e603836796489f8.jpg",
+      "friendly_name": "figure_196.jpg",
+      "abs_path": "data/mineru_cache\\chapter_06_p263-311_线性系统的校正方法__7c23f6ec\\images\\figure_196.jpg",
+      "index": 196
+    },
+    "c49f82ce0b80176947a429927d7dbe39148534333d7d4cfa45768510eb399448.jpg": {
+      "original_name": "c49f82ce0b80176947a429927d7dbe39148534333d7d4cfa45768510eb399448.jpg",
+      "original_rel_path": "c49f82ce0b80176947a429927d7dbe39148534333d7d4cfa45768510eb399448.jpg",
+      "friendly_name": "figure_197.jpg",
+      "abs_path": "data/mineru_cache\\chapter_06_p263-311_线性系统的校正方法__7c23f6ec\\images\\figure_197.jpg",
+      "index": 197
+    },
+    "c6a53605b915243481b748dbfff039c0fbb236f35a46caf985d453d8848b2303.jpg": {
+      "original_name": "c6a53605b915243481b748dbfff039c0fbb236f35a46caf985d453d8848b2303.jpg",
+      "original_rel_path": "c6a53605b915243481b748dbfff039c0fbb236f35a46caf985d453d8848b2303.jpg",
+      "friendly_name": "figure_198.jpg",
+      "abs_path": "data/mineru_cache\\chapter_06_p263-311_线性系统的校正方法__7c23f6ec\\images\\figure_198.jpg",
+      "index": 198
+    },
+    "c6b38d332b373771487290c4e25882221dc2e1cbdd37fb02b3f26dfbe73ddc0c.jpg": {
+      "original_name": "c6b38d332b373771487290c4e25882221dc2e1cbdd37fb02b3f26dfbe73ddc0c.jpg",
+      "original_rel_path": "c6b38d332b373771487290c4e25882221dc2e1cbdd37fb02b3f26dfbe73ddc0c.jpg",
+      "friendly_name": "figure_199.jpg",
+      "abs_path": "data/mineru_cache\\chapter_06_p263-311_线性系统的校正方法__7c23f6ec\\images\\figure_199.jpg",
+      "index": 199
+    },
+    "c7991bdf24c15104556a6b4d1f7b884d3c0055ec8b3157697d14abcb9a624b68.jpg": {
+      "original_name": "c7991bdf24c15104556a6b4d1f7b884d3c0055ec8b3157697d14abcb9a624b68.jpg",
+      "original_rel_path": "c7991bdf24c15104556a6b4d1f7b884d3c0055ec8b3157697d14abcb9a624b68.jpg",
+      "friendly_name": "figure_200.jpg",
+      "abs_path": "data/mineru_cache\\chapter_06_p263-311_线性系统的校正方法__7c23f6ec\\images\\figure_200.jpg",
+      "index": 200
+    },
+    "c830da4d4765011cbfa29e08de60672935ddc900cad91c7350fdb30db04392b0.jpg": {
+      "original_name": "c830da4d4765011cbfa29e08de60672935ddc900cad91c7350fdb30db04392b0.jpg",
+      "original_rel_path": "c830da4d4765011cbfa29e08de60672935ddc900cad91c7350fdb30db04392b0.jpg",
+      "friendly_name": "figure_201.jpg",
+      "abs_path": "data/mineru_cache\\chapter_06_p263-311_线性系统的校正方法__7c23f6ec\\images\\figure_201.jpg",
+      "index": 201
+    },
+    "c8f69eed6522966385a9ed2c54945e103341cf6e0e5c08856d78d8d5f0cb52ff.jpg": {
+      "original_name": "c8f69eed6522966385a9ed2c54945e103341cf6e0e5c08856d78d8d5f0cb52ff.jpg",
+      "original_rel_path": "c8f69eed6522966385a9ed2c54945e103341cf6e0e5c08856d78d8d5f0cb52ff.jpg",
+      "friendly_name": "figure_202.jpg",
+      "abs_path": "data/mineru_cache\\chapter_06_p263-311_线性系统的校正方法__7c23f6ec\\images\\figure_202.jpg",
+      "index": 202
+    },
+    "ca109484175a76defe3eecd472486480e0134ff69b3ea8059fb042efc2d0989c.jpg": {
+      "original_name": "ca109484175a76defe3eecd472486480e0134ff69b3ea8059fb042efc2d0989c.jpg",
+      "original_rel_path": "ca109484175a76defe3eecd472486480e0134ff69b3ea8059fb042efc2d0989c.jpg",
+      "friendly_name": "figure_203.jpg",
+      "abs_path": "data/mineru_cache\\chapter_06_p263-311_线性系统的校正方法__7c23f6ec\\images\\figure_203.jpg",
+      "index": 203
+    },
+    "ca4336284a0d409f22f2fe329a8359c26715ad2eef4ffc91ad10bdc0d35812b7.jpg": {
+      "original_name": "ca4336284a0d409f22f2fe329a8359c26715ad2eef4ffc91ad10bdc0d35812b7.jpg",
+      "original_rel_path": "ca4336284a0d409f22f2fe329a8359c26715ad2eef4ffc91ad10bdc0d35812b7.jpg",
+      "friendly_name": "figure_204.jpg",
+      "abs_path": "data/mineru_cache\\chapter_06_p263-311_线性系统的校正方法__7c23f6ec\\images\\figure_204.jpg",
+      "index": 204
+    },
+    "ca4b33dc291eace083e906d3baf5d54a40f71bc73c2a0389eece8eb4f2e07b5f.jpg": {
+      "original_name": "ca4b33dc291eace083e906d3baf5d54a40f71bc73c2a0389eece8eb4f2e07b5f.jpg",
+      "original_rel_path": "ca4b33dc291eace083e906d3baf5d54a40f71bc73c2a0389eece8eb4f2e07b5f.jpg",
+      "friendly_name": "figure_205.jpg",
+      "abs_path": "data/mineru_cache\\chapter_06_p263-311_线性系统的校正方法__7c23f6ec\\images\\figure_205.jpg",
+      "index": 205
+    },
+    "cb1ca08815beaa5ceb4d1cb89818f274d50fe689996983ffea0571e9cb570a13.jpg": {
+      "original_name": "cb1ca08815beaa5ceb4d1cb89818f274d50fe689996983ffea0571e9cb570a13.jpg",
+      "original_rel_path": "cb1ca08815beaa5ceb4d1cb89818f274d50fe689996983ffea0571e9cb570a13.jpg",
+      "friendly_name": "figure_206.jpg",
+      "abs_path": "data/mineru_cache\\chapter_06_p263-311_线性系统的校正方法__7c23f6ec\\images\\figure_206.jpg",
+      "index": 206
+    },
+    "cc382e7e6af355a106ce4833371b62c609363b91c646520cea210eaa494a3f2f.jpg": {
+      "original_name": "cc382e7e6af355a106ce4833371b62c609363b91c646520cea210eaa494a3f2f.jpg",
+      "original_rel_path": "cc382e7e6af355a106ce4833371b62c609363b91c646520cea210eaa494a3f2f.jpg",
+      "friendly_name": "figure_207.jpg",
+      "abs_path": "data/mineru_cache\\chapter_06_p263-311_线性系统的校正方法__7c23f6ec\\images\\figure_207.jpg",
+      "index": 207
+    },
+    "cc568b5ff8473c4530ae71519c9603aa89d9ef00d352ca40c05007684f777d50.jpg": {
+      "original_name": "cc568b5ff8473c4530ae71519c9603aa89d9ef00d352ca40c05007684f777d50.jpg",
+      "original_rel_path": "cc568b5ff8473c4530ae71519c9603aa89d9ef00d352ca40c05007684f777d50.jpg",
+      "friendly_name": "figure_208.jpg",
+      "abs_path": "data/mineru_cache\\chapter_06_p263-311_线性系统的校正方法__7c23f6ec\\images\\figure_208.jpg",
+      "index": 208
+    },
+    "cc5f229482a30de97bdfe85ca8569040b9c84e85d1dd1b4913c2fe025e27589c.jpg": {
+      "original_name": "cc5f229482a30de97bdfe85ca8569040b9c84e85d1dd1b4913c2fe025e27589c.jpg",
+      "original_rel_path": "cc5f229482a30de97bdfe85ca8569040b9c84e85d1dd1b4913c2fe025e27589c.jpg",
+      "friendly_name": "figure_209.jpg",
+      "abs_path": "data/mineru_cache\\chapter_06_p263-311_线性系统的校正方法__7c23f6ec\\images\\figure_209.jpg",
+      "index": 209
+    },
+    "cd9ea378c8b4e6e0b9ff16a74c21ac15e2155afdda8b0590b88fb6e12e05c6e5.jpg": {
+      "original_name": "cd9ea378c8b4e6e0b9ff16a74c21ac15e2155afdda8b0590b88fb6e12e05c6e5.jpg",
+      "original_rel_path": "cd9ea378c8b4e6e0b9ff16a74c21ac15e2155afdda8b0590b88fb6e12e05c6e5.jpg",
+      "friendly_name": "figure_210.jpg",
+      "abs_path": "data/mineru_cache\\chapter_06_p263-311_线性系统的校正方法__7c23f6ec\\images\\figure_210.jpg",
+      "index": 210
+    },
+    "ce15829bf11cb6d11e2a9c8a44ec36ba3b82f55587e980f11f2906d4e91186dd.jpg": {
+      "original_name": "ce15829bf11cb6d11e2a9c8a44ec36ba3b82f55587e980f11f2906d4e91186dd.jpg",
+      "original_rel_path": "ce15829bf11cb6d11e2a9c8a44ec36ba3b82f55587e980f11f2906d4e91186dd.jpg",
+      "friendly_name": "figure_211.jpg",
+      "abs_path": "data/mineru_cache\\chapter_06_p263-311_线性系统的校正方法__7c23f6ec\\images\\figure_211.jpg",
+      "index": 211
+    },
+    "d0bda5b82a573c22afe590d7b1e6a96a239928a741d7b6048e237b9f13cfa7b1.jpg": {
+      "original_name": "d0bda5b82a573c22afe590d7b1e6a96a239928a741d7b6048e237b9f13cfa7b1.jpg",
+      "original_rel_path": "d0bda5b82a573c22afe590d7b1e6a96a239928a741d7b6048e237b9f13cfa7b1.jpg",
+      "friendly_name": "figure_212.jpg",
+      "abs_path": "data/mineru_cache\\chapter_06_p263-311_线性系统的校正方法__7c23f6ec\\images\\figure_212.jpg",
+      "index": 212
+    },
+    "d161d224bc4d57a72e4820c721f41f83c888f77def3d7f17b8e5f5bdf696a565.jpg": {
+      "original_name": "d161d224bc4d57a72e4820c721f41f83c888f77def3d7f17b8e5f5bdf696a565.jpg",
+      "original_rel_path": "d161d224bc4d57a72e4820c721f41f83c888f77def3d7f17b8e5f5bdf696a565.jpg",
+      "friendly_name": "figure_213.jpg",
+      "abs_path": "data/mineru_cache\\chapter_06_p263-311_线性系统的校正方法__7c23f6ec\\images\\figure_213.jpg",
+      "index": 213
+    },
+    "d1cf6b3e560390b6938935ff185bb3991aa5a7631e77bd184499b0ec2597bf23.jpg": {
+      "original_name": "d1cf6b3e560390b6938935ff185bb3991aa5a7631e77bd184499b0ec2597bf23.jpg",
+      "original_rel_path": "d1cf6b3e560390b6938935ff185bb3991aa5a7631e77bd184499b0ec2597bf23.jpg",
+      "friendly_name": "figure_214.jpg",
+      "abs_path": "data/mineru_cache\\chapter_06_p263-311_线性系统的校正方法__7c23f6ec\\images\\figure_214.jpg",
+      "index": 214
+    },
+    "d1db71616bf51e6f53243ac5f2c375cf7d89ec305c78c9fa0d471e588da40a76.jpg": {
+      "original_name": "d1db71616bf51e6f53243ac5f2c375cf7d89ec305c78c9fa0d471e588da40a76.jpg",
+      "original_rel_path": "d1db71616bf51e6f53243ac5f2c375cf7d89ec305c78c9fa0d471e588da40a76.jpg",
+      "friendly_name": "figure_215.jpg",
+      "abs_path": "data/mineru_cache\\chapter_06_p263-311_线性系统的校正方法__7c23f6ec\\images\\figure_215.jpg",
+      "index": 215
+    },
+    "d32db83af510b77f993d58ab62f171a835144ab18ca1a609515918c90e64c98e.jpg": {
+      "original_name": "d32db83af510b77f993d58ab62f171a835144ab18ca1a609515918c90e64c98e.jpg",
+      "original_rel_path": "d32db83af510b77f993d58ab62f171a835144ab18ca1a609515918c90e64c98e.jpg",
+      "friendly_name": "figure_216.jpg",
+      "abs_path": "data/mineru_cache\\chapter_06_p263-311_线性系统的校正方法__7c23f6ec\\images\\figure_216.jpg",
+      "index": 216
+    },
+    "d36fb9ed8b54109f994e2bc50b90bf677691d8bb2e87d4a0c3bdc4fd3529ae9a.jpg": {
+      "original_name": "d36fb9ed8b54109f994e2bc50b90bf677691d8bb2e87d4a0c3bdc4fd3529ae9a.jpg",
+      "original_rel_path": "d36fb9ed8b54109f994e2bc50b90bf677691d8bb2e87d4a0c3bdc4fd3529ae9a.jpg",
+      "friendly_name": "figure_217.jpg",
+      "abs_path": "data/mineru_cache\\chapter_06_p263-311_线性系统的校正方法__7c23f6ec\\images\\figure_217.jpg",
+      "index": 217
+    },
+    "d372df261c2968c9bf22c2558908b58de20d9ae553a8e2666d4fa09e67ee835c.jpg": {
+      "original_name": "d372df261c2968c9bf22c2558908b58de20d9ae553a8e2666d4fa09e67ee835c.jpg",
+      "original_rel_path": "d372df261c2968c9bf22c2558908b58de20d9ae553a8e2666d4fa09e67ee835c.jpg",
+      "friendly_name": "figure_218.jpg",
+      "abs_path": "data/mineru_cache\\chapter_06_p263-311_线性系统的校正方法__7c23f6ec\\images\\figure_218.jpg",
+      "index": 218
+    },
+    "d37eb9d3648a8c21b2ae2c43e7f7704d35ea750ded1741f0afd4eda04fc8cbc4.jpg": {
+      "original_name": "d37eb9d3648a8c21b2ae2c43e7f7704d35ea750ded1741f0afd4eda04fc8cbc4.jpg",
+      "original_rel_path": "d37eb9d3648a8c21b2ae2c43e7f7704d35ea750ded1741f0afd4eda04fc8cbc4.jpg",
+      "friendly_name": "figure_219.jpg",
+      "abs_path": "data/mineru_cache\\chapter_06_p263-311_线性系统的校正方法__7c23f6ec\\images\\figure_219.jpg",
+      "index": 219
+    },
+    "d3c94c35af57f73cd188267bcc8b77a5704f77bf441fe8d3f6318e888f7018f7.jpg": {
+      "original_name": "d3c94c35af57f73cd188267bcc8b77a5704f77bf441fe8d3f6318e888f7018f7.jpg",
+      "original_rel_path": "d3c94c35af57f73cd188267bcc8b77a5704f77bf441fe8d3f6318e888f7018f7.jpg",
+      "friendly_name": "figure_220.jpg",
+      "abs_path": "data/mineru_cache\\chapter_06_p263-311_线性系统的校正方法__7c23f6ec\\images\\figure_220.jpg",
+      "index": 220
+    },
+    "d3d2d240cf1c411dd1c88f32b5775944d9fa1eb7380cbabbf009839337d86e3a.jpg": {
+      "original_name": "d3d2d240cf1c411dd1c88f32b5775944d9fa1eb7380cbabbf009839337d86e3a.jpg",
+      "original_rel_path": "d3d2d240cf1c411dd1c88f32b5775944d9fa1eb7380cbabbf009839337d86e3a.jpg",
+      "friendly_name": "figure_221.jpg",
+      "abs_path": "data/mineru_cache\\chapter_06_p263-311_线性系统的校正方法__7c23f6ec\\images\\figure_221.jpg",
+      "index": 221
+    },
+    "d516343363b26d9f814892286f8d2be5353fc6d525bfce860210bb61f37b3489.jpg": {
+      "original_name": "d516343363b26d9f814892286f8d2be5353fc6d525bfce860210bb61f37b3489.jpg",
+      "original_rel_path": "d516343363b26d9f814892286f8d2be5353fc6d525bfce860210bb61f37b3489.jpg",
+      "friendly_name": "figure_222.jpg",
+      "abs_path": "data/mineru_cache\\chapter_06_p263-311_线性系统的校正方法__7c23f6ec\\images\\figure_222.jpg",
+      "index": 222
+    },
+    "d55653906a435b557f3578fe9a08da8baf53d98e1136a91f555c9c97001dbdac.jpg": {
+      "original_name": "d55653906a435b557f3578fe9a08da8baf53d98e1136a91f555c9c97001dbdac.jpg",
+      "original_rel_path": "d55653906a435b557f3578fe9a08da8baf53d98e1136a91f555c9c97001dbdac.jpg",
+      "friendly_name": "figure_223.jpg",
+      "abs_path": "data/mineru_cache\\chapter_06_p263-311_线性系统的校正方法__7c23f6ec\\images\\figure_223.jpg",
+      "index": 223
+    },
+    "d6e6fe394e3aa2945544d58fa055e69078025d50a575a08d4cb06178b812f75b.jpg": {
+      "original_name": "d6e6fe394e3aa2945544d58fa055e69078025d50a575a08d4cb06178b812f75b.jpg",
+      "original_rel_path": "d6e6fe394e3aa2945544d58fa055e69078025d50a575a08d4cb06178b812f75b.jpg",
+      "friendly_name": "figure_224.jpg",
+      "abs_path": "data/mineru_cache\\chapter_06_p263-311_线性系统的校正方法__7c23f6ec\\images\\figure_224.jpg",
+      "index": 224
+    },
+    "d70a636a10e9f8acc249244669448ff0a6840fb2be9d8e152ecbf259b4834984.jpg": {
+      "original_name": "d70a636a10e9f8acc249244669448ff0a6840fb2be9d8e152ecbf259b4834984.jpg",
+      "original_rel_path": "d70a636a10e9f8acc249244669448ff0a6840fb2be9d8e152ecbf259b4834984.jpg",
+      "friendly_name": "figure_225.jpg",
+      "abs_path": "data/mineru_cache\\chapter_06_p263-311_线性系统的校正方法__7c23f6ec\\images\\figure_225.jpg",
+      "index": 225
+    },
+    "d70ee7cee6b5f63529586e69a274361b195e4f29d0d539b00d984009c748058e.jpg": {
+      "original_name": "d70ee7cee6b5f63529586e69a274361b195e4f29d0d539b00d984009c748058e.jpg",
+      "original_rel_path": "d70ee7cee6b5f63529586e69a274361b195e4f29d0d539b00d984009c748058e.jpg",
+      "friendly_name": "figure_226.jpg",
+      "abs_path": "data/mineru_cache\\chapter_06_p263-311_线性系统的校正方法__7c23f6ec\\images\\figure_226.jpg",
+      "index": 226
+    },
+    "d7522390e2d68b9c005ff5c1391ab44cc4332067b9e999ddee95b518e8508639.jpg": {
+      "original_name": "d7522390e2d68b9c005ff5c1391ab44cc4332067b9e999ddee95b518e8508639.jpg",
+      "original_rel_path": "d7522390e2d68b9c005ff5c1391ab44cc4332067b9e999ddee95b518e8508639.jpg",
+      "friendly_name": "figure_227.jpg",
+      "abs_path": "data/mineru_cache\\chapter_06_p263-311_线性系统的校正方法__7c23f6ec\\images\\figure_227.jpg",
+      "index": 227
+    },
+    "d758de8c91adb0d5cac8898188aa171f4eda632417f72f11fea788e4d44dff17.jpg": {
+      "original_name": "d758de8c91adb0d5cac8898188aa171f4eda632417f72f11fea788e4d44dff17.jpg",
+      "original_rel_path": "d758de8c91adb0d5cac8898188aa171f4eda632417f72f11fea788e4d44dff17.jpg",
+      "friendly_name": "figure_228.jpg",
+      "abs_path": "data/mineru_cache\\chapter_06_p263-311_线性系统的校正方法__7c23f6ec\\images\\figure_228.jpg",
+      "index": 228
+    },
+    "d802971996d800901a6a994469f361e1dbf1e1c7d52c6b272020ab7382fb366f.jpg": {
+      "original_name": "d802971996d800901a6a994469f361e1dbf1e1c7d52c6b272020ab7382fb366f.jpg",
+      "original_rel_path": "d802971996d800901a6a994469f361e1dbf1e1c7d52c6b272020ab7382fb366f.jpg",
+      "friendly_name": "figure_229.jpg",
+      "abs_path": "data/mineru_cache\\chapter_06_p263-311_线性系统的校正方法__7c23f6ec\\images\\figure_229.jpg",
+      "index": 229
+    },
+    "d80fbb843b0d9b06135013b69d490765e961ce1784acfb2410803340c939254d.jpg": {
+      "original_name": "d80fbb843b0d9b06135013b69d490765e961ce1784acfb2410803340c939254d.jpg",
+      "original_rel_path": "d80fbb843b0d9b06135013b69d490765e961ce1784acfb2410803340c939254d.jpg",
+      "friendly_name": "figure_230.jpg",
+      "abs_path": "data/mineru_cache\\chapter_06_p263-311_线性系统的校正方法__7c23f6ec\\images\\figure_230.jpg",
+      "index": 230
+    },
+    "d8aab8c8a95760b64c57357640f2774018728b082917ad80e4d34adda0eda371.jpg": {
+      "original_name": "d8aab8c8a95760b64c57357640f2774018728b082917ad80e4d34adda0eda371.jpg",
+      "original_rel_path": "d8aab8c8a95760b64c57357640f2774018728b082917ad80e4d34adda0eda371.jpg",
+      "friendly_name": "figure_231.jpg",
+      "abs_path": "data/mineru_cache\\chapter_06_p263-311_线性系统的校正方法__7c23f6ec\\images\\figure_231.jpg",
+      "index": 231
+    },
+    "d8e2606717e398faac1fa8d288e96041357cf6923b1c543cb9a92276bef82fbb.jpg": {
+      "original_name": "d8e2606717e398faac1fa8d288e96041357cf6923b1c543cb9a92276bef82fbb.jpg",
+      "original_rel_path": "d8e2606717e398faac1fa8d288e96041357cf6923b1c543cb9a92276bef82fbb.jpg",
+      "friendly_name": "figure_232.jpg",
+      "abs_path": "data/mineru_cache\\chapter_06_p263-311_线性系统的校正方法__7c23f6ec\\images\\figure_232.jpg",
+      "index": 232
+    },
+    "d9a8d9928b449638b6829ec2f9f0e86269a57bdae11b897af6eced2a9d248486.jpg": {
+      "original_name": "d9a8d9928b449638b6829ec2f9f0e86269a57bdae11b897af6eced2a9d248486.jpg",
+      "original_rel_path": "d9a8d9928b449638b6829ec2f9f0e86269a57bdae11b897af6eced2a9d248486.jpg",
+      "friendly_name": "figure_233.jpg",
+      "abs_path": "data/mineru_cache\\chapter_06_p263-311_线性系统的校正方法__7c23f6ec\\images\\figure_233.jpg",
+      "index": 233
+    },
+    "daa573669ee3235fcf76a9dc46c5b88916750155c771977c0c359e636f1803e4.jpg": {
+      "original_name": "daa573669ee3235fcf76a9dc46c5b88916750155c771977c0c359e636f1803e4.jpg",
+      "original_rel_path": "daa573669ee3235fcf76a9dc46c5b88916750155c771977c0c359e636f1803e4.jpg",
+      "friendly_name": "figure_234.jpg",
+      "abs_path": "data/mineru_cache\\chapter_06_p263-311_线性系统的校正方法__7c23f6ec\\images\\figure_234.jpg",
+      "index": 234
+    },
+    "db2aefd8e94650c039dd0450c5c978b2cb8ca688106df3ed42ad6b7ec22c17e1.jpg": {
+      "original_name": "db2aefd8e94650c039dd0450c5c978b2cb8ca688106df3ed42ad6b7ec22c17e1.jpg",
+      "original_rel_path": "db2aefd8e94650c039dd0450c5c978b2cb8ca688106df3ed42ad6b7ec22c17e1.jpg",
+      "friendly_name": "figure_235.jpg",
+      "abs_path": "data/mineru_cache\\chapter_06_p263-311_线性系统的校正方法__7c23f6ec\\images\\figure_235.jpg",
+      "index": 235
+    },
+    "db715796af5d9fb4ee51c1fe9789b96e0738f7415a1faa4d1a55912c78202100.jpg": {
+      "original_name": "db715796af5d9fb4ee51c1fe9789b96e0738f7415a1faa4d1a55912c78202100.jpg",
+      "original_rel_path": "db715796af5d9fb4ee51c1fe9789b96e0738f7415a1faa4d1a55912c78202100.jpg",
+      "friendly_name": "figure_236.jpg",
+      "abs_path": "data/mineru_cache\\chapter_06_p263-311_线性系统的校正方法__7c23f6ec\\images\\figure_236.jpg",
+      "index": 236
+    },
+    "dba6dd10197d4b77076fa5d6e51da666fa4054592b95a37635c5995208834189.jpg": {
+      "original_name": "dba6dd10197d4b77076fa5d6e51da666fa4054592b95a37635c5995208834189.jpg",
+      "original_rel_path": "dba6dd10197d4b77076fa5d6e51da666fa4054592b95a37635c5995208834189.jpg",
+      "friendly_name": "figure_237.jpg",
+      "abs_path": "data/mineru_cache\\chapter_06_p263-311_线性系统的校正方法__7c23f6ec\\images\\figure_237.jpg",
+      "index": 237
+    },
+    "dbc20ba2411cba55858c995314eae5930df88eecbc51a70903edd5085b64d705.jpg": {
+      "original_name": "dbc20ba2411cba55858c995314eae5930df88eecbc51a70903edd5085b64d705.jpg",
+      "original_rel_path": "dbc20ba2411cba55858c995314eae5930df88eecbc51a70903edd5085b64d705.jpg",
+      "friendly_name": "figure_238.jpg",
+      "abs_path": "data/mineru_cache\\chapter_06_p263-311_线性系统的校正方法__7c23f6ec\\images\\figure_238.jpg",
+      "index": 238
+    },
+    "dc0774b184a3eaa9f12568115167c74fa5f6087fb98b98ab8d57c5cd8d16adf9.jpg": {
+      "original_name": "dc0774b184a3eaa9f12568115167c74fa5f6087fb98b98ab8d57c5cd8d16adf9.jpg",
+      "original_rel_path": "dc0774b184a3eaa9f12568115167c74fa5f6087fb98b98ab8d57c5cd8d16adf9.jpg",
+      "friendly_name": "figure_239.jpg",
+      "abs_path": "data/mineru_cache\\chapter_06_p263-311_线性系统的校正方法__7c23f6ec\\images\\figure_239.jpg",
+      "index": 239
+    },
+    "ddda501cc2c36e711d3f1ac40c5f305b09c57ad98d4cc7d011578fc29878626a.jpg": {
+      "original_name": "ddda501cc2c36e711d3f1ac40c5f305b09c57ad98d4cc7d011578fc29878626a.jpg",
+      "original_rel_path": "ddda501cc2c36e711d3f1ac40c5f305b09c57ad98d4cc7d011578fc29878626a.jpg",
+      "friendly_name": "figure_240.jpg",
+      "abs_path": "data/mineru_cache\\chapter_06_p263-311_线性系统的校正方法__7c23f6ec\\images\\figure_240.jpg",
+      "index": 240
+    },
+    "e0a352364847d42e1fb903a9c6f4239a2d0ca6314d3afc2391b83fec544d29c9.jpg": {
+      "original_name": "e0a352364847d42e1fb903a9c6f4239a2d0ca6314d3afc2391b83fec544d29c9.jpg",
+      "original_rel_path": "e0a352364847d42e1fb903a9c6f4239a2d0ca6314d3afc2391b83fec544d29c9.jpg",
+      "friendly_name": "figure_241.jpg",
+      "abs_path": "data/mineru_cache\\chapter_06_p263-311_线性系统的校正方法__7c23f6ec\\images\\figure_241.jpg",
+      "index": 241
+    },
+    "e1627b7a28c91ba40597b8ed86d32b86818378f0a3aa468361f68e243918a399.jpg": {
+      "original_name": "e1627b7a28c91ba40597b8ed86d32b86818378f0a3aa468361f68e243918a399.jpg",
+      "original_rel_path": "e1627b7a28c91ba40597b8ed86d32b86818378f0a3aa468361f68e243918a399.jpg",
+      "friendly_name": "figure_242.jpg",
+      "abs_path": "data/mineru_cache\\chapter_06_p263-311_线性系统的校正方法__7c23f6ec\\images\\figure_242.jpg",
+      "index": 242
+    },
+    "e18f2a25d2c9cfc2637a42a8fb07c16b9322bc49c36de31ef382169898d9371f.jpg": {
+      "original_name": "e18f2a25d2c9cfc2637a42a8fb07c16b9322bc49c36de31ef382169898d9371f.jpg",
+      "original_rel_path": "e18f2a25d2c9cfc2637a42a8fb07c16b9322bc49c36de31ef382169898d9371f.jpg",
+      "friendly_name": "figure_243.jpg",
+      "abs_path": "data/mineru_cache\\chapter_06_p263-311_线性系统的校正方法__7c23f6ec\\images\\figure_243.jpg",
+      "index": 243
+    },
+    "e302de5ad0863e39e6f7e6bc0c85b37724cbc62788168bf0d2f2dbafca458c29.jpg": {
+      "original_name": "e302de5ad0863e39e6f7e6bc0c85b37724cbc62788168bf0d2f2dbafca458c29.jpg",
+      "original_rel_path": "e302de5ad0863e39e6f7e6bc0c85b37724cbc62788168bf0d2f2dbafca458c29.jpg",
+      "friendly_name": "figure_244.jpg",
+      "abs_path": "data/mineru_cache\\chapter_06_p263-311_线性系统的校正方法__7c23f6ec\\images\\figure_244.jpg",
+      "index": 244
+    },
+    "e5156e8c127668e2886b2f02924ddb711acb22dbfa22ee4ceea89e9bf63fe469.jpg": {
+      "original_name": "e5156e8c127668e2886b2f02924ddb711acb22dbfa22ee4ceea89e9bf63fe469.jpg",
+      "original_rel_path": "e5156e8c127668e2886b2f02924ddb711acb22dbfa22ee4ceea89e9bf63fe469.jpg",
+      "friendly_name": "figure_245.jpg",
+      "abs_path": "data/mineru_cache\\chapter_06_p263-311_线性系统的校正方法__7c23f6ec\\images\\figure_245.jpg",
+      "index": 245
+    },
+    "e62f7a2f302fe41b773c8048873872c38f270bed34434a566d43fc82f5af7097.jpg": {
+      "original_name": "e62f7a2f302fe41b773c8048873872c38f270bed34434a566d43fc82f5af7097.jpg",
+      "original_rel_path": "e62f7a2f302fe41b773c8048873872c38f270bed34434a566d43fc82f5af7097.jpg",
+      "friendly_name": "figure_246.jpg",
+      "abs_path": "data/mineru_cache\\chapter_06_p263-311_线性系统的校正方法__7c23f6ec\\images\\figure_246.jpg",
+      "index": 246
+    },
+    "e86a33fc2cc5e791b79f5290eb1df72d3103c4b89f551af0c0eea120054190a7.jpg": {
+      "original_name": "e86a33fc2cc5e791b79f5290eb1df72d3103c4b89f551af0c0eea120054190a7.jpg",
+      "original_rel_path": "e86a33fc2cc5e791b79f5290eb1df72d3103c4b89f551af0c0eea120054190a7.jpg",
+      "friendly_name": "figure_247.jpg",
+      "abs_path": "data/mineru_cache\\chapter_06_p263-311_线性系统的校正方法__7c23f6ec\\images\\figure_247.jpg",
+      "index": 247
+    },
+    "ebc53776d46efe3b0a79b504e486137b8c36424a245883a8814519fee3ae4f32.jpg": {
+      "original_name": "ebc53776d46efe3b0a79b504e486137b8c36424a245883a8814519fee3ae4f32.jpg",
+      "original_rel_path": "ebc53776d46efe3b0a79b504e486137b8c36424a245883a8814519fee3ae4f32.jpg",
+      "friendly_name": "figure_248.jpg",
+      "abs_path": "data/mineru_cache\\chapter_06_p263-311_线性系统的校正方法__7c23f6ec\\images\\figure_248.jpg",
+      "index": 248
+    },
+    "ebd76f1524bbb441de33d4ccfd20c350a520fb5d30f97ff7ac84fcb7b4ac7c79.jpg": {
+      "original_name": "ebd76f1524bbb441de33d4ccfd20c350a520fb5d30f97ff7ac84fcb7b4ac7c79.jpg",
+      "original_rel_path": "ebd76f1524bbb441de33d4ccfd20c350a520fb5d30f97ff7ac84fcb7b4ac7c79.jpg",
+      "friendly_name": "figure_249.jpg",
+      "abs_path": "data/mineru_cache\\chapter_06_p263-311_线性系统的校正方法__7c23f6ec\\images\\figure_249.jpg",
+      "index": 249
+    },
+    "ec9be33a237b25ec8a443c8db9dd6f7996c174cf38288a72609443045b798a95.jpg": {
+      "original_name": "ec9be33a237b25ec8a443c8db9dd6f7996c174cf38288a72609443045b798a95.jpg",
+      "original_rel_path": "ec9be33a237b25ec8a443c8db9dd6f7996c174cf38288a72609443045b798a95.jpg",
+      "friendly_name": "figure_250.jpg",
+      "abs_path": "data/mineru_cache\\chapter_06_p263-311_线性系统的校正方法__7c23f6ec\\images\\figure_250.jpg",
+      "index": 250
+    },
+    "ee8babfe4b7b529e9a16d03fff4cbac17a517cd6732c997d9105e556ccf32cd0.jpg": {
+      "original_name": "ee8babfe4b7b529e9a16d03fff4cbac17a517cd6732c997d9105e556ccf32cd0.jpg",
+      "original_rel_path": "ee8babfe4b7b529e9a16d03fff4cbac17a517cd6732c997d9105e556ccf32cd0.jpg",
+      "friendly_name": "figure_251.jpg",
+      "abs_path": "data/mineru_cache\\chapter_06_p263-311_线性系统的校正方法__7c23f6ec\\images\\figure_251.jpg",
+      "index": 251
+    },
+    "f108903ba2c2971954854ee85bf323442b5be43cd7bffa1a37eab6e15d03727c.jpg": {
+      "original_name": "f108903ba2c2971954854ee85bf323442b5be43cd7bffa1a37eab6e15d03727c.jpg",
+      "original_rel_path": "f108903ba2c2971954854ee85bf323442b5be43cd7bffa1a37eab6e15d03727c.jpg",
+      "friendly_name": "figure_252.jpg",
+      "abs_path": "data/mineru_cache\\chapter_06_p263-311_线性系统的校正方法__7c23f6ec\\images\\figure_252.jpg",
+      "index": 252
+    },
+    "f1477b9c899b046e6f8196b2336b2c664844691449f18acff613ed848b343072.jpg": {
+      "original_name": "f1477b9c899b046e6f8196b2336b2c664844691449f18acff613ed848b343072.jpg",
+      "original_rel_path": "f1477b9c899b046e6f8196b2336b2c664844691449f18acff613ed848b343072.jpg",
+      "friendly_name": "figure_253.jpg",
+      "abs_path": "data/mineru_cache\\chapter_06_p263-311_线性系统的校正方法__7c23f6ec\\images\\figure_253.jpg",
+      "index": 253
+    },
+    "f31065878f0dab7dde0d4cbd705ddc7e6de01bfc793a9cadbae6815267a17a59.jpg": {
+      "original_name": "f31065878f0dab7dde0d4cbd705ddc7e6de01bfc793a9cadbae6815267a17a59.jpg",
+      "original_rel_path": "f31065878f0dab7dde0d4cbd705ddc7e6de01bfc793a9cadbae6815267a17a59.jpg",
+      "friendly_name": "figure_254.jpg",
+      "abs_path": "data/mineru_cache\\chapter_06_p263-311_线性系统的校正方法__7c23f6ec\\images\\figure_254.jpg",
+      "index": 254
+    },
+    "f3ebf7d44581efb40939386d75296de51b80b316c9f1fb93f5cee5505b5752e6.jpg": {
+      "original_name": "f3ebf7d44581efb40939386d75296de51b80b316c9f1fb93f5cee5505b5752e6.jpg",
+      "original_rel_path": "f3ebf7d44581efb40939386d75296de51b80b316c9f1fb93f5cee5505b5752e6.jpg",
+      "friendly_name": "figure_255.jpg",
+      "abs_path": "data/mineru_cache\\chapter_06_p263-311_线性系统的校正方法__7c23f6ec\\images\\figure_255.jpg",
+      "index": 255
+    },
+    "f40d766082c424ae1d993883af0869b7662b9d17750688b0d3b1fc49b8629c78.jpg": {
+      "original_name": "f40d766082c424ae1d993883af0869b7662b9d17750688b0d3b1fc49b8629c78.jpg",
+      "original_rel_path": "f40d766082c424ae1d993883af0869b7662b9d17750688b0d3b1fc49b8629c78.jpg",
+      "friendly_name": "figure_256.jpg",
+      "abs_path": "data/mineru_cache\\chapter_06_p263-311_线性系统的校正方法__7c23f6ec\\images\\figure_256.jpg",
+      "index": 256
+    },
+    "f5620d8cac2691fea2796db5eca0e2c043aefd6e5d183da314e4ff44b8fe7989.jpg": {
+      "original_name": "f5620d8cac2691fea2796db5eca0e2c043aefd6e5d183da314e4ff44b8fe7989.jpg",
+      "original_rel_path": "f5620d8cac2691fea2796db5eca0e2c043aefd6e5d183da314e4ff44b8fe7989.jpg",
+      "friendly_name": "figure_257.jpg",
+      "abs_path": "data/mineru_cache\\chapter_06_p263-311_线性系统的校正方法__7c23f6ec\\images\\figure_257.jpg",
+      "index": 257
+    },
+    "f676a2a502e7876f8c88bb95a617f6b715f18914f9045e9bbf8709f39806fe00.jpg": {
+      "original_name": "f676a2a502e7876f8c88bb95a617f6b715f18914f9045e9bbf8709f39806fe00.jpg",
+      "original_rel_path": "f676a2a502e7876f8c88bb95a617f6b715f18914f9045e9bbf8709f39806fe00.jpg",
+      "friendly_name": "figure_258.jpg",
+      "abs_path": "data/mineru_cache\\chapter_06_p263-311_线性系统的校正方法__7c23f6ec\\images\\figure_258.jpg",
+      "index": 258
+    },
+    "f87bb7b3fa98c22ae68ffba416438f324641dda20bdd5bb71ab3078413a835f6.jpg": {
+      "original_name": "f87bb7b3fa98c22ae68ffba416438f324641dda20bdd5bb71ab3078413a835f6.jpg",
+      "original_rel_path": "f87bb7b3fa98c22ae68ffba416438f324641dda20bdd5bb71ab3078413a835f6.jpg",
+      "friendly_name": "figure_259.jpg",
+      "abs_path": "data/mineru_cache\\chapter_06_p263-311_线性系统的校正方法__7c23f6ec\\images\\figure_259.jpg",
+      "index": 259
+    },
+    "f9f7a46683bb83ed561837c5f9c8379b9fc8050de48d7cc1e62eb94e62915d52.jpg": {
+      "original_name": "f9f7a46683bb83ed561837c5f9c8379b9fc8050de48d7cc1e62eb94e62915d52.jpg",
+      "original_rel_path": "f9f7a46683bb83ed561837c5f9c8379b9fc8050de48d7cc1e62eb94e62915d52.jpg",
+      "friendly_name": "figure_260.jpg",
+      "abs_path": "data/mineru_cache\\chapter_06_p263-311_线性系统的校正方法__7c23f6ec\\images\\figure_260.jpg",
+      "index": 260
+    },
+    "fa7ec3aa1bf63eed70b8c72ed50e4b7af5e47899b75a52f4130e60c758b2f94e.jpg": {
+      "original_name": "fa7ec3aa1bf63eed70b8c72ed50e4b7af5e47899b75a52f4130e60c758b2f94e.jpg",
+      "original_rel_path": "fa7ec3aa1bf63eed70b8c72ed50e4b7af5e47899b75a52f4130e60c758b2f94e.jpg",
+      "friendly_name": "figure_261.jpg",
+      "abs_path": "data/mineru_cache\\chapter_06_p263-311_线性系统的校正方法__7c23f6ec\\images\\figure_261.jpg",
+      "index": 261
+    },
+    "fb429c931c6bd58438a256b7a0a7dcb406a5a2f8d0886ffc18448894bc5aaff8.jpg": {
+      "original_name": "fb429c931c6bd58438a256b7a0a7dcb406a5a2f8d0886ffc18448894bc5aaff8.jpg",
+      "original_rel_path": "fb429c931c6bd58438a256b7a0a7dcb406a5a2f8d0886ffc18448894bc5aaff8.jpg",
+      "friendly_name": "figure_262.jpg",
+      "abs_path": "data/mineru_cache\\chapter_06_p263-311_线性系统的校正方法__7c23f6ec\\images\\figure_262.jpg",
+      "index": 262
+    },
+    "fc49cb4e4d710e22e56da3511d74fce7e9eb3ebc842ea285d7e07740452daa0a.jpg": {
+      "original_name": "fc49cb4e4d710e22e56da3511d74fce7e9eb3ebc842ea285d7e07740452daa0a.jpg",
+      "original_rel_path": "fc49cb4e4d710e22e56da3511d74fce7e9eb3ebc842ea285d7e07740452daa0a.jpg",
+      "friendly_name": "figure_263.jpg",
+      "abs_path": "data/mineru_cache\\chapter_06_p263-311_线性系统的校正方法__7c23f6ec\\images\\figure_263.jpg",
+      "index": 263
+    },
+    "fd6ba0b519ab5ff980e85155aca5d7e9b21adbc02cde0728b4d46fd72047e306.jpg": {
+      "original_name": "fd6ba0b519ab5ff980e85155aca5d7e9b21adbc02cde0728b4d46fd72047e306.jpg",
+      "original_rel_path": "fd6ba0b519ab5ff980e85155aca5d7e9b21adbc02cde0728b4d46fd72047e306.jpg",
+      "friendly_name": "figure_264.jpg",
+      "abs_path": "data/mineru_cache\\chapter_06_p263-311_线性系统的校正方法__7c23f6ec\\images\\figure_264.jpg",
+      "index": 264
+    },
+    "ffa78ae9ea412437150572d9952a01817db70e7f0b1f2f6877b6959c250c4d11.jpg": {
+      "original_name": "ffa78ae9ea412437150572d9952a01817db70e7f0b1f2f6877b6959c250c4d11.jpg",
+      "original_rel_path": "ffa78ae9ea412437150572d9952a01817db70e7f0b1f2f6877b6959c250c4d11.jpg",
+      "friendly_name": "figure_265.jpg",
+      "abs_path": "data/mineru_cache\\chapter_06_p263-311_线性系统的校正方法__7c23f6ec\\images\\figure_265.jpg",
+      "index": 265
+    }
+  },
+  "json_files": {
+    "29b4e4fb-85c4-43db-a938-312a1ca84d38_content_list.json": "data/mineru_cache\\chapter_06_p263-311_线性系统的校正方法__7c23f6ec\\json\\29b4e4fb-85c4-43db-a938-312a1ca84d38_content_list.json",
+    "29b4e4fb-85c4-43db-a938-312a1ca84d38_model.json": "data/mineru_cache\\chapter_06_p263-311_线性系统的校正方法__7c23f6ec\\json\\29b4e4fb-85c4-43db-a938-312a1ca84d38_model.json",
+    "content_list_v2.json": "data/mineru_cache\\chapter_06_p263-311_线性系统的校正方法__7c23f6ec\\json\\content_list_v2.json",
+    "layout.json": "data/mineru_cache\\chapter_06_p263-311_线性系统的校正方法__7c23f6ec\\json\\layout.json"
+  }
+}

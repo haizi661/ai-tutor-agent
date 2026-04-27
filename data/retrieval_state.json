@@ -1,0 +1,17 @@
+{
+  "version": 2,
+  "embedding_provider": "dashscope",
+  "embedding_model_name": "text-embedding-v2",
+  "vector_store_backend": "chroma",
+  "vector_store_dir": "E:\\ai_code\\ai-tutor-agent\\data\\chroma_db",
+  "vector_store_layout": {
+    "course_primary": "knowledge__course_primary",
+    "supplemental": "knowledge__supplemental"
+  },
+  "knowledge_index_layout": {
+    "course_primary": "knowledge_index__course_primary.json",
+    "supplemental": "knowledge_index__supplemental.json"
+  },
+  "knowledge_chunk_size": 1000,
+  "knowledge_chunk_overlap": 150
+}
