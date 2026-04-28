@@ -24,8 +24,13 @@
     const LONG_VISIBLE_FALLBACK_MS = 5200;
     const MAX_VISIBLE_FALLBACKS = 2;
 
-    function renderMarkdown(target, text) {
-        target.innerHTML = marked.parse(text);
+    function renderMarkdown(target, text, options = {}) {
+        const rawText = String(text || '');
+        const allowGraphRagHtml = options.allowGraphRagHtml === true
+            || rawText.includes('GraphRAG 调试报告')
+            || rawText.includes('answer-media-block')
+            || rawText.includes('media-card');
+        target.innerHTML = allowGraphRagHtml ? rawText : marked.parse(rawText);
         app.renderMath(target);
     }
 
@@ -78,6 +83,8 @@
                 delimiters: [
                     { left: '$$', right: '$$', display: true },
                     { left: '$', right: '$', display: false },
+                    { left: '\\[', right: '\\]', display: true },
+                    { left: '\\(', right: '\\)', display: false },
                 ],
                 throwOnError: false,
             });
@@ -425,7 +432,7 @@
         if (!state.currentAgentBodyEl) return;
         // Strip teaching markers from displayed text (pure transform, side effects applied on session.end)
         const displayText = app.filterTeachingMarkersFromBuffer(state.currentTextBuffer);
-        state.currentAgentBodyEl.innerHTML = marked.parse(displayText);
+        renderMarkdown(state.currentAgentBodyEl, displayText, { allowGraphRagHtml: true });
         
         // Debounce heavy KaTeX rendering to prevent flickering and CPU spikes during fast streaming
         if (mathRenderTimeout) clearTimeout(mathRenderTimeout);
@@ -472,6 +479,7 @@
         };
         if (status === 'in_progress' || type === 'current') {
             state.currentGraphNode = title;
+            state.currentGraphNodeId = nodeId || state.currentGraphNodeId || '';
         }
 
         const sameStatus = prev && typeof prev === 'object' && prev.status === status;
@@ -484,12 +492,72 @@
         }
 
         app.refreshUserKgMapIfOpen?.();
+        app.syncKnowledgeGraphVisualState?.();
     };
 
     /** 在下游节点到来时高亮提示（不影响 UKG 状态，只做视觉）*/
     app.highlightNextNode = function highlightNextNode(title) {
         if (!title) return;
         _appendGraphEventChip(`→  即将进入：${title}`, 'next');
+    };
+
+    function _buildGraphViewerUrl({ nodeTitle = '', nodeId = '' } = {}) {
+        if (typeof app.buildKnowledgeGraphUrl === 'function') {
+            return app.buildKnowledgeGraphUrl({ embedded: true, focus: nodeTitle || nodeId });
+        }
+        const params = new URLSearchParams();
+        const topic = (state.currentTopic || state.graphTopicHint || '').trim();
+        const focus = (nodeTitle || nodeId || state.currentGraphNode || state.currentGraphNodeId || '').trim();
+        if (topic) params.set('topic', topic);
+        if (focus) params.set('focus', focus);
+        params.set('embedded', '1');
+        return `/knowledge-graph/b/viewer/index.html?${params.toString()}`;
+    }
+
+    app.renderKnowledgeGraphVisualCard = function renderKnowledgeGraphVisualCard(payload = {}) {
+        const nodeTitle = String(payload.title || payload.node_name || state.currentGraphNode || state.graph_anchor_title || '').trim();
+        const nodeId = String(payload.id || payload.node_id || state.currentGraphNodeId || state.graph_anchor_id || '').trim();
+        if (!nodeTitle && !nodeId) return;
+
+        state.currentGraphNode = nodeTitle || state.currentGraphNode;
+        state.currentGraphNodeId = nodeId || state.currentGraphNodeId;
+
+        document.querySelector('.assistant-card-row.graph-visual-card-row')?.remove();
+        const container = document.getElementById('messages');
+        if (!container) return;
+        const row = createAssistantCardRow('graph-visual-card-row');
+        const card = document.createElement('section');
+        card.className = 'graph-visual-card prompt-flow-card';
+        const graphSrc = _buildGraphViewerUrl({ nodeTitle, nodeId });
+        card.innerHTML = `
+            <div class="graph-visual-head">
+                <div>
+                    <div class="prompt-label">当前主讲节点</div>
+                    <div class="graph-visual-title">${nodeTitle || nodeId}</div>
+                    <div class="graph-visual-copy">这不是重新开始，而是在标记当前讲到图谱的哪个节点。临时问题会单独回答，不改变这里的主线进度。</div>
+                </div>
+                <button type="button" class="graph-visual-open">打开完整图谱</button>
+            </div>
+            <div class="graph-visual-frame-wrap">
+                <iframe
+                    class="graph-visual-frame"
+                    data-graph-mini-frame
+                    title="当前学习节点知识图谱"
+                    loading="lazy"
+                    src="${graphSrc}"
+                ></iframe>
+            </div>
+        `;
+        const frame = card.querySelector('[data-graph-mini-frame]');
+        if (frame) {
+            frame.dataset.src = graphSrc;
+            frame.onload = () => app.syncKnowledgeGraphVisualState?.();
+        }
+        card.querySelector('.graph-visual-open')?.addEventListener('click', () => app.openKnowledgeGraphModal?.());
+        row.body.appendChild(card);
+        container.appendChild(row.wrap);
+        app.syncKnowledgeGraphVisualState?.();
+        app.scrollMessagesToBottom?.();
     };
 
     /** 若"掌握图"面板已打开则刷新 */
@@ -1382,15 +1450,63 @@
             : '<p class="muted">还没有画像数据。</p>';
     };
 
+    function _assessmentQuestionKey(question = {}, index = 0) {
+        const rawKey = question.id ?? question.question_id ?? question.key ?? question.concept_id ?? (index + 1);
+        return String(rawKey ?? (index + 1));
+    }
+
+    function _assessmentBackendQuestionKey(question = {}, index = 0) {
+        return String(question.id ?? (index + 1));
+    }
+
+    function _assessmentCandidateKeys(question = {}, index = 0) {
+        return [
+            _assessmentQuestionKey(question, index),
+            _assessmentBackendQuestionKey(question, index),
+            question.id,
+            question.question_id,
+            question.key,
+            question.concept_id,
+            index + 1,
+            String(index + 1),
+        ]
+            .filter(value => value !== undefined && value !== null && String(value).trim() !== '')
+            .map(value => String(value));
+    }
+
+    function _assessmentAnswerFor(question = {}, answers = {}, index = 0) {
+        const keys = _assessmentCandidateKeys(question, index);
+        for (const key of keys) {
+            const answer = answers[key];
+            if (answer !== undefined && answer !== null && String(answer).trim() !== '') {
+                return String(answer).trim().toUpperCase();
+            }
+        }
+        return '';
+    }
+
+    function _normalizeAssessmentAnswers(questions = [], answers = {}) {
+        const normalized = {};
+        questions.forEach((question, index) => {
+            const answer = _assessmentAnswerFor(question, answers, index);
+            if (!answer) return;
+            const uiKey = _assessmentQuestionKey(question, index);
+            const backendKey = _assessmentBackendQuestionKey(question, index);
+            normalized[uiKey] = answer;
+            normalized[backendKey] = answer;
+        });
+        return normalized;
+    }
+
     function _answeredAssessmentCount(questions = [], answers = {}) {
-        return questions.filter(q => Boolean(String(answers[q.id] || '').trim())).length;
+        return questions.filter((q, index) => Boolean(_assessmentAnswerFor(q, answers, index))).length;
     }
 
     function _assessmentProgressMetaHtml(questions = [], answers = {}) {
         const answeredCount = _answeredAssessmentCount(questions, answers);
         return `
             <span>已作答 ${answeredCount} / ${questions.length}</span>
-            <span>每题一旦作答就会锁定，恢复历史时保持同样状态。</span>
+            <span>提交后答案会固定展示，恢复历史时保持同样状态。</span>
         `;
     }
 
@@ -1400,45 +1516,230 @@
         meta.innerHTML = _assessmentProgressMetaHtml(state.assessmentQuestions, state.answers);
     }
 
-    app.renderAssessmentForm = function renderAssessmentForm(questions, initialAnswers = {}) {
+    function _allAssessmentAnswered(questions = [], answers = {}) {
+        return Array.isArray(questions)
+            && questions.length > 0
+            && questions.every((q, index) => Boolean(_assessmentAnswerFor(q, answers, index)));
+    }
+
+    function _assessmentOptionLabel(question = {}, answer = '') {
+        const normalized = String(answer || '').trim().toUpperCase();
+        const matched = (question.options || []).find(opt => (opt || '').trim().charAt(0).toUpperCase() === normalized);
+        if (!matched) return normalized || '未作答';
+        return matched.replace(/^[A-D]\.\s*/, '').trim() || matched;
+    }
+
+    function _renderLockedAssessmentSummary(target, questions = [], answers = {}, statusText = '已提交，答案已固定') {
+        const rows = questions.map((q, index) => {
+            const answer = _assessmentAnswerFor(q, answers, index);
+            const concept = q.concept || q.concept_title || '';
+            return `
+                <article class="assessment-locked-row">
+                    <div class="assessment-locked-index">${index + 1}</div>
+                    <div class="assessment-locked-main">
+                        <div class="q-header">
+                            <span class="q-tag q-tag--subj">自评题</span>
+                            ${concept ? `<span class="q-tag q-tag--concept">${concept}</span>` : ''}
+                            <span class="q-status-chip q-status-chip--locked">已固定</span>
+                        </div>
+                        <div class="q-text">${q.question || ''}</div>
+                        <div class="assessment-locked-answer">
+                            <span class="q-opt-letter">${answer || '-'}</span>
+                            <span class="q-opt-label">${_assessmentOptionLabel(q, answer)}</span>
+                        </div>
+                    </div>
+                </article>
+            `;
+        }).join('');
+
+        target.classList.add('assessment-locked-summary');
+        target.innerHTML = `
+            <div class="prompt-card prompt-flow-shell">
+                <div class="prompt-label">快速摸底</div>
+                <div class="prompt-title">${statusText}</div>
+                <div class="prompt-copy">这份测评记录将作为学习画像和初始图谱节点选择的依据，不能在当前流程中继续修改。</div>
+            </div>
+            <div class="assessment-progress-meta">${_assessmentProgressMetaHtml(questions, answers)}</div>
+            <div class="assessment-locked-list">${rows}</div>
+        `;
+        app.renderMath?.(target);
+    }
+
+    app.renderAssessmentForm = function renderAssessmentForm(questions, initialAnswers = {}, options = {}) {
         state.assessmentQuestions = questions;
-        state.answers = { ...initialAnswers };
+        state.answers = _normalizeAssessmentAnswers(questions, initialAnswers || {});
         document.querySelector('.assessment-container')?.remove();
+
         const container = document.getElementById('messages');
         const row = createAssistantCardRow('assessment-container');
         const div = document.createElement('div');
         div.className = 'assessment-container prompt-flow-card';
 
-        const selfEvalQs = questions.filter(q => q.type === 'self_eval');
-        const objectiveQs = questions.filter(q => q.type === 'objective');
-        const hasPairing = selfEvalQs.some(q => q.concept);
-        const introCard = document.createElement('div');
-        introCard.className = 'prompt-card prompt-flow-shell';
-        introCard.innerHTML = `
-            <div class="prompt-label">开始前的小测</div>
-            <div class="prompt-title">先对齐起点</div>
-            <div class="prompt-copy">
-                ${hasPairing
-                    ? `前 ${selfEvalQs.length} 题是<strong>自我评价</strong>，后 ${objectiveQs.length} 题是对应的<strong>实际测验</strong>。`
-                    : `先用这 ${questions.length} 题确定你的起点。`}
+        const total = Array.isArray(questions) ? questions.length : 0;
+        if (!total) {
+            div.innerHTML = `
+                <div class="prompt-card prompt-flow-shell">
+                    <div class="prompt-label">快速摸底</div>
+                    <div class="prompt-title">暂时没有拿到测评题</div>
+                    <div class="prompt-copy">可以先跳过摸底，直接开始正式讲解。</div>
+                </div>
+                <div class="q-stepper-nav">
+                    <button type="button" class="q-stepper-btn q-stepper-skip">先不测，直接开始</button>
+                </div>
+            `;
+            div.querySelector('.q-stepper-skip').onclick = () => {
+                row.wrap.remove();
+                app.submitTopicConfirmation?.(true, 'direct_tutor');
+            };
+            row.body.appendChild(div);
+            container.appendChild(row.wrap);
+            app.scrollMessagesToBottom();
+            return;
+        }
+        if (options.locked === true && options.allowEdit !== true) {
+            _renderLockedAssessmentSummary(div, questions, state.answers, options.statusText || '测评已完成，答案已固定');
+            row.body.appendChild(div);
+            container.appendChild(row.wrap);
+            app.scrollMessagesToBottom();
+            return;
+        }
+        let currentIdx = 0;
+
+        // ── 步进器骨架 ──
+        div.innerHTML = `
+            <div class="q-stepper-progress">
+                <span class="q-stepper-label">第 <span data-cur>1</span> 题 / 共 ${total} 题</span>
+                <div class="q-progress-bar"><div class="q-progress-fill" data-fill style="width:${(1 / total) * 100}%"></div></div>
+            </div>
+            <div class="q-stepper-body"></div>
+            <div class="q-stepper-nav">
+                <button type="button" class="q-stepper-btn q-stepper-prev" disabled>上一题</button>
+                <button type="button" class="q-stepper-btn q-stepper-skip">先不测，直接开始</button>
+                <button type="button" class="q-stepper-btn q-stepper-next" disabled>下一题</button>
+                <button type="button" class="q-stepper-btn q-stepper-submit" style="display:none" disabled>确认提交</button>
             </div>
         `;
-        div.appendChild(introCard);
 
-        const shortcutRow = document.createElement('div');
-        shortcutRow.className = 'suggestion-row prompt-flow-actions';
-        const skipBtn = document.createElement('button');
-        skipBtn.type = 'button';
-        skipBtn.className = 'chip chip-muted assessment-skip-btn';
-        skipBtn.title = '跳过测评，直接进入讲解';
-        skipBtn.textContent = '先不测，直接开始';
-        shortcutRow.appendChild(skipBtn);
-        div.appendChild(shortcutRow);
+        const body = div.querySelector('.q-stepper-body');
+        const prevBtn = div.querySelector('.q-stepper-prev');
+        const nextBtn = div.querySelector('.q-stepper-next');
+        const submitBtn = div.querySelector('.q-stepper-submit');
+        const skipBtn = div.querySelector('.q-stepper-skip');
+        const curLabel = div.querySelector('[data-cur]');
+        const fillBar = div.querySelector('[data-fill]');
+        let draftTimer = null;
 
-        const progressMeta = document.createElement('div');
-        progressMeta.className = 'assessment-progress-meta';
-        progressMeta.innerHTML = _assessmentProgressMetaHtml(questions, state.answers);
-        div.appendChild(progressMeta);
+        function scheduleDraftSave() {
+            if (!state.currentThreadId) return;
+            window.clearTimeout(draftTimer);
+            draftTimer = window.setTimeout(() => {
+                fetch('/api/assessment_draft', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        thread_id: state.currentThreadId,
+                        answers: _normalizeAssessmentAnswers(questions, state.answers),
+                    }),
+                }).catch(err => console.warn('assessment draft save failed', err));
+            }, 250);
+        }
+
+        function renderQuestion(idx) {
+            currentIdx = idx;
+            const q = questions[idx];
+            const answerKey = _assessmentQuestionKey(q, idx);
+            const backendAnswerKey = _assessmentBackendQuestionKey(q, idx);
+            const savedAnswer = _assessmentAnswerFor(q, state.answers, idx);
+            const concept = q.concept || q.concept_title || '';
+            const phaseLabel = '自评题';
+
+            body.innerHTML = `
+                <div class="q-header">
+                    <span class="q-tag q-tag--subj">${phaseLabel}</span>
+                    ${concept ? `<span class="q-tag q-tag--concept">${concept}</span>` : ''}
+                </div>
+                <div class="q-text">${q.question}</div>
+                <div class="q-options">${(q.options || []).map(opt => {
+                    const key = (opt || '').trim().charAt(0).toUpperCase();
+                    const label = opt.replace(/^[A-D]\.\s*/, '');
+                    const isSelected = key === savedAnswer;
+                    return `<div class="q-opt${isSelected ? ' selected' : ''}" data-v="${key}">
+                        <span class="q-opt-letter">${key}</span>
+                        <span class="q-opt-indicator"></span>
+                        <span class="q-opt-label">${label}</span>
+                    </div>`;
+                }).join('')}</div>
+            `;
+
+            // Option click
+            body.querySelectorAll('.q-opt').forEach(opt => {
+                opt.addEventListener('click', () => {
+                    body.querySelectorAll('.q-opt').forEach(o => o.classList.remove('selected'));
+                    opt.classList.add('selected');
+                    state.answers[answerKey] = opt.dataset.v;
+                    state.answers[backendAnswerKey] = opt.dataset.v;
+                    state.answers = _normalizeAssessmentAnswers(questions, state.answers);
+                    updateNav();
+                    _refreshAssessmentProgressMeta();
+                    scheduleDraftSave();
+                });
+            });
+
+            updateNav();
+        }
+
+        function updateNav() {
+            const q = questions[currentIdx];
+            const hasAnswer = Boolean(_assessmentAnswerFor(q, state.answers, currentIdx));
+            const isFirst = currentIdx === 0;
+            const isLast = currentIdx === total - 1;
+
+            curLabel.textContent = currentIdx + 1;
+            fillBar.style.width = `${((currentIdx + 1) / total) * 100}%`;
+
+            prevBtn.disabled = isFirst;
+            prevBtn.style.visibility = isFirst ? 'hidden' : 'visible';
+
+            if (isLast) {
+                nextBtn.style.display = 'none';
+                submitBtn.style.display = '';
+                const allAnswered = _allAssessmentAnswered(questions, state.answers);
+                submitBtn.disabled = !allAnswered;
+            } else {
+                nextBtn.style.display = '';
+                submitBtn.style.display = 'none';
+                nextBtn.disabled = !hasAnswer;
+            }
+        }
+
+        prevBtn.onclick = () => { if (currentIdx > 0) renderQuestion(currentIdx - 1); };
+        nextBtn.onclick = () => { if (currentIdx < total - 1 && _assessmentAnswerFor(questions[currentIdx], state.answers, currentIdx)) renderQuestion(currentIdx + 1); };
+
+        submitBtn.onclick = async () => {
+            const allAnswered = _allAssessmentAnswered(questions, state.answers);
+            if (!allAnswered) return;
+            const normalizedAnswers = _normalizeAssessmentAnswers(questions, state.answers);
+            state.answers = normalizedAnswers;
+            submitBtn.disabled = true;
+            submitBtn.textContent = '正在分析…';
+            app.setStatusBanner('正在分析你的起点…', 'processing');
+            try {
+                const response = await fetch('/api/submit_assessment', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ thread_id: state.currentThreadId, answers: normalizedAnswers }),
+                });
+                if (!response.ok) throw new Error(`submit_assessment failed: ${response.status}`);
+                _renderLockedAssessmentSummary(div, questions, normalizedAnswers);
+                app.startStreamingTurn?.('正在生成学习画像');
+                app.connectSSE();
+            } catch (err) {
+                console.error(err);
+                submitBtn.disabled = false;
+                submitBtn.textContent = '确认提交';
+                app.setStatusBanner('测评提交失败，请稍后重试。', 'danger');
+            }
+        };
 
         skipBtn.onclick = () => {
             row.wrap.remove();
@@ -1455,125 +1756,17 @@
         };
 
         app.updateLearningProgress({ step: 2, label: '学习进度 2/5' });
-
-        if (selfEvalQs.length) {
-            const sec1 = document.createElement('section');
-            sec1.className = 'assessment-section';
-            sec1.innerHTML = `<div class="assessment-section-title">自我评价</div>`;
-            selfEvalQs.forEach(q => sec1.appendChild(_buildQuestionItem(q, state)));
-            div.appendChild(sec1);
-        }
-
-        if (objectiveQs.length) {
-            const sec2 = document.createElement('section');
-            sec2.className = 'assessment-section';
-            sec2.innerHTML = `<div class="assessment-section-title">实际测验</div>`;
-            objectiveQs.forEach(q => sec2.appendChild(_buildQuestionItem(q, state)));
-            div.appendChild(sec2);
-        }
-
-        if (!selfEvalQs.length && !objectiveQs.length) {
-            questions.forEach(q => div.appendChild(_buildQuestionItem(q, state)));
-        }
-
-        const submitBtn = document.createElement('button');
-        submitBtn.type = 'button';
-        submitBtn.className = 'chip chip-primary btn-submit-all';
-        submitBtn.innerText = '提交答案';
-        submitBtn.onclick = async () => {
-            const totalRequired = questions.length;
-            const answered = Object.keys(state.answers).length;
-            if (answered < totalRequired) {
-                const unanswered = questions.filter(q => !state.answers[q.id]);
-                const firstUnanswered = unanswered[0];
-                if (firstUnanswered) {
-                    div.querySelector(`#q-${firstUnanswered.id}`)?.closest('.q-item')
-                        ?.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                }
-                submitBtn.classList.add('shake');
-                setTimeout(() => submitBtn.classList.remove('shake'), 600);
-                return;
-            }
-            submitBtn.disabled = true;
-            submitBtn.innerText = '整理中…';
-            app.setStatusBanner('正在分析自评与实测的差距…', 'processing');
-            await fetch('/api/submit_assessment', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ thread_id: state.currentThreadId, answers: state.answers }),
-            });
-            app.connectSSE();
-        };
-        div.appendChild(submitBtn);
+        renderQuestion(0);
         row.body.appendChild(div);
         container.appendChild(row.wrap);
         app.scrollMessagesToBottom();
     };
 
-    /** 构建单题 DOM，支持 concept 标签 */
-    function _buildQuestionItem(q, state) {
-        const answerCode = String(state.answers[q.id] || '').trim().toUpperCase();
-        const matchedOption = (q.options || []).find(opt => answerCode === opt.trim().charAt(0).toUpperCase()) || '';
-        const qDiv = document.createElement('div');
-        qDiv.className = `q-item${answerCode ? ' q-item--answered' : ''}`;
-        const conceptTag = q.concept
-            ? `<span class="q-concept-tag">${q.concept}</span>`
-            : '';
-        const statusChip = answerCode
-            ? `<span class="q-status-chip q-status-chip--locked">已作答</span>`
-            : `<span class="q-status-chip q-status-chip--pending">待作答</span>`;
-        qDiv.innerHTML = `
-            <div class="q-head">
-                <div class="q-text">${conceptTag}${q.id}. ${q.question}</div>
-                ${statusChip}
-            </div>
-            ${
-                answerCode
-                    ? `
-                        <div class="q-answer-card">
-                            <div class="q-answer-label">你的选择</div>
-                            <div class="q-answer-text">${matchedOption || answerCode}</div>
-                        </div>
-                        <div class="q-answer-note">答案已锁定并随会话保存，恢复后保持不可重复作答。</div>
-                    `
-                    : `<div class="opt-grid suggestion-row" id="q-${q.id}"></div>`
-            }
-        `;
-        if (answerCode) {
-            return qDiv;
-        }
-        const grid = qDiv.querySelector('.opt-grid');
-        (q.options || []).forEach(opt => {
-            const btn = document.createElement('button');
-            btn.type = 'button';
-            btn.className = 'chip opt-btn';
-            btn.innerText = opt;
-            btn.setAttribute('aria-pressed', 'false');
-            btn.onclick = async () => {
-                state.answers[q.id] = opt.trim().charAt(0).toUpperCase();
-                qDiv.replaceWith(_buildQuestionItem(q, state));
-                _refreshAssessmentProgressMeta();
-                if (!state.currentThreadId) return;
-                try {
-                    await fetch('/api/assessment_draft', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ thread_id: state.currentThreadId, answers: state.answers }),
-                    });
-                } catch (_error) {
-                    app.setStatusBanner?.('答案已锁定，但暂时没有写回草稿。', 'warning');
-                }
-            };
-            grid.appendChild(btn);
-        });
-        return qDiv;
-    }
-
     // ================================================================
     // 对话式逐题测评 UI  — 三种题型 × 三种状态
     // ================================================================
     //
-    // 题型：self_eval（自评 1-5 点选）、objective（客观四选一）
+    // 题型：self_eval（自评 1-5 点选）、objective（客观四选一）、subjective_choice（主观四选一）
     // 状态：unanswered → selected → locked（含对错反馈）
     //
     // 后端 payload:
@@ -1617,8 +1810,8 @@
             </div>`;
 
         // ── 标题行 ──
-        const phaseLabel = phase === 'self_eval' ? '自评' : '客观题';
-        const phaseCls = phase === 'self_eval' ? 'q-tag--self' : 'q-tag--obj';
+        const phaseLabel = phase === 'self_eval' ? '自评' : phase === 'subjective_choice' ? '摩底题' : '客观题';
+        const phaseCls = phase === 'self_eval' ? 'q-tag--self' : phase === 'subjective_choice' ? 'q-tag--subj' : 'q-tag--obj';
         const headerHtml = `
             <div class="q-header">
                 <span class="q-tag ${phaseCls}">${phaseLabel}</span>
@@ -1628,7 +1821,64 @@
         // ── 题面 ──
         const questionHtml = `<div class="q-text">${qText}</div>`;
 
-        if (phase === 'self_eval') {
+        if (phase === 'subjective_choice') {
+            // ── 主观选择题：四选一，选完即锁定，不等 feedback ──
+            const chosenKey = isRestored ? (restore.chosen || '').toUpperCase() : '';
+
+            const optsHtml = options.map(opt => {
+                const key = _parseOptionKey(opt);
+                let cls = 'q-opt';
+                if (isRestored) {
+                    cls += ' locked';
+                    if (key === chosenKey) cls += ' correct-chosen';
+                    else cls += ' dimmed';
+                }
+                const label = opt.replace(/^[A-D]\.\s*/, '');
+                return `<div class="${cls}" data-v="${key}">
+                    <span class="q-opt-letter">${key}</span>
+                    <span class="q-opt-indicator"></span>
+                    <span class="q-opt-label">${label}</span>
+                </div>`;
+            }).join('');
+
+            card.innerHTML = `
+                ${isRestored ? '<div class="q-restored-banner">历史记录，不可修改</div>' : ''}
+                ${progressHtml}
+                ${headerHtml}
+                ${questionHtml}
+                <div class="q-options">${optsHtml}</div>
+                ${!isRestored ? '<button class="q-submit" disabled>确认</button>' : ''}
+            `;
+
+            if (!isRestored) {
+                let sel = null;
+                const opts = card.querySelectorAll('.q-opt');
+                const submitBtn = card.querySelector('.q-submit');
+
+                opts.forEach(opt => {
+                    opt.addEventListener('click', () => {
+                        if (opt.classList.contains('locked')) return;
+                        opts.forEach(o => o.classList.remove('selected'));
+                        opt.classList.add('selected');
+                        sel = opt.dataset.v;
+                        submitBtn.disabled = false;
+                    });
+                });
+
+                submitBtn.addEventListener('click', () => {
+                    if (!sel) return;
+                    submitBtn.disabled = true;
+                    submitBtn.textContent = '已记录';
+                    opts.forEach(o => {
+                        o.classList.add('locked');
+                        if (o.dataset.v === sel) o.classList.add('correct-chosen');
+                        else o.classList.add('dimmed');
+                        o.style.pointerEvents = 'none';
+                    });
+                    _submitDialogAnswer(qId, sel, card);
+                });
+            }
+        } else if (phase === 'self_eval') {
             // ── 自评题：1-5 圆点 ──
             const savedVal = isRestored ? parseInt(restore.answer) || 0 : 0;
             const dotsHtml = [1, 2, 3, 4, 5].map(v => {
@@ -1837,99 +2087,51 @@
     app.renderTopicConfirmation = function renderTopicConfirmation(topic, details = {}) {
         state.pendingTopicConfirmation = topic;
         state.pendingTopicConfirmationDetails = details || {};
-        document.querySelector('.topic-confirm-card')?.remove();
+        document.querySelector('.assistant-card-row.topic-confirm-card')?.remove();
         const container = document.getElementById('messages');
         const row = createAssistantCardRow('topic-confirm-card');
         const card = document.createElement('div');
-        card.className = 'topic-confirm-card prompt-flow-card';
-        const detailSummary = (details.detail_summary || '').trim();
-        const focus = (details.topic_focus || '').trim();
-        const background = (details.topic_background || '').trim();
-        const starterOptions = Array.isArray(details.topic_starter_options) ? details.topic_starter_options.filter(Boolean) : [];
-        const detailItems = [];
-        if (focus) detailItems.push(`这次先抓：${focus}`);
-        if (background) detailItems.push(`当前状态：${background}`);
-        if (!detailItems.length && detailSummary) detailItems.push(detailSummary);
-        const prompt = document.createElement('div');
-        prompt.className = 'prompt-card prompt-flow-shell';
-        prompt.innerHTML = `
-            <div class="prompt-label">确认主题</div>
-            <div class="prompt-title">${topic}</div>
-            <div class="prompt-copy">确认后直接开始。</div>
-        `;
-        card.appendChild(prompt);
+        card.className = 'topic-confirm-card prompt-flow-card tc-card-v2';
 
-        if (detailItems.length) {
-            const detailBox = document.createElement('div');
-            detailBox.className = 'topic-confirm-details prompt-flow-section';
-            detailBox.innerHTML = `
-                <div class="topic-confirm-detail-title">重点</div>
-                <ul class="topic-confirm-detail-list"></ul>
-            `;
-            const detailList = detailBox.querySelector('.topic-confirm-detail-list');
-            detailItems.forEach(item => {
-                const li = document.createElement('li');
-                li.textContent = item;
-                detailList.appendChild(li);
-            });
-            card.appendChild(detailBox);
-        }
-
-        if (starterOptions.length) {
-            const starterBox = document.createElement('div');
-            starterBox.className = 'topic-confirm-starters prompt-flow-section';
-            starterBox.innerHTML = `<div class="topic-confirm-detail-title">切入点</div>`;
-            const starterList = document.createElement('div');
-            starterList.className = 'suggestion-row topic-confirm-chip-list';
-            starterOptions.forEach(option => {
-                const chip = document.createElement('button');
-                chip.type = 'button';
-                chip.className = 'chip topic-confirm-chip';
-                chip.textContent = option;
-                chip.onclick = () => {
-                    app.showTopicEditInput?.();
-                    const input = document.getElementById('topic-edit-input');
-                    if (input) {
-                        input.value = option;
-                        input.focus();
-                    }
-                };
-                starterList.appendChild(chip);
-            });
-            starterBox.appendChild(starterList);
-            card.appendChild(starterBox);
-        }
-
-        const actions = document.createElement('div');
-        actions.className = 'suggestion-row prompt-flow-actions';
-        const actionButtons = [
-            { label: '直接开始', className: 'chip chip-primary', run: () => app.submitTopicConfirmation(true, 'direct_tutor') },
-            { label: '先看例子', className: 'chip', run: () => app.submitTopicConfirmation(true, 'analogy_tutor') },
-            { label: '先做小测', className: 'chip', run: () => app.submitTopicConfirmation(true, 'assessment') },
-            { label: '修改主题', className: 'chip chip-muted', run: () => app.showTopicEditInput?.() },
-        ];
-        actionButtons.forEach(({ label, className, run }) => {
-            const button = document.createElement('button');
-            button.type = 'button';
-            button.className = className;
-            button.textContent = label;
-            button.onclick = run;
-            actions.appendChild(button);
-        });
-        card.appendChild(actions);
-
-        const editBox = document.createElement('div');
-        editBox.id = 'topic-edit-box';
-        editBox.className = 'prompt-inline-editor';
-        editBox.hidden = true;
-        editBox.innerHTML = `
-            <input id="topic-edit-input" class="topic-confirm-input" placeholder="输入更明确的主题">
-            <div class="suggestion-row prompt-flow-actions">
-                <button type="button" class="chip chip-warn">用这个继续</button>
+        card.innerHTML = `
+            <div class="tc-header">
+                <span class="tc-icon">📖</span>
+                <span class="tc-label">确认学习主题</span>
+            </div>
+            <div class="tc-body">
+                <div class="tc-topic">${topic}</div>
+                <div class="tc-desc">确认后先做一组快速摸底，了解你的起点再正式开始讲解。</div>
+                <div class="tc-actions">
+                    <button type="button" class="tc-btn tc-btn-primary" data-action="assess">
+                        <span class="tc-btn-icon">✅</span> 确认，开始摸底
+                    </button>
+                    <button type="button" class="tc-btn tc-btn-secondary" data-action="skip">
+                        <span class="tc-btn-icon">⚡</span> 跳过摸底直接学
+                    </button>
+                </div>
+                <div class="tc-edit-trigger">
+                    <a href="#" class="tc-edit-link">不是这个主题？点击修改</a>
+                </div>
+                <div class="tc-edit-box" id="topic-edit-box">
+                    <div class="tc-edit-inner">
+                        <input id="topic-edit-input" class="tc-edit-input" placeholder="输入你想学的主题" />
+                        <button type="button" class="tc-btn tc-btn-change" data-action="change">换这个主题</button>
+                    </div>
+                </div>
             </div>
         `;
-        editBox.querySelector('button').onclick = () => app.submitTopicConfirmation(false, 'assessment');
-        card.appendChild(editBox);
+
+        card.querySelector('[data-action="assess"]').onclick = () => app.submitTopicConfirmation(true, 'assessment');
+        card.querySelector('[data-action="skip"]').onclick = () => app.submitTopicConfirmation(true, 'direct_tutor');
+        card.querySelector('.tc-edit-link').onclick = (e) => {
+            e.preventDefault();
+            const box = document.getElementById('topic-edit-box');
+            if (box) {
+                const isOpen = box.classList.toggle('tc-edit-open');
+                if (isOpen) document.getElementById('topic-edit-input')?.focus();
+            }
+        };
+        card.querySelector('[data-action="change"]').onclick = () => app.submitTopicConfirmation(false, 'assessment');
 
         row.body.appendChild(card);
         container.appendChild(row.wrap);
@@ -2046,19 +2248,337 @@
         }
     };
 
+    // ================================================================
+    // 课后 / 作业 / 客观题 选择卡片
+    // ================================================================
+
+    app.renderPostLessonChoice = function renderPostLessonChoice(options = []) {
+        document.querySelector('.post-lesson-card')?.remove();
+        const container = document.getElementById('messages');
+        const row = createAssistantCardRow('topic-confirm-card post-lesson-card');
+        const card = document.createElement('div');
+        card.className = 'topic-confirm-card post-lesson-card prompt-flow-card';
+        card.innerHTML = `
+            <div class="prompt-card prompt-flow-shell">
+                <div class="prompt-label">课后选择</div>
+                <div class="prompt-title">接下来做什么</div>
+                <div class="prompt-copy">选一个继续。</div>
+            </div>
+            <div class="suggestion-row topic-confirm-chip-list selector-chip-list post-lesson-actions"></div>
+        `;
+        const actions = card.querySelector('.post-lesson-actions');
+        const normalized = Array.isArray(options) && options.length
+            ? options
+            : [
+                { value: 'temporary_question', label: '随便问问' },
+                { value: 'start_test', label: '来做测验' },
+            ];
+        normalized.forEach(option => {
+            const button = document.createElement('button');
+            button.type = 'button';
+            button.className = 'chip topic-confirm-chip selector-chip';
+            button.textContent = option.label || option.value;
+            button.onclick = () => app.submitAwaitingChoice?.(option.value, option.label || option.value);
+            actions.appendChild(button);
+        });
+        row.body.appendChild(card);
+        container.appendChild(row.wrap);
+        app.scrollMessagesToBottom();
+    };
+
+    app.renderContinueOrHomeworkChoice = function renderContinueOrHomeworkChoice(options = []) {
+        document.querySelector('.continue-homework-card')?.remove();
+        const container = document.getElementById('messages');
+        const row = createAssistantCardRow('topic-confirm-card continue-homework-card');
+        const card = document.createElement('div');
+        card.className = 'topic-confirm-card continue-homework-card prompt-flow-card';
+        card.innerHTML = `
+            <div class="prompt-card prompt-flow-shell">
+                <div class="prompt-label">继续 / 收作业</div>
+                <div class="prompt-title">还学吗</div>
+                <div class="prompt-copy">继续下一个节点还是今天先到这里。</div>
+            </div>
+            <div class="suggestion-row topic-confirm-chip-list selector-chip-list continue-homework-actions"></div>
+        `;
+        const actions = card.querySelector('.continue-homework-actions');
+        const normalized = Array.isArray(options) && options.length
+            ? options
+            : [
+                { value: 'continue_next_node', label: '继续下一个' },
+                { value: 'stop_today', label: '今天先到这里' },
+            ];
+        normalized.forEach(option => {
+            const button = document.createElement('button');
+            button.type = 'button';
+            button.className = 'chip topic-confirm-chip selector-chip';
+            button.textContent = option.label || option.value;
+            button.onclick = () => app.submitAwaitingChoice?.(option.value, option.label || option.value);
+            actions.appendChild(button);
+        });
+        row.body.appendChild(card);
+        container.appendChild(row.wrap);
+        app.scrollMessagesToBottom();
+    };
+
+    app.renderHomeworkReviewChoice = function renderHomeworkReviewChoice(options = []) {
+        document.querySelector('.homework-review-card')?.remove();
+        const container = document.getElementById('messages');
+        const row = createAssistantCardRow('topic-confirm-card homework-review-card');
+        const card = document.createElement('div');
+        card.className = 'topic-confirm-card homework-review-card prompt-flow-card';
+        card.innerHTML = `
+            <div class="prompt-card prompt-flow-shell">
+                <div class="prompt-label">作业</div>
+                <div class="prompt-title">上次留了作业</div>
+                <div class="prompt-copy">先回顾还是直接答题。</div>
+            </div>
+            <div class="suggestion-row topic-confirm-chip-list selector-chip-list homework-review-actions"></div>
+        `;
+        const actions = card.querySelector('.homework-review-actions');
+        const normalized = Array.isArray(options) && options.length
+            ? options
+            : [
+                { value: 'review_homework', label: '先看看题目' },
+                { value: 'answer_homework', label: '直接回答' },
+                { value: 'skip_homework', label: '跳过' },
+            ];
+        normalized.forEach(option => {
+            const button = document.createElement('button');
+            button.type = 'button';
+            button.className = 'chip topic-confirm-chip selector-chip';
+            button.textContent = option.label || option.value;
+            button.onclick = () => app.submitAwaitingChoice?.(option.value, option.label || option.value);
+            actions.appendChild(button);
+        });
+        row.body.appendChild(card);
+        container.appendChild(row.wrap);
+        app.scrollMessagesToBottom();
+    };
+
+    app.renderConsolidationChoice = function renderConsolidationChoice(options = []) {
+        document.querySelector('.consolidation-card')?.remove();
+        const container = document.getElementById('messages');
+        const row = createAssistantCardRow('topic-confirm-card consolidation-card');
+        const card = document.createElement('div');
+        card.className = 'topic-confirm-card consolidation-card prompt-flow-card';
+        card.innerHTML = `
+            <div class="prompt-card prompt-flow-shell">
+                <div class="prompt-label">继续学习</div>
+                <div class="prompt-title">上次没有留作业</div>
+                <div class="prompt-copy">你想先巩固复习已学内容，还是直接开始下一节点？</div>
+            </div>
+            <div class="suggestion-row topic-confirm-chip-list selector-chip-list consolidation-actions"></div>
+        `;
+        const actions = card.querySelector('.consolidation-actions');
+        const normalized = Array.isArray(options) && options.length
+            ? options
+            : [
+                { value: 'consolidate', label: '巩固复习（生成复习题）' },
+                { value: 'continue_learning', label: '直接开始下一节点' },
+            ];
+        normalized.forEach(option => {
+            const button = document.createElement('button');
+            button.type = 'button';
+            button.className = 'chip topic-confirm-chip selector-chip';
+            button.textContent = option.label || option.value;
+            button.onclick = () => app.submitAwaitingChoice?.(option.value, option.label || option.value);
+            actions.appendChild(button);
+        });
+        row.body.appendChild(card);
+        container.appendChild(row.wrap);
+        app.scrollMessagesToBottom();
+    };
+
+    app.renderObjectiveTestCard = function renderObjectiveTestCard(questions = [], kind = 'objective_test_answers') {
+        document.querySelectorAll('.obj-test-card:not(.submitted-collapsed)').forEach(card => card.remove());
+        const container = document.getElementById('messages');
+        const row = createAssistantCardRow('topic-confirm-card obj-test-card');
+        const card = document.createElement('div');
+        card.className = 'topic-confirm-card obj-test-card prompt-flow-card';
+        const label = kind === 'variant_test_answers' ? '变式练习' : '客观测验';
+        card.innerHTML = `
+            <div class="prompt-card prompt-flow-shell">
+                <div class="prompt-label">${label}</div>
+                <div class="prompt-title">请逐题作答</div>
+                <div class="prompt-copy">选好后点提交。</div>
+            </div>
+            <button type="button" class="chip selector-chip obj-test-review-toggle" hidden aria-expanded="true">默认收起，点击展开查看作答情况</button>
+            <div class="obj-test-review-body">
+                <div class="obj-test-questions"></div>
+                <button class="chip chip-primary obj-test-submit" disabled>提交全部答案</button>
+            </div>
+        `;
+        const qContainer = card.querySelector('.obj-test-questions');
+        const submitBtn = card.querySelector('.obj-test-submit');
+        const reviewToggle = card.querySelector('.obj-test-review-toggle');
+        const reviewBody = card.querySelector('.obj-test-review-body');
+        const answerMap = {};
+        const normalizedQs = Array.isArray(questions) ? questions : [];
+        const setReviewCollapsed = (collapsed) => {
+            card.classList.toggle('submitted-collapsed', collapsed);
+            if (reviewBody) reviewBody.hidden = collapsed;
+            if (reviewToggle) {
+                reviewToggle.hidden = false;
+                reviewToggle.setAttribute('aria-expanded', collapsed ? 'false' : 'true');
+                reviewToggle.textContent = collapsed ? '已提交客观题，点击展开查看作答情况' : '收起作答情况';
+            }
+        };
+        if (reviewToggle) {
+            reviewToggle.onclick = () => setReviewCollapsed(reviewToggle.getAttribute('aria-expanded') === 'true');
+        }
+
+        normalizedQs.forEach((q, idx) => {
+            const qEl = document.createElement('div');
+            qEl.className = 'obj-test-q';
+            const qid = q.question_id || q.id || `Q${idx + 1}`;
+            const qText = q.question || q.stem || `第 ${idx + 1} 题`;
+            const rawOpts = q.options || [];
+            const optEntries = Array.isArray(rawOpts)
+                ? rawOpts.map(o => ({ key: _parseOptionKey(o), text: o }))
+                : Object.entries(rawOpts).map(([k, v]) => ({ key: k.toUpperCase(), text: `${k}. ${v}` }));
+            qEl.innerHTML = `
+                <div class="obj-test-q-text">${idx + 1}. ${qText}</div>
+                <div class="obj-test-q-opts"></div>
+            `;
+            const optContainer = qEl.querySelector('.obj-test-q-opts');
+            optEntries.forEach(({ key, text }) => {
+                const btn = document.createElement('button');
+                btn.type = 'button';
+                btn.className = 'chip selector-chip obj-test-opt';
+                btn.dataset.qIdx = String(idx);
+                btn.dataset.qid = qid;
+                btn.dataset.v = key;
+                btn.textContent = text;
+                btn.onclick = () => {
+                    optContainer.querySelectorAll('.obj-test-opt').forEach(o => o.classList.remove('selected'));
+                    btn.classList.add('selected');
+                    answerMap[qid] = key;
+                    submitBtn.disabled = Object.keys(answerMap).length < normalizedQs.length;
+                };
+                optContainer.appendChild(btn);
+            });
+            qContainer.appendChild(qEl);
+        });
+
+        submitBtn.onclick = () => {
+            const answerPayload = JSON.stringify(answerMap);
+            submitBtn.disabled = true;
+            submitBtn.textContent = '已提交，等待批改…';
+            card.querySelectorAll('.obj-test-opt').forEach(o => {
+                o.style.pointerEvents = 'none';
+                o.classList.add('locked');
+            });
+            card.querySelectorAll('.obj-test-answer-summary').forEach(el => el.remove());
+            normalizedQs.forEach((q, idx) => {
+                const qid = q.question_id || q.id || `Q${idx + 1}`;
+                const userKey = answerMap[qid] || '';
+                const correctKey = (q.answer_key || q.correct_answer || '').toUpperCase();
+                const qEl = qContainer.children[idx];
+                if (qEl) {
+                    if (correctKey) {
+                        qEl.querySelectorAll('.obj-test-opt').forEach(o => {
+                            const v = (o.dataset.v || '').toUpperCase();
+                            if (v === correctKey) o.classList.add('correct-answer');
+                            if (v === userKey && userKey !== correctKey) o.classList.add('wrong-answer');
+                        });
+                    }
+                    const summary = document.createElement('div');
+                    summary.className = 'obj-test-answer-summary';
+                    summary.textContent = `你的答案：${userKey || '未作答'}；正确答案：${correctKey || '未提供'}`;
+                    qEl.appendChild(summary);
+                }
+            });
+            setReviewCollapsed(true);
+            app.submitAwaitingChoice?.(answerPayload, '答案已提交');
+        };
+
+        app.collapseSubmittedObjectiveTestCard = function collapseSubmittedObjectiveTestCard() {
+            const activeCard = document.querySelector('.obj-test-card');
+            if (!activeCard) return;
+            const activeToggle = activeCard.querySelector('.obj-test-review-toggle');
+            const activeBody = activeCard.querySelector('.obj-test-review-body');
+            if (!activeToggle || activeToggle.hidden) return;
+            activeCard.classList.add('submitted-collapsed');
+            if (activeBody) activeBody.hidden = true;
+            activeToggle.setAttribute('aria-expanded', 'false');
+            activeToggle.textContent = '已提交客观题，点击展开查看作答情况';
+        };
+
+        row.body.appendChild(card);
+        container.appendChild(row.wrap);
+        app.scrollMessagesToBottom();
+    };
+
+    app.renderObjectiveQuizReviewCard = function renderObjectiveQuizReviewCard(data = {}, content = '') {
+        const questions = Array.isArray(data.questions) ? data.questions : [];
+        const answers = data.answers || {};
+        const kind = data.kind || 'objective_test_answers';
+        const title = data.title || (kind === 'variant_test_answers' ? '变式练习' : '客观测评');
+        app.renderObjectiveTestCard(questions, kind);
+        const card = Array.from(document.querySelectorAll('.obj-test-card')).pop();
+        if (!card) {
+            if (content) app.appendMessage('agent', content, { kind: 'objective_quiz_review' });
+            return;
+        }
+        const qContainer = card.querySelector('.obj-test-questions');
+        const submitBtn = card.querySelector('.obj-test-submit');
+        const toggle = card.querySelector('.obj-test-review-toggle');
+        const body = card.querySelector('.obj-test-review-body');
+        const heading = card.querySelector('.prompt-label');
+        if (heading) heading.textContent = title;
+        if (submitBtn) submitBtn.remove();
+        card.querySelectorAll('.obj-test-opt').forEach(o => {
+            o.style.pointerEvents = 'none';
+            o.classList.add('locked');
+        });
+        questions.forEach((q, idx) => {
+            const qid = q.question_id || q.id || `Q${idx + 1}`;
+            const userKey = String(answers[qid] || answers[String(idx + 1)] || answers[`Q${idx + 1}`] || '').toUpperCase();
+            const correctKey = String(q.answer_key || q.correct_answer || q.correct || '').toUpperCase();
+            const qEl = qContainer?.children?.[idx];
+            if (!qEl) return;
+            qEl.querySelectorAll('.obj-test-opt').forEach(o => {
+                const v = String(o.dataset.v || '').toUpperCase();
+                if (correctKey && v === correctKey) o.classList.add('correct-answer');
+                if (userKey && correctKey && v === userKey && userKey !== correctKey) o.classList.add('wrong-answer');
+                if (userKey && v === userKey) o.classList.add('selected');
+            });
+            const summary = document.createElement('div');
+            summary.className = 'obj-test-answer-summary';
+            summary.textContent = `你的答案：${userKey || '未作答'}；正确答案：${correctKey || '未提供'}`;
+            qEl.appendChild(summary);
+        });
+        card.classList.add('submitted-collapsed');
+        if (body) body.hidden = true;
+        if (toggle) {
+            toggle.hidden = false;
+            toggle.setAttribute('aria-expanded', 'false');
+            toggle.textContent = `已提交${title}，点击展开查看作答情况`;
+        }
+    };
+
     function applySessionArtifacts(stateSnapshot) {
         state.currentTopic = stateSnapshot.current_topic || '';
         state.currentTopicFocus = stateSnapshot.topic_focus || '';
         state.graphTopicHint = stateSnapshot.current_topic || stateSnapshot.proposed_topic || state.graphTopicHint || '';
-        state.currentGraphNode = stateSnapshot.graph_anchor_title || state.currentGraphNode || '';
+        state.currentGraphNode = stateSnapshot.graph_anchor_title || stateSnapshot.current_node_name || '';
         if (stateSnapshot.user_knowledge_graph && typeof stateSnapshot.user_knowledge_graph === 'object') {
             state.userKnowledgeGraph = { ...stateSnapshot.user_knowledge_graph };
         } else if (stateSnapshot.userKnowledgeGraph && typeof stateSnapshot.userKnowledgeGraph === 'object') {
             state.userKnowledgeGraph = { ...stateSnapshot.userKnowledgeGraph };
         }
         app.updateLearningProgress(stateSnapshot || {});
+        state.currentGraphNodeId = stateSnapshot.graph_anchor_id || stateSnapshot.current_node_id || '';
         if (stateSnapshot.assessment_radar && stateSnapshot.assessment_radar.dimensions) {
             app.showRadar(stateSnapshot.assessment_radar);
+        }
+        if (state.currentGraphNode || state.currentGraphNodeId) {
+            app.renderKnowledgeGraphVisualCard?.({
+                title: state.currentGraphNode,
+                id: state.currentGraphNodeId,
+                status: stateSnapshot.current_node_status || 'in_progress',
+                type: 'current',
+            });
         }
 
         if (stateSnapshot.flow_status === 'awaiting_topic_confirmation' && stateSnapshot.proposed_topic) {
@@ -2076,7 +2596,14 @@
         }
 
         if (stateSnapshot.flow_status === 'awaiting_assessment' && (stateSnapshot.assessment_questions || []).length) {
-            app.renderAssessmentForm(stateSnapshot.assessment_questions, stateSnapshot.assessment_answers || {});
+            const assessmentQuestions = stateSnapshot.assessment_questions || [];
+            const assessmentAnswers = stateSnapshot.assessment_answers || {};
+            const isCompletedAssessment = Boolean(stateSnapshot.is_assessed)
+                && _allAssessmentAnswered(assessmentQuestions, assessmentAnswers);
+            app.renderAssessmentForm(assessmentQuestions, assessmentAnswers, {
+                locked: isCompletedAssessment,
+                statusText: isCompletedAssessment ? '测评已完成，答案已固定' : undefined,
+            });
         }
 
         if (stateSnapshot.flow_status === 'awaiting_next_step_selector') {
@@ -2085,6 +2612,43 @@
 
         if (stateSnapshot.flow_status === 'awaiting_post_eval_selector') {
             app.renderPostEvalSelector(stateSnapshot.pending_interaction_options || []);
+        }
+
+        if (stateSnapshot.flow_status === 'assessment_dialog') {
+            const asState = stateSnapshot.assessment_state || {};
+            const asPairs = asState.pairs || [];
+            const asIdx = asState.current_pair_index || 0;
+            const asPhase = asState.phase || 'subjective_choice';
+            if (asIdx < asPairs.length) {
+                const pair = asPairs[asIdx];
+                const src = asPhase === 'subjective_choice' ? pair?.subjective : asPhase === 'self_eval' ? pair?.self_eval : pair?.objective;
+                if (src) {
+                    app.renderAssessmentDialogQuestion({
+                        pair_index: asIdx,
+                        total_pairs: asPairs.length,
+                        phase: asPhase,
+                        concept: pair.concept,
+                        question_id: src.id,
+                        question: src.question,
+                        options: src.options,
+                    });
+                }
+            }
+        }
+
+        const pik = stateSnapshot.pending_interaction_kind || '';
+        const pio = stateSnapshot.pending_interaction_options || [];
+        if (pik === 'post_lesson_choice') {
+            app.renderPostLessonChoice?.(pio);
+        }
+        if (pik === 'continue_or_homework_choice') {
+            app.renderContinueOrHomeworkChoice?.(pio);
+        }
+        if (pik === 'homework_review_choice') {
+            app.renderHomeworkReviewChoice?.(pio);
+        }
+        if (pik === 'objective_test_answers' || pik === 'variant_test_answers') {
+            app.renderObjectiveTestCard?.(pio, pik);
         }
     }
 
@@ -2114,15 +2678,41 @@
                 item.kind === 'topic_confirmation_card'
                 && (data.proposed_topic || content.trim())
             ) {
+                if (stateSnapshot?.flow_status !== 'awaiting_topic_confirmation') {
+                    return;
+                }
                 app.renderTopicConfirmation(data.proposed_topic || content, data);
                 return;
             }
             if (item.kind === 'assessment_form' && Array.isArray(data.questions) && data.questions.length) {
-                app.renderAssessmentForm(data.questions, data.answers || {});
+                const snapshotAnswers = stateSnapshot?.assessment_answers || {};
+                const timelineAnswers = data.answers || {};
+                const isCompletedAssessment = Boolean(stateSnapshot?.is_assessed)
+                    && _allAssessmentAnswered(data.questions, snapshotAnswers);
+                app.renderAssessmentForm(
+                    data.questions,
+                    isCompletedAssessment ? snapshotAnswers : timelineAnswers,
+                    {
+                        locked: isCompletedAssessment || data.locked === true,
+                        statusText: isCompletedAssessment ? '测评已完成，答案已固定' : undefined,
+                    }
+                );
                 return;
             }
             if (item.kind === 'interrupt_confirmation_card') {
                 app.renderInterruptConfirmation?.();
+                return;
+            }
+            if (item.kind === 'objective_quiz_review') {
+                app.renderObjectiveQuizReviewCard?.(data, content);
+                return;
+            }
+            if (item.kind === 'graph_rag_debug_report') {
+                app.appendMessage('agent', content || '<section><h1>GraphRAG 调试报告</h1></section>', { kind: 'graph_rag_debug_report' });
+                return;
+            }
+            if (item.kind === 'wrong_question_explanations') {
+                app.appendMessage('agent', content || '错题订正讲解', { kind: 'wrong_question_explanations' });
                 return;
             }
             if (item.kind === 'next_step_selector') {
@@ -2201,15 +2791,34 @@
             const answers = as.answers || {};
             const pairs = as.pairs || [];
             const total = pairs.length;
+            const isSubjective = as.phase === 'subjective_choice' || as.phase === 'done' && pairs[0]?.subjective;
 
             for (let i = 0; i < total; i++) {
                 const pair = pairs[i];
                 if (!pair) continue;
 
+                if (isSubjective || pair.subjective) {
+                    // 主观选择题恢复
+                    const sq = pair.subjective;
+                    if (!sq) continue;
+                    const sqId = String(sq.id);
+                    if (answers[sqId] != null) {
+                        app.renderAssessmentDialogQuestion({
+                            pair_index: i,
+                            total_pairs: total,
+                            phase: 'subjective_choice',
+                            concept: pair.concept,
+                            question_id: sq.id,
+                            question: sq.question,
+                            options: sq.options,
+                        }, { chosen: answers[sqId] });
+                    }
+                    continue;
+                }
+
                 // 自评题
                 const selfId = String(pair.self_eval?.id);
                 if (answers[selfId] != null) {
-                    // 将 A/B/C/D 映射为 1-5
                     const selfAnswer = 'ABCD'.indexOf(answers[selfId]) + 1;
                     app.renderAssessmentDialogQuestion({
                         pair_index: i,

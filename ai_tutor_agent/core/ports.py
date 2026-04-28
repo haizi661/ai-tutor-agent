@@ -30,6 +30,20 @@ class KnowledgeProvider(Protocol):
         """Query external knowledge source."""
 
 
+class QuestionBankProvider(Protocol):
+    def get_objective_questions(self, node_id: str, k: int = 10) -> list[dict[str, Any]]:
+        """Return objective questions bound to a graph node."""
+
+    def get_variant_question(self, wrong_item: dict[str, Any]) -> dict[str, Any]:
+        """Return one variant question for a wrong objective item."""
+
+    def get_homework_questions(self, node_ids: list[str], k: int = 5) -> list[dict[str, Any]]:
+        """Return homework questions for selected graph nodes."""
+
+    def get_assessment_questions(self, node_ids: list[str], k: int = 10) -> list[dict[str, Any]]:
+        """Return pre-assessment subjective-choice questions for given graph node ids."""
+
+
 class NoopEventSink:
     def emit(self, event: AgentEvent) -> None:
         del event
@@ -75,3 +89,7 @@ class RuntimeContext:
     event_sink: EventSink = field(default_factory=NoopEventSink)
     answer_provider: AnswerProvider = field(default_factory=MissingAnswerProvider)
     knowledge_provider: KnowledgeProvider = field(default_factory=NoopKnowledgeProvider)
+    settings: Any | None = None
+    graph_rag_pipeline: Any | None = None
+    student_state_store: Any | None = None
+    question_bank_provider: Any | None = None

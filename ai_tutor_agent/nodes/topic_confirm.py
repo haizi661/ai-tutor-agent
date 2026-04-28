@@ -25,10 +25,7 @@ def build_topic_confirm_node(event_sink: EventSink):
             make_event(
                 "topic.confirmation_needed",
                 "topic_confirmer",
-                message=(
-                    f"我先把这次方向收成【{proposed_topic}】。"
-                    "如果重点没跑偏，我们就从这里切进去。"
-                ),
+                message=f"识别到学习主题：【{proposed_topic}】，请确认。",
                 data={
                     "proposed_topic": proposed_topic,
                     "detail_summary": detail_summary,
@@ -43,7 +40,7 @@ def build_topic_confirm_node(event_sink: EventSink):
             make_event(
                 "node.complete",
                 "topic_confirmer",
-                message="主题和当前重点已经先替你收了一遍，等你确认。",
+                message="等你确认学习主题。",
             )
         )
         return {
@@ -53,10 +50,7 @@ def build_topic_confirm_node(event_sink: EventSink):
                 {
                     "role": "assistant",
                     "kind": "topic_confirmation_card",
-                    "content": (
-                        f"我先把这次方向收成【{proposed_topic}】。"
-                        "如果重点没跑偏，我们就从这里切进去。"
-                    ),
+                    "content": f"识别到学习主题：【{proposed_topic}】，请确认。",
                     "data": {
                         "proposed_topic": proposed_topic,
                         "detail_summary": detail_summary,

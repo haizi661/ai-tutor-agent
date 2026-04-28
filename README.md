@@ -4,10 +4,13 @@
 
 ## 核心能力
 
-- 闭环教学：`Tutor -> Tester -> Evaluator`
-- 临时提问不中断主线：支持“继续追问 / 回到主线”
+- 知识图谱节点制掌握学习：主题确认 -> 学前诊断 -> 图谱节点选择 -> 节点讲解 -> 节点测试 -> 错题补救 -> 下一节点/作业
+- 图谱 2.1 主线推进：负责学习路径、当前节点、前置关系、学习目标、必会点和常见误区
+- 图谱 2.2 / RAG 证据增强：负责临时问题、图表/公式/资料证据检索与补充回答
+- 节点后客观题批量测试：支持 answer_key 确定性评分，避免把客观题评分交给 LLM 自由判断
+- 学生状态与作业恢复：支持学习记录、作业生成、二次登录恢复和继续学习
 - Web 会话恢复：支持历史恢复、等待输入恢复、状态横幅恢复
-- RAG 资料检索：支持上传 PDF / Markdown / 文本，向量库存储默认在 `data/chroma_db`
+- 资料库检索：支持上传 PDF / Markdown / 文本，向量库存储默认在 `data/chroma_db`
 - 本地运维配置：Web 本地设置页与 `.env` 一致
 
 ## 运行要求
@@ -37,8 +40,8 @@ python -m pip install -e .
 	- 推荐在仓库根目录执行 `python -m pip install -r requirements.txt`。
 	- 仅使用旧的最小依赖或不完整环境，可能缺少 `pymupdf`、`rank-bm25` 等解析依赖。
 2. 图谱数据目录是否存在：
-	- 默认读取 `a2-control-theory/source-notes`，并在同级目录读取 `notes.jsonl` / `graph.json`。
-	- 若目录不在默认位置，请设置 `COURSE_PRIMARY_DIR=/你的路径/source-notes`。
+	- 当前主教学流程默认读取 2026-04-27 图谱 B 运行资产：`data/knowledge_map_outputs/auto_control_knowledge_map_v2_nodes.csv`、`data/knowledge_map_outputs/auto_control_knowledge_map_v2_edges.csv`、`data/mineru_cache` 与 `data/media_evidence_index`。
+	- 历史 Graph A / A2 资料已归档到 `docs/archive/a2-control-theory/`，不作为当前主教学图谱。
 3. 快速自检：
 
 ```bash
@@ -54,7 +57,7 @@ print('initialization_error =', kp.initialization_error)
 PY
 ```
 
-说明：当 `notes.jsonl` 缺失时，系统会自动回退尝试从 `graph.json` 加载节点。
+说明：旧 `notes.jsonl` / `graph.json` course_primary 逻辑仅保留为兼容路径；默认关闭，避免误把归档 Graph A 当成当前主教学图谱。
 
 ## 快速启动
 
@@ -113,11 +116,21 @@ VECTOR_STORE_DIR=data/chroma_db
 
 ## Web 使用方式
 
-1. 先输入主题，系统可能先做主题确认和学前小测
-2. 正式流程按“讲解 -> 出题 -> 作答 -> 评估”推进
-3. 中途如果只想问当前卡点，直接输入问题即可
-4. 临时问题回答后，页面会出现“回到主线 / 继续追问”确认卡
-5. 选择“回到主线”后，会回到刚才那一道题，而不是重新开始
+当前推荐从 Web UI 使用，主流程已经升级为知识图谱节点制掌握学习：
+
+1. 先输入学习主题，例如“自动控制原理中的根轨迹法”。
+2. 主题确认后，推荐选择先做学前诊断，不要直接跳过测评。
+3. 系统会根据诊断结果选择图谱 2.1 初始节点，并加载当前节点内容开始讲解。
+4. 讲解后可以选择“我还有临时问题”或“没有问题，开始测试”。
+5. 临时问题走图谱 2.2 / RAG 检索回答，回答后回到讲解后选择。
+6. 开始测试后进入节点客观题批量测试；通过则规划下一节点，未通过则进入错题讲解与变式题。
+7. 节点通过后可以继续下一个节点，也可以今天结束并生成作业。
+8. 二次登录/恢复会优先检查作业和学习进度，尽量接着原状态继续。
+
+更详细的当前状态、使用命令、缺口与下一步计划见：
+
+- `docs/current-status-and-usage.md`
+- `docs/next-iteration-plan.md`
 
 ## 项目结构
 

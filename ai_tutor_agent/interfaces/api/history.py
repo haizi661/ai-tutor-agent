@@ -80,6 +80,12 @@ def _set_thread_meta(conn: sqlite3.Connection, thread_id: str, pinned: bool | No
     return {"pinned": new_pinned, "archived": new_archived}
 
 
+def _delete_thread_meta(conn: sqlite3.Connection, thread_id: str) -> None:
+    _ensure_thread_meta_table(conn)
+    conn.execute("DELETE FROM thread_meta WHERE thread_id = ?", (thread_id,))
+    conn.commit()
+
+
 def _ensure_custom_title_table(conn: sqlite3.Connection) -> None:
     conn.execute(
         """
@@ -201,6 +207,9 @@ def _serialize_state(values: dict[str, Any]) -> dict[str, Any]:
         "graph_anchor_id": values.get("graph_anchor_id", ""),
         "graph_anchor_title": values.get("graph_anchor_title", ""),
         "graph_anchor_filename": values.get("graph_anchor_filename", ""),
+        "current_node_id": values.get("current_node_id", ""),
+        "current_node_name": values.get("current_node_name", ""),
+        "current_node_status": values.get("current_node_status", ""),
         "graph_prerequisites": values.get("graph_prerequisites", []),
         "graph_neighbors": values.get("graph_neighbors", []),
         "graph_learning_objectives": values.get("graph_learning_objectives", []),
@@ -221,6 +230,9 @@ def _serialize_state(values: dict[str, Any]) -> dict[str, Any]:
         "assessment_concept_gaps": values.get("assessment_concept_gaps", {}),
         "assessment_state": values.get("assessment_state", {}),
         "user_knowledge_graph": values.get("user_knowledge_graph", {}),
+        "student_state_snapshot": values.get("student_state_snapshot", {}),
+        "homework_items": values.get("homework_items", []),
+        "homework_status": values.get("homework_status", ""),
         "is_assessed": values.get("is_assessed", False),
         "flow_status": values.get("flow_status", "greeting"),
     }
@@ -251,6 +263,13 @@ def _checkpoint_summary(thread_id: str, checkpoint_tuple, alias_title: str = "")
         "updated_at": checkpoint_tuple.checkpoint.get("ts"),
         "checkpoint_id": checkpoint_tuple.checkpoint.get("id"),
     }
+
+
+def _with_thread_meta(summary: dict[str, Any], meta: dict[str, Any]) -> dict[str, Any]:
+    enriched = dict(summary)
+    enriched["pinned"] = bool(meta.get("pinned"))
+    enriched["archived"] = bool(meta.get("archived"))
+    return enriched
 
 
 def _history_entries(checkpoint_store, thread_id: str, *, limit: int = 20) -> list[dict[str, Any]]:
@@ -542,13 +561,14 @@ async def get_history(request: Request):
                 continue
             checkpoint_tuple = checkpoint_store.get_tuple({"configurable": {"thread_id": thread_id}})
             if checkpoint_tuple:
-                summary = _checkpoint_summary(
-                    thread_id,
-                    checkpoint_tuple,
-                    alias_title=alias_by_thread.get(str(thread_id), ""),
+                summary = _with_thread_meta(
+                    _checkpoint_summary(
+                        thread_id,
+                        checkpoint_tuple,
+                        alias_title=alias_by_thread.get(str(thread_id), ""),
+                    ),
+                    meta,
                 )
-                summary["pinned"] = meta.get("pinned", False)
-                summary["archived"] = False
                 items.append(summary)
 
         items.sort(key=lambda x: (0 if x.get("pinned") else 1, 0))
@@ -575,9 +595,13 @@ async def get_history_detail(thread_id: str, request: Request):
         values = checkpoint_tuple.checkpoint.get("channel_values", {})
         with sqlite3.connect(db_path) as conn:
             alias_title = _get_custom_title(conn, thread_id)
+            meta = _get_thread_meta(conn, thread_id)
         return {
             "thread_id": thread_id,
-            "summary": _checkpoint_summary(thread_id, checkpoint_tuple, alias_title=alias_title),
+            "summary": _with_thread_meta(
+                _checkpoint_summary(thread_id, checkpoint_tuple, alias_title=alias_title),
+                meta,
+            ),
             "state": _serialize_state(values),
             "graph_markers_replay": replay_graph_markers(values),
             "runtime": {
@@ -612,6 +636,7 @@ async def delete_history(thread_id: str, request: Request):
             pass
         with sqlite3.connect(db_path) as conn:
             _delete_custom_title(conn, thread_id)
+            _delete_thread_meta(conn, thread_id)
         runtime.session_manager.remove(thread_id)
         return {"status": "success"}
     finally:
@@ -634,11 +659,15 @@ async def update_history_title(thread_id: str, payload: ThreadTitlePayload, requ
 
         with sqlite3.connect(db_path) as conn:
             custom_title = _set_custom_title(conn, thread_id, normalized)
+            meta = _get_thread_meta(conn, thread_id)
 
         return {
             "thread_id": thread_id,
             "custom_title": custom_title,
-            "summary": _checkpoint_summary(thread_id, checkpoint_tuple, alias_title=custom_title),
+            "summary": _with_thread_meta(
+                _checkpoint_summary(thread_id, checkpoint_tuple, alias_title=custom_title),
+                meta,
+            ),
         }
     finally:
         saver_conn.close()

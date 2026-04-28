@@ -76,76 +76,64 @@ def test_greeting_node_refines_broad_topic_with_limited_follow_up():
     llm = FakeLLM(
         [
             '{"status":"confirmed","topic":"自动控制原理","goal":"","focus":"","background":"","detail_summary":"先从自动控制原理开始。","needs_follow_up":true,"follow_up_mode":"ask_user","suggested_options":[],"assistant_reply":"这次你更想先解决哪一块？"}',
-            '{"status":"confirmed","topic":"自动控制原理","goal":"先搞懂根轨迹怎么画","focus":"根轨迹怎么画","background":"考前复习","detail_summary":"这次先解决根轨迹怎么画，当前更像考前复习。","needs_follow_up":false,"follow_up_mode":"none","suggested_options":[],"assistant_reply":""}',
         ]
     )
     sink = BufferedEventSink()
-    answer_provider = FakeAnswerProvider("先搞懂根轨迹怎么画，考前复习用")
+    answer_provider = FakeAnswerProvider("不会用到")
     node = build_greeting_node(llm, sink, answer_provider)
 
     result = node({"current_topic": "自动控制原理"})
 
     assert result["proposed_topic"] == "自动控制原理"
-    assert result["current_user_goal"] == "先搞懂根轨迹怎么画"
-    assert result["topic_focus"] == "根轨迹怎么画"
-    assert result["topic_background"] == "考前复习"
-    assert result["topic_detail_summary"] == "这次先解决根轨迹怎么画，当前更像考前复习。"
-    assert result["topic_clarify_rounds"] == 1
-    assert llm.calls == 2
-    assert answer_provider.prompts == ["这次你更想先解决哪一块？"]
-    assert answer_provider.states[0]["interaction_kind"] == "topic_detail_prompt"
+    assert result["current_user_goal"] == "自动控制原理"
+    assert result["topic_focus"] == "自动控制原理"
+    assert result["topic_background"] == ""
+    assert result["topic_detail_summary"] == "先从自动控制原理开始。"
+    assert result["topic_clarify_rounds"] == 0
+    assert llm.calls == 1
+    assert answer_provider.prompts == []
 
 
 def test_greeting_node_gives_topic_specific_options_for_zero_base_user():
     llm = FakeLLM(
         [
             '{"status":"confirmed","topic":"控制原理","goal":"","focus":"","background":"","detail_summary":"先从控制原理开始。","needs_follow_up":true,"follow_up_mode":"ask_user","suggested_options":[],"assistant_reply":"你是零基础入门，还是备考/做作业遇到卡点？"}',
-            '{"status":"confirmed","topic":"控制原理","goal":"","focus":"","background":"零基础入门","detail_summary":"当前更像零基础入门。","needs_follow_up":true,"follow_up_mode":"suggest_options","suggested_options":["传递函数和框图","稳定性到底在看什么","一阶/二阶系统响应","PID 的直觉"],"assistant_reply":"零基础一般先从这些切口里挑一个："}',
-            '{"status":"confirmed","topic":"控制原理","goal":"先搞懂传递函数和框图","focus":"传递函数和框图","background":"零基础入门","detail_summary":"这次先从传递函数和框图入门，当前是零基础。","needs_follow_up":false,"follow_up_mode":"none","suggested_options":["传递函数和框图","稳定性到底在看什么","一阶/二阶系统响应","PID 的直觉"],"assistant_reply":""}',
         ]
     )
     sink = BufferedEventSink()
-    answer_provider = FakeAnswerProvider(["我是零基础入门", "先从传递函数和框图开始"])
+    answer_provider = FakeAnswerProvider(["不会用到"])
     node = build_greeting_node(llm, sink, answer_provider)
 
     result = node({"current_topic": "我要学习控制原理"})
 
     assert result["proposed_topic"] == "控制原理"
-    assert result["current_user_goal"] == "先搞懂传递函数和框图"
-    assert result["topic_focus"] == "传递函数和框图"
-    assert result["topic_background"] == "零基础入门"
-    assert result["topic_starter_options"] == [
-        "传递函数和框图",
-        "稳定性到底在看什么",
-        "一阶/二阶系统响应",
-        "PID 的直觉",
-    ]
-    assert result["topic_clarify_rounds"] == 2
-    assert "零基础入门" in answer_provider.prompts[0]
-    assert "传递函数和框图" in answer_provider.prompts[1]
-    assert answer_provider.states[1]["prompt_kind"] == "topic_options"
-    assert answer_provider.states[1]["starter_options"][0] == "传递函数和框图"
+    assert result["current_user_goal"] == "控制原理"
+    assert result["topic_focus"] == "控制原理"
+    assert result["topic_background"] == ""
+    assert result["topic_starter_options"] == []
+    assert result["topic_clarify_rounds"] == 0
+    assert llm.calls == 1
+    assert answer_provider.prompts == []
 
 
 def test_greeting_node_stops_when_user_has_given_enough_context_even_if_llm_wants_more():
     llm = FakeLLM(
         [
             '{"status":"confirmed","topic":"控制原理","goal":"","focus":"","background":"","detail_summary":"先从控制原理开始。","needs_follow_up":true,"follow_up_mode":"ask_user","suggested_options":[],"assistant_reply":"你是零基础入门，还是备考/做作业遇到卡点？"}',
-            '{"status":"confirmed","topic":"控制原理","goal":"","focus":"","background":"零基础入门","detail_summary":"当前更像零基础入门。","needs_follow_up":true,"follow_up_mode":"ask_user","suggested_options":[],"assistant_reply":"最想先理解哪个核心概念？"}',
         ]
     )
     sink = BufferedEventSink()
-    answer_provider = FakeAnswerProvider("我是零基础入门，先想知道有哪些核心概念")
+    answer_provider = FakeAnswerProvider("不会用到")
     node = build_greeting_node(llm, sink, answer_provider)
 
     result = node({"current_topic": "我要学习控制原理"})
 
     assert result["proposed_topic"] == "控制原理"
-    assert result["topic_background"] == "零基础入门"
-    assert result["current_user_goal"] == "我是零基础入门，先想知道有哪些核心概念"
-    assert result["topic_clarify_rounds"] == 1
-    assert llm.calls == 2
-    assert answer_provider.prompts == ["你是零基础入门，还是备考/做作业遇到卡点？"]
+    assert result["topic_background"] == ""
+    assert result["current_user_goal"] == "控制原理"
+    assert result["topic_clarify_rounds"] == 0
+    assert llm.calls == 1
+    assert answer_provider.prompts == []
 
 
 def test_topic_confirm_node_emits_confirmation_contract_event():

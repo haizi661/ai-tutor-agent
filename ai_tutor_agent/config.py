@@ -92,8 +92,8 @@ class Settings:
     http_proxy: Optional[str]
     https_proxy: Optional[str]
     local_config_enabled: bool
-    course_primary_enabled: bool = True
-    course_primary_dir: str = "a2-control-theory/source-notes"
+    course_primary_enabled: bool = False
+    course_primary_dir: str = "docs/archive/a2-control-theory/source-notes"
     vector_store_backend: str = "chroma"
     vector_store_dir: str = "data/chroma_db"
     # RAG 2.0 新增字段
@@ -116,6 +116,11 @@ class Settings:
     web_search_provider: str = "tavily"
     tavily_api_key: Optional[str] = None
     web_search_max_results: int = 5
+    graph_rag_enable_llm: bool = False
+    graph_rag_llm_profile: str = ""
+    question_bank_dir: str = "data/question_bank"
+    default_course_id: str = "a2-control-theory"
+    default_course_topic: str = "自动控制原理"
 
 
 LOCAL_CONFIG_KEYS = [
@@ -164,6 +169,11 @@ LOCAL_CONFIG_KEYS = [
     "WEB_SEARCH_PROVIDER",
     "TAVILY_API_KEY",
     "WEB_SEARCH_MAX_RESULTS",
+    "GRAPH_RAG_ENABLE_LLM",
+    "GRAPH_RAG_LLM_PROFILE",
+    "QUESTION_BANK_DIR",
+    "DEFAULT_COURSE_ID",
+    "DEFAULT_COURSE_TOPIC",
     "LOCAL_CONFIG_ENABLED",
 ]
 
@@ -217,8 +227,10 @@ def update_env_file(updates: dict[str, str]) -> None:
 
 @lru_cache(maxsize=1)
 def get_settings() -> Settings:
-    # Ensure we load the absolute latest from .env, ignoring cached system env vars
-    load_dotenv(dotenv_path=get_env_file_path(), override=True)
+    # Load defaults from .env while preserving explicit shell/process overrides.
+    # This lets one-shot startup commands such as GRAPH_RAG_ENABLE_LLM=true python main.py
+    # take precedence over persisted local configuration values.
+    load_dotenv(dotenv_path=get_env_file_path(), override=False)
     raw_values = read_local_config_values()
 
     # Determine provider dynamically
@@ -403,8 +415,11 @@ def get_settings() -> Settings:
         pass_score=_read_env_int("PASS_SCORE", 80),
         memory_db_path=os.getenv("MEMORY_DB_PATH", "data/tutor_memory.db").strip() or "data/tutor_memory.db",
         knowledge_dir=os.getenv("KNOWLEDGE_DIR", "data/knowledge").strip() or "data/knowledge",
-        course_primary_enabled=_read_env_bool("COURSE_PRIMARY_ENABLED", True),
-        course_primary_dir=os.getenv("COURSE_PRIMARY_DIR", "a2-control-theory/source-notes").strip() or "a2-control-theory/source-notes",
+        course_primary_enabled=_read_env_bool("COURSE_PRIMARY_ENABLED", False),
+        course_primary_dir=(
+            os.getenv("COURSE_PRIMARY_DIR", "docs/archive/a2-control-theory/source-notes").strip()
+            or "docs/archive/a2-control-theory/source-notes"
+        ),
         knowledge_chunk_size=_read_env_int("KNOWLEDGE_CHUNK_SIZE", 1000),
         knowledge_chunk_overlap=_read_env_int("KNOWLEDGE_CHUNK_OVERLAP", 150),
         knowledge_top_k=_read_env_int("KNOWLEDGE_TOP_K", 3),
@@ -433,4 +448,12 @@ def get_settings() -> Settings:
         web_search_provider=web_search_provider,
         tavily_api_key=os.getenv("TAVILY_API_KEY", "").strip() or None,
         web_search_max_results=_read_env_int("WEB_SEARCH_MAX_RESULTS", 5),
+        graph_rag_enable_llm=_read_env_bool("GRAPH_RAG_ENABLE_LLM", False),
+        graph_rag_llm_profile=os.getenv("GRAPH_RAG_LLM_PROFILE", "").strip().lower(),
+        question_bank_dir=os.getenv("QUESTION_BANK_DIR", "data/question_bank").strip() or "data/question_bank",
+        default_course_id=(
+            os.getenv("DEFAULT_COURSE_ID", "a2-control-theory").strip()
+            or "a2-control-theory"
+        ),
+        default_course_topic=os.getenv("DEFAULT_COURSE_TOPIC", "自动控制原理").strip() or "自动控制原理",
     )

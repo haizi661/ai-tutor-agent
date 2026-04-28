@@ -37,14 +37,6 @@ def create_api_app(
 
     frontend_dir = get_frontend_dir()
     os.makedirs(frontend_dir, exist_ok=True)
-    project_root = os.path.dirname(frontend_dir)
-    knowledge_graph_dir = os.path.join(project_root, "a2-control-theory")
-    if os.path.isdir(knowledge_graph_dir):
-        app.mount(
-            "/knowledge-graph/a2",
-            StaticFiles(directory=knowledge_graph_dir, html=True),
-            name="knowledge-graph-a2",
-        )
     app.mount("/", StaticFiles(directory=frontend_dir, html=True), name="frontend")
     return app
 

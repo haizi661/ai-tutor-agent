@@ -12,7 +12,10 @@ from fastapi import FastAPI, Request
 from ...config import Settings, get_settings
 from ...core.ports import KnowledgeProvider, NoopKnowledgeProvider, RuntimeContext
 from ...infrastructure.checkpoint import create_sqlite_checkpointer
+from ...infrastructure.question_bank import LocalQuestionBankProvider
 from ...infrastructure.retriever import LocalFileKnowledgeProvider
+from ...knowledge_map.graph_rag_pipeline import GraphRAGPipeline
+from ...knowledge_map.student_state import StudentStateStore
 from ...orchestration.workflow import create_app_with_sqlite_checkpointer
 
 
@@ -56,11 +59,13 @@ CHAT_PROFILES = {
         "label": "DeepSeek",
         "description": "DeepSeek official OpenAI-compatible endpoint.",
         "llm_provider": "openai",
-        "default_model": "deepseek-chat",
+        "default_model": "deepseek-v4-flash",
         "openai_api_base": "https://api.deepseek.com/v1",
         "models": [
-            {"id": "deepseek-chat", "label": "DeepSeek Chat"},
-            {"id": "deepseek-reasoner", "label": "DeepSeek Reasoner"},
+            {"id": "deepseek-v4-flash", "label": "DeepSeek V4 Flash"},
+            {"id": "deepseek-v4-pro", "label": "DeepSeek V4 Pro"},
+            {"id": "deepseek-chat", "label": "DeepSeek Chat (legacy)"},
+            {"id": "deepseek-reasoner", "label": "DeepSeek Reasoner (legacy)"},
         ],
         "api_key_label": "DeepSeek API Key",
     },
@@ -303,6 +308,9 @@ class SessionManager:
 class ApiRuntime:
     settings: Settings
     knowledge_provider: KnowledgeProvider
+    graph_rag_pipeline: GraphRAGPipeline | None = None
+    student_state_store: StudentStateStore | None = None
+    question_bank_provider: object | None = None
     session_manager: SessionManager = field(default_factory=SessionManager)
     workflow_factory: Callable[[Settings, Optional[RuntimeContext]], tuple[object, object]] = (
         create_app_with_sqlite_checkpointer
@@ -316,6 +324,9 @@ class ApiRuntime:
 
 def build_runtime(settings: Optional[Settings] = None) -> ApiRuntime:
     settings = settings or get_settings()
+    graph_rag_pipeline = None
+    question_bank_provider = None
+    student_state_store = StudentStateStore()
 
     try:
         knowledge_provider = LocalFileKnowledgeProvider(settings)
@@ -327,7 +338,35 @@ def build_runtime(settings: Optional[Settings] = None) -> ApiRuntime:
         knowledge_provider = NoopKnowledgeProvider()
         print(f"⚠️ Web: 知识库加载失败: {exc}")
 
-    return ApiRuntime(settings=settings, knowledge_provider=knowledge_provider)
+    try:
+        graph_llm_profile = settings.graph_rag_llm_profile or settings.chat_profile
+        graph_rag_pipeline = GraphRAGPipeline(
+            enable_llm=settings.graph_rag_enable_llm,
+            llm_profile=graph_llm_profile,
+        )
+        mode = f"LLM={'开启' if settings.graph_rag_enable_llm else '关闭'}"
+        print(f"🕸️ Web: 图谱搜索 2.2 已加载（{mode}, profile={graph_llm_profile or 'default'}）。")
+    except Exception as exc:
+        graph_rag_pipeline = None
+        print(f"⚠️ Web: 图谱搜索 2.2 加载失败，将回退到普通检索: {exc}")
+
+    try:
+        question_bank_provider = LocalQuestionBankProvider(
+            settings.question_bank_dir,
+            course_id=settings.default_course_id,
+        )
+        print("🧾 Web: 本地题库 Provider 已加载。")
+    except Exception as exc:
+        question_bank_provider = None
+        print(f"⚠️ Web: 本地题库 Provider 加载失败，将使用 AI/fallback 出题: {exc}")
+
+    return ApiRuntime(
+        settings=settings,
+        knowledge_provider=knowledge_provider,
+        graph_rag_pipeline=graph_rag_pipeline,
+        student_state_store=student_state_store,
+        question_bank_provider=question_bank_provider,
+    )
 
 
 def refresh_runtime(runtime: ApiRuntime) -> Settings:
@@ -345,6 +384,27 @@ def refresh_runtime(runtime: ApiRuntime) -> Settings:
         print(f"⚠️ Web: 重载配置后知识库初始化失败: {exc}")
 
     runtime.knowledge_provider = knowledge_provider
+    try:
+        graph_llm_profile = runtime.settings.graph_rag_llm_profile or runtime.settings.chat_profile
+        runtime.graph_rag_pipeline = GraphRAGPipeline(
+            enable_llm=runtime.settings.graph_rag_enable_llm,
+            llm_profile=graph_llm_profile,
+        )
+        mode = f"LLM={'开启' if runtime.settings.graph_rag_enable_llm else '关闭'}"
+        print(f"🕸️ Web: 已按最新配置重建图谱搜索 2.2 引擎（{mode}, profile={graph_llm_profile or 'default'}）。")
+    except Exception as exc:
+        runtime.graph_rag_pipeline = None
+        print(f"⚠️ Web: 重载配置后图谱搜索 2.2 初始化失败: {exc}")
+    try:
+        runtime.question_bank_provider = LocalQuestionBankProvider(
+            runtime.settings.question_bank_dir,
+            course_id=runtime.settings.default_course_id,
+        )
+        print("🧾 Web: 已按最新配置重建本地题库 Provider。")
+    except Exception as exc:
+        runtime.question_bank_provider = None
+        print(f"⚠️ Web: 重载配置后本地题库 Provider 初始化失败: {exc}")
+    runtime.student_state_store = StudentStateStore()
     return runtime.settings
 
 

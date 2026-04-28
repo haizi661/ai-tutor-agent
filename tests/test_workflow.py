@@ -76,10 +76,10 @@ def test_route_after_topic_confirmer_can_go_directly_to_tutor():
     assert decision == "tutor"
 
 
-def test_route_after_tutor_now_goes_to_next_step_selector():
+def test_route_after_tutor_now_goes_to_post_lesson_choice():
     decision = workflow_module.route_after_tutor({"interrupt_query": ""})
 
-    assert decision == "next_step_selector"
+    assert decision == "post_lesson_choice"
 
 
 def test_route_after_next_step_selector_can_branch_back_to_tutor():

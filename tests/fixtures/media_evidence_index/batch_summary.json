@@ -1,0 +1,20 @@
+{
+  "count": 1,
+  "chapters": [
+    {
+      "doc_dir": "chapter_p33-81",
+      "chapter_key": "chapter_p33-81",
+      "raw_count": 2,
+      "filtered_count": 2,
+      "linked_count": 2,
+      "annotated_count": 2,
+      "asset_type_counts": {
+        "figure": 1,
+        "formula": 1
+      },
+      "filtered_path": "tests/fixtures/media_evidence_index/chapter_p33-81_filtered_candidates.jsonl",
+      "linked_path": "tests/fixtures/media_evidence_index/chapter_p33-81_linked_candidates.jsonl",
+      "annotated_path": "tests/fixtures/media_evidence_index/chapter_p33-81_annotated_assets.jsonl"
+    }
+  ]
+}

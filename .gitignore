@@ -8,6 +8,9 @@ venv/
 
 # Env / secrets
 .env
+.env.*
+!.env.example
+!.env.sample
 
 # Local runtime data
 *.db
@@ -21,15 +24,24 @@ venv/
 *.pid
 data/*
 !data/.gitkeep
+!data/question_bank/
+!data/question_bank/**
 !data/knowledge/
-!data/chroma_db/
-!data/minerU_cache/
 data/knowledge/*
 !data/knowledge/.gitkeep
-data/chroma_db/*
-!data/chroma_db/.gitkeep
-data/minerU_cache/*
-!data/minerU_cache/.gitkeep
+data/bm25_cache*.json
+data/chroma_db/
+data/knowledge_map_outputs/
+data/knowledge_splits/
+data/knowledge_map_vector_db/
+data/knowledge_index__*.json
+data/media_evidence_index/
+data/minerU_cache/
+data/mineru_cache/
+data/retrieval_state.json
+data/student_states/
+data/test_outputs/
+data/tutor_memory.db
 data/vector_store/
 
 # Tool caches
@@ -42,6 +54,19 @@ htmlcov/
 # OS artifacts
 .DS_Store
 Thumbs.db
+*~
+*.tmp
+*.temp
+*.bak
+*.orig
 
 # AI Agent Context
 docs/GEMINI_CONTEXT.md
+
+# Editor / IDE
+.idea/
+.vscode/
+
+# Local presentation / report materials
+ppt/
+~$*

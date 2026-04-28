@@ -46,8 +46,9 @@ def test_settings_default_to_local_embedding_provider(monkeypatch):
     assert settings.llm_provider == "google"
     assert settings.embedding_provider == "local"
     assert settings.embedding_model_name == "sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2"
-    assert settings.course_primary_enabled is True
-    assert settings.course_primary_dir == "a2-control-theory/source-notes"
+    assert settings.course_primary_enabled is False
+    assert settings.course_primary_dir == "docs/archive/a2-control-theory/source-notes"
+    assert settings.default_course_id == "a2-control-theory"
     assert settings.pdf_parse_backend == "auto"
     get_settings.cache_clear()
 
@@ -121,6 +122,28 @@ def test_settings_parse_retrieval_rewrite_overrides(monkeypatch):
     assert settings.retrieval_rewrite_enabled is True
     assert settings.retrieval_rewrite_mode == "smart"
     assert settings.retrieval_rewrite_debug is True
+    get_settings.cache_clear()
+
+
+def test_shell_environment_overrides_graph_rag_llm_env_file_value(monkeypatch, tmp_path):
+    _clear_runtime_env(monkeypatch)
+    env_file = tmp_path / ".env"
+    env_file.write_text(
+        "DEEPSEEK_API_KEY=deepseek-key\n"
+        "CHAT_PROFILE=deepseek\n"
+        "GRAPH_RAG_ENABLE_LLM=false\n"
+        "GRAPH_RAG_LLM_PROFILE=qwen\n",
+        encoding="utf-8",
+    )
+    monkeypatch.setenv("AI_TUTOR_ENV_FILE", str(env_file))
+    monkeypatch.setenv("GRAPH_RAG_ENABLE_LLM", "true")
+    monkeypatch.setenv("GRAPH_RAG_LLM_PROFILE", "deepseek")
+    get_settings.cache_clear()
+
+    settings = get_settings()
+
+    assert settings.graph_rag_enable_llm is True
+    assert settings.graph_rag_llm_profile == "deepseek"
     get_settings.cache_clear()
 
 

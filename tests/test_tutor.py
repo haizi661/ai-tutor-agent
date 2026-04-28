@@ -17,6 +17,30 @@ class FakeStreamingLLM:
         yield SimpleNamespace(content=response)
 
 
+class FailingThenInvokeLLM:
+    def __init__(self, invoke_response):
+        self.invoke_response = invoke_response
+        self.messages = []
+        self.invoke_calls = 0
+
+    def stream(self, messages):
+        self.messages.append(messages)
+        raise RuntimeError("incomplete chunked read")
+
+    def invoke(self, messages):
+        self.messages.append(messages)
+        self.invoke_calls += 1
+        return SimpleNamespace(content=self.invoke_response)
+
+
+class DeadLLM:
+    def stream(self, _messages):
+        raise RuntimeError("stream down")
+
+    def invoke(self, _messages):
+        raise RuntimeError("invoke down")
+
+
 class StubKnowledgeProvider:
     def query(self, query, *, rewrite_request=None):
         del rewrite_request
@@ -437,3 +461,119 @@ def test_tutor_preserves_marker_lines_after_citation_filter_and_advances_graph_a
     graph_events = [event for event in sink.events if event.type == "graph.node_update"]
     assert any(event.data.get("title") == "反馈" and event.data.get("status") == "mastered" for event in graph_events)
     assert any(event.data.get("title") == "负反馈" and event.data.get("status") == "upcoming" for event in graph_events)
+
+
+def test_tutor_outputs_node_content_context_directly_without_graph_search_or_llm_rewrite():
+    sink = BufferedEventSink()
+    llm = FakeStreamingLLM("LLM 不应该改写当前节点的预置教师讲解。")
+
+    class FailingGraphPipeline:
+        def ask(self, query, *, traversal_mode=None):
+            del query, traversal_mode
+            raise AssertionError("主流程已有当前节点讲解时，不允许调用图谱搜索输出教学内容")
+
+    class FailingKnowledgeProvider:
+        def query(self, query, *, rewrite_request=None):
+            del query, rewrite_request
+            raise AssertionError("主流程已有当前节点讲解时，不允许调用通用知识库输出教学内容")
+
+    node = build_tutor_node(
+        llm,
+        RuntimeContext(
+            event_sink=sink,
+            knowledge_provider=FailingKnowledgeProvider(),
+            graph_rag_pipeline=FailingGraphPipeline(),
+        ),
+    )
+    teacher_explanation = "【预置教师讲解】稳定性基础只讲 explanation_teacher_style 字段。"
+
+    result = node(
+        {
+            "current_topic": "自动控制原理",
+            "current_user_goal": "学习稳定性",
+            "current_node_id": "stability",
+            "current_node_name": "稳定性",
+            "graph_anchor_id": "stability",
+            "graph_anchor_title": "稳定性",
+            "node_content_context": teacher_explanation,
+            "tutor_citations": [],
+            "tutor_evidence": [],
+            "difficulty_level": 3,
+            "attempt_count": 0,
+            "feedback": "",
+            "assessment_radar": {},
+        }
+    )
+
+    assert result["tutor_content"] == teacher_explanation
+    assert llm.messages == []
+    streamed = "".join(event.data.get("text", "") for event in sink.events if event.type == "node.stream")
+    assert streamed == teacher_explanation
+    assert "图谱2.2" not in result["tutor_content"]
+    assert "relation_path" not in result["tutor_content"]
+
+
+def test_tutor_retries_with_invoke_when_stream_breaks():
+    sink = BufferedEventSink()
+    llm = FailingThenInvokeLLM("稳定性先看最终会不会回到平衡点。不要把它和响应快慢混在一起。")
+    node = build_tutor_node(llm, RuntimeContext(event_sink=sink, knowledge_provider=StubKnowledgeProvider()))
+
+    result = node(
+        {
+            "current_topic": "控制理论中的稳定性",
+            "difficulty_level": 3,
+            "attempt_count": 0,
+            "feedback": "",
+            "assessment_radar": {},
+        }
+    )
+
+    assert llm.invoke_calls == 1
+    assert "稳定性先看最终会不会回到平衡点" in result["tutor_content"]
+    assert result["llm_stream_disabled"] is True
+    assert result["llm_stream_failures"] == 1
+    assert not [event for event in sink.events if event.type == "session.warning"]
+
+
+def test_tutor_uses_local_fallback_when_stream_and_invoke_both_fail():
+    sink = BufferedEventSink()
+    node = build_tutor_node(DeadLLM(), RuntimeContext(event_sink=sink, knowledge_provider=StubKnowledgeProvider()))
+
+    result = node(
+        {
+            "current_topic": "控制理论中的稳定性",
+            "current_user_goal": "先理解稳定性",
+            "difficulty_level": 3,
+            "attempt_count": 0,
+            "feedback": "",
+            "assessment_radar": {},
+        }
+    )
+
+    assert "这一轮先抓【先理解稳定性】最关键的判断" in result["tutor_content"]
+    assert result["llm_stream_disabled"] is True
+    assert result["llm_stream_failures"] == 1
+    assert not [event for event in sink.events if event.type == "session.warning"]
+
+
+def test_tutor_skips_stream_after_session_marked_unstable():
+    sink = BufferedEventSink()
+    llm = FailingThenInvokeLLM("后续直接非流式回答。")
+    node = build_tutor_node(llm, RuntimeContext(event_sink=sink, knowledge_provider=StubKnowledgeProvider()))
+
+    result = node(
+        {
+            "current_topic": "控制理论中的稳定性",
+            "difficulty_level": 3,
+            "attempt_count": 0,
+            "feedback": "",
+            "assessment_radar": {},
+            "llm_stream_disabled": True,
+            "llm_stream_failures": 1,
+        }
+    )
+
+    assert llm.invoke_calls == 1
+    assert len(llm.messages) == 1
+    assert result["llm_stream_disabled"] is True
+    assert result["llm_stream_failures"] == 1

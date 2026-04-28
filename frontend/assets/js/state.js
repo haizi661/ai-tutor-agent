@@ -60,6 +60,7 @@ window.AITutorApp.state = {
     userKnowledgeGraph: {},       // {nodeTitle: {status, calibrated, gap_type, turn_count}}
     userKgMapOpen: true,          // 掌握图区块是否展开
     currentGraphNode: '',         // 当前正在教的图谱节点标题
+    currentGraphNodeId: '',       // 当前正在教的图谱节点 ID
 };
 
 window.AITutorApp._stateSubscribers = new Set();

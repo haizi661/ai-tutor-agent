@@ -1,7 +1,8 @@
 from types import SimpleNamespace
 
 from ai_tutor_agent.application.session import run_learning_session
-from ai_tutor_agent.core.ports import BufferedEventSink
+from ai_tutor_agent.core.ports import BufferedEventSink, RuntimeContext
+from ai_tutor_agent.knowledge_map.student_state import StudentStateStore
 
 
 class FakeApp:
@@ -19,6 +20,36 @@ class FakeApp:
 
     def invoke(self, payload, config):
         self.invocations.append((payload, config))
+
+
+class StubGraphPipeline:
+    def __init__(self):
+        self.node_map = {
+            "KM001": {
+                "node_id": "KM001",
+                "name": "稳定性",
+                "chapter": "chapter_01",
+                "core_concepts": ["稳定性定义"],
+                "key_points": ["先看最终是否回到平衡点"],
+                "related_nodes": ["KM002"],
+                "recommended_next_nodes": ["KM002"],
+                "prerequisite_nodes": [],
+                "extra": {"common_errors": ["把稳定性和瞬态性能混在一起"]},
+                "importance_level": "3",
+            },
+            "KM002": {
+                "node_id": "KM002",
+                "name": "负反馈",
+                "chapter": "chapter_02",
+                "core_concepts": ["负反馈作用"],
+                "key_points": ["说明负反馈如何改善系统性能"],
+                "related_nodes": [],
+                "recommended_next_nodes": [],
+                "prerequisite_nodes": ["KM001"],
+                "extra": {"common_errors": []},
+                "importance_level": "3",
+            },
+        }
 
 
 def test_run_learning_session_uses_new_turn_for_pre_topic_history():
@@ -162,3 +193,94 @@ def test_run_learning_session_resume_mainline_clears_interrupt_history():
         {"role": "assistant", "kind": "tutor", "content": "主线讲解"},
     ]
     assert config == {"configurable": {"thread_id": "thread-5"}}
+
+
+def test_run_learning_session_announces_homework_on_second_login():
+    sink = BufferedEventSink()
+    app = FakeApp(
+        {
+            "current_topic": "自动控制原理",
+            "flow_status": "homework_assigned",
+            "is_assessed": True,
+            "homework_status": "assigned",
+            "homework_items": [
+                {"question_id": "HW-KM001", "prompt": "围绕“稳定性”说明核心判断依据。"},
+                {"question_id": "HW-KM002", "prompt": "围绕“负反馈”说明其典型作用。"},
+            ],
+        }
+    )
+
+    run_learning_session(
+        app,
+        sink,
+        thread_id="thread-6",
+        topic="",
+        current_state=app.get_state({"configurable": {"thread_id": "thread-6"}}),
+    )
+
+    assert app.invocations == []
+    assert any("上次留下的作业" in event.message for event in sink.events)
+
+
+def test_run_learning_session_can_resume_next_node_from_homework_state():
+    sink = BufferedEventSink()
+    app = FakeApp(
+        {
+            "current_topic": "自动控制原理",
+            "flow_status": "homework_assigned",
+            "is_assessed": True,
+            "homework_status": "assigned",
+            "homework_items": [{"question_id": "HW-KM001", "prompt": "围绕“稳定性”说明核心判断依据。"}],
+            "next_node_candidate_id": "KM002",
+            "next_node_candidate_name": "负反馈",
+        }
+    )
+
+    run_learning_session(
+        app,
+        sink,
+        thread_id="thread-7",
+        topic="继续学习",
+        current_state=app.get_state({"configurable": {"thread_id": "thread-7"}}),
+    )
+
+    payload, config = app.invocations[0]
+    assert payload["learning_resume_target"] == "tutor"
+    assert payload["current_user_goal"] == "负反馈"
+    assert payload["homework_status"] == "deferred"
+    assert config == {"configurable": {"thread_id": "thread-7"}}
+
+
+def test_run_learning_session_can_generate_consolidation_homework(tmp_path):
+    sink = BufferedEventSink()
+    app = FakeApp(
+        {
+            "current_topic": "自动控制原理",
+            "flow_status": "normal",
+            "is_assessed": True,
+            "learning_phase": "daily_wrapup",
+            "student_id": "student_a",
+            "student_state_snapshot": {
+                "visited_nodes": ["KM001", "KM002"],
+                "wrong_nodes": ["KM001"],
+            },
+        }
+    )
+    runtime_context = RuntimeContext(
+        graph_rag_pipeline=StubGraphPipeline(),
+        student_state_store=StudentStateStore(tmp_path / "student_states"),
+    )
+
+    run_learning_session(
+        app,
+        sink,
+        thread_id="thread-8",
+        topic="先巩固",
+        current_state=app.get_state({"configurable": {"thread_id": "thread-8"}}),
+        runtime_context=runtime_context,
+    )
+
+    assert app.updated is not None
+    _, values = app.updated
+    assert values["homework_status"] == "assigned"
+    assert len(values["homework_items"]) >= 1

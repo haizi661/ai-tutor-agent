@@ -1,11 +1,19 @@
 from __future__ import annotations
 
+import logging
 import re
 
 from langchain_core.messages import HumanMessage, SystemMessage
 
 from ..core.events import make_event
 from ..core.graph_service import GraphQueryService
+from ..core.learning_support import (
+    build_graph_citation_plan,
+    build_graph_context_from_result,
+    build_graph_guidance_from_result,
+    mark_student_node_started,
+    normalize_graph_answer,
+)
 from ..core.output_format import (
     collapse_blank_lines,
     parse_json_object,
@@ -18,6 +26,8 @@ from ..core.teacher_voice import build_teacher_voice
 from ..core.text import content_to_text
 from ..infrastructure.retriever import RetrievalRewriteRequest
 from .affect import detect_affect, primary_affect
+
+logger = logging.getLogger(__name__)
 
 # ─────────────────────────────────────────────────────
 # 教学策略选择：根据失败次数自动切换教学方法
@@ -762,10 +772,36 @@ def _build_evidence_prompt(citation_plan: list[dict]) -> str:
         rank = item.get("rank")
         label = str(item.get("display_label") or item.get("filename") or f"证据 {rank}").strip()
         snippet = str(item.get("snippet") or "").strip()
-        if not rank or not snippet:
-            continue
-        lines.append(f"[{rank}] {label}\n{snippet}")
-    return "\n\n".join(lines)
+        if rank and snippet:
+            lines.append(f"[{rank}] {label}：{snippet}")
+    return "\n".join(lines)
+
+
+def _state_seeded_citation_plan(state: dict) -> list[dict]:
+    seeded = state.get("tutor_citations") or []
+    return [dict(item) for item in seeded if isinstance(item, dict)] if isinstance(seeded, list) else []
+
+
+def _state_seeded_evidence(state: dict) -> list[dict]:
+    seeded = state.get("tutor_evidence") or []
+    return [dict(item) for item in seeded if isinstance(item, dict)] if isinstance(seeded, list) else []
+
+
+def _build_node_content_prompt(state: dict, citation_plan: list[dict]) -> tuple[str, bool]:
+    node_context = str(state.get("node_content_context") or "").strip()
+    if not node_context:
+        return "", False
+    prompt = (
+        "\n\n【图谱 2.1 当前节点材料】\n"
+        "下面内容来自 node_content_loader 对当前 graph.json 节点的结构化抽取。"
+        "正式讲解必须优先覆盖这里的学习目标、必会要点、常见误区和节点解释；"
+        "只有这里不足时，才补充图谱 2.2 检索或通用资料。\n"
+        f"---\n{node_context}\n---\n"
+    )
+    if citation_plan:
+        prompt += f"\n【节点预取证据】\n{_build_evidence_prompt(citation_plan)}\n"
+    return prompt, True
+
 
 
 def _filter_cited_lines(text: str, citation_count: int) -> str:
@@ -805,6 +841,61 @@ def _build_evidence_backed_fallback(topic: str, citation_plan: list[dict]) -> st
     return collapse_blank_lines(f"{joined}\n\n先把这条主线站稳，再把它放回题目或场景里看。")
 
 
+def _build_resilient_teacher_fallback(
+    topic: str,
+    learning_target: str = "",
+    graph_context: dict[str, object] | None = None,
+) -> str:
+    context = dict(graph_context or {})
+    anchor = str(
+        context.get("anchor_title")
+        or learning_target
+        or topic
+    ).strip() or topic
+    must_know = _string_list(context.get("must_know"))
+    common_errors = _string_list(context.get("common_errors"))
+
+    parts = [f"这一轮先抓【{anchor}】最关键的判断，不要急着把所有细节一起背。"]
+    if must_know:
+        parts.append(f"先记住：{must_know[0]}。")
+    if common_errors:
+        parts.append(f"最容易出错的是：{common_errors[0]}。")
+    parts.append("你先把这条主线站稳，我们下一步再把它放进例子或题目里。")
+    return collapse_blank_lines(" ".join(parts))
+
+
+def _invoke_llm_text(llm, messages: list[object]) -> str:
+    response = llm.invoke(messages)
+    return content_to_text(getattr(response, "content", response))
+
+
+def _collect_llm_text_with_fallback(
+    llm,
+    messages: list[object],
+    *,
+    source: str,
+    prefer_invoke: bool = False,
+) -> tuple[str, bool]:
+    if prefer_invoke:
+        try:
+            return _invoke_llm_text(llm, messages), False
+        except Exception:
+            logger.exception("%s invoke failed while stream disabled", source)
+            return "", False
+    try:
+        raw_response = ""
+        for chunk in llm.stream(messages):
+            raw_response += content_to_text(getattr(chunk, "content", chunk))
+        return raw_response, False
+    except Exception as stream_exc:
+        logger.warning("%s stream failed, retrying with invoke: %s", source, stream_exc)
+        try:
+            return _invoke_llm_text(llm, messages), True
+        except Exception as invoke_exc:
+            logger.exception("%s invoke fallback failed", source)
+            return "", True
+
+
 # ─────────────────────────────────────────────────────
 # 主节点构建函数
 # ─────────────────────────────────────────────────────
@@ -812,6 +903,11 @@ def build_tutor_node(tutor_llm, runtime: RuntimeContext):
     def tutor_node(state: AgentState):
         event_sink = runtime.event_sink
         knowledge_provider = runtime.knowledge_provider
+        graph_rag_pipeline = getattr(runtime, "graph_rag_pipeline", None)
+        student_state_store = getattr(runtime, "student_state_store", None)
+        student_id = str(state.get("student_id") or "default_student").strip() or "default_student"
+        llm_stream_disabled = bool(state.get("llm_stream_disabled", False))
+        llm_stream_failures = int(state.get("llm_stream_failures") or 0)
 
         topic = state["current_topic"]
         current_user_goal = str(state.get("current_user_goal") or topic).strip() or topic
@@ -877,13 +973,76 @@ def build_tutor_node(tutor_llm, runtime: RuntimeContext):
                 )
             )
 
-        # RAG: 检索相关知识
+        # 主流程当前节点讲解：已由 node_content_loader 固定写入 explanation_teacher_style。
+        # 这里必须直接输出该字段，不再调用图谱搜索、通用检索或 LLM 改写，避免 relation_path 等检索产物混入教学正文。
+        direct_node_content = str(state.get("node_content_context") or "").strip()
+        if direct_node_content:
+            active_graph_context = _coalesce_graph_context(state, {})
+            graph_anchor = str(active_graph_context.get("anchor_title") or state.get("current_node_name") or "").strip()
+            graph_anchor_id = str(active_graph_context.get("anchor_id") or state.get("current_node_id") or graph_anchor).strip()
+            if graph_anchor:
+                user_kg[graph_anchor] = {
+                    **(user_kg.get(graph_anchor, {}) if isinstance(user_kg.get(graph_anchor), dict) else {}),
+                    "status": "in_progress",
+                    "turn_count": int((user_kg.get(graph_anchor, {}).get("turn_count") or 0) if isinstance(user_kg.get(graph_anchor), dict) else 0) + 1,
+                }
+                event_sink.emit(
+                    make_event(
+                        "graph.node_update",
+                        "tutor",
+                        message=f"当前节点：{graph_anchor}",
+                        data={"title": graph_anchor, "id": graph_anchor_id, "status": "in_progress", "type": "current"},
+                    )
+                )
+                started_snapshot = mark_student_node_started(
+                    student_state_store,
+                    student_id=student_id,
+                    node_id=graph_anchor_id,
+                    question=learning_target or topic,
+                )
+            else:
+                started_snapshot = {}
+            stream_text_chunks(event_sink, "tutor", direct_node_content)
+            event_sink.emit(
+                make_event(
+                    "node.complete",
+                    "tutor",
+                    message="这一步先讲到这里，接下来你可以自己决定是继续讲、换例子、先总结，还是来一道题。",
+                    data={"content_length": len(direct_node_content), "strategy": strategy, "evidence": []},
+                )
+            )
+            return {
+                "tutor_content": direct_node_content,
+                "teaching_strategy": strategy,
+                "next_step_choice": "",
+                "post_eval_choice": "",
+                "practice_generation_mode": "",
+                "tutor_citations": [],
+                "tutor_evidence": [],
+                "user_knowledge_graph": user_kg,
+                "graph_anchor_id": graph_anchor_id,
+                "graph_anchor_title": graph_anchor,
+                "graph_anchor_filename": str(active_graph_context.get("anchor_filename") or ""),
+                "learning_phase": "lesson_presented",
+                "learning_resume_target": "post_lesson_choice",
+                "flow_status": "awaiting_post_lesson_choice",
+                "pending_interaction_kind": "post_lesson_choice",
+                "pending_interaction_prompt": "这一步先讲到这里。你想继续深入、换个例子、先总结，还是开始测试？",
+                "student_state_snapshot": started_snapshot or dict(state.get("student_state_snapshot") or {}),
+                "llm_stream_disabled": llm_stream_disabled,
+                "llm_stream_failures": llm_stream_failures,
+            }
+
+        # RAG: 非主流程节点讲解的回退路径才允许检索相关知识
         citations = []
-        citation_plan = []
+        seeded_citation_plan = _state_seeded_citation_plan(state)
+        seeded_evidence = _state_seeded_evidence(state)
+        citation_plan = list(seeded_citation_plan)
         context = ""
         graph_guidance = ""
         graph_context: dict[str, object] = {}
-        evidence_contract = False
+        evidence_contract = bool(citation_plan)
+        graph_result: dict[str, object] | None = None
         updated_goal = learning_target
         rewrite_request = RetrievalRewriteRequest(
             channel="tutor",
@@ -901,7 +1060,33 @@ def build_tutor_node(tutor_llm, runtime: RuntimeContext):
             topic_focus=topic_focus,
             topic_starter_options=topic_starter_options,
         )
-        if hasattr(knowledge_provider, "query_with_sources"):
+        if graph_rag_pipeline is not None:
+            try:
+                graph_result = graph_rag_pipeline.ask(search_query, traversal_mode="balanced")
+            except Exception as exc:
+                graph_result = None
+                event_sink.emit(
+                    make_event(
+                        "session.warning",
+                        "tutor",
+                        message="图谱 2.2 检索失败，已回退到常规知识库讲解。",
+                        data={"error": str(exc)},
+                    )
+                )
+
+        if graph_result is not None:
+            context = str(graph_result.get("context_text") or "").strip()
+            graph_guidance = build_graph_guidance_from_result(graph_result)
+            graph_context = build_graph_context_from_result(
+                graph_rag_pipeline,
+                graph_result,
+                fallback_query=search_query,
+            )
+            graph_citation_plan = build_graph_citation_plan(graph_result)
+            citation_plan = seeded_citation_plan + [item for item in graph_citation_plan if item not in seeded_citation_plan]
+            citations = citation_plan
+            evidence_contract = bool(citation_plan)
+        elif hasattr(knowledge_provider, "query_with_sources"):
             try:
                 retrieval = knowledge_provider.query_with_sources(search_query, rewrite_request=rewrite_request)
             except TypeError:
@@ -910,8 +1095,8 @@ def build_tutor_node(tutor_llm, runtime: RuntimeContext):
             graph_guidance = str(retrieval.get("graph_guidance") or "").strip()
             graph_context = dict(retrieval.get("graph_context") or {})
             citations = retrieval.get("citations", [])
-            citation_plan = retrieval.get("citation_plan", citations)
-            evidence_contract = any(key in retrieval for key in ("citation_plan", "evidence", "needs_follow_up"))
+            citation_plan = retrieval.get("citation_plan", citations) or seeded_citation_plan
+            evidence_contract = bool(citation_plan) or any(key in retrieval for key in ("citation_plan", "evidence", "needs_follow_up"))
             if retrieval.get("needs_follow_up") and hasattr(runtime, "answer_provider"):
                 follow_up_question = str(retrieval.get("follow_up_question") or "").strip()
                 if follow_up_question:
@@ -938,28 +1123,37 @@ def build_tutor_node(tutor_llm, runtime: RuntimeContext):
                         graph_guidance = str(retrieval.get("graph_guidance") or "").strip()
                         graph_context = dict(retrieval.get("graph_context") or {})
                         citations = retrieval.get("citations", [])
-                        citation_plan = retrieval.get("citation_plan", citations)
+                        citation_plan = retrieval.get("citation_plan", citations) or seeded_citation_plan
         else:
             try:
                 context = knowledge_provider.query(search_query, rewrite_request=rewrite_request)
             except TypeError:
                 context = knowledge_provider.query(search_query)
-        knowledge_prompt = ""
-        if context and citation_plan:
-            knowledge_prompt = (
+        node_content_prompt, has_node_content_context = _build_node_content_prompt(state, citation_plan)
+        knowledge_prompt = node_content_prompt
+        if graph_result is not None and context:
+            knowledge_prompt += (
+                "\n\n【图谱 2.2 上下文】\n"
+                "请在已经覆盖图谱 2.1 当前节点材料后，再依据以下知识图谱检索结果补充图表、公式和关系路径信息：\n"
+                f"---\n{context}\n---\n"
+            )
+            if citation_plan:
+                knowledge_prompt += f"\n【图谱 2.2 证据】\n{_build_evidence_prompt(citation_plan)}\n"
+        elif context and citation_plan:
+            knowledge_prompt += (
                 "\n\n【证据资料】下面是已经通过检索选出的可引用证据。"
                 "你只能依据这些证据组织讲解，不能补充没有证据支持的事实。\n"
                 f"{_build_evidence_prompt(citation_plan)}\n"
             )
         elif context:
-            knowledge_prompt = f"\n\n【参考资料】请优先结合以下知识进行讲解：\n{context}\n"
+            knowledge_prompt += f"\n\n【参考资料】请在覆盖图谱 2.1 当前节点材料后，再结合以下知识进行讲解：\n{context}\n"
         if graph_guidance:
             knowledge_prompt += f"\n【课程图谱教学提示】\n{graph_guidance}\n"
 
         # ── 知识不足时的多层回退策略 ──
         # 不再停止并要求用户"收紧问题"，而是利用 LLM 自身知识继续讲解
         knowledge_source_hint = ""
-        if hasattr(knowledge_provider, "query_with_sources") and evidence_contract and not citation_plan:
+        if graph_result is None and hasattr(knowledge_provider, "query_with_sources") and evidence_contract and not citation_plan:
             # 无课程资料证据：降级为 LLM 自身知识讲解模式
             knowledge_source_hint = (
                 "\n\n【知识来源说明】当前课程资料库中暂未找到直接匹配的证据片段。"
@@ -977,6 +1171,7 @@ def build_tutor_node(tutor_llm, runtime: RuntimeContext):
 
         active_graph_context = _coalesce_graph_context(state, graph_context)
         graph_anchor = str(active_graph_context.get("anchor_title") or "").strip()
+        student_state_snapshot = dict(state.get("student_state_snapshot") or {})
 
         # ── 图谱驱动：前驱缺口检测与后继路径定位 ──
         prerequisite_gap_hint = ""
@@ -1039,6 +1234,14 @@ def build_tutor_node(tutor_llm, runtime: RuntimeContext):
                     data={"title": graph_anchor, "id": graph_anchor_id, "status": "in_progress", "type": "current"},
                 )
             )
+            started_snapshot = mark_student_node_started(
+                student_state_store,
+                student_id=student_id,
+                node_id=graph_anchor_id,
+                question=updated_goal or learning_target or topic,
+            )
+            if started_snapshot:
+                student_state_snapshot = started_snapshot
 
         graph_instruction = _build_graph_instruction_block(
             {**state, "user_knowledge_graph": user_kg},
@@ -1069,14 +1272,15 @@ def build_tutor_node(tutor_llm, runtime: RuntimeContext):
 3. 如果适合，给一个贴近日常直觉的类比、判断口诀或观察角度
 4. 如果学生容易混淆两个概念，要直接点破"不要把 A 和 B 混在一起"
 5. **提问是教学工具**，每次提问都有明确预期——你期待学生回答什么、这个回答能告诉你什么
-6. 如果有证据资料，优先使用这些证据来组织讲解
-7. 如果使用了证据，每一句事实性内容后面都必须加上形如 [1]、[2] 的行内引用
-8. 不要输出"参考来源"列表，来源面板由系统单独渲染
-9. 如果没有证据资料，你仍然要基于你作为专业领域专家的知识来讲解，但请注意：
+6. 如果有【图谱 2.1 当前节点材料】，必须先覆盖该材料中的学习目标、必会要点、常见误区和节点解释，再做扩展
+7. 如果有证据资料，优先使用这些证据来组织讲解
+8. 如果使用了证据，每一句事实性内容后面都必须加上形如 [1]、[2] 的行内引用
+9. 不要输出"参考来源"列表，来源面板由系统单独渲染
+10. 如果没有证据资料，你仍然要基于你作为专业领域专家的知识来讲解，但请注意：
    - 讲解内容必须准确、负责，不确定的地方要明确说明
    - 可以适当推荐学生查阅哪些经典教材或资料
    - 不要因为缺少资料就拒绝讲解或要求学生换问法
-10. 默认输出自然中文段落；除非确实在给步骤或对比，否则不要用列表{knowledge_source_hint}{graph_instruction}"""
+11. 默认输出自然中文段落；除非确实在给步骤或对比，否则不要用列表{knowledge_source_hint}{graph_instruction}"""
         )
 
         strategy_inst = _strategy_instruction(strategy, feedback, attempt_count)
@@ -1121,22 +1325,41 @@ def build_tutor_node(tutor_llm, runtime: RuntimeContext):
 - 每轮只推进一个概念，必须带一个具体例子、物理直觉或工程场景
 - 如果要提问，只问一个能暴露理解边界的问题"""
 
-        system_msg = SystemMessage(content=system_content)
-        human_msg = HumanMessage(content=human_content)
-
-        raw_response = ""
-        for chunk in tutor_llm.stream([system_msg, human_msg]):
-            chunk_text = content_to_text(chunk.content)
-            raw_response += chunk_text
-
-        if citation_plan:
-            full_response = _filter_cited_lines(raw_response, len(citation_plan))
+        if graph_result is not None and not has_node_content_context:
+            full_response = normalize_graph_answer(
+                str(graph_result.get("answer") or ""),
+                list(graph_result.get("media_items") or []),
+            )
             if not full_response:
                 full_response = _build_evidence_backed_fallback(topic, citation_plan)
+            stream_text_chunks(event_sink, "tutor", full_response)
         else:
-            full_response = _render_teacher_reply(raw_response, topic)
+            system_msg = SystemMessage(content=system_content)
+            human_msg = HumanMessage(content=human_content)
+            raw_response, stream_failed = _collect_llm_text_with_fallback(
+                tutor_llm,
+                [system_msg, human_msg],
+                source="tutor",
+                prefer_invoke=llm_stream_disabled,
+            )
+            if stream_failed:
+                llm_stream_disabled = True
+                llm_stream_failures += 1
 
-        stream_text_chunks(event_sink, "tutor", full_response)
+            if citation_plan:
+                full_response = _filter_cited_lines(raw_response, len(citation_plan))
+                if not full_response:
+                    full_response = _build_evidence_backed_fallback(topic, citation_plan)
+            else:
+                full_response = _render_teacher_reply(raw_response, topic)
+                if not full_response:
+                    full_response = _build_resilient_teacher_fallback(
+                        topic,
+                        learning_target=updated_goal or learning_target or topic,
+                        graph_context=active_graph_context,
+                    )
+
+            stream_text_chunks(event_sink, "tutor", full_response)
 
         # ── 提取并处理教学标记（掌握度更新、节点跳转）──
         full_response, teaching_markers = _extract_teaching_markers(full_response)
@@ -1219,11 +1442,14 @@ def build_tutor_node(tutor_llm, runtime: RuntimeContext):
             "post_eval_choice": "",
             "practice_generation_mode": "",
             "tutor_citations": citation_plan,
-            "tutor_evidence": citation_plan,
+            "tutor_evidence": seeded_evidence or citation_plan,
             "user_knowledge_graph": user_kg,
             "graph_anchor_id": str(returned_graph_context.get("anchor_id") or ""),
             "graph_anchor_title": str(returned_graph_context.get("anchor_title") or ""),
             "graph_anchor_filename": str(returned_graph_context.get("anchor_filename") or ""),
+            "current_node_id": str(returned_graph_context.get("anchor_id") or ""),
+            "current_node_name": str(returned_graph_context.get("anchor_title") or ""),
+            "current_node_status": "teaching" if str(returned_graph_context.get("anchor_title") or "").strip() else str(state.get("current_node_status") or ""),
             "graph_prerequisites": list(returned_graph_context.get("prerequisites") or []),
             "graph_neighbors": list(returned_graph_context.get("neighbors") or []),
             "graph_learning_objectives": list(returned_graph_context.get("learning_objectives") or []),
@@ -1235,7 +1461,13 @@ def build_tutor_node(tutor_llm, runtime: RuntimeContext):
             "current_user_goal": updated_goal,
             "session_goal": session_goal,
             "turn_goal": next_graph_title or turn_goal or topic_focus or updated_goal,
+            "student_state_snapshot": student_state_snapshot,
+            "learning_phase": "node_teaching",
+            "learning_resume_target": "post_lesson_choice",
+            "learning_resume_reason": "tutor_completed",
             "affect_signals": affect_signals,
+            "llm_stream_disabled": llm_stream_disabled,
+            "llm_stream_failures": llm_stream_failures,
         }
 
     return tutor_node

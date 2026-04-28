@@ -73,6 +73,7 @@ def run_cli() -> None:
             thread_id=thread_id,
             topic=topic_input,
             current_state=current_state,
+            runtime_context=runtime,
         )
     except UserAbortError as exc:
         event_sink.emit(

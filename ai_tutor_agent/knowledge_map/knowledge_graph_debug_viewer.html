@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>知识图谱调试页</title>
+  <script src="https://unpkg.com/vis-network/standalone/umd/vis-network.min.js"></script>
+  <style>
+    * { box-sizing: border-box; }
+    body { margin: 0; font-family: Arial, Helvetica, sans-serif; background: #f8fafc; color: #0f172a; }
+    .wrap { display: grid; grid-template-columns: 360px 1fr; gap: 16px; padding: 16px; min-height: 100vh; }
+    .panel, .main { background: white; border-radius: 18px; box-shadow: 0 4px 18px rgba(15,23,42,0.08); overflow: hidden; }
+    .section { padding: 16px; border-bottom: 1px solid #e2e8f0; }
+    .section:last-child { border-bottom: none; }
+    h1, h2, h3, p { margin: 0; }
+    h1 { font-size: 20px; margin-bottom: 8px; }
+    h2 { font-size: 16px; margin-bottom: 10px; }
+    .muted { color: #64748b; font-size: 13px; line-height: 1.5; }
+    .row { display: flex; gap: 8px; align-items: center; margin-top: 10px; }
+    input[type="text"], input[type="number"] { width: 100%; padding: 10px 12px; border: 1px solid #cbd5e1; border-radius: 12px; }
+    input[type="file"] { width: 100%; }
+    button { border: none; border-radius: 12px; background: #0f766e; color: white; padding: 10px 14px; cursor: pointer; }
+    button.secondary { background: #334155; }
+    button.ghost { background: #e2e8f0; color: #0f172a; }
+    .badge { display: inline-block; padding: 4px 8px; border-radius: 999px; background: #eef2ff; color: #4338ca; font-size: 12px; margin-right: 6px; margin-top: 6px; }
+    .stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+    .stat { border: 1px solid #e2e8f0; border-radius: 16px; padding: 12px; text-align: center; }
+    .stat .num { font-size: 24px; font-weight: 700; }
+    #network { width: 100%; height: 70vh; background: #fff; }
+    .detail { padding: 16px; display: grid; grid-template-columns: 1fr 1fr; gap: 16px; border-top: 1px solid #e2e8f0; }
+    .card { border: 1px solid #e2e8f0; border-radius: 16px; padding: 14px; background: #fff; min-height: 180px; }
+    .edge-item { border: 1px solid #e2e8f0; border-radius: 12px; padding: 10px; margin-top: 8px; background: #f8fafc; }
+    .checks { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+    .checks label { font-size: 13px; display: flex; align-items: center; gap: 6px; }
+    .scroll { max-height: 280px; overflow: auto; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="panel">
+      <div class="section">
+        <h1>知识图谱调试页</h1>
+        <p class="muted">直接上传你导出的 <b>auto_control_knowledge_map_v2.json</b>，或者分别上传 nodes.csv 和 edges.csv。</p>
+      </div>
+
+      <div class="section">
+        <h2>上传文件</h2>
+        <div class="row"><input id="jsonFile" type="file" accept=".json"></div>
+        <div class="row"><input id="nodesFile" type="file" accept=".csv"></div>
+        <div class="row"><input id="edgesFile" type="file" accept=".csv"></div>
+        <div class="row">
+          <button id="fitBtn">适配视图</button>
+          <button id="resetBtn" class="ghost">重置筛选</button>
+        </div>
+      </div>
+
+      <div class="section">
+        <h2>统计</h2>
+        <div class="stats">
+          <div class="stat"><div class="num" id="nodeCount">0</div><div class="muted">节点</div></div>
+          <div class="stat"><div class="num" id="edgeCount">0</div><div class="muted">边</div></div>
+          <div class="stat"><div class="num" id="isolatedCount">0</div><div class="muted">孤立点</div></div>
+        </div>
+      </div>
+
+      <div class="section">
+        <h2>筛选</h2>
+        <div class="row"><input id="searchInput" type="text" placeholder="搜索节点名 / 章节 / ID"></div>
+        <div class="row"><input id="strengthInput" type="number" min="0" max="1" step="0.1" value="0.4"></div>
+        <p class="muted">最小关系强度，例如 0.4。</p>
+        <div class="checks" id="relationChecks"></div>
+      </div>
+    </div>
+
+    <div class="main">
+      <div id="network"></div>
+      <div class="detail">
+        <div class="card">
+          <h2>节点详情</h2>
+          <div id="nodeDetail" class="muted" style="margin-top:10px; line-height:1.7;">点击图中的节点查看详情。</div>
+        </div>
+        <div class="card">
+          <h2>关联边</h2>
+          <div id="edgeDetail" class="muted scroll" style="margin-top:10px; line-height:1.7;">点击图中的节点查看关联边。</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let rawNodes = [];
+    let rawEdges = [];
+    let network = null;
+    let currentNodeId = null;
+    const relationColors = {
+      prerequisite_of: '#2563eb',
+      parallel_to: '#059669',
+      extends_to: '#7c3aed',
+      easy_to_confuse_with: '#dc2626',
+      related_to: '#6b7280',
+      weak_related_to: '#94a3b8'
+    };
+
+    function parseMaybe(value, fallback) {
+      if (value == null || value === '') return fallback;
+      if (Array.isArray(value) || typeof value === 'object') return value;
+      try { return JSON.parse(String(value).replace(/'/g, '"')); } catch { return fallback; }
+    }
+
+    function normalizeNode(n) {
+      return {
+        node_id: String(n.node_id || '').trim(),
+        id: String(n.node_id || '').trim(),
+        label: `${n.node_id || ''}\n${n.name || ''}`,
+        name: String(n.name || '').trim(),
+        chapter: String(n.chapter || '').trim(),
+        source_type: String(n.source_type || '').trim(),
+        summary: String(n.summary || '').trim(),
+        requirement_level: String(n.requirement_level || '').trim(),
+        importance_level: String(n.importance_level || '').trim(),
+        mastery_threshold: Number(n.mastery_threshold || 0),
+        page_refs: parseMaybe(n.page_refs, []),
+        tags: parseMaybe(n.tags, []),
+        extra: parseMaybe(n.extra, {}),
+      };
+    }
+
+    function normalizeEdge(e) {
+      const relationType = String(e.relation_type || e.relation || 'related_to').trim();
+      const strength = Number(e.relation_strength ?? e.weight ?? 0);
+      return {
+        edge_id: String(e.edge_id || '').trim(),
+        from: String(e.source || '').trim(),
+        to: String(e.target || '').trim(),
+        source: String(e.source || '').trim(),
+        target: String(e.target || '').trim(),
+        relation_type: relationType,
+        relation_label: String(e.relation_label || relationType).trim(),
+        relation_strength: Number.isFinite(strength) ? strength : 0,
+        direction_type: String(e.direction_type || 'undirected').trim(),
+        relation_note: String(e.relation_note || e.evidence || '').trim(),
+        arrows: String(e.direction_type || '').trim() === 'directed' ? 'to' : '',
+        color: { color: relationColors[relationType] || '#94a3b8' },
+        width: Math.max(1, (Number.isFinite(strength) ? strength : 0.4) * 3),
+        smooth: String(e.direction_type || '').trim() === 'directed',
+      };
+    }
+
+    function updateStats(nodes, edges) {
+      const degree = {};
+      nodes.forEach(n => degree[n.node_id] = 0);
+      edges.forEach(e => {
+        if (degree[e.source] !== undefined) degree[e.source] += 1;
+        if (degree[e.target] !== undefined) degree[e.target] += 1;
+      });
+      const isolated = nodes.filter(n => !degree[n.node_id]).length;
+      document.getElementById('nodeCount').innerText = nodes.length;
+      document.getElementById('edgeCount').innerText = edges.length;
+      document.getElementById('isolatedCount').innerText = isolated;
+    }
+
+    function buildRelationChecks(edges) {
+      const box = document.getElementById('relationChecks');
+      box.innerHTML = '';
+      const types = [...new Set(edges.map(e => e.relation_type))];
+      types.forEach(type => {
+        const id = `rel_${type}`;
+        const label = document.createElement('label');
+        label.innerHTML = `<input type="checkbox" id="${id}" checked> ${type}`;
+        box.appendChild(label);
+        document.getElementById(id).addEventListener('change', renderGraph);
+      });
+    }
+
+    function getEnabledRelations() {
+      const box = document.getElementById('relationChecks');
+      const checks = box.querySelectorAll('input[type="checkbox"]');
+      const enabled = new Set();
+      checks.forEach(c => {
+        if (c.checked) enabled.add(c.id.replace('rel_', ''));
+      });
+      return enabled;
+    }
+
+    function renderGraph() {
+      const q = document.getElementById('searchInput').value.trim().toLowerCase();
+      const minStrength = Number(document.getElementById('strengthInput').value || 0);
+      const enabled = getEnabledRelations();
+
+      let nodes = rawNodes.slice();
+      let edges = rawEdges.slice().filter(e => e.relation_strength >= minStrength);
+      edges = edges.filter(e => enabled.size === 0 || enabled.has(e.relation_type));
+
+      if (q) {
+        nodes = nodes.filter(n =>
+          n.node_id.toLowerCase().includes(q) ||
+          n.name.toLowerCase().includes(q) ||
+          n.chapter.toLowerCase().includes(q) ||
+          (Array.isArray(n.tags) ? n.tags.join(' ').toLowerCase().includes(q) : false)
+        );
+      }
+
+      const nodeIds = new Set(nodes.map(n => n.node_id));
+      edges = edges.filter(e => nodeIds.has(e.source) && nodeIds.has(e.target));
+
+      updateStats(nodes, edges);
+
+      const data = {
+        nodes: new vis.DataSet(nodes.map(n => ({
+          ...n,
+          color: n.source_type.includes('chapter_anchor') ? '#111827' : '#0f766e',
+          shape: 'dot',
+          size: n.source_type.includes('chapter_anchor') ? 18 : 12,
+          font: { size: 16, face: 'Arial' }
+        }))),
+        edges: new vis.DataSet(edges)
+      };
+
+      const options = {
+        physics: { stabilization: false, barnesHut: { gravitationalConstant: -3000, springLength: 150 } },
+        interaction: { hover: true, navigationButtons: true, keyboard: true },
+        edges: { font: { align: 'top', size: 10 } }
+      };
+
+      if (!network) {
+        network = new vis.Network(document.getElementById('network'), data, options);
+        network.on('click', params => {
+          if (params.nodes.length) {
+            currentNodeId = params.nodes[0];
+            showNodeDetail(currentNodeId);
+            showEdgeDetail(currentNodeId);
+          }
+        });
+      } else {
+        network.setData(data);
+      }
+    }
+
+    function showNodeDetail(nodeId) {
+      const node = rawNodes.find(n => n.node_id === nodeId);
+      if (!node) return;
+      document.getElementById('nodeDetail').innerHTML = `
+        <div><b>${node.node_id} | ${node.name}</b></div>
+        <div>章节：${node.chapter || '无'}</div>
+        <div>类型：${node.source_type || '无'}</div>
+        <div>要求：${node.requirement_level || '无'}</div>
+        <div>重要度：${node.importance_level || '无'}</div>
+        <div>掌握阈值：${node.mastery_threshold ?? ''}</div>
+        <div>标签：${Array.isArray(node.tags) ? node.tags.join(' / ') : '无'}</div>
+        <div>页码：${Array.isArray(node.page_refs) ? node.page_refs.join(', ') : ''}</div>
+        <div style="margin-top:8px;"><b>summary</b></div>
+        <div>${node.summary || '暂无'}</div>
+      `;
+    }
+
+    function showEdgeDetail(nodeId) {
+      const related = rawEdges.filter(e => e.source === nodeId || e.target === nodeId);
+      const box = document.getElementById('edgeDetail');
+      if (!related.length) {
+        box.innerHTML = '该节点当前没有关联边。';
+        return;
+      }
+      box.innerHTML = related.map(e => `
+        <div class="edge-item">
+          <div><b>${e.edge_id} | ${e.relation_type}</b></div>
+          <div>${e.source} → ${e.target}</div>
+          <div>强度：${e.relation_strength}；方向：${e.direction_type}</div>
+          <div>${e.relation_note || ''}</div>
+        </div>
+      `).join('');
+    }
+
+    function parseCsv(text) {
+      const lines = text.trim().split(/\r?\n/);
+      const headers = lines[0].split(',');
+      return lines.slice(1).map(line => {
+        const values = line.split(/,(?=(?:[^"]*"[^"]*")*[^"]*$)/);
+        const obj = {};
+        headers.forEach((h, i) => obj[h] = (values[i] || '').replace(/^"|"$/g, ''));
+        return obj;
+      });
+    }
+
+    function bindFileInput(id, handler) {
+      document.getElementById(id).addEventListener('change', e => {
+        const file = e.target.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = () => handler(String(reader.result || ''));
+        reader.readAsText(file, 'utf-8');
+      });
+    }
+
+    bindFileInput('jsonFile', text => {
+      const data = JSON.parse(text);
+      rawNodes = (data.nodes || []).map(normalizeNode);
+      rawEdges = (data.edges || []).map(normalizeEdge);
+      buildRelationChecks(rawEdges);
+      renderGraph();
+    });
+
+    bindFileInput('nodesFile', text => {
+      rawNodes = parseCsv(text).map(normalizeNode);
+      renderGraph();
+    });
+
+    bindFileInput('edgesFile', text => {
+      rawEdges = parseCsv(text).map(normalizeEdge);
+      buildRelationChecks(rawEdges);
+      renderGraph();
+    });
+
+    document.getElementById('searchInput').addEventListener('input', renderGraph);
+    document.getElementById('strengthInput').addEventListener('input', renderGraph);
+    document.getElementById('fitBtn').addEventListener('click', () => network && network.fit());
+    document.getElementById('resetBtn').addEventListener('click', () => {
+      document.getElementById('searchInput').value = '';
+      document.getElementById('strengthInput').value = '0.4';
+      const checks = document.querySelectorAll('#relationChecks input[type="checkbox"]');
+      checks.forEach(c => c.checked = true);
+      renderGraph();
+      if (network) network.fit();
+    });
+  </script>
+</body>
+</html>

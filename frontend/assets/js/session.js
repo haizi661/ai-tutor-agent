@@ -179,6 +179,11 @@
         document.querySelector('.next-step-card')?.remove();
         document.querySelector('.post-eval-card')?.remove();
         document.querySelector('.interrupt-confirm-card')?.remove();
+        document.querySelector('.post-lesson-card')?.remove();
+        document.querySelector('.continue-homework-card')?.remove();
+        document.querySelector('.homework-review-card')?.remove();
+        app.collapseSubmittedObjectiveTestCard?.();
+        document.querySelector('.consolidation-card')?.remove();
         if (visibleText) app.appendMessage('user', visibleText);
         startStreamingTurn('已收到');
         try {
@@ -236,7 +241,20 @@
             }
             state.pendingTopicConfirmation = null;
             state.pendingTopicConfirmationDetails = null;
-            document.querySelector('.topic-confirm-card')?.remove();
+            const tcCard = document.querySelector('.topic-confirm-card.prompt-flow-card');
+            if (tcCard) {
+                const choiceLabel = confirmed
+                    ? (startMode === 'direct_tutor' ? '跳过摸底，直接开始' : '已确认，开始摸底')
+                    : `已换主题：${payload.topic}`;
+                tcCard.innerHTML = `
+                    <div class="tc-locked-content">
+                        <span class="tc-locked-icon">✅</span>
+                        <span class="tc-locked-topic">${state.currentTopic || payload.topic}</span>
+                        <span class="tc-confirmed-badge">${choiceLabel}</span>
+                    </div>
+                `;
+                tcCard.classList.add('tc-locked');
+            }
             startStreamingTurn('正在继续');
             app.connectSSE();
         } catch (error) {
@@ -372,9 +390,30 @@
             const data = safelyParseEventData(e.data);
             app.setPendingTurnRole?.(turnRoleForSource(data.source));
             appendThinking(data.message || '已完成', 'success', 'node.complete');
+            if (['initial_node_selector', 'node_content_loader'].includes(data.source) && data.data?.node_id) {
+                state.currentGraphNode = data.data?.node_name || state.currentGraphNode;
+                state.currentGraphNodeId = data.data?.node_id || state.currentGraphNodeId || '';
+                app.renderKnowledgeGraphVisualCard?.({
+                    title: state.currentGraphNode,
+                    id: state.currentGraphNodeId,
+                });
+            }
             const evidence = Array.isArray(data.data?.evidence) ? data.data.evidence : [];
             if (data.source === 'tutor' && evidence.length) {
                 app.renderEvidencePanel?.(evidence, { tone: 'info', role: 'tutor' });
+            }
+            if (data.source === 'wrong_question_explainer') {
+                const explanations = Array.isArray(data.data?.explanations) ? data.data.explanations : [];
+                const lines = ['错题订正讲解'];
+                explanations.forEach((item, index) => {
+                    const qid = item.question_id || `Q${index + 1}`;
+                    const stem = item.stem || '';
+                    const userAnswer = String(item.user_answer || '').toUpperCase() || '未作答';
+                    const answerKey = String(item.answer_key || '').toUpperCase() || '未提供';
+                    const explanation = item.explanation || '这题需要回到题干中的关键条件，重新区分正确概念与误区。';
+                    lines.push('', stem ? `${qid}. ${stem}` : `${qid}.`, `你的答案：${userAnswer}；正确答案：${answerKey}`, explanation);
+                });
+                app.appendMessage?.('agent', lines.join('\n'), { kind: 'wrong_question_explanations' });
             }
             app.clearTypingIndicator?.();
         });
@@ -409,7 +448,9 @@
             }
             if (payload.type === 'current') {
                 state.currentGraphNode = payload.title;
+                state.currentGraphNodeId = payload.id || state.currentGraphNodeId || '';
             }
+            app.syncKnowledgeGraphVisualState?.();
             app.scheduleSidebarUpdate?.();
         });
 
@@ -419,6 +460,7 @@
             const kg = data.data || {};
             state.userKnowledgeGraph = { ...state.userKnowledgeGraph, ...kg };
             app.refreshUserKgMapIfOpen?.();
+            app.syncKnowledgeGraphVisualState?.();
             app.scheduleSidebarUpdate?.();
         });
 
@@ -462,7 +504,23 @@
             });
         });
 
-        // ── 对话式逐题测评 ──
+        // ── 批量测评（步进器模式）──
+        state.eventSource.addEventListener('assessment.batch', e => {
+            const data = safelyParseEventData(e.data);
+            const questions = data.data?.questions || [];
+            app.updateLearningProgress?.({ step: 2, label: '学习进度 2/5' });
+            consumeAwaitingTurn(
+                data.message || '请完成自评',
+                '等你完成自评',
+                {
+                    role: 'assessment',
+                    showInChat: false,
+                    render: () => app.renderAssessmentForm(questions),
+                }
+            );
+        });
+
+        // ── 对话式逐题测评（保留兼容）──
         state.eventSource.addEventListener('assessment.question', e => {
             const data = safelyParseEventData(e.data);
             const payload = data.data || {};
@@ -559,6 +617,78 @@
                 });
                 return;
             }
+            if (payload.interaction_kind === 'post_lesson_choice') {
+                app.updateLearningProgress?.({ step: 4, label: '学习进度 4/5' });
+                consumeAwaitingTurn(message, '等你决定课后步骤', {
+                    role: 'prompt',
+                    awaitingInput: true,
+                    showInChat: false,
+                    render: () => app.renderPostLessonChoice?.(payload.options || []),
+                    placeholder: '也可以直接输入选项',
+                });
+                return;
+            }
+            if (payload.interaction_kind === 'continue_or_homework_choice') {
+                app.updateLearningProgress?.({ step: 5, label: '学习进度 5/5' });
+                consumeAwaitingTurn(message, '等你决定继续还是收作业', {
+                    role: 'prompt',
+                    awaitingInput: true,
+                    showInChat: false,
+                    render: () => app.renderContinueOrHomeworkChoice?.(payload.options || []),
+                    placeholder: '也可以直接输入选项',
+                });
+                return;
+            }
+            if (payload.interaction_kind === 'homework_review_choice') {
+                consumeAwaitingTurn(message, '等你决定作业安排', {
+                    role: 'prompt',
+                    awaitingInput: true,
+                    showInChat: false,
+                    render: () => app.renderHomeworkReviewChoice?.(payload.options || []),
+                    placeholder: '选择查看作业或直接回答',
+                });
+                return;
+            }
+            if (payload.interaction_kind === 'homework_answers') {
+                consumeAwaitingTurn(message, '等你提交作业', {
+                    role: 'prompt',
+                    awaitingInput: true,
+                    showInChat: true,
+                    placeholder: '请输入你的作业答案',
+                });
+                document.getElementById('chat-input')?.focus();
+                return;
+            }
+            if (payload.interaction_kind === 'objective_test_answers' || payload.interaction_kind === 'variant_test_answers') {
+                consumeAwaitingTurn(message, '等你答题', {
+                    role: 'prompt',
+                    awaitingInput: true,
+                    showInChat: false,
+                    render: () => app.renderObjectiveTestCard?.(payload.options || [], payload.interaction_kind),
+                    placeholder: '也可以直接输入答案，如 ABCD',
+                });
+                return;
+            }
+            if (payload.interaction_kind === 'consolidation_choice') {
+                consumeAwaitingTurn(message, '等你决定是否巩固复习', {
+                    role: 'prompt',
+                    awaitingInput: true,
+                    showInChat: false,
+                    render: () => app.renderConsolidationChoice?.(payload.options || []),
+                    placeholder: '巩固复习 / 直接开始下一节点',
+                });
+                return;
+            }
+            if (payload.interaction_kind === 'temporary_question') {
+                consumeAwaitingTurn(message, '等你输入临时问题', {
+                    role: 'prompt',
+                    awaitingInput: true,
+                    showInChat: true,
+                    placeholder: '输入你想问的问题',
+                });
+                document.getElementById('chat-input')?.focus();
+                return;
+            }
             app.updateLearningProgress?.({ step: 3, label: '学习进度 3/5' });
             consumeAwaitingTurn(message, message, {
                 role: 'prompt',
@@ -588,7 +718,80 @@
             }
             // 在流结束时处理教学标记的副作用（掌握度更新、节点提示）
             app.applyTeachingMarkerSideEffects?.(state.currentTextBuffer);
+            const endPayload = data.data || {};
+            const endKind = endPayload.pending_interaction_kind || '';
             const message = data.message || '这一步先到这里。';
+            if (endKind === 'session_complete') {
+                consumeVisibleTurn('今天的学习到此结束。辛苦了！', 'success', { kind: 'end', role: 'prompt', clearTyping: true });
+                finalizeStreamState('今天结束了', 'success');
+                app.fetchHistory();
+                app.scheduleSidebarUpdate?.();
+                return;
+            }
+            if (endKind === 'post_lesson_choice') {
+                app.updateLearningProgress?.({ step: 4, label: '学习进度 4/5' });
+                consumeAwaitingTurn(endPayload.prompt || message, '等你决定课后步骤', {
+                    role: 'prompt',
+                    awaitingInput: true,
+                    showInChat: false,
+                    render: () => app.renderPostLessonChoice?.(endPayload.options || []),
+                    placeholder: '也可以直接输入：我还有临时问题 / 开始测试',
+                });
+                app.fetchHistory();
+                return;
+            }
+            if (endKind === 'temporary_question') {
+                consumeAwaitingTurn(endPayload.prompt || message, '等你输入临时问题', {
+                    role: 'prompt',
+                    awaitingInput: true,
+                    showInChat: true,
+                    placeholder: '输入你想问的问题',
+                });
+                document.getElementById('chat-input')?.focus();
+                app.fetchHistory();
+                return;
+            }
+            if (endKind === 'objective_test_answers' || endKind === 'variant_test_answers') {
+                consumeAwaitingTurn(endPayload.prompt || message, '等你答题', {
+                    role: 'prompt',
+                    awaitingInput: true,
+                    showInChat: false,
+                    render: () => app.renderObjectiveTestCard?.(endPayload.options || [], endKind),
+                    placeholder: '也可以直接输入答案，如 ABCD',
+                });
+                app.fetchHistory();
+                return;
+            }
+            if (endKind === 'continue_or_homework_choice') {
+                app.updateLearningProgress?.({ step: 5, label: '学习进度 5/5' });
+                consumeAwaitingTurn(endPayload.prompt || message, '等你决定继续还是收作业', {
+                    role: 'prompt',
+                    awaitingInput: true,
+                    showInChat: false,
+                    render: () => app.renderContinueOrHomeworkChoice?.(endPayload.options || []),
+                    placeholder: '也可以直接输入：继续学习 / 今天不学了',
+                });
+                app.fetchHistory();
+                return;
+            }
+            if (endKind === 'homework_review_choice') {
+                consumeAwaitingTurn(endPayload.prompt || message, '等你决定作业安排', {
+                    role: 'prompt',
+                    awaitingInput: true,
+                    showInChat: false,
+                    render: () => app.renderHomeworkReviewChoice?.(endPayload.options || []),
+                    placeholder: '选择查看作业或直接回答',
+                });
+                app.fetchHistory();
+                return;
+            }
+            // 测评答题阶段：如果页面上有未完成的答题卡，保持 awaiting 状态
+            const activeQCard = document.querySelector('.q-card .q-submit:not([disabled])') || document.querySelector('.q-card .q-opt:not(.locked)');
+            if (activeQCard) {
+                app.clearTypingIndicator?.();
+                finalizeStreamState('请继续作答', 'awaiting');
+                return;
+            }
             if (!state.turnHasVisibleOutput) {
                 consumeVisibleTurn(message, 'success', { kind: 'end', role: 'prompt', clearTyping: true });
             } else {

@@ -41,6 +41,9 @@ def test_serialize_state_includes_closed_loop_fields():
             "tester_question_template": "定义辨析",
             "tutor_evidence": [{"rank": 1, "display_label": "guide.pdf", "snippet": "证据片段"}],
             "message_history": [{"role": "user", "kind": "topic_input", "content": "我想学控制原理"}],
+            "homework_items": [{"question_id": "HW-KM001", "prompt": "复习稳定性"}],
+            "homework_status": "assigned",
+            "student_state_snapshot": {"visited_nodes": ["KM001"]},
         }
     )
 
@@ -60,6 +63,9 @@ def test_serialize_state_includes_closed_loop_fields():
     assert serialized["tester_question_template"] == "定义辨析"
     assert serialized["tutor_evidence"][0]["display_label"] == "guide.pdf"
     assert serialized["message_history"][0]["content"] == "我想学控制原理"
+    assert serialized["homework_items"][0]["question_id"] == "HW-KM001"
+    assert serialized["homework_status"] == "assigned"
+    assert serialized["student_state_snapshot"]["visited_nodes"] == ["KM001"]
 
 
 def test_reconstruct_messages_keeps_coach_turn_and_evaluator_summary():

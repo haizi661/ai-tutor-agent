@@ -7,6 +7,7 @@ from ai_tutor_agent.nodes.assessment import (
     _decide_teaching_start,
     _generate_profile_report,
     _generate_radar_data,
+    build_user_profiler_node,
 )
 from ai_tutor_agent.nodes.evaluator import build_evaluator_node
 
@@ -97,7 +98,7 @@ def test_generate_radar_data_warns_when_objective_answer_key_missing():
     assert any("缺少 correct_answer" in event.message for event in sink.events)
 
 
-def test_generate_profile_report_returns_bridge_copy_without_streaming_visible_text():
+def test_generate_profile_report_returns_bridge_copy_and_streams_chunks():
     sink = BufferedEventSink()
     llm = FakeStreamingLLM("我现在大致知道从哪里开始了，你对稳定性有直觉，但边界还不稳。接下来先从稳定性的判断对象讲起。")
 
@@ -108,10 +109,47 @@ def test_generate_profile_report_returns_bridge_copy_without_streaming_visible_t
         {"稳定性": {"gap_type": "aligned_low"}},
         3,
         "explain",
+        "自动控制的一般概念",
     )
 
     assert report.startswith("我现在大致知道从哪里开始了")
-    assert not any(event.type == "node.stream" and event.source == "user_profiler" for event in sink.events)
+    stream_events = [event for event in sink.events if event.type == "node.stream" and event.source == "user_profiler"]
+    assert len(stream_events) >= 1
+    streamed_text = "".join(event.message for event in stream_events)
+    assert streamed_text == report
+
+
+def test_user_profiler_hands_off_to_initial_node_selector_instead_of_preselecting_gap_node():
+    sink = BufferedEventSink()
+    llm = FakeStreamingLLM("我现在大致知道从哪里开始了，你的基础还需要先搭框架。接下来先从自动控制的一般概念开始，把课程起点打稳。")
+
+    class GraphPipeline:
+        node_map = {
+            "KM001": {
+                "node_id": "KM001",
+                "name": "自动控制的一般概念",
+                "prerequisite_nodes": [],
+                "source_type": "skeleton_chapter_anchor",
+            }
+        }
+
+    node = build_user_profiler_node(llm, sink, GraphPipeline())
+    result = node(
+        {
+            "current_topic": "自动控制原理",
+            "assessment_questions": [
+                {"id": 1, "type": "subjective_choice", "concept": "传递函数", "question": "Q", "options": ["A", "B"], "score_map": {"A": 25, "B": 75}}
+            ],
+            "assessment_answers": {"1": "A"},
+            "turn_goal": "自动控制原理",
+            "topic_focus": "",
+        }
+    )
+
+    assert result["learning_resume_target"] == "initial_node_selector"
+    assert result["learning_phase"] == "profiled"
+    assert result["current_node_id"] == ""
+    assert result["graph_anchor_title"] == ""
 
 
 # ===========================================================================

@@ -4,6 +4,26 @@ from typing import TypedDict
 
 
 class AgentState(TypedDict):
+    learning_phase: str                # 新主流程阶段: topic_init/pre_assessment/node_teaching/...
+    learning_resume_target: str        # 会话恢复时优先进入的节点
+    learning_resume_reason: str        # 为什么恢复到该节点
+    current_node_id: str               # 当前正在学习的图谱节点 ID
+    current_node_name: str             # 当前正在学习的图谱节点名称
+    current_node_status: str           # 当前节点状态: selected/teaching/quizzing/passed
+    next_node_candidate_id: str        # 候选下一节点 ID
+    next_node_candidate_name: str      # 候选下一节点名称
+    node_quiz_items: list              # 节点客观题批量题目
+    node_quiz_answers: dict            # 节点客观题作答
+    node_quiz_wrong_items: list        # 节点客观题错题
+    node_quiz_score: int               # 节点客观题得分
+    node_content_context: str           # 当前图谱节点抽取出的结构化讲解上下文
+    next_node_candidate_reason: str     # 初始/下一节点选择原因
+    homework_items: list               # 本轮布置的作业题
+    homework_answers: dict             # 作业作答缓存
+    homework_results: list             # 作业评分结果
+    homework_score: int                # 作业总分
+    homework_status: str               # none/pending/completed
+    student_state_snapshot: dict       # StudentStateStore 读取到的快照
     current_topic: str
     current_user_goal: str
     session_goal: str
@@ -40,8 +60,12 @@ class AgentState(TypedDict):
     score_history: list                 # 历史得分记录 [(total, logic, concept, feedback_str), ...]
     teaching_strategy: str             # 当前教学策略: explain/analogy/stepbystep/socratic
     next_step_choice: str              # 讲解后的下一步选择
+    post_lesson_choice: str            # 节点讲解后的严格选择: temporary_question/start_test
+    continue_or_homework_choice: str    # 节点通过后的严格选择: continue_next_node/stop_today
     post_eval_choice: str              # 通过评估后的下一步选择
     practice_generation_mode: str      # 练习生成模式: ""/same_type
+    variant_questions: list            # 错题变式题
+    wrong_question_explanations: list  # 错题讲解
     pending_interaction_kind: str      # 挂起中的交互类型
     pending_interaction_prompt: str    # 挂起中的交互提示
     pending_interaction_options: list  # 挂起中的交互选项
@@ -74,10 +98,32 @@ class AgentState(TypedDict):
     resume_tester: bool                # 临时提问后是否回到原测题
     conversation_history: list         # 临时问答历史
     affect_signals: dict               # 最近一轮情绪信号 {frustrated: 0.8, curious: 0.4}
+    llm_stream_disabled: bool          # 当前会话是否禁用流式输出
+    llm_stream_failures: int           # 当前会话累计流式失败次数
 
 
 def build_initial_state(topic: str = "") -> AgentState:
     return {
+        "learning_phase": "topic_init",
+        "learning_resume_target": "intake_router",
+        "learning_resume_reason": "new_session",
+        "current_node_id": "",
+        "current_node_name": "",
+        "current_node_status": "",
+        "next_node_candidate_id": "",
+        "next_node_candidate_name": "",
+        "node_quiz_items": [],
+        "node_quiz_answers": {},
+        "node_quiz_wrong_items": [],
+        "node_quiz_score": 0,
+        "node_content_context": "",
+        "next_node_candidate_reason": "",
+        "homework_items": [],
+        "homework_answers": {},
+        "homework_results": [],
+        "homework_score": 0,
+        "homework_status": "none",
+        "student_state_snapshot": {},
         "student_id": "default_student",
         "skip_reason": "",
         "interrupt_query": "",
@@ -116,8 +162,12 @@ def build_initial_state(topic: str = "") -> AgentState:
         "score_history": [],
         "teaching_strategy": "explain",
         "next_step_choice": "",
+        "post_lesson_choice": "",
+        "continue_or_homework_choice": "",
         "post_eval_choice": "",
         "practice_generation_mode": "",
+        "variant_questions": [],
+        "wrong_question_explanations": [],
         "pending_interaction_kind": "",
         "pending_interaction_prompt": "",
         "pending_interaction_options": [],
@@ -147,4 +197,6 @@ def build_initial_state(topic: str = "") -> AgentState:
         "coach_content": "",
         "conversation_history": [],
         "affect_signals": {},
+        "llm_stream_disabled": False,
+        "llm_stream_failures": 0,
     }

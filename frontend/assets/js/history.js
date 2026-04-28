@@ -131,6 +131,7 @@
         state.currentTopicFocus = '';
         state.graphTopicHint = '';
         state.currentGraphNode = '';
+        state.currentGraphNodeId = '';
         state.userKnowledgeGraph = {};
         state.latestRadarData = null;
         app.setChatInputPlaceholder?.();

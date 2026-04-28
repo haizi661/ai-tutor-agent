@@ -181,15 +181,38 @@
         if (submit) app.handlePrimaryAction?.();
     }
 
-    function buildKnowledgeGraphUrl({ embedded = true } = {}) {
+    function buildKnowledgeGraphUrl({ embedded = true, focus = '', topic = '' } = {}) {
         const params = new URLSearchParams();
-        const topic = (state.currentTopic || state.graphTopicHint || '').trim();
-        const focus = (state.currentGraphNode || state.currentTopicFocus || '').trim();
-        if (topic) params.set('topic', topic);
-        if (focus) params.set('focus', focus);
+        const topicValue = (topic || state.currentTopic || state.graphTopicHint || '').trim();
+        const focusValue = (focus || state.currentGraphNode || state.currentGraphNodeId || state.currentTopicFocus || '').trim();
+        if (topicValue) params.set('topic', topicValue);
+        if (focusValue) params.set('focus', focusValue);
         if (embedded) params.set('embedded', '1');
-        return `/knowledge-graph/a2/viewer/index.html?${params.toString()}`;
+        return `/knowledge-graph/b/viewer/index.html?${params.toString()}`;
     }
+    app.buildKnowledgeGraphUrl = buildKnowledgeGraphUrl;
+
+    app.syncKnowledgeGraphVisualState = function syncKnowledgeGraphVisualState({ reload = false } = {}) {
+        const payload = {
+            type: 'a2-parent:graph-state',
+            currentNode: state.currentGraphNode || '',
+            currentNodeId: state.currentGraphNodeId || '',
+            userKnowledgeGraph: state.userKnowledgeGraph || {},
+        };
+        const frames = document.querySelectorAll('#knowledge-graph-frame, [data-graph-mini-frame]');
+        frames.forEach(frame => {
+            const focus = payload.currentNode || payload.currentNodeId || state.currentTopicFocus || '';
+            const nextSrc = buildKnowledgeGraphUrl({ embedded: true, focus });
+            if (reload && frame.dataset.src !== nextSrc) {
+                frame.src = nextSrc;
+                frame.dataset.src = nextSrc;
+                return;
+            }
+            try {
+                frame.contentWindow?.postMessage(payload, '*');
+            } catch (_error) {}
+        });
+    };
 
     app.openKnowledgeGraphModal = function openKnowledgeGraphModal() {
         const iframe = document.getElementById('knowledge-graph-frame');
@@ -199,10 +222,12 @@
                 iframe.src = nextSrc;
                 iframe.dataset.src = nextSrc;
             }
+            iframe.onload = () => app.syncKnowledgeGraphVisualState?.();
         }
         setModalOpen('knowledge-graph-modal', true);
         setButtonActive('open-graph-modal-btn', true);
         app.patchState?.({ knowledgeGraphModalOpen: true }, 'knowledge-graph-modal');
+        app.syncKnowledgeGraphVisualState?.();
     };
 
     app.refreshKnowledgeGraphModal = function refreshKnowledgeGraphModal() {
@@ -211,6 +236,7 @@
         const nextSrc = buildKnowledgeGraphUrl({ embedded: true });
         iframe.src = nextSrc;
         iframe.dataset.src = nextSrc;
+        iframe.onload = () => app.syncKnowledgeGraphVisualState?.();
     };
 
     app.closeKnowledgeGraphModal = function closeKnowledgeGraphModal(event) {
@@ -875,6 +901,10 @@
             if (payload?.type === 'a2-graph-viewer:status') {
                 const subtitle = document.getElementById('knowledge-graph-subtitle');
                 if (subtitle && payload.message) subtitle.textContent = String(payload.message);
+                return;
+            }
+            if (payload?.type === 'a2-graph-viewer:ready') {
+                app.syncKnowledgeGraphVisualState?.();
             }
         });
     }

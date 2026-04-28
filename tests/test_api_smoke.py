@@ -255,6 +255,49 @@ class SelectorResumeWorkflowFactory:
         return SelectorResumeGraphApp(runtime), DummyConn()
 
 
+class PendingInteractionWorkflowFactory:
+    def __init__(self, checkpoint_store):
+        self.checkpoint_store = checkpoint_store
+
+    def __call__(self, settings, runtime=None):
+        del settings
+        factory = self
+
+        class PendingInteractionGraphApp:
+            def __init__(self):
+                self.checkpoint_store = factory.checkpoint_store
+
+            def get_state(self, config):
+                thread_id = config["configurable"]["thread_id"]
+                return FakeStateSnapshot(self.checkpoint_store.states.get(thread_id, {}))
+
+            def update_state(self, config, values):
+                thread_id = config["configurable"]["thread_id"]
+                state = dict(self.checkpoint_store.states.get(thread_id, {}))
+                state.update(values)
+                self.checkpoint_store.save(thread_id, state, source="update", step=2)
+
+            def invoke(self, payload, config):
+                thread_id = config["configurable"]["thread_id"]
+                state = dict(self.checkpoint_store.states.get(thread_id, {}))
+                if payload:
+                    state.update(payload)
+                state.update(
+                    {
+                        "flow_status": "awaiting_post_lesson_choice",
+                        "pending_interaction_kind": "post_lesson_choice",
+                        "pending_interaction_prompt": "讲解完成后请选择下一步。",
+                        "pending_interaction_options": [
+                            {"value": "temporary_question", "label": "我还有临时问题"},
+                            {"value": "start_test", "label": "没有问题，开始测试"},
+                        ],
+                    }
+                )
+                self.checkpoint_store.save(thread_id, state, source="loop", step=1)
+
+        return PendingInteractionGraphApp(), DummyConn()
+
+
 class MutableKnowledgeProvider:
     def __init__(self):
         self.files = {}
@@ -417,11 +460,12 @@ def build_test_settings(tmp_path):
     )
 
 
-def create_test_client(tmp_path, *, checkpoint_store=None, workflow_factory=None):
+def create_test_client(tmp_path, *, checkpoint_store=None, workflow_factory=None, graph_rag_pipeline=None):
     checkpoint_store = checkpoint_store or FakeCheckpointStore()
     runtime = ApiRuntime(
         settings=build_test_settings(tmp_path),
         knowledge_provider=NoopKnowledgeProvider(),
+        graph_rag_pipeline=graph_rag_pipeline,
         workflow_factory=workflow_factory or FakeWorkflowFactory(checkpoint_store),
         checkpoint_factory=lambda path: (checkpoint_store, DummyConn()),
     )
@@ -448,7 +492,7 @@ def test_api_config_endpoint_allows_runtime_model_switch(tmp_path):
         updated = update.json()
         assert updated["chat_profile"] == "deepseek"
         assert updated["llm_provider"] == "openai"
-        assert updated["model_name"] == "deepseek-chat"
+        assert updated["model_name"] == "deepseek-v4-flash"
         assert updated["openai_api_base"] == "https://api.deepseek.com/v1"
 
 
@@ -457,6 +501,86 @@ def test_api_root_serves_frontend_index(tmp_path):
         response = client.get("/")
         assert response.status_code == 200
         assert "AI Tutor" in response.text
+
+
+def test_stream_end_includes_pending_interaction_payload_for_state_pauses(tmp_path):
+    thread_id = "session-pending-end"
+    checkpoint_store = FakeCheckpointStore()
+    with create_test_client(
+        tmp_path,
+        checkpoint_store=checkpoint_store,
+        workflow_factory=PendingInteractionWorkflowFactory(checkpoint_store),
+    ) as client:
+        start = client.post("/api/start", json={"thread_id": thread_id, "topic": "控制理论"})
+        assert start.status_code == 200
+
+        stream = client.get(f"/api/stream?thread_id={thread_id}")
+
+    assert stream.status_code == 200
+    assert "event: session.end" in stream.text
+    assert '"pending_interaction_kind": "post_lesson_choice"' in stream.text
+    assert '"我还有临时问题"' in stream.text
+    assert '"没有问题，开始测试"' in stream.text
+
+
+def test_graph_b_data_sanitizes_non_json_values(tmp_path):
+    try:
+        import numpy as np
+    except Exception:
+        np = None
+    try:
+        import pandas as pd
+    except Exception:
+        pd = None
+
+    class FakeNAType:
+        __module__ = "pandas._libs.missing"
+
+    class FakeArray:
+        def tolist(self):
+            return [float("nan"), 2]
+
+    class FakeScalar:
+        def item(self):
+            return float("inf")
+
+    class DirtyGraphPipeline:
+        nodes = [
+            {
+                "node_id": "N1",
+                "name": "节点一",
+                "bad": float("nan"),
+                "arr": np.array([1.0, float("inf")]) if np is not None else FakeArray(),
+                "path": Path("graph/node.md"),
+                "missing": pd.NA if pd is not None else FakeNAType(),
+                "nested": {"ratio": float("-inf")},
+            }
+        ]
+        edges = [
+            {
+                "source": "N1",
+                "target": "N2",
+                "relation_strength": float("nan"),
+                "weight": np.float64(float("inf")) if np is not None else FakeScalar(),
+                "evidence": [float("nan"), Path("edge.md")],
+            }
+        ]
+
+    with create_test_client(tmp_path, graph_rag_pipeline=DirtyGraphPipeline()) as client:
+        response = client.get("/api/graph/b/data.json")
+
+    assert response.status_code == 200
+    assert b"NaN" not in response.content
+    assert b"Infinity" not in response.content
+    payload = response.json()
+    assert payload["nodes"][0]["bad"] is None
+    assert payload["nodes"][0]["arr"] == [1.0, None] or payload["nodes"][0]["arr"] == [None, 2]
+    assert payload["nodes"][0]["path"] == "graph/node.md"
+    assert payload["nodes"][0]["missing"] is None
+    assert payload["nodes"][0]["nested"]["ratio"] is None
+    assert payload["edges"][0]["relation_strength"] == 0.5
+    assert payload["edges"][0]["weight"] == 0.5
+    assert payload["edges"][0]["evidence"] == [None, "edge.md"]
 
 
 def test_pre_assessment_pause_submit_and_restore_flow(tmp_path):
@@ -966,6 +1090,80 @@ def test_api_answer_can_resume_pending_selector_from_checkpoint(tmp_path):
         assert updated["flow_status"] == "normal"
         assert updated["next_step_choice"] == "practice_now"
         assert updated["pending_interaction_answer"] == ""
+
+
+def test_api_answer_can_resume_new_pending_interaction_from_checkpoint(tmp_path):
+    checkpoint_store = FakeCheckpointStore()
+    checkpoint_store.save(
+        "post-lesson-thread",
+        {
+            "flow_status": "awaiting_post_lesson_choice",
+            "learning_phase": "post_lesson_choice",
+            "learning_resume_target": "post_lesson_choice",
+            "pending_interaction_kind": "post_lesson_choice",
+            "pending_interaction_answer": "",
+        },
+    )
+    runtime = ApiRuntime(
+        settings=build_test_settings(tmp_path),
+        knowledge_provider=NoopKnowledgeProvider(),
+        workflow_factory=SelectorResumeWorkflowFactory(checkpoint_store),
+        checkpoint_factory=lambda path: (checkpoint_store, DummyConn()),
+    )
+
+    with TestClient(create_api_app(runtime_factory=lambda: runtime)) as client:
+        response = client.post(
+            "/api/answer",
+            json={"thread_id": "post-lesson-thread", "answer": "start_test"},
+        )
+        assert response.status_code == 200
+
+        deadline = time.time() + 2
+        while time.time() < deadline:
+            updated = checkpoint_store.states.get("post-lesson-thread", {})
+            if updated.get("pending_interaction_answer") == "start_test":
+                break
+            time.sleep(0.05)
+
+        updated = checkpoint_store.states["post-lesson-thread"]
+        assert updated["pending_interaction_answer"] == "start_test"
+
+
+def test_api_answer_can_resume_objective_answers_from_checkpoint(tmp_path):
+    checkpoint_store = FakeCheckpointStore()
+    checkpoint_store.save(
+        "objective-thread",
+        {
+            "flow_status": "awaiting_objective_answers",
+            "learning_phase": "node_quiz_batch",
+            "learning_resume_target": "objective_test_scorer",
+            "pending_interaction_kind": "objective_test_answers",
+            "pending_interaction_answer": "",
+        },
+    )
+    runtime = ApiRuntime(
+        settings=build_test_settings(tmp_path),
+        knowledge_provider=NoopKnowledgeProvider(),
+        workflow_factory=SelectorResumeWorkflowFactory(checkpoint_store),
+        checkpoint_factory=lambda path: (checkpoint_store, DummyConn()),
+    )
+
+    with TestClient(create_api_app(runtime_factory=lambda: runtime)) as client:
+        response = client.post(
+            "/api/answer",
+            json={"thread_id": "objective-thread", "answer": '{"Q1":"A"}'},
+        )
+        assert response.status_code == 200
+
+        deadline = time.time() + 2
+        while time.time() < deadline:
+            updated = checkpoint_store.states.get("objective-thread", {})
+            if updated.get("pending_interaction_answer") == '{"Q1":"A"}':
+                break
+            time.sleep(0.05)
+
+        updated = checkpoint_store.states["objective-thread"]
+        assert updated["pending_interaction_answer"] == '{"Q1":"A"}'
 
 
 def test_waiting_for_input_timeout_emits_error_and_end(monkeypatch, tmp_path):

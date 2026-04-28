@@ -9,6 +9,7 @@ from pydantic import BaseModel
 
 from ...application.session import run_learning_session
 from ...core.events import make_event
+from ...core.learning_flow import infer_resume_target
 from ...core.ports import RuntimeContext
 from ..sse import format_sse
 from .adapter import WebAnswerProvider, WebEventSink
@@ -20,6 +21,19 @@ router = APIRouter(prefix="/api", tags=["session"])
 SSE_POLL_TIMEOUT_SECONDS = 15
 RESUME_POLL_INTERVAL_SECONDS = 0.05
 RESUME_POLL_TIMEOUT_SECONDS = 3
+
+PENDING_INTERACTION_FLOW_STATUSES = {
+    "awaiting_next_step_selector",
+    "awaiting_post_eval_selector",
+    "awaiting_post_lesson_choice",
+    "awaiting_temporary_question",
+    "awaiting_objective_answers",
+    "awaiting_variant_answers",
+    "awaiting_continue_or_homework_choice",
+    "awaiting_consolidation_choice",
+    "awaiting_homework_review_choice",
+    "awaiting_homework_answers",
+}
 
 
 class ChatRequest(BaseModel):
@@ -64,7 +78,13 @@ def _thread_config(thread_id: str) -> dict:
 
 
 def _checkpoint_state_patch(thread_id: str, runtime, patch: dict) -> None:
-    runtime_context = RuntimeContext(knowledge_provider=runtime.knowledge_provider)
+    runtime_context = RuntimeContext(
+        knowledge_provider=runtime.knowledge_provider,
+        settings=runtime.settings,
+        graph_rag_pipeline=runtime.graph_rag_pipeline,
+        student_state_store=runtime.student_state_store,
+        question_bank_provider=getattr(runtime, "question_bank_provider", None),
+    )
     graph_app, conn = runtime.workflow_factory(runtime.settings, runtime=runtime_context)
     try:
         graph_app.update_state(_thread_config(thread_id), patch)
@@ -99,6 +119,10 @@ def _build_runtime_context(thread_id: str, runtime, event_q: queue.Queue, input_
         event_sink=event_sink,
         answer_provider=answer_provider,
         knowledge_provider=runtime.knowledge_provider,
+        settings=runtime.settings,
+        graph_rag_pipeline=runtime.graph_rag_pipeline,
+        student_state_store=runtime.student_state_store,
+        question_bank_provider=getattr(runtime, "question_bank_provider", None),
     )
 
 
@@ -116,9 +140,39 @@ def _run_graph_session(
     try:
         runner(graph_app, runtime_context, thread_config)
     except Exception as exc:
-        runtime_context.event_sink.emit(make_event("session.error", "api", message=str(exc)))
+        import traceback
+        tb = traceback.format_exc()
+        print(f"[session:{thread_id}] Graph run error: {exc}\n{tb}")
+        err_type = type(exc).__name__
+        err_msg = str(exc).strip() or "未知错误"
+        hint = ""
+        if "Connection" in err_type or "connection" in err_msg.lower():
+            hint = "\n💡 提示：LLM 服务连接失败，请检查网络或在设置中确认 API Key 和模型配置。"
+        elif "auth" in err_msg.lower() or "api key" in err_msg.lower() or "401" in err_msg:
+            hint = "\n💡 提示：API Key 无效或已过期，请在设置中更新。"
+        elif "rate" in err_msg.lower() or "429" in err_msg:
+            hint = "\n💡 提示：API 调用频率超限，请稍后重试。"
+        runtime_context.event_sink.emit(
+            make_event("session.error", "api", message=f"{err_msg}{hint}")
+        )
     finally:
-        runtime_context.event_sink.emit(make_event("session.end", "api", message="Session ended."))
+        end_data = {}
+        try:
+            final_state = graph_app.get_state(thread_config)
+            values = dict(getattr(final_state, "values", {}) or {})
+            pending_kind = str(values.get("pending_interaction_kind") or "").strip()
+            if pending_kind or values.get("flow_status") in PENDING_INTERACTION_FLOW_STATUSES:
+                end_data = {
+                    "flow_status": values.get("flow_status", ""),
+                    "pending_interaction_kind": pending_kind,
+                    "interaction_kind": pending_kind,
+                    "prompt": values.get("pending_interaction_prompt", ""),
+                    "options": values.get("pending_interaction_options", []),
+                    "recommended": values.get("pending_interaction_recommended", ""),
+                }
+        except Exception:
+            end_data = {}
+        runtime_context.event_sink.emit(make_event("session.end", "api", message="这一轮处理完成。", data=end_data))
         conn.close()
         runtime.session_manager.mark_finished(thread_id)
 
@@ -132,6 +186,7 @@ def _graph_worker(thread_id: str, topic: str, runtime, event_q: queue.Queue, inp
             thread_id=thread_id,
             topic=topic,
             current_state=current_state,
+            runtime_context=runtime_context,
         )
 
     _run_graph_session(thread_id, runtime, event_q, input_q, runner)
@@ -150,6 +205,9 @@ def _resume_assessment_worker(
             {
                 "assessment_answers": answers,
                 "flow_status": "profiling",
+                "learning_phase": "profile_complete",
+                "learning_resume_target": "user_profiler",
+                "learning_resume_reason": "assessment_submitted",
             },
         )
         runtime_context.event_sink.emit(
@@ -177,6 +235,9 @@ def _resume_assessment_dialog_worker(
             {
                 "pending_interaction_answer": answer,
                 "flow_status": "assessment_dialog",
+                "learning_phase": "pre_assessment",
+                "learning_resume_target": "assessment_dialog",
+                "learning_resume_reason": "assessment_dialog_answer",
             },
         )
         graph_app.invoke(None, config=thread_config)
@@ -218,6 +279,9 @@ def _resume_topic_confirmation_worker(
                         "current_user_goal": "",
                         "proposed_topic": "",
                         "flow_status": "greeting",
+                        "learning_phase": "topic_init",
+                        "learning_resume_target": "greeter",
+                        "learning_resume_reason": "missing_confirmed_topic",
                     },
                 )
                 runtime_context.event_sink.emit(
@@ -236,7 +300,10 @@ def _resume_topic_confirmation_worker(
                         "session_goal": session_goal or current_goal or confirmed_topic,
                         "turn_goal": turn_goal or topic_focus or current_goal or confirmed_topic,
                         "proposed_topic": "",
-                        "flow_status": "assessment_pending" if requested_mode == "assessment" else "direct_tutor",
+                        "flow_status": "assessment_pending" if requested_mode == "assessment" else "normal",
+                        "learning_phase": "pre_assessment" if requested_mode == "assessment" else "node_selection",
+                        "learning_resume_target": "assessment_generator" if requested_mode == "assessment" else "initial_node_selector",
+                        "learning_resume_reason": "topic_confirmed",
                         "teaching_strategy": "analogy" if requested_mode == "analogy_tutor" else "explain",
                         "topic_focus": topic_focus,
                         "topic_background": topic_background,
@@ -246,8 +313,8 @@ def _resume_topic_confirmation_worker(
                 )
                 start_message = {
                     "assessment": f"✅ 已确认学习主题：{confirmed_topic}。我们先快速摸一下起点，再开始正式讲解。",
-                    "direct_tutor": f"✅ 已确认学习主题：{confirmed_topic}。我先直接开始讲，讲到合适的位置再决定要不要练一题。",
-                    "analogy_tutor": f"✅ 已确认学习主题：{confirmed_topic}。我先用更直观的例子带你入门，再逐步深入。",
+                    "direct_tutor": f"✅ 已确认学习主题：{confirmed_topic}。跳过测评，我先从知识图谱选一个起点节点开始讲。",
+                    "analogy_tutor": f"✅ 已确认学习主题：{confirmed_topic}。跳过测评，我先用更直观的例子从第一个节点带你入门。",
                 }[requested_mode]
                 runtime_context.event_sink.emit(
                     make_event(
@@ -271,6 +338,9 @@ def _resume_topic_confirmation_worker(
                     "topic_starter_options": [],
                     "topic_clarify_rounds": 0,
                     "flow_status": "greeting",
+                    "learning_phase": "topic_init",
+                    "learning_resume_target": "greeter",
+                    "learning_resume_reason": "topic_rejected",
                 },
             )
             runtime_context.event_sink.emit(
@@ -304,6 +374,9 @@ def _resume_interrupt_confirmation_worker(
                     "flow_status": "normal",
                     "interrupt_query": "",
                     "resume_tester": resume_tester,
+                    "learning_phase": "node_quiz_batch" if resume_tester else "node_teaching",
+                    "learning_resume_target": "tester" if resume_tester else "next_step_selector",
+                    "learning_resume_reason": "interrupt_confirmed",
                     "skip_reason": "",
                     "user_answer": "",
                     "conversation_history": cleaned_history,
@@ -320,7 +393,12 @@ def _resume_interrupt_confirmation_worker(
         else:
             graph_app.update_state(
                 thread_config,
-                {"flow_status": "awaiting_interrupt_confirmation"},
+                {
+                    "flow_status": "awaiting_interrupt_confirmation",
+                    "learning_phase": "node_temp_qna",
+                    "learning_resume_target": "interruption_tutor",
+                    "learning_resume_reason": "interrupt_followup_continues",
+                },
             )
             runtime_context.event_sink.emit(
                 make_event(
@@ -334,7 +412,7 @@ def _resume_interrupt_confirmation_worker(
     _run_graph_session(thread_id, runtime, event_q, input_q, runner)
 
 
-def _resume_pending_selector_worker(
+def _resume_pending_interaction_worker(
     thread_id: str,
     answer: str,
     runtime,
@@ -344,25 +422,30 @@ def _resume_pending_selector_worker(
     def runner(graph_app, runtime_context, thread_config):
         state = graph_app.get_state(thread_config).values or {}
         flow_status = str(state.get("flow_status", "") or "")
-        if flow_status not in {"awaiting_next_step_selector", "awaiting_post_eval_selector"}:
+        if flow_status not in PENDING_INTERACTION_FLOW_STATUSES:
             runtime_context.event_sink.emit(
                 make_event(
                     "session.warning",
                     "api",
-                    message="当前没有可恢复的选择器步骤。",
+                    message="当前没有可恢复的待处理交互。",
                 )
             )
             return
 
-        graph_app.update_state(
-            thread_config,
+        graph_app.invoke(
             {
                 "pending_interaction_answer": answer,
+                "learning_resume_target": infer_resume_target(state),
+                "learning_resume_reason": "api_pending_interaction_answered",
             },
+            config=thread_config,
         )
-        graph_app.invoke(None, config=thread_config)
 
     _run_graph_session(thread_id, runtime, event_q, input_q, runner)
+
+
+# Backward-compatible alias for older tests/imports that still use selector wording.
+_resume_pending_selector_worker = _resume_pending_interaction_worker
 
 
 def _start_worker(thread_id: str, runtime, target, *worker_args):
@@ -462,11 +545,11 @@ async def provide_answer(req: AnswerRequest, request: Request):
         finally:
             saver_conn.close()
 
-        if state.get("flow_status") in {"awaiting_next_step_selector", "awaiting_post_eval_selector"}:
+        if state.get("flow_status") in PENDING_INTERACTION_FLOW_STATUSES:
             _schedule_resume_worker(
                 req.thread_id,
                 runtime,
-                _resume_pending_selector_worker,
+                _resume_pending_interaction_worker,
                 req.thread_id,
                 req.answer,
             )

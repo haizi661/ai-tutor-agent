@@ -74,31 +74,34 @@ def _build_concept_candidates(graph_nodes: dict) -> list[dict]:
 # AssessmentGenerator — 生成 10 自评 + 10 配对客观题
 # ===========================================================================
 
-def build_assessment_generator_node(llm, event_sink: EventSink, *, graph_nodes: Optional[dict] = None):
+def build_assessment_generator_node(llm, event_sink: EventSink, *, graph_nodes: Optional[dict] = None, question_bank_provider=None):
     """
     Parameters
     ----------
     graph_nodes : dict[str, dict] | None
         由 retriever.course_graph_nodes 提供，key 为节点标题。
         为 None 时由 LLM 自行从领域知识中选概念。
+    question_bank_provider : QuestionBankProvider | None
+        本地题库。优先从题库取题，不足时再用 LLM 补充。
     """
 
     def node(state: AgentState) -> dict:
         topic = state["current_topic"]
 
-        # ── 幂等保护：题目已存在时直接推第一道未答题（刷新场景）──
+        # ── 幂等保护：题目已存在时直接重发（刷新场景）──
         existing = state.get("assessment_questions", [])
-        existing_as = dict(state.get("assessment_state") or {})
-        if existing and existing_as.get("pairs"):
-            # 恢复场景：重推当前待答题
-            pair_idx = int(existing_as.get("current_pair_index") or 0)
-            phase = str(existing_as.get("phase") or "self_eval")
-            pairs = existing_as["pairs"]
-            if pair_idx < len(pairs):
-                _emit_current_question(event_sink, pairs, pair_idx, phase, len(pairs))
+        if existing:
+            event_sink.emit(
+                make_event(
+                    "assessment.batch",
+                    "assessment_generator",
+                    message="测评题目已就绪，请作答。",
+                    data={"questions": existing},
+                )
+            )
             return {
-                "flow_status": "assessment_dialog",
-                "assessment_state": existing_as,
+                "flow_status": "awaiting_assessment",
+                "assessment_questions": existing,
             }
 
         event_sink.emit(
@@ -112,147 +115,81 @@ def build_assessment_generator_node(llm, event_sink: EventSink, *, graph_nodes: 
 
         # ── 构建概念候选提示 ──
         candidates = _build_concept_candidates(graph_nodes or {})
-        concept_hint = ""
-        if candidates:
-            concept_list = json.dumps(candidates, ensure_ascii=False)
-            concept_hint = (
-                f"\n可用知识图谱概念（共 {len(candidates)} 个，请从中选出最能代表【{topic}】整体掌握水平的概念）：\n"
-                f"{concept_list}\n"
-            )
 
-        system_msg = SystemMessage(
-            content=(
-                "你是一位经验丰富的教育测评专家，擅长设计精准的诊断性测评量表。"
-                "你的输出必须是合法 JSON，不含任何 Markdown 代码块标记。"
-            )
-        )
-        human_msg = HumanMessage(
-            content=f"""请为学习主题【{topic}】设计一份「概念配对双测量表」。
-{concept_hint}
-任务说明：
-1. 选出 10 个能全面覆盖【{topic}】学习范围的核心概念（分散在基础/规则/推理/应用等不同层次）
-2. 为每个概念生成：
-   - 1 道自我评价题（Q1-Q10）：让学生判断自己能不能处理一个具体情境，不要像打分表
-   - 1 道配对客观题（Q11-Q20）：考察同一概念的实际掌握，必须放进具体工程/应用情境
-3. 配对关系固定：Q1↔Q11, Q2↔Q12, ..., Q10↔Q20
+        # ── 1) 优先从题库取题 ──
+        bank_questions: list = []
+        if question_bank_provider is not None and hasattr(question_bank_provider, "get_assessment_questions"):
+            try:
+                bank_questions = list(question_bank_provider.get_assessment_questions([], k=10) or [])
+            except Exception:
+                bank_questions = []
+            if bank_questions:
+                bank_questions = _adapt_bank_questions(bank_questions)
 
-自评题选项（固定，所有自评题相同）：
-A. 从没接触过  B. 听说过，但说不清  C. 理解基本概念，能说出来  D. 能熟练应用或推导
-
-客观题要求：
-- 四选一，有干扰项
-- 包含 correct 与 correct_answer（A/B/C/D 之一，二者相同）
-- 题干必须落在具体场景里，不能写成纯名词解释
-
-dimension 必须是以下六者之一（每道题都要有）：
-基础概念 / 规则理解 / 逻辑推理 / 场景应用 / 细节辨析 / 综合应用
-
-额外要求：
-- concept / concept_title 使用节点名称
-- concept_id 优先使用图谱里的 concept_id；没有时可回填 concept_title
-- 自评题不要写“请打分 1-5”
-- 不要一次性像卷子说明那样解释流程，题干本身要像老师在摸底
-- 客观题的错误选项要像学生真的会选的干扰项，而不是明显错误
-
-输出 JSON Schema（直接输出，不加任何说明）：
-{{
-  "questions": [
-    {{
-      "id": 1,
-      "type": "self_eval",
-      "concept": "概念名称",
-      "concept_id": "node_id",
-      "concept_title": "概念名称",
-      "paired_id": 11,
-      "dimension": "基础概念",
-      "question": "如果有人让你用一个具体场景解释「概念名称」，你现在能处理到什么程度？",
-      "options": ["A. 从没接触过", "B. 听说过，但说不清", "C. 理解基本概念，能说出来", "D. 能熟练应用或推导"],
-      "correct": "",
-      "correct_answer": ""
-    }},
-    ...（Q1-Q10 自评）
-    {{
-      "id": 11,
-      "type": "objective",
-      "concept": "概念名称",
-      "concept_id": "node_id",
-      "concept_title": "概念名称",
-      "paired_id": 1,
-      "dimension": "基础概念",
-      "question": "给出一个具体工程或应用情境，问关于「概念名称」的判断题。",
-      "options": ["A. ...", "B. ...", "C. ...", "D. ..."],
-      "correct": "B",
-      "correct_answer": "B"
-    }},
-    ...（Q11-Q20 客观）
-  ]
-}}"""
-        )
-
-        raw = ""
-        for chunk in llm.stream([system_msg, human_msg]):
-            raw += content_to_text(chunk.content)
-
+        # ── 2) 题库不足时用 LLM 补充 ──
         questions: list = []
-        try:
-            cleaned = raw.strip()
-            for prefix in ("```json", "```"):
-                if cleaned.startswith(prefix):
-                    cleaned = cleaned[len(prefix):]
-                    break
-            if cleaned.endswith("```"):
-                cleaned = cleaned[:-3]
-            parsed = json.loads(cleaned.strip())
-            questions = parsed.get("questions", [])
-        except Exception as exc:
+        if len(bank_questions) >= 10:
+            questions = bank_questions[:10]
             event_sink.emit(
                 make_event(
-                    "session.warning",
+                    "node.stream",
                     "assessment_generator",
-                    message=f"测评量表 JSON 解析失败: {exc}",
+                    data={"text": "（本轮测评使用题库中的标准题目）\n"},
                 )
             )
+        else:
+            questions = list(bank_questions)
+            remaining = 10 - len(questions)
+            llm_questions = _generate_llm_assessment_questions(llm, event_sink, topic, candidates, remaining)
+            questions.extend(llm_questions)
+            if bank_questions:
+                event_sink.emit(
+                    make_event(
+                        "node.stream",
+                        "assessment_generator",
+                        data={"text": f"（题库提供 {len(bank_questions)} 题，AI 补充 {len(llm_questions)} 题）\n"},
+                    )
+                )
 
-        # ── 组装 10 组配对 pair ──
-        pairs = _build_pairs(questions)
-        assessment_state_dict = {
-            "phase": "self_eval",
-            "current_pair_index": 0,
-            "pairs": pairs,
-            "answers": {},
-            "pending_self_score": None,
-        }
+        questions = _normalize_subjective_questions(questions, candidates)
 
-        # ── 发出对话式引导语 + 第一道自评题 ──
+        # ── 发出引导语 ──
         event_sink.emit(
             make_event(
                 "node.stream",
                 "assessment_generator",
-                data={"text": "接下来我会一题一题地问你，先是自我评价，然后是对应的实际判断题。我们开始吧。\n\n"},
+                data={"text": f"接下来请完成 {len(questions)} 道自评题，帮我快速了解你的起点。\n\n"},
             )
         )
-        if pairs:
-            _emit_current_question(event_sink, pairs, 0, "self_eval", len(pairs))
+
+        # ── 批量推送所有题目，由前端步进器处理翻页 ──
+        event_sink.emit(
+            make_event(
+                "assessment.batch",
+                "assessment_generator",
+                message="测评题目已就绪，请作答。",
+                data={"questions": questions},
+            )
+        )
 
         event_sink.emit(
             make_event(
                 "node.complete",
                 "assessment_generator",
-                message="概念配对量表已生成，开始逐题追问。",
-                data={"count": len(questions), "pair_count": len(pairs)},
+                message="学前测评题已生成，等待用户作答。",
+                data={"count": len(questions)},
             )
         )
 
         return {
             "assessment_questions": questions,
-            "assessment_state": assessment_state_dict,
-            "flow_status": "assessment_dialog",
+            "flow_status": "awaiting_assessment",
             "message_history": list(state.get("message_history", []))
             + [
                 {
                     "role": "assistant",
                     "kind": "assessment_intro",
-                    "content": "学前小测开始，我会一题一题地追问你。",
+                    "content": f"学前自评开始，共 {len(questions)} 道题。",
                 }
             ],
         }
@@ -261,11 +198,148 @@ dimension 必须是以下六者之一（每道题都要有）：
 
 
 # ===========================================================================
+# 辅助：题库题目 → 标准评估格式
+# ===========================================================================
+
+def _adapt_bank_questions(bank_items: list) -> list[dict]:
+    """把题库 JSONL 格式的题目转换成 assessment_generator 内部格式。"""
+    adapted = []
+    for item in bank_items:
+        qid = item.get("question_id") or item.get("id") or f"BANK-{len(adapted) + 1}"
+        question_text = str(item.get("question") or item.get("stem") or item.get("prompt") or "").strip()
+        if not question_text:
+            continue
+        options = item.get("options", [])
+        if isinstance(options, dict):
+            options = [f"{k}. {v}" for k, v in sorted(options.items())]
+        score_map = item.get("score_map") or dict(SELF_SCORE_MAP)
+        if isinstance(score_map, dict):
+            score_map = {str(k).upper(): int(v) for k, v in score_map.items()}
+        adapted.append({
+            "id": len(adapted) + 1,
+            "type": item.get("type", "subjective_choice"),
+            "concept": str(item.get("concept") or item.get("concept_title") or "").strip(),
+            "concept_id": str(item.get("concept_id") or item.get("node_id") or "").strip(),
+            "concept_title": str(item.get("concept_title") or item.get("concept") or "").strip(),
+            "dimension": str(item.get("dimension") or "").strip(),
+            "question": question_text,
+            "options": options,
+            "score_map": score_map,
+        })
+    return adapted
+
+
+def _generate_llm_assessment_questions(llm, event_sink: EventSink, topic: str, candidates: list[dict], count: int) -> list:
+    """用 LLM 生成指定数量的主观选择题（当题库不足时调用）。"""
+    if llm is None or count <= 0:
+        return []
+
+    concept_hint = ""
+    if candidates:
+        concept_list = json.dumps(candidates, ensure_ascii=False)
+        concept_hint = (
+            f"\n可用知识图谱概念（共 {len(candidates)} 个，请从中选出最能代表【{topic}】整体掌握水平的概念）：\n"
+            f"{concept_list}\n"
+        )
+
+    system_msg = SystemMessage(
+        content=(
+            "你是一位经验丰富的教育测评专家，擅长设计精准的诊断性测评量表。"
+            "你的输出必须是合法 JSON，不含任何 Markdown 代码块标记。"
+        )
+    )
+    human_msg = HumanMessage(
+        content=f"""请为学习主题【{topic}】设计 {count} 道自我评估选择题用于学前摸底。
+{concept_hint}
+任务说明：
+1. 选出 {count} 个能覆盖【{topic}】学习范围的核心概念（分散在基础/规则/推理/应用等不同层次）
+2. 每题让学生评估自己对某个概念的了解和熟悉程度（例如"关于「XX」，你目前的了解程度如何？"）
+3. 四个选项 A/B/C/D 从低到高依次为：没接触过 → 有所耳闻但模糊 → 比较了解 → 非常熟悉能运用
+4. 每题必须提供 score_map，A/B/C/D 分别映射为 25/50/75/100
+5. 选项描述要贴合该概念的学习场景，帮助学生准确定位自己的水平
+
+dimension 必须是以下六者之一：
+基础概念 / 规则理解 / 逻辑推理 / 场景应用 / 细节辨析 / 综合应用
+
+输出 JSON Schema（直接输出，不加任何说明）：
+{{{{
+  "questions": [
+    {{{{
+      "id": 1,
+      "type": "subjective_choice",
+      "concept": "概念名称",
+      "concept_id": "node_id",
+      "concept_title": "概念名称",
+      "dimension": "基础概念",
+      "question": "题干",
+      "options": ["A. ...", "B. ...", "C. ...", "D. ..."],
+      "score_map": {{{{"A": 25, "B": 50, "C": 75, "D": 100}}}}
+    }}}}
+  ]
+}}}}"""
+    )
+
+    raw = ""
+    try:
+        for chunk in llm.stream([system_msg, human_msg]):
+            raw += content_to_text(chunk.content)
+    except Exception as exc:
+        event_sink.emit(
+            make_event(
+                "session.warning",
+                "assessment_generator",
+                message=f"LLM 出题请求失败: {exc}",
+            )
+        )
+        return []
+
+    questions: list = []
+    try:
+        cleaned = raw.strip()
+        for prefix in ("```json", "```"):
+            if cleaned.startswith(prefix):
+                cleaned = cleaned[len(prefix):]
+                break
+        if cleaned.endswith("```"):
+            cleaned = cleaned[:-3]
+        parsed = json.loads(cleaned.strip())
+        questions = parsed.get("questions", [])
+    except Exception as exc:
+        event_sink.emit(
+            make_event(
+                "session.warning",
+                "assessment_generator",
+                message=f"测评量表 JSON 解析失败: {exc}",
+            )
+        )
+
+    return questions[:count]
+
+
+# ===========================================================================
 # 辅助：从 20 题中组装 10 组配对
 # ===========================================================================
 
 def _build_pairs(questions: list) -> list[dict]:
     """从 Q1-Q10 (self_eval) + Q11-Q20 (objective) 组装 10 组配对。"""
+    if _is_subjective_assessment(questions):
+        pairs = []
+        for question in questions[:10]:
+            concept = _question_concept_title(question) or f"概念{question.get('id', len(pairs) + 1)}"
+            pairs.append({
+                "index": len(pairs),
+                "concept": concept,
+                "concept_id": str(question.get("concept_id") or concept).strip(),
+                "subjective": {
+                    "id": question["id"],
+                    "question": question.get("question", ""),
+                    "options": question.get("options", []),
+                    "dimension": str(question.get("dimension") or "").strip(),
+                    "score_map": question.get("score_map") or dict(SELF_SCORE_MAP),
+                },
+            })
+        return pairs
+
     self_qs = {q["id"]: q for q in questions if q.get("type") == "self_eval"}
     obj_qs = {q["id"]: q for q in questions if q.get("type") == "objective"}
 
@@ -295,11 +369,118 @@ def _build_pairs(questions: list) -> list[dict]:
     return pairs
 
 
+def _is_subjective_assessment(questions: list) -> bool:
+    return bool(questions) and all(q.get("type") == "subjective_choice" for q in questions[:10])
+
+
+def _normalize_subjective_questions(questions: list, candidates: list[dict]) -> list[dict]:
+    normalized: list[dict] = []
+    for index, raw in enumerate([q for q in questions if isinstance(q, dict)], start=1):
+        if len(normalized) >= 10:
+            break
+        if raw.get("type") == "objective":
+            continue
+        concept = str(raw.get("concept_title") or raw.get("concept") or "").strip()
+        question_text = str(raw.get("question") or "").strip()
+        if not concept and index - 1 < len(candidates):
+            concept = str(candidates[index - 1].get("concept_title") or candidates[index - 1].get("concept") or "").strip()
+        if not concept:
+            concept = f"概念{index}"
+        if not question_text:
+            question_text = f"关于「{concept}」，你目前的了解和掌握程度如何？"
+        options = _normalize_subjective_options(raw.get("options"))
+        score_map = _normalize_score_map(raw.get("score_map"))
+        normalized.append(
+            {
+                "id": len(normalized) + 1,
+                "type": "subjective_choice",
+                "concept": concept,
+                "concept_id": str(raw.get("concept_id") or concept).strip(),
+                "concept_title": concept,
+                "dimension": str(raw.get("dimension") or ASSESSMENT_DIMENSIONS[(len(normalized)) % len(ASSESSMENT_DIMENSIONS)]).strip(),
+                "question": question_text,
+                "options": options,
+                "score_map": score_map,
+            }
+        )
+
+    while len(normalized) < 10:
+        index = len(normalized)
+        candidate = candidates[index] if index < len(candidates) else {}
+        concept = str(candidate.get("concept_title") or candidate.get("concept") or f"概念{index + 1}").strip()
+        normalized.append(
+            {
+                "id": index + 1,
+                "type": "subjective_choice",
+                "concept": concept,
+                "concept_id": str(candidate.get("concept_id") or concept).strip(),
+                "concept_title": concept,
+                "dimension": ASSESSMENT_DIMENSIONS[index % len(ASSESSMENT_DIMENSIONS)],
+                "question": f"关于「{concept}」，你目前的了解和掌握程度如何？",
+                "options": _normalize_subjective_options([]),
+                "score_map": dict(SELF_SCORE_MAP),
+            }
+        )
+    return normalized
+
+
+def _normalize_subjective_options(options: object) -> list[str]:
+    values = [str(item).strip() for item in options or [] if str(item).strip()] if isinstance(options, list) else []
+    defaults = [
+        "A. 基本没接触过，不太清楚这个概念",
+        "B. 有所耳闻，但理解比较模糊",
+        "C. 比较了解，能说出核心要点",
+        "D. 非常熟悉，能灵活运用",
+    ]
+    merged = values[:4] + defaults[len(values[:4]):]
+    result = []
+    for idx, text in enumerate(merged[:4]):
+        key = "ABCD"[idx]
+        if text[:1].upper() in {"A", "B", "C", "D"}:
+            result.append(text)
+        else:
+            result.append(f"{key}. {text}")
+    return result
+
+
+def _normalize_score_map(score_map: object) -> dict[str, int]:
+    if isinstance(score_map, dict):
+        result = {}
+        for key in ("A", "B", "C", "D"):
+            try:
+                result[key] = int(score_map.get(key, SELF_SCORE_MAP[key]))
+            except Exception:
+                result[key] = SELF_SCORE_MAP[key]
+        return result
+    return dict(SELF_SCORE_MAP)
+
+
 def _emit_current_question(event_sink: EventSink, pairs: list, pair_idx: int, phase: str, total_pairs: int):
     """通过 SSE 事件发出当前待答的一道题。"""
     if pair_idx >= len(pairs):
         return
     pair = pairs[pair_idx]
+    if phase == "subjective_choice":
+        q = pair["subjective"]
+        event_sink.emit(
+            make_event(
+                "assessment.question",
+                "assessment_dialog",
+                message=q["question"],
+                data={
+                    "pair_index": pair_idx,
+                    "total_pairs": total_pairs,
+                    "phase": "subjective_choice",
+                    "concept": pair["concept"],
+                    "question_id": q["id"],
+                    "question": q["question"],
+                    "options": q["options"],
+                    "score_map": q.get("score_map") or dict(SELF_SCORE_MAP),
+                },
+            )
+        )
+        return
+
     if phase == "self_eval":
         q = pair["self_eval"]
         event_sink.emit(
@@ -370,6 +551,62 @@ def build_assessment_dialog_node(event_sink: EventSink):
 
         pair = pairs[pair_idx]
         message_history = list(state.get("message_history", []))
+
+        if phase == "subjective_choice":
+            question = pair["subjective"]
+            answers[str(question["id"])] = user_answer
+            message_history.append({
+                "role": "user",
+                "kind": "assessment_answer",
+                "content": user_answer,
+                "data": {"question_id": question["id"], "phase": "subjective_choice"},
+            })
+
+            next_idx = pair_idx + 1
+            as_dict["current_pair_index"] = next_idx
+            as_dict["answers"] = answers
+
+            if next_idx >= total:
+                as_dict["phase"] = "done"
+                event_sink.emit(
+                    make_event(
+                        "node.stream",
+                        "assessment_dialog",
+                        data={"text": "\n10 道题完成了！我现在来分析你的起点……\n"},
+                    )
+                )
+                event_sink.emit(
+                    make_event(
+                        "node.complete",
+                        "assessment_dialog",
+                        message="主观选择测评完成，进入画像分析。",
+                        data={"total_answered": len(answers)},
+                    )
+                )
+                return {
+                    "assessment_state": as_dict,
+                    "assessment_answers": answers,
+                    "flow_status": "profiling",
+                    "pending_interaction_answer": "",
+                    "message_history": message_history,
+                }
+
+            as_dict["phase"] = "subjective_choice"
+            event_sink.emit(
+                make_event(
+                    "node.stream",
+                    "assessment_dialog",
+                    data={"text": f"\n好，第 {next_idx + 1}/{total} 题——\n\n"},
+                )
+            )
+            _emit_current_question(event_sink, pairs, next_idx, "subjective_choice", total)
+            return {
+                "assessment_state": as_dict,
+                "assessment_answers": answers,
+                "flow_status": "assessment_dialog",
+                "pending_interaction_answer": "",
+                "message_history": message_history,
+            }
 
         if phase == "self_eval":
             # 收到自评回答
@@ -538,7 +775,43 @@ def _build_pair_feedback(concept: str, is_correct: bool, correct: str, gap: int,
 # UserProfiler — 差距分析 + 教学策略决定
 # ===========================================================================
 
-def build_user_profiler_node(llm, event_sink: EventSink):
+def _resolve_course_start_label(graph_pipeline: Optional[object], topic: str) -> str:
+    node_map = dict(getattr(graph_pipeline, "node_map", {}) or {})
+    if not node_map:
+        return topic
+
+    def string_list(values) -> list[str]:
+        if isinstance(values, list):
+            return [str(item).strip() for item in values if str(item).strip()]
+        return []
+
+    def source_type(node: dict) -> str:
+        return str(node.get("source_type") or "").strip().lower()
+
+    def numeric_key(node_id: str) -> tuple[int, str]:
+        digits = "".join(ch for ch in str(node_id or "") if ch.isdigit())
+        return (int(digits) if digits else 999999, str(node_id or ""))
+
+    candidates = []
+    for node_id, node in node_map.items():
+        if string_list(node.get("prerequisite_nodes")):
+            continue
+        name = str(node.get("name") or node_id).strip()
+        candidates.append(
+            (
+                0 if "一般概念" in name else 1,
+                0 if "chapter_anchor" in source_type(node) else 1,
+                numeric_key(str(node_id)),
+                name,
+            )
+        )
+    if not candidates:
+        return topic
+    candidates.sort()
+    return candidates[0][3] or topic
+
+
+def build_user_profiler_node(llm, event_sink: EventSink, graph_pipeline=None):
     def node(state: AgentState) -> dict:
         topic = state["current_topic"]
         questions = state.get("assessment_questions", [])
@@ -557,7 +830,7 @@ def build_user_profiler_node(llm, event_sink: EventSink):
         concept_gaps = _compute_concept_gaps(questions, answers)
         radar_data = _generate_radar_data(event_sink, topic, questions, answers)
         difficulty_level, teaching_strategy = _decide_teaching_start(concept_gaps)
-        start_anchor_title, start_anchor_id = _select_initial_teaching_anchor(concept_gaps)
+        start_label = _resolve_course_start_label(graph_pipeline, topic)
 
         # 推送雷达图（前端兼容）
         event_sink.emit(
@@ -566,7 +839,13 @@ def build_user_profiler_node(llm, event_sink: EventSink):
 
         # ── Step 2: 流式生成画像报告 ──
         full_report = _generate_profile_report(
-            llm, event_sink, topic, concept_gaps, difficulty_level, teaching_strategy
+            llm,
+            event_sink,
+            topic,
+            concept_gaps,
+            difficulty_level,
+            teaching_strategy,
+            start_label,
         )
 
         # ── Step 3: 广播教学起点决策 ──
@@ -619,14 +898,20 @@ def build_user_profiler_node(llm, event_sink: EventSink):
             "user_knowledge_graph": user_knowledge_graph,
             "is_assessed": True,
             "flow_status": "normal",
+            "learning_phase": "profiled",
+            "learning_resume_target": "initial_node_selector",
+            "learning_resume_reason": "profiling_complete_select_course_root",
             "difficulty_level": difficulty_level,
             "teaching_strategy": teaching_strategy,
             "attempt_count": 0,
             "score_history": [],
-            "graph_anchor_id": start_anchor_id,
-            "graph_anchor_title": start_anchor_title,
-            "turn_goal": start_anchor_title or state.get("turn_goal", "") or topic,
-            "topic_focus": start_anchor_title or state.get("topic_focus", ""),
+            "graph_anchor_id": "",
+            "graph_anchor_title": "",
+            "current_node_id": "",
+            "current_node_name": "",
+            "current_node_status": "",
+            "turn_goal": state.get("turn_goal", "") or topic,
+            "topic_focus": state.get("topic_focus", ""),
         }
 
     return node
@@ -660,10 +945,35 @@ def _compute_concept_gaps(questions: list, answers: dict) -> dict:
     }]
     gap_type: overconfident | underconfident | aligned_high | aligned_low
     """
+    concept_gaps: dict = {}
+    subjective_qs = [q for q in questions if q.get("type") == "subjective_choice"]
+    if subjective_qs:
+        for index, q in enumerate(subjective_qs, start=1):
+            qid = q.get("id", index)
+            concept = _question_concept_title(q) or f"概念{qid}"
+            answer = _normalize_answer(answers.get(str(qid), answers.get(qid, "")))
+            score = _subjective_choice_score(q, answer)
+            # 纯主观题无配对实测，按自评分段标记掌握水平
+            if score >= 75:
+                gap_type = "aligned_high"    # 自评掌握良好
+            elif score >= 50:
+                gap_type = "aligned_low"     # 自评有基础但仍需加强
+            else:
+                gap_type = "underconfident"  # 自评薄弱，需要重点补
+            concept_gaps[concept] = {
+                "concept_id": str(q.get("concept_id") or concept).strip(),
+                "self_score": score,
+                "actual_score": score,
+                "gap": 0,
+                "gap_type": gap_type,
+                "calibrated": score,
+                "dimension": str(q.get("dimension") or "").strip(),
+            }
+        return concept_gaps
+
     self_qs = {q["id"]: q for q in questions if q.get("type") == "self_eval"}
     obj_qs = {q["id"]: q for q in questions if q.get("type") == "objective"}
 
-    concept_gaps: dict = {}
     for qid, q in self_qs.items():
         concept = _question_concept_title(q) or f"概念{qid}"
         paired_id = q.get("paired_id")
@@ -707,6 +1017,11 @@ def _compute_concept_gaps(questions: list, answers: dict) -> dict:
         }
 
     return concept_gaps
+
+
+def _subjective_choice_score(question: dict, answer: str) -> int:
+    score_map = _normalize_score_map(question.get("score_map"))
+    return int(score_map.get(_normalize_answer(answer), 50))
 
 
 def _decide_teaching_start(concept_gaps: dict) -> tuple[int, str]:
@@ -810,6 +1125,14 @@ def _generate_radar_data(event_sink: EventSink, topic: str, questions: list, ans
         qid = str(question.get("id"))
         answer = _normalize_answer(answers.get(qid, answers.get(question.get("id"), "")))
 
+        if question.get("type") == "subjective_choice":
+            score = _subjective_choice_score(question, answer)
+            aggregates[dimension]["self_total"] += score
+            aggregates[dimension]["self_count"] += 1
+            aggregates[dimension]["objective_total"] += score
+            aggregates[dimension]["objective_count"] += 1
+            continue
+
         if question.get("type") == "self_eval":
             score = SELF_SCORE_MAP.get(answer)
             if score is None:
@@ -873,6 +1196,7 @@ def _generate_profile_report(
     concept_gaps: dict,
     difficulty_level: int,
     strategy: str,
+    start_label: str,
 ) -> str:
     # 分类整理差距
     overconfident = [c for c, v in concept_gaps.items() if v["gap_type"] == "overconfident"]
@@ -914,7 +1238,7 @@ def _generate_profile_report(
             f"概念差距发现：\n{gap_text}\n\n"
             "请输出 2 句自然中文，总长不超过 80 字：\n"
             "1. 第一句必须以“我现在大致知道从哪里开始了”开头，并点出一个关键发现。\n"
-            "2. 第二句直接说接下来先从什么点切入，让后续讲解自然接上。\n"
+            f"2. 第二句必须明确说接下来先从「{start_label or topic}」开始，把课程起点打稳，再自然接入后续讲解。\n"
             "禁止输出标题、列表、emoji、分数、报告式总结。"
         )
     )
@@ -922,6 +1246,10 @@ def _generate_profile_report(
     full_report = ""
     for chunk in llm.stream([system_msg, human_msg]):
         text = content_to_text(chunk.content)
-        full_report += text
+        if text:
+            full_report += text
+            event_sink.emit(
+                make_event("node.stream", "user_profiler", message=text)
+            )
 
     return full_report

@@ -31,6 +31,38 @@ AMBIGUOUS_INPUTS = {
 
 MAX_TOPIC_DETAIL_ROUNDS = 4
 
+DOMAIN_TOPIC_HINTS = {
+    "自动控制",
+    "控制原理",
+    "控制理论",
+    "传递函数",
+    "根轨迹",
+    "方框图",
+    "稳定性",
+    "系统",
+    "原理",
+    "理论",
+    "函数",
+    "数学",
+    "物理",
+    "电路",
+    "信号",
+    "概率",
+    "线代",
+    "微积分",
+}
+
+DETAIL_ONLY_HINTS = {
+    "零基础",
+    "从头开始",
+    "准备考试",
+    "备考",
+    "考试",
+    "做作业",
+    "作业",
+    "入门",
+}
+
 
 def _looks_ambiguous(text: str) -> bool:
     cleaned = text.strip().lower()
@@ -95,6 +127,28 @@ def _looks_like_actionable_question(text: str) -> bool:
     return any(pattern in cleaned for pattern in patterns)
 
 
+def _looks_like_topic_only_request(text: str) -> bool:
+    """A clear topic should go to confirmation, not another intake question."""
+    cleaned = _normalize_text(text)
+    if not cleaned or _looks_ambiguous(cleaned):
+        return False
+    if _looks_exploratory_request(cleaned) or _looks_like_actionable_question(cleaned):
+        return False
+    if any(hint in cleaned for hint in DETAIL_ONLY_HINTS) and not any(
+        hint in cleaned for hint in DOMAIN_TOPIC_HINTS
+    ):
+        return False
+    if any(hint in cleaned for hint in DOMAIN_TOPIC_HINTS):
+        return True
+    if re.search(r"(我要|我想|想|要|开始|从头|帮我|教我|带我).{1,12}(学|学习|了解|入门)", cleaned):
+        return len(cleaned) > 4
+    if "学" in cleaned and len(cleaned) > 4:
+        return True
+    if 2 < len(cleaned) <= 24 and not re.search(r"(还是|或者|吗|呢)", cleaned):
+        return True
+    return False
+
+
 def _infer_goal_from_turns(topic: str, goal: str, focus: str, turns: list[str]) -> str:
     if _normalize_text(goal):
         return _normalize_text(goal)
@@ -118,6 +172,8 @@ def _has_minimum_intake_context(topic: str, goal: str, background: str, focus: s
         return False
     if normalized_focus or normalized_goal or normalized_background:
         return True
+    if turns and _looks_like_topic_only_request(turns[-1]):
+        return True
     return any(
         _looks_exploratory_request(turn) or _looks_like_actionable_question(turn)
         for turn in turns
@@ -140,6 +196,8 @@ def _should_stop_topic_intake(
     if not _has_minimum_intake_context(topic, goal, background, focus, turns):
         return False
     latest_turn = _normalize_text(turns[-1] if turns else "")
+    if _looks_like_topic_only_request(latest_turn):
+        return True
     if (
         _normalize_text(follow_up_mode).lower() == "suggest_options"
         and not _normalize_text(goal)
@@ -267,14 +325,14 @@ def _build_topic_analysis(llm, turns: list[str], *, clarify_round: int) -> dict:
             "}\n\n"
             "规则：\n"
             "1. 只要能确认大主题，就用 confirmed，不要为了追求完美一直 clarify。\n"
-            "2. 只有在缺少当前最关键的起点信息时才 needs_follow_up=true。优先补：现在想先解决哪一块、目前处于什么状态。\n"
-            "3. 如果用户明显是在问“有哪些重点/从哪开始/你推荐哪个”，不要再问宽泛问题，改用 suggest_options 给 2 到 3 个贴着主题的起步点。\n"
+            "2. 如果用户只是说“我要学习/我想学/开始学 + 主题”，直接 needs_follow_up=false；后续由自评和知识图谱决定起点。\n"
+            "3. 如果用户明显是在问“有哪些重点/从哪开始/你推荐哪个”，不要让用户先选方向，收成大主题并交给知识图谱选点。\n"
             "4. 如果用户已经给出具体知识点、卡点、题型或场景，就不要再追问背景。\n"
             "5. 如果用户直接丢来一个知识问题，可以把该问题收成 goal 或 focus，不要把它误判成闲聊。\n"
             "6. 一次只问一个问题，问题必须短、具体，不能出现“你的学习目标是什么”这种空泛问法。\n"
             "7. 不要追问教学模式、流程偏好或工具偏好，这些不是开场必须信息。\n"
             f"8. 当前已经追问过 {clarify_round} 轮；当轮次达到 {MAX_TOPIC_DETAIL_ROUNDS} 时，禁止继续追问，直接综合输出。\n"
-            "9. 对零基础用户，优先给“从哪块先入门”的选项，不要让他先自己命名概念。\n"
+            "9. 不要追问零基础/备考/入口方向；这些由测评和图谱策略处理。\n"
             "10. assistant_reply 不要寒暄，不要超过 28 个字。"
         )
     )

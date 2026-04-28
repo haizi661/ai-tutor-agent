@@ -7,6 +7,7 @@ from langchain_core.messages import HumanMessage, SystemMessage
 from pydantic import BaseModel, Field
 
 from ..core.events import make_event
+from ..core.learning_support import update_student_state_after_evaluation
 from ..core.ports import EventSink, RuntimeContext
 from ..core.state import AgentState
 from ..core.teacher_voice import build_teacher_voice
@@ -32,16 +33,16 @@ class EvaluationResult(BaseModel):
 def _resolve_runtime_parts(
     runtime_or_event_sink: RuntimeContext | EventSink,
     configured_pass_score: int | None = None,
-) -> tuple[EventSink, int]:
+) -> tuple[EventSink, int, object | None]:
     if isinstance(runtime_or_event_sink, RuntimeContext):
         runtime = runtime_or_event_sink
         runtime_settings = getattr(runtime, "settings", None)
         resolved_pass_score = configured_pass_score or (
             runtime_settings.pass_score if runtime_settings is not None else None
         )
-        return runtime.event_sink, resolved_pass_score or 80
+        return runtime.event_sink, resolved_pass_score or 80, getattr(runtime, "student_state_store", None)
 
-    return runtime_or_event_sink, configured_pass_score or 80
+    return runtime_or_event_sink, configured_pass_score or 80, None
 
 
 def _should_cap_score(user_answer: str) -> bool:
@@ -118,7 +119,7 @@ def build_evaluator_node(
     runtime_or_event_sink: RuntimeContext | EventSink,
     pass_score: int | None = None,
 ):
-    event_sink, resolved_pass_score = _resolve_runtime_parts(runtime_or_event_sink, pass_score)
+    event_sink, resolved_pass_score, student_state_store = _resolve_runtime_parts(runtime_or_event_sink, pass_score)
 
     structured_llm = None
     if hasattr(evaluator_llm, "with_structured_output"):
@@ -244,6 +245,18 @@ def build_evaluator_node(
             and concept_score >= 55
         )
         attempt_count = 0 if passed else state.get("attempt_count", 0) + 1
+        current_node_id = str(state.get("current_node_id") or state.get("graph_anchor_id") or "").strip()
+        student_id = str(state.get("student_id") or "default_student").strip() or "default_student"
+        student_state_snapshot = dict(state.get("student_state_snapshot") or {})
+        updated_snapshot = update_student_state_after_evaluation(
+            student_state_store,
+            student_id=student_id,
+            node_id=current_node_id,
+            score=max(0.0, min(float(total_score) / 100.0, 1.0)),
+            passed=passed,
+        )
+        if updated_snapshot:
+            student_state_snapshot = updated_snapshot
 
         return {
             "score": total_score,
@@ -258,6 +271,11 @@ def build_evaluator_node(
             "needs_hint": needs_hint,
             "attempt_count": attempt_count,
             "score_history": score_history,
+            "current_node_status": "passed" if passed else "quizzing",
+            "student_state_snapshot": student_state_snapshot,
+            "learning_phase": "node_passed" if passed else "node_quiz_remediation",
+            "learning_resume_target": "post_eval_selector" if passed else "tester",
+            "learning_resume_reason": "evaluation_passed" if passed else "evaluation_retry",
         }
 
     return evaluator_node
