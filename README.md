@@ -82,6 +82,24 @@ cp .env.example .env
 python main.py
 ```
 
+当前项目在作者本地常用的启动方式如下：
+
+```bash
+cd /home/haizi/ai-tutor-agent && \
+GRAPH_RAG_ENABLE_LLM=true \
+GRAPH_RAG_LLM_PROFILE=deepseek \
+CHAT_PROFILE=deepseek \
+LLM_PROVIDER=openai \
+MODEL_NAME=deepseek-v4-flash \
+python main.py
+```
+
+说明：
+
+- 这组命令面向 Linux / WSL 环境
+- 如果是在 Windows 原生终端运行，需要把路径和环境变量写法改成对应系统格式
+- 当前临时问答路径与 Windows 环境适配还没有完全完善，跨环境启动时请优先检查模型配置、路径和 shell 变量注入方式
+
 4. 浏览器访问
 
 ```text

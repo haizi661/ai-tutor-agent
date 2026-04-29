@@ -206,6 +206,24 @@ cp .env.example .env
 python main.py
 ```
 
+当前作者本地用于图谱主流程与临时问答联调的常用启动命令：
+
+```bash
+cd /home/haizi/ai-tutor-agent && \
+GRAPH_RAG_ENABLE_LLM=true \
+GRAPH_RAG_LLM_PROFILE=deepseek \
+CHAT_PROFILE=deepseek \
+LLM_PROVIDER=openai \
+MODEL_NAME=deepseek-v4-flash \
+python main.py
+```
+
+补充说明：
+
+- 上面这条命令基于 Linux / WSL shell
+- Windows 原生环境需要自行改成对应的目录和环境变量设置方式
+- 当前临时问答路径与 Windows 的兼容性还未完全收敛，其他开发者接手时应优先同步调整本机启动脚本与环境注入方式
+
 浏览器打开：
 
 ```text

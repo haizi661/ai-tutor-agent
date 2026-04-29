@@ -270,7 +270,12 @@ def _resume_topic_confirmation_worker(
             requested_mode = "assessment"
 
         if confirmed:
-            confirmed_topic = proposed_topic or next_topic
+            # A topic may be confirmed only once, while later UI actions (for example
+            # "先不测，直接开始" on an already-generated assessment card) reuse this
+            # endpoint with start_mode=direct_tutor. In that resume path proposed_topic
+            # has already been cleared, so fall back to the durable current/session
+            # topic instead of treating the session as missing a topic.
+            confirmed_topic = proposed_topic or next_topic or current_goal or session_goal or state.get("current_topic", "").strip()
             if not confirmed_topic:
                 graph_app.update_state(
                     thread_config,
@@ -292,6 +297,26 @@ def _resume_topic_confirmation_worker(
                     )
                 )
             else:
+                existing_message_history = list(state.get("message_history") or [])
+                if requested_mode != "assessment":
+                    existing_message_history = [
+                        {
+                            **item,
+                            "data": {
+                                **(item.get("data") or {}),
+                                "locked": True,
+                                "statusText": "已跳过学前测评，答案已固定",
+                            },
+                        }
+                        if isinstance(item, dict) and item.get("kind") == "assessment_form"
+                        else item
+                        for item in existing_message_history
+                    ]
+                locked_label = {
+                    "assessment": "已确认，开始摸底",
+                    "direct_tutor": "已跳过摸底，直接开始",
+                    "analogy_tutor": "已跳过摸底，示例入门",
+                }[requested_mode]
                 graph_app.update_state(
                     thread_config,
                     {
@@ -309,6 +334,17 @@ def _resume_topic_confirmation_worker(
                         "topic_background": topic_background,
                         "topic_detail_summary": topic_detail_summary,
                         "topic_starter_options": topic_starter_options,
+                        "assessment_questions": [] if requested_mode != "assessment" else state.get("assessment_questions", []),
+                        "assessment_answers": {} if requested_mode != "assessment" else state.get("assessment_answers", {}),
+                        "assessment_state": {} if requested_mode != "assessment" else state.get("assessment_state", {}),
+                        "message_history": existing_message_history + [
+                            {
+                                "role": "assistant",
+                                "kind": "topic_confirmation_locked",
+                                "content": f"学习主题【{confirmed_topic}】{locked_label}。",
+                                "data": {"topic": confirmed_topic, "label": locked_label, "start_mode": requested_mode},
+                            }
+                        ],
                     },
                 )
                 start_message = {

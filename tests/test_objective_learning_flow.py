@@ -339,6 +339,72 @@ def test_fallback_objective_questions_are_contextualized_by_current_node_fields(
     assert {item["source"] for item in result["node_quiz_items"]} == {"contextual_fallback"}
 
 
+def test_objective_generator_rejects_low_quality_ai_questions_and_uses_stronger_contextual_fallback():
+    low_quality_json = """
+    {
+      "questions": [
+        {
+          "question_id": "AI-BAD-1",
+          "stem": "在“自动控制系统示例”中，哪一项最能体现本节点要求掌握的“实例”？",
+          "options": {
+            "A": "符合本节点：实例",
+            "B": "只看表面动作，忽略本节点给出的关键条件或反馈关系",
+            "C": "把“自动控制系统示例”与相邻概念混同，未说明“实例”的作用条件",
+            "D": "认为“实例”与本节点无关，结论方向和节点要点相反"
+          },
+          "answer_key": "A",
+          "explanation": "泛化解析"
+        },
+        {
+          "question_id": "AI-BAD-2",
+          "stem": "在“自动控制系统示例”中，哪一项最能体现本节点要求掌握的“自动控制”？",
+          "options": {
+            "A": "围绕“自动控制”判断：反馈控制系统是由各种结构不同的元部件组成的。从完成“自动控制”这一功能来看，一个系统必然包含被控对象和控制装置两大部分，而控制装置是由具有一定功能的各种基本元件组成的。在不同系统中，结构完全不同的元部件却可以具有相同的功能，因此，将组成系统的元部件按功能分类主要有以下几种：图1-5典型反馈控制系统方框图。通常加到反馈控制系统上的外作用有两种类型，一种是有用输入，一种是扰动。",
+            "B": "只看表面动作，忽略本节点给出的关键条件或反馈关系",
+            "C": "把“自动控制系统示例”与相邻概念混同，未说明“自动控制”的作用条件",
+            "D": "认为“自动控制”与本节点无关，结论方向和节点要点相反"
+          },
+          "answer_key": "A",
+          "explanation": "整段材料塞进选项"
+        }
+      ]
+    }
+    """
+    sink = BufferedEventSink()
+    llm = FakeLLM(low_quality_json)
+    runtime = RuntimeContext(event_sink=sink)
+    node = build_objective_test_generator_node(runtime, llm=llm, count=2)
+
+    result = node({
+        "current_node_id": "KM-AUTO-SYS-EXAMPLE",
+        "current_node_name": "自动控制系统示例",
+        "graph_learning_objectives": ["能根据函数记录仪方框图判断自动控制系统的闭环组成"],
+        "graph_must_know": [
+            "比较元件把输入量与测量反馈量比较并形成偏差信号",
+            "前向通路与主反馈通路共同构成主回路",
+        ],
+        "graph_common_errors": [
+            "只看到输出记录动作，忽略测量元件把输出量反馈到输入端",
+            "把扰动当成有用输入，未区分二者对被控量的作用",
+        ],
+        "node_content_context": "一个典型反馈控制系统中，比较元件将输入量与测量元件检测到的被控量比较；负号表示负反馈；信号从输入端到输出端的通路称前向通路，输出经测量元件反馈到输入端的通路称主反馈通路。",
+    })
+
+    assert [item["source"] for item in result["node_quiz_items"]] == ["contextual_fallback", "contextual_fallback"]
+    for item in result["node_quiz_items"]:
+        option_values = list(item["options"].values())
+        assert all("符合本节点" not in option for option in option_values)
+        assert all("围绕“" not in option for option in option_values)
+        assert all("结论方向和节点要点相反" not in option for option in option_values)
+        assert all(len(option) <= 95 for option in option_values)
+        assert len(set(option_values)) == 4
+        assert item["answer_key"] in item["options"]
+    all_text = "\n".join(item["stem"] + "\n" + "\n".join(item["options"].values()) for item in result["node_quiz_items"])
+    assert "比较元件" in all_text
+    assert "主反馈通路" in all_text
+    assert "只看到输出记录动作" in all_text
+
+
 def test_workflow_routes_tutor_to_post_lesson_choice_and_objective_scorer_to_next_node_planner():
     assert workflow_module.route_after_tutor({"interrupt_query": ""}) == "post_lesson_choice"
     assert workflow_module.route_after_post_lesson_choice({"post_lesson_choice": "start_test"}) == "objective_test_generator"

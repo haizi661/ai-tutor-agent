@@ -47,9 +47,15 @@ class GraphMediaEnricher:
                 continue
 
             candidates = self._collect_annotated_media_items(traversed, question=question)
-            if not candidates:
-                doc = self._find_matching_doc(node)
-                candidates = self._collect_fallback_media_items(node, doc, traversed, question=question)
+            doc = self._find_matching_doc(node)
+            fallback_candidates: list[dict[str, Any]] = []
+            if doc:
+                fallback_candidates = self._collect_fallback_media_items(node, doc, traversed, question=question)
+            if candidates:
+                candidates = self._merge_missing_media_types(candidates, fallback_candidates)
+                candidates = self._replace_unusable_figure_candidates(candidates, fallback_candidates)
+            else:
+                candidates = fallback_candidates
 
             for item in candidates:
                 ref = str(item.get("reference", "") or "").strip()
@@ -123,7 +129,7 @@ class GraphMediaEnricher:
         match_info: dict[str, Any],
     ) -> dict[str, Any] | None:
         asset_type = str(asset.get("asset_type", "") or "")
-        if asset_type not in {"figure", "formula"}:
+        if asset_type not in {"figure", "formula", "table"}:
             return None
 
         reference = str(asset.get("asset_id", "") or "").strip()
@@ -177,7 +183,7 @@ class GraphMediaEnricher:
         else:
             if not item["text"]:
                 return None
-            item["caption"] = str(asset.get("title_text", "") or "").strip()
+            item["caption"] = str(asset.get("title_text", "") or asset.get("caption_text", "") or "").strip()
 
         return item
 
@@ -193,7 +199,9 @@ class GraphMediaEnricher:
         formulas = self._collect_formula_items(node, doc)
         figures = self._collect_figure_items(node, doc)
 
-        for item in formulas + figures:
+        tables = self._collect_table_items(node, doc)
+
+        for item in formulas + figures + tables:
             item["hop"] = traversed.get("hop", 99)
             item["node_role"] = traversed.get("node_role", "context")
             item["analysis_hint"] = self._build_analysis_hint_from_media_item(item)
@@ -204,23 +212,97 @@ class GraphMediaEnricher:
                 item["visual_summary"] = ""
             item["media_score"] = self._score_media_item(item, question=question)
             results.append(item)
+
         return results
+
+    def _merge_missing_media_types(
+        self,
+        candidates: list[dict[str, Any]],
+        fallback_candidates: list[dict[str, Any]],
+    ) -> list[dict[str, Any]]:
+        if not fallback_candidates:
+            return candidates
+        present_types = {str(item.get("asset_type", "")) for item in candidates}
+        missing_fallbacks = [
+            item
+            for item in fallback_candidates
+            if str(item.get("asset_type", "")) not in present_types
+        ]
+        if not missing_fallbacks:
+            return candidates
+        seen_refs = {str(item.get("reference", "")) for item in candidates}
+        merged = list(candidates)
+        for item in missing_fallbacks:
+            ref = str(item.get("reference", ""))
+            if ref and ref in seen_refs:
+                continue
+            merged.append(item)
+            if ref:
+                seen_refs.add(ref)
+        return merged
+
+    def _replace_unusable_figure_candidates(
+        self,
+        candidates: list[dict[str, Any]],
+        fallback_candidates: list[dict[str, Any]],
+    ) -> list[dict[str, Any]]:
+        fallback_figures = [
+            item
+            for item in fallback_candidates
+            if item.get("asset_type") == "figure" and self._figure_has_existing_image(item)
+        ]
+        if not fallback_figures:
+            return candidates
+
+        replacements = list(fallback_figures)
+        updated: list[dict[str, Any]] = []
+        for item in candidates:
+            if item.get("asset_type") == "figure" and not self._figure_has_existing_image(item):
+                if replacements:
+                    updated.append(replacements.pop(0))
+                continue
+            updated.append(item)
+
+        seen_refs = {str(item.get("reference", "")) for item in updated}
+        for item in replacements:
+            ref = str(item.get("reference", ""))
+            if ref and ref not in seen_refs:
+                updated.append(item)
+                seen_refs.add(ref)
+        return updated
+
+    def _figure_has_existing_image(self, item: dict[str, Any]) -> bool:
+        if item.get("asset_type") != "figure":
+            return True
+        for path in item.get("image_paths_abs", []) or []:
+            try:
+                if Path(str(path)).exists():
+                    return True
+            except OSError:
+                continue
+        return False
 
     def _select_primary_media_items(self, media_items: list[dict[str, Any]]) -> list[dict[str, Any]]:
         selected: list[dict[str, Any]] = []
         formula_count = 0
         figure_count = 0
+        table_count = 0
         for item in media_items:
-            if item["asset_type"] == "formula" and formula_count >= 2:
+            asset_type = item["asset_type"]
+            if asset_type == "formula" and formula_count >= 2:
                 continue
-            if item["asset_type"] == "figure" and figure_count >= 1:
+            if asset_type == "figure" and figure_count >= 1:
+                continue
+            if asset_type == "table" and table_count >= 1:
                 continue
             selected.append(item)
-            if item["asset_type"] == "formula":
+            if asset_type == "formula":
                 formula_count += 1
-            else:
+            elif asset_type == "figure":
                 figure_count += 1
-            if len(selected) >= 3:
+            elif asset_type == "table":
+                table_count += 1
+            if len(selected) >= 4:
                 break
         return selected
 
@@ -243,9 +325,13 @@ class GraphMediaEnricher:
         formula_idx = 1
         figure_idx = 1
         for item in media_items:
-            if item["asset_type"] == "formula":
+            asset_type = item["asset_type"]
+            if asset_type == "formula":
                 item["display_label"] = f"式{self._to_chinese_numeral(formula_idx)}"
                 formula_idx += 1
+            elif asset_type == "table":
+                item["display_label"] = f"表{self._to_chinese_numeral(figure_idx)}"
+                figure_idx += 1
             else:
                 item["display_label"] = f"图{self._to_chinese_numeral(figure_idx)}"
                 figure_idx += 1
@@ -503,13 +589,29 @@ class GraphMediaEnricher:
         if not isinstance(page_range, list) or len(page_range) != 2:
             return None
         start_page, end_page = page_range
-        for doc in self.chapter_docs:
-            if doc["start_page"] == start_page and doc["end_page"] == end_page:
-                return doc
-        for doc in self.chapter_docs:
-            if doc["start_page"] <= start_page <= doc["end_page"]:
-                return doc
+        exact_matches = [doc for doc in self.chapter_docs if doc["start_page"] == start_page and doc["end_page"] == end_page]
+        if exact_matches:
+            return max(exact_matches, key=lambda doc: self._doc_quality_score(doc))
+        containing_matches = [doc for doc in self.chapter_docs if doc["start_page"] <= start_page <= doc["end_page"]]
+        if containing_matches:
+            return max(containing_matches, key=lambda doc: self._doc_quality_score(doc))
         return None
+
+    def _doc_quality_score(self, doc: dict[str, Any]) -> float:
+        manifest = doc.get("manifest", {}) or {}
+        images = manifest.get("images", {}) or {}
+        cache_dir = str(manifest.get("cache_dir", "") or doc.get("cache_dir", "") or "")
+        full_md = str(doc.get("full_md", "") or "")
+        score = 0.0
+        score += min(len(full_md) / 1000.0, 80.0)
+        score += min(len(images), 80) * 1.5
+        if "content_list" in " ".join(str(path) for path in (manifest.get("json_files", []) or [])):
+            score += 10.0
+        if re.search(r"chapter_\d+_p\d+-\d+", cache_dir):
+            score += 25.0
+        if re.search(r"chapter_p\d+-\d+", cache_dir):
+            score -= 20.0
+        return score
 
     def _collect_formula_items(self, node: dict[str, Any], doc: dict[str, Any] | None) -> list[dict[str, Any]]:
         formulas: list[str] = []
@@ -547,6 +649,9 @@ class GraphMediaEnricher:
             return []
 
         figures = self._extract_figures_from_block(scope_text, doc["manifest"])
+        return self._build_figure_media_items(node, figures)
+
+    def _build_figure_media_items(self, node: dict[str, Any], figures: list[dict[str, Any]]) -> list[dict[str, Any]]:
         results: list[dict[str, Any]] = []
         for idx, figure in enumerate(figures[:3], start=1):
             results.append(
@@ -558,6 +663,27 @@ class GraphMediaEnricher:
                     "caption": figure["caption"],
                     "image_paths_abs": figure["image_paths_abs"],
                     "text": "",
+                }
+            )
+        return results
+
+    def _collect_table_items(self, node: dict[str, Any], doc: dict[str, Any] | None) -> list[dict[str, Any]]:
+        if not doc:
+            return []
+        scope_text = self._extract_node_scope_text(node, doc)
+        if not scope_text:
+            return []
+        tables = self._extract_tables_from_block(scope_text)
+        results: list[dict[str, Any]] = []
+        for idx, table in enumerate(tables[:2], start=1):
+            results.append(
+                {
+                    "node_id": str(node.get("node_id", "")),
+                    "node_name": str(node.get("name", "")),
+                    "asset_type": "table",
+                    "reference": f"{node.get('node_id', '')}.table_asset[{idx}]",
+                    "caption": table.get("caption", "相关表格"),
+                    "text": table.get("text", ""),
                 }
             )
         return results
@@ -755,10 +881,25 @@ class GraphMediaEnricher:
             index += 1
         return formulas[:4]
 
+    def _extract_tables_from_block(self, block_text: str) -> list[dict[str, str]]:
+        tables: list[dict[str, str]] = []
+        for idx, match in enumerate(re.finditer(r"<table\b.*?</table>", block_text, flags=re.IGNORECASE | re.DOTALL), start=1):
+            raw_table = match.group(0).strip()
+            if raw_table:
+                tables.append({"caption": f"相关表格 {idx}", "text": raw_table})
+        return tables
+
     def _extract_figures_from_block(self, block_text: str, manifest: dict[str, Any]) -> list[dict[str, Any]]:
         figures: list[dict[str, Any]] = []
         lines = block_text.splitlines()
         pending_paths: list[str] = []
+
+        def flush_pending(caption: str) -> None:
+            nonlocal pending_paths
+            resolved = self._resolve_image_paths(pending_paths, manifest)
+            if resolved:
+                figures.append({"caption": self._clean_caption(caption) or "相关图表", "image_paths_abs": resolved})
+            pending_paths = []
 
         for idx, raw in enumerate(lines):
             line = (raw or "").strip()
@@ -767,28 +908,49 @@ class GraphMediaEnricher:
 
             image_paths = re.findall(r"!\[.*?\]\((.*?)\)", line)
             if image_paths:
+                alt_texts = [alt.strip() for alt in re.findall(r"!\[(.*?)\]\(.*?\)", line) if alt.strip()]
+                inline_caption = self._clean_caption(re.sub(r"!\[.*?\]\((.*?)\)", "", line))
+                if pending_paths and (inline_caption or alt_texts):
+                    flush_pending(inline_caption or alt_texts[0])
                 pending_paths.extend(image_paths)
-                caption = self._clean_caption(re.sub(r"!\[.*?\]\((.*?)\)", "", line))
+                caption = inline_caption or (alt_texts[0] if alt_texts and self._looks_like_figure_caption(alt_texts[0]) else "")
                 if caption:
-                    resolved = self._resolve_image_paths(pending_paths, manifest)
-                    if resolved:
-                        figures.append({"caption": caption, "image_paths_abs": resolved})
-                    pending_paths = []
+                    flush_pending(caption)
                 continue
 
             if pending_paths and self._looks_like_figure_caption(line):
-                resolved = self._resolve_image_paths(pending_paths, manifest)
-                if resolved:
-                    figures.append({"caption": self._clean_caption(line), "image_paths_abs": resolved})
-                pending_paths = []
+                caption_parts = []
+                previous_non_empty = ""
+                for lookbehind in reversed(lines[max(0, idx - 3) : idx]):
+                    candidate = (lookbehind or "").strip()
+                    if candidate:
+                        previous_non_empty = candidate
+                        break
+                if previous_non_empty and not previous_non_empty.startswith("!") and not self._looks_like_figure_caption(previous_non_empty):
+                    caption_parts.append(previous_non_empty)
+                caption_parts.append(line)
+                flush_pending(" ".join(caption_parts))
                 continue
 
             if pending_paths:
-                next_text = " ".join(part.strip() for part in lines[idx : idx + 2] if part.strip())
-                resolved = self._resolve_image_paths(pending_paths, manifest)
-                if resolved:
-                    figures.append({"caption": self._clean_caption(next_text) or "相关图表", "image_paths_abs": resolved})
-                pending_paths = []
+                next_non_empty = ""
+                upcoming_caption = ""
+                for lookahead in lines[idx : min(idx + 4, len(lines))]:
+                    candidate = (lookahead or "").strip()
+                    if not candidate:
+                        continue
+                    if not next_non_empty:
+                        next_non_empty = candidate
+                    if self._looks_like_figure_caption(candidate):
+                        upcoming_caption = candidate
+                        break
+                if upcoming_caption:
+                    if line == upcoming_caption:
+                        flush_pending(upcoming_caption)
+                    continue
+                flush_pending(next_non_empty or "相关图表")
+        if pending_paths:
+            flush_pending("相关图表")
         return figures
 
     def _resolve_image_paths(self, image_paths: list[str], manifest: dict[str, Any]) -> list[str]:
@@ -814,7 +976,10 @@ class GraphMediaEnricher:
             if abs_path is None:
                 abs_path = str((cache_dir / "images" / Path(trimmed).name).resolve())
             else:
-                abs_path = str(Path(abs_path).resolve())
+                abs_candidate = Path(str(abs_path).replace("\\", "/"))
+                if not abs_candidate.is_absolute():
+                    abs_candidate = Path.cwd() / abs_candidate
+                abs_path = str(abs_candidate.resolve())
 
             if abs_path not in resolved and Path(abs_path).exists():
                 resolved.append(abs_path)

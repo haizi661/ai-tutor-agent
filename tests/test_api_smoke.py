@@ -373,6 +373,18 @@ class TopicConfirmWorkflowFactory:
                         )
                     )
                     return
+                if state.get("learning_resume_target") == "initial_node_selector":
+                    state["flow_status"] = "normal"
+                    state["tutor_content"] = "开始直接讲解。"
+                    self.checkpoint_store.save(thread_id, state, source="loop", step=3)
+                    self.runtime_context.event_sink.emit(
+                        make_event(
+                            "node.stream",
+                            "tutor",
+                            data={"text": "开始直接讲解。"},
+                        )
+                    )
+                    return
                 self.checkpoint_store.save(thread_id, state, source="loop", step=3)
                 self.runtime_context.event_sink.emit(
                     make_event(
@@ -701,6 +713,71 @@ def test_topic_confirmation_resume_flow(tmp_path):
         assert updated["state"]["proposed_topic"] == ""
         assert updated["state"]["coach_content"] == ""
         assert updated["state"]["needs_hint"] is False
+
+
+def test_confirmed_topic_can_skip_existing_assessment_without_proposed_topic(tmp_path):
+    thread_id = "session-skip-confirmed-assessment"
+    checkpoint_store = FakeCheckpointStore()
+    checkpoint_store.save(
+        thread_id,
+        {
+            "current_topic": "自动控制原理",
+            "current_user_goal": "自动控制原理",
+            "session_goal": "自动控制原理",
+            "proposed_topic": "",
+            "flow_status": "awaiting_assessment",
+            "assessment_questions": [{"id": 1, "question": "Q1"}],
+            "assessment_answers": {"1": "B"},
+            "assessment_state": {"draft": True},
+            "message_history": [
+                {
+                    "role": "assistant",
+                    "kind": "assessment_form",
+                    "content": "快速摸底",
+                    "data": {"questions": [{"id": 1, "question": "Q1"}], "answers": {"1": "B"}},
+                }
+            ],
+        },
+        source="loop",
+        step=1,
+    )
+    runtime = ApiRuntime(
+        settings=build_test_settings(tmp_path),
+        knowledge_provider=NoopKnowledgeProvider(),
+        workflow_factory=TopicConfirmWorkflowFactory(checkpoint_store),
+        checkpoint_factory=lambda path: (checkpoint_store, DummyConn()),
+    )
+
+    with TestClient(create_api_app(runtime_factory=lambda: runtime)) as client:
+        skip = client.post(
+            "/api/confirm_topic",
+            json={"thread_id": thread_id, "confirmed": True, "topic": "", "start_mode": "direct_tutor"},
+        )
+        assert skip.status_code == 200
+
+        stream = client.get(f"/api/stream?thread_id={thread_id}")
+        assert stream.status_code == 200
+        assert "event: node.stream" in stream.text
+        assert "开始直接讲解" in stream.text
+
+        updated = client.get(f"/api/history/{thread_id}").json()
+        state = updated["state"]
+        assert state["current_topic"] == "自动控制原理"
+        assert state["proposed_topic"] == ""
+        assert state["flow_status"] == "normal"
+        assert checkpoint_store.states[thread_id]["learning_resume_target"] == "initial_node_selector"
+        assert state["assessment_questions"] == []
+        assert state["assessment_answers"] == {}
+        assert state["assessment_state"] == {}
+        assessment_items = [item for item in state["message_history"] if item.get("kind") == "assessment_form"]
+        assert assessment_items[-1]["data"]["locked"] is True
+        assert assessment_items[-1]["data"]["statusText"] == "已跳过学前测评，答案已固定"
+        locked_items = [item for item in state["message_history"] if item.get("kind") == "topic_confirmation_locked"]
+        assert locked_items[-1]["data"] == {
+            "topic": "自动控制原理",
+            "label": "已跳过摸底，直接开始",
+            "start_mode": "direct_tutor",
+        }
 
 
 def test_api_start_continues_running_session_that_is_waiting_for_input(tmp_path):

@@ -31,8 +31,9 @@ class FakeGraphRAGPipeline:
 
 
 class FakeDebugGraphRAGPipeline:
-    def __init__(self):
+    def __init__(self, figure_path: str = ""):
         self.calls = []
+        self.figure_path = figure_path
 
     def ask(self, question, **kwargs):
         self.calls.append((question, kwargs))
@@ -50,7 +51,7 @@ class FakeDebugGraphRAGPipeline:
                     "asset_type": "figure",
                     "node_name": "系统时间响应的性能指标",
                     "caption": "单位阶跃响应曲线",
-                    "image_paths_abs": [],
+                    "image_paths_abs": [self.figure_path] if self.figure_path else [],
                 },
                 {
                     "reference": "KM015.formula_asset[1]",
@@ -94,9 +95,13 @@ def test_interruption_polishes_graph_rag_context_with_tutor_llm_when_graph_answe
     assert "LLM 根据图谱上下文解释" in streamed
 
 
-def test_interruption_preserves_debug_graph_rag_html_report_for_llm_graph_answers():
+def test_interruption_preserves_debug_graph_rag_html_report_for_llm_graph_answers(tmp_path):
+    image_path = tmp_path / "figure.png"
+    image_path.write_bytes(
+        b"\x89PNG\r\n\x1a\n\x00\x00\x00\rIHDR\x00\x00\x00\x01\x00\x00\x00\x01\x08\x02\x00\x00\x00\x90wS\xde"
+    )
     tutor_llm = FakeTutorLLM("不应该吞掉 debug_graph_rag 结构")
-    graph = FakeDebugGraphRAGPipeline()
+    graph = FakeDebugGraphRAGPipeline(str(image_path))
     sink = BufferedEventSink()
     runtime = RuntimeContext(event_sink=sink, knowledge_provider=NoopKnowledgeProvider(), graph_rag_pipeline=graph)
     node = build_interruption_node(tutor_llm, runtime)

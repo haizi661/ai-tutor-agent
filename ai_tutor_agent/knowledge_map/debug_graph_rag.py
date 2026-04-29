@@ -1,8 +1,10 @@
 ﻿from __future__ import annotations
 
 import argparse
+import base64
 import html
 import json
+import mimetypes
 import re
 from pathlib import Path
 
@@ -38,45 +40,72 @@ def build_html_report(result: dict) -> str:
         modal_id = f"media-modal-{idx}"
         media_labels_by_ref[item.get("reference", "")] = item.get("display_label", f"媒体{idx}")
 
-        if item.get("asset_type") == "formula":
-            formula_text = html.escape(item.get("text", ""))
+        asset_type = item.get("asset_type")
+        if asset_type == "formula":
+            formula_raw = str(item.get("text", "") or "").strip()
+            formula_text = html.escape(formula_raw)
+            formula_attr = html.escape(formula_raw, quote=True)
             preview = f"""
             <button class="media-card formula-card" onclick="openModal('{modal_id}')">
               <div class="media-ref">{display_label} <span class="raw-ref">[{ref}]</span></div>
               <div class="media-node">{node_name}</div>
-              <div class="formula-math">\\[{formula_text}\\]</div>
+              <div class="formula-scroll formula-viewport"><div class="formula-math formula-render" data-latex="{formula_attr}">{formula_text}</div></div>
             </button>
             """
             modal_body = (
-                f"<div class='formula-full formula-math'>\\[{formula_text}\\]</div>"
+                f"<div class='formula-scroll formula-viewport formula-full'><div class='formula-math formula-render' data-latex=\"{formula_attr}\">{formula_text}</div></div>"
                 f"<details class='formula-raw'><summary>查看原始 LaTeX</summary><pre>{formula_text}</pre></details>"
             )
+        elif asset_type == "table":
+            caption = html.escape(item.get("caption", "") or item.get("title", ""))
+            table_html = _sanitize_table_html(str(item.get("text", "") or item.get("raw_text", "")))
+            preview = f"""
+            <button class="media-card table-card" onclick="openModal('{modal_id}')">
+              <div class="media-ref">{display_label} <span class="raw-ref">[{ref}]</span></div>
+              <div class="media-node">{node_name}</div>
+              <div class="media-caption">{caption}</div>
+              <div class="table-preview table-viewport">{table_html}</div>
+            </button>
+            """
+            modal_body = f"<div class='table-full table-viewport'>{table_html}</div><p>{caption}</p>"
         else:
             caption = html.escape(item.get("caption", ""))
             paths = item.get("image_paths_abs", []) or []
             preview_img = ""
             gallery = []
-            if paths:
-                preview_src = Path(paths[0]).resolve().as_uri()
+            image_sources = [_image_path_to_data_uri(path) for path in paths]
+            image_sources = [src for src in image_sources if src]
+            if image_sources:
+                preview_src = image_sources[0]
                 preview_img = f"<img src='{preview_src}' alt='{caption}' loading='lazy' />"
-            for path in paths:
-                uri = Path(path).resolve().as_uri()
+            for uri in image_sources:
                 gallery.append(f"<img src='{uri}' alt='{caption}' loading='lazy' />")
-            preview = f"""
-            <button class="media-card figure-card" onclick="openModal('{modal_id}')">
-              <div class="media-ref">{display_label} <span class="raw-ref">[{ref}]</span></div>
-              <div class="media-node">{node_name}</div>
-              <div class="media-caption">{caption}</div>
-              {preview_img}
-            </button>
-            """
-            modal_body = f"<div class='figure-gallery'>{''.join(gallery)}</div><p>{caption}</p>"
+            if preview_img:
+                preview = f"""
+                <button class="media-card figure-card" onclick="openModal('{modal_id}')">
+                  <div class="media-ref">{display_label} <span class="raw-ref">[{ref}]</span></div>
+                  <div class="media-node">{node_name}</div>
+                  <div class="media-caption">{caption}</div>
+                  <div class="figure-viewport">{preview_img}</div>
+                </button>
+                """
+                modal_body = f"<div class='figure-gallery figure-viewport'>{''.join(gallery)}</div><p>{caption}</p>"
+            else:
+                preview = f"""
+                <div class="media-card media-unavailable-card" role="note">
+                  <div class="media-ref">{display_label} <span class="raw-ref">[{ref}]</span></div>
+                  <div class="media-node">{node_name}</div>
+                  <div class="media-caption">{caption}</div>
+                  <div class="media-unavailable-copy">图像文件暂不可用；已保留图表引用，等待上游素材路径修复后会自动显示真实图。</div>
+                </div>
+                """
+                modal_body = f"<p class='media-unavailable-copy'>图像文件暂不可用：{caption}</p>"
 
         media_cards_by_ref[item.get("reference", "")] = preview
         modal_cards.append(
             f"""
             <div id="{modal_id}" class="modal" onclick="closeModal('{modal_id}')">
-              <div class="modal-content" onclick="event.stopPropagation()">
+              <div class="modal-content{' modal-content--wide' if asset_type == 'table' else ''}" onclick="event.stopPropagation()">
                 <button class="close-btn" onclick="closeModal('{modal_id}')">关闭</button>
                 <div class="media-ref">{display_label} <span class="raw-ref">[{ref}]</span></div>
                 <div class="media-node">{node_name}</div>
@@ -98,17 +127,8 @@ def build_html_report(result: dict) -> str:
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>GraphRAG Debug Report</title>
-  <script>
-    window.MathJax = {{
-      tex: {{
-        inlineMath: [['$', '$'], ['\\\\(', '\\\\)']],
-        displayMath: [['\\\\[', '\\\\]'], ['$$', '$$']]
-      }},
-      svg: {{ fontCache: 'global' }},
-      startup: {{ typeset: false }}
-    }};
-  </script>
-  <script defer src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
   <style>
     body {{ font-family: Arial, sans-serif; margin: 24px; color: #1f2937; background: #f8fafc; }}
     main {{ max-width: 1100px; margin: 0 auto; }}
@@ -119,9 +139,9 @@ def build_html_report(result: dict) -> str:
     .answer .section-title {{ font-weight: 700; margin-top: 14px; }}
     .answer .answer-media-block {{ margin: 14px 0 18px; padding-top: 8px; border-top: 1px solid #e2e8f0; }}
     .answer .answer-media-title {{ font-size: 14px; color: #475569; margin-bottom: 10px; font-weight: 600; }}
-    .media-grid {{ display: grid; gap: 12px; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); }}
+    .media-grid {{ display: grid; gap: 12px; grid-template-columns: 1fr; }}
     .media-card {{ width: 100%; text-align: left; border: 1px solid #cbd5e1; background: #fff; border-radius: 8px; padding: 12px; cursor: pointer; }}
-    .media-card img {{ width: 100%; max-height: 220px; object-fit: contain; margin-top: 10px; border-radius: 6px; background: #f8fafc; }}
+    .media-card img {{ display: block; width: auto; max-width: 100%; height: auto; max-height: 360px; object-fit: contain; margin: 10px auto 0; border-radius: 6px; background: #f8fafc; }}
     .media-card pre {{ white-space: pre-wrap; word-break: break-word; font-size: 13px; margin: 10px 0 0; }}
     .media-ref {{ font-size: 12px; color: #475569; }}
     .raw-ref {{ color: #94a3b8; }}
@@ -129,12 +149,21 @@ def build_html_report(result: dict) -> str:
     .media-caption {{ margin-top: 8px; }}
     .modal {{ display: none; position: fixed; inset: 0; background: rgba(15, 23, 42, 0.68); padding: 24px; overflow: auto; }}
     .modal-content {{ max-width: 960px; margin: 0 auto; background: white; border-radius: 8px; padding: 16px; }}
-    .figure-gallery {{ display: grid; gap: 12px; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); margin-top: 12px; }}
-    .figure-gallery img {{ width: 100%; max-height: 70vh; object-fit: contain; background: #f8fafc; border-radius: 6px; }}
-    .formula-math {{ margin-top: 10px; padding: 12px; border-radius: 6px; background: #f8fafc; overflow-x: auto; }}
-    .formula-full {{ font-size: 18px; line-height: 1.8; background: #f8fafc; padding: 12px; border-radius: 6px; overflow-x: auto; }}
+    .modal-content--wide {{ max-width: min(1280px, 96vw); }}
+    .figure-gallery {{ display: grid; gap: 12px; grid-template-columns: 1fr; margin-top: 12px; }}
+    .figure-gallery img {{ display: block; width: auto; max-width: 100%; height: auto; max-height: 70vh; object-fit: contain; background: #f8fafc; border-radius: 6px; margin: 0 auto; }}
+    .formula-scroll, .formula-viewport {{ margin-top: 10px; padding: 12px; border-radius: 6px; background: #f8fafc; overflow: auto; max-width: 100%; max-height: 420px; display: flex; justify-content: center; align-items: flex-start; }}
+    .figure-viewport {{ margin-top: 10px; overflow: auto; max-width: 100%; max-height: 70vh; border-radius: 6px; background: #f8fafc; }}
+    .formula-scroll.is-overflowing, .formula-viewport.is-overflowing {{ justify-content: flex-start; }}
+    .formula-math {{ min-width: max-content; line-height: 1.8; text-align: center; white-space: nowrap; }}
+    .formula-math .katex {{ white-space: nowrap; }}
+    .formula-full {{ font-size: 18px; }}
     .formula-raw {{ margin-top: 12px; }}
     .formula-raw summary {{ cursor: pointer; color: #475569; }}
+    .table-preview, .table-full, .table-viewport {{ margin-top: 10px; overflow: auto; border-radius: 6px; background: #f8fafc; max-width: 100%; max-height: 70vh; }}
+    .table-preview table, .table-full table {{ width: max-content; min-width: 100%; border-collapse: collapse; font-size: 13px; }}
+    .table-preview th, .table-preview td, .table-full th, .table-full td {{ border: 1px solid #cbd5e1; padding: 6px 8px; vertical-align: top; }}
+    .table-preview th, .table-full th {{ background: #eef2ff; font-weight: 700; }}
     .close-btn {{ border: 1px solid #cbd5e1; background: white; border-radius: 6px; padding: 6px 10px; cursor: pointer; float: right; }}
   </style>
 </head>
@@ -156,17 +185,20 @@ def build_html_report(result: dict) -> str:
   </main>
   <script>
     function typesetMath(scope) {{
-      if (!window.MathJax || !MathJax.typesetPromise) {{
-        return;
-      }}
-      const targets = [];
-      if (!scope || scope === document) {{
-        targets.push(document.body);
-      }} else {{
-        targets.push(scope);
-      }}
-      MathJax.typesetPromise(targets).catch(function(err) {{
-        console.error(err);
+      if (!window.katex) return;
+      const root = (!scope || scope === document) ? document : scope;
+      root.querySelectorAll('.formula-render').forEach(function(el) {{
+        const latex = el.getAttribute('data-latex') || el.textContent || '';
+        if (!latex.trim()) return;
+        try {{
+          katex.render(latex, el, {{ displayMode: true, throwOnError: false, strict: 'ignore' }});
+          const scroller = el.closest('.formula-scroll');
+          if (scroller && el.scrollWidth > scroller.clientWidth) {{
+            scroller.classList.add('is-overflowing');
+          }}
+        }} catch (err) {{
+          console.error(err);
+        }}
       }});
     }}
 
@@ -186,6 +218,86 @@ def build_html_report(result: dict) -> str:
 </body>
 </html>
 """
+
+
+def _image_path_to_data_uri(path: str) -> str:
+    try:
+        image_path = Path(str(path)).expanduser().resolve()
+        if not image_path.exists() or not image_path.is_file():
+            return ""
+        media_type, _ = mimetypes.guess_type(str(image_path))
+        if not media_type or not media_type.startswith("image/"):
+            media_type = "image/png"
+        encoded = base64.b64encode(image_path.read_bytes()).decode("ascii")
+        return f"data:{media_type};base64,{encoded}"
+    except OSError:
+        return ""
+
+
+def _sanitize_table_html(table_text: str) -> str:
+    raw = str(table_text or "").strip()
+    if not raw:
+        return "<div class=\"table-empty\">表格内容为空</div>"
+    if re.search(r"<\s*table\b", raw, flags=re.IGNORECASE) and re.search(r"<\s*/\s*table\s*>", raw, flags=re.IGNORECASE):
+        return _sanitize_basic_table_html(raw)
+    markdown_table = _markdown_table_to_html(raw)
+    if markdown_table:
+        return markdown_table
+    return f"<pre>{html.escape(raw)}</pre>"
+
+
+def _sanitize_basic_table_html(raw: str) -> str:
+    allowed_tags = {"table", "thead", "tbody", "tr", "th", "td", "caption"}
+    escaped_placeholders: list[str] = []
+
+    def keep_allowed_tag(match: re.Match[str]) -> str:
+        token = match.group(0)
+        tag_name = match.group(1).lower().lstrip("/")
+        if tag_name not in allowed_tags:
+            return html.escape(token)
+        closing = "/" if token.startswith("</") else ""
+        return f"\u0000{len(escaped_placeholders)}\u0000" if _store_placeholder(f"<{closing}{tag_name}>", escaped_placeholders) else ""
+
+    escaped = html.escape(re.sub(r"<\s*(/?)\s*([a-zA-Z0-9]+)(?:\s+[^>]*)?>", lambda m: _escape_or_placeholder_table_tag(m, escaped_placeholders, allowed_tags), raw))
+    for idx, tag in enumerate(escaped_placeholders):
+        escaped = escaped.replace(html.escape(f"\u0000{idx}\u0000"), tag)
+    return escaped
+
+
+def _escape_or_placeholder_table_tag(match: re.Match[str], placeholders: list[str], allowed_tags: set[str]) -> str:
+    tag_name = match.group(2).lower()
+    if tag_name not in allowed_tags:
+        return match.group(0)
+    closing = "/" if match.group(1) else ""
+    placeholders.append(f"<{closing}{tag_name}>")
+    return f"\u0000{len(placeholders) - 1}\u0000"
+
+
+def _markdown_table_to_html(raw: str) -> str:
+    lines = [line.strip() for line in raw.splitlines() if line.strip()]
+    table_lines = [line for line in lines if "|" in line]
+    if len(table_lines) < 2:
+        return ""
+    rows = []
+    for line in table_lines:
+        cells = [cell.strip() for cell in line.strip("|").split("|")]
+        if cells and all(re.fullmatch(r":?-{3,}:?", cell) for cell in cells):
+            continue
+        rows.append(cells)
+    if not rows:
+        return ""
+    header, *body = rows
+    header_html = "".join(f"<th>{html.escape(cell)}</th>" for cell in header)
+    body_html = "".join(
+        "<tr>" + "".join(f"<td>{html.escape(cell)}</td>" for cell in row) + "</tr>"
+        for row in body
+    )
+    return f"<table><thead><tr>{header_html}</tr></thead><tbody>{body_html}</tbody></table>"
+
+
+def _store_placeholder(value: str, placeholders: list[str]) -> bool:
+    placeholders.append(value)
+    return True
 
 
 def _render_answer_html(
@@ -214,14 +326,18 @@ def _render_answer_html(
                     break
                 index += 1
             math_block = "\n".join(part for part in math_lines if part is not None).strip()
-            blocks.append(f"<div class=\"formula-math answer-formula\">{html.escape(math_block)}</div>")
+            latex = math_block.strip().removeprefix("$$").removesuffix("$$").strip()
+            latex_attr = html.escape(latex, quote=True)
+            blocks.append(f"<div class=\"formula-scroll formula-viewport answer-formula\"><div class=\"formula-math formula-render\" data-latex=\"{latex_attr}\">{html.escape(latex)}</div></div>")
             index += 1
             continue
         clean_line, refs = _extract_media_refs(stripped)
         if clean_line:
             if _is_block_math_line(clean_line):
+                latex = clean_line.strip().removeprefix("$$").removesuffix("$$").strip()
+                latex_attr = html.escape(latex, quote=True)
                 blocks.append(
-                    f"<div class=\"formula-math answer-formula\">{html.escape(clean_line)}</div>"
+                    f"<div class=\"formula-scroll formula-viewport answer-formula\"><div class=\"formula-math formula-render\" data-latex=\"{latex_attr}\">{html.escape(latex)}</div></div>"
                 )
             else:
                 rendered_line = _render_answer_line(clean_line, media_labels_by_ref)

@@ -30,8 +30,20 @@
             || rawText.includes('GraphRAG 调试报告')
             || rawText.includes('answer-media-block')
             || rawText.includes('media-card');
-        target.innerHTML = allowGraphRagHtml ? rawText : marked.parse(rawText);
+        target.innerHTML = allowGraphRagHtml ? extractGraphRagReportBody(rawText) : marked.parse(rawText);
         app.renderMath(target);
+    }
+
+    function extractGraphRagReportBody(rawText = '') {
+        const text = String(rawText || '');
+        if (!/<html[\s>]/i.test(text)) return text;
+        try {
+            const doc = new DOMParser().parseFromString(text, 'text/html');
+            const main = doc.querySelector('main');
+            return main ? main.innerHTML : (doc.body?.innerHTML || text);
+        } catch (_err) {
+            return text;
+        }
     }
 
     function deriveLearningProgressStep(snapshot = {}) {
@@ -78,6 +90,21 @@
     };
 
     app.renderMath = function renderMath(el) {
+        if (window.katex) {
+            el.querySelectorAll?.('.formula-render[data-latex]').forEach((node) => {
+                const latex = node.getAttribute('data-latex') || node.textContent || '';
+                if (!latex.trim()) return;
+                try {
+                    katex.render(latex, node, { displayMode: true, throwOnError: false, strict: 'ignore' });
+                    const scroller = node.closest('.formula-scroll');
+                    if (scroller && node.scrollWidth > scroller.clientWidth) {
+                        scroller.classList.add('is-overflowing');
+                    }
+                } catch (err) {
+                    console.warn('KaTeX formula-render failed', err);
+                }
+            });
+        }
         if (window.renderMathInElement) {
             renderMathInElement(el, {
                 delimiters: [
@@ -1587,9 +1614,15 @@
                     <button type="button" class="q-stepper-btn q-stepper-skip">先不测，直接开始</button>
                 </div>
             `;
-            div.querySelector('.q-stepper-skip').onclick = () => {
-                row.wrap.remove();
-                app.submitTopicConfirmation?.(true, 'direct_tutor');
+            div.querySelector('.q-stepper-skip').onclick = async () => {
+                _renderLockedAssessmentSummary(div, questions, state.answers, '已跳过学前测评，答案已固定');
+                app.setStatusBanner('已跳过摸底，正在进入正式讲解', 'processing');
+                try {
+                    await app.submitTopicConfirmation?.(true, 'direct_tutor');
+                } catch (err) {
+                    console.error(err);
+                    app.setStatusBanner('跳过摸底失败，请稍后重试。', 'danger');
+                }
             };
             row.body.appendChild(div);
             container.appendChild(row.wrap);
@@ -1741,18 +1774,15 @@
             }
         };
 
-        skipBtn.onclick = () => {
-            row.wrap.remove();
-            fetch('/api/confirm_topic', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    thread_id: state.currentThreadId,
-                    confirmed: true,
-                    topic: state.pendingTopicConfirmation || '',
-                    start_mode: 'direct_tutor',
-                }),
-            }).then(() => app.connectSSE());
+        skipBtn.onclick = async () => {
+            _renderLockedAssessmentSummary(div, questions, state.answers, '已跳过学前测评，答案已固定');
+            app.setStatusBanner('已跳过摸底，正在进入正式讲解', 'processing');
+            try {
+                await app.submitTopicConfirmation?.(true, 'direct_tutor');
+            } catch (err) {
+                console.error(err);
+                app.setStatusBanner('跳过摸底失败，请稍后重试。', 'danger');
+            }
         };
 
         app.updateLearningProgress({ step: 2, label: '学习进度 2/5' });
@@ -2165,6 +2195,38 @@
         app.scrollMessagesToBottom();
     };
 
+    app.lockActiveChoiceCard = function lockActiveChoiceCard(value = '', label = '') {
+        const normalized = String(value || '').trim();
+        const visible = String(label || value || '').trim();
+        const activeCards = document.querySelectorAll([
+            '.next-step-card',
+            '.post-eval-card',
+            '.post-lesson-card',
+            '.continue-homework-card',
+            '.homework-review-card',
+            '.consolidation-card',
+        ].join(','));
+        activeCards.forEach(card => {
+            card.classList.add('choice-card--locked');
+            card.dataset.lockedChoice = normalized;
+            card.querySelectorAll('button').forEach(button => {
+                const isChosen = String(button.dataset.choiceValue || '').trim() === normalized
+                    || String(button.dataset.choiceLabel || '').trim() === visible;
+                button.disabled = true;
+                button.classList.add('choice-chip--locked');
+                button.classList.toggle('choice-chip--chosen', isChosen);
+                button.setAttribute('aria-disabled', 'true');
+            });
+            const actions = card.querySelector('.selector-chip-list, .suggestion-row');
+            if (actions && !card.querySelector('.choice-locked-summary')) {
+                const summary = document.createElement('div');
+                summary.className = 'choice-locked-summary';
+                summary.textContent = visible ? `已选择：${visible}` : '已选择，等待继续。';
+                actions.insertAdjacentElement('afterend', summary);
+            }
+        });
+    };
+
     app.renderNextStepSelector = function renderNextStepSelector(options = []) {
         document.querySelector('.next-step-card')?.remove();
         document.querySelector('.post-eval-card')?.remove();
@@ -2172,6 +2234,7 @@
         const row = createAssistantCardRow('topic-confirm-card next-step-card');
         const card = document.createElement('div');
         card.className = 'topic-confirm-card next-step-card prompt-flow-card';
+        card.dataset.cardKind = 'next_step_selector';
         card.innerHTML = `
             <div class="prompt-card prompt-flow-shell">
                 <div class="prompt-label">下一步</div>
@@ -2194,6 +2257,8 @@
             button.type = 'button';
             button.className = 'chip topic-confirm-chip selector-chip';
             button.textContent = option.label;
+            button.dataset.choiceValue = option.value;
+            button.dataset.choiceLabel = option.label;
             button.onclick = () => app.submitAwaitingChoice?.(option.value, option.label);
             actions.appendChild(button);
         });
@@ -2210,6 +2275,7 @@
         const row = createAssistantCardRow('topic-confirm-card post-eval-card');
         const card = document.createElement('div');
         card.className = 'topic-confirm-card post-eval-card prompt-flow-card';
+        card.dataset.cardKind = 'post_eval_selector';
         card.innerHTML = `
             <div class="prompt-card prompt-flow-shell">
                 <div class="prompt-label">这轮完成</div>
@@ -2231,6 +2297,8 @@
             button.type = 'button';
             button.className = 'chip topic-confirm-chip selector-chip';
             button.textContent = option.label;
+            button.dataset.choiceValue = option.value;
+            button.dataset.choiceLabel = option.label;
             button.onclick = () => app.submitAwaitingChoice?.(option.value, option.label);
             actions.appendChild(button);
         });
@@ -2258,6 +2326,7 @@
         const row = createAssistantCardRow('topic-confirm-card post-lesson-card');
         const card = document.createElement('div');
         card.className = 'topic-confirm-card post-lesson-card prompt-flow-card';
+        card.dataset.cardKind = 'post_lesson_choice';
         card.innerHTML = `
             <div class="prompt-card prompt-flow-shell">
                 <div class="prompt-label">课后选择</div>
@@ -2278,6 +2347,8 @@
             button.type = 'button';
             button.className = 'chip topic-confirm-chip selector-chip';
             button.textContent = option.label || option.value;
+            button.dataset.choiceValue = option.value;
+            button.dataset.choiceLabel = option.label || option.value;
             button.onclick = () => app.submitAwaitingChoice?.(option.value, option.label || option.value);
             actions.appendChild(button);
         });
@@ -2312,6 +2383,8 @@
             button.type = 'button';
             button.className = 'chip topic-confirm-chip selector-chip';
             button.textContent = option.label || option.value;
+            button.dataset.choiceValue = option.value;
+            button.dataset.choiceLabel = option.label || option.value;
             button.onclick = () => app.submitAwaitingChoice?.(option.value, option.label || option.value);
             actions.appendChild(button);
         });
@@ -2347,6 +2420,8 @@
             button.type = 'button';
             button.className = 'chip topic-confirm-chip selector-chip';
             button.textContent = option.label || option.value;
+            button.dataset.choiceValue = option.value;
+            button.dataset.choiceLabel = option.label || option.value;
             button.onclick = () => app.submitAwaitingChoice?.(option.value, option.label || option.value);
             actions.appendChild(button);
         });
@@ -2381,6 +2456,8 @@
             button.type = 'button';
             button.className = 'chip topic-confirm-chip selector-chip';
             button.textContent = option.label || option.value;
+            button.dataset.choiceValue = option.value;
+            button.dataset.choiceLabel = option.label || option.value;
             button.onclick = () => app.submitAwaitingChoice?.(option.value, option.label || option.value);
             actions.appendChild(button);
         });
@@ -2674,6 +2751,25 @@
             const role = item.role || 'agent';
             const content = item.content || '';
             const data = item.data || {};
+            if (item.kind === 'topic_confirmation_locked') {
+                const topic = data.topic || stateSnapshot?.current_topic || stateSnapshot?.current_user_goal || content;
+                const label = data.label || '已确认';
+                if (topic) {
+                    const row = createAssistantCardRow('topic-confirm-card');
+                    const card = document.createElement('div');
+                    card.className = 'topic-confirm-card prompt-flow-card tc-card-v2 tc-locked';
+                    card.innerHTML = `
+                        <div class="tc-locked-content">
+                            <span class="tc-locked-icon">✅</span>
+                            <span class="tc-locked-topic">${topic}</span>
+                            <span class="tc-confirmed-badge">${label}</span>
+                        </div>
+                    `;
+                    row.body.appendChild(card);
+                    messages.appendChild(row.wrap);
+                }
+                return;
+            }
             if (
                 item.kind === 'topic_confirmation_card'
                 && (data.proposed_topic || content.trim())
@@ -2694,7 +2790,7 @@
                     isCompletedAssessment ? snapshotAnswers : timelineAnswers,
                     {
                         locked: isCompletedAssessment || data.locked === true,
-                        statusText: isCompletedAssessment ? '测评已完成，答案已固定' : undefined,
+                        statusText: isCompletedAssessment ? '测评已完成，答案已固定' : data.statusText,
                     }
                 );
                 return;

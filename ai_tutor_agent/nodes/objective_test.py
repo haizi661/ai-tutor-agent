@@ -83,6 +83,60 @@ def _join_list(values: Any, *, limit: int = 6) -> str:
     return "；".join(_string_list(values)[:limit])
 
 
+_PLACEHOLDER_TERMS = {
+    "实例",
+    "示例",
+    "系统示例",
+    "自动控制",
+    "核心概念",
+    "核心判断",
+    "本节点",
+    "节点要点",
+}
+
+_LOW_QUALITY_PHRASES = (
+    "符合本节点",
+    "围绕“",
+    "结论方向和节点要点相反",
+    "本节点要求掌握的",
+    "第 1 个核心判断",
+    "第 2 个核心判断",
+    "第 3 个核心判断",
+    "第 4 个核心判断",
+)
+
+
+def _clip_text(value: str, *, limit: int = 82) -> str:
+    text = " ".join(str(value or "").replace("\n", " ").split()).strip(" ；;。")
+    if len(text) <= limit:
+        return text
+    return text[: limit - 1].rstrip("，、；;。 ") + "…"
+
+
+def _has_low_quality_marker(text: str) -> bool:
+    return any(phrase in text for phrase in _LOW_QUALITY_PHRASES)
+
+
+def _looks_like_placeholder_question(item: dict[str, Any]) -> bool:
+    stem = str(item.get("stem") or "")
+    options = _normalize_options(item.get("options"))
+    option_values = [str(value or "") for value in options.values()]
+    combined = "\n".join([stem] + option_values)
+    if _has_low_quality_marker(combined):
+        return True
+    if "哪一项最能体现本节点要求掌握的" in stem:
+        return True
+    if any(len(option) > 110 for option in option_values):
+        return True
+    if len(set(option_values)) < 4:
+        return True
+    short_correct = str(options.get(_normalize_answer(item.get("answer_key")), "")).strip(" 。")
+    if short_correct in {f"符合本节点：{term}" for term in _PLACEHOLDER_TERMS}:
+        return True
+    generic_hits = sum(1 for term in _PLACEHOLDER_TERMS if f"“{term}”" in combined or term in short_correct)
+    return generic_hits >= 3 and not any(keyword in combined for keyword in ("比较元件", "反馈", "扰动", "前向通路", "测量", "被控"))
+
+
 def _build_objective_generation_context(state: AgentState, node_id: str, node_name: str) -> str:
     content = str(
         state.get("node_content_context")
@@ -140,9 +194,12 @@ def _generate_ai_questions(llm: Any, state: AgentState, node_id: str, node_name:
 2. 每题必须包含 answer_key，值只能是 A/B/C/D。
 3. answer_key 是后续程序确定性评分的唯一依据，所以必须明确可靠。
 4. 题干必须包含本节点的具体对象、条件、判断或应用场景，不要写成泛化模板。
-5. 至少优先覆盖“学习目标”“必会要点”和“常见误区”；干扰项要对应真实误区，不能明显荒谬。
-6. 禁止生成“第 1 个核心判断”这类占位题，禁止所有题目的正确选项固定为 A。
-7. 输出 JSON Schema：
+5. 每个选项必须是 1 个明确判断，长度不超过 90 个汉字；禁止把整段讲解材料复制进选项。
+6. 正确项要给出可判断的具体事实/关系，不能写“符合本节点：实例/示例/自动控制”这类占位文本。
+7. 干扰项要对应真实误区，且与正确项只差一个关键条件；禁止“结论方向相反”“与本节点无关”这类万能干扰项。
+8. 至少优先覆盖“学习目标”“必会要点”和“常见误区”。
+9. 禁止生成“第 1 个核心判断”这类占位题，禁止所有题目的正确选项固定为 A。
+10. 输出 JSON Schema：
 {{
   "questions": [
     {{
@@ -166,7 +223,7 @@ def _generate_ai_questions(llm: Any, state: AgentState, node_id: str, node_name:
     normalized: list[dict[str, Any]] = []
     for index, raw in enumerate(_extract_question_list(parsed), start=1):
         item = _normalize_question(raw, index, node_id)
-        if item:
+        if item and not _looks_like_placeholder_question(item):
             normalized.append(item)
     return normalized[:count]
 
@@ -174,36 +231,49 @@ def _generate_ai_questions(llm: Any, state: AgentState, node_id: str, node_name:
 def _fallback_questions(node_id: str, node_name: str, k: int = 10, state: AgentState | None = None) -> list[dict[str, Any]]:
     state = state or {}
     title = node_name or node_id or "当前节点"
-    objectives = _string_list(state.get("graph_learning_objectives"))
-    must_know = _string_list(state.get("graph_must_know"))
-    common_errors = _string_list(state.get("graph_common_errors"))
+    objectives = [_clip_text(item, limit=72) for item in _string_list(state.get("graph_learning_objectives"))]
+    must_know = [_clip_text(item, limit=76) for item in _string_list(state.get("graph_must_know"))]
+    common_errors = [_clip_text(item, limit=76) for item in _string_list(state.get("graph_common_errors"))]
     content = str(state.get("node_content_context") or "").strip()
+    content_sentences = [
+        _clip_text(part, limit=76)
+        for part in content.replace("；", "。").replace(";", "。").split("。")
+        if _clip_text(part, limit=76)
+    ]
 
-    seeds = must_know or objectives or ([content[:80]] if content else []) or [title]
-    error_seed = common_errors[0] if common_errors else "忽略本节点给出的关键条件或反馈关系"
+    seeds = must_know or objectives or content_sentences or [f"识别{title}中的关键反馈关系"]
+    objectives = objectives or [f"能依据材料判断{title}的组成关系"]
+    common_errors = common_errors or ["只看外部动作，忽略测量反馈和比较环节"]
+    context_a = content_sentences[0] if content_sentences else seeds[0]
+    context_b = content_sentences[1] if len(content_sentences) > 1 else objectives[0]
+
     questions: list[dict[str, Any]] = []
     for i in range(1, k + 1):
         concept = seeds[(i - 1) % len(seeds)]
-        objective = objectives[(i - 1) % len(objectives)] if objectives else f"理解“{title}”中的关键判断"
+        objective = objectives[(i - 1) % len(objectives)]
+        error_seed = common_errors[(i - 1) % len(common_errors)]
         correct_key = ("A", "B", "C", "D")[(i - 1) % 4]
-        options = {
-            "A": f"围绕“{concept}”判断：{objective}",
-            "B": f"只看表面动作，{error_seed}",
-            "C": f"把“{title}”与相邻概念混同，未说明“{concept}”的作用条件",
-            "D": f"认为“{concept}”与本节点无关，结论方向和节点要点相反",
-        }
-        correct_text = f"符合本节点：{concept}"
-        options[correct_key] = correct_text
+        correct_text = _clip_text(f"{concept}，这是判断{title}是否成立的关键关系", limit=88)
+        distractors = [
+            _clip_text(f"只保留外部动作描述，忽略{error_seed}", limit=88),
+            _clip_text(f"把目标任务说成{objective}，但没有说明{concept}", limit=88),
+            _clip_text(f"把{context_b}当作唯一依据，遗漏{concept}这一判据", limit=88),
+        ]
+        option_keys = ["A", "B", "C", "D"]
+        options: dict[str, str] = {}
+        distractor_iter = iter(distractors)
+        for key in option_keys:
+            options[key] = correct_text if key == correct_key else next(distractor_iter)
         questions.append(
             {
                 "question_id": f"AUTO-{node_id or 'NODE'}-{i}",
                 "node_id": node_id,
-                "stem": f"在“{title}”中，哪一项最能体现本节点要求掌握的“{concept}”？",
+                "stem": _clip_text(f"根据{title}的材料，下列哪项最准确体现“{concept}”？", limit=90),
                 "options": options,
                 "answer_key": correct_key,
-                "explanation": f"正确项直接对应当前节点的必会要点/学习目标：{concept}。干扰项主要对应常见误区：{error_seed}。",
+                "explanation": _clip_text(f"正确项点明了{concept}。本题易错点是{error_seed}。材料依据：{context_a}", limit=150),
                 "wrong_option_analysis": {
-                    key: f"该选项没有准确抓住“{concept}”在“{title}”中的作用。"
+                    key: _clip_text(f"该项缺少或误用了“{concept}”这一判断条件。", limit=80)
                     for key in ("A", "B", "C", "D")
                     if key != correct_key
                 },

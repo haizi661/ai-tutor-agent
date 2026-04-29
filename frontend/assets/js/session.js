@@ -176,14 +176,9 @@
     app.submitAwaitingChoice = async function submitAwaitingChoice(answer, visibleText = '') {
         const text = String(answer || '').trim();
         if (!text || !state.currentThreadId) return;
-        document.querySelector('.next-step-card')?.remove();
-        document.querySelector('.post-eval-card')?.remove();
+        app.lockActiveChoiceCard?.(text, visibleText);
         document.querySelector('.interrupt-confirm-card')?.remove();
-        document.querySelector('.post-lesson-card')?.remove();
-        document.querySelector('.continue-homework-card')?.remove();
-        document.querySelector('.homework-review-card')?.remove();
         app.collapseSubmittedObjectiveTestCard?.();
-        document.querySelector('.consolidation-card')?.remove();
         if (visibleText) app.appendMessage('user', visibleText);
         startStreamingTurn('已收到');
         try {
@@ -305,8 +300,7 @@
             document.querySelector('.interrupt-confirm-card')?.remove();
             state.pendingInterruptConfirmation = false;
         }
-        document.querySelector('.next-step-card')?.remove();
-        document.querySelector('.post-eval-card')?.remove();
+        app.lockActiveChoiceCard?.(text, text);
         app.appendMessage('user', text);
 
         if (state.isAwaitingInput) {
