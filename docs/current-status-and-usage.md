@@ -218,6 +218,18 @@ MODEL_NAME=deepseek-v4-flash \
 python main.py
 ```
 
+如果使用千问链路，可切换为：
+
+```bash
+cd /home/haizi/ai-tutor-agent && \
+GRAPH_RAG_ENABLE_LLM=true \
+GRAPH_RAG_LLM_PROFILE=qwen \
+CHAT_PROFILE=qwen \
+LLM_PROVIDER=openai \
+MODEL_NAME=qwen-plus \
+python main.py
+```
+
 补充说明：
 
 - 上面这条命令基于 Linux / WSL shell

@@ -94,6 +94,18 @@ MODEL_NAME=deepseek-v4-flash \
 python main.py
 ```
 
+如果要切换到千问配置，可使用：
+
+```bash
+cd /home/haizi/ai-tutor-agent && \
+GRAPH_RAG_ENABLE_LLM=true \
+GRAPH_RAG_LLM_PROFILE=qwen \
+CHAT_PROFILE=qwen \
+LLM_PROVIDER=openai \
+MODEL_NAME=qwen-plus \
+python main.py
+```
+
 说明：
 
 - 这组命令面向 Linux / WSL 环境
