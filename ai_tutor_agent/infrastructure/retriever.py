@@ -6,6 +6,7 @@ import json
 import os
 import re
 import shutil
+from contextlib import contextmanager
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any, Dict, List
@@ -26,6 +27,9 @@ from ..core.text import content_to_text
 from .llm import build_retrieval_planner_llm
 from .processor import KnowledgeProcessor
 from .web_search import TavilySearchClient, WebSearchResult
+
+
+DEFAULT_HUGGINGFACE_MIRROR_ENDPOINT = "https://hf-mirror.com"
 
 
 def chunk_text(text: str, chunk_size: int, chunk_overlap: int) -> list[str]:
@@ -59,6 +63,38 @@ def chunk_text(text: str, chunk_size: int, chunk_overlap: int) -> list[str]:
     return chunks
 
 
+def _read_env_bool(name: str, default: bool) -> bool:
+    value = os.getenv(name, "").strip().lower()
+    if not value:
+        return default
+    return value in {"1", "true", "yes", "on"}
+
+
+def huggingface_mirror_endpoint() -> str:
+    return (
+        os.getenv("HF_MIRROR_ENDPOINT", "").strip()
+        or os.getenv("HUGGINGFACE_MIRROR_ENDPOINT", "").strip()
+        or DEFAULT_HUGGINGFACE_MIRROR_ENDPOINT
+    ).rstrip("/")
+
+
+def huggingface_mirror_fallback_enabled() -> bool:
+    return _read_env_bool("HF_ENDPOINT_FALLBACK_ENABLED", True)
+
+
+@contextmanager
+def _temporary_huggingface_endpoint(endpoint: str):
+    previous = os.environ.get("HF_ENDPOINT")
+    os.environ["HF_ENDPOINT"] = endpoint
+    try:
+        yield
+    finally:
+        if previous is None:
+            os.environ.pop("HF_ENDPOINT", None)
+        else:
+            os.environ["HF_ENDPOINT"] = previous
+
+
 def resolve_local_embedding_model_path(model_name: str) -> str:
     if os.path.isdir(model_name):
         return model_name
@@ -70,6 +106,36 @@ def resolve_local_embedding_model_path(model_name: str) -> str:
             f"Local embedding model {model_name!r} was not found in the local HuggingFace cache. "
             "Run once with network access or configure HTTP_PROXY / HTTPS_PROXY to pre-download it."
         ) from exc
+
+
+def _build_huggingface_embeddings_with_mirror_fallback(embeddings_cls, model_name: str):
+    try:
+        return embeddings_cls(model_name=model_name)
+    except Exception as original_exc:
+        mirror_endpoint = huggingface_mirror_endpoint()
+        current_endpoint = os.getenv("HF_ENDPOINT", "").strip().rstrip("/")
+        should_retry = (
+            huggingface_mirror_fallback_enabled()
+            and mirror_endpoint
+            and current_endpoint != mirror_endpoint
+            and not os.path.isdir(model_name)
+        )
+        if not should_retry:
+            raise original_exc
+
+        print(
+            "⚠️ [RAG] HuggingFace 默认源访问失败，"
+            f"正在改用镜像 {mirror_endpoint} 重试本地 embedding 模型下载..."
+        )
+        try:
+            with _temporary_huggingface_endpoint(mirror_endpoint):
+                return embeddings_cls(model_name=model_name)
+        except Exception as mirror_exc:
+            raise RuntimeError(
+                f"Failed to initialize local embedding model {model_name!r} from HuggingFace default endpoint "
+                f"or mirror {mirror_endpoint!r}. Configure HF_ENDPOINT / HF_MIRROR_ENDPOINT, HTTP_PROXY / HTTPS_PROXY, "
+                "or pre-download the model into the local HuggingFace cache."
+            ) from mirror_exc
 
 
 def build_embedding_backend(settings: Settings):
@@ -99,12 +165,12 @@ def build_embedding_backend(settings: Settings):
             model_name = settings.embedding_model_name
 
         try:
-            return HuggingFaceEmbeddings(model_name=model_name)
+            return _build_huggingface_embeddings_with_mirror_fallback(HuggingFaceEmbeddings, model_name)
         except Exception as exc:
             raise RuntimeError(
                 f"Failed to initialize local embedding model {settings.embedding_model_name!r}. "
-                "If this is the first launch, make sure HuggingFace is reachable, or pre-download "
-                "the model into the local HuggingFace cache."
+                "If this is the first launch, make sure HuggingFace or the configured mirror is reachable, "
+                "or pre-download the model into the local HuggingFace cache."
             ) from exc
 
     if provider == "google":

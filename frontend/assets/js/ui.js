@@ -958,6 +958,10 @@
     app.finalizeAgentTurn = function finalizeAgentTurn() {
         app.clearTurnHeartbeat();
         app.setAssistantActionBarState?.(state.currentAgentTurnEl, false);
+        const finalizedTurn = state.currentAgentTurnEl;
+        if (finalizedTurn?.dataset?.containsObjectiveReview === 'true') {
+            finalizedTurn.classList.add('agent-turn-finalized-review');
+        }
         state.currentAgentMsgEl = null;
         state.currentAgentTurnEl = null;
         state.currentAgentMainFlowEl = null;
@@ -2195,9 +2199,30 @@
         app.scrollMessagesToBottom();
     };
 
-    app.lockActiveChoiceCard = function lockActiveChoiceCard(value = '', label = '') {
+    app.lockChoiceCard = function lockChoiceCard(card, value = '', label = '') {
+        if (!card) return;
         const normalized = String(value || '').trim();
         const visible = String(label || value || '').trim();
+        card.classList.add('choice-card--locked');
+        card.dataset.lockedChoice = normalized;
+        card.querySelectorAll('button').forEach(button => {
+            const isChosen = String(button.dataset.choiceValue || '').trim() === normalized
+                || String(button.dataset.choiceLabel || '').trim() === visible;
+            button.disabled = true;
+            button.classList.add('choice-chip--locked');
+            button.classList.toggle('choice-chip--chosen', isChosen);
+            button.setAttribute('aria-disabled', 'true');
+        });
+        const actions = card.querySelector('.selector-chip-list, .suggestion-row');
+        if (actions && !card.querySelector('.choice-locked-summary')) {
+            const summary = document.createElement('div');
+            summary.className = 'choice-locked-summary';
+            summary.textContent = visible ? `已选择：${visible}` : '已选择，等待继续。';
+            actions.insertAdjacentElement('afterend', summary);
+        }
+    };
+
+    app.lockActiveChoiceCard = function lockActiveChoiceCard(value = '', label = '') {
         const activeCards = document.querySelectorAll([
             '.next-step-card',
             '.post-eval-card',
@@ -2206,28 +2231,10 @@
             '.homework-review-card',
             '.consolidation-card',
         ].join(','));
-        activeCards.forEach(card => {
-            card.classList.add('choice-card--locked');
-            card.dataset.lockedChoice = normalized;
-            card.querySelectorAll('button').forEach(button => {
-                const isChosen = String(button.dataset.choiceValue || '').trim() === normalized
-                    || String(button.dataset.choiceLabel || '').trim() === visible;
-                button.disabled = true;
-                button.classList.add('choice-chip--locked');
-                button.classList.toggle('choice-chip--chosen', isChosen);
-                button.setAttribute('aria-disabled', 'true');
-            });
-            const actions = card.querySelector('.selector-chip-list, .suggestion-row');
-            if (actions && !card.querySelector('.choice-locked-summary')) {
-                const summary = document.createElement('div');
-                summary.className = 'choice-locked-summary';
-                summary.textContent = visible ? `已选择：${visible}` : '已选择，等待继续。';
-                actions.insertAdjacentElement('afterend', summary);
-            }
-        });
+        activeCards.forEach(card => app.lockChoiceCard(card, value, label));
     };
 
-    app.renderNextStepSelector = function renderNextStepSelector(options = []) {
+    app.renderNextStepSelector = function renderNextStepSelector(options = [], renderOptions = {}) {
         document.querySelector('.next-step-card')?.remove();
         document.querySelector('.post-eval-card')?.remove();
         const container = document.getElementById('messages');
@@ -2262,13 +2269,16 @@
             button.onclick = () => app.submitAwaitingChoice?.(option.value, option.label);
             actions.appendChild(button);
         });
+        if (renderOptions.locked) {
+            app.lockChoiceCard(card, renderOptions.selectedValue || '', renderOptions.selectedLabel || renderOptions.statusText || '');
+        }
         row.body.appendChild(card);
         container.appendChild(row.wrap);
         app.updateLearningProgress({ step: 4, label: '学习进度 4/5' });
         app.scrollMessagesToBottom();
     };
 
-    app.renderPostEvalSelector = function renderPostEvalSelector(options = []) {
+    app.renderPostEvalSelector = function renderPostEvalSelector(options = [], renderOptions = {}) {
         document.querySelector('.post-eval-card')?.remove();
         document.querySelector('.next-step-card')?.remove();
         const container = document.getElementById('messages');
@@ -2302,6 +2312,9 @@
             button.onclick = () => app.submitAwaitingChoice?.(option.value, option.label);
             actions.appendChild(button);
         });
+        if (renderOptions.locked) {
+            app.lockChoiceCard(card, renderOptions.selectedValue || '', renderOptions.selectedLabel || renderOptions.statusText || '');
+        }
         row.body.appendChild(card);
         container.appendChild(row.wrap);
         app.updateLearningProgress({ step: 5, label: '学习进度 5/5' });
@@ -2320,7 +2333,7 @@
     // 课后 / 作业 / 客观题 选择卡片
     // ================================================================
 
-    app.renderPostLessonChoice = function renderPostLessonChoice(options = []) {
+    app.renderPostLessonChoice = function renderPostLessonChoice(options = [], renderOptions = {}) {
         document.querySelector('.post-lesson-card')?.remove();
         const container = document.getElementById('messages');
         const row = createAssistantCardRow('topic-confirm-card post-lesson-card');
@@ -2352,12 +2365,15 @@
             button.onclick = () => app.submitAwaitingChoice?.(option.value, option.label || option.value);
             actions.appendChild(button);
         });
+        if (renderOptions.locked) {
+            app.lockChoiceCard(card, renderOptions.selectedValue || '', renderOptions.selectedLabel || renderOptions.statusText || '');
+        }
         row.body.appendChild(card);
         container.appendChild(row.wrap);
         app.scrollMessagesToBottom();
     };
 
-    app.renderContinueOrHomeworkChoice = function renderContinueOrHomeworkChoice(options = []) {
+    app.renderContinueOrHomeworkChoice = function renderContinueOrHomeworkChoice(options = [], renderOptions = {}) {
         document.querySelector('.continue-homework-card')?.remove();
         const container = document.getElementById('messages');
         const row = createAssistantCardRow('topic-confirm-card continue-homework-card');
@@ -2388,12 +2404,15 @@
             button.onclick = () => app.submitAwaitingChoice?.(option.value, option.label || option.value);
             actions.appendChild(button);
         });
+        if (renderOptions.locked) {
+            app.lockChoiceCard(card, renderOptions.selectedValue || '', renderOptions.selectedLabel || renderOptions.statusText || '');
+        }
         row.body.appendChild(card);
         container.appendChild(row.wrap);
         app.scrollMessagesToBottom();
     };
 
-    app.renderHomeworkReviewChoice = function renderHomeworkReviewChoice(options = []) {
+    app.renderHomeworkReviewChoice = function renderHomeworkReviewChoice(options = [], renderOptions = {}) {
         document.querySelector('.homework-review-card')?.remove();
         const container = document.getElementById('messages');
         const row = createAssistantCardRow('topic-confirm-card homework-review-card');
@@ -2425,12 +2444,15 @@
             button.onclick = () => app.submitAwaitingChoice?.(option.value, option.label || option.value);
             actions.appendChild(button);
         });
+        if (renderOptions.locked) {
+            app.lockChoiceCard(card, renderOptions.selectedValue || '', renderOptions.selectedLabel || renderOptions.statusText || '');
+        }
         row.body.appendChild(card);
         container.appendChild(row.wrap);
         app.scrollMessagesToBottom();
     };
 
-    app.renderConsolidationChoice = function renderConsolidationChoice(options = []) {
+    app.renderConsolidationChoice = function renderConsolidationChoice(options = [], renderOptions = {}) {
         document.querySelector('.consolidation-card')?.remove();
         const container = document.getElementById('messages');
         const row = createAssistantCardRow('topic-confirm-card consolidation-card');
@@ -2461,6 +2483,9 @@
             button.onclick = () => app.submitAwaitingChoice?.(option.value, option.label || option.value);
             actions.appendChild(button);
         });
+        if (renderOptions.locked) {
+            app.lockChoiceCard(card, renderOptions.selectedValue || '', renderOptions.selectedLabel || renderOptions.statusText || '');
+        }
         row.body.appendChild(card);
         container.appendChild(row.wrap);
         app.scrollMessagesToBottom();
@@ -2588,6 +2613,7 @@
     };
 
     app.renderObjectiveQuizReviewCard = function renderObjectiveQuizReviewCard(data = {}, content = '') {
+        app.finalizeAgentTurn?.();
         const questions = Array.isArray(data.questions) ? data.questions : [];
         const answers = data.answers || {};
         const kind = data.kind || 'objective_test_answers';
@@ -2605,6 +2631,7 @@
             return;
         }
         reviewCard.dataset.reviewRendered = 'true';
+        reviewCard.closest('.msg-wrapper')?.setAttribute('data-contains-objective-review', 'true');
         const qContainer = reviewCard.querySelector('.obj-test-questions');
         const submitBtn = reviewCard.querySelector('.obj-test-submit');
         const toggle = reviewCard.querySelector('.obj-test-review-toggle');
@@ -2820,11 +2847,27 @@
                 return;
             }
             if (item.kind === 'next_step_selector') {
-                app.renderNextStepSelector?.(data.options || []);
+                app.renderNextStepSelector?.(data.options || [], data);
                 return;
             }
             if (item.kind === 'post_eval_selector') {
-                app.renderPostEvalSelector?.(data.options || []);
+                app.renderPostEvalSelector?.(data.options || [], data);
+                return;
+            }
+            if (item.kind === 'post_lesson_choice_card') {
+                app.renderPostLessonChoice?.(data.options || [], data);
+                return;
+            }
+            if (item.kind === 'continue_or_homework_choice_card') {
+                app.renderContinueOrHomeworkChoice?.(data.options || [], data);
+                return;
+            }
+            if (item.kind === 'homework_review_choice_card') {
+                app.renderHomeworkReviewChoice?.(data.options || [], data);
+                return;
+            }
+            if (item.kind === 'consolidation_choice_card') {
+                app.renderConsolidationChoice?.(data.options || [], data);
                 return;
             }
             if (!content.trim()) return;

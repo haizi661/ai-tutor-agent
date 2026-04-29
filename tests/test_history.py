@@ -253,3 +253,157 @@ def test_reconstruct_messages_includes_structured_cards():
     assert topic_item["data"]["proposed_topic"] == "控制理论"
     assert assessment_item["data"]["questions"][0]["id"] == 1
     assert interrupt_item["data"]["requires_confirmation"] is True
+
+
+def test_reconstruct_messages_keeps_objective_review_after_wrong_explanations():
+    store = FakeCheckpointStore(
+        [
+            _checkpoint(
+                {
+                    "node_quiz_items": [
+                        {"question_id": "Q1", "question": "反馈是什么？", "options": ["A", "B"], "answer_key": "A"},
+                    ],
+                    "pending_interaction_kind": "objective_test_answers",
+                    "pending_interaction_answer": '{"Q1":"B"}',
+                    "message_history": [
+                        {
+                            "role": "assistant",
+                            "kind": "objective_quiz_review",
+                            "content": "客观测评批改结果\n得分：0",
+                            "data": {
+                                "kind": "objective_test_answers",
+                                "title": "客观测评",
+                                "questions": [
+                                    {"question_id": "Q1", "question": "反馈是什么？", "options": ["A", "B"], "answer_key": "A"},
+                                ],
+                                "answers": {"Q1": "B"},
+                                "score": 0,
+                                "passed": False,
+                            },
+                        }
+                    ],
+                },
+                "2026-04-12T10:03:00+00:00",
+            ),
+            _checkpoint(
+                {
+                    "message_history": [
+                        {
+                            "role": "assistant",
+                            "kind": "objective_quiz_review",
+                            "content": "客观测评批改结果\n得分：0",
+                            "data": {
+                                "kind": "objective_test_answers",
+                                "title": "客观测评",
+                                "questions": [
+                                    {"question_id": "Q1", "question": "反馈是什么？", "options": ["A", "B"], "answer_key": "A"},
+                                ],
+                                "answers": {"Q1": "B"},
+                                "score": 0,
+                                "passed": False,
+                            },
+                        },
+                        {
+                            "role": "assistant",
+                            "kind": "wrong_question_explanations",
+                            "content": "错题订正讲解\nQ1. 反馈需要看输出回送输入。",
+                            "data": {"explanations": [{"question_id": "Q1", "explanation": "反馈需要看输出回送输入。"}]},
+                        },
+                    ],
+                },
+                "2026-04-12T10:04:00+00:00",
+            ),
+        ]
+    )
+
+    items = _reconstruct_messages(store, "thread-objective-review")
+    kinds = [item["kind"] for item in items]
+
+    assert kinds.count("objective_quiz_review") == 1
+    assert "wrong_question_explanations" in kinds
+    assert kinds.index("objective_quiz_review") < kinds.index("wrong_question_explanations")
+    review_item = next(item for item in items if item["kind"] == "objective_quiz_review")
+    assert review_item["data"]["answers"] == {"Q1": "B"}
+
+
+def test_reconstruct_messages_locks_pending_choice_card_after_answer():
+    store = FakeCheckpointStore(
+        [
+            _checkpoint(
+                {
+                    "flow_status": "awaiting_post_lesson_choice",
+                    "pending_interaction_kind": "post_lesson_choice",
+                    "pending_interaction_prompt": "节点讲完了，接下来做什么？",
+                    "pending_interaction_options": [
+                        {"value": "temporary_question", "label": "我还有临时问题"},
+                        {"value": "start_test", "label": "没有问题，开始测试"},
+                    ],
+                },
+                "2026-04-12T10:05:00+00:00",
+            ),
+            _checkpoint(
+                {
+                    "flow_status": "normal",
+                    "pending_interaction_kind": "",
+                    "pending_interaction_prompt": "",
+                    "pending_interaction_options": [],
+                    "message_history": [
+                        {"role": "user", "kind": "post_lesson_choice", "content": "没有问题，开始测试"},
+                    ],
+                },
+                "2026-04-12T10:06:00+00:00",
+            ),
+        ]
+    )
+
+    items = _reconstruct_messages(store, "thread-choice-lock")
+    choice_item = next(item for item in items if item["kind"] == "post_lesson_choice_card")
+
+    assert choice_item["data"]["locked"] is True
+    assert choice_item["data"]["selectedLabel"] == "没有问题，开始测试"
+
+
+def test_reconstruct_messages_locks_synthetic_assessment_form_after_skip():
+    store = FakeCheckpointStore(
+        [
+            _checkpoint(
+                {
+                    "current_topic": "自动控制原理",
+                    "current_user_goal": "自动控制原理",
+                    "flow_status": "awaiting_assessment",
+                    "assessment_questions": [
+                        {"id": 1, "question": "Q1", "options": ["A", "B", "C", "D"]},
+                    ],
+                    "assessment_answers": {"1": "B"},
+                },
+                "2026-04-12T10:01:00+00:00",
+            ),
+            _checkpoint(
+                {
+                    "current_topic": "自动控制原理",
+                    "current_user_goal": "自动控制原理",
+                    "flow_status": "normal",
+                    "assessment_questions": [],
+                    "assessment_answers": {},
+                    "assessment_state": {},
+                    "message_history": [
+                        {
+                            "role": "assistant",
+                            "kind": "topic_confirmation_locked",
+                            "content": "学习主题【自动控制原理】已跳过摸底，直接开始。",
+                            "data": {"topic": "自动控制原理", "label": "已跳过摸底，直接开始", "start_mode": "direct_tutor"},
+                        }
+                    ],
+                },
+                "2026-04-12T10:02:00+00:00",
+            ),
+        ]
+    )
+
+    items = _reconstruct_messages(store, "thread-skip-assessment")
+    assessment_item = next(item for item in items if item["kind"] == "assessment_form")
+
+    assert assessment_item["data"]["questions"][0]["id"] == 1
+    assert assessment_item["data"]["answers"] == {"1": "B"}
+    assert assessment_item["data"]["locked"] is True
+    assert assessment_item["data"]["statusText"] == "已跳过学前测评，答案已固定"

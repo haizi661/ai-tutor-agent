@@ -102,6 +102,7 @@ def build_node_content_loader_node(runtime: RuntimeContext):
         node_id = str(state.get("current_node_id") or state.get("graph_anchor_id") or "").strip()
         node = node_map.get(node_id) or {}
         node_name = _node_name(node, node_id) or str(state.get("current_node_name") or state.get("graph_anchor_title") or node_id).strip()
+        topic = str(state.get("current_topic") or state.get("current_user_goal") or "").strip()
 
         graph_patch = build_graph_state_patch(graph_pipeline, node_id) if node_id else {}
         teacher_explanation = _teacher_explanation(node) if node else ""

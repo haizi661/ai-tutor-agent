@@ -139,3 +139,34 @@ def test_frontend_quiz_review_reuses_submitted_card_before_rendering_variant_car
     assert review_body.index("existingCards.find") < review_body.index("app.renderObjectiveTestCard(questions, kind)")
     assert "card.dataset.quizKind = kind" in content
     assert "data.data?.review" in SESSION_JS.read_text(encoding="utf-8")
+
+
+def test_frontend_quiz_review_finalizes_before_wrong_explanation_turn():
+    content = UI_JS.read_text(encoding="utf-8")
+    review_start = content.index("app.renderObjectiveQuizReviewCard = function renderObjectiveQuizReviewCard")
+    review_end = content.index("function applySessionArtifacts", review_start)
+    review_body = content[review_start:review_end]
+    finalize_start = content.index("app.finalizeAgentTurn = function finalizeAgentTurn")
+    finalize_end = content.index("app.roleFromMessageKind", finalize_start)
+    finalize_body = content[finalize_start:finalize_end]
+
+    assert "app.finalizeAgentTurn?.();" in review_body
+    assert "data-contains-objective-review" in review_body
+    assert "containsObjectiveReview" in finalize_body
+    assert "agent-turn-finalized-review" in finalize_body
+
+
+def test_frontend_restores_choice_cards_as_locked_from_timeline_data():
+    content = UI_JS.read_text(encoding="utf-8")
+
+    assert "app.lockChoiceCard" in content
+    assert "renderPostLessonChoice(options = [], renderOptions = {})" in content
+    assert "renderContinueOrHomeworkChoice(options = [], renderOptions = {})" in content
+    assert "renderHomeworkReviewChoice(options = [], renderOptions = {})" in content
+    assert "renderConsolidationChoice(options = [], renderOptions = {})" in content
+    assert "app.lockChoiceCard(card, renderOptions.selectedValue || '', renderOptions.selectedLabel || renderOptions.statusText || '')" in content
+    assert "item.kind === 'post_lesson_choice_card'" in content
+    assert "item.kind === 'continue_or_homework_choice_card'" in content
+    assert "item.kind === 'homework_review_choice_card'" in content
+    assert "item.kind === 'consolidation_choice_card'" in content
+    assert "app.renderPostLessonChoice?.(data.options || [], data)" in content

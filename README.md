@@ -133,12 +133,15 @@ PROXY_SCHEME=http
 PDF_PARSE_BACKEND=auto
 MINERU_PROXY_MODE=inherit
 VECTOR_STORE_DIR=data/chroma_db
+HF_ENDPOINT_FALLBACK_ENABLED=true
+HF_MIRROR_ENDPOINT=https://hf-mirror.com
 ```
 
 行为说明：
 
 - `PDF_PARSE_BACKEND=auto`：先试 MinerU，失败回退本地 PyMuPDF
 - `MINERU_PROXY_MODE=direct`：只让 MinerU 直连，其他模型和 HuggingFace 继续走代理
+- 本地 embedding 首次下载 HuggingFace 模型时，如果默认源不可达，会自动改用 `HF_MIRROR_ENDPOINT`，默认是 `https://hf-mirror.com`
 - Web 端“清空书架”会删除知识文件和当前知识向量，但 `data/chroma_db` 目录本身可能保留为空数据库目录
 
 ## Web 使用方式

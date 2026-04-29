@@ -67,6 +67,8 @@
 - 当前主教学图谱是 2026-04-27 图谱 B 运行资产：`data/knowledge_map_outputs/auto_control_knowledge_map_v2_nodes.csv` 与 `data/knowledge_map_outputs/auto_control_knowledge_map_v2_edges.csv`。
 - `GraphRAGPipeline` 默认读取图谱 B，并结合 `data/mineru_cache` 与 `data/media_evidence_index` 提供节点内容、临时问答与证据增强。
 - 历史 Graph A / A2 资料已归档到 `docs/archive/a2-control-theory/`，只保留作溯源与对照，不再作为当前主教学图谱，也不再由前端默认挂载为主 viewer。
+- 迁移到新机器时，至少需要随代码提交或同步 `data/knowledge_map_outputs/auto_control_knowledge_map_v2_nodes.csv`、`data/knowledge_map_outputs/auto_control_knowledge_map_v2_edges.csv`、`data/knowledge_map_outputs/auto_control_knowledge_map_v2.json` 与 `data/media_evidence_index/`。`.env`、`data/chroma_db/`、上传 PDF 和 `data/mineru_cache/` 仍按本地资产处理，不应直接提交密钥或大体积缓存。
+- 如果新机器首次运行需要下载本地 embedding 模型，默认 HuggingFace 源不可达时会自动改用 `HF_MIRROR_ENDPOINT`，默认镜像为 `https://hf-mirror.com`；也可以在 `.env` 中改成自己的镜像或关闭 `HF_ENDPOINT_FALLBACK_ENABLED`。
 
 ### 2.3 图谱 2.2：临时问答与证据增强
 

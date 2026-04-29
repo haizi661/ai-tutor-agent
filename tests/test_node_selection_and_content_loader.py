@@ -189,6 +189,17 @@ def test_node_content_loader_falls_back_to_structured_context_when_teacher_expla
     assert not graph.queries
 
 
+def test_node_content_loader_handles_missing_graph_node_without_topic_name_error():
+    runtime = RuntimeContext(event_sink=BufferedEventSink(), graph_rag_pipeline=FakeGraphPipeline())
+    node = build_node_content_loader_node(runtime)
+
+    result = node({"current_topic": "自动控制原理", "current_node_id": "KM999"})
+
+    assert result["current_node_id"] == "KM999"
+    assert result["turn_goal"] == "KM999"
+    assert result["learning_resume_target"] == "tutor"
+
+
 def test_node_content_loader_does_not_query_graph_rag_or_include_relation_path_text():
     class RawRelationGraphPipeline(FakeGraphPipeline):
         def query(self, question, **kwargs):

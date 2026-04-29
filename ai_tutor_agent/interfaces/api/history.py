@@ -406,14 +406,109 @@ def _reconstruct_messages(checkpoint_store, thread_id: str, *, limit: int = 240)
             }
         )
 
+    choice_card_kinds = {
+        "next_step_selector": "next_step_selector",
+        "post_eval_selector": "post_eval_selector",
+        "post_lesson_choice": "post_lesson_choice_card",
+        "continue_or_homework_choice": "continue_or_homework_choice_card",
+        "homework_review_choice": "homework_review_choice_card",
+        "consolidation_choice": "consolidation_choice_card",
+    }
+
+    choice_answer_kinds = {
+        "next_step_selector": "next_step_choice",
+        "post_eval_selector": "post_eval_choice",
+        "post_lesson_choice": "post_lesson_choice",
+        "continue_or_homework_choice": "continue_or_homework_choice",
+        "homework_review_choice": "homework_review_choice",
+        "consolidation_choice": "consolidation_choice",
+    }
+
+    def choice_label(options: Any, answer: str) -> str:
+        normalized = str(answer or "").strip()
+        if not normalized:
+            return ""
+        if isinstance(options, list):
+            for option in options:
+                if not isinstance(option, dict):
+                    continue
+                value = str(option.get("value") or "").strip()
+                label = str(option.get("label") or value).strip()
+                if normalized in {value, label}:
+                    return label or normalized
+        return normalized
+
+    def lock_open_assessment_forms_when_skipped(values: dict[str, Any]) -> None:
+        assessment_cleared = not (values.get("assessment_questions") or [])
+        history_entries = values.get("message_history") or []
+        skipped_assessment = any(
+            isinstance(entry, dict)
+            and entry.get("kind") == "topic_confirmation_locked"
+            and (entry.get("data") or {}).get("start_mode") in {"direct_tutor", "analogy_tutor"}
+            for entry in history_entries
+        )
+        if not (assessment_cleared and skipped_assessment):
+            return
+        for message in messages:
+            if message.get("kind") != "assessment_form" or not isinstance(message.get("data"), dict):
+                continue
+            message["data"] = {
+                **message["data"],
+                "locked": True,
+                "statusText": "已跳过学前测评，答案已固定",
+            }
+
+    def lock_open_choice_cards_from_answer(entry: dict[str, Any]) -> None:
+        answer_kind = str(entry.get("kind") or "").strip()
+        answer = str(entry.get("content") or "").strip()
+        if not answer:
+            return
+        matching_pending_kinds = [kind for kind, user_kind in choice_answer_kinds.items() if user_kind == answer_kind]
+        if not matching_pending_kinds:
+            return
+        for message in reversed(messages):
+            data = message.get("data")
+            if not isinstance(data, dict) or data.get("locked") is True:
+                continue
+            pending_kind = str(data.get("interaction_kind") or "").strip()
+            if pending_kind not in matching_pending_kinds:
+                continue
+            selected_label = choice_label(data.get("options") or [], answer)
+            message["data"] = {
+                **data,
+                "locked": True,
+                "selectedValue": answer,
+                "selectedLabel": selected_label,
+                "statusText": f"已选择：{selected_label}" if selected_label else "已选择，答案已固定",
+            }
+            return
+
     for item in timeline:
         updated_at = item["updated_at"]
         values = item["values"]
+
+        pending_kind = str(values.get("pending_interaction_kind") or "").strip()
+        pending_options = values.get("pending_interaction_options") or []
+        pending_prompt = str(values.get("pending_interaction_prompt") or "").strip()
+        if pending_kind in choice_card_kinds and pending_options and pending_kind != str(previous_values.get("pending_interaction_kind") or "").strip():
+            push(
+                "agent",
+                choice_card_kinds[pending_kind],
+                pending_prompt or "请选择下一步。",
+                updated_at,
+                data={
+                    "interaction_kind": pending_kind,
+                    "options": pending_options,
+                    "recommended": values.get("pending_interaction_recommended", ""),
+                    "locked": False,
+                },
+            )
 
         current_message_history = values.get("message_history") or []
         previous_message_history = previous_values.get("message_history") or []
         if len(current_message_history) > len(previous_message_history):
             for entry in current_message_history[len(previous_message_history) :]:
+                lock_open_choice_cards_from_answer(entry)
                 push(
                     str(entry.get("role", "user")) or "user",
                     str(entry.get("kind", "user_message")) or "user_message",
@@ -421,6 +516,7 @@ def _reconstruct_messages(checkpoint_store, thread_id: str, *, limit: int = 240)
                     updated_at,
                     data=entry.get("data"),
                 )
+            lock_open_assessment_forms_when_skipped(values)
 
         assessment_questions = values.get("assessment_questions") or []
         previous_assessment_questions = previous_values.get("assessment_questions") or []
@@ -430,7 +526,7 @@ def _reconstruct_messages(checkpoint_store, thread_id: str, *, limit: int = 240)
                 "assessment_form",
                 "学前小测已经准备好了。你先做完这一轮，我再按你的起点来调讲解深度。",
                 updated_at,
-                data={"questions": assessment_questions},
+                data={"questions": assessment_questions, "answers": values.get("assessment_answers") or {}},
             )
 
         awaiting_topic_confirmation = values.get("flow_status") == "awaiting_topic_confirmation"

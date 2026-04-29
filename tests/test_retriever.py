@@ -208,6 +208,57 @@ def test_build_embedding_backend_uses_local_cached_path(monkeypatch, tmp_path):
     assert captured["model_name"] == "/tmp/hf-model"
 
 
+def test_build_embedding_backend_retries_huggingface_mirror_when_default_endpoint_fails(monkeypatch, tmp_path):
+    settings = build_test_settings(tmp_path)
+    monkeypatch.delenv("HF_ENDPOINT", raising=False)
+    monkeypatch.setenv("HF_MIRROR_ENDPOINT", "https://hf-mirror.com")
+    monkeypatch.setattr(
+        retriever,
+        "resolve_local_embedding_model_path",
+        lambda _: (_ for _ in ()).throw(RuntimeError("cache miss")),
+    )
+
+    attempts = []
+
+    class FakeEmbeddings:
+        def __init__(self, model_name):
+            attempts.append((model_name, retriever.os.getenv("HF_ENDPOINT")))
+            if retriever.os.getenv("HF_ENDPOINT") != "https://hf-mirror.com":
+                raise OSError("huggingface default endpoint blocked")
+
+    monkeypatch.setattr("langchain_huggingface.HuggingFaceEmbeddings", FakeEmbeddings)
+
+    backend = retriever.build_embedding_backend(settings)
+
+    assert isinstance(backend, FakeEmbeddings)
+    assert attempts == [
+        ("sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2", None),
+        ("sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2", "https://hf-mirror.com"),
+    ]
+    assert retriever.os.getenv("HF_ENDPOINT") is None
+
+
+def test_build_embedding_backend_can_disable_huggingface_mirror_fallback(monkeypatch, tmp_path):
+    settings = build_test_settings(tmp_path)
+    monkeypatch.delenv("HF_ENDPOINT", raising=False)
+    monkeypatch.setenv("HF_ENDPOINT_FALLBACK_ENABLED", "false")
+    monkeypatch.setattr(
+        retriever,
+        "resolve_local_embedding_model_path",
+        lambda _: (_ for _ in ()).throw(RuntimeError("cache miss")),
+    )
+
+    class FakeEmbeddings:
+        def __init__(self, model_name):
+            del model_name
+            raise OSError("huggingface default endpoint blocked")
+
+    monkeypatch.setattr("langchain_huggingface.HuggingFaceEmbeddings", FakeEmbeddings)
+
+    with pytest.raises(RuntimeError, match="Failed to initialize local embedding model"):
+        retriever.build_embedding_backend(settings)
+
+
 def test_clear_documents_removes_files_and_vector_entries(monkeypatch, tmp_path):
     settings = build_test_settings(tmp_path)
     deleted_wheres = []
