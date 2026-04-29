@@ -34,6 +34,7 @@ def test_objective_and_variant_cards_are_not_globally_removed_when_next_card_ren
     assert "app.renderObjectiveQuizReviewCard" in content
     assert "objective_quiz_review" in content
     assert "variant_test_answers" in content
+    assert "document.querySelectorAll('.obj-test-card:not(.submitted-collapsed)').forEach(card => card.remove())" in render_body
 
 
 def test_frontend_restores_persistent_quiz_review_and_wrong_explanations_from_timeline():
@@ -60,7 +61,9 @@ def test_frontend_allows_graphrag_debug_report_html_and_math_assets():
     styles = Path("frontend/assets/styles.css").read_text(encoding="utf-8")
     assert 'data-role="graph_rag_debug_report"' in styles
     assert ".media-grid" in styles
-    assert "grid-template-columns: 1fr" in styles
+    assert "grid-template-columns: repeat(auto-fit, minmax(240px, 1fr))" in styles
+    assert "align-items: stretch" in styles
+    assert "min-height: 230px" in styles
     assert "height: auto" in styles
     assert "min-width: max-content" in styles
     assert "justify-content: center" in styles
@@ -103,6 +106,8 @@ def test_frontend_restores_skipped_topic_and_assessment_as_locked_artifacts():
     assert "_renderLockedAssessmentSummary(div, questions, state.answers, '已跳过学前测评，答案已固定')" in ui_content
     assert "row.wrap.remove();\n                app.submitTopicConfirmation?.(true, 'direct_tutor')" not in ui_content
     assert "startMode === 'direct_tutor' ? '跳过摸底，直接开始'" in session_content
+    assert "formatErrorMessage(error)" in session_content
+    assert "JSON.stringify(value)" in session_content
 
 
 def test_frontend_renders_wrong_question_explanations_immediately_from_sse_before_variant_card():
@@ -112,7 +117,25 @@ def test_frontend_renders_wrong_question_explanations_immediately_from_sse_befor
     complete_end = session_js.index("state.eventSource.addEventListener('intent.detected'", complete_start)
     complete_handler = session_js[complete_start:complete_end]
 
+    assert "data.source === 'objective_test_scorer'" in complete_handler
+    assert "app.renderObjectiveQuizReviewCard?.(data.data.review" in complete_handler
     assert "data.source === 'wrong_question_explainer'" in complete_handler
     assert "wrong_question_explanations" in complete_handler
     assert "app.appendMessage?.('agent'" in complete_handler
+    assert complete_handler.index("data.source === 'objective_test_scorer'") < complete_handler.index("data.source === 'wrong_question_explainer'")
     assert complete_handler.index("data.source === 'wrong_question_explainer'") < complete_handler.index("app.clearTypingIndicator")
+
+
+def test_frontend_quiz_review_reuses_submitted_card_before_rendering_variant_card():
+    content = UI_JS.read_text(encoding="utf-8")
+    review_start = content.index("app.renderObjectiveQuizReviewCard = function renderObjectiveQuizReviewCard")
+    review_end = content.index("function applySessionArtifacts", review_start)
+    review_body = content[review_start:review_end]
+
+    assert "candidate.dataset.quizKind === kind && !candidate.dataset.reviewRendered" in review_body
+    assert "reviewCard.dataset.reviewRendered = 'true'" in review_body
+    assert "reviewCard.classList.add('submitted-collapsed')" in review_body
+    assert "app.renderObjectiveTestCard(questions, kind)" in review_body
+    assert review_body.index("existingCards.find") < review_body.index("app.renderObjectiveTestCard(questions, kind)")
+    assert "card.dataset.quizKind = kind" in content
+    assert "data.data?.review" in SESSION_JS.read_text(encoding="utf-8")

@@ -103,7 +103,7 @@ def test_build_html_report_renders_table_media_cards():
     assert "典型输入信号" in html_text
 
 
-def test_build_html_report_uses_single_column_media_and_non_distorting_visual_styles():
+def test_build_html_report_uses_card_grid_media_layout_and_non_distorting_visual_styles():
     result = {
         "question": "q",
         "answer": "结论：结合式一和图一。",
@@ -129,11 +129,50 @@ def test_build_html_report_uses_single_column_media_and_non_distorting_visual_st
 
     html_text = build_html_report(result)
 
-    assert "grid-template-columns: 1fr" in html_text
+    assert "grid-template-columns: repeat(auto-fit, minmax(240px, 1fr))" in html_text
+    assert "align-items: stretch" in html_text
+    assert "min-height: 230px" in html_text
     assert "height: auto" in html_text
     assert "max-width: 100%" in html_text
     assert "min-width: max-content" in html_text
     assert "overflow: auto" in html_text
+
+
+def test_render_answer_html_converts_plain_media_reference_lines_into_one_card_grid():
+    media_cards_by_ref = {
+        "chapter_01.formula_asset[1]": '<button class="media-card formula-card">式一</button>',
+        "chapter_01.formula_asset[2]": '<button class="media-card formula-card">式二</button>',
+        "KM002.figure_asset[1]": '<button class="media-card figure-card">图一</button>',
+    }
+    media_labels_by_ref = {
+        "chapter_01.formula_asset[1]": "式一",
+        "chapter_01.formula_asset[2]": "式二",
+        "KM002.figure_asset[1]": "图一",
+    }
+    answer = """式一 [chapter_01.formula_asset[1]]
+自动控制的一般概念
+$$
+\\ddot{y}(t)+y(t)\\dot{y}(t)+y^2(t)=r(t)
+$$
+式二 [chapter_01.formula_asset[2]]
+自动控制系统的分类
+$$
+f(t)=\\lim_{t_0\\to0}\\frac{A}{t_0}[1(t)-1(t-t_0)]
+$$
+图一 [KM002.figure_asset[1]]
+自动控制的基本原理与方式
+图 1-1 人取书的反馈控制系统方框图"""
+
+    html_text = _render_answer_html(answer, media_cards_by_ref, media_labels_by_ref)
+
+    assert html_text.count('class="answer-media-block"') == 1
+    assert 'class="media-grid"' in html_text
+    assert 'formula-card' in html_text
+    assert 'figure-card' in html_text
+    assert "chapter_01.formula_asset[1]" not in html_text
+    assert "KM002.figure_asset[1]" not in html_text
+    assert "\\ddot{y}(t)" not in html_text
+    assert "图 1-1 人取书的反馈控制系统方框图" not in html_text
 
 
 def test_build_html_report_embedded_formula_uses_katex_not_mathjax_or_raw_delimiters():

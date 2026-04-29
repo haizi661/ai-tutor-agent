@@ -12,6 +12,7 @@ from ai_tutor_agent.knowledge_map.media_index.media_asset_annotator import Media
 from ai_tutor_agent.knowledge_map.media_index.media_asset_scanner import MediaAssetScanner
 from ai_tutor_agent.knowledge_map.media_index.media_candidate_filter import MediaCandidateFilter
 from ai_tutor_agent.knowledge_map.media_index.media_node_linker import MediaNodeLinker
+from ai_tutor_agent.platform_paths import project_relative_path, resolve_project_path
 
 
 def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
@@ -56,8 +57,8 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
 
 def main() -> None:
     args = parse_args()
-    mineru_cache_root = Path(args.mineru_cache_root)
-    output_dir = Path(args.output_dir)
+    mineru_cache_root = resolve_project_path(args.mineru_cache_root)
+    output_dir = resolve_project_path(args.output_dir)
     output_dir.mkdir(parents=True, exist_ok=True)
     config = replace(
         MediaIndexConfig(),
@@ -70,7 +71,7 @@ def main() -> None:
 
     scanner = MediaAssetScanner(config=config)
     candidate_filter = MediaCandidateFilter(config=config)
-    linker = MediaNodeLinker(nodes_csv_path=args.nodes_csv, config=config)
+    linker = MediaNodeLinker(nodes_csv_path=resolve_project_path(args.nodes_csv), config=config)
     annotator = MediaAssetAnnotator(config=config)
 
     docs = collect_docs(
@@ -105,9 +106,9 @@ def main() -> None:
                 "linked_count": len(linked_candidates),
                 "annotated_count": len(annotated_assets),
                 "asset_type_counts": dict(Counter(item.get("asset_type", "") for item in annotated_assets)),
-                "filtered_path": str(filtered_path.resolve()),
-                "linked_path": str(linked_path.resolve()),
-                "annotated_path": str(annotated_path.resolve()),
+                "filtered_path": project_relative_path(filtered_path),
+                "linked_path": project_relative_path(linked_path),
+                "annotated_path": project_relative_path(annotated_path),
             }
         )
 
@@ -123,7 +124,7 @@ def main() -> None:
         ),
         encoding="utf-8",
     )
-    print(json.dumps({"processed": len(batch_summary), "summary_path": str(summary_path.resolve())}, ensure_ascii=False, indent=2))
+    print(json.dumps({"processed": len(batch_summary), "summary_path": project_relative_path(summary_path)}, ensure_ascii=False, indent=2))
 
 
 def collect_docs(

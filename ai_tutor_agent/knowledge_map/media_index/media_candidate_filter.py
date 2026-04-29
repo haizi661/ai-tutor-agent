@@ -7,6 +7,7 @@ from typing import Any
 
 from ai_tutor_agent.knowledge_map.config.media_index_config import MediaIndexConfig
 from ai_tutor_agent.knowledge_map.schema.media_asset_schema import normalize_raw_media_candidate
+from ai_tutor_agent.platform_paths import resolve_project_path
 
 
 class MediaCandidateFilter:
@@ -41,7 +42,7 @@ class MediaCandidateFilter:
         return kept
 
     def write_jsonl(self, candidates: list[dict[str, Any]], output_path: str | Path) -> Path:
-        target = Path(output_path)
+        target = resolve_project_path(output_path)
         target.parent.mkdir(parents=True, exist_ok=True)
         with target.open("w", encoding="utf-8") as fh:
             for item in candidates:

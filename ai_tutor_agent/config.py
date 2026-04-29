@@ -6,13 +6,14 @@ from functools import lru_cache
 from typing import Optional
 
 from dotenv import dotenv_values, load_dotenv
+from .platform_paths import project_root
 
 
-PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+PROJECT_ROOT = str(project_root())
 
 
 def get_env_file_path() -> str:
-    return os.getenv("AI_TUTOR_ENV_FILE", "").strip() or os.path.join(PROJECT_ROOT, ".env")
+    return os.getenv("AI_TUTOR_ENV_FILE", "").strip() or str(project_root() / ".env")
 
 
 def _read_env_int(name: str, default: int) -> int:
@@ -392,7 +393,7 @@ def get_settings() -> Settings:
     resolved_vector_store_dir = (
         os.getenv("VECTOR_STORE_DIR", "").strip()
         or os.getenv("CHROMA_DIR", "").strip()
-        or os.path.join(PROJECT_ROOT, "data", "chroma_db")
+        or "data/chroma_db"
     )
 
     return Settings(

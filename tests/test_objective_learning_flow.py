@@ -211,6 +211,13 @@ def test_objective_test_scorer_failing_score_routes_to_explicit_remediation_node
     assert len(result["node_quiz_wrong_items"]) == 8
     assert result["variant_questions"] == []
     assert result["pending_interaction_kind"] == ""
+    assert result["message_history"][-1]["kind"] == "objective_quiz_review"
+    assert result["message_history"][-1]["data"]["kind"] == "objective_test_answers"
+    event = runtime.event_sink.events[-1]
+    assert event.source == "objective_test_scorer"
+    assert event.data["review"]["kind"] == "objective_test_answers"
+    assert event.data["review"]["questions"] == items
+    assert "客观测评批改" in event.data["review_content"]
 
 
 def test_ai_generated_objective_questions_are_scored_by_embedded_answer_key_not_llm():

@@ -1,7 +1,7 @@
 # AI Tutor Agent 当前完成情况与使用说明
 
 更新时间：2026-04-28
-项目路径：`/home/haizi/ai-tutor-agent`
+项目根目录：本文所有命令默认都在本仓库根目录执行，路径统一使用项目内相对路径。
 
 ## 1. 当前一句话结论
 
@@ -80,7 +80,6 @@
 可用检查命令：
 
 ```bash
-cd /home/haizi/ai-tutor-agent
 python -m ai_tutor_agent.knowledge_map.runtime_assets --media-index data/media_evidence_index
 ```
 
@@ -200,7 +199,6 @@ get_homework_questions(node_ids, k=5)
 ### 4.1 启动 Web UI
 
 ```bash
-cd /home/haizi/ai-tutor-agent
 python -m pip install -r requirements.txt
 cp .env.example .env
 python main.py
@@ -209,7 +207,6 @@ python main.py
 当前作者本地用于图谱主流程与临时问答联调的常用启动命令：
 
 ```bash
-cd /home/haizi/ai-tutor-agent && \
 GRAPH_RAG_ENABLE_LLM=true \
 GRAPH_RAG_LLM_PROFILE=deepseek \
 CHAT_PROFILE=deepseek \
@@ -221,7 +218,6 @@ python main.py
 如果使用千问链路，可切换为：
 
 ```bash
-cd /home/haizi/ai-tutor-agent && \
 GRAPH_RAG_ENABLE_LLM=true \
 GRAPH_RAG_LLM_PROFILE=qwen \
 CHAT_PROFILE=qwen \
@@ -232,8 +228,9 @@ python main.py
 
 补充说明：
 
-- 上面这条命令基于 Linux / WSL shell
-- Windows 原生环境需要自行改成对应的目录和环境变量设置方式
+- 以上命令默认都在项目根目录执行，不依赖任何机器上的绝对路径
+- Linux、macOS、Windows、WSL 均应保持 `data/...`、`docs/...`、`frontend/...` 这类项目内相对路径口径
+- 不同系统只需要调整 shell 的环境变量写法，不需要修改项目路径
 - 当前临时问答路径与 Windows 的兼容性还未完全收敛，其他开发者接手时应优先同步调整本机启动脚本与环境注入方式
 
 浏览器打开：
@@ -319,7 +316,6 @@ A B C D A B C D A B
 项目也保留 CLI 入口：
 
 ```bash
-cd /home/haizi/ai-tutor-agent
 python main.py --cli
 ```
 
@@ -344,14 +340,12 @@ curl http://127.0.0.1:8000/api/health
 ### 5.2 图谱完整性检查
 
 ```bash
-cd /home/haizi/ai-tutor-agent
 PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 pytest -q tests/test_graph_integrity.py
 ```
 
 ### 5.3 主流程聚焦回归
 
 ```bash
-cd /home/haizi/ai-tutor-agent
 PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 pytest -q \
   tests/test_workflow.py \
   tests/test_node_selection_and_content_loader.py \
@@ -367,7 +361,6 @@ PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 pytest -q \
 如果 `data/media_evidence_index`、`data/mineru_cache` 或 `viewer/data.js` 异常：
 
 ```bash
-cd /home/haizi/ai-tutor-agent
 scripts/sync_knowledge_map_runtime_assets.sh
 ```
 

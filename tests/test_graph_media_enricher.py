@@ -240,6 +240,43 @@ def test_find_matching_doc_prefers_rich_doc_over_same_page_stub(tmp_path):
     assert "图 2-9" in figures[0]["caption"]
 
 
+def test_extract_figures_from_block_filters_qr_code_guide_images(tmp_path):
+    cache_dir = tmp_path / "cache" / "chapter_01_p009-032"
+    image_dir = cache_dir / "images"
+    image_dir.mkdir(parents=True)
+    qr_image = image_dir / "qr.png"
+    real_image = image_dir / "system.png"
+    qr_image.write_bytes(b"qr image bytes")
+    real_image.write_bytes(b"real figure bytes")
+
+    enricher = GraphMediaEnricher(mineru_cache_root=tmp_path / "cache", annotated_assets_path=tmp_path / "missing")
+    manifest = {
+        "cache_dir": str(cache_dir),
+        "images": {
+            "qr.png": {"abs_path": str(qr_image), "original_name": "qr.png"},
+            "system.png": {"abs_path": str(real_image), "original_name": "system.png"},
+        },
+    }
+    block = "\n".join(
+        [
+            "自动控制的基本原理与方式",
+            "本章导学",
+            "![](images/qr.png)",
+            "本章导学",
+            "扫码学习本章导学微课。",
+            "![](images/system.png)",
+            "图 1-2 自动控制系统组成框图",
+        ]
+    )
+
+    figures = enricher._extract_figures_from_block(block, manifest)
+
+    assert len(figures) == 1
+    assert figures[0]["image_paths_abs"] == [str(real_image)]
+    assert "图 1-2" in figures[0]["caption"]
+    assert str(qr_image) not in figures[0]["image_paths_abs"]
+
+
 @pytest.mark.parametrize(
     "image_path",
     [
@@ -247,6 +284,7 @@ def test_find_matching_doc_prefers_rich_doc_over_same_page_stub(tmp_path):
         "real-step.jpg",
         "data/mineru_cache\\chapter_02_p033-081_real\\images\\real-step.jpg",
         "C:\\Users\\haizi\\Desktop\\real-step.jpg",
+        "E:\\data\\mineru_cache\\chapter_02_p033-081_real\\images\\real-step.jpg",
     ],
 )
 def test_resolve_image_paths_handles_manifest_variants_and_windows_paths(tmp_path, image_path):
@@ -269,4 +307,26 @@ def test_resolve_image_paths_handles_manifest_variants_and_windows_paths(tmp_pat
 
     resolved = enricher._resolve_image_paths([image_path], manifest)
 
-    assert resolved == [str(image)]
+    assert resolved == [str(image.resolve())]
+
+
+def test_enricher_loads_annotated_assets_from_summary_with_relative_paths_under_target_dir(tmp_path):
+    media_index_dir = tmp_path / "data" / "media_evidence_index"
+    media_index_dir.mkdir(parents=True)
+    annotated_file = media_index_dir / "chapter_02_annotated_assets.jsonl"
+    annotated_file.write_text(
+        '{"asset_id":"KM001.figure_asset[1]","asset_type":"figure","anchor_node_id":"KM001","source_path":"data/mineru_cache/chapter/images/x.png"}\n',
+        encoding="utf-8",
+    )
+    (media_index_dir / "batch_summary.json").write_text(
+        '{"count":1,"chapters":[{"annotated_path":"chapter_02_annotated_assets.jsonl"}]}',
+        encoding="utf-8",
+    )
+
+    enricher = GraphMediaEnricher(
+        mineru_cache_root=tmp_path / "data" / "mineru_cache",
+        annotated_assets_path=media_index_dir,
+    )
+
+    assert len(enricher.annotated_assets) == 1
+    assert enricher.annotated_assets[0]["asset_id"] == "KM001.figure_asset[1]"

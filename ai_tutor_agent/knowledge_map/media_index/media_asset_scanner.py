@@ -11,6 +11,7 @@ from ai_tutor_agent.knowledge_map.schema.media_asset_schema import (
     build_empty_raw_media_candidate,
     normalize_raw_media_candidate,
 )
+from ai_tutor_agent.platform_paths import resolve_existing_path, resolve_project_path
 
 
 class MediaAssetScanner:
@@ -19,7 +20,7 @@ class MediaAssetScanner:
 
     def scan_documents(self) -> list[dict[str, Any]]:
         candidates: list[dict[str, Any]] = []
-        root = self.config.mineru_cache_root
+        root = resolve_project_path(self.config.mineru_cache_root)
         if not root.exists():
             return []
 
@@ -78,7 +79,7 @@ class MediaAssetScanner:
         return candidates
 
     def write_jsonl(self, candidates: list[dict[str, Any]], output_path: str | Path | None = None) -> Path:
-        target = Path(output_path) if output_path is not None else self.config.raw_candidates_path
+        target = resolve_project_path(output_path or self.config.raw_candidates_path)
         target.parent.mkdir(parents=True, exist_ok=True)
         with target.open("w", encoding="utf-8") as fh:
             for item in candidates:
@@ -362,10 +363,13 @@ class MediaAssetScanner:
                 if meta.get("original_name") == image_name or meta.get("friendly_name") == image_name:
                     abs_path = meta.get("abs_path")
                     break
-        resolved = Path(abs_path) if abs_path else doc_dir / "images" / Path(trimmed).name
-        if not resolved.exists():
-            return None
-        return resolved.resolve()
+        if abs_path:
+            resolved = resolve_existing_path(abs_path, base_dir=doc_dir)
+            if resolved is None:
+                resolved = resolve_existing_path(Path(str(trimmed).replace("\\", "/")).name, base_dir=doc_dir / "images")
+        else:
+            resolved = resolve_existing_path(Path(str(trimmed).replace("\\", "/")).name, base_dir=doc_dir / "images")
+        return resolved
 
     def _looks_like_caption(self, text: str) -> bool:
         cleaned = (text or "").strip()

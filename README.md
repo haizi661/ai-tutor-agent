@@ -21,14 +21,12 @@
 安装：
 
 ```bash
-cd /home/haizi/ai-tutor-agent
 python -m pip install -r requirements.txt
 ```
 
 或：
 
 ```bash
-cd /home/haizi/ai-tutor-agent
 python -m pip install -e .
 ```
 
@@ -85,7 +83,6 @@ python main.py
 当前项目在作者本地常用的启动方式如下：
 
 ```bash
-cd /home/haizi/ai-tutor-agent && \
 GRAPH_RAG_ENABLE_LLM=true \
 GRAPH_RAG_LLM_PROFILE=deepseek \
 CHAT_PROFILE=deepseek \
@@ -97,7 +94,6 @@ python main.py
 如果要切换到千问配置，可使用：
 
 ```bash
-cd /home/haizi/ai-tutor-agent && \
 GRAPH_RAG_ENABLE_LLM=true \
 GRAPH_RAG_LLM_PROFILE=qwen \
 CHAT_PROFILE=qwen \
@@ -108,9 +104,10 @@ python main.py
 
 说明：
 
-- 这组命令面向 Linux / WSL 环境
-- 如果是在 Windows 原生终端运行，需要把路径和环境变量写法改成对应系统格式
-- 当前临时问答路径与 Windows 环境适配还没有完全完善，跨环境启动时请优先检查模型配置、路径和 shell 变量注入方式
+- 以上命令默认都在项目根目录执行，不依赖任何机器上的绝对路径
+- 项目内路径统一写成 `data/...`、`docs/...`、`frontend/...` 这类相对路径
+- Linux、macOS、Windows、WSL 都应保持这个口径；若 shell 语法不同，只调整环境变量写法，不修改项目路径
+- 当前临时问答链路在 Windows 环境下仍有部分兼容问题未完全收敛，跨系统联调时请优先检查模型配置和 shell 写法
 
 4. 浏览器访问
 
@@ -197,7 +194,6 @@ pytest -q
 用于做 RAG 检索回归对比：
 
 ```bash
-cd /home/haizi/ai-tutor-agent
 python scripts/evaluate_retrieval.py \
 	--eval-file data/retrieval_eval/sample_eval.jsonl \
 	--k-values 1,3,5 \

@@ -483,27 +483,32 @@ def build_objective_test_scorer_node(runtime: RuntimeContext, *, pass_score: int
         if attempt_snapshot:
             updated_snapshot = {**updated_snapshot, "question_attempts": attempt_snapshot.get("question_attempts", [])}
 
+        quiz_kind = str(state.get("pending_interaction_kind") or "objective_test_answers").strip() or "objective_test_answers"
+        review_title = "变式练习" if quiz_kind == "variant_test_answers" else "客观测评"
+        review_entry = _quiz_review_history_entry(
+            title=review_title,
+            kind=quiz_kind,
+            items=items,
+            answers=answers,
+            score=score,
+            passed=passed,
+        )
         event_sink.emit(
             make_event(
                 "node.complete",
                 "objective_test_scorer",
                 message=f"本节点客观题得分 {score} 分，{'已通过' if passed else '需要订正后再验证'}。",
-                data={"score": score, "passed": passed, "wrong_count": len(wrong_items)},
+                data={
+                    "score": score,
+                    "passed": passed,
+                    "wrong_count": len(wrong_items),
+                    "review": review_entry.get("data", {}),
+                    "review_content": review_entry.get("content", ""),
+                },
             )
         )
-        quiz_kind = str(state.get("pending_interaction_kind") or "objective_test_answers").strip() or "objective_test_answers"
-        review_title = "变式练习" if quiz_kind == "variant_test_answers" else "客观测评"
         message_history = list(state.get("message_history", []))
-        message_history.append(
-            _quiz_review_history_entry(
-                title=review_title,
-                kind=quiz_kind,
-                items=items,
-                answers=answers,
-                score=score,
-                passed=passed,
-            )
-        )
+        message_history.append(review_entry)
         if not passed:
             return {
                 "node_quiz_answers": answers,

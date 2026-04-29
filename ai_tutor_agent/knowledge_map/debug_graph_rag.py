@@ -11,6 +11,7 @@ from pathlib import Path
 from dotenv import load_dotenv
 
 from ai_tutor_agent.knowledge_map.graph_rag_pipeline import GraphRAGPipeline
+from ai_tutor_agent.platform_paths import resolve_existing_path, resolve_project_path
 
 load_dotenv()
 
@@ -139,8 +140,8 @@ def build_html_report(result: dict) -> str:
     .answer .section-title {{ font-weight: 700; margin-top: 14px; }}
     .answer .answer-media-block {{ margin: 14px 0 18px; padding-top: 8px; border-top: 1px solid #e2e8f0; }}
     .answer .answer-media-title {{ font-size: 14px; color: #475569; margin-bottom: 10px; font-weight: 600; }}
-    .media-grid {{ display: grid; gap: 12px; grid-template-columns: 1fr; }}
-    .media-card {{ width: 100%; text-align: left; border: 1px solid #cbd5e1; background: #fff; border-radius: 8px; padding: 12px; cursor: pointer; }}
+    .media-grid {{ display: grid; gap: 14px; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); align-items: stretch; }}
+    .media-card {{ width: 100%; min-height: 230px; height: 100%; text-align: left; border: 1px solid #cbd5e1; background: #fff; border-radius: 10px; padding: 12px; cursor: pointer; display: flex; flex-direction: column; gap: 6px; box-sizing: border-box; }}
     .media-card img {{ display: block; width: auto; max-width: 100%; height: auto; max-height: 360px; object-fit: contain; margin: 10px auto 0; border-radius: 6px; background: #f8fafc; }}
     .media-card pre {{ white-space: pre-wrap; word-break: break-word; font-size: 13px; margin: 10px 0 0; }}
     .media-ref {{ font-size: 12px; color: #475569; }}
@@ -222,7 +223,7 @@ def build_html_report(result: dict) -> str:
 
 def _image_path_to_data_uri(path: str) -> str:
     try:
-        image_path = Path(str(path)).expanduser().resolve()
+        image_path = resolve_existing_path(path) or resolve_project_path(path)
         if not image_path.exists() or not image_path.is_file():
             return ""
         media_type, _ = mimetypes.guess_type(str(image_path))
@@ -316,6 +317,24 @@ def _render_answer_html(
         if not stripped:
             index += 1
             continue
+        plain_refs, next_index = _collect_plain_media_reference_group(
+            lines,
+            index,
+            media_cards_by_ref,
+            media_labels_by_ref,
+        )
+        if plain_refs:
+            cards = []
+            for ref in plain_refs:
+                card = media_cards_by_ref.get(ref)
+                if not card:
+                    continue
+                used_refs.add(ref)
+                cards.append(card)
+            if cards:
+                blocks.append(_build_media_block(cards))
+            index = next_index
+            continue
         if stripped == "$$":
             math_lines: list[str] = ["$$"]
             index += 1
@@ -373,6 +392,95 @@ def _render_answer_html(
     return "".join(blocks)
 
 
+def _collect_plain_media_reference_group(
+    lines: list[str],
+    start_index: int,
+    media_cards_by_ref: dict[str, str],
+    media_labels_by_ref: dict[str, str],
+) -> tuple[list[str], int]:
+    first_line = lines[start_index].strip()
+    first_ref = _plain_media_reference_line(first_line, media_labels_by_ref)
+    if not first_ref or first_ref not in media_cards_by_ref:
+        return [], start_index
+
+    refs: list[str] = []
+    index = start_index
+    while index < len(lines):
+        current = lines[index].strip()
+        current_ref = _plain_media_reference_line(current, media_labels_by_ref)
+        if not current_ref or current_ref not in media_cards_by_ref:
+            break
+        if current_ref not in refs:
+            refs.append(current_ref)
+        index += 1
+        index = _skip_plain_media_inline_payload(lines, index, media_labels_by_ref)
+    return refs, index
+
+
+def _plain_media_reference_line(line: str, media_labels_by_ref: dict[str, str]) -> str:
+    stripped = line.strip()
+    for ref, label in sorted(media_labels_by_ref.items(), key=lambda item: len(item[0]), reverse=True):
+        ref_text = str(ref or "").strip()
+        label_text = str(label or "").strip()
+        if not ref_text:
+            continue
+        bare_ref = f"[{ref_text}]"
+        labeled_ref = f"{label_text} {bare_ref}" if label_text else bare_ref
+        if stripped == bare_ref or stripped == labeled_ref:
+            return ref_text
+    match = re.fullmatch(r"([^\[]*)\[(.+)\]\s*", stripped)
+    if not match:
+        return ""
+    label_text = match.group(1).strip()
+    ref = match.group(2).strip()
+    expected_label = str(media_labels_by_ref.get(ref, "")).strip()
+    if expected_label and label_text and label_text != expected_label:
+        return ""
+    return ref
+
+
+def _skip_plain_media_inline_payload(
+    lines: list[str],
+    index: int,
+    media_labels_by_ref: dict[str, str],
+) -> int:
+    while index < len(lines):
+        stripped = lines[index].strip()
+        if not stripped:
+            index += 1
+            continue
+        if _plain_media_reference_line(stripped, media_labels_by_ref):
+            return index
+        if stripped == "$$":
+            index += 1
+            while index < len(lines):
+                if lines[index].strip() == "$$":
+                    index += 1
+                    break
+                index += 1
+            continue
+        if _is_plain_media_payload_line(stripped):
+            index += 1
+            continue
+        break
+    return index
+
+
+def _is_plain_media_payload_line(line: str) -> bool:
+    stripped = line.strip()
+    if not stripped:
+        return True
+    if _is_section_line(stripped):
+        return False
+    if stripped.startswith(("结论：", "分析：", "举例：", "拓展：", "依据：")):
+        return False
+    if re.match(r"^(图|表)\s*\d", stripped):
+        return True
+    if stripped.endswith(("概念", "分类", "方式", "原理", "分析", "指标", "框图", "示意图", "曲线", "表")):
+        return True
+    return False
+
+
 def _render_answer_line(line: str, media_labels_by_ref: dict[str, str]) -> str:
     rendered = html.escape(_strip_stray_brackets(line))
     for ref, label in media_labels_by_ref.items():
@@ -422,7 +530,7 @@ def _build_media_block(cards: list[str], *, title: str = "相关公式与图表"
 
 
 def write_html_report(result: dict, output_path: str) -> Path:
-    target = Path(output_path)
+    target = resolve_project_path(output_path)
     target.parent.mkdir(parents=True, exist_ok=True)
     target.write_text(build_html_report(result), encoding="utf-8")
     return target.resolve()

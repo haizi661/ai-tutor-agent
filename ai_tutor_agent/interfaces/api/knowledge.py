@@ -6,7 +6,7 @@ import numbers
 import os
 import mimetypes
 from collections.abc import Mapping
-from pathlib import Path
+from pathlib import Path, PureWindowsPath
 
 from fastapi import APIRouter, File, Request, UploadFile
 
@@ -141,32 +141,26 @@ async def upload_file(request: Request, file: UploadFile = File(...)):
     if not hasattr(knowledge_provider, "add_document"):
         return {"status": "error", "message": "Knowledge provider does not support uploads."}
 
-    temp_dir = tempfile.mkdtemp()
-    file_path = os.path.join(temp_dir, file.filename)
-    with open(file_path, "wb") as buffer:
-        content = await file.read()
-        buffer.write(content)
-
+    raw_name = file.filename or ""
+    safe_name = Path(PureWindowsPath(raw_name).name).name or "upload.bin"
     try:
-        success = knowledge_provider.add_document(file_path)
+        with tempfile.TemporaryDirectory(prefix="ai_tutor_upload_") as temp_dir:
+            file_path = Path(temp_dir) / safe_name
+            with file_path.open("wb") as buffer:
+                content = await file.read()
+                buffer.write(content)
+            success = knowledge_provider.add_document(str(file_path))
         if success:
-            return {"status": "success", "filename": file.filename}
+            return {"status": "success", "filename": safe_name}
         # File may have been stored even if indexing failed (unsupported type)
         knowledge_dir = getattr(knowledge_provider, "knowledge_dir", None)
-        stored = knowledge_dir and (Path(knowledge_dir) / Path(file.filename).name).exists()
+        stored = knowledge_dir and (Path(knowledge_dir) / safe_name).exists()
         if stored:
-            return {"status": "success", "filename": file.filename,
+            return {"status": "success", "filename": safe_name,
                     "message": "已保存到资料库（此格式仅支持查阅，暂不支持内容搜索）"}
-        return {"status": "error", "filename": file.filename, "message": "上传失败，文件未能保存"}
+        return {"status": "error", "filename": safe_name, "message": "上传失败，文件未能保存"}
     except Exception as exc:
-        return {"status": "error", "filename": file.filename, "message": str(exc)}
-    finally:
-        try:
-            if os.path.exists(file_path):
-                os.remove(file_path)
-            os.rmdir(temp_dir)
-        except OSError:
-            pass
+        return {"status": "error", "filename": safe_name, "message": str(exc)}
 
 
 @router.delete("/knowledge/files/{filename}")

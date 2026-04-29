@@ -1,7 +1,7 @@
 import queue
 import threading
 import time
-from typing import Dict
+from typing import Dict, Optional
 
 from fastapi import APIRouter, HTTPException, Request
 from fastapi.responses import StreamingResponse
@@ -64,7 +64,7 @@ class AssessmentAnswerRequest(BaseModel):
 class TopicConfirmRequest(BaseModel):
     thread_id: str
     confirmed: bool
-    topic: str = ""
+    topic: Optional[str] = ""
     start_mode: str = "assessment"
 
 
@@ -639,7 +639,8 @@ async def assessment_answer(req: AssessmentAnswerRequest, request: Request):
 async def confirm_topic(req: TopicConfirmRequest, request: Request):
     runtime = get_runtime(request)
 
-    if not req.confirmed and not req.topic.strip():
+    topic = (req.topic or "").strip()
+    if not req.confirmed and not topic:
         return {"status": "error", "message": "A revised topic is required when confirmation is rejected."}
 
     _schedule_resume_worker(
@@ -648,7 +649,7 @@ async def confirm_topic(req: TopicConfirmRequest, request: Request):
         _resume_topic_confirmation_worker,
         req.thread_id,
         req.confirmed,
-        req.topic,
+        topic,
         req.start_mode,
     )
     return {"status": "ok", "message": "Topic confirmation received."}

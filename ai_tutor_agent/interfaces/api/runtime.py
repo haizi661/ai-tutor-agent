@@ -16,6 +16,7 @@ from ...infrastructure.question_bank import LocalQuestionBankProvider
 from ...infrastructure.retriever import LocalFileKnowledgeProvider
 from ...knowledge_map.graph_rag_pipeline import GraphRAGPipeline
 from ...knowledge_map.student_state import StudentStateStore
+from ...platform_paths import resolve_project_path
 from ...orchestration.workflow import create_app_with_sqlite_checkpointer
 
 
@@ -422,10 +423,7 @@ def get_runtime(request: Request) -> ApiRuntime:
 
 
 def get_frontend_dir() -> str:
-    project_root = os.path.abspath(
-        os.path.join(os.path.dirname(__file__), "..", "..", "..")
-    )
-    return os.path.join(project_root, "frontend")
+    return str(resolve_project_path("frontend"))
 
 
 def serialize_runtime_config(settings: Settings) -> dict:

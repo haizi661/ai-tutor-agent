@@ -107,9 +107,25 @@
         return data;
     }
 
+    function stringifyMessageValue(value) {
+        if (typeof value === 'string') return value;
+        if (value == null) return '';
+        try {
+            return JSON.stringify(value);
+        } catch (_error) {
+            return String(value);
+        }
+    }
+
     function pickErrorMessage(payload, fallback) {
         if (!payload || typeof payload !== 'object') return fallback;
-        return payload.detail || payload.message || fallback;
+        const detail = stringifyMessageValue(payload.detail).trim();
+        const message = stringifyMessageValue(payload.message).trim();
+        return detail || message || fallback;
+    }
+
+    function formatErrorMessage(error, fallback = '请求失败') {
+        return stringifyMessageValue(error?.message || error || fallback).trim() || fallback;
     }
 
     function summarizeAssessmentResult(data) {
@@ -253,7 +269,7 @@
             startStreamingTurn('正在继续');
             app.connectSSE();
         } catch (error) {
-            const message = `主题确认请求失败：${error.message}`;
+            const message = `主题确认请求失败：${formatErrorMessage(error)}`;
             app.setStatusBanner(message, 'danger');
             alert(message);
         }
@@ -395,6 +411,9 @@
             const evidence = Array.isArray(data.data?.evidence) ? data.data.evidence : [];
             if (data.source === 'tutor' && evidence.length) {
                 app.renderEvidencePanel?.(evidence, { tone: 'info', role: 'tutor' });
+            }
+            if (data.source === 'objective_test_scorer' && data.data?.review) {
+                app.renderObjectiveQuizReviewCard?.(data.data.review, data.data.review_content || '');
             }
             if (data.source === 'wrong_question_explainer') {
                 const explanations = Array.isArray(data.data?.explanations) ? data.data.explanations : [];

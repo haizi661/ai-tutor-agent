@@ -14,6 +14,7 @@ from ai_tutor_agent.knowledge_map.media_index.media_asset_annotator import Media
 from ai_tutor_agent.knowledge_map.media_index.media_candidate_filter import MediaCandidateFilter
 from ai_tutor_agent.knowledge_map.media_index.media_asset_scanner import MediaAssetScanner
 from ai_tutor_agent.knowledge_map.media_index.media_node_linker import MediaNodeLinker
+from ai_tutor_agent.platform_paths import resolve_project_path
 
 
 def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
@@ -44,11 +45,11 @@ def main() -> None:
     args = parse_args()
     config = replace(
         MediaIndexConfig(),
-        mineru_cache_root=Path(args.mineru_cache_root),
+        mineru_cache_root=resolve_project_path(args.mineru_cache_root),
     )
     scanner = MediaAssetScanner(config=config)
     candidate_filter = MediaCandidateFilter(config=config)
-    linker = MediaNodeLinker(nodes_csv_path=args.nodes_csv, config=config) if args.link else None
+    linker = MediaNodeLinker(nodes_csv_path=resolve_project_path(args.nodes_csv), config=config) if args.link else None
     visual_analyzer = build_visual_analyzer() if args.annotate and args.enable_vision else None
     annotator = MediaAssetAnnotator(config=config, visual_analyzer=visual_analyzer) if args.annotate else None
 

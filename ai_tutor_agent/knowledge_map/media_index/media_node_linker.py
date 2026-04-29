@@ -13,6 +13,7 @@ from ai_tutor_agent.knowledge_map.schema.media_asset_schema import (
     normalize_linked_media_asset,
     normalize_raw_media_candidate,
 )
+from ai_tutor_agent.platform_paths import resolve_project_path
 
 
 class MediaNodeLinker:
@@ -23,7 +24,7 @@ class MediaNodeLinker:
         config: MediaIndexConfig | None = None,
     ) -> None:
         self.config = config or MediaIndexConfig()
-        self.nodes_csv_path = Path(nodes_csv_path)
+        self.nodes_csv_path = resolve_project_path(nodes_csv_path)
         self.nodes = self.load_nodes()
 
     def load_nodes(self) -> list[dict[str, Any]]:
@@ -57,7 +58,7 @@ class MediaNodeLinker:
         return linked_assets
 
     def write_jsonl(self, candidates: list[dict[str, Any]], output_path: str | Path | None = None) -> Path:
-        target = Path(output_path) if output_path is not None else self.config.output_dir / self.config.linked_candidates_filename
+        target = resolve_project_path(output_path or (self.config.output_dir / self.config.linked_candidates_filename))
         target.parent.mkdir(parents=True, exist_ok=True)
         with target.open("w", encoding="utf-8") as fh:
             for item in candidates:

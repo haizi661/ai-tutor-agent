@@ -5,6 +5,8 @@ import re
 from pathlib import Path
 from typing import Any
 
+from ai_tutor_agent.platform_paths import resolve_existing_path, resolve_project_path
+
 
 class GraphMediaEnricher:
     def __init__(
@@ -14,10 +16,10 @@ class GraphMediaEnricher:
         visual_analyzer: Any | None = None,
         annotated_assets_path: str | Path = "data/media_evidence_index",
     ) -> None:
-        self.mineru_cache_root = Path(mineru_cache_root)
+        self.mineru_cache_root = resolve_project_path(mineru_cache_root)
         self.chapter_docs = self._load_chapter_docs()
         self.visual_analyzer = visual_analyzer
-        self.annotated_assets_path = Path(annotated_assets_path)
+        self.annotated_assets_path = resolve_project_path(annotated_assets_path)
         self.annotated_assets = self._load_annotated_assets()
         self._visual_cache: dict[str, str] = {}
 
@@ -177,7 +179,9 @@ class GraphMediaEnricher:
             image_paths_abs = [source_path] if source_path else []
             if not image_paths_abs:
                 return None
-            item["image_paths_abs"] = image_paths_abs
+            item["image_paths_abs"] = [str(resolved) for path in image_paths_abs if (resolved := resolve_existing_path(path))]
+            if not item["image_paths_abs"]:
+                return None
             if self.visual_analyzer is not None and not item["visual_summary"]:
                 item["visual_summary"] = self._describe_figure(item, question=question)
         else:
@@ -506,7 +510,7 @@ class GraphMediaEnricher:
         return results
 
     def _resolve_annotated_asset_files(self) -> list[Path]:
-        target = self.annotated_assets_path
+        target = resolve_existing_path(self.annotated_assets_path) or self.annotated_assets_path
         if not target.exists():
             return []
         if target.is_file():
@@ -518,8 +522,8 @@ class GraphMediaEnricher:
             try:
                 summary = json.loads(summary_path.read_text(encoding="utf-8"))
                 for chapter in summary.get("chapters", []) or []:
-                    annotated_path = Path(str(chapter.get("annotated_path", "") or ""))
-                    if annotated_path.exists() and annotated_path not in files:
+                    annotated_path = resolve_existing_path(chapter.get("annotated_path", "") or "", base_dir=target)
+                    if annotated_path is not None and annotated_path not in files:
                         files.append(annotated_path)
             except Exception:
                 pass
@@ -545,10 +549,11 @@ class GraphMediaEnricher:
 
     def _load_chapter_docs(self) -> list[dict[str, Any]]:
         docs: list[dict[str, Any]] = []
-        if not self.mineru_cache_root.exists():
+        root = resolve_existing_path(self.mineru_cache_root) or resolve_project_path(self.mineru_cache_root)
+        if not root.exists():
             return docs
 
-        for item in self.mineru_cache_root.iterdir():
+        for item in root.iterdir():
             if not item.is_dir():
                 continue
             manifest_path = item / "manifest.json"
@@ -897,8 +902,9 @@ class GraphMediaEnricher:
         def flush_pending(caption: str) -> None:
             nonlocal pending_paths
             resolved = self._resolve_image_paths(pending_paths, manifest)
-            if resolved:
-                figures.append({"caption": self._clean_caption(caption) or "相关图表", "image_paths_abs": resolved})
+            cleaned_caption = self._clean_caption(caption) or "相关图表"
+            if resolved and not self._looks_like_qr_guide_image(cleaned_caption, pending_paths):
+                figures.append({"caption": cleaned_caption, "image_paths_abs": resolved})
             pending_paths = []
 
         for idx, raw in enumerate(lines):
@@ -945,8 +951,7 @@ class GraphMediaEnricher:
                         upcoming_caption = candidate
                         break
                 if upcoming_caption:
-                    if line == upcoming_caption:
-                        flush_pending(upcoming_caption)
+                    flush_pending(upcoming_caption)
                     continue
                 flush_pending(next_non_empty or "相关图表")
         if pending_paths:
@@ -973,16 +978,18 @@ class GraphMediaEnricher:
                         abs_path = meta.get("abs_path")
                         break
 
+            image_name = Path(trimmed).name
             if abs_path is None:
-                abs_path = str((cache_dir / "images" / Path(trimmed).name).resolve())
+                candidate = resolve_existing_path(image_name, base_dir=cache_dir / "images")
             else:
-                abs_candidate = Path(str(abs_path).replace("\\", "/"))
-                if not abs_candidate.is_absolute():
-                    abs_candidate = Path.cwd() / abs_candidate
-                abs_path = str(abs_candidate.resolve())
+                candidate = resolve_existing_path(abs_path, base_dir=cache_dir)
+                if candidate is None:
+                    candidate = resolve_existing_path(image_name, base_dir=cache_dir / "images")
 
-            if abs_path not in resolved and Path(abs_path).exists():
-                resolved.append(abs_path)
+            if candidate is not None:
+                candidate_text = str(candidate)
+                if candidate_text not in resolved:
+                    resolved.append(candidate_text)
         return resolved
 
     def _looks_like_formula(self, text: str) -> bool:
@@ -1004,6 +1011,23 @@ class GraphMediaEnricher:
 
     def _looks_like_figure_caption(self, text: str) -> bool:
         return bool(re.search(r"(图|Figure|Fig\.)\s*[\d\-]+", text, flags=re.IGNORECASE))
+
+    def _looks_like_qr_guide_image(self, caption: str, image_paths: list[str]) -> bool:
+        haystack = " ".join([caption, *[Path(str(path)).name for path in image_paths]]).lower()
+        qr_keywords = [
+            "二维码",
+            "扫码",
+            "扫一扫",
+            "qr",
+            "qrcode",
+            "本章导学",
+            "导学",
+            "微课",
+            "视频",
+        ]
+        if any(keyword.lower() in haystack for keyword in qr_keywords):
+            return True
+        return bool(image_paths) and not self._looks_like_figure_caption(caption)
 
     def _clean_formula_text(self, text: str) -> str:
         return re.sub(r"\s+", " ", (text or "").strip())[:240]

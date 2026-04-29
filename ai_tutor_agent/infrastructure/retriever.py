@@ -19,6 +19,7 @@ from langchain_core.messages import HumanMessage, SystemMessage
 from rank_bm25 import BM25Okapi
 
 from ..config import PROJECT_ROOT, Settings
+from ..platform_paths import resolve_project_path
 from ..core.output_format import parse_json_object
 from ..core.ports import KnowledgeProvider
 from ..core.text import content_to_text
@@ -409,7 +410,7 @@ def _strip_query_prefixes(term: str) -> str:
 class LocalFileKnowledgeProvider(KnowledgeProvider):
     def __init__(self, settings: Settings):
         self.settings = settings
-        self.knowledge_dir = Path(settings.knowledge_dir)
+        self.knowledge_dir = resolve_project_path(settings.knowledge_dir)
         self.knowledge_dir.mkdir(parents=True, exist_ok=True)
         self.course_primary_dir = self._resolve_source_dir(settings.course_primary_dir)
         self.index_file = self.knowledge_dir.parent / "knowledge_index.json"
@@ -507,10 +508,7 @@ class LocalFileKnowledgeProvider(KnowledgeProvider):
             print(f"⚠️ [RAG] 初始化失败，已回退为无知识库模式: {exc}")
 
     def _resolve_source_dir(self, path_value: str) -> Path:
-        candidate = Path(path_value)
-        if candidate.is_absolute():
-            return candidate
-        return (Path(PROJECT_ROOT) / candidate).resolve()
+        return resolve_project_path(path_value)
 
     def _build_source_specs(self) -> list[KnowledgeSourceSpec]:
         specs: list[KnowledgeSourceSpec] = []

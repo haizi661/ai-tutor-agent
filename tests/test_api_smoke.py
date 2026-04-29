@@ -780,6 +780,48 @@ def test_confirmed_topic_can_skip_existing_assessment_without_proposed_topic(tmp
         }
 
 
+def test_confirmed_topic_skip_accepts_null_topic_from_restored_assessment_card(tmp_path):
+    thread_id = "session-skip-restored-null-topic"
+    checkpoint_store = FakeCheckpointStore()
+    checkpoint_store.save(
+        thread_id,
+        {
+            "current_topic": "自动控制原理",
+            "current_user_goal": "自动控制原理",
+            "session_goal": "自动控制原理",
+            "proposed_topic": "",
+            "flow_status": "awaiting_assessment",
+            "assessment_questions": [{"id": 1, "question": "Q1"}],
+            "assessment_answers": {"1": "B"},
+            "assessment_state": {"draft": True},
+        },
+        source="loop",
+        step=1,
+    )
+    runtime = ApiRuntime(
+        settings=build_test_settings(tmp_path),
+        knowledge_provider=NoopKnowledgeProvider(),
+        workflow_factory=TopicConfirmWorkflowFactory(checkpoint_store),
+        checkpoint_factory=lambda path: (checkpoint_store, DummyConn()),
+    )
+
+    with TestClient(create_api_app(runtime_factory=lambda: runtime)) as client:
+        skip = client.post(
+            "/api/confirm_topic",
+            json={"thread_id": thread_id, "confirmed": True, "topic": None, "start_mode": "direct_tutor"},
+        )
+        assert skip.status_code == 200
+
+        stream = client.get(f"/api/stream?thread_id={thread_id}")
+        assert stream.status_code == 200
+        assert "开始直接讲解" in stream.text
+
+        state = client.get(f"/api/history/{thread_id}").json()["state"]
+        assert state["current_topic"] == "自动控制原理"
+        assert state["flow_status"] == "normal"
+        assert state["assessment_questions"] == []
+
+
 def test_api_start_continues_running_session_that_is_waiting_for_input(tmp_path):
     runtime = ApiRuntime(
         settings=build_test_settings(tmp_path),
@@ -1085,6 +1127,28 @@ def test_knowledge_upload_and_clear_flow(tmp_path):
         listed_after = client.get("/api/knowledge/files")
         assert listed_after.status_code == 200
         assert listed_after.json()["items"] == []
+
+
+def test_knowledge_upload_sanitizes_path_like_filename(tmp_path):
+    runtime = ApiRuntime(
+        settings=build_test_settings(tmp_path),
+        knowledge_provider=MutableKnowledgeProvider(),
+        workflow_factory=FakeWorkflowFactory(FakeCheckpointStore()),
+        checkpoint_factory=lambda path: (FakeCheckpointStore(), DummyConn()),
+    )
+
+    with TestClient(create_api_app(runtime_factory=lambda: runtime)) as client:
+        upload = client.post(
+            "/api/upload",
+            files={"file": (r"C:\Users\tester\Desktop\notes.md", b"# control theory", "text/markdown")},
+        )
+        assert upload.status_code == 200
+        assert upload.json()["status"] == "success"
+        assert upload.json()["filename"] == "notes.md"
+
+        listed = client.get("/api/knowledge/files")
+        assert listed.status_code == 200
+        assert listed.json()["items"][0]["filename"] == "notes.md"
 
 
 def test_api_answer_rejects_when_not_awaiting_input(tmp_path):

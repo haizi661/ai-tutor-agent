@@ -39,7 +39,17 @@ class FakeDebugGraphRAGPipeline:
         self.calls.append((question, kwargs))
         return {
             "question": question,
-            "answer": "结论：超调量随阻尼比增大而减小。\n[[MEDIA:KM013.figure_asset[1]]]\n[[MEDIA:KM015.formula_asset[1]]]",
+            "answer": (
+                "结论：超调量随阻尼比增大而减小。\n"
+                "式一 [KM015.formula_asset[1]]\n"
+                "二阶系统的时域分析\n"
+                "$$\n"
+                r"\\sigma\\% = e^{-\\pi\\zeta/\\sqrt{1-\\zeta^2}}\\times 100\\%"
+                "\n$$\n"
+                "图一 [KM013.figure_asset[1]]\n"
+                "系统时间响应的性能指标\n"
+                "单位阶跃响应曲线"
+            ),
             "context_text": "二阶系统时域分析上下文",
             "evidence_items": [
                 {"reference": "KM015.summary", "text": "二阶系统动态过程及典型性能指标。"},
@@ -125,6 +135,10 @@ def test_interruption_preserves_debug_graph_rag_html_report_for_llm_graph_answer
     assert "media-card figure-card" in streamed
     assert "media-card formula-card" in streamed
     assert "formula-math" in streamed
+    assert streamed.count('<div class="answer-media-block">') == 1
+    assert "式一 [KM015.formula_asset[1]]" not in streamed
+    assert '<div class="formula-scroll formula-viewport answer-formula"' not in streamed
+    assert "单位阶跃响应曲线</p><p>" not in streamed
     assert "KM013.figure_asset[1]" in streamed
     assert "KM015.summary" in streamed
     assert "不应该吞掉" not in streamed

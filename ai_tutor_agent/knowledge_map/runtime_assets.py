@@ -4,6 +4,7 @@ import argparse
 import json
 from pathlib import Path
 from typing import Any
+from ai_tutor_agent.platform_paths import project_relative_path, resolve_project_path
 
 
 def _count_jsonl(path: Path) -> int:
@@ -18,7 +19,7 @@ def _count_jsonl(path: Path) -> int:
 
 
 def inspect_media_evidence_index(path: str | Path) -> dict[str, Any]:
-    root = Path(path)
+    root = resolve_project_path(path)
     summary_path = root / "batch_summary.json"
     annotated_paths = sorted(root.glob("*_annotated_assets.jsonl")) if root.exists() else []
     linked_paths = sorted(root.glob("*_linked_candidates.jsonl")) if root.exists() else []
@@ -35,7 +36,7 @@ def inspect_media_evidence_index(path: str | Path) -> dict[str, Any]:
             summary = {"invalid_json": True}
 
     return {
-        "path": str(root),
+        "path": project_relative_path(root),
         "exists": root.exists(),
         "summary_exists": summary_path.exists(),
         "summary_valid": bool(summary) and not summary.get("invalid_json"),

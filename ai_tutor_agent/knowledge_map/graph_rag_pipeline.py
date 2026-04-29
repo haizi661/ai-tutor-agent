@@ -17,6 +17,7 @@ from ai_tutor_agent.knowledge_map.builders.graph_traverser import GraphTraverser
 from ai_tutor_agent.knowledge_map.builders.node_selector import NodeSelector
 from ai_tutor_agent.knowledge_map.builders.qwen_visual_analyzer import QwenVisualAnalyzer
 from ai_tutor_agent.knowledge_map.config.graph_rag_config import GraphRAGConfig
+from ai_tutor_agent.platform_paths import resolve_project_path
 
 
 class GraphRAGPipeline:
@@ -33,8 +34,8 @@ class GraphRAGPipeline:
         config: GraphRAGConfig | None = None,
     ) -> None:
         self.config = config or GraphRAGConfig()
-        self.nodes_csv_path = Path(nodes_csv_path)
-        self.edges_csv_path = Path(edges_csv_path)
+        self.nodes_csv_path = resolve_project_path(nodes_csv_path)
+        self.edges_csv_path = resolve_project_path(edges_csv_path)
         self.nodes = self._load_nodes()
         self.edges = self._load_edges()
         self.node_map = {node["node_id"]: node for node in self.nodes}

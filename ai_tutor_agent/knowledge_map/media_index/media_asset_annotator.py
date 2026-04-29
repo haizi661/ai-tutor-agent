@@ -99,7 +99,9 @@ class MediaAssetAnnotator:
         return annotated
 
     def write_jsonl(self, assets: list[dict[str, Any]], output_path: str | Path | None = None) -> Path:
-        target = Path(output_path) if output_path is not None else self.config.output_dir / self.config.annotated_assets_filename
+        from ai_tutor_agent.platform_paths import resolve_project_path
+
+        target = resolve_project_path(output_path or (self.config.output_dir / self.config.annotated_assets_filename))
         target.parent.mkdir(parents=True, exist_ok=True)
         with target.open("w", encoding="utf-8") as fh:
             for item in assets:

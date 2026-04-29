@@ -2472,6 +2472,7 @@
         const row = createAssistantCardRow('topic-confirm-card obj-test-card');
         const card = document.createElement('div');
         card.className = 'topic-confirm-card obj-test-card prompt-flow-card';
+        card.dataset.quizKind = kind;
         const label = kind === 'variant_test_answers' ? '变式练习' : '客观测验';
         card.innerHTML = `
             <div class="prompt-card prompt-flow-shell">
@@ -2591,20 +2592,27 @@
         const answers = data.answers || {};
         const kind = data.kind || 'objective_test_answers';
         const title = data.title || (kind === 'variant_test_answers' ? '变式练习' : '客观测评');
-        app.renderObjectiveTestCard(questions, kind);
-        const card = Array.from(document.querySelectorAll('.obj-test-card')).pop();
+        const existingCards = Array.from(document.querySelectorAll('.obj-test-card'));
+        const card = existingCards.find(candidate => candidate.dataset.quizKind === kind && !candidate.dataset.reviewRendered)
+            || existingCards.find(candidate => !candidate.dataset.reviewRendered)
+            || null;
         if (!card) {
+            app.renderObjectiveTestCard(questions, kind);
+        }
+        const reviewCard = card || Array.from(document.querySelectorAll('.obj-test-card')).pop();
+        if (!reviewCard) {
             if (content) app.appendMessage('agent', content, { kind: 'objective_quiz_review' });
             return;
         }
-        const qContainer = card.querySelector('.obj-test-questions');
-        const submitBtn = card.querySelector('.obj-test-submit');
-        const toggle = card.querySelector('.obj-test-review-toggle');
-        const body = card.querySelector('.obj-test-review-body');
-        const heading = card.querySelector('.prompt-label');
+        reviewCard.dataset.reviewRendered = 'true';
+        const qContainer = reviewCard.querySelector('.obj-test-questions');
+        const submitBtn = reviewCard.querySelector('.obj-test-submit');
+        const toggle = reviewCard.querySelector('.obj-test-review-toggle');
+        const body = reviewCard.querySelector('.obj-test-review-body');
+        const heading = reviewCard.querySelector('.prompt-label');
         if (heading) heading.textContent = title;
         if (submitBtn) submitBtn.remove();
-        card.querySelectorAll('.obj-test-opt').forEach(o => {
+        reviewCard.querySelectorAll('.obj-test-opt').forEach(o => {
             o.style.pointerEvents = 'none';
             o.classList.add('locked');
         });
@@ -2625,7 +2633,7 @@
             summary.textContent = `你的答案：${userKey || '未作答'}；正确答案：${correctKey || '未提供'}`;
             qEl.appendChild(summary);
         });
-        card.classList.add('submitted-collapsed');
+        reviewCard.classList.add('submitted-collapsed');
         if (body) body.hidden = true;
         if (toggle) {
             toggle.hidden = false;
