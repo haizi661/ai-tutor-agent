@@ -659,6 +659,7 @@
         document.getElementById('local-proxy-scheme').value = data.proxy_scheme || 'http';
         document.getElementById('local-http-proxy').value = data.http_proxy || '';
         document.getElementById('local-https-proxy').value = data.https_proxy || '';
+        document.getElementById('local-no-proxy').value = data.no_proxy || '';
         document.getElementById('local-mineru-proxy-mode').value = data.mineru_proxy_mode || 'inherit';
         document.getElementById('local-mineru-http-proxy').value = data.mineru_http_proxy || '';
         document.getElementById('local-mineru-https-proxy').value = data.mineru_https_proxy || '';
@@ -740,6 +741,7 @@
             proxy_scheme: document.getElementById('local-proxy-scheme').value,
             http_proxy: document.getElementById('local-http-proxy').value.trim(),
             https_proxy: document.getElementById('local-https-proxy').value.trim(),
+            no_proxy: document.getElementById('local-no-proxy').value.trim(),
             mineru_proxy_mode: document.getElementById('local-mineru-proxy-mode').value,
             mineru_http_proxy: document.getElementById('local-mineru-http-proxy').value.trim(),
             mineru_https_proxy: document.getElementById('local-mineru-https-proxy').value.trim(),

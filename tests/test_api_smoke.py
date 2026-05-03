@@ -6,7 +6,6 @@ from pathlib import Path
 from types import SimpleNamespace
 
 import pytest
-from fastapi.testclient import TestClient
 
 from ai_tutor_agent.config import Settings
 from ai_tutor_agent.core.events import make_event
@@ -14,6 +13,7 @@ from ai_tutor_agent.core.ports import NoopKnowledgeProvider
 from ai_tutor_agent.interfaces.api.app import create_api_app
 from ai_tutor_agent.interfaces.api.history import _checkpoint_summary
 from ai_tutor_agent.interfaces.api.runtime import ApiRuntime
+from asgi_test_client import SyncASGITestClient as TestClient
 
 
 class DummyConn:
@@ -665,8 +665,57 @@ def test_history_summary_uses_stage_aware_display_title(tmp_path):
     meta_summary = _checkpoint_summary("thread-meta", checkpoint_store.get_tuple({"configurable": {"thread_id": "thread-meta"}}))
     confirm_summary = _checkpoint_summary("thread-confirm", checkpoint_store.get_tuple({"configurable": {"thread_id": "thread-confirm"}}))
 
-    assert meta_summary["display_title"] == "未确认主题"
+    assert meta_summary["display_title"] == "新对话"
     assert confirm_summary["display_title"] == "待确认：高等数学"
+
+
+def test_history_summary_title_from_first_user_message(tmp_path):
+    """有 message_history 时，pre-topic 状态应提取首条用户消息作为标题。"""
+    checkpoint_store = FakeCheckpointStore()
+    checkpoint_store.save(
+        "thread-msg",
+        {
+            "current_topic": "",
+            "proposed_topic": "",
+            "flow_status": "topic_intake",
+            "message_history": [
+                {"role": "assistant", "content": "你好，想学什么？"},
+                {"role": "user", "content": "我想学自动控制原理"},
+            ],
+        },
+        source="loop",
+        step=1,
+    )
+    summary = _checkpoint_summary("thread-msg", checkpoint_store.get_tuple({"configurable": {"thread_id": "thread-msg"}}))
+    assert summary["display_title"] == "我想学自动控制原理"
+
+
+def test_history_summary_title_truncates_long_message():
+    """首条用户消息超过 30 字符时应截断加省略号。"""
+    from ai_tutor_agent.interfaces.api.history import _extract_topic_from_messages
+
+    long_msg = "这是一个非常非常长的用户消息用来测试截断功能是否正常工作请务必确保超过三十个字符"
+    result = _extract_topic_from_messages({"message_history": [{"role": "user", "content": long_msg}]})
+    assert len(result) <= 31  # 30 chars + "…"
+    assert result.endswith("…")
+
+
+def test_history_summary_fallback_to_proposed_topic():
+    """current_topic 为空时应 fallback 到 proposed_topic。"""
+    checkpoint_store = FakeCheckpointStore()
+    checkpoint_store.save(
+        "thread-fallback",
+        {
+            "current_topic": "",
+            "proposed_topic": "线性代数",
+            "flow_status": "normal",
+            "message_history": [],
+        },
+        source="loop",
+        step=1,
+    )
+    summary = _checkpoint_summary("thread-fallback", checkpoint_store.get_tuple({"configurable": {"thread_id": "thread-fallback"}}))
+    assert summary["display_title"] == "线性代数"
 
 
 def test_topic_confirmation_resume_flow(tmp_path):
@@ -1422,6 +1471,20 @@ def test_runtime_build_falls_back_when_local_embedding_cache_is_missing(monkeypa
 
 
 def test_local_config_round_trip(monkeypatch, tmp_path):
+    for key in [
+        "CHAT_PROFILE",
+        "GOOGLE_API_KEY",
+        "GEMINI_API_KEY",
+        "QWEN_API_KEY",
+        "DEEPSEEK_API_KEY",
+        "OPENAI_API_KEY",
+        "OPENAI_API_BASE",
+        "MINIMAX_API_KEY",
+        "GLM_API_KEY",
+        "MODEL_NAME",
+        "LLM_PROVIDER",
+    ]:
+        monkeypatch.delenv(key, raising=False)
     env_path = tmp_path / ".env.test"
     env_path.write_text(
         "\n".join(

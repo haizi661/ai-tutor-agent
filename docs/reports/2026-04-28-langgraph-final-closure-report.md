@@ -1,5 +1,7 @@
 # LangGraph 知识图谱驱动智能导师系统最终闭合补充报告
 
+> 术语同步说明：2026-04-30 已按当前主线统一历史计划/报告中的用户可见文案：课后停顿为“继续追问 / 我懂了，进入小测”，学习结束为“结束本轮学习，生成作业”。内部结束学习路由值仅表示代码兼容标识，不代表用户界面文案。
+
 报告时间：2026-04-28
 项目根目录：本报告中的路径说明统一以仓库根目录为基准，使用项目内相对路径。
 
@@ -8,7 +10,7 @@
 本轮目标是把上一阶段仍未完全闭合的底座继续补齐，重点包括：
 
 1. 27 号风格知识图谱可视化是否正确接入；
-2. `viewer/data.js` 是否与当前 `a2-control-theory/graph.json` 可重复同步；
+2. `viewer/data.js` 是否与当前 `docs/archive/a2-control-theory/graph.json` 可重复同步；
 3. `media_evidence_index` 是否存在并达到最小可用状态；
 4. `tutor` 是否真正优先使用图谱 2.1 当前节点材料，而不是绕过 `node_content_loader`；
 5. 图谱、可视化、GraphRAG、主流程节点能否通过回归测试。
@@ -41,8 +43,8 @@
 
 ```bash
 python -m ai_tutor_agent.knowledge_map.viewer_data \
-  --graph-json a2-control-theory/graph.json \
-  --output a2-control-theory/viewer/data.js
+  --graph-json docs/archive/a2-control-theory/graph.json \
+  --output docs/archive/a2-control-theory/viewer/data.js
 ```
 
 生成数据保持：
@@ -152,7 +154,7 @@ python -m ai_tutor_agent.knowledge_map.runtime_assets \
 ```text
 git archive 恢复 runtime assets
 → build_media_index_batch
-→ viewer_data 重建 a2-control-theory/viewer/data.js
+→ viewer_data 重建 docs/archive/a2-control-theory/viewer/data.js
 → runtime_assets 检查 media_evidence_index
 → completed
 ```
@@ -185,7 +187,7 @@ git archive 恢复 runtime assets
 这使主流程更加符合设计分工：
 
 - 图谱 2.1：学习路径、当前节点、节点材料、教学目标；
-- 图谱 2.2：临时问题检索、证据增强、图表公式补充。
+- 图谱 2.2：追问/卡点检索、证据增强、图表公式补充。
 
 ## 4. 当前运行资产状态
 
@@ -265,7 +267,7 @@ warnings 仍为已有 SWIG DeprecationWarning，不是本轮逻辑问题。
 
 可以这样说：
 
-> 当前项目已经完成 LangGraph 节点制掌握学习主流程的主体闭合：从主题确认、学前诊断、图谱节点选择、节点内容加载、讲解、临时问答、节点后客观测试、错题补救、下一节点规划、作业生成，到二次登录恢复和作业处理，均已形成显式节点和可测试路由。知识图谱 2.1 负责学习路径与节点内容，图谱 2.2 负责临时问答和证据增强。A2 图谱当前包含 85 个节点、240 条边，内部无阻塞性 dangling；27 号风格可视化数据已由当前 graph.json 重建，viewer 节点、边、详情字段与 graph.json 对齐；媒体证据索引当前包含 11 个章节、2928 条标注资产，GraphRAG 可用。最新聚焦回归 88 项通过。
+> 当前项目已经完成 LangGraph 节点制掌握学习主流程的主体闭合：从主题确认、学前诊断、图谱节点选择、节点内容加载、讲解、自然追问、节点后客观测试、错题补救、下一节点规划、作业生成，到二次登录恢复和作业处理，均已形成显式节点和可测试路由。知识图谱 2.1 负责学习路径与节点内容，图谱 2.2 负责自然追问和证据增强。A2 图谱当前包含 85 个节点、240 条边，内部无阻塞性 dangling；27 号风格可视化数据已由当前 graph.json 重建，viewer 节点、边、详情字段与 graph.json 对齐；媒体证据索引当前包含 11 个章节、2928 条标注资产，GraphRAG 可用。最新聚焦回归 88 项通过。
 
 严谨补充：
 

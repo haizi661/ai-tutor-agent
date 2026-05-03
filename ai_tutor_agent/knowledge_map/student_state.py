@@ -39,11 +39,72 @@ class StudentState:
     homework_assignments: list[dict[str, Any]] = field(default_factory=list)
     homework_history: list[dict[str, Any]] = field(default_factory=list)
     question_attempts: list[dict[str, Any]] = field(default_factory=list)
+    evidence_events: list[dict[str, Any]] = field(default_factory=list)  # legacy: no longer written; kept for JSON backward compat
     daily_learning_records: dict[str, list[str]] = field(default_factory=dict)
     last_learning_at: str = ""
+    teaching_strategy: str = ""
+    difficulty_level: int = 0
+    # 用户知识图谱：只包含已学习的节点，学了才加进去
+    # 结构: {node_id: {title, status, score, attempts, wrong_questions, evidence, last_updated}}
+    knowledge_graph: dict[str, dict[str, Any]] = field(default_factory=dict)
 
     def to_dict(self) -> dict[str, Any]:
         return asdict(self)
+
+    def kg_register_node(self, node_id: str, title: str = "") -> dict[str, Any]:
+        """Register a node when the user first starts learning it."""
+        if node_id not in self.knowledge_graph:
+            self.knowledge_graph[node_id] = {
+                "title": title or node_id,
+                "status": "in_progress",
+                "score": 0,
+                "attempts": 0,
+                "wrong_questions": [],
+                "evidence": [],
+                "last_updated": now_ts(),
+            }
+        return self.knowledge_graph[node_id]
+
+    def kg_update_score(
+        self,
+        node_id: str,
+        score: int,
+        *,
+        passed: bool,
+        wrong_items: list[dict[str, Any]] | None = None,
+        source: str = "quiz",
+        title: str = "",
+    ) -> None:
+        """Update score, collect wrong questions, record evidence after a quiz/homework."""
+        entry = self.kg_register_node(node_id, title) if node_id not in self.knowledge_graph else self.knowledge_graph[node_id]
+        entry["score"] = max(0, min(100, int(score)))
+        entry["attempts"] = int(entry.get("attempts") or 0) + 1
+        entry["status"] = "mastered" if passed else "in_progress"
+        entry["last_updated"] = now_ts()
+        # Collect wrong questions
+        if wrong_items:
+            for item in wrong_items:
+                entry["wrong_questions"].append({
+                    "question_id": str(item.get("question_id") or item.get("id") or ""),
+                    "stem": str(item.get("stem") or item.get("prompt") or "")[:200],
+                    "student_answer": str(item.get("student_answer") or item.get("answer") or ""),
+                    "correct_answer": str(item.get("correct_answer") or item.get("expected") or item.get("answer_key") or ""),
+                    "feedback": str(item.get("feedback") or "")[:200],
+                    "source": source,
+                    "time": now_ts(),
+                })
+        # Record evidence (有理有据)
+        entry["evidence"].append({
+            "type": f"{source}_{'pass' if passed else 'fail'}",
+            "score": int(score),
+            "detail": f"{source} {'通过' if passed else '未通过'}，得分 {score}",
+            "time": now_ts(),
+        })
+        # Cap wrong_questions and evidence to prevent unbounded growth
+        if len(entry["wrong_questions"]) > 100:
+            entry["wrong_questions"] = entry["wrong_questions"][-100:]
+        if len(entry["evidence"]) > 50:
+            entry["evidence"] = entry["evidence"][-50:]
 
     def ensure_node_record(self, node_id: str) -> dict[str, Any]:
         if node_id not in self.node_learning_records:
@@ -81,6 +142,7 @@ class StudentState:
             self.homework.remove(question_id)
 
 
+
 class StudentStateStore:
     def __init__(self, state_dir: str | Path = "data/student_states") -> None:
         self.state_dir = Path(state_dir)
@@ -112,8 +174,12 @@ class StudentStateStore:
             homework_assignments=raw.get("homework_assignments", []) or [],
             homework_history=raw.get("homework_history", []) or [],
             question_attempts=raw.get("question_attempts", []) or [],
+            evidence_events=raw.get("evidence_events", []) or [],
             daily_learning_records=raw.get("daily_learning_records", {}) or {},
             last_learning_at=raw.get("last_learning_at", "") or "",
+            teaching_strategy=raw.get("teaching_strategy", "") or "",
+            difficulty_level=int(raw.get("difficulty_level") or 0),
+            knowledge_graph=raw.get("knowledge_graph", {}) or {},
         )
 
         # 向后兼容：如果旧数据里只有 mastery_scores，没有 node_learning_records

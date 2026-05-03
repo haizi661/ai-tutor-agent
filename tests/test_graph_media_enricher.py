@@ -70,6 +70,71 @@ def test_collect_for_nodes_falls_back_to_doc_figures_when_annotated_assets_only_
     assert "单位阶跃响应曲线" in figures[0]["caption"]
 
 
+def test_collect_for_nodes_falls_back_to_chapter_figure_when_node_scope_has_no_image(tmp_path):
+    cache_dir = tmp_path / "cache" / "chapter_01_p009-032_auto_control"
+    image_dir = cache_dir / "images"
+    image_dir.mkdir(parents=True)
+    image_path = image_dir / "feedback-system.png"
+    image_path.write_bytes(b"real figure bytes")
+
+    enricher = GraphMediaEnricher(mineru_cache_root=tmp_path / "cache", annotated_assets_path=tmp_path / "missing")
+    enricher.annotated_assets = [
+        {
+            "asset_id": "doc:formula:feedback",
+            "asset_type": "formula",
+            "anchor_node_id": "KM002",
+            "anchor_node_name": "自动控制的基本原理与方式",
+            "raw_text": r"e(t)=r(t)-b(t)",
+            "title_text": "反馈误差关系",
+            "formula_meaning": "给出参考输入与反馈信号之间的误差关系。",
+            "confidence": 0.8,
+        }
+    ]
+    enricher.chapter_docs = [
+        {
+            "manifest": {
+                "cache_dir": str(cache_dir),
+                "images": {
+                    "feedback-system.png": {
+                        "abs_path": "C:\\old-machine\\mineru\\images\\feedback-system.png",
+                        "original_name": "feedback-system.png",
+                    }
+                },
+            },
+            "full_md": "\n".join(
+                [
+                    "# 1-1 自动控制的一般概念",
+                    "## 自动控制的基本原理与方式",
+                    "这里讲反馈控制的定义，但本小节摘取范围内没有图片。",
+                    "## 自动控制系统的组成",
+                    "反馈控制系统通常包含比较、控制、执行和反馈环节。",
+                    "![](images/feedback-system.png)",
+                    "图 1-2 反馈控制系统方框图",
+                ]
+            ),
+            "start_page": 9,
+            "end_page": 32,
+        }
+    ]
+    node = {
+        "node_id": "KM002",
+        "name": "自动控制的基本原理与方式",
+        "extra": {"chapter_page_range": [9, 32], "retrieval_keywords": ["反馈控制", "方框图", "控制系统"]},
+        "page_refs": [12],
+    }
+
+    media_items = enricher.collect_for_nodes(
+        traversed_nodes=[{"node_id": "KM002", "name": "自动控制的基本原理与方式", "hop": 0, "node_role": "primary", "score": 1.0}],
+        node_map={"KM002": node},
+        question="反馈控制系统方框图是什么",
+    )
+
+    figures = [item for item in media_items if item["asset_type"] == "figure"]
+    assert figures
+    assert figures[0]["image_paths_abs"] == [str(image_path.resolve())]
+    assert "反馈控制系统方框图" in figures[0]["caption"]
+
+
 def test_collect_for_nodes_includes_annotated_table_assets(tmp_path):
     enricher = GraphMediaEnricher(mineru_cache_root=tmp_path / "cache", annotated_assets_path=tmp_path / "missing")
     enricher.annotated_assets = [

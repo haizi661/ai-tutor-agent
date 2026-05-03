@@ -193,7 +193,14 @@ def build_post_eval_selector_node(
                 "pending_interaction_recommended": "",
                 "pending_interaction_answer": "",
                 "message_history": list(state.get("message_history", []))
-                + [{"role": "user", "kind": "post_eval_choice", "content": choice or normalized_choice}],
+                + [
+                    {
+                        "role": "user",
+                        "kind": "post_eval_choice",
+                        "content": choice or normalized_choice,
+                        "data": {"selected_value": normalized_choice},
+                    }
+                ],
             }
 
         if normalized_choice == "summarize_wrapup":
@@ -218,7 +225,14 @@ def build_post_eval_selector_node(
                 "pending_interaction_recommended": "",
                 "pending_interaction_answer": "",
                 "message_history": list(state.get("message_history", []))
-                + [{"role": "user", "kind": "post_eval_choice", "content": choice or normalized_choice}],
+                + [
+                    {
+                        "role": "user",
+                        "kind": "post_eval_choice",
+                        "content": choice or normalized_choice,
+                        "data": {"selected_value": normalized_choice},
+                    }
+                ],
             }
 
         chosen_option = option_map.get(normalized_choice, {})
@@ -271,7 +285,14 @@ def build_post_eval_selector_node(
             "next_node_candidate_name": next_node_name,
             **graph_state_patch,
             "message_history": list(state.get("message_history", []))
-            + [{"role": "user", "kind": "post_eval_choice", "content": choice or normalized_choice or "继续拔高"}],
+            + [
+                {
+                    "role": "user",
+                    "kind": "post_eval_choice",
+                    "content": choice or normalized_choice or "继续拔高",
+                    "data": {"selected_value": "continue_advance"},
+                }
+            ],
         }
 
     return node

@@ -70,6 +70,8 @@ Thumbs.db
 *.orig
 
 # AI Agent Context
+.codex
+.hermes/
 docs/GEMINI_CONTEXT.md
 
 # Editor / IDE
@@ -78,4 +80,7 @@ docs/GEMINI_CONTEXT.md
 
 # Local presentation / report materials
 ppt/
+*.pptx
+*.docx
+*.doc
 ~$*

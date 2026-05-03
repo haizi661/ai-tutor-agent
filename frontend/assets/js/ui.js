@@ -11,6 +11,8 @@
         tester: { label: '', avatar: '伴' },
         interruption: { label: '', avatar: '伴' },
         interruption_tutor: { label: '', avatar: '伴' },
+        graph_rag_debug_report: { label: '', avatar: '伴' },
+        graph_rag_answer: { label: '', avatar: '伴' },
         evaluation: { label: '', avatar: '伴' },
         profile: { label: '', avatar: '伴' },
         assessment: { label: '', avatar: '伴' },
@@ -26,12 +28,181 @@
 
     function renderMarkdown(target, text, options = {}) {
         const rawText = String(text || '');
-        const allowGraphRagHtml = options.allowGraphRagHtml === true
-            || rawText.includes('GraphRAG 调试报告')
-            || rawText.includes('answer-media-block')
-            || rawText.includes('media-card');
-        target.innerHTML = allowGraphRagHtml ? extractGraphRagReportBody(rawText) : marked.parse(rawText);
+        const allowGraphRagHtml = options.allowGraphRagHtml === true;
+        const allowLearningHtml = options.allowLearningHtml === true;
+        if (allowGraphRagHtml) {
+            target.innerHTML = sanitizeLearningHtml(extractGraphRagReportBody(rawText), { allowDebugClasses: true });
+        } else if (allowLearningHtml) {
+            target.innerHTML = sanitizeLearningHtml(rawText);
+        } else {
+            target.innerHTML = sanitizeRenderedHtml(marked.parse(rawText));
+        }
+        normalizeLearningRelatedOverview(target);
+        stripRedundantTextAfterTables(target);
         app.renderMath(target);
+    }
+
+    /**
+     * When an answer contains <table> elements, the LLM often also writes
+     * text paragraphs that restate the same content.  Hide those paragraphs
+     * so the user only sees the table itself.
+     */
+    function stripRedundantTextAfterTables(root) {
+        if (!root?.querySelectorAll) return;
+        const tables = root.querySelectorAll('table');
+        if (!tables.length) return;
+        tables.forEach((table) => {
+            // Walk siblings after the table; hide text-only elements until we
+            // hit another structured block (table, figure, formula card, etc.).
+            let sibling = table.nextElementSibling;
+            while (sibling) {
+                const tag = (sibling.tagName || '').toLowerCase();
+                // Stop at another structured element
+                if (['table', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'section'].includes(tag)) break;
+                if (sibling.classList?.contains('learning-table-card') ||
+                    sibling.classList?.contains('learning-formula-card') ||
+                    sibling.classList?.contains('learning-figure-card') ||
+                    sibling.classList?.contains('learning-evidence-card') ||
+                    sibling.classList?.contains('learning-related-overview')) break;
+                // Hide text-only elements (p, div, span wrappers around text)
+                if (['p', 'div', 'span', 'ul', 'ol'].includes(tag)) {
+                    sibling.style.display = 'none';
+                }
+                sibling = sibling.nextElementSibling;
+            }
+        });
+    }
+
+    function sanitizeRenderedHtml(rawHtml = '') {
+        return sanitizeLearningHtml(rawHtml, { allowDebugClasses: false });
+    }
+
+    function sanitizeLearningHtml(rawText = '', options = {}) {
+        const text = String(rawText || '');
+        const source = /<html[\s>]/i.test(text) ? extractGraphRagReportBody(text) : text;
+        const template = document.createElement('template');
+        template.innerHTML = source;
+        const allowedTags = [
+            'a', 'b', 'blockquote', 'br', 'button', 'caption', 'code', 'details', 'div', 'em',
+            'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'hr', 'img', 'li', 'main', 'ol', 'p', 'pre',
+            'section', 'span', 'strong', 'sub', 'summary', 'sup', 'table', 'tbody', 'td', 'th',
+            'thead', 'tr', 'ul',
+        ];
+        const allowedAttributes = [
+            'alt', 'aria-hidden', 'aria-label', 'aria-modal', 'class', 'colspan', 'data-latex', 'data-learning-action',
+            'href', 'id', 'loading', 'role', 'rowspan', 'src', 'target', 'title', 'type',
+        ];
+        const allowedClasses = [
+            'learning-answer-content',
+            'learning-block-header',
+            'learning-block-title',
+            'learning-block-actions',
+            'learning-block-caption',
+            'learning-evidence-card',
+            'learning-evidence-card--formula',
+            'learning-evidence-card--figure',
+            'learning-evidence-card--table',
+            'learning-evidence-card--source',
+            'learning-evidence-header',
+            'learning-evidence-type',
+            'learning-evidence-title',
+            'learning-evidence-summary',
+            'learning-source-line',
+            'learning-debug-details',
+            'learning-latex-details',
+            'learning-figure-unavailable',
+            'learning-media-ref',
+            'learning-reference-block',
+            'learning-reference-text',
+            'learning-reference-media',
+            'learning-reference-media-title',
+            'learning-reference-media-grid',
+            'learning-related-overview',
+            'learning-formula-card',
+            'learning-inline-formula-card',
+            'learning-formula-viewport',
+            'learning-figure-card',
+            'learning-figure-viewport',
+            'learning-table-card',
+            'learning-table-viewport',
+            'learning-derivation-card',
+            'learning-derivation-steps',
+            'learning-code-viewport',
+            'learning-media-group',
+            'formula-render',
+            'formula-math',
+            'homework-answer-content',
+            'homework-assignment-card',
+            'homework-feedback-card',
+            'homework-item-list',
+            'homework-item-card',
+            'homework-result-card',
+            'homework-item-meta',
+            'homework-item-index',
+            'homework-item-id',
+            'homework-question-text',
+            'homework-answer-viewport',
+            'homework-reference',
+            'homework-rubric-list',
+            'homework-score-badge',
+            'homework-score-badge--good',
+            'homework-score-badge--warn',
+            'homework-score-badge--danger',
+            'homework-answer-line',
+            'homework-feedback-text',
+        ];
+        if (options.allowDebugClasses) {
+            allowedClasses.push(
+                'graph-rag-answer-panel', 'graph-rag-evidence-panel', 'answer-media-block', 'media-grid',
+                'media-card', 'formula-card', 'figure-card', 'table-card', 'media-ref', 'raw-ref',
+                'media-node', 'media-caption', 'media-hint', 'modal', 'modal-content', 'modal-content--wide',
+                'close-btn', 'figure-viewport', 'figure-gallery', 'formula-scroll', 'formula-viewport',
+                'formula-full', 'formula-raw', 'table-preview', 'table-viewport', 'table-full',
+                'answer-formula', 'section-title', 'media-unavailable-card', 'media-unavailable-copy'
+            );
+        }
+        template.content.querySelectorAll('*').forEach((node) => {
+            const tag = node.tagName.toLowerCase();
+            if (!allowedTags.includes(tag)) {
+                node.replaceWith(document.createTextNode(node.textContent || ''));
+                return;
+            }
+            [...node.attributes].forEach((attr) => {
+                const name = attr.name.toLowerCase();
+                const value = attr.value || '';
+                if (name.startsWith('on') || !allowedAttributes.includes(name)) {
+                    node.removeAttribute(attr.name);
+                    return;
+                }
+                if ((name === 'href' || name === 'src') && !isSafeUrl(value, name)) {
+                    node.removeAttribute(attr.name);
+                    return;
+                }
+                if (name === 'target' && value !== '_blank') {
+                    node.removeAttribute(attr.name);
+                }
+            });
+            if (node.classList?.length) {
+                [...node.classList].forEach((className) => {
+                    if (!allowedClasses.includes(className) && !className.startsWith('katex')) {
+                        node.classList.remove(className);
+                    }
+                });
+            }
+            if (node.tagName.toLowerCase() === 'a' && node.getAttribute('target') === '_blank') {
+                node.setAttribute('rel', 'noopener noreferrer');
+            }
+        });
+        return template.innerHTML;
+    }
+
+    function isSafeUrl(value = '', attrName = '') {
+        const raw = String(value || '').trim();
+        if (!raw) return false;
+        if (raw.startsWith('#') || raw.startsWith('/') || raw.startsWith('./') || raw.startsWith('../')) return true;
+        const lower = raw.toLowerCase();
+        if (attrName === 'src' && lower.startsWith('data:image/')) return true;
+        return lower.startsWith('http://') || lower.startsWith('https://');
     }
 
     function extractGraphRagReportBody(rawText = '') {
@@ -44,6 +215,38 @@
         } catch (_err) {
             return text;
         }
+    }
+
+    function normalizeLearningRelatedOverview(root) {
+        root.querySelectorAll?.('.learning-related-overview').forEach((overview) => {
+            const cards = Array.from(overview.querySelectorAll([
+                ':scope > .learning-formula-card',
+                ':scope > .learning-figure-card',
+                ':scope > .learning-table-card',
+                ':scope > .learning-derivation-card',
+                ':scope > .learning-evidence-card',
+            ].join(', ')));
+            const seen = new Set();
+            let kept = 0;
+            cards.forEach((card) => {
+                const key = (
+                    card.querySelector('[data-latex]')?.getAttribute('data-latex')
+                    || card.querySelector('img')?.getAttribute('src')
+                    || card.querySelector('.learning-block-title, .learning-evidence-title')?.textContent
+                    || card.textContent
+                    || ''
+                ).replace(/\s+/g, ' ').trim();
+                if (!key || seen.has(key) || kept >= 3) {
+                    card.remove();
+                    return;
+                }
+                seen.add(key);
+                kept += 1;
+            });
+            if (!overview.querySelector('.learning-formula-card, .learning-figure-card, .learning-table-card, .learning-derivation-card, .learning-evidence-card')) {
+                overview.remove();
+            }
+        });
     }
 
     function deriveLearningProgressStep(snapshot = {}) {
@@ -96,10 +299,7 @@
                 if (!latex.trim()) return;
                 try {
                     katex.render(latex, node, { displayMode: true, throwOnError: false, strict: 'ignore' });
-                    const scroller = node.closest('.formula-scroll');
-                    if (scroller && node.scrollWidth > scroller.clientWidth) {
-                        scroller.classList.add('is-overflowing');
-                    }
+                    updateFormulaViewportOverflow(node.closest('.formula-scroll, .learning-formula-viewport') || node);
                 } catch (err) {
                     console.warn('KaTeX formula-render failed', err);
                 }
@@ -116,7 +316,108 @@
                 throwOnError: false,
             });
         }
+        updateFormulaViewportOverflow(el);
     };
+
+    function updateFormulaViewportOverflow(root) {
+        const scope = root || document;
+        const viewports = scope.matches?.('.formula-scroll, .learning-formula-viewport')
+            ? [scope]
+            : [...(scope.querySelectorAll?.('.formula-scroll, .learning-formula-viewport') || [])];
+        viewports.forEach((viewport) => {
+            const content = viewport.querySelector?.('.katex, .formula-render, .formula-math') || viewport.firstElementChild;
+            const isOverflowing = Boolean(content && content.scrollWidth > viewport.clientWidth + 2);
+            viewport.classList.toggle('is-overflowing', isOverflowing);
+        });
+    }
+
+    let formulaOverflowResizeTimer = null;
+    window.addEventListener('resize', () => {
+        window.clearTimeout(formulaOverflowResizeTimer);
+        formulaOverflowResizeTimer = window.setTimeout(() => updateFormulaViewportOverflow(document), 120);
+    });
+
+    window.openModal = function openModal(id) {
+        const modal = document.getElementById(id);
+        if (!modal) return;
+        modal.style.display = 'block';
+        modal.setAttribute('aria-hidden', 'false');
+        app.renderMath(modal);
+    };
+
+    window.closeModal = function closeModal(id) {
+        const modal = document.getElementById(id);
+        if (!modal) return;
+        modal.style.display = 'none';
+        modal.setAttribute('aria-hidden', 'true');
+    };
+
+    function ensureLearningViewer() {
+        let overlay = document.getElementById('learning-viewer-overlay');
+        if (overlay) return overlay;
+        overlay = document.createElement('div');
+        overlay.id = 'learning-viewer-overlay';
+        overlay.className = 'learning-viewer-overlay';
+        overlay.setAttribute('aria-hidden', 'true');
+        overlay.innerHTML = `
+            <div class="learning-viewer-panel" role="dialog" aria-modal="true" aria-label="学习内容放大查看" onclick="event.stopPropagation()">
+                <div class="learning-viewer-header">
+                    <div class="learning-viewer-title">放大查看</div>
+                    <button type="button" class="learning-viewer-close" onclick="closeLearningViewer()">关闭</button>
+                </div>
+                <div class="learning-viewer-body"></div>
+            </div>
+        `;
+        overlay.addEventListener('click', () => window.closeLearningViewer());
+        document.body.appendChild(overlay);
+        return overlay;
+    }
+
+    window.openLearningViewer = function openLearningViewer(source) {
+        const sourceEl = typeof source === 'string' ? document.querySelector(source) : source;
+        if (!sourceEl) return;
+        const overlay = ensureLearningViewer();
+        const body = overlay.querySelector('.learning-viewer-body');
+        body.innerHTML = '';
+        body.appendChild(sourceEl.cloneNode(true));
+        overlay.classList.add('is-open');
+        overlay.setAttribute('aria-hidden', 'false');
+        app.renderMath(body);
+    };
+
+    window.closeLearningViewer = function closeLearningViewer() {
+        const overlay = document.getElementById('learning-viewer-overlay');
+        if (!overlay) return;
+        overlay.classList.remove('is-open');
+        overlay.setAttribute('aria-hidden', 'true');
+    };
+
+    window.copyLearningBlock = async function copyLearningBlock(source) {
+        const sourceEl = typeof source === 'string' ? document.querySelector(source) : source;
+        if (!sourceEl) return false;
+        const text = sourceEl.innerText || sourceEl.textContent || '';
+        if (!text.trim()) return false;
+        try {
+            await navigator.clipboard.writeText(text.trim());
+            return true;
+        } catch (_error) {
+            app.setStatusBanner?.('复制失败，请手动选择内容复制。', 'warning');
+            return false;
+        }
+    };
+
+    document.addEventListener('click', (event) => {
+        const actionButton = event.target?.closest?.('[data-learning-action]');
+        if (!actionButton) return;
+        const block = actionButton.closest('.learning-formula-card, .learning-figure-card, .learning-table-card, .learning-derivation-card');
+        if (!block) return;
+        const action = actionButton.dataset.learningAction;
+        if (action === 'open') {
+            window.openLearningViewer?.(block);
+        } else if (action === 'copy') {
+            window.copyLearningBlock?.(block);
+        }
+    });
 
     /* ── Sidebar state sync ── */
     app.updateSidebarState = function updateSidebarState(snapshot) {
@@ -459,7 +760,10 @@
         if (!state.currentAgentBodyEl) return;
         // Strip teaching markers from displayed text (pure transform, side effects applied on session.end)
         const displayText = app.filterTeachingMarkersFromBuffer(state.currentTextBuffer);
-        renderMarkdown(state.currentAgentBodyEl, displayText, { allowGraphRagHtml: true });
+        renderMarkdown(state.currentAgentBodyEl, displayText, {
+            allowLearningHtml: state.currentTurnRole === 'graph_rag_answer' || state.currentTurnRole === 'graph_rag_debug_report',
+            allowGraphRagHtml: state.currentTurnRole === 'graph_rag_debug_report',
+        });
         
         // Debounce heavy KaTeX rendering to prevent flickering and CPU spikes during fast streaming
         if (mathRenderTimeout) clearTimeout(mathRenderTimeout);
@@ -657,10 +961,10 @@
         el.dataset.tone = tone;
     };
 
-    app.scrollMessagesToBottom = function scrollMessagesToBottom() {
+    app.scrollMessagesToBottom = function scrollMessagesToBottom(options = {}) {
         const container = document.getElementById('messages');
         if (!container) return;
-        const shouldForceScroll = container.hidden;
+        const shouldForceScroll = Boolean(options.force) || container.hidden;
         app.refreshChatSurfaceState?.();
         if (container.hidden) return;
         
@@ -671,6 +975,67 @@
         if (isNearBottom) {
             container.scrollTop = container.scrollHeight;
         }
+    };
+
+    function restoredInteractionSelector(snapshot = {}) {
+        const flowStatus = String(snapshot.flow_status || '').trim();
+        const pendingKind = String(snapshot.pending_interaction_kind || '').trim();
+        const kind = pendingKind || ({
+            awaiting_post_lesson_choice: 'post_lesson_choice',
+            awaiting_next_step_selector: 'next_step_selector',
+            awaiting_post_eval_selector: 'post_eval_selector',
+            awaiting_continue_or_homework_choice: 'continue_or_homework_choice',
+            awaiting_homework_review_choice: 'homework_review_choice',
+            awaiting_homework_answers: 'homework_answers',
+            homework_assigned: 'homework_review_choice',
+            awaiting_consolidation_choice: 'consolidation_choice',
+            awaiting_objective_answers: 'objective_test_answers',
+            awaiting_variant_answers: 'variant_test_answers',
+            awaiting_assessment: 'assessment',
+            assessment_dialog: 'assessment',
+            awaiting_topic_confirmation: 'topic_confirmation',
+            awaiting_interrupt_confirmation: 'interrupt_confirmation',
+        }[flowStatus] || '');
+        return {
+            post_lesson_choice: '.post-lesson-card',
+            next_step_selector: '.next-step-card',
+            post_eval_selector: '.post-eval-card',
+            continue_or_homework_choice: '.continue-homework-card',
+            homework_review_choice: '.homework-review-card, .homework-assignment-card',
+            homework_answers: '.homework-answer-card',
+            consolidation_choice: '.consolidation-card',
+            objective_test_answers: '.obj-test-card',
+            variant_test_answers: '.obj-test-card',
+            assessment: '.assessment-container, .q-card',
+            topic_confirmation: '.topic-confirm-card:not(.tc-locked)',
+            interrupt_confirmation: '.interrupt-confirm-card',
+        }[kind] || '.msg-wrapper:last-child';
+    }
+
+    app.focusRestoredSessionPosition = function focusRestoredSessionPosition(snapshot = {}) {
+        const container = document.getElementById('messages');
+        if (!container) return;
+        app.refreshChatSurfaceState?.();
+        if (container.hidden) return;
+
+        const selector = restoredInteractionSelector(snapshot);
+        const candidates = Array.from(container.querySelectorAll(selector));
+        const rawTarget = candidates.pop() || container.querySelector('.msg-wrapper:last-child');
+        const target = rawTarget?.closest?.('.msg-wrapper') || rawTarget;
+        if (!target) return;
+
+        const scrollToTarget = () => {
+            const containerRect = container.getBoundingClientRect();
+            const targetRect = target.getBoundingClientRect();
+            const top = container.scrollTop + targetRect.top - containerRect.top - 16;
+            container.scrollTop = Math.max(0, top);
+        };
+
+        window.requestAnimationFrame(scrollToTarget);
+        window.setTimeout(scrollToTarget, 150);
+        window.setTimeout(scrollToTarget, 500);
+        window.setTimeout(scrollToTarget, 1200);
+        window.setTimeout(scrollToTarget, 1800);
     };
 
     app.clearTurnHeartbeat = function clearTurnHeartbeat() {
@@ -808,7 +1173,7 @@
         }, delay);
     };
 
-    app.appendAgentTurnShell = function appendAgentTurnShell(initialText = '', role = state.currentTurnRole || 'teacher') {
+    app.appendAgentTurnShell = function appendAgentTurnShell(initialText = '', role = state.currentTurnRole || 'teacher', renderOptions = {}) {
         const meta = app.getTurnRoleMeta(role);
         const wrap = document.createElement('div');
         wrap.className = 'msg-wrapper msg-row agent';
@@ -838,7 +1203,7 @@
         state.currentTextBuffer = initialText;
         state.traceCount = 0;
 
-        renderMarkdown(state.currentAgentBodyEl, initialText);
+        renderMarkdown(state.currentAgentBodyEl, initialText, renderOptions);
         wrap.querySelector('.bubble-wrap')?.appendChild(buildAssistantMessageTools(wrap));
         app.setAssistantActionBarState?.(wrap, Boolean(state.isStreaming));
         app.scrollMessagesToBottom();
@@ -981,6 +1346,8 @@
         if (kind === 'tutor_citations' || kind === 'tutor_evidence') return 'tutor';
         if (kind === 'coach') return 'coach';
         if (kind === 'tester_question') return 'tester';
+        if (kind === 'graph_rag_answer') return 'graph_rag_answer';
+        if (kind === 'graph_rag_debug_report') return 'graph_rag_debug_report';
         if (kind === 'evaluator_card') return 'evaluation';
         if (kind === 'assessment_result') return 'profile';
         return 'teacher';
@@ -1328,7 +1695,10 @@
                 return;
             }
             const turnRole = options.turnRole || app.roleFromMessageKind(options.kind);
-            app.appendAgentTurnShell(text, turnRole);
+            app.appendAgentTurnShell(text, turnRole, {
+                allowLearningHtml: options.allowLearningHtml === true || options.kind === 'graph_rag_answer' || options.kind === 'homework_answer_prompt',
+                allowGraphRagHtml: options.allowGraphRagHtml === true || options.kind === 'graph_rag_debug_report',
+            });
             app.finalizeAgentTurn();
             return;
         }
@@ -1348,7 +1718,7 @@
         bubbleWrap.className = 'bubble-wrap';
         const bubble = document.createElement('div');
         bubble.className = role === 'user' ? 'bubble user' : 'bubble ai';
-        bubble.innerHTML = marked.parse(text);
+        bubble.innerHTML = sanitizeRenderedHtml(marked.parse(text));
         bubbleWrap.appendChild(bubble);
 
         if (role === 'user') {
@@ -1372,7 +1742,7 @@
             <div class="bubble-wrap">
                 <div class="msg-content system prompt-card">
                     <div class="system-kicker prompt-label">提示</div>
-                    <div class="system-body">${marked.parse(text)}</div>
+                    <div class="system-body">${sanitizeRenderedHtml(marked.parse(text))}</div>
                 </div>
             </div>
         `;
@@ -2342,9 +2712,9 @@
         card.dataset.cardKind = 'post_lesson_choice';
         card.innerHTML = `
             <div class="prompt-card prompt-flow-shell">
-                <div class="prompt-label">课后选择</div>
-                <div class="prompt-title">接下来做什么</div>
-                <div class="prompt-copy">选一个继续。</div>
+                <div class="prompt-label">课后停顿</div>
+                <div class="prompt-title">还有哪里卡住？</div>
+                <div class="prompt-copy">可以直接打一整句问题，也可以先说“这里没懂”；顺了再进入小测。</div>
             </div>
             <div class="suggestion-row topic-confirm-chip-list selector-chip-list post-lesson-actions"></div>
         `;
@@ -2352,8 +2722,8 @@
         const normalized = Array.isArray(options) && options.length
             ? options
             : [
-                { value: 'temporary_question', label: '随便问问' },
-                { value: 'start_test', label: '来做测验' },
+                { value: 'temporary_question', label: '继续追问' },
+                { value: 'start_test', label: '我懂了，进入小测' },
             ];
         normalized.forEach(option => {
             const button = document.createElement('button');
@@ -2379,6 +2749,7 @@
         const row = createAssistantCardRow('topic-confirm-card continue-homework-card');
         const card = document.createElement('div');
         card.className = 'topic-confirm-card continue-homework-card prompt-flow-card';
+        card.dataset.cardKind = 'continue_or_homework_choice';
         card.innerHTML = `
             <div class="prompt-card prompt-flow-shell">
                 <div class="prompt-label">继续 / 收作业</div>
@@ -2418,11 +2789,12 @@
         const row = createAssistantCardRow('topic-confirm-card homework-review-card');
         const card = document.createElement('div');
         card.className = 'topic-confirm-card homework-review-card prompt-flow-card';
+        card.dataset.cardKind = 'homework_review_choice';
         card.innerHTML = `
             <div class="prompt-card prompt-flow-shell">
                 <div class="prompt-label">作业</div>
-                <div class="prompt-title">上次留了作业</div>
-                <div class="prompt-copy">先回顾还是直接答题。</div>
+                <div class="prompt-title">作业安排</div>
+                <div class="prompt-copy">现在做，保存到下次，或保留作业继续学习。</div>
             </div>
             <div class="suggestion-row topic-confirm-chip-list selector-chip-list homework-review-actions"></div>
         `;
@@ -2430,9 +2802,9 @@
         const normalized = Array.isArray(options) && options.length
             ? options
             : [
-                { value: 'review_homework', label: '先看看题目' },
-                { value: 'answer_homework', label: '直接回答' },
-                { value: 'skip_homework', label: '跳过' },
+                { value: 'answer_homework', label: '现在做作业' },
+                { value: 'save_for_later', label: '保存，下次再做' },
+                { value: 'continue_learning', label: '保留作业，继续学习' },
             ];
         normalized.forEach(option => {
             const button = document.createElement('button');
@@ -2458,6 +2830,7 @@
         const row = createAssistantCardRow('topic-confirm-card consolidation-card');
         const card = document.createElement('div');
         card.className = 'topic-confirm-card consolidation-card prompt-flow-card';
+        card.dataset.cardKind = 'consolidation_choice';
         card.innerHTML = `
             <div class="prompt-card prompt-flow-shell">
                 <div class="prompt-label">继续学习</div>
@@ -2485,6 +2858,63 @@
         });
         if (renderOptions.locked) {
             app.lockChoiceCard(card, renderOptions.selectedValue || '', renderOptions.selectedLabel || renderOptions.statusText || '');
+        }
+        row.body.appendChild(card);
+        container.appendChild(row.wrap);
+        app.scrollMessagesToBottom();
+    };
+
+    app.renderHomeworkAnswerCard = function renderHomeworkAnswerCard(items = [], renderOptions = {}) {
+        document.querySelectorAll('.homework-answer-card:not(.locked)').forEach(card => card.remove());
+        const container = document.getElementById('messages');
+        const row = createAssistantCardRow('topic-confirm-card homework-answer-card');
+        const card = document.createElement('div');
+        card.className = 'topic-confirm-card homework-answer-card prompt-flow-card';
+        card.dataset.cardKind = 'homework_answers';
+        const normalized = Array.isArray(items) ? items : [];
+        card.innerHTML = `
+            <div class="prompt-card prompt-flow-shell">
+                <div class="prompt-label">作业提交</div>
+                <div class="prompt-title">按题号填写答案</div>
+                <div class="prompt-copy">支持逐题填写，也可以直接在输入框提交 JSON。</div>
+            </div>
+            <div class="homework-answer-fields"></div>
+            <button type="button" class="chip chip-primary homework-submit-btn">提交作业答案</button>
+        `;
+        const fields = card.querySelector('.homework-answer-fields');
+        normalized.forEach((item, idx) => {
+            const qid = String(item.question_id || item.id || `HW-${idx + 1}`);
+            const promptText = String(item.prompt || qid);
+            const field = document.createElement('label');
+            field.className = 'homework-answer-field';
+            const label = document.createElement('span');
+            label.className = 'homework-answer-field-label';
+            label.textContent = `${idx + 1}. ${promptText}`;
+            const textarea = document.createElement('textarea');
+            textarea.rows = 3;
+            textarea.dataset.qid = qid;
+            textarea.placeholder = `填写 ${qid} 的答案`;
+            field.appendChild(label);
+            field.appendChild(textarea);
+            fields.appendChild(field);
+        });
+        const submitBtn = card.querySelector('.homework-submit-btn');
+        submitBtn.onclick = () => {
+            const answers = {};
+            card.querySelectorAll('textarea[data-qid]').forEach(input => {
+                const value = String(input.value || '').trim();
+                if (value) answers[input.dataset.qid] = value;
+                input.disabled = true;
+            });
+            submitBtn.disabled = true;
+            submitBtn.textContent = '已提交，等待批改…';
+            card.classList.add('locked');
+            app.submitAwaitingChoice?.(JSON.stringify(answers), '作业答案已提交');
+        };
+        if (renderOptions.locked) {
+            card.classList.add('locked');
+            card.querySelectorAll('textarea').forEach(input => input.disabled = true);
+            submitBtn.disabled = true;
         }
         row.body.appendChild(card);
         container.appendChild(row.wrap);
@@ -2670,10 +3100,10 @@
     };
 
     function applySessionArtifacts(stateSnapshot) {
-        state.currentTopic = stateSnapshot.current_topic || '';
-        state.currentTopicFocus = stateSnapshot.topic_focus || '';
-        state.graphTopicHint = stateSnapshot.current_topic || stateSnapshot.proposed_topic || state.graphTopicHint || '';
-        state.currentGraphNode = stateSnapshot.graph_anchor_title || stateSnapshot.current_node_name || '';
+        state.currentTopic = stateSnapshot.current_topic || stateSnapshot.currentTopic || stateSnapshot.current_user_goal || stateSnapshot.session_goal || '';
+        state.currentTopicFocus = stateSnapshot.topic_focus || stateSnapshot.currentTopicFocus || '';
+        state.graphTopicHint = state.currentTopic || stateSnapshot.proposed_topic || state.graphTopicHint || '';
+        state.currentGraphNode = stateSnapshot.graph_anchor_title || stateSnapshot.current_node_name || stateSnapshot.currentGraphNode || '';
         if (stateSnapshot.user_knowledge_graph && typeof stateSnapshot.user_knowledge_graph === 'object') {
             state.userKnowledgeGraph = { ...stateSnapshot.user_knowledge_graph };
         } else if (stateSnapshot.userKnowledgeGraph && typeof stateSnapshot.userKnowledgeGraph === 'object') {
@@ -2759,9 +3189,19 @@
         if (pik === 'homework_review_choice') {
             app.renderHomeworkReviewChoice?.(pio);
         }
+        if (pik === 'consolidation_choice') {
+            app.renderConsolidationChoice?.(pio);
+        }
+        if (pik === 'homework_answers') {
+            state.isAwaitingInput = true;
+            app.renderHomeworkAnswerCard?.(stateSnapshot.homework_items || [], stateSnapshot);
+            app.setChatInputPlaceholder?.('请输入你的作业答案');
+        }
         if (pik === 'objective_test_answers' || pik === 'variant_test_answers') {
             app.renderObjectiveTestCard?.(pio, pik);
         }
+        app.updateSidebarState?.(stateSnapshot);
+        app.refreshChatSurfaceState?.();
     }
 
     app.restoreMessageTimeline = function restoreMessageTimeline(items, stateSnapshot) {
@@ -2838,8 +3278,15 @@
                 app.renderObjectiveQuizReviewCard?.(data, content);
                 return;
             }
-            if (item.kind === 'graph_rag_debug_report') {
-                app.appendMessage('agent', content || '<section><h1>GraphRAG 调试报告</h1></section>', { kind: 'graph_rag_debug_report' });
+            if (item.kind === 'homework_answer_prompt') {
+                app.renderHomeworkAnswerCard?.(data.homework_items || data.items || stateSnapshot?.homework_items || [], data);
+                return;
+            }
+            if (item.kind === 'graph_rag_answer' || item.kind === 'graph_rag_debug_report') {
+                const fallbackHtml = item.kind === 'graph_rag_answer'
+                    ? '<section class="learning-answer-content"><p></p></section>'
+                    : '<section class="graph-rag-answer-panel"><div class="answer"></div></section>';
+                app.appendMessage('agent', content || fallbackHtml, { kind: item.kind });
                 return;
             }
             if (item.kind === 'wrong_question_explanations') {

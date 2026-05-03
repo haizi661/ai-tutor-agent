@@ -85,6 +85,7 @@ class LocalConfigUpdateRequest(BaseModel):
     proxy_scheme: str = "http"
     http_proxy: str = ""
     https_proxy: str = ""
+    no_proxy: str = ""
     mineru_proxy_mode: str = "inherit"
     mineru_http_proxy: str = ""
     mineru_https_proxy: str = ""
@@ -181,6 +182,7 @@ async def get_local_config(request: Request):
         "proxy_scheme": proxy_scheme,
         "http_proxy": raw_values.get("HTTP_PROXY", settings.http_proxy or ""),
         "https_proxy": raw_values.get("HTTPS_PROXY", settings.https_proxy or ""),
+        "no_proxy": raw_values.get("NO_PROXY", "") or settings.no_proxy or "",
         "mineru_proxy_mode": raw_values.get("MINERU_PROXY_MODE", settings.mineru_proxy_mode),
         "mineru_http_proxy": raw_values.get("MINERU_HTTP_PROXY", settings.mineru_http_proxy or ""),
         "mineru_https_proxy": raw_values.get("MINERU_HTTPS_PROXY", settings.mineru_https_proxy or ""),
@@ -256,6 +258,7 @@ async def update_local_config(req: LocalConfigUpdateRequest, request: Request):
         "PROXY_SCHEME": req.proxy_scheme.strip() or raw_values.get("PROXY_SCHEME", "http"),
         "HTTP_PROXY": req.http_proxy.strip(),
         "HTTPS_PROXY": req.https_proxy.strip(),
+        "NO_PROXY": req.no_proxy.strip(),
         "MINERU_PROXY_MODE": req.mineru_proxy_mode.strip() or raw_values.get("MINERU_PROXY_MODE", "inherit"),
         "MINERU_HTTP_PROXY": req.mineru_http_proxy.strip(),
         "MINERU_HTTPS_PROXY": req.mineru_https_proxy.strip(),

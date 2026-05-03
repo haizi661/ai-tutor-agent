@@ -19,7 +19,7 @@ from langchain_core.documents import Document
 from langchain_core.messages import HumanMessage, SystemMessage
 from rank_bm25 import BM25Okapi
 
-from ..config import PROJECT_ROOT, Settings
+from ..config import PROJECT_ROOT, Settings, should_bypass_smart_proxy
 from ..platform_paths import resolve_project_path
 from ..core.output_format import parse_json_object
 from ..core.ports import KnowledgeProvider
@@ -192,8 +192,12 @@ def build_embedding_backend(settings: Settings):
         if settings.openai_api_base:
             kwargs["base_url"] = settings.openai_api_base
         proxy_url = settings.http_proxy or settings.https_proxy
-        if proxy_url:
-            kwargs["http_client"] = httpx.Client(proxy=proxy_url)
+        if proxy_url and should_bypass_smart_proxy(settings.openai_api_base):
+            kwargs["http_client"] = httpx.Client(
+                transport=httpx.HTTPTransport(), follow_redirects=True, trust_env=False
+            )
+        elif proxy_url:
+            kwargs["http_client"] = httpx.Client(proxy=proxy_url, trust_env=False)
         return OpenAIEmbeddings(**kwargs)
 
     raise RuntimeError(f"Unsupported EMBEDDING_PROVIDER: {provider}")

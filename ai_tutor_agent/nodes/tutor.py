@@ -5,9 +5,12 @@ import re
 
 from langchain_core.messages import HumanMessage, SystemMessage
 
+from ai_tutor_agent.knowledge_map.debug_graph_rag import build_learning_answer_html
+
 from ..core.events import make_event
 from ..core.graph_service import GraphQueryService
 from ..core.learning_support import (
+    trim_message_history,
     build_graph_citation_plan,
     build_graph_context_from_result,
     build_graph_guidance_from_result,
@@ -999,6 +1002,7 @@ def build_tutor_node(tutor_llm, runtime: RuntimeContext):
                     student_id=student_id,
                     node_id=graph_anchor_id,
                     question=learning_target or topic,
+                    title=graph_anchor,
                 )
             else:
                 started_snapshot = {}
@@ -1239,6 +1243,7 @@ def build_tutor_node(tutor_llm, runtime: RuntimeContext):
                 student_id=student_id,
                 node_id=graph_anchor_id,
                 question=updated_goal or learning_target or topic,
+                title=graph_anchor,
             )
             if started_snapshot:
                 student_state_snapshot = started_snapshot
@@ -1326,11 +1331,15 @@ def build_tutor_node(tutor_llm, runtime: RuntimeContext):
 - 如果要提问，只问一个能暴露理解边界的问题"""
 
         if graph_result is not None and not has_node_content_context:
-            full_response = normalize_graph_answer(
+            graph_answer_text = normalize_graph_answer(
                 str(graph_result.get("answer") or ""),
                 list(graph_result.get("media_items") or []),
             )
-            if not full_response:
+            if graph_answer_text:
+                graph_payload = dict(graph_result)
+                graph_payload["answer"] = graph_answer_text
+                full_response = build_learning_answer_html(graph_payload).strip()
+            else:
                 full_response = _build_evidence_backed_fallback(topic, citation_plan)
             stream_text_chunks(event_sink, "tutor", full_response)
         else:

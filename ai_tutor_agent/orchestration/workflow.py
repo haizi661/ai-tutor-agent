@@ -414,8 +414,8 @@ def build_workflow(
     workflow.add_node("session_resume_router", build_session_resume_router_node(runtime))
     workflow.add_node("homework_review", build_homework_review_node(runtime))
     workflow.add_node("homework_answer_dialog", build_homework_answer_dialog_node(runtime))
-    workflow.add_node("homework_scorer", build_homework_scorer_node(runtime))
-    workflow.add_node("homework_explainer", build_homework_explainer_node(runtime))
+    workflow.add_node("homework_scorer", build_homework_scorer_node(runtime, evaluator_llm))
+    workflow.add_node("homework_explainer", build_homework_explainer_node(runtime, evaluator_llm))
     workflow.add_node("tester", build_tester_node(tester_llm, runtime))  # 统一传 runtime
     workflow.add_node("evaluator", build_evaluator_node(evaluator_llm, runtime))  # 统一传 runtime
     # 新增：Coach 助教节点

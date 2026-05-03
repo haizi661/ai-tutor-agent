@@ -218,8 +218,38 @@ def test_run_learning_session_announces_homework_on_second_login():
         current_state=app.get_state({"configurable": {"thread_id": "thread-6"}}),
     )
 
-    assert app.invocations == []
+    payload, config = app.invocations[0]
+    assert payload["learning_resume_target"] == "session_resume_router"
+    assert payload["learning_phase"] == "homework_resume"
+    assert config == {"configurable": {"thread_id": "thread-6"}}
     assert any("上次留下的作业" in event.message for event in sink.events)
+
+
+def test_run_learning_session_respects_deferred_homework_choice_on_restore():
+    sink = BufferedEventSink()
+    app = FakeApp(
+        {
+            "current_topic": "自动控制原理",
+            "flow_status": "normal",
+            "is_assessed": True,
+            "homework_status": "deferred",
+            "homework_items": [{"question_id": "HW-KM001", "prompt": "围绕“稳定性”说明核心判断依据。"}],
+            "learning_resume_target": "node_content_loader",
+            "next_node_candidate_id": "KM002",
+            "next_node_candidate_name": "负反馈",
+        }
+    )
+
+    run_learning_session(
+        app,
+        sink,
+        thread_id="thread-6b",
+        topic="",
+        current_state=app.get_state({"configurable": {"thread_id": "thread-6b"}}),
+    )
+
+    assert app.invocations == [(None, {"configurable": {"thread_id": "thread-6b"}})]
+    assert any("按你上次的选择继续学习" in event.message for event in sink.events)
 
 
 def test_run_learning_session_can_resume_next_node_from_homework_state():

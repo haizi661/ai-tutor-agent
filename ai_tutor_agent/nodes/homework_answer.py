@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import html
 import json
 import re
 from typing import Any
@@ -7,6 +8,7 @@ from typing import Any
 from ..core.events import make_event
 from ..core.ports import RuntimeContext
 from ..core.state import AgentState
+from ..core.text import content_to_text
 
 
 def _question_id(item: dict[str, Any], index: int) -> str:
@@ -92,6 +94,7 @@ def _rubric_terms(item: dict[str, Any]) -> list[str]:
 
 
 def _score_subjective(item: dict[str, Any], answer: str) -> dict[str, Any]:
+    """Fallback keyword-based scoring when LLM is unavailable."""
     terms = _rubric_terms(item)
     if not terms:
         is_correct = bool(answer.strip())
@@ -112,7 +115,61 @@ def _score_subjective(item: dict[str, Any], answer: str) -> dict[str, Any]:
     }
 
 
-def _score_item(item: dict[str, Any], answer: str, index: int) -> dict[str, Any]:
+_SCORING_SYSTEM_PROMPT = (
+    "你是一位自动控制原理课程的作业批改助手。"
+    "根据评分标准（rubric）和参考答案要点，对学生作答进行评分。"
+    "只返回 JSON，不要解释。格式：\n"
+    '{"score": 0-100整数, "is_correct": true/false, '
+    '"matched_points": ["已覆盖的要点"], "missing_points": ["缺失的要点"], '
+    '"feedback": "一句话批改意见"}'
+)
+
+
+def _llm_score_subjective(
+    llm: Any,
+    item: dict[str, Any],
+    answer: str,
+) -> dict[str, Any] | None:
+    """Use LLM to score a subjective homework answer. Returns None on failure."""
+    prompt_parts = [
+        f"题目：{item.get('prompt', '')}",
+        f"参考答案要点：{item.get('reference_answer', '')}",
+    ]
+    rubric = _string_list(item.get("rubric"))
+    if rubric:
+        prompt_parts.append(f"评分标准：{'；'.join(rubric)}")
+    prompt_parts.append(f"学生作答：{answer}")
+    user_prompt = "\n".join(prompt_parts)
+
+    try:
+        from langchain_core.messages import HumanMessage, SystemMessage
+
+        resp = llm.invoke([
+            SystemMessage(content=_SCORING_SYSTEM_PROMPT),
+            HumanMessage(content=user_prompt),
+        ])
+        text = content_to_text(resp).strip()
+        # Extract JSON from possible markdown fences
+        json_match = re.search(r"\{[^{}]*\}", text)
+        if not json_match:
+            return None
+        data = json.loads(json_match.group())
+        score = int(data.get("score", 0))
+        score = max(0, min(100, score))
+        return {
+            "score": score,
+            "is_correct": bool(data.get("is_correct", score >= 60)),
+            "matched_points": list(data.get("matched_points") or []),
+            "missing_points": list(data.get("missing_points") or []),
+            "expected": str(item.get("reference_answer") or "").strip(),
+            "feedback": str(data.get("feedback") or "评分完成。").strip(),
+            "scored_by": "llm",
+        }
+    except Exception:
+        return None
+
+
+def _score_item(item: dict[str, Any], answer: str, index: int, *, llm: Any = None) -> dict[str, Any]:
     qid = _question_id(item, index)
     answer_key = str(item.get("answer_key") or "").strip().upper()
     if answer_key:
@@ -132,6 +189,18 @@ def _score_item(item: dict[str, Any], answer: str, index: int) -> dict[str, Any]
             "feedback": feedback,
         }
 
+    # Subjective: try LLM scoring first, fall back to keyword matching
+    if llm is not None:
+        llm_result = _llm_score_subjective(llm, item, answer)
+        if llm_result is not None:
+            return {
+                "question_id": qid,
+                "node_id": item.get("node_id", ""),
+                "type": "subjective_review",
+                "answer": answer,
+                **llm_result,
+            }
+
     subjective = _score_subjective(item, answer)
     return {
         "question_id": qid,
@@ -147,36 +216,55 @@ def _persist_homework_result(runtime: RuntimeContext, state: AgentState, patch: 
     if store is None:
         return {}
     student_id = str(state.get("student_id") or "default_student").strip() or "default_student"
-    if hasattr(store, "record_homework_result"):
-        result = store.record_homework_result(
-            student_id,
-            homework_items=patch["homework_items"],
-            homework_answers=patch["homework_answers"],
-            homework_score=patch["homework_score"],
-            homework_results=patch["homework_results"],
+    if not (hasattr(store, "load") and hasattr(store, "save")):
+        return {}
+    student_state = store.load(student_id)
+    if student_state is None:
+        return {}
+    if hasattr(student_state, "homework"):
+        student_state.homework = []
+    history = list(getattr(student_state, "homework_history", []) or [])
+    history.append(
+        {
+            "items": patch["homework_items"],
+            "answers": patch["homework_answers"],
+            "score": patch["homework_score"],
+            "results": patch["homework_results"],
+        }
+    )
+    try:
+        setattr(student_state, "homework_history", history)
+    except Exception:
+        pass
+    # Blend homework scores into mastery (70% existing + 30% homework)
+    # and update knowledge_graph per node (evidence recorded per-node via kg_update_score)
+    for result in (patch.get("homework_results") or []):
+        nid = str(result.get("node_id") or "").strip()
+        if not nid:
+            continue
+        hw_score = float(result.get("score") or 0)
+        old_mastery = float(student_state.mastery_scores.get(nid, 0))
+        blended = round(0.7 * old_mastery + 0.3 * hw_score, 1)
+        student_state.update_mastery(nid, blended)
+        # Collect wrong homework items for knowledge_graph
+        hw_wrong = []
+        if not result.get("is_correct"):
+            hw_wrong.append({
+                "question_id": str(result.get("question_id") or ""),
+                "stem": str(result.get("prompt") or "")[:200],
+                "student_answer": str(result.get("answer") or ""),
+                "correct_answer": str(result.get("expected") or ""),
+                "feedback": str(result.get("feedback") or "")[:200],
+            })
+        student_state.kg_update_score(
+            nid, int(round(hw_score)),
+            passed=bool(result.get("is_correct")),
+            wrong_items=hw_wrong or None,
+            source="homework",
         )
-        return dict(result or {})
-    if hasattr(store, "load") and hasattr(store, "save"):
-        student_state = store.load(student_id)
-        if student_state is not None:
-            if hasattr(student_state, "homework"):
-                student_state.homework = []
-            history = list(getattr(student_state, "homework_history", []) or [])
-            history.append(
-                {
-                    "items": patch["homework_items"],
-                    "answers": patch["homework_answers"],
-                    "score": patch["homework_score"],
-                    "results": patch["homework_results"],
-                }
-            )
-            try:
-                setattr(student_state, "homework_history", history)
-            except Exception:
-                pass
-            store.save(student_state)
-            if hasattr(student_state, "to_dict"):
-                return dict(student_state.to_dict() or {})
+    store.save(student_state)
+    if hasattr(student_state, "to_dict"):
+        return dict(student_state.to_dict() or {})
     return {}
 
 
@@ -220,6 +308,7 @@ def build_homework_answer_dialog_node(runtime: RuntimeContext):
             }
 
         event_sink.emit(make_event("node.complete", "homework_answer_dialog", message="已收到作业答案，开始评分。"))
+        answer_content = _normalize_answer(raw_answer)
         return {
             "flow_status": "normal",
             "homework_status": "submitted",
@@ -232,19 +321,28 @@ def build_homework_answer_dialog_node(runtime: RuntimeContext):
             "pending_interaction_options": [],
             "pending_interaction_recommended": "",
             "pending_interaction_answer": "",
+            "message_history": list(state.get("message_history", []))[-199:]
+            + [
+                {
+                    "role": "user",
+                    "kind": "homework_answers",
+                    "content": answer_content,
+                    "data": {"answers": answers},
+                }
+            ],
         }
 
     return node
 
 
-def build_homework_scorer_node(runtime: RuntimeContext):
+def build_homework_scorer_node(runtime: RuntimeContext, llm: Any = None):
     event_sink = runtime.event_sink
 
     def node(state: AgentState) -> dict:
         homework_items = list(state.get("homework_items") or [])
         homework_answers = dict(state.get("homework_answers") or {})
         results = [
-            _score_item(item, homework_answers.get(_question_id(item, index), ""), index)
+            _score_item(item, homework_answers.get(_question_id(item, index), ""), index, llm=llm)
             for index, item in enumerate(homework_items, start=1)
         ]
         homework_score = round(sum(item["score"] for item in results) / len(results)) if results else 0
@@ -276,6 +374,44 @@ def build_homework_scorer_node(runtime: RuntimeContext):
     return node
 
 
+def _html_escape(value: Any) -> str:
+    return html.escape(str(value or "").strip())
+
+
+def build_homework_feedback_html(results: list[dict[str, Any]], score: int) -> str:
+    badge_tone = "good" if score >= 80 else "warn" if score >= 60 else "danger"
+    cards: list[str] = []
+    for index, item in enumerate(results, start=1):
+        qid = _html_escape(item.get("question_id") or f"HW-{index}")
+        status = "正确" if item.get("is_correct") else "需要修正"
+        feedback = _html_escape(item.get("feedback"))
+        expected = _html_escape(item.get("expected"))
+        answer = _html_escape(item.get("answer"))
+        expected_html = f'<div class="homework-reference"><strong>参考要点：</strong>{expected}</div>' if expected and not item.get("is_correct") else ""
+        answer_html = f'<div class="homework-answer-line"><strong>你的答案：</strong>{answer}</div>' if answer else ""
+        cards.append(
+            f'<article class="homework-result-card" data-result="{"correct" if item.get("is_correct") else "wrong"}">'
+            f'<div class="homework-item-meta"><span class="homework-item-index">{index}</span><span class="homework-item-id">{qid}</span><span>{status}</span></div>'
+            '<div class="homework-answer-viewport">'
+            f'{answer_html}'
+            f'<div class="homework-feedback-text">{feedback}</div>'
+            f'{expected_html}'
+            '</div>'
+            '</article>'
+        )
+    return (
+        '<div class="learning-answer-content homework-answer-content">'
+        '<section class="homework-feedback-card">'
+        '<div class="learning-block-header">'
+        '<div class="learning-block-title">作业讲解</div>'
+        f'<div class="homework-score-badge homework-score-badge--{badge_tone}">本次得分：{score} 分</div>'
+        '</div>'
+        '<div class="homework-item-list">'
+        + "".join(cards)
+        + '</div></section></div>'
+    )
+
+
 def _format_explanation(results: list[dict[str, Any]], score: int) -> str:
     lines = [f"### 作业讲解\n本次作业得分：{score} 分。"]
     for item in results:
@@ -288,19 +424,68 @@ def _format_explanation(results: list[dict[str, Any]], score: int) -> str:
     return "\n".join(lines)
 
 
-def build_homework_explainer_node(runtime: RuntimeContext):
+def _llm_explain_homework(llm: Any, results: list[dict[str, Any]], state: AgentState) -> str:
+    """Generate LLM deep explanations for wrong homework answers."""
+    wrong = [r for r in results if not r.get("is_correct")]
+    if not wrong or llm is None:
+        return ""
+    topic = str(state.get("current_topic") or "").strip()
+    items_text = ""
+    for i, r in enumerate(wrong, 1):
+        prompt_text = str(r.get("prompt") or r.get("question") or "").strip()
+        answer_text = str(r.get("answer") or "").strip()
+        expected_text = str(r.get("expected") or "").strip()
+        feedback_text = str(r.get("feedback") or "").strip()
+        items_text += (
+            f"\n题目{i}: {prompt_text}\n"
+            f"学生答案: {answer_text}\n"
+            f"参考要点: {expected_text}\n"
+            f"初步反馈: {feedback_text}\n"
+        )
+    system_prompt = (
+        "你是一位自动控制理论的辅导老师。学生完成了作业，以下是他答错的题目。"
+        "请针对每道错题给出深度讲解，包括：\n"
+        "1. 错误根源分析（概念误解还是计算失误）\n"
+        "2. 正确的解题思路（分步骤）\n"
+        "3. 相关知识点的简要回顾\n"
+        "4. 避免类似错误的建议\n\n"
+        "用中文回答，语言简洁清晰，适合学生阅读。"
+        "直接输出讲解内容，不要重复题目本身。"
+    )
+    if topic:
+        system_prompt += f"\n当前学习主题：{topic}"
+    try:
+        from langchain_core.messages import HumanMessage, SystemMessage
+        messages = [SystemMessage(content=system_prompt), HumanMessage(content=items_text.strip())]
+        response = llm.invoke(messages)
+        return content_to_text(getattr(response, "content", response)).strip()
+    except Exception:
+        return ""
+
+
+def build_homework_explainer_node(runtime: RuntimeContext, llm: Any = None):
     event_sink = runtime.event_sink
 
     def node(state: AgentState) -> dict:
         results = list(state.get("homework_results") or [])
         score = int(state.get("homework_score") or 0)
-        tutor_content = _format_explanation(results, score)
+        tutor_content = build_homework_feedback_html(results, score)
+        # LLM deep explanation for wrong answers
+        llm_explanation = _llm_explain_homework(llm, results, state)
+        if llm_explanation:
+            escaped = _html_escape(llm_explanation).replace("\n", "<br>")
+            tutor_content += (
+                '<section class="homework-llm-explanation">'
+                '<h3>📖 深度讲解</h3>'
+                f'<div class="homework-explanation-body">{escaped}</div>'
+                '</section>'
+            )
         event_sink.emit(
             make_event(
                 "node.complete",
                 "homework_explainer",
                 message="作业讲解完成，作业已归档。",
-                data={"homework_score": score},
+                data={"homework_score": score, "has_llm_explanation": bool(llm_explanation)},
             )
         )
         return {

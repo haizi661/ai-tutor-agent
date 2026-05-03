@@ -75,6 +75,30 @@ class FakeDebugGraphRAGPipeline:
         }
 
 
+class FakeFallbackGraphRAGPipelineWithMedia:
+    def __init__(self):
+        self.calls = []
+
+    def ask(self, question, **kwargs):
+        self.calls.append((question, kwargs))
+        return {
+            "question": question,
+            "answer": "式一 [KM015.formula_asset[1]]\n$$\n\\sigma\\%=e^{-\\pi\\zeta/\\sqrt{1-\\zeta^2}}\\times100\\%\n$$",
+            "context_text": "二阶系统超调量公式用于说明阻尼比越大，超调越小。",
+            "evidence_items": [{"reference": "KM015.formula", "text": "二阶系统超调量公式。"}],
+            "media_items": [
+                {
+                    "reference": "KM015.formula_asset[1]",
+                    "display_label": "式一",
+                    "asset_type": "formula",
+                    "node_name": "二阶系统的时域分析",
+                    "text": "\\sigma\\%=e^{-\\pi\\zeta/\\sqrt{1-\\zeta^2}}\\times100\\%",
+                },
+            ],
+            "plan": {"used_llm": False},
+        }
+
+
 class NoopKnowledgeProvider:
     def query(self, *args, **kwargs):
         return ""
@@ -100,12 +124,77 @@ def test_interruption_polishes_graph_rag_context_with_tutor_llm_when_graph_answe
     prompt_text = "\n".join(str(m.content) for m in tutor_llm.calls[0])
     assert "图谱检索上下文" in prompt_text
     assert "模板式 fallback answer" in prompt_text
+    assert "短问短答" in prompt_text
+    assert "追问" in prompt_text
+    assert "不要机械套固定的“结论 -> 分析 -> 举例 -> 拓展 -> 依据”模板" in prompt_text
+    assert "[[MEDIA:媒体reference]]" in prompt_text
     assert result["flow_status"] == "awaiting_post_lesson_choice"
+    assert result["pending_interaction_kind"] == "post_lesson_choice"
+    assert result["pending_interaction_recommended"] == "start_test"
+    assert "可以继续追问" in result["pending_interaction_prompt"]
     streamed = "".join(str(e.data.get("text", "")) for e in sink.events if e.type == "node.stream")
     assert "LLM 根据图谱上下文解释" in streamed
 
 
-def test_interruption_preserves_debug_graph_rag_html_report_for_llm_graph_answers(tmp_path):
+def test_interruption_keeps_media_cards_after_polishing_graph_fallback_answer():
+    tutor_llm = FakeTutorLLM("LLM 润色后解释：阻尼比越大，指数项越小，所以超调量越小。")
+    graph = FakeFallbackGraphRAGPipelineWithMedia()
+    sink = BufferedEventSink()
+    runtime = RuntimeContext(event_sink=sink, knowledge_provider=NoopKnowledgeProvider(), graph_rag_pipeline=graph)
+    node = build_interruption_node(tutor_llm, runtime)
+
+    result = node(
+        {
+            "current_topic": "二阶系统时域分析",
+            "interrupt_query": "为什么阻尼比越大超调越小？",
+            "learning_resume_target": "temporary_question_collector",
+        }
+    )
+
+    assert tutor_llm.calls
+    assert result["flow_status"] == "awaiting_post_lesson_choice"
+    streamed = "".join(str(e.data.get("text", "")) for e in sink.events if e.type == "node.stream")
+    assert "LLM 润色后解释" in streamed
+    assert "learning-answer-content" in streamed
+    assert "graph-rag-answer-panel" not in streamed
+    assert "answer-media-block" not in streamed
+    assert "media-card" not in streamed
+    assert "learning-formula-card" in streamed
+    assert "learning-media-group" in streamed
+    assert "formula-render" in streamed
+    assert result["message_history"][-1]["kind"] == "graph_rag_answer"
+
+
+def test_interruption_dedupes_polished_formula_payload_after_media_marker():
+    tutor_llm = FakeTutorLLM(
+        "分析：阻尼比越大，指数衰减越明显。 [[MEDIA:KM015.formula_asset[1]]]\n"
+        "$$\n"
+        "\\sigma\\%=e^{-\\pi\\zeta/\\sqrt{1-\\zeta^2}}\\times100\\%\n"
+        "$$"
+    )
+    graph = FakeFallbackGraphRAGPipelineWithMedia()
+    sink = BufferedEventSink()
+    runtime = RuntimeContext(event_sink=sink, knowledge_provider=NoopKnowledgeProvider(), graph_rag_pipeline=graph)
+    node = build_interruption_node(tutor_llm, runtime)
+
+    result = node(
+        {
+            "current_topic": "二阶系统时域分析",
+            "interrupt_query": "为什么阻尼比越大超调越小？",
+            "learning_resume_target": "temporary_question_collector",
+        }
+    )
+
+    prompt_text = "\n".join(str(m.content) for m in tutor_llm.calls[0])
+    assert "不要再抄写同一个公式源码" in prompt_text
+    assert result["message_history"][-1]["kind"] == "graph_rag_answer"
+    streamed = "".join(str(e.data.get("text", "")) for e in sink.events if e.type == "node.stream")
+    assert streamed.count("learning-formula-card") == 1
+    assert "learning-inline-formula-card" not in streamed
+    assert "$$" not in streamed
+
+
+def test_interruption_preserves_graph_rag_media_answer_for_llm_graph_answers(tmp_path):
     image_path = tmp_path / "figure.png"
     image_path.write_bytes(
         b"\x89PNG\r\n\x1a\n\x00\x00\x00\rIHDR\x00\x00\x00\x01\x00\x00\x00\x01\x08\x02\x00\x00\x00\x90wS\xde"
@@ -125,22 +214,29 @@ def test_interruption_preserves_debug_graph_rag_html_report_for_llm_graph_answer
     )
 
     assert graph.calls
-    assert tutor_llm.calls == [], "GraphRAG 已用 LLM 生成完整调试报告时，不应再由 tutor_llm 二次整理吞掉结构"
+    assert tutor_llm.calls == [], "GraphRAG 已用 LLM 生成完整媒体回答时，不应再由 tutor_llm 二次整理吞掉结构"
     assert result["flow_status"] == "awaiting_post_lesson_choice"
     streamed = "".join(str(e.data.get("text", "")) for e in sink.events if e.type == "node.stream")
-    assert "GraphRAG 调试报告" in streamed
+    stream_kinds = [e.data.get("kind") for e in sink.events if e.type == "node.stream"]
+    assert stream_kinds == ["graph_rag_answer"]
+    assert "learning-answer-content" in streamed
+    assert "graph-rag-answer-panel" not in streamed
     assert "相关公式与图表" in streamed
-    assert "证据" in streamed
-    assert "answer-media-block" in streamed
-    assert "media-card figure-card" in streamed
-    assert "media-card formula-card" in streamed
+    assert "KM015.summary" in streamed
+    assert "answer-media-block" not in streamed
+    assert "media-card" not in streamed
+    assert "learning-figure-card" in streamed
+    assert "learning-formula-card" in streamed
     assert "formula-math" in streamed
-    assert streamed.count('<div class="answer-media-block">') == 1
+    assert streamed.count('learning-media-group') == 1
     assert "式一 [KM015.formula_asset[1]]" not in streamed
     assert '<div class="formula-scroll formula-viewport answer-formula"' not in streamed
     assert "单位阶跃响应曲线</p><p>" not in streamed
-    assert "KM013.figure_asset[1]" in streamed
+    assert any(
+        item.get("reference") == "KM013.figure_asset[1]"
+        for item in result["message_history"][-1]["data"]["graph_rag_result"]["media_items"]
+    )
     assert "KM015.summary" in streamed
     assert "不应该吞掉" not in streamed
-    assert result["message_history"][-1]["kind"] == "graph_rag_debug_report"
+    assert result["message_history"][-1]["kind"] == "graph_rag_answer"
     assert result["message_history"][-1]["data"]["graph_rag_result"]["media_items"]

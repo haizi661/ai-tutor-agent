@@ -42,7 +42,12 @@ def test_serialize_state_includes_closed_loop_fields():
             "tutor_evidence": [{"rank": 1, "display_label": "guide.pdf", "snippet": "证据片段"}],
             "message_history": [{"role": "user", "kind": "topic_input", "content": "我想学控制原理"}],
             "homework_items": [{"question_id": "HW-KM001", "prompt": "复习稳定性"}],
+            "homework_answers": {"HW-KM001": "看极点"},
+            "homework_results": [{"question_id": "HW-KM001", "score": 80}],
+            "homework_score": 80,
             "homework_status": "assigned",
+            "continue_or_homework_choice": "stop_today",
+            "pending_interaction_answer": "answer_homework",
             "student_state_snapshot": {"visited_nodes": ["KM001"]},
         }
     )
@@ -64,7 +69,12 @@ def test_serialize_state_includes_closed_loop_fields():
     assert serialized["tutor_evidence"][0]["display_label"] == "guide.pdf"
     assert serialized["message_history"][0]["content"] == "我想学控制原理"
     assert serialized["homework_items"][0]["question_id"] == "HW-KM001"
+    assert serialized["homework_answers"]["HW-KM001"] == "看极点"
+    assert serialized["homework_results"][0]["score"] == 80
+    assert serialized["homework_score"] == 80
     assert serialized["homework_status"] == "assigned"
+    assert serialized["continue_or_homework_choice"] == "stop_today"
+    assert serialized["pending_interaction_answer"] == "answer_homework"
     assert serialized["student_state_snapshot"]["visited_nodes"] == ["KM001"]
 
 
@@ -361,6 +371,90 @@ def test_reconstruct_messages_locks_pending_choice_card_after_answer():
 
     assert choice_item["data"]["locked"] is True
     assert choice_item["data"]["selectedLabel"] == "没有问题，开始测试"
+
+
+def test_reconstruct_messages_locks_homework_choice_by_persisted_value():
+    store = FakeCheckpointStore(
+        [
+            _checkpoint(
+                {
+                    "flow_status": "awaiting_homework_review_choice",
+                    "pending_interaction_kind": "homework_review_choice",
+                    "pending_interaction_prompt": "这份作业已按当前图谱节点保存。请选择。",
+                    "pending_interaction_options": [
+                        {"value": "answer_homework", "label": "现在做作业"},
+                        {"value": "save_for_later", "label": "保存，下次再做"},
+                        {"value": "continue_learning", "label": "保留作业，继续学习"},
+                    ],
+                },
+                "2026-04-12T10:07:00+00:00",
+            ),
+            _checkpoint(
+                {
+                    "flow_status": "normal",
+                    "homework_status": "deferred",
+                    "pending_interaction_kind": "",
+                    "pending_interaction_prompt": "",
+                    "pending_interaction_options": [],
+                    "message_history": [
+                        {
+                            "role": "user",
+                            "kind": "homework_review_choice",
+                            "content": "继续学习",
+                            "data": {"selected_value": "continue_learning"},
+                        },
+                    ],
+                },
+                "2026-04-12T10:08:00+00:00",
+            ),
+        ]
+    )
+
+    items = _reconstruct_messages(store, "thread-homework-choice")
+    choice_item = next(item for item in items if item["kind"] == "homework_review_choice_card")
+
+    assert choice_item["data"]["locked"] is True
+    assert choice_item["data"]["selectedValue"] == "continue_learning"
+    assert choice_item["data"]["selectedLabel"] == "保留作业，继续学习"
+
+
+def test_reconstruct_messages_restores_homework_answer_prompt_and_answer():
+    store = FakeCheckpointStore(
+        [
+            _checkpoint(
+                {
+                    "flow_status": "awaiting_homework_answers",
+                    "pending_interaction_kind": "homework_answers",
+                    "pending_interaction_prompt": "请按题号提交你的作业答案。",
+                    "homework_items": [{"question_id": "HW-KM001", "prompt": "复习稳定性。"}],
+                },
+                "2026-04-12T10:09:00+00:00",
+            ),
+            _checkpoint(
+                {
+                    "flow_status": "normal",
+                    "pending_interaction_kind": "",
+                    "message_history": [
+                        {
+                            "role": "user",
+                            "kind": "homework_answers",
+                            "content": '{"HW-KM001":"看闭环极点"}',
+                            "data": {"answers": {"HW-KM001": "看闭环极点"}},
+                        }
+                    ],
+                },
+                "2026-04-12T10:10:00+00:00",
+            ),
+        ]
+    )
+
+    items = _reconstruct_messages(store, "thread-homework-answer")
+    kinds = [item["kind"] for item in items]
+
+    assert "homework_answer_prompt" in kinds
+    assert "homework_answers" in kinds
+    answer_item = next(item for item in items if item["kind"] == "homework_answers")
+    assert answer_item["data"]["answers"]["HW-KM001"] == "看闭环极点"
 
 
 def test_reconstruct_messages_locks_synthetic_assessment_form_after_skip():

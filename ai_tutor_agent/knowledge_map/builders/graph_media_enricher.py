@@ -650,10 +650,9 @@ class GraphMediaEnricher:
             return []
 
         scope_text = self._extract_node_scope_text(node, doc)
-        if not scope_text:
-            return []
-
-        figures = self._extract_figures_from_block(scope_text, doc["manifest"])
+        figures = self._extract_figures_from_block(scope_text, doc["manifest"]) if scope_text else []
+        if not figures:
+            figures = self._extract_chapter_fallback_figures(node, doc)
         return self._build_figure_media_items(node, figures)
 
     def _build_figure_media_items(self, node: dict[str, Any], figures: list[dict[str, Any]]) -> list[dict[str, Any]]:
@@ -893,6 +892,73 @@ class GraphMediaEnricher:
             if raw_table:
                 tables.append({"caption": f"相关表格 {idx}", "text": raw_table})
         return tables
+
+    def _extract_chapter_fallback_figures(self, node: dict[str, Any], doc: dict[str, Any]) -> list[dict[str, Any]]:
+        full_md = str(doc.get("full_md", "") or "")
+        if not full_md:
+            return []
+        candidates = self._extract_figures_from_block(full_md, doc["manifest"])
+        if not candidates:
+            return []
+
+        query_terms = self._chapter_figure_query_terms(node)
+        ranked: list[tuple[float, int, dict[str, Any]]] = []
+        for idx, figure in enumerate(candidates):
+            caption = str(figure.get("caption", "") or "")
+            score = self._score_chapter_fallback_figure(caption, query_terms)
+            if score <= 0:
+                continue
+            ranked.append((score, idx, figure))
+        if not ranked:
+            return candidates[:1]
+        ranked.sort(key=lambda item: (-item[0], item[1]))
+        return [figure for _, _, figure in ranked[:3]]
+
+    def _chapter_figure_query_terms(self, node: dict[str, Any]) -> list[str]:
+        terms: list[str] = []
+
+        def add(value: Any) -> None:
+            if isinstance(value, list):
+                for item in value:
+                    add(item)
+                return
+            text = str(value or "").strip()
+            if not text:
+                return
+            for part in re.findall(r"[\u4e00-\u9fff]{2,}|[A-Za-z][A-Za-z0-9_%\-]{1,}|\d+-\d+", text):
+                if part not in terms:
+                    terms.append(part)
+            compact = re.sub(r"\s+", "", text)
+            if 2 <= len(compact) <= 16 and compact not in terms:
+                terms.append(compact)
+
+        extra = node.get("extra", {}) or {}
+        add(node.get("name", ""))
+        add(node.get("tags", []))
+        add(node.get("core_concepts", []))
+        add(extra.get("retrieval_keywords", []))
+        add(extra.get("matched_block_title", ""))
+        add(extra.get("retrieval_matched_block_title", ""))
+        return terms[:24]
+
+    def _score_chapter_fallback_figure(self, caption: str, query_terms: list[str]) -> float:
+        normalized_caption = re.sub(r"\s+", "", str(caption or ""))
+        if not normalized_caption:
+            return 0.0
+        score = 0.0
+        if self._looks_like_figure_caption(normalized_caption):
+            score += 2.0
+        for term in query_terms:
+            compact = re.sub(r"\s+", "", str(term or ""))
+            if len(compact) < 2:
+                continue
+            if compact in normalized_caption or normalized_caption in compact:
+                score += min(len(compact), 8) * 0.5
+        figure_keywords = ["框图", "方框图", "结构", "原理", "系统", "反馈", "响应", "曲线", "特性", "流程"]
+        for keyword in figure_keywords:
+            if keyword in normalized_caption:
+                score += 0.7
+        return score
 
     def _extract_figures_from_block(self, block_text: str, manifest: dict[str, Any]) -> list[dict[str, Any]]:
         figures: list[dict[str, Any]] = []

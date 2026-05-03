@@ -1,8 +1,8 @@
 from __future__ import annotations
 
 from ..core.events import make_event
-from ..core.learning_flow import infer_resume_target
-from ..core.learning_support import build_graph_state_patch, recommend_next_node
+from ..core.learning_flow import infer_resume_target, normalize_resume_target
+from ..core.learning_support import build_graph_state_patch, recommend_next_node, trim_message_history
 from ..core.ports import RuntimeContext
 from ..core.state import AgentState
 
@@ -10,8 +10,10 @@ PENDING_FLOW_STATUSES = {
     "awaiting_post_lesson_choice",
     "awaiting_temporary_question",
     "awaiting_objective_answers",
+    "awaiting_variant_answers",
     "awaiting_continue_or_homework_choice",
     "awaiting_homework_review_choice",
+    "awaiting_homework_answers",
     "awaiting_interrupt_confirmation",
     "assessment_dialog",
     "profiling",
@@ -23,12 +25,21 @@ CONSOLIDATION_OPTIONS = [
 ]
 
 
+_TERMINAL_HOMEWORK_STATUSES = {"completed", "submitted", "deferred"}
+
+
 def _has_homework(state: AgentState) -> bool:
-    return bool(state.get("homework_items")) and str(state.get("homework_status") or "").strip() in {
-        "assigned",
-        "deferred",
-        "in_progress",
-    }
+    """有作业且状态为活跃（非终态、非暂缓）。状态缺失时默认视为 assigned。"""
+    if not state.get("homework_items"):
+        return False
+    status = str(state.get("homework_status") or "").strip()
+    if not status:
+        return True  # 状态丢失，有 items 就当有作业
+    return status not in _TERMINAL_HOMEWORK_STATUSES
+
+
+def _has_deferred_homework(state: AgentState) -> bool:
+    return bool(state.get("homework_items")) and str(state.get("homework_status") or "").strip() == "deferred"
 
 
 def build_session_resume_router_node(runtime: RuntimeContext):
@@ -77,6 +88,26 @@ def build_session_resume_router_node(runtime: RuntimeContext):
                 "learning_resume_reason": "existing_homework_found",
             }
 
+        if _has_deferred_homework(state):
+            target = normalize_resume_target(state.get("learning_resume_target", ""))
+            if target in {"session_resume_router", "homework_review", "homework_answer_dialog", "homework_generator"}:
+                target = ""
+            next_target = target or ("node_content_loader" if state.get("next_node_candidate_id") else "next_node_planner")
+            event_sink.emit(
+                make_event(
+                    "node.complete",
+                    "session_resume_router",
+                    message="检测到上次已选择暂缓作业，按原选择继续学习。",
+                    data={"homework_count": len(state.get("homework_items") or []), "target": next_target},
+                )
+            )
+            return {
+                "flow_status": "normal",
+                "learning_phase": state.get("learning_phase") or "node_selected",
+                "learning_resume_target": next_target,
+                "learning_resume_reason": "homework_deferred_continue_learning",
+            }
+
         # ── 无作业：询问用户是否需要巩固复习 ──
         awaiting_consolidation = state.get("flow_status") == "awaiting_consolidation_choice"
         if not awaiting_consolidation:
@@ -103,7 +134,41 @@ def build_session_resume_router_node(runtime: RuntimeContext):
 
         # ── 用户已选择 ──
         choice = str(state.get("pending_interaction_answer") or "").strip().lower()
-        consolidate_values = {"consolidate", "巩固", "巩固复习", "复习", "生成复习题"}
+        if not choice:
+            prompt = str(state.get("pending_interaction_prompt") or "").strip() or "上次没有留作业。你想先巩固复习已学内容，还是直接开始下一节点的学习？"
+            event_sink.emit(
+                make_event(
+                    "node.start",
+                    "session_resume_router",
+                    message=prompt,
+                    data={"options": CONSOLIDATION_OPTIONS, "requires_input": True},
+                )
+            )
+            return {
+                "flow_status": "awaiting_consolidation_choice",
+                "learning_phase": "homework_resume",
+                "learning_resume_target": "session_resume_router",
+                "learning_resume_reason": "consolidation_choice_required",
+                "pending_interaction_kind": "consolidation_choice",
+                "pending_interaction_prompt": prompt,
+                "pending_interaction_options": state.get("pending_interaction_options") or CONSOLIDATION_OPTIONS,
+                "pending_interaction_recommended": state.get("pending_interaction_recommended") or "continue_learning",
+                "pending_interaction_answer": "",
+            }
+        consolidate_values = {"consolidate", "巩固", "先巩固", "需要巩固", "巩固复习", "复习", "生成复习题"}
+        continue_values = {"continue_learning", "继续", "继续学习", "直接开始下一节点", "直接开始下一个节点", "下一节点"}
+        normalized_choice = "consolidate" if choice in consolidate_values else "continue_learning"
+        if choice and choice not in consolidate_values and choice not in continue_values:
+            normalized_choice = "continue_learning"
+        message_history = list(state.get("message_history", []))
+        message_history.append(
+            {
+                "role": "user",
+                "kind": "consolidation_choice",
+                "content": str(state.get("pending_interaction_answer") or "").strip() or normalized_choice,
+                "data": {"selected_value": normalized_choice},
+            }
+        )
         if choice in consolidate_values:
             event_sink.emit(
                 make_event(
@@ -122,6 +187,7 @@ def build_session_resume_router_node(runtime: RuntimeContext):
                 "pending_interaction_options": [],
                 "pending_interaction_recommended": "",
                 "pending_interaction_answer": "",
+                "message_history": trim_message_history(message_history),
             }
 
         # 用户选择继续学习，找下一节点
@@ -164,6 +230,7 @@ def build_session_resume_router_node(runtime: RuntimeContext):
                 "pending_interaction_options": [],
                 "pending_interaction_recommended": "",
                 "pending_interaction_answer": "",
+                "message_history": trim_message_history(message_history),
                 **graph_patch,
             }
 
@@ -184,6 +251,7 @@ def build_session_resume_router_node(runtime: RuntimeContext):
             "pending_interaction_options": [],
             "pending_interaction_recommended": "",
             "pending_interaction_answer": "",
+            "message_history": trim_message_history(message_history),
         }
 
     return node

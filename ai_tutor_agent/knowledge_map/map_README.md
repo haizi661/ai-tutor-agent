@@ -1,4 +1,6 @@
-# 🚀 knowledge_map + companion 模块 README（2.0版本）
+# knowledge_map + companion 模块 README（历史参考）
+
+> 2026-04-30 状态：本文记录 `knowledge_map` 模块早期 2.0 设计。当前主教学图谱是 2026-04-27 Graph B 运行资产，权威运行说明请看 `AGENTS.md`、`docs/current-status-and-usage.md` 和 `docs/knowledge-map-runtime-assets.md`。
 
 ## 1. 模块目标
 

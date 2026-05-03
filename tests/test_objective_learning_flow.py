@@ -129,6 +129,43 @@ def test_post_lesson_direct_question_routes_to_temporary_question_channel():
     assert resumed["learning_phase"] == "temporary_question_collecting"
 
 
+def test_post_lesson_choice_accepts_freeform_hesitation_as_temporary_question():
+    sink = BufferedEventSink()
+    provider = FakeAnswerProvider("")
+    node = build_post_lesson_choice_node(sink, provider)
+
+    resumed = node(
+        {
+            "flow_status": "awaiting_post_lesson_choice",
+            "pending_interaction_answer": "还是没太明白这个负反馈判断",
+            "current_node_id": "KM001",
+            "current_node_name": "稳定性",
+        }
+    )
+
+    assert resumed["post_lesson_choice"] == "temporary_question"
+    assert resumed["interrupt_query"] == "还是没太明白这个负反馈判断"
+    assert resumed["learning_resume_target"] == "temporary_question_collector"
+    assert resumed["learning_phase"] == "temporary_question_collecting"
+
+
+def test_post_lesson_choice_prompt_is_not_binary_or_rigid():
+    sink = BufferedEventSink()
+    provider = FakeAnswerProvider("")
+    node = build_post_lesson_choice_node(sink, provider)
+
+    result = node({"current_node_name": "稳定性"})
+
+    assert result["flow_status"] == "awaiting_post_lesson_choice"
+    prompt = result["pending_interaction_prompt"]
+    assert "还有临时问题，还是开始测试" not in prompt
+    assert "可以直接追问" in prompt
+    assert "一句话说卡点" in prompt
+    assert "进入小测" in prompt
+    labels = [item["label"] for item in result["pending_interaction_options"]]
+    assert labels == ["继续追问", "我懂了，进入小测"]
+
+
 def test_objective_test_generator_uses_ai_to_create_objective_questions_without_question_bank():
     sink = BufferedEventSink()
     llm = FakeLLM(AI_OBJECTIVE_JSON)
@@ -418,3 +455,54 @@ def test_workflow_routes_tutor_to_post_lesson_choice_and_objective_scorer_to_nex
     assert workflow_module.route_after_post_lesson_choice({"post_lesson_choice": "temporary_question"}) == "temporary_question_collector"
     assert workflow_module.route_after_objective_test_scorer({"current_node_status": "passed"}) == "next_node_planner"
     assert workflow_module.route_after_objective_test_scorer({"current_node_status": "quizzing", "flow_status": "awaiting_objective_answers"}) == "pause"
+
+
+def test_post_lesson_choice_resets_stale_post_lesson_choice_on_first_run():
+    """When returning from temporary Q&A, post_lesson_choice may still be
+    'temporary_question' from the previous interaction.  The first-run path
+    must reset it to '' so routing does not mis-fire."""
+    sink = BufferedEventSink()
+    provider = FakeAnswerProvider("")
+    node = build_post_lesson_choice_node(sink, provider)
+
+    # Simulate restoring a session where post_lesson_choice is stale
+    first = node({
+        "current_node_id": "KM001",
+        "current_node_name": "稳定性",
+        "post_lesson_choice": "temporary_question",  # stale from previous run
+    })
+    assert first["flow_status"] == "awaiting_post_lesson_choice"
+    assert first["post_lesson_choice"] == "", "stale post_lesson_choice must be reset"
+
+    # After reset, routing should NOT go to temporary_question_collector
+    from ai_tutor_agent.orchestration import workflow as workflow_module
+    routing_state = {"flow_status": "normal", "post_lesson_choice": first["post_lesson_choice"]}
+    assert workflow_module.route_after_post_lesson_choice(routing_state) == "objective_test_generator"
+
+
+def test_post_lesson_choice_start_test_routing_with_stale_state():
+    """Full round-trip: stale temporary_question -> first run (reset) -> user
+    answers start_test -> must route to objective_test_generator."""
+    sink = BufferedEventSink()
+    provider = FakeAnswerProvider("")
+    node = build_post_lesson_choice_node(sink, provider)
+
+    # First run with stale state
+    first = node({
+        "current_node_id": "KM001",
+        "current_node_name": "稳定性",
+        "post_lesson_choice": "temporary_question",
+    })
+    assert first["post_lesson_choice"] == ""
+
+    # User answers "start_test"
+    resumed = node({
+        "flow_status": "awaiting_post_lesson_choice",
+        "pending_interaction_answer": "start_test",
+        "pending_interaction_options": first["pending_interaction_options"],
+        "current_node_id": "KM001",
+        "current_node_name": "稳定性",
+        "post_lesson_choice": "",  # was reset
+    })
+    assert resumed["post_lesson_choice"] == "start_test"
+    assert resumed["learning_resume_target"] == "objective_test_generator"

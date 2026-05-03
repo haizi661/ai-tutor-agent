@@ -27,8 +27,11 @@ def build_temporary_question_collector_node(event_sink: EventSink):
 
         if not awaiting_question and not query:
             node_name = str(state.get("current_node_name") or state.get("graph_anchor_title") or state.get("current_node_id") or "当前节点").strip()
-            prompt = f"你想围绕【{node_name}】临时追问什么？请直接输入你的问题。"
-            options = [{"id": "temporary_question", "label": "输入临时问题"}]
+            prompt = f"围绕【{node_name}】，把你卡住的地方直接说出来就行；可以是一句话、一个反例、一个公式或一个图上的疑问。"
+            options = [
+                {"id": "temporary_question", "label": "直接输入追问"},
+                {"id": "example_question", "label": "比如：这一步为什么成立？"},
+            ]
             event_sink.emit(
                 make_event(
                     "node.start",

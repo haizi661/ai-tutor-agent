@@ -111,9 +111,9 @@ def infer_learning_phase(state: Mapping[str, Any] | None) -> str:
         return "node_quiz_variant_testing"
     if flow_status == "awaiting_continue_or_homework_choice":
         return "continue_or_homework_choice"
-    if flow_status == "homework_assigned":
+    if flow_status == "awaiting_consolidation_choice":
         return "homework_resume"
-    if flow_status in {"awaiting_homework_review_choice", "awaiting_homework_answers"}:
+    if flow_status in {"homework_assigned", "awaiting_homework_review_choice", "awaiting_homework_answers"}:
         return "homework_resume"
 
     if flow_status == "awaiting_post_eval_selector":
@@ -174,10 +174,12 @@ def infer_resume_target(state: Mapping[str, Any] | None) -> str:
         return "variant_test_answer_dialog"
     if flow_status == "awaiting_continue_or_homework_choice":
         return "continue_or_homework_selector"
-    if flow_status == "homework_assigned":
+    if flow_status == "awaiting_consolidation_choice":
         return "session_resume_router"
     if flow_status == "awaiting_homework_review_choice":
         return "homework_review"
+    if flow_status == "homework_assigned":
+        return "session_resume_router"
     if flow_status == "awaiting_homework_answers":
         return "homework_answer_dialog"
     if flow_status == "awaiting_post_eval_selector":

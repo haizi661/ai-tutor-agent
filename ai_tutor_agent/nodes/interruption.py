@@ -3,10 +3,10 @@ from __future__ import annotations
 import logging
 
 from langchain_core.messages import HumanMessage, SystemMessage
-from ai_tutor_agent.knowledge_map.debug_graph_rag import build_html_report
+from ai_tutor_agent.knowledge_map.debug_graph_rag import build_answer_media_html, build_learning_answer_html
 
 from ..core.events import make_event
-from ..core.learning_support import normalize_graph_answer
+from ..core.learning_support import normalize_graph_answer, trim_message_history
 from ..core.ports import RuntimeContext
 from ..core.state import AgentState
 from ..core.teacher_voice import build_teacher_voice
@@ -112,8 +112,18 @@ def _graph_rag_used_llm(graph_result: dict[str, object] | None) -> bool:
     return isinstance(plan, dict) and plan.get("used_llm") is True
 
 
-def _build_graph_rag_debug_report_html(graph_result: dict[str, object]) -> str:
-    return build_html_report(graph_result)
+def _build_graph_rag_answer_html(graph_result: dict[str, object], *, answer_override: str = "") -> str:
+    payload = dict(graph_result or {})
+    if answer_override:
+        payload["answer"] = answer_override
+    return build_learning_answer_html(payload)
+
+
+def _build_graph_rag_debug_answer_html(graph_result: dict[str, object], *, answer_override: str = "") -> str:
+    payload = dict(graph_result or {})
+    if answer_override:
+        payload["answer"] = answer_override
+    return build_answer_media_html(payload)
 
 
 def _build_graph_rag_llm_messages(state: AgentState, query: str, graph_result: dict[str, object], recent_interrupt_context: str) -> list[object]:
@@ -121,7 +131,8 @@ def _build_graph_rag_llm_messages(state: AgentState, query: str, graph_result: d
         SystemMessage(
             content=build_teacher_voice(
                 """你现在负责处理中途追问。图谱 RAG 已经完成节点检索与上下文构造，
-你必须基于图谱结果重新组织成自然、准确、面向学生的解释；不要直接照搬检索模板或 fallback 文本。"""
+你必须基于图谱结果重新组织成自然、准确、面向学生的解释；不要直接照搬检索模板或 fallback 文本。
+如果图谱结果里有公式、图或表，不要压缩掉它们对应的解释，也不要把媒体引用全部堆到最后。"""
             )
         ),
         HumanMessage(
@@ -131,12 +142,16 @@ def _build_graph_rag_llm_messages(state: AgentState, query: str, graph_result: d
                 f"图谱检索答案草稿：\n{graph_result.get('answer') or ''}\n\n"
                 f"图谱检索上下文：\n{graph_result.get('context_text') or ''}\n\n"
                 f"相关节点摘要：\n{graph_result.get('node_summaries') or []}\n\n"
+                f"相关公式/图表/表格：\n{graph_result.get('media_items') or []}\n\n"
                 f"最近临时会话上下文：\n{recent_interrupt_context or '无'}\n\n"
                 "输出要求：\n"
                 "1. 必须回答用户问题本身，不要只说检索到了什么\n"
-                "2. 控制在 220 字以内\n"
-                "3. 若图谱草稿是 fallback/模板化内容，要用上下文重写成具体解释\n"
-                "4. 最后一句自然提醒可以回到刚才主线继续"
+                "2. 根据问题复杂度自适应：短问短答可以 120 到 220 字；涉及公式、图或概念辨析时再展开到 300 到 500 字\n"
+                "3. 若图谱草稿是 fallback/模板化内容，要用上下文重写成具体解释，但不要丢掉图谱中的公式、图表、表格线索\n"
+                "4. 如果正文分析到某个媒体，请在相关段落后单独保留一行 [[MEDIA:媒体reference]]，每个媒体最多出现一次\n"
+                "5. 已有媒体引用后不要再抄写同一个公式源码、图题、表格原文或 caption，前端会用媒体卡片展示\n"
+                "6. 不要机械套固定的“结论 -> 分析 -> 举例 -> 拓展 -> 依据”模板；按学生追问自然组织，可以是直接解释、换个例子、指出误区或给判断抓手\n"
+                "7. 最后一句自然收束：可以继续追问，也可以回到刚才主线继续"
             )
         ),
     ]
@@ -168,6 +183,9 @@ def build_interruption_node(tutor_llm, runtime: RuntimeContext):
 
         search_query = f"{state.get('current_topic', '')} {query}".strip()
         graph_result = None
+        full_response = ""
+        response_kind = "interruption"
+        response_data: dict[str, object] = {}
         if graph_rag_pipeline is not None:
             try:
                 graph_result = graph_rag_pipeline.ask(search_query or query, traversal_mode="balanced")
@@ -189,12 +207,9 @@ def build_interruption_node(tutor_llm, runtime: RuntimeContext):
             ).strip()
             graph_context = str(graph_result.get("context_text") or "").strip()
             graph_used_llm = _graph_rag_used_llm(graph_result)
-            full_response = ""
-            response_kind = "interruption"
-            response_data: dict[str, object] = {}
             if graph_used_llm:
-                full_response = _build_graph_rag_debug_report_html(graph_result).strip()
-                response_kind = "graph_rag_debug_report"
+                full_response = _build_graph_rag_answer_html(graph_result).strip()
+                response_kind = "graph_rag_answer"
                 response_data = {"graph_rag_result": graph_result}
             else:
                 should_polish = tutor_llm is not None and (graph_context or _looks_like_graph_fallback(graph_answer, graph_result))
@@ -208,13 +223,22 @@ def build_interruption_node(tutor_llm, runtime: RuntimeContext):
                         llm_stream_disabled = True
                         llm_stream_failures += 1
                     full_response = full_response.strip()
+                    if full_response and graph_result.get("media_items"):
+                        full_response = _build_graph_rag_answer_html(graph_result, answer_override=full_response).strip()
+                        response_kind = "graph_rag_answer"
+                        response_data = {"graph_rag_result": graph_result}
                 if not full_response:
-                    full_response = graph_answer or graph_context or "我先把这个临时问题的关键主线收紧，再继续给你讲。"
+                    if graph_result.get("media_items"):
+                        full_response = _build_graph_rag_answer_html(graph_result).strip()
+                        response_kind = "graph_rag_answer"
+                        response_data = {"graph_rag_result": graph_result}
+                    else:
+                        full_response = graph_answer or graph_context or "我先把这个临时问题的关键主线收紧，再继续给你讲。"
             event_sink.emit(
                 make_event(
                     "node.stream",
                     "interruption_tutor",
-                    data={"text": full_response},
+                    data={"text": full_response, "kind": response_kind},
                 )
             )
         else:
@@ -299,7 +323,7 @@ def build_interruption_node(tutor_llm, runtime: RuntimeContext):
                 make_event(
                     "node.stream",
                     "interruption_tutor",
-                    data={"text": full_response},
+                    data={"text": full_response, "kind": response_kind},
                 )
             )
 
@@ -324,11 +348,17 @@ def build_interruption_node(tutor_llm, runtime: RuntimeContext):
 
         if from_post_lesson:
             # 临时问题来自讲解后选择，直接回到 post_lesson_choice，不显示中断确认卡片
+            post_prompt = "这个问题先讲到这里。你可以继续追问、换个角度问，或者如果已经顺了就进入小测。"
+            post_options = [
+                {"value": "temporary_question", "label": "继续追问"},
+                {"value": "start_test", "label": "我懂了，进入小测"},
+            ]
             event_sink.emit(
                 make_event(
                     "session.info",
                     "interruption_tutor",
-                    message="好，这个问题先到这里。你可以继续提问，或者开始测试。",
+                    message=post_prompt,
+                    data={"options": post_options, "interaction_kind": "post_lesson_choice"},
                 )
             )
             return {
@@ -338,8 +368,13 @@ def build_interruption_node(tutor_llm, runtime: RuntimeContext):
                 "learning_phase": "post_lesson_choice",
                 "learning_resume_target": "post_lesson_choice",
                 "learning_resume_reason": "interrupt_answered_back_to_choice",
+                "pending_interaction_kind": "post_lesson_choice",
+                "pending_interaction_prompt": post_prompt,
+                "pending_interaction_options": post_options,
+                "pending_interaction_recommended": "start_test",
+                "pending_interaction_answer": "",
                 "conversation_history": history,
-                "message_history": message_history,
+                "message_history": trim_message_history(message_history),
                 "llm_stream_disabled": llm_stream_disabled,
                 "llm_stream_failures": llm_stream_failures,
             }
@@ -378,7 +413,7 @@ def build_interruption_node(tutor_llm, runtime: RuntimeContext):
             "learning_resume_target": "interruption_tutor",
             "learning_resume_reason": "interrupt_answered_waiting_confirmation",
             "conversation_history": history,
-            "message_history": message_history,
+            "message_history": trim_message_history(message_history),
             "llm_stream_disabled": llm_stream_disabled,
             "llm_stream_failures": llm_stream_failures,
         }

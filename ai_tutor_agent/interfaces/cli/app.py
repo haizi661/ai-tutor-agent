@@ -1,5 +1,5 @@
 from ...application.session import run_learning_session
-from ...config import get_settings
+from ...config import apply_network_environment, get_settings
 from ...core.events import make_event
 from ...core.ports import RuntimeContext, UserAbortError
 from ...infrastructure.retriever import LocalFileKnowledgeProvider
@@ -9,6 +9,7 @@ from .adapter import CliAnswerProvider, CliEventSink
 
 def run_cli() -> None:
     settings = get_settings()
+    apply_network_environment(settings)
     event_sink = CliEventSink()
     answer_provider = CliAnswerProvider()
     

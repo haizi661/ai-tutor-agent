@@ -6,10 +6,14 @@
 
 - 知识图谱节点制掌握学习：主题确认 -> 学前诊断 -> 图谱节点选择 -> 节点讲解 -> 节点测试 -> 错题补救 -> 下一节点/作业
 - 图谱 2.1 主线推进：负责学习路径、当前节点、前置关系、学习目标、必会点和常见误区
-- 图谱 2.2 / RAG 证据增强：负责临时问题、图表/公式/资料证据检索与补充回答
+- 图谱 2.2 / RAG 证据增强：负责临时追问、图表/公式/资料证据检索与补充回答，并把公式/图表/表格渲染为学习者可读的证据卡片
+- 临时问答证据布局：正文引用的公式、图表、表格会绑定在对应解释段落附近；未被正文引用的补充媒体只作为限量参考，避免重复堆叠
 - 节点后客观题批量测试：支持 answer_key 确定性评分，避免把客观题评分交给 LLM 自由判断
+- 最小本地题库 Provider：支持 `data/question_bank/<course_id>/*.jsonl`，题库不足时 fallback 到 AI/内置题
 - 学生状态与作业恢复：支持学习记录、作业生成、二次登录恢复和继续学习
-- Web 会话恢复：支持历史恢复、等待输入恢复、状态横幅恢复
+- 用户画像与学情原型：学前诊断生成概念差距、起始难度和教学策略；学习过程记录节点掌握、错题节点、题目作答和作业历史
+- 前端交互卡片恢复：支持讲解后选择、批量题卡、继续/作业选择、作业复习等 pending/locked 状态
+- Web 会话恢复：支持历史恢复、等待输入恢复、状态横幅恢复，并在恢复后定位到当前待处理卡片
 - 资料库检索：支持上传 PDF / Markdown / 文本，向量库存储默认在 `data/chroma_db`
 - 本地运维配置：Web 本地设置页与 `.env` 一致
 
@@ -22,6 +26,24 @@
 
 ```bash
 python -m pip install -r requirements.txt
+```
+
+中国大陆网络建议使用镜像安装依赖：
+
+```bash
+python -m pip install -r requirements.txt -i https://pypi.tuna.tsinghua.edu.cn/simple
+```
+
+如果后续需要安装 npm 依赖，先固定 npm 镜像：
+
+```bash
+npm config set registry https://registry.npmmirror.com
+```
+
+也可以一次性写入本机 pip/npm 镜像配置：
+
+```bash
+bash scripts/setup_cn_mirrors.sh
 ```
 
 或：
@@ -80,6 +102,11 @@ cp .env.example .env
 python main.py
 ```
 
+说明：
+
+- Web UI 端口固定为 `8000`；如果已被旧进程占用，启动会直接报错，而不是偷偷切到别的端口
+- `AI_TUTOR_HOST` 只控制绑定地址，不控制端口；例如 `AI_TUTOR_HOST=127.0.0.1 python main.py`
+
 当前项目在作者本地常用的启动方式如下：
 
 ```bash
@@ -130,6 +157,7 @@ http://127.0.0.1:8000
 PROXY_HOST=127.0.0.1
 PROXY_PORT=7897
 PROXY_SCHEME=http
+NO_PROXY=
 PDF_PARSE_BACKEND=auto
 MINERU_PROXY_MODE=inherit
 VECTOR_STORE_DIR=data/chroma_db
@@ -139,6 +167,8 @@ HF_MIRROR_ENDPOINT=https://hf-mirror.com
 
 行为说明：
 
+- 启用 `PROXY_HOST` / `PROXY_PORT` 后，国外 API 默认走代理；国内模型端点和镜像域名会自动合并进 `NO_PROXY`，直接连接
+- 国内直连域名包括 Qwen/DashScope、DeepSeek、MiniMax、GLM、MinerU/OpenXLab、`hf-mirror.com`、ModelScope、常见 PyPI 和 npm 镜像
 - `PDF_PARSE_BACKEND=auto`：先试 MinerU，失败回退本地 PyMuPDF
 - `MINERU_PROXY_MODE=direct`：只让 MinerU 直连，其他模型和 HuggingFace 继续走代理
 - 本地 embedding 首次下载 HuggingFace 模型时，如果默认源不可达，会自动改用 `HF_MIRROR_ENDPOINT`，默认是 `https://hf-mirror.com`
@@ -150,17 +180,30 @@ HF_MIRROR_ENDPOINT=https://hf-mirror.com
 
 1. 先输入学习主题，例如“自动控制原理中的根轨迹法”。
 2. 主题确认后，推荐选择先做学前诊断，不要直接跳过测评。
-3. 系统会根据诊断结果选择图谱 2.1 初始节点，并加载当前节点内容开始讲解。
-4. 讲解后可以选择“我还有临时问题”或“没有问题，开始测试”。
-5. 临时问题走图谱 2.2 / RAG 检索回答，回答后回到讲解后选择。
-6. 开始测试后进入节点客观题批量测试；通过则规划下一节点，未通过则进入错题讲解与变式题。
-7. 节点通过后可以继续下一个节点，也可以今天结束并生成作业。
+3. 测评完成后，系统进入图谱 2.1 初始节点选择，并加载当前节点内容开始讲解。
+4. 讲解后进入“课后停顿”：可以直接打一整句追问或卡点，也可以点击“继续追问”或“我懂了，进入小测”。
+5. 临时追问走图谱 2.2 / RAG 检索回答；回答按问题复杂度自适应，不机械套固定模板，结束后回到“继续追问 / 我懂了，进入小测”。
+6. 开始小测后进入节点客观题批量测试；通过则规划下一节点，未通过则进入错题讲解与变式题。
+7. 节点通过后可以继续下一个节点，也可以结束本轮学习并生成作业。
 8. 二次登录/恢复会优先检查作业和学习进度，尽量接着原状态继续。
+
+恢复历史时，页面应显示当前学习主题和图谱节点，并自动滚动到当前待处理卡片。长公式、宽表格和图表必须留在自己的局部滚动/预览容器中，不应撑破聊天区域或被底部输入框遮挡。
+
+## 用户画像与学情状态
+
+当前画像由两层组成：
+
+1. 学前诊断画像：`user_profiler` 根据测评答案计算 `assessment_concept_gaps`、`assessment_radar`、`difficulty_level`、`teaching_strategy` 和初始 `user_knowledge_graph`。
+2. 学习过程状态：`StudentStateStore` 在 `data/student_states/*.json` 中保存当前节点、掌握分、已学节点、错题节点、客观题作答记录、作业批次和作业历史。
+
+这套状态已经能支撑恢复、继续学习和作业布置，但仍是轻量原型。后续产品化时应把它升级为明确的长期学习者模型：统一掌握分尺度，记录每次测验/追问/作业的证据事件，沉淀错因标签和复习时间，并让节点选择同时参考画像信号与知识图谱前置关系。
 
 更详细的当前状态、使用命令、缺口与下一步计划见：
 
 - `docs/current-status-and-usage.md`
 - `docs/next-iteration-plan.md`
+- `docs/knowledge-map-runtime-assets.md`
+- `docs/plans/2026-04-30-interaction-artifact-validation-contract.md`：交互卡片、历史恢复与浏览器验收契约
 
 ## 项目结构
 
@@ -186,10 +229,26 @@ HF_MIRROR_ENDPOINT=https://hf-mirror.com
 
 ## 验证
 
-开发后至少跑一遍：
+开发后至少跑一遍聚焦回归。当前本地建议禁用 pytest 插件自动加载，避免无关插件影响：
 
 ```bash
-pytest -q
+PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 pytest -q
+```
+
+涉及 GraphRAG HTML、前端交互卡片、历史恢复或临时追问时，还要补对应契约测试；只跑字符串级单测不能宣称 UI/流程完整闭合。
+
+2026-05-01 对历史恢复、交流框高度、公式图表去重/限量与布局做过一次完整回归：
+
+```bash
+PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 pytest -q
+# 424 passed, 5 warnings
+```
+
+2026-05-02 用户知识图谱、evidence 架构统一后完整回归：
+
+```bash
+PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 pytest -q
+# 450 passed, 5 warnings
 ```
 
 ## 离线检索评测（Recall@k / MRR / nDCG）

@@ -1,13 +1,22 @@
-# 比较老了但可以看看
+# knowledge_map 早期说明（历史参考）
+
+> 2026-04-30 状态：本文是 `knowledge_map` 早期开发说明，只作历史参考。当前运行口径请优先看 `AGENTS.md`、`README.md`、`docs/current-status-and-usage.md` 和 `docs/knowledge-map-runtime-assets.md`。
 
 ## 快速上手看结果
 
-切分pdf文件python ai_tutor_agent\split_pdf_by_chapters.py
+切分 PDF 文件：
+
+```bash
+python ai_tutor_agent/split_pdf_by_chapters.py
+```
 
 调试图谱用
-第一步python -m ai_tutor_agent.knowledge_map.debug_pipeline_v2
-第二步python -m ai_tutor_agent.knowledge_map.debug_vector_retrieval
-第三步python -m ai_tutor_agent.knowledge_map.debug_rag_qa
+
+```bash
+python -m ai_tutor_agent.knowledge_map.debug_pipeline_v2
+python -m ai_tutor_agent.knowledge_map.debug_vector_retrieval
+python -m ai_tutor_agent.knowledge_map.debug_rag_qa
+```
 
 调试图谱问答用python -m ai_tutor_agent.knowledge_map.debug_companion
 输入help就会弹出推荐用的问题
@@ -31,11 +40,11 @@
 
 ---
 
-## 2. 今天完成了什么
-所有知识图谱相关代码全在ai_tutor_agent\knowledge_map里面 结果文件全在ai-tutor-agent\data\knowledge_map_outputs里面。
-rag最新版已经融合 但rag的多模态能力还没用上
+## 2. 早期阶段完成了什么
 
-今天主要完成了 knowledge_map 模块“图谱驱动问答”的第一版闭环，具体包括以下内容：
+早期知识图谱相关代码主要在 `ai_tutor_agent/knowledge_map/`，结果文件主要在 `data/knowledge_map_outputs/`。当前 GraphRAG/媒体证据链路已经继续演进，本文不再作为最新完成情况来源。
+
+早期阶段完成了 knowledge_map 模块“图谱驱动问答”的第一版闭环，具体包括以下内容：
 
 ### 2.1 知识图谱结构搭建完成
 - 新建了独立的 `knowledge_map` 模块目录

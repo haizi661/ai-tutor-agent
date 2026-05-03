@@ -51,22 +51,29 @@ def test_frontend_allows_graphrag_debug_report_html_and_math_assets():
     session_content = SESSION_JS.read_text(encoding="utf-8")
 
     assert "graph_rag_debug_report" in session_content or "graph_rag_debug_report" in ui_content
+    assert "graph_rag_answer" in session_content
+    assert "graph-rag-answer-panel" in ui_content
     assert "allowGraphRagHtml" in ui_content
-    assert "GraphRAG 调试报告" in ui_content
+    assert "allowGraphRagHtml: options.allowGraphRagHtml === true" in ui_content
     assert "answer-media-block" in ui_content
     assert "media-card" in ui_content
+    assert "window.openModal" in ui_content
+    assert "window.closeModal" in ui_content
     assert "app.renderMath" in ui_content
     assert "{ left: '\\\\[', right: '\\\\]', display: true }" in ui_content
     assert "{ left: '\\\\(', right: '\\\\)', display: false }" in ui_content
     styles = Path("frontend/assets/styles.css").read_text(encoding="utf-8")
     assert 'data-role="graph_rag_debug_report"' in styles
     assert ".media-grid" in styles
+    assert "72rem" in styles
     assert "grid-template-columns: repeat(auto-fit, minmax(240px, 1fr))" in styles
     assert "align-items: stretch" in styles
     assert "min-height: 230px" in styles
+    assert "min-width: 0" in styles
     assert "height: auto" in styles
     assert "min-width: max-content" in styles
     assert "justify-content: center" in styles
+    assert ".media-hint" in styles
     assert "formula-scroll" in styles
     assert "formula-viewport" in styles
     assert "overflow: auto" in styles
@@ -92,6 +99,38 @@ def test_frontend_locks_confirmation_and_dialog_cards_after_user_action():
     assert "document.querySelector('.next-step-card')?.remove();" not in session_content
     assert "d.classList.add('locked')" in ui_content
     assert "submitBtn.remove()" in ui_content
+
+
+def test_frontend_new_session_is_persisted_before_history_refresh():
+    history_content = Path("frontend/assets/js/history.js").read_text(encoding="utf-8")
+
+    assert "app.startNewSession = async function startNewSession" in history_content
+    assert "fetch('/api/sessions'" in history_content
+    assert "body: JSON.stringify({ thread_id: state.currentThreadId })" in history_content
+    assert "await app.fetchHistory()" in history_content
+
+
+def test_frontend_restores_homework_pending_interactions_from_history():
+    history_content = Path("frontend/assets/js/history.js").read_text(encoding="utf-8")
+    session_content = SESSION_JS.read_text(encoding="utf-8")
+    ui_content = UI_JS.read_text(encoding="utf-8")
+
+    assert "applyRestoredPendingInteraction" in history_content
+    assert "kind === 'homework_review_choice'" in history_content
+    assert "kind === 'homework_answers'" in history_content
+    assert "kind === 'consolidation_choice'" in history_content
+    assert "fetch(`/api/sessions/${id}/resume`, { method: 'POST' })" in history_content
+    assert "endKind === 'homework_answers'" in session_content
+    assert "endKind === 'consolidation_choice'" in session_content
+    assert "pik === 'consolidation_choice'" in ui_content
+    assert "pik === 'homework_answers'" in ui_content
+
+
+def test_assessment_ready_keeps_confirmed_topic_in_frontend_state():
+    session_content = SESSION_JS.read_text(encoding="utf-8")
+
+    assert "const confirmedTopic = state.currentTopic || state.pendingTopicConfirmation || state.graphTopicHint || ''" in session_content
+    assert "state.currentTopic = ''" not in session_content
 
 
 def test_frontend_restores_skipped_topic_and_assessment_as_locked_artifacts():

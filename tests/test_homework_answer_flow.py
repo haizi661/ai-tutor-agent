@@ -19,22 +19,17 @@ class FakeAnswerProvider:
 class FakeStudentStateStore:
     def __init__(self):
         self.saved = []
+        self._state = None
 
-    def record_homework_result(self, student_id, *, homework_items, homework_answers, homework_score, homework_results):
-        snapshot = {
-            "student_id": student_id,
-            "homework": [],
-            "homework_history": [
-                {
-                    "items": homework_items,
-                    "answers": homework_answers,
-                    "score": homework_score,
-                    "results": homework_results,
-                }
-            ],
-        }
-        self.saved.append(snapshot)
-        return snapshot
+    def load(self, student_id):
+        from ai_tutor_agent.knowledge_map.student_state import StudentState
+        if self._state is None:
+            self._state = StudentState(student_id=student_id)
+        return self._state
+
+    def save(self, student_state):
+        self._state = student_state
+        self.saved.append(student_state.to_dict() if hasattr(student_state, "to_dict") else {})
 
 
 HOMEWORK_ITEMS = [
@@ -83,6 +78,8 @@ def test_homework_answer_dialog_collects_structured_answers_from_pending_answer(
     assert result["learning_resume_target"] == "homework_scorer"
     assert result["homework_answers"]["HW-KM001"] == "稳定性、扰动、平衡、极点"
     assert result["homework_answers"]["HW-KM002"] == "B"
+    assert result["message_history"][-1]["kind"] == "homework_answers"
+    assert result["message_history"][-1]["data"]["answers"]["HW-KM002"] == "B"
 
 
 def test_homework_scorer_uses_answer_key_and_reference_terms_deterministically():
@@ -142,6 +139,10 @@ def test_homework_explainer_archives_completed_homework_and_returns_to_resume_ro
     assert result["homework_items"] == []
     assert result["homework_answers"] == {}
     assert result["learning_resume_target"] == "session_resume_router"
+    assert "homework-answer-content" in result["tutor_content"]
+    assert "homework-feedback-card" in result["tutor_content"]
+    assert "homework-result-card" in result["tutor_content"]
+    assert "homework-score-badge" in result["tutor_content"]
     assert "HW-KM002" in result["tutor_content"]
 
 

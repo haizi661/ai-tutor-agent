@@ -35,6 +35,7 @@ class FakeStudentState:
         self.completed_nodes = ["KM001"]
         self.wrong_nodes = ["KM002"]
         self.homework = []
+        self.homework_assignments = []
 
     def add_homework(self, question_id):
         self.homework.append(question_id)
@@ -47,6 +48,7 @@ class FakeStudentState:
             "completed_nodes": list(self.completed_nodes),
             "wrong_nodes": list(self.wrong_nodes),
             "homework": list(self.homework),
+            "homework_assignments": list(self.homework_assignments),
         }
 
 
@@ -85,12 +87,24 @@ def test_homework_generator_builds_homework_and_persists_to_student_state():
         }
     )
 
-    assert result["flow_status"] == "homework_assigned"
-    assert result["learning_phase"] == "daily_wrapup"
-    assert result["learning_resume_target"] == "session_resume_router"
+    assert result["flow_status"] == "awaiting_homework_review_choice"
+    assert result["learning_phase"] == "homework_resume"
+    assert result["learning_resume_target"] == "homework_review"
+    assert result["pending_interaction_kind"] == "homework_review_choice"
+    assert [item["value"] for item in result["pending_interaction_options"]] == [
+        "answer_homework",
+        "save_for_later",
+        "continue_learning",
+    ]
     assert result["homework_status"] == "assigned"
+    assert result["homework_assignment_id"].startswith("HW-student_a-")
     assert result["homework_items"]
     assert result["homework_items"][0]["question_id"].startswith("HW-")
+    assert result["homework_items"][0]["graph_node_id"] == result["homework_items"][0]["node_id"]
+    assert "node_key_points" in result["homework_items"][0]
+    assert "homework-answer-content" in result["tutor_content"]
+    assert "homework-assignment-card" in result["tutor_content"]
+    assert "homework-answer-viewport" in result["tutor_content"]
     assert "参考答案" in result["tutor_content"]
     assert store.saved
     assert store.saved[-1]["homework"]
@@ -110,7 +124,7 @@ def test_homework_generator_falls_back_to_current_node_when_snapshot_empty():
 
     assert result["homework_status"] == "assigned"
     assert result["homework_items"][0]["node_id"] == "KM001"
-    assert result["flow_status"] == "homework_assigned"
+    assert result["flow_status"] == "awaiting_homework_review_choice"
 
 
 def test_homework_generator_falls_back_without_question_bank_or_graph_pipeline():

@@ -11,6 +11,65 @@ from .platform_paths import project_root
 
 PROJECT_ROOT = str(project_root())
 
+SMART_PROXY_DIRECT_HOSTS = (
+    "127.0.0.1",
+    "localhost",
+    "::1",
+    "dashscope.aliyuncs.com",
+    ".aliyuncs.com",
+    "api.deepseek.com",
+    ".deepseek.com",
+    "api.minimaxi.com",
+    ".minimaxi.com",
+    "open.bigmodel.cn",
+    ".bigmodel.cn",
+    "cdn-mineru.openxlab.org.cn",
+    ".openxlab.org.cn",
+    "hf-mirror.com",
+    ".hf-mirror.com",
+    "modelscope.cn",
+    ".modelscope.cn",
+    "pypi.tuna.tsinghua.edu.cn",
+    "pypi.mirrors.ustc.edu.cn",
+    "mirrors.aliyun.com",
+    "mirrors.cloud.tencent.com",
+    "registry.npmmirror.com",
+)
+
+
+def _normalize_host(value: str | None) -> str:
+    raw_value = (value or "").strip()
+    if not raw_value:
+        return ""
+    if "://" in raw_value:
+        try:
+            from urllib.parse import urlparse
+
+            return (urlparse(raw_value).hostname or "").lower()
+        except Exception:
+            return ""
+    if raw_value.startswith("[") and "]" in raw_value:
+        return raw_value[1:raw_value.index("]")].lower()
+    if raw_value.count(":") > 1:
+        return raw_value.lower()
+    return raw_value.split(":", 1)[0].lower()
+
+
+def _host_matches_rule(host: str, rule: str) -> bool:
+    normalized_host = host.lower().strip(".")
+    normalized_rule = rule.lower().strip()
+    if not normalized_host or not normalized_rule:
+        return False
+    if normalized_rule.startswith("."):
+        suffix = normalized_rule.lstrip(".")
+        return normalized_host == suffix or normalized_host.endswith(f".{suffix}")
+    return normalized_host == normalized_rule.strip(".")
+
+
+def should_bypass_smart_proxy(url_or_host: str | None) -> bool:
+    host = _normalize_host(url_or_host)
+    return any(_host_matches_rule(host, rule) for rule in SMART_PROXY_DIRECT_HOSTS)
+
 
 def get_env_file_path() -> str:
     return os.getenv("AI_TUTOR_ENV_FILE", "").strip() or str(project_root() / ".env")
@@ -65,6 +124,58 @@ def _read_derived_proxy_url(values: Optional[dict[str, str]] = None) -> Optional
     return f"{proxy_scheme}://{proxy_host}:{proxy_port}"
 
 
+def _split_no_proxy(value: str | None) -> list[str]:
+    if not value:
+        return []
+    return [item.strip() for item in value.split(",") if item.strip()]
+
+
+def _merge_no_proxy(*values: str | None) -> str:
+    merged: list[str] = []
+    seen: set[str] = set()
+    for value in values:
+        for item in _split_no_proxy(value):
+            key = item.lower()
+            if key in seen:
+                continue
+            seen.add(key)
+            merged.append(item)
+    return ",".join(merged)
+
+
+def _read_no_proxy(raw_values: dict[str, str], *, proxy_enabled: bool) -> str:
+    configured = _merge_no_proxy(
+        os.getenv("NO_PROXY", ""),
+        os.getenv("no_proxy", ""),
+        raw_values.get("NO_PROXY", ""),
+        raw_values.get("no_proxy", ""),
+    )
+    if not proxy_enabled:
+        return configured
+    return _merge_no_proxy(configured, ",".join(SMART_PROXY_DIRECT_HOSTS))
+
+
+def apply_network_environment(settings: "Settings") -> None:
+    """Apply the runtime network policy to libraries that read environment proxy vars.
+
+    Smart mode keeps foreign APIs behind the configured proxy while bypassing that
+    proxy for domestic model providers, mirrors, localhost, and package mirrors.
+    Explicit per-client code may still pass a direct/proxy httpx client.
+    """
+    proxy_env_pairs = (
+        ("HTTP_PROXY", "http_proxy", settings.http_proxy),
+        ("HTTPS_PROXY", "https_proxy", settings.https_proxy),
+        ("NO_PROXY", "no_proxy", settings.no_proxy),
+    )
+    for upper_key, lower_key, value in proxy_env_pairs:
+        if value:
+            os.environ[upper_key] = value
+            os.environ[lower_key] = value
+        else:
+            os.environ.pop(upper_key, None)
+            os.environ.pop(lower_key, None)
+
+
 @dataclass(frozen=True)
 class Settings:
     chat_profile: str
@@ -93,6 +204,7 @@ class Settings:
     http_proxy: Optional[str]
     https_proxy: Optional[str]
     local_config_enabled: bool
+    no_proxy: str = ""
     course_primary_enabled: bool = False
     course_primary_dir: str = "docs/archive/a2-control-theory/source-notes"
     vector_store_backend: str = "chroma"
@@ -117,7 +229,7 @@ class Settings:
     web_search_provider: str = "tavily"
     tavily_api_key: Optional[str] = None
     web_search_max_results: int = 5
-    graph_rag_enable_llm: bool = False
+    graph_rag_enable_llm: bool = True
     graph_rag_llm_profile: str = ""
     question_bank_dir: str = "data/question_bank"
     default_course_id: str = "a2-control-theory"
@@ -155,6 +267,7 @@ LOCAL_CONFIG_KEYS = [
     "PROXY_SCHEME",
     "HTTP_PROXY",
     "HTTPS_PROXY",
+    "NO_PROXY",
     "MINERU_PROXY_MODE",
     "MINERU_HTTP_PROXY",
     "MINERU_HTTPS_PROXY",
@@ -225,6 +338,9 @@ def update_env_file(updates: dict[str, str]) -> None:
     with open(env_path, "w", encoding="utf-8") as file_obj:
         file_obj.writelines(new_lines)
 
+    for key, value in normalized_updates.items():
+        os.environ[key] = str(value)
+
 
 @lru_cache(maxsize=1)
 def get_settings() -> Settings:
@@ -256,25 +372,30 @@ def get_settings() -> Settings:
     mineru_https_proxy = os.getenv("MINERU_HTTPS_PROXY", "").strip() or None
     chat_profile = os.getenv("CHAT_PROFILE", "").strip().lower() or "custom"
     
-    # Proxy settings
+    # Proxy settings: shell/process environment is authoritative. .env/local config
+    # supplies defaults only, matching load_dotenv(..., override=False) above.
+    derived_proxy_url_from_shell = _read_derived_proxy_url()
     derived_proxy_url_from_file = _read_derived_proxy_url(raw_values)
-    derived_proxy_url = derived_proxy_url_from_file or _read_derived_proxy_url()
+    derived_proxy_url = derived_proxy_url_from_shell or derived_proxy_url_from_file
     http_proxy = (
-        (raw_values.get("HTTP_PROXY", "") or "").strip()
-        or derived_proxy_url_from_file
-        or os.getenv("HTTP_PROXY", "").strip()
+        os.getenv("HTTP_PROXY", "").strip()
         or os.getenv("http_proxy", "").strip()
+        or derived_proxy_url_from_shell
+        or (raw_values.get("HTTP_PROXY", "") or "").strip()
+        or (raw_values.get("http_proxy", "") or "").strip()
         or derived_proxy_url
         or None
     )
     https_proxy = (
-        (raw_values.get("HTTPS_PROXY", "") or "").strip()
-        or derived_proxy_url_from_file
-        or os.getenv("HTTPS_PROXY", "").strip()
+        os.getenv("HTTPS_PROXY", "").strip()
         or os.getenv("https_proxy", "").strip()
+        or derived_proxy_url_from_shell
+        or (raw_values.get("HTTPS_PROXY", "") or "").strip()
+        or (raw_values.get("https_proxy", "") or "").strip()
         or derived_proxy_url
         or None
     )
+    no_proxy = _read_no_proxy(raw_values, proxy_enabled=bool(http_proxy or https_proxy))
 
     if chat_profile == "gemini":
         provider = "openai"
@@ -430,6 +551,7 @@ def get_settings() -> Settings:
         http_proxy=http_proxy,
         https_proxy=https_proxy,
         local_config_enabled=os.getenv("LOCAL_CONFIG_ENABLED", "true").strip().lower() != "false",
+        no_proxy=no_proxy,
         dashscope_api_key=dashscope_api_key,
         mineru_api_token=mineru_api_token,
         chroma_dir=resolved_vector_store_dir,
@@ -449,7 +571,7 @@ def get_settings() -> Settings:
         web_search_provider=web_search_provider,
         tavily_api_key=os.getenv("TAVILY_API_KEY", "").strip() or None,
         web_search_max_results=_read_env_int("WEB_SEARCH_MAX_RESULTS", 5),
-        graph_rag_enable_llm=_read_env_bool("GRAPH_RAG_ENABLE_LLM", False),
+        graph_rag_enable_llm=_read_env_bool("GRAPH_RAG_ENABLE_LLM", True),
         graph_rag_llm_profile=os.getenv("GRAPH_RAG_LLM_PROFILE", "").strip().lower(),
         question_bank_dir=os.getenv("QUESTION_BANK_DIR", "data/question_bank").strip() or "data/question_bank",
         default_course_id=(

@@ -45,7 +45,7 @@ def build_topic_confirm_node(event_sink: EventSink):
         )
         return {
             "flow_status": "awaiting_topic_confirmation",
-            "message_history": list(state.get("message_history", []))
+            "message_history": list(state.get("message_history", []))[-199:]
             + [
                 {
                     "role": "assistant",

@@ -8,10 +8,29 @@ from ai_tutor_agent.knowledge_map.student_state import StudentState, StudentStat
 
 MEDIA_MARKER_RE = re.compile(r"\[\[MEDIA:([^\]]+)\]\]")
 
+# Maximum message_history entries to keep. Oldest entries are dropped first.
+MAX_MESSAGE_HISTORY = 200
+
+
+def trim_message_history(history: list[dict[str, Any]], limit: int = MAX_MESSAGE_HISTORY) -> list[dict[str, Any]]:
+    """Keep only the most recent *limit* entries to prevent checkpoint bloat."""
+    if len(history) <= limit:
+        return history
+    return history[-limit:]
+
 
 def _string_list(values: Any) -> list[str]:
     if isinstance(values, list):
         return [str(item).strip() for item in values if str(item).strip()]
+    if isinstance(values, tuple):
+        return [str(item).strip() for item in values if str(item).strip()]
+    text = str(values or "").strip()
+    if not text:
+        return []
+    if text.startswith("[") and text.endswith("]"):
+        text = text[1:-1]
+    parts = re.split(r"[;；\n,，、]+", text)
+    return [part.strip().strip("'\"") for part in parts if part.strip().strip("'\"")]
     return []
 
 
@@ -217,6 +236,7 @@ def mark_student_node_started(
     student_id: str,
     node_id: str,
     question: str,
+    title: str = "",
 ) -> dict[str, Any]:
     student_state, _ = load_student_state_snapshot(student_state_store, student_id)
     if student_state is None or not node_id:
@@ -224,6 +244,8 @@ def mark_student_node_started(
     student_state.current_node_id = node_id
     student_state.last_question = str(question or "").strip()
     student_state.mark_node_started(node_id)
+    # Register node in knowledge_graph (学了才加进去)
+    student_state.kg_register_node(node_id, title)
     return save_student_state_snapshot(student_state_store, student_state)
 
 
@@ -234,6 +256,10 @@ def update_student_state_after_evaluation(
     node_id: str,
     score: float,
     passed: bool,
+    teaching_strategy: str = "",
+    difficulty_level: int = 0,
+    wrong_items: list[dict[str, Any]] | None = None,
+    node_title: str = "",
 ) -> dict[str, Any]:
     student_state, _ = load_student_state_snapshot(student_state_store, student_id)
     if student_state is None or not node_id:
@@ -241,6 +267,12 @@ def update_student_state_after_evaluation(
 
     student_state.current_node_id = node_id
     student_state.update_mastery(node_id, score)
+    # Sync teaching strategy and difficulty from AgentState
+    if teaching_strategy:
+        student_state.teaching_strategy = teaching_strategy
+    if difficulty_level:
+        student_state.difficulty_level = difficulty_level
+    # Evidence is recorded per-node via kg_update_score below (single source of truth).
     if passed:
         student_state.mark_node_completed(node_id)
         if node_id not in student_state.visited_nodes:
@@ -259,6 +291,11 @@ def update_student_state_after_evaluation(
         student_state.daily_learning_records[today] = learned_today
     if hasattr(student_state, "last_learning_at"):
         student_state.last_learning_at = now_ts()
+    # Update knowledge_graph (score, wrong_questions, evidence)
+    student_state.kg_update_score(
+        node_id, int(round(score)), passed=passed,
+        wrong_items=wrong_items, source="quiz", title=node_title,
+    )
     return save_student_state_snapshot(student_state_store, student_state)
 
 
@@ -327,14 +364,34 @@ def build_homework_items(
         node = node_map.get(node_id) or {}
         title = str(node.get("name") or node_id).strip()
         must_know = _string_list(node.get("core_concepts"))[:2]
+        key_points = _string_list(node.get("key_points"))[:2]
+        formulas = _string_list(node.get("formulas"))[:2]
+        examples = _string_list(node.get("examples"))[:1]
+        source_refs = _string_list(node.get("page_refs"))[:3]
         focus = "、".join(must_know) if must_know else title
+        key_point_text = "；".join(key_points) if key_points else "节点中的关键判断步骤"
+        formula_text = f"；必要时结合公式：{'；'.join(formulas)}" if formulas else ""
+        example_text = f"；可参考情境：{'；'.join(examples)}" if examples else ""
         items.append(
             {
                 "question_id": f"HW-{node_id}",
                 "node_id": node_id,
+                "graph_node_id": node_id,
+                "node_title": title,
                 "title": title,
                 "type": "subjective_review",
-                "prompt": f"围绕“{title}”完成一道复习题，说明 {focus} 的核心概念、关键判断依据，并结合一个具体情境展开说明。",
+                "prompt": (
+                    f"围绕“{title}”完成一道复习题：先说明 {focus} 的核心概念，"
+                    f"再解释 {key_point_text}{formula_text}{example_text}，最后给出一个具体判断过程。"
+                ),
+                "reference_answer": (
+                    f"答案应覆盖 {focus}；说明 {key_point_text}"
+                    f"{formula_text}；并能把结论落到一个具体情境或判断步骤中。"
+                ),
+                "rubric": ["概念准确", "节点关键点覆盖", "推理步骤清楚", "能结合情境或公式"],
+                "source_refs": source_refs,
+                "media_refs": [],
+                "covered_node_ids": [node_id],
             }
         )
     return items
@@ -357,12 +414,14 @@ def assign_homework_items(
         if question_id:
             student_state.add_homework(question_id)
             assignment_items.append(dict(item))
+    assignment_id = f"HW-{student_id}-{now_ts()}"
+    assigned_at = now_ts()
     if hasattr(student_state, "homework_assignments"):
         student_state.homework_assignments = [
             {
-                "assignment_id": f"HW-{student_id}-{now_ts()}",
+                "assignment_id": assignment_id,
                 "status": "assigned",
-                "assigned_at": now_ts(),
+                "assigned_at": assigned_at,
                 "items": assignment_items,
             }
         ] if assignment_items else []

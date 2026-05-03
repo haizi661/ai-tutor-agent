@@ -5,24 +5,18 @@ import urllib.parse
 
 import httpx
 
-from ..config import Settings
-
-DOMESTIC_API_HOSTS = {
-    "dashscope.aliyuncs.com",
-    "api.deepseek.com",
-    "api.minimaxi.com",
-    "open.bigmodel.cn",
-}
+from ..config import Settings, should_bypass_smart_proxy
 
 
 def _needs_proxy(api_base: str | None) -> bool:
     if not api_base:
         return True
     try:
-        host = urllib.parse.urlparse(api_base).hostname or ""
+        parsed = urllib.parse.urlparse(api_base)
+        host = parsed.hostname or api_base
     except Exception:
         return True
-    return host not in DOMESTIC_API_HOSTS
+    return not should_bypass_smart_proxy(host)
 
 
 def _proxy_reachable(proxy_url: str, timeout: float = 1.5) -> bool:
@@ -44,12 +38,12 @@ def _build_http_client(settings: Settings):
         # Domestic API — return an explicit no-proxy client so that the
         # OpenAI SDK ignores HTTP_PROXY / HTTPS_PROXY env vars.
         return httpx.Client(
-            transport=httpx.HTTPTransport(), follow_redirects=True
+            transport=httpx.HTTPTransport(), follow_redirects=True, trust_env=False
         )
     if not _proxy_reachable(proxy_url):
         print(f"⚠️ 代理 {proxy_url} 不可达，LLM 将直连（不走代理）。")
         return None
-    return httpx.Client(proxy=proxy_url)
+    return httpx.Client(proxy=proxy_url, trust_env=False)
 
 
 def _build_openai_chat(settings: Settings, *, temperature: float, client=None):

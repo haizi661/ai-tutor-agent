@@ -1,5 +1,7 @@
 # LangGraph 知识图谱驱动智能导师系统阶段性使用与完成工作报告
 
+> 术语同步说明：2026-04-30 已按当前主线统一历史计划/报告中的用户可见文案：课后停顿为“继续追问 / 我懂了，进入小测”，学习结束为“结束本轮学习，生成作业”。内部结束学习路由值仅表示代码兼容标识，不代表用户界面文案。
+
 报告时间：2026-04-28 01:43:25 CST
 项目根目录：本报告中的路径说明统一以仓库根目录为基准，使用项目内相对路径。
 报告用途：阶段性汇报、研发进展说明、后续验收与评审参考
@@ -28,8 +30,8 @@
 2. 知识图谱 2.1 融入学习路径
    - 已新增 `initial_node_selector` 和 `node_content_loader`，用于从图谱结构中选择初始学习节点、读取当前节点内容、学习目标、必会点、常见误区、推荐下一节点等。
 
-3. 图谱 2.2 融入临时问答
-   - 已新增 `temporary_question_collector`，将“临时问题”从讲解后选择中拆出，形成：收集问题 → GraphRAG 检索回答 → 回到讲解后选择 的闭环。
+3. 图谱 2.2 融入自然追问
+   - 已新增 `temporary_question_collector`，将“追问/卡点”从讲解后选择中拆出，形成：收集问题 → GraphRAG 检索回答 → 回到讲解后选择 的闭环。
 
 4. 节点后客观测试体系
    - 已新增 `objective_test_generator` 和 `objective_test_scorer`。
@@ -42,7 +44,7 @@
 
 6. 下一节点与学习结束分支
    - 已新增 `next_node_planner` 和 `continue_or_homework_selector`。
-   - 通过节点测试后，系统可以规划下一图谱节点，并让学习者选择继续学习或今天结束并生成作业。
+   - 通过节点测试后，系统可以规划下一图谱节点，并让学习者选择继续学习或结束本轮学习并生成作业。
 
 7. 作业生成与作业作答闭环
    - 已新增 `homework_generator`、`homework_review`、`homework_answer_dialog`、`homework_scorer`、`homework_explainer`。
@@ -54,7 +56,7 @@
 
 9. 图谱完整性审计
    - 已新增 `graph_integrity.py` 与对应测试，用于检查图谱节点、边、引用和教学字段完整性。
-   - 当前已明确发现 `a2-control-theory/graph.json` 存在已知 dangling node reference 数据债务，避免误报“图谱已完全闭合”。
+   - 当前已明确发现 `docs/archive/a2-control-theory/graph.json` 存在已知 dangling node reference 数据债务，避免误报“图谱已完全闭合”。
 
 10. 测试验证
    - 最新大范围回归结果：`98 passed, 5 warnings in 2.24s`。
@@ -92,7 +94,7 @@ topic_confirmer
                ├─ continue_next_node
                │  → node_content_loader
                │  → tutor
-               └─ stop_today
+               └─ end_current_round
                   → homework_generator
                   → END
 ```
@@ -287,14 +289,14 @@ workflow 已经从原有泛化教学循环，升级为更接近“节点制掌�
 
 ---
 
-### 4. 讲解后选择与临时问答
+### 4. 讲解后选择与自然追问
 
 #### `ai_tutor_agent/nodes/post_lesson_choice.py`
 
 作用：节点讲解后，让用户选择：
 
-- 提临时问题
-- 开始测试
+- 继续追问
+- 我懂了，进入小测
 
 输出：
 
@@ -304,7 +306,7 @@ workflow 已经从原有泛化教学循环，升级为更接近“节点制掌�
 
 #### `ai_tutor_agent/nodes/temporary_question_collector.py`
 
-作用：收集用户临时问题。
+作用：收集用户追问/卡点。
 
 流程：
 
@@ -315,16 +317,16 @@ workflow 已经从原有泛化教学循环，升级为更接近“节点制掌�
 
 意义：
 
-临时问答不再直接混在 post_lesson_choice 或 tutor 中，而是成为独立可恢复节点。
+自然追问不再直接混在 post_lesson_choice 或 tutor 中，而是成为独立可恢复节点。
 
 #### `ai_tutor_agent/nodes/interruption.py`
 
-作用：处理临时问题问答，并在结束后回到主流程选择点。
+作用：处理追问/卡点问答，并在结束后回到主流程选择点。
 
 当前目标：
 
 ```text
-临时问题回答完成 → post_lesson_choice
+追问回答完成 → post_lesson_choice
 ```
 
 而不是回到旧的 next_step_selector。
@@ -422,7 +424,7 @@ objective_test_scorer failed
 作用：让用户选择：
 
 - 继续学习下一节点
-- 今天不学了，生成作业
+- 结束本轮学习，生成作业
 
 输出：
 
@@ -439,7 +441,7 @@ objective_test_scorer failed
 
 #### `ai_tutor_agent/nodes/homework_generator.py`
 
-作用：当用户选择今天结束时，生成作业并保存状态。
+作用：当用户选择结束本轮学习时，生成作业并保存状态。
 
 写入：
 
@@ -514,7 +516,7 @@ objective_test_scorer failed
 
 当前发现：
 
-- `a2-control-theory/graph.json` 可以加载，教学字段存在。
+- `docs/archive/a2-control-theory/graph.json` 可以加载，教学字段存在。
 - 但存在已知 `dangling_node_reference` 数据债务。
 - 因此当前不能宣称“图谱数据本体 100% 完整”。
 
@@ -573,10 +575,10 @@ post_lesson_choice
 
 用户可以选择：
 
-1. 提临时问题
-2. 开始测试
+1. 继续追问
+2. 我懂了，进入小测
 
-如果提临时问题：
+如果继续追问：
 
 ```text
 temporary_question_collector
@@ -584,7 +586,7 @@ temporary_question_collector
 → post_lesson_choice
 ```
 
-如果开始测试：
+如果进入小测：
 
 ```text
 objective_test_generator
@@ -630,7 +632,7 @@ continue_or_homework_selector
 → tutor
 ```
 
-2. 今天不学了
+2. 结束本轮学习
 
 ```text
 continue_or_homework_selector
@@ -816,8 +818,8 @@ PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 pytest -q \
 2. 图谱 2.1 用于学习路径
    - 已接入初始节点选择、节点内容加载、下一节点规划。
 
-3. 图谱 2.2 用于临时问答
-   - 已接入临时问题收集与 interruption_tutor 流程。
+3. 图谱 2.2 用于自然追问
+   - 已接入追问/卡点收集与 interruption_tutor 流程。
 
 4. 节点后测试
    - 已支持 AI 出题 / provider 出题 / fallback。
@@ -838,7 +840,7 @@ PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 pytest -q \
 ### 仍不能过度宣称完整的部分
 
 1. 图谱数据本体尚未 100% 完整
-   - `a2-control-theory/graph.json` 已知存在 dangling node reference。
+   - `docs/archive/a2-control-theory/graph.json` 已知存在 dangling node reference。
 
 2. tutor 对 node_content_context 的强约束仍可继续加强
    - 当前已接入图谱内容，但后续应进一步保证 tutor 必须优先使用 `node_content_context`、`tutor_evidence`、`tutor_citations`。
@@ -870,7 +872,7 @@ PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 pytest -q \
 - 图谱节点选择
 - 图谱内容加载
 - 节点讲解
-- 临时问答
+- 自然追问
 - 节点后客观测试
 - answer_key 确定性评分
 - 错题讲解
@@ -895,7 +897,7 @@ PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 pytest -q \
 
 可以在汇报中这样概括：
 
-本阶段我们完成了基于 LangGraph 的知识图谱驱动教学主流程重构。系统已经从原来的通用对话式 tutor/tester/evaluator 循环，升级为显式可恢复的掌握学习状态机。当前流程覆盖主题确认、学前诊断、用户画像、图谱节点选择、节点内容加载、节点讲解、临时问答、节点后客观测试、错题补救、变式题验证、下一节点规划、作业生成、二次登录恢复、作业作答评分与讲解等关键环节。
+本阶段我们完成了基于 LangGraph 的知识图谱驱动教学主流程重构。系统已经从原来的通用对话式 tutor/tester/evaluator 循环，升级为显式可恢复的掌握学习状态机。当前流程覆盖主题确认、学前诊断、用户画像、图谱节点选择、节点内容加载、节点讲解、自然追问、节点后客观测试、错题补救、变式题验证、下一节点规划、作业生成、二次登录恢复、作业作答评分与讲解等关键环节。
 
 在技术上，我们新增了多个独立 LangGraph 节点，将原先隐藏在大节点内部的业务逻辑拆成可测试、可恢复、可路由的状态机节点。客观题评分和作业客观题评分均采用 answer_key 确定性判分，避免 LLM 黑箱评分。真实题库尚未接入时，系统允许 AI 临时生成客观题，但必须输出可审计 answer_key。
 

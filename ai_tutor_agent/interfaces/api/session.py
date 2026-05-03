@@ -11,6 +11,7 @@ from ...application.session import run_learning_session
 from ...core.events import make_event
 from ...core.learning_flow import infer_resume_target
 from ...core.ports import RuntimeContext
+from ...core.state import build_initial_state
 from ..sse import format_sse
 from .adapter import WebAnswerProvider, WebEventSink
 from .runtime import get_runtime
@@ -39,6 +40,10 @@ PENDING_INTERACTION_FLOW_STATUSES = {
 class ChatRequest(BaseModel):
     thread_id: str
     topic: str = ""
+
+
+class CreateSessionRequest(BaseModel):
+    thread_id: str
 
 
 class AnswerRequest(BaseModel):
@@ -90,6 +95,21 @@ def _checkpoint_state_patch(thread_id: str, runtime, patch: dict) -> None:
         graph_app.update_state(_thread_config(thread_id), patch)
     finally:
         conn.close()
+
+
+def _checkpoint_exists(thread_id: str, runtime) -> bool:
+    checkpoint_store, saver_conn = runtime.checkpoint_factory(runtime.settings.memory_db_path)
+    try:
+        return checkpoint_store.get_tuple(_thread_config(thread_id)) is not None
+    finally:
+        saver_conn.close()
+
+
+def _ensure_thread_checkpoint(thread_id: str, runtime) -> bool:
+    if _checkpoint_exists(thread_id, runtime):
+        return False
+    _checkpoint_state_patch(thread_id, runtime, build_initial_state(""))
+    return True
 
 
 def _clear_interrupt_history(history: list) -> list:
@@ -180,6 +200,20 @@ def _run_graph_session(
 def _graph_worker(thread_id: str, topic: str, runtime, event_q: queue.Queue, input_q: queue.Queue):
     def runner(graph_app, runtime_context, thread_config):
         current_state = graph_app.get_state(thread_config)
+        # Refresh student_state_snapshot from JSON to recover from server restarts
+        # where the JSON file may be newer than the last checkpoint save.
+        _store = getattr(runtime, "student_state_store", None)
+        if _store is not None and current_state and current_state.values:
+            try:
+                _snap = _store.load(thread_id)
+                if _snap is not None:
+                    graph_app.update_state(
+                        thread_config,
+                        {"student_state_snapshot": _snap.to_dict()},
+                    )
+                    current_state = graph_app.get_state(thread_config)
+            except Exception:
+                pass  # best-effort; fall back to checkpoint snapshot
         run_learning_session(
             graph_app,
             runtime_context.event_sink,
@@ -538,6 +572,17 @@ async def start_session(req: ChatRequest, request: Request):
     return {"status": "running", "thread_id": req.thread_id}
 
 
+@router.post("/sessions")
+async def create_session(req: CreateSessionRequest, request: Request):
+    runtime = get_runtime(request)
+    thread_id = req.thread_id.strip()
+    if not thread_id:
+        raise HTTPException(status_code=400, detail="thread_id is required")
+    created = _ensure_thread_checkpoint(thread_id, runtime)
+    runtime.session_manager.get_or_create(thread_id)
+    return {"status": "created" if created else "exists", "thread_id": thread_id}
+
+
 @router.post("/sessions/{thread_id}/resume")
 async def resume_session(thread_id: str, request: Request):
     runtime = get_runtime(request)
@@ -666,3 +711,27 @@ async def confirm_interrupt(req: InterruptConfirmRequest, request: Request):
         req.confirmed,
     )
     return {"status": "ok", "message": "Interrupt confirmation received."}
+
+
+@router.get("/students/{student_id}/knowledge-graph")
+async def get_knowledge_graph(student_id: str, request: Request):
+    """Return the user's knowledge graph — only nodes they have learned."""
+    runtime = get_runtime(request)
+    store = getattr(runtime, "student_state_store", None)
+    if store is None:
+        return {"knowledge_graph": {}, "summary": {"total": 0, "mastered": 0, "in_progress": 0}}
+    try:
+        student_state = store.load(student_id)
+    except Exception:
+        return {"knowledge_graph": {}, "summary": {"total": 0, "mastered": 0, "in_progress": 0}}
+    kg = student_state.knowledge_graph if hasattr(student_state, "knowledge_graph") else {}
+    mastered = sum(1 for v in kg.values() if v.get("status") == "mastered")
+    in_progress = sum(1 for v in kg.values() if v.get("status") == "in_progress")
+    return {
+        "knowledge_graph": kg,
+        "summary": {
+            "total": len(kg),
+            "mastered": mastered,
+            "in_progress": in_progress,
+        },
+    }

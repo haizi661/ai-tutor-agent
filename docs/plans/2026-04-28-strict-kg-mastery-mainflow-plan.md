@@ -1,5 +1,7 @@
 # 知识图谱节点制掌握学习主流程改造计划
 
+> 术语同步说明：2026-04-30 已按当前主线统一历史计划/报告中的用户可见文案：课后停顿为“继续追问 / 我懂了，进入小测”，学习结束为“结束本轮学习，生成作业”。内部结束学习路由值仅表示代码兼容标识，不代表用户界面文案。
+
 > **For Hermes:** Use subagent-driven-development skill to implement this plan task-by-task.
 
 **Goal:** 将当前 ai-tutor-agent 从“已有图谱/RAG/测评/客观题底座 + 部分严格主流程”改造成完整的知识图谱驱动节点制掌握学习闭环。
@@ -21,7 +23,7 @@
 3. 用户画像、雷达图数据、初始图谱锚点选择雏形。
 4. tutor 图谱感知讲解。
 5. 讲解后选择节点 `post_lesson_choice`。
-6. 临时问题节点 `interruption_tutor`，已经能走图谱/RAG 检索解答。
+6. 追问/卡点节点 `interruption_tutor`，已经能走图谱/RAG 检索解答。
 7. 节点后客观题生成节点 `objective_test_generator`，目前没有题库时可用 AI 出题。
 8. 节点后客观题确定性评分节点 `objective_test_scorer`，根据 `answer_key` 判分，不由 LLM 判分。
 9. 评分失败后错题解释 + 变式题最小闭环。
@@ -30,7 +32,7 @@
 
 主要缺口：
 
-1. “从图谱 2.1 选择初始节点”和“从图谱 2.2 检索讲解/临时问题”的边界还没有在代码层显式命名和隔离，当前更多是共用 GraphRAGPipeline/KnowledgeProvider。
+1. “从图谱 2.1 选择初始节点”和“从图谱 2.2 检索讲解/追问/卡点”的边界还没有在代码层显式命名和隔离，当前更多是共用 GraphRAGPipeline/KnowledgeProvider。
 2. `user_profiler` 直接跳到 `tutor`，缺少显式 `initial_node_selector` 和 `node_content_loader` 节点。
 3. `post_eval_selector` 仍混合了“下一节点规划、是否继续学习、作业收尾”三类职责，应拆分为显式节点。
 4. 作业目前是 `build_homework_items` 根据已学/错题节点生成 prompt，不是真正“大题题库”或“大题 AI 临时生成 + 答案/评分标准”。
@@ -197,8 +199,8 @@ node_content_loader
 
 ```text
 讲解完成后：
-1. 输入临时问题 → 图谱搜索2.2 → 检索处理并输出解答 → 回到选择步骤
-2. 没有临时问题，开始测试 → 下一步骤
+1. 直接输入追问或卡点 → 图谱搜索2.2 → 检索处理并输出解答 → 回到选择步骤
+2. 我懂了，进入小测 → 下一步骤
 ```
 
 当前：
@@ -209,12 +211,12 @@ node_content_loader
 
 差异：
 
-- 当前 session 层对任意输入可能直接当成临时问题，和 `post_lesson_choice` 的显式选择可能有冲突。
-- 临时问题“图谱搜索 2.2”未在代码命名上显式区分。
+- 当前 session 层对任意输入可能直接当成追问/卡点，和 `post_lesson_choice` 的显式选择可能有冲突。
+- 追问/卡点“图谱搜索 2.2”未在代码命名上显式区分。
 
 需要改：
 
-1. 在 `post_lesson_choice` 的 `temporary_question` 分支中，不仅记录选择，还要进入一个等待用户输入临时问题的状态：
+1. 在 `post_lesson_choice` 的 `temporary_question` 分支中，不仅记录选择，还要进入一个等待用户直接输入追问或卡点的状态：
 
 ```text
 flow_status=awaiting_temporary_question_text
@@ -368,7 +370,7 @@ next_node_planner
 ```text
 是否开始下一个节点的学习：
 1. 确认开始 → 重复上述学习步骤
-2. 今天不学了 → 根据策略调用大题题库【待开发】输出题目生成作业 → 结束会话
+2. 结束本轮学习 → 根据策略调用大题题库【待开发】输出题目生成作业 → 结束会话
 ```
 
 当前：
@@ -381,7 +383,7 @@ next_node_planner
 
 差异：
 
-- 目标只需要两个选择：继续下一节点 / 今天不学了生成作业。
+- 目标只需要两个选择：继续下一节点 / 结束本轮学习生成作业。
 - `same_type_practice` 属于旧流程，不应在新严格主流程里作为主选项。
 - `post_eval_wrapup` 同时做总结 + 作业，不够显式。
 - 作业生成不是题库/AI 大题生成，而是 prompt 占位。
@@ -400,7 +402,7 @@ homework_generator
 ```python
 [
   {"value": "continue_next_node", "label": "开始下一个节点"},
-  {"value": "stop_today", "label": "今天不学了，生成作业"},
+  {"value": "end_current_round", "label": "结束本轮学习，生成作业"},
 ]
 ```
 
@@ -410,13 +412,13 @@ homework_generator
 next_node_planner
 → continue_or_homework_selector
    ├─ continue_next_node → node_content_loader → tutor
-   └─ stop_today → homework_generator → END
+   └─ end_current_round → homework_generator → END
 ```
 
 作业策略：
 
-1. 优先命中当天已学节点。
-2. 加入最近错过/低分节点。
+1. 优先命中本轮已学节点。
+2. 加入当前或历史错题/低分节点。
 3. 加入之前已学但间隔较久的节点用于复习。
 4. 题库未开发时：AI 生成大题 + 参考答案 + 评分 rubric。
 5. 题库开发后：HomeworkBankProvider 替换 AI 来源。
@@ -510,7 +512,7 @@ intake_router
                  ├─ continue_next_node
                  │   → node_content_loader
                  │   → tutor
-                 └─ stop_today
+                 └─ end_current_round
                      → homework_generator
                      → END
 ```
@@ -631,7 +633,7 @@ session_resume_router
    - `objective_test_scorer passed → next_node_planner`
    - `next_node_planner → continue_or_homework_selector`
    - `continue_next_node → node_content_loader`
-   - `stop_today → homework_generator → END`
+   - `end_current_round → homework_generator → END`
 
 2. 先让测试失败。
 3. 最小实现路由函数与节点注册占位。
@@ -685,9 +687,9 @@ PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 pytest -q tests/test_strict_mastery_workflow.py
 
 ---
 
-### Task 4: 修正 post_lesson_choice 的临时问题收集
+### Task 4: 修正 post_lesson_choice 的追问/卡点收集
 
-**Objective:** 避免选择“临时问题”后还没输入问题就直接进入 interruption。
+**Objective:** 避免选择“追问/卡点”后还没输入问题就直接进入 interruption。
 
 **Files:**
 - Create: `ai_tutor_agent/nodes/temporary_question.py`
@@ -770,7 +772,7 @@ post_lesson_choice temporary_question
 
 ### Task 8: 替换 post_eval_selector 为 continue_or_homework_selector
 
-**Objective:** 按用户目标只保留“开始下一个节点 / 今天不学了生成作业”。
+**Objective:** 按用户目标只保留“开始下一个节点 / 结束本轮学习生成作业”。
 
 **Files:**
 - Create: `ai_tutor_agent/nodes/continue_or_homework_selector.py`
@@ -781,7 +783,7 @@ post_lesson_choice temporary_question
 
 ```text
 continue_next_node → node_content_loader
-stop_today → homework_generator
+end_current_round → homework_generator
 ```
 
 旧 `same_type_practice` 从新主线移除，只作为 legacy tester 兼容路径。
@@ -800,7 +802,7 @@ stop_today → homework_generator
 
 **Behavior:**
 
-- 选节点：今天已学 + 错题/低分 + 旧已学复习。
+- 选节点：本轮已学 + 错题/低分 + 旧已学复习。
 - 生成题目：大题/综合题。
 - 保存：
   - `homework_items`
@@ -881,7 +883,7 @@ PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 pytest -q
 
 1. `initial_node_selector` + `node_content_loader`：补齐图谱节点制主流程最关键缺口。
 2. `continue_or_homework_selector` + `next_node_planner`：替换通过后的旧 post_eval 混合逻辑。
-3. `temporary_question_collector`：让临时问题分支更严谨。
+3. `temporary_question_collector`：让追问/卡点分支更严谨。
 4. `wrong_question_explainer` + `variant_question_generator`：把失败补救拆成显式节点。
 5. `homework_generator`：完成当天结束作业生成。
 6. `session_resume_router/homework_review/homework_scorer`：完成第二次登录闭环。

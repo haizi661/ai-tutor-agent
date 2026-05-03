@@ -1,4 +1,7 @@
-# 比较老了可以先不看
+# knowledge_map 早期需求说明（历史参考）
+
+> 2026-04-30 状态：本文是早期需求拆分，不是当前项目优先级来源。当前计划请优先看 `docs/next-iteration-plan.md`，运行资产口径请看 `docs/knowledge-map-runtime-assets.md`。
+
 # knowledge_map 模块需求说明（Requirement）
 
 ## 1. 项目背景

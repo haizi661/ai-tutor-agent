@@ -5,8 +5,9 @@ from ..core.ports import RuntimeContext
 from ..core.state import AgentState
 
 HOMEWORK_REVIEW_OPTIONS = [
-    {"value": "answer_homework", "label": "先处理上次作业"},
-    {"value": "continue_learning", "label": "暂缓作业，继续学习"},
+    {"value": "answer_homework", "label": "现在做作业"},
+    {"value": "save_for_later", "label": "保存，下次再做"},
+    {"value": "continue_learning", "label": "保留作业，继续学习"},
 ]
 
 
@@ -14,22 +15,31 @@ def _normalize_choice(text: str) -> str:
     lowered = str(text or "").strip().lower()
     mapping = {
         "先做作业": "answer_homework",
+        "现在做": "answer_homework",
+        "现在做作业": "answer_homework",
         "处理作业": "answer_homework",
         "做作业": "answer_homework",
         "作业": "answer_homework",
         "answer_homework": "answer_homework",
+        "稍后做": "save_for_later",
+        "晚点做": "save_for_later",
+        "下次做": "save_for_later",
+        "保存下次做": "save_for_later",
+        "保存，下次再做": "save_for_later",
+        "save_for_later": "save_for_later",
         "继续": "continue_learning",
         "继续学习": "continue_learning",
         "下一节点": "continue_learning",
         "开始下一节点": "continue_learning",
         "暂缓作业": "continue_learning",
+        "保留作业，继续学习": "continue_learning",
         "continue_learning": "continue_learning",
     }
     return mapping.get(lowered, lowered)
 
 
 def _format_homework_prompt(items: list[dict]) -> str:
-    lines = ["检测到你上次留下的作业。请选择：先处理作业，或暂缓作业继续学习。"]
+    lines = ["这份作业已按当前图谱节点保存。请选择：现在做、保存下次再做，或保留作业继续学习。"]
     for index, item in enumerate(items[:3], start=1):
         prompt = str(item.get("prompt") or "").strip()
         if prompt:
@@ -80,6 +90,40 @@ def build_homework_review_node(runtime: RuntimeContext):
                 },
             ).strip()
         normalized_choice = _normalize_choice(choice) or "answer_homework"
+        if normalized_choice not in {"answer_homework", "save_for_later", "continue_learning"}:
+            normalized_choice = "answer_homework"
+        message_history = list(state.get("message_history", []))
+        message_history.append(
+            {
+                "role": "user",
+                "kind": "homework_review_choice",
+                "content": choice or normalized_choice,
+                "data": {"selected_value": normalized_choice},
+            }
+        )
+
+        if normalized_choice == "save_for_later":
+            event_sink.emit(
+                make_event(
+                    "node.complete",
+                    "homework_review",
+                    message="好，作业已保存。下次恢复这个学习页时会继续显示，不会重新生成。",
+                    data={"homework_count": len(homework_items)},
+                )
+            )
+            return {
+                "flow_status": "homework_assigned",
+                "homework_status": "assigned",
+                "learning_phase": "daily_wrapup",
+                "learning_resume_target": "session_resume_router",
+                "learning_resume_reason": "homework_saved_for_later",
+                "pending_interaction_kind": "",
+                "pending_interaction_prompt": "",
+                "pending_interaction_options": [],
+                "pending_interaction_recommended": "",
+                "pending_interaction_answer": "",
+                "message_history": message_history,
+            }
 
         if normalized_choice == "continue_learning":
             next_node_id = str(state.get("next_node_candidate_id") or "").strip()
@@ -109,6 +153,7 @@ def build_homework_review_node(runtime: RuntimeContext):
                 "pending_interaction_options": [],
                 "pending_interaction_recommended": "",
                 "pending_interaction_answer": "",
+                "message_history": message_history,
             }
 
         event_sink.emit(
@@ -130,6 +175,7 @@ def build_homework_review_node(runtime: RuntimeContext):
             "pending_interaction_options": [],
             "pending_interaction_recommended": "",
             "pending_interaction_answer": "",
+            "message_history": message_history,
         }
 
     return node

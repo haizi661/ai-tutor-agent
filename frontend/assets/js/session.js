@@ -441,7 +441,12 @@
             const chunk = data.data?.text;
             if (!chunk) return;
 
-            const role = turnRoleForSource(data.source);
+            const streamKind = String(data.data?.kind || '').trim();
+            const role = streamKind === 'graph_rag_answer'
+                ? 'graph_rag_answer'
+                : streamKind === 'graph_rag_debug_report'
+                ? 'graph_rag_debug_report'
+                : turnRoleForSource(data.source);
             app.setPendingTurnRole?.(role);
             app.clearTypingIndicator?.();
             app.ensureAgentTurn?.(role);
@@ -507,8 +512,10 @@
         state.eventSource.addEventListener('assessment.form_ready', e => {
             const data = safelyParseEventData(e.data);
             const message = data.message || '小测已准备好。';
+            const confirmedTopic = state.currentTopic || state.pendingTopicConfirmation || state.graphTopicHint || '';
             state.pendingTopicConfirmation = null;
-            state.currentTopic = '';
+            state.currentTopic = confirmedTopic;
+            state.graphTopicHint = confirmedTopic || state.graphTopicHint;
             app.updateLearningProgress?.({ step: 2, label: '学习进度 2/5' });
             consumeAwaitingTurn(message, '等你完成小测', {
                 role: 'assessment',
@@ -637,7 +644,7 @@
                     awaitingInput: true,
                     showInChat: false,
                     render: () => app.renderPostLessonChoice?.(payload.options || []),
-                    placeholder: '也可以直接输入选项',
+                    placeholder: '比如：为什么这里要看符号？/ 能不能换个例子？',
                 });
                 return;
             }
@@ -658,7 +665,7 @@
                     awaitingInput: true,
                     showInChat: false,
                     render: () => app.renderHomeworkReviewChoice?.(payload.options || []),
-                    placeholder: '选择查看作业或直接回答',
+                    placeholder: '现在做作业 / 保存下次做 / 保留作业继续学习',
                 });
                 return;
             }
@@ -748,7 +755,7 @@
                     awaitingInput: true,
                     showInChat: false,
                     render: () => app.renderPostLessonChoice?.(endPayload.options || []),
-                    placeholder: '也可以直接输入：我还有临时问题 / 开始测试',
+                    placeholder: '比如：为什么这里要看符号？/ 能不能换个例子？',
                 });
                 app.fetchHistory();
                 return;
@@ -793,7 +800,29 @@
                     awaitingInput: true,
                     showInChat: false,
                     render: () => app.renderHomeworkReviewChoice?.(endPayload.options || []),
-                    placeholder: '选择查看作业或直接回答',
+                    placeholder: '现在做作业 / 保存下次做 / 保留作业继续学习',
+                });
+                app.fetchHistory();
+                return;
+            }
+            if (endKind === 'homework_answers') {
+                consumeAwaitingTurn(endPayload.prompt || message, '等你提交作业', {
+                    role: 'prompt',
+                    awaitingInput: true,
+                    showInChat: true,
+                    placeholder: '请输入你的作业答案',
+                });
+                document.getElementById('chat-input')?.focus();
+                app.fetchHistory();
+                return;
+            }
+            if (endKind === 'consolidation_choice') {
+                consumeAwaitingTurn(endPayload.prompt || message, '等你决定是否巩固复习', {
+                    role: 'prompt',
+                    awaitingInput: true,
+                    showInChat: false,
+                    render: () => app.renderConsolidationChoice?.(endPayload.options || []),
+                    placeholder: '巩固复习 / 直接开始下一节点',
                 });
                 app.fetchHistory();
                 return;

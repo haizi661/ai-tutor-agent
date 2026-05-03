@@ -247,14 +247,17 @@
             const customTitle = entry.custom_title || '';
             const isPinned = Boolean(entry.pinned);
             const timeText = relativeTime(entry.updated_at || entry.updatedAt || entry.created_at || '');
-            const stateLabel = label === '未确认主题'
+            const flowStatus = entry.flow_status || '';
+            const isPreTopic = PRE_TOPIC_FLOW_STATUSES.has(flowStatus);
+            const isPendingConfirm = flowStatus === 'awaiting_topic_confirmation';
+            const stateLabel = isPreTopic
                 ? '待开始'
-                : (label.startsWith('待确认：') ? '待确认' : '学习页');
+                : (isPendingConfirm ? '待确认' : '学习页');
             const row = document.createElement('div');
             row.className = `history-item topic-item ${id === state.currentThreadId ? 'active' : ''} ${isPinned ? 'is-pinned' : ''}`;
             row.dataset.threadId = id;
-            if (label === '未确认主题') row.dataset.historyState = 'unconfirmed';
-            else if (label.startsWith('待确认：')) row.dataset.historyState = 'pending';
+            if (isPreTopic) row.dataset.historyState = 'unconfirmed';
+            else if (isPendingConfirm) row.dataset.historyState = 'pending';
             else row.dataset.historyState = 'topic';
 
             const textButton = document.createElement('button');
@@ -433,17 +436,83 @@
         app.renderHistoryList();
     };
 
-    app.startNewSession = function startNewSession() {
+    app.startNewSession = async function startNewSession() {
         if (state.isVoiceListening) app.stopVoiceInput();
         resetRuntimeView();
         state.currentThreadId = app.makeThreadId();
         window.localStorage.setItem(LAST_THREAD_STORAGE_KEY, state.currentThreadId);
-        app.setStatusBanner('新页已打开', 'ready');
+        app.setStatusBanner('新页已打开，正在保存', 'processing');
         app.applyPrimaryActionState?.();
         app.updateSidebarState?.();
         app.refreshChatSurfaceState?.();
-        app.fetchHistory();
+        try {
+            const res = await fetch('/api/sessions', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ thread_id: state.currentThreadId }),
+            });
+            if (!res.ok) throw new Error(`create session failed: ${res.status}`);
+            app.setStatusBanner('新页已打开', 'ready');
+        } catch (_error) {
+            app.setStatusBanner('新页已打开，但历史保存失败；发送第一条消息后会自动保存', 'warning');
+        }
+        await app.fetchHistory();
     };
+
+    function applyRestoredPendingInteraction(interactionKind, source = {}) {
+        const kind = String(interactionKind || '').trim();
+        if (!kind) return false;
+        const options = source.options || source.pending_interaction_options || [];
+        state.isAwaitingInput = true;
+        if (kind === 'next_step_selector') {
+            app.renderNextStepSelector?.(options);
+            app.setChatInputPlaceholder?.('也可以直接输入：继续深入 / 换个例子 / 来一道题 / 先总结一下');
+            app.setStatusBanner('等你决定下一步', 'awaiting');
+            return true;
+        }
+        if (kind === 'post_eval_selector') {
+            app.renderPostEvalSelector?.(options);
+            app.setChatInputPlaceholder?.('也可以直接输入：继续拔高 / 换一道同类型 / 总结本轮收获');
+            app.setStatusBanner('等你决定下一步', 'awaiting');
+            return true;
+        }
+        if (kind === 'post_lesson_choice') {
+            app.renderPostLessonChoice?.(options);
+            app.setChatInputPlaceholder?.('比如：为什么这里要看符号？/ 能不能换个例子？');
+            app.setStatusBanner('等你决定课后步骤', 'awaiting');
+            return true;
+        }
+        if (kind === 'continue_or_homework_choice') {
+            app.renderContinueOrHomeworkChoice?.(options);
+            app.setChatInputPlaceholder?.('也可以直接输入：继续学习 / 今天不学了');
+            app.setStatusBanner('等你决定继续还是收作业', 'awaiting');
+            return true;
+        }
+        if (kind === 'homework_review_choice') {
+            app.renderHomeworkReviewChoice?.(options);
+            app.setChatInputPlaceholder?.('现在做作业 / 保存下次做 / 保留作业继续学习');
+            app.setStatusBanner('等你决定作业安排', 'awaiting');
+            return true;
+        }
+        if (kind === 'homework_answers') {
+            app.setChatInputPlaceholder?.('请输入你的作业答案');
+            app.setStatusBanner('等你提交作业', 'awaiting');
+            return true;
+        }
+        if (kind === 'consolidation_choice') {
+            app.renderConsolidationChoice?.(options);
+            app.setChatInputPlaceholder?.('巩固复习 / 直接开始下一节点');
+            app.setStatusBanner('等你决定是否巩固复习', 'awaiting');
+            return true;
+        }
+        if (kind === 'objective_test_answers' || kind === 'variant_test_answers') {
+            app.renderObjectiveTestCard?.(options, kind);
+            app.setChatInputPlaceholder?.('也可以直接输入答案，如 ABCD');
+            app.setStatusBanner('等你答题', 'awaiting');
+            return true;
+        }
+        return false;
+    }
 
     app.deleteSession = async function deleteSession(id, event, label = id) {
         if (event) event.stopPropagation();
@@ -484,17 +553,10 @@
             const awaitingInputState = runtime.awaiting_input_state || {};
 
             if (runtime.awaiting_input) {
-                state.isAwaitingInput = true;
-                app.setChatInputPlaceholder?.('输入你的解答，或先追问一个临时问题…');
-                if (awaitingInputState.interaction_kind === 'next_step_selector') {
-                    app.renderNextStepSelector?.(awaitingInputState.options || []);
-                    app.setChatInputPlaceholder?.('也可以直接输入：继续深入 / 换个例子 / 来一道题 / 先总结一下');
-                    app.setStatusBanner('等你决定下一步', 'awaiting');
-                } else if (awaitingInputState.interaction_kind === 'post_eval_selector') {
-                    app.renderPostEvalSelector?.(awaitingInputState.options || []);
-                    app.setChatInputPlaceholder?.('也可以直接输入：继续拔高 / 换一道同类型 / 总结本轮收获');
-                    app.setStatusBanner('等你决定下一步', 'awaiting');
-                } else if (
+                if (!applyRestoredPendingInteraction(awaitingInputState.interaction_kind, awaitingInputState)) {
+                    state.isAwaitingInput = true;
+                    app.setChatInputPlaceholder?.('输入你的解答，或先追问一个临时问题…');
+                    if (
                     data.state?.is_assessed
                     && data.state?.tutor_content
                     && !data.state?.tester_question
@@ -506,6 +568,7 @@
                 } else {
                     app.setStatusBanner('等你继续', 'awaiting');
                 }
+                }
             } else if (data.state.flow_status === 'awaiting_next_step_selector') {
                 state.isAwaitingInput = true;
                 app.setChatInputPlaceholder?.('也可以直接输入：继续深入 / 换个例子 / 来一道题 / 先总结一下');
@@ -514,6 +577,23 @@
                 state.isAwaitingInput = true;
                 app.setChatInputPlaceholder?.('也可以直接输入：继续拔高 / 换一道同类型 / 总结本轮收获');
                 app.setStatusBanner('等你决定下一步', 'awaiting');
+            } else if (data.state.flow_status === 'awaiting_post_lesson_choice') {
+                state.isAwaitingInput = true;
+                app.renderPostLessonChoice?.(data.state.pending_interaction_options || []);
+                app.setChatInputPlaceholder?.('比如：为什么这里要看符号？/ 能不能换个例子？');
+                app.setStatusBanner('等你决定课后步骤', 'awaiting');
+            } else if (applyRestoredPendingInteraction(data.state?.pending_interaction_kind, data.state || {})) {
+                // 已按持久化的待处理交互恢复卡片与输入态。
+            } else if (
+                (data.state?.flow_status === 'homework_assigned' || data.state?.homework_status === 'assigned')
+                && Array.isArray(data.state?.homework_items)
+                && data.state.homework_items.length
+            ) {
+                app.setChatInputPlaceholder?.();
+                app.setStatusBanner('正在恢复课后作业', 'processing');
+                const resume = await fetch(`/api/sessions/${id}/resume`, { method: 'POST' });
+                if (!resume.ok) throw new Error(`恢复课后作业失败：${resume.status}`);
+                app.connectSSE?.();
             } else if (runtime.is_running) {
                 app.setChatInputPlaceholder?.();
                 app.setStatusBanner('正在接回这页', 'processing');
@@ -539,6 +619,7 @@
                 app.setChatInputPlaceholder?.();
                 app.setStatusBanner('已回到这页', 'info');
             }
+            app.focusRestoredSessionPosition?.(data.state || {});
         } catch (err) {
             app.appendMessage('agent', `恢复失败：${err.message}`);
             app.setStatusBanner(`恢复失败：${err.message}`, 'danger');

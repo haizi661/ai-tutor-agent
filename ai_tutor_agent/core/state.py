@@ -23,6 +23,7 @@ class AgentState(TypedDict):
     homework_results: list             # 作业评分结果
     homework_score: int                # 作业总分
     homework_status: str               # none/pending/completed
+    homework_assignment_id: str         # 当前作业批次 ID
     student_state_snapshot: dict       # StudentStateStore 读取到的快照
     current_topic: str
     current_user_goal: str
@@ -123,6 +124,7 @@ def build_initial_state(topic: str = "") -> AgentState:
         "homework_results": [],
         "homework_score": 0,
         "homework_status": "none",
+        "homework_assignment_id": "",
         "student_state_snapshot": {},
         "student_id": "default_student",
         "skip_reason": "",

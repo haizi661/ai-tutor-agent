@@ -167,6 +167,9 @@ def replay_graph_markers(values: dict[str, Any]) -> list[dict[str, Any]]:
 
 def _serialize_state(values: dict[str, Any]) -> dict[str, Any]:
     return {
+        "learning_phase": values.get("learning_phase", ""),
+        "learning_resume_target": values.get("learning_resume_target", ""),
+        "learning_resume_reason": values.get("learning_resume_reason", ""),
         "current_topic": values.get("current_topic", ""),
         "current_user_goal": values.get("current_user_goal", ""),
         "session_goal": values.get("session_goal", ""),
@@ -201,6 +204,7 @@ def _serialize_state(values: dict[str, Any]) -> dict[str, Any]:
         "pending_interaction_prompt": values.get("pending_interaction_prompt", ""),
         "pending_interaction_options": values.get("pending_interaction_options", []),
         "pending_interaction_recommended": values.get("pending_interaction_recommended", ""),
+        "pending_interaction_answer": values.get("pending_interaction_answer", ""),
         "coach_content": values.get("coach_content", ""),
         "tutor_citations": values.get("tutor_citations", []),
         "tutor_evidence": values.get("tutor_evidence", []),
@@ -232,26 +236,47 @@ def _serialize_state(values: dict[str, Any]) -> dict[str, Any]:
         "user_knowledge_graph": values.get("user_knowledge_graph", {}),
         "student_state_snapshot": values.get("student_state_snapshot", {}),
         "homework_items": values.get("homework_items", []),
+        "homework_answers": values.get("homework_answers", {}),
+        "homework_results": values.get("homework_results", []),
+        "homework_score": values.get("homework_score", 0),
         "homework_status": values.get("homework_status", ""),
+        "post_lesson_choice": values.get("post_lesson_choice", ""),
+        "continue_or_homework_choice": values.get("continue_or_homework_choice", ""),
         "is_assessed": values.get("is_assessed", False),
         "flow_status": values.get("flow_status", "greeting"),
     }
 
 
+def _extract_topic_from_messages(values: dict[str, Any], max_len: int = 30) -> str:
+    """从 message_history 中提取首条用户消息作为标题候选。"""
+    for msg in values.get("message_history") or []:
+        if str(msg.get("role", "")).strip() == "user":
+            content = str(msg.get("content") or "").strip()
+            if content:
+                return content[:max_len] + ("…" if len(content) > max_len else "")
+    for entry in values.get("conversation_history") or []:
+        role = str(entry.get("role", "")).strip()
+        if role == "user":
+            content = str(entry.get("content") or entry.get("text") or "").strip()
+            if content:
+                return content[:max_len] + ("…" if len(content) > max_len else "")
+    return ""
+
+
 def _checkpoint_summary(thread_id: str, checkpoint_tuple, alias_title: str = "") -> dict[str, Any]:
     values = checkpoint_tuple.checkpoint.get("channel_values", {})
     flow_status = values.get("flow_status", "greeting")
-    current_topic = values.get("current_topic", "")
-    proposed_topic = values.get("proposed_topic", "")
+    current_topic = str(values.get("current_topic", "") or "").strip()
+    proposed_topic = str(values.get("proposed_topic", "") or "").strip()
     custom_title = _normalize_custom_title(alias_title)
     if custom_title:
         display_title = custom_title
     elif flow_status == "awaiting_topic_confirmation" and proposed_topic:
         display_title = f"待确认：{proposed_topic}"
     elif flow_status in PRE_TOPIC_FLOW_STATUSES:
-        display_title = "未确认主题"
+        display_title = _extract_topic_from_messages(values) or "新对话"
     else:
-        display_title = current_topic or thread_id
+        display_title = current_topic or proposed_topic or _extract_topic_from_messages(values) or "新对话"
     return {
         "thread_id": thread_id,
         "current_topic": current_topic,
@@ -461,7 +486,10 @@ def _reconstruct_messages(checkpoint_store, thread_id: str, *, limit: int = 240)
     def lock_open_choice_cards_from_answer(entry: dict[str, Any]) -> None:
         answer_kind = str(entry.get("kind") or "").strip()
         answer = str(entry.get("content") or "").strip()
-        if not answer:
+        entry_data = entry.get("data") if isinstance(entry.get("data"), dict) else {}
+        selected_value = str(entry_data.get("selected_value") or entry_data.get("selectedValue") or "").strip()
+        answer_for_lock = selected_value or answer
+        if not answer_for_lock:
             return
         matching_pending_kinds = [kind for kind, user_kind in choice_answer_kinds.items() if user_kind == answer_kind]
         if not matching_pending_kinds:
@@ -473,11 +501,11 @@ def _reconstruct_messages(checkpoint_store, thread_id: str, *, limit: int = 240)
             pending_kind = str(data.get("interaction_kind") or "").strip()
             if pending_kind not in matching_pending_kinds:
                 continue
-            selected_label = choice_label(data.get("options") or [], answer)
+            selected_label = choice_label(data.get("options") or [], answer_for_lock) or choice_label(data.get("options") or [], answer)
             message["data"] = {
                 **data,
                 "locked": True,
-                "selectedValue": answer,
+                "selectedValue": answer_for_lock,
                 "selectedLabel": selected_label,
                 "statusText": f"已选择：{selected_label}" if selected_label else "已选择，答案已固定",
             }
@@ -502,6 +530,18 @@ def _reconstruct_messages(checkpoint_store, thread_id: str, *, limit: int = 240)
                     "recommended": values.get("pending_interaction_recommended", ""),
                     "locked": False,
                 },
+            )
+        if (
+            pending_kind == "homework_answers"
+            and pending_prompt
+            and pending_kind != str(previous_values.get("pending_interaction_kind") or "").strip()
+        ):
+            push(
+                "agent",
+                "homework_answer_prompt",
+                pending_prompt,
+                updated_at,
+                data={"interaction_kind": pending_kind, "homework_items": values.get("homework_items", [])},
             )
 
         current_message_history = values.get("message_history") or []

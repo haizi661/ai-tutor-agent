@@ -240,7 +240,35 @@ def run_learning_session(
         homework_status = str(state_values.get("homework_status") or "").strip()
 
         if homework_items and homework_status in {"assigned", "deferred", "in_progress"}:
+            flow_status = str(state_values.get("flow_status") or "").strip()
+            pending_kind = str(state_values.get("pending_interaction_kind") or "").strip()
             if not topic.strip():
+                if flow_status in {"awaiting_homework_review_choice", "awaiting_homework_answers"} or pending_kind in {
+                    "homework_review_choice",
+                    "homework_answers",
+                }:
+                    event_sink.emit(
+                        make_event(
+                            "session.info",
+                            "session",
+                            message=_format_homework_message(homework_items),
+                            data={"thread_id": thread_id, "homework_status": homework_status, "homework_count": len(homework_items)},
+                        )
+                    )
+                    return
+
+                if homework_status == "deferred":
+                    event_sink.emit(
+                        make_event(
+                            "session.info",
+                            "session",
+                            message="\n我找到你上次暂缓的作业了。这次先按你上次的选择继续学习，作业仍保留在记录里。",
+                            data={"thread_id": thread_id, "homework_status": homework_status, "homework_count": len(homework_items)},
+                        )
+                    )
+                    app.invoke(None, config=thread_config)
+                    return
+
                 event_sink.emit(
                     make_event(
                         "session.info",
@@ -248,6 +276,15 @@ def run_learning_session(
                         message=_format_homework_message(homework_items),
                         data={"thread_id": thread_id, "homework_status": homework_status, "homework_count": len(homework_items)},
                     )
+                )
+                app.invoke(
+                    {
+                        "flow_status": flow_status or "homework_assigned",
+                        "learning_phase": "homework_resume",
+                        "learning_resume_target": "session_resume_router",
+                        "learning_resume_reason": "resume_existing_homework",
+                    },
+                    config=thread_config,
                 )
                 return
 

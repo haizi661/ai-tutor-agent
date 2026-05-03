@@ -662,6 +662,11 @@
                                     <label for="local-https-proxy">HTTPS Proxy</label>
                                     <input id="local-https-proxy" type="text" placeholder="http://127.0.0.1:7897">
                                 </div>
+                                <div class="config-field">
+                                    <label for="local-no-proxy">直连域名（NO_PROXY）</label>
+                                    <textarea id="local-no-proxy" rows="3" placeholder="127.0.0.1,localhost,dashscope.aliyuncs.com,.aliyuncs.com,hf-mirror.com"></textarea>
+                                    <small>留空也会自动合并国内模型、HuggingFace 镜像、PyPI/npm 镜像和本机地址，避免国内服务被代理绕远。</small>
+                                </div>
                             </div>
 
                             <div class="settings-block">

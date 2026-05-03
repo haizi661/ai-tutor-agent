@@ -122,7 +122,14 @@ def build_continue_or_homework_selector_node(runtime: RuntimeContext):
                 "pending_interaction_recommended": "",
                 "pending_interaction_answer": "",
                 "message_history": list(state.get("message_history", []))
-                + [{"role": "user", "kind": "continue_or_homework_choice", "content": choice or normalized_choice}],
+                + [
+                    {
+                        "role": "user",
+                        "kind": "continue_or_homework_choice",
+                        "content": choice or normalized_choice,
+                        "data": {"selected_value": normalized_choice},
+                    }
+                ],
             }
 
         event_sink.emit(
@@ -144,7 +151,14 @@ def build_continue_or_homework_selector_node(runtime: RuntimeContext):
             "pending_interaction_recommended": "",
             "pending_interaction_answer": "",
             "message_history": list(state.get("message_history", []))
-            + [{"role": "user", "kind": "continue_or_homework_choice", "content": choice or normalized_choice}],
+            + [
+                {
+                    "role": "user",
+                    "kind": "continue_or_homework_choice",
+                    "content": choice or normalized_choice,
+                    "data": {"selected_value": normalized_choice},
+                }
+            ],
         }
 
     return node

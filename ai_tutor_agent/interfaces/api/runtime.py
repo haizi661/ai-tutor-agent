@@ -9,7 +9,7 @@ from typing import Callable, Optional
 
 from fastapi import FastAPI, Request
 
-from ...config import Settings, get_settings
+from ...config import Settings, apply_network_environment, get_settings
 from ...core.ports import KnowledgeProvider, NoopKnowledgeProvider, RuntimeContext
 from ...infrastructure.checkpoint import create_sqlite_checkpointer
 from ...infrastructure.question_bank import LocalQuestionBankProvider
@@ -325,6 +325,7 @@ class ApiRuntime:
 
 def build_runtime(settings: Optional[Settings] = None) -> ApiRuntime:
     settings = settings or get_settings()
+    apply_network_environment(settings)
     graph_rag_pipeline = None
     question_bank_provider = None
     student_state_store = StudentStateStore()
@@ -373,6 +374,7 @@ def build_runtime(settings: Optional[Settings] = None) -> ApiRuntime:
 def refresh_runtime(runtime: ApiRuntime) -> Settings:
     get_settings.cache_clear()
     runtime.settings = get_settings()
+    apply_network_environment(runtime.settings)
 
     try:
         knowledge_provider = LocalFileKnowledgeProvider(runtime.settings)

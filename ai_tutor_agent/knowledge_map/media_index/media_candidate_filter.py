@@ -112,11 +112,44 @@ class MediaCandidateFilter:
             return False
         if len(re.findall(r"[\u4e00-\u9fff]", raw_text)) > 20 and "\\tag" not in raw_text:
             return False
+        if not self._has_balanced_latex_structure(raw_text):
+            return False
         return any(token in raw_text for token in ["=", "\\frac", "\\sum", "\\omega", "\\sigma", "\\Phi"])
 
     def _passes_table_quality(self, candidate: dict[str, Any]) -> bool:
         raw_text = str(candidate.get("raw_text", "") or "").strip()
         return raw_text.startswith("<table>") and "</table>" in raw_text and "<tr>" in raw_text
+
+    def _has_balanced_latex_structure(self, raw_text: str) -> bool:
+        text = str(raw_text or "").strip()
+        if not text:
+            return False
+        if re.search(r"\\[A-Za-z]+$", text):
+            return False
+        stack: list[str] = []
+        pairs = {"}": "{", "]": "[", ")": "("}
+        escaped = False
+        for char in text:
+            if escaped:
+                escaped = False
+                continue
+            if char == "\\":
+                escaped = True
+                continue
+            if char in "{[(":
+                stack.append(char)
+            elif char in pairs:
+                if not stack or stack[-1] != pairs[char]:
+                    return False
+                stack.pop()
+        if stack:
+            return False
+        for env in re.findall(r"\\begin\s*\{([^}]+)\}", text):
+            if len(re.findall(rf"\\begin\s*\{{{re.escape(env)}\}}", text)) != len(
+                re.findall(rf"\\end\s*\{{{re.escape(env)}\}}", text)
+            ):
+                return False
+        return True
 
     def _build_dedup_group(self, candidate: dict[str, Any]) -> str:
         asset_type = candidate.get("asset_type", "")

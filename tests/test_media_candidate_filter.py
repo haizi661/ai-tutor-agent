@@ -23,6 +23,42 @@ def test_media_candidate_filter_keeps_fixture_formula_and_figure():
     assert any(item["asset_type"] == "formula" for item in filtered)
 
 
+def test_media_candidate_filter_drops_truncated_latex_formula_candidates():
+    config = MediaIndexConfig(min_image_bytes=0)
+    candidate_filter = MediaCandidateFilter(config=config)
+    candidates = [
+        {
+            "asset_id": "broken-formula",
+            "asset_type": "formula",
+            "source_doc_id": "doc",
+            "source_doc_name": "doc.pdf",
+            "raw_text": r"\begin{array}{l} a _ {0} \frac {\mathrm {d} ^ {n}}{\mathrm {d} t ^ {n}} c (t) = b _ {m - 1} \frac {\mathr",
+            "nearby_text": "线性定常系统微分方程。",
+            "page_range": [],
+            "chapter_title": "第二章",
+            "content_hash": "broken",
+            "extra": {},
+        },
+        {
+            "asset_id": "complete-formula",
+            "asset_type": "formula",
+            "source_doc_id": "doc",
+            "source_doc_name": "doc.pdf",
+            "raw_text": r"\begin{array}{l} a_0 \frac{\mathrm{d}^n}{\mathrm{d}t^n} c(t)=b_0 r(t) \end{array}",
+            "nearby_text": "线性定常系统微分方程。",
+            "page_range": [],
+            "chapter_title": "第二章",
+            "content_hash": "complete",
+            "extra": {},
+        },
+    ]
+
+    filtered = candidate_filter.filter_candidates(candidates)
+
+    assert [item["asset_id"] for item in filtered] == ["complete-formula"]
+
+
+
 def test_media_candidate_filter_deduplicates_same_caption_figures():
     config = MediaIndexConfig(min_image_bytes=0)
     candidate_filter = MediaCandidateFilter(config=config)

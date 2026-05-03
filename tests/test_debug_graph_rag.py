@@ -2,6 +2,7 @@ from pathlib import Path
 
 from ai_tutor_agent.knowledge_map.debug_graph_rag import (
     _render_answer_html,
+    build_answer_media_html,
     build_html_report,
     write_html_report,
 )
@@ -175,6 +176,50 @@ $$
     assert "图 1-1 人取书的反馈控制系统方框图" not in html_text
 
 
+def test_render_answer_html_places_plain_bracket_media_refs_in_body_once():
+    media_cards_by_ref = {
+        "KM013.figure_asset[1]": '<button class="media-card figure-card">图一</button>',
+        "KM015.formula_asset[1]": '<button class="media-card formula-card">式一</button>',
+    }
+    media_labels_by_ref = {
+        "KM013.figure_asset[1]": "图一",
+        "KM015.formula_asset[1]": "式一",
+    }
+    answer = "结论：先用式一 [KM015.formula_asset[1]] 看阻尼比，再结合图一 [KM013.figure_asset[1]] 看响应曲线。"
+
+    html_text = _render_answer_html(answer, media_cards_by_ref, media_labels_by_ref)
+
+    assert html_text.count('class="answer-media-block"') == 1
+    assert "正文引用的相关公式与图表" in html_text
+    assert html_text.count("formula-card") == 1
+    assert html_text.count("figure-card") == 1
+    assert "式一 [KM015.formula_asset[1]]" not in html_text
+    assert "图一 [KM013.figure_asset[1]]" not in html_text
+    assert "式一 式一" not in html_text
+    assert "图一 图一" not in html_text
+    assert html_text.index("结论：") < html_text.index('class="answer-media-block"')
+    assert html_text.index("figure-card") < html_text.index("formula-card")
+
+
+def test_render_answer_html_inserts_unreferenced_media_near_analysis_in_graph_order():
+    media_cards_by_ref = {
+        "KM013.figure_asset[1]": '<button class="media-card figure-card">图一</button>',
+        "KM015.formula_asset[1]": '<button class="media-card formula-card">式一</button>',
+    }
+    media_labels_by_ref = {
+        "KM013.figure_asset[1]": "图一",
+        "KM015.formula_asset[1]": "式一",
+    }
+    answer = "结论：阻尼比增大时超调量会减小。\n分析：这是由二阶系统动态响应的衰减规律决定的。\n拓展：还要结合调节时间一起看。"
+
+    html_text = _render_answer_html(answer, media_cards_by_ref, media_labels_by_ref)
+
+    assert html_text.count('class="answer-media-block"') == 1
+    assert "图谱检索到的相关公式与图表" in html_text
+    assert html_text.index("分析：") < html_text.index('class="answer-media-block"') < html_text.index("拓展：")
+    assert html_text.index("figure-card") < html_text.index("formula-card")
+
+
 def test_build_html_report_embedded_formula_uses_katex_not_mathjax_or_raw_delimiters():
     result = {
         "question": "q",
@@ -199,6 +244,33 @@ def test_build_html_report_embedded_formula_uses_katex_not_mathjax_or_raw_delimi
     assert r"\[" not in html_text
     assert r"\]" not in html_text
     assert "formula-scroll" in html_text
+
+
+def test_build_answer_media_html_returns_chat_fragment_with_normalized_formula():
+    result = {
+        "question": "q",
+        "answer": "结论：超调量见式一。 [[MEDIA:KM015.formula_asset[1]]]",
+        "evidence_items": [{"reference": "KM015.summary", "text": "二阶系统性能指标。"}],
+        "media_items": [
+            {
+                "asset_type": "formula",
+                "reference": "KM015.formula_asset[1]",
+                "display_label": "式一",
+                "node_name": "二阶系统的时域分析",
+                "text": "\n$$\n\\sigma\\% = e^{-\\pi\\zeta/\\sqrt{1-\\zeta^2}}\\times 100\\%\n$$\n",
+            },
+        ],
+    }
+
+    html_text = build_answer_media_html(result)
+
+    assert "<html" not in html_text
+    assert "graph-rag-answer-panel" in html_text
+    assert "graph-rag-evidence-panel" in html_text
+    assert "answer-media-block" in html_text
+    assert "formula-render" in html_text
+    assert 'data-latex="\\sigma\\% = e^{-\\pi\\zeta/\\sqrt{1-\\zeta^2}}\\times 100\\%"' in html_text
+    assert "$$" not in html_text
 
 
 def test_build_html_report_skips_figure_card_when_image_source_missing():

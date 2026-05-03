@@ -1,8 +1,10 @@
 # Main Learning Flow Redesign Implementation Plan
 
+> 术语同步说明：2026-04-30 已按当前主线统一历史计划/报告中的用户可见文案：课后停顿为“继续追问 / 我懂了，进入小测”，学习结束为“结束本轮学习，生成作业”。内部结束学习路由值仅表示代码兼容标识，不代表用户界面文案。
+
 > **For Hermes:** Use subagent-driven-development skill to implement this plan task-by-task.
 
-**Goal:** Redesign the LangGraph main tutoring workflow from a flexible tutor/practice loop into a node-centered learning pipeline: topic intake → diagnostic assessment → radar/profile → initial graph node → node lesson → temporary-question loop → objective-question test → wrong-question remediation/variant loop → next-node planning → continue-or-homework decision → second-login continuation/homework handling.
+**Goal:** Redesign the LangGraph main tutoring workflow from a flexible tutor/practice loop into a node-centered learning pipeline: topic intake → diagnostic assessment → radar/profile → initial graph node → node lesson → follow-up question loop → objective-question test → wrong-question remediation/variant loop → next-node planning → continue-or-homework decision → second-login continuation/homework handling.
 
 **Architecture:** Keep LangGraph as the durable workflow state machine, but replace the current loose `tutor -> next_step_selector -> tester/evaluator -> post_eval_selector` loop with explicit stage nodes and explicit `flow_status` values. Preserve existing ports (`event_sink`, `answer_provider`, `knowledge_provider`) and checkpoint semantics, while adding a thin student-record service and question-bank abstraction for objective questions and homework. Existing subjective assessment, tutor RAG, interruption tutor, and graph services should be reused where possible instead of rewritten.
 
@@ -48,7 +50,7 @@ Current behavior characteristics:
 - Evaluation is LLM rubric-based via `evaluator.py`.
 - Passing leads to `post_eval_selector`, which currently means continue advance / same-type practice / wrapup.
 - Failure may route to `coach`, then back to `next_step_selector`.
-- Temporary questions are supported through `interrupt_query` and `interruption_tutor`.
+- Follow-up questions are supported through `interrupt_query` and `interruption_tutor`.
 - Student long-term record exists partly in `knowledge_map/student_state.py`, but it is not yet the central workflow persistence mechanism.
 
 ### 1.2 Target flow described by user
@@ -64,8 +66,8 @@ New-user / new-topic flow:
 7. Extract content from knowledge graph for that node.
 8. Teach the node.
 9. After teaching, user chooses:
-   - temporary question: send question to graph search 2.2, retrieve/process/answer, then return to same choice step;
-   - no temporary question: start test.
+   - follow-up question: send question to graph search 2.2, retrieve/process/answer, then return to same choice step;
+   - student is ready: start the quiz.
 10. Generate 10 objective multiple-choice questions from question bank. `[question bank not yet developed]`
 11. User answers and system scores.
 12. If score fails:
@@ -77,7 +79,7 @@ New-user / new-topic flow:
 14. Ask whether to start next node.
 15. User chooses:
    - confirm start: repeat node learning flow;
-   - stop today: select major/homework questions using user record, today's learned nodes, prior learned nodes hit by major questions, etc. `[major question bank not yet developed]`; output homework; end session.
+   - generate homework and end the current learning round: select major/homework questions using user record, nodes learned in the current round, prior learned nodes hit by major questions, etc. `[major question bank not yet developed]`; output homework; end session.
 
 Second-login flow:
 
@@ -141,7 +143,7 @@ Add or replace with these new nodes:
    - Writes graph context fields into state.
 
 4. `post_lesson_choice`
-   - Explicitly asks whether student has temporary questions or wants to start test.
+   - Explicitly asks whether student has follow-up questions or wants to start the quiz.
    - Replaces current automatic `next_step_selector` after teaching.
 
 5. `objective_test_generator`
@@ -169,7 +171,7 @@ Add or replace with these new nodes:
    - Writes proposed next node.
 
 11. `continue_or_homework_selector`
-   - Asks whether to start next node now or stop today.
+   - Asks whether to start next node now or generate homework and end the current learning round.
 
 12. `homework_generator`
    - Selects/generates homework from major question bank strategy.
@@ -464,11 +466,11 @@ Outputs include:
 
 ---
 
-## 8. Post-Lesson Temporary Question Loop
+## 8. Post-Lesson Follow-up Question Loop
 
 ### Task 6: Replace automatic `next_step_selector` after tutor with `post_lesson_choice`
 
-**Objective:** Match the target flow: after teaching, only two choices are allowed: ask temporary question or start test.
+**Objective:** Match the target flow: after teaching, only two choices are allowed: ask a follow-up question or start the quiz.
 
 **Files:**
 - Create: `ai_tutor_agent/nodes/post_lesson.py`
@@ -479,13 +481,13 @@ Outputs include:
 Options:
 ```python
 POST_LESSON_OPTIONS = [
-  {"value": "temporary_question", "label": "我有临时问题"},
-  {"value": "start_test", "label": "没有问题，开始测试"},
+  {"value": "temporary_question", "label": "继续追问"},
+  {"value": "start_test", "label": "我懂了，进入小测"},
 ]
 ```
 
 Behavior:
-- If user chooses temporary question, set:
+- If user chooses follow-up question, set:
 ```python
 {
   "interrupt_query": user_question,
@@ -495,7 +497,7 @@ Behavior:
 ```
 - Route to `interruption_tutor`.
 - After `interruption_tutor`, route back to `post_lesson_choice` rather than pause.
-- If user chooses start test, set:
+- If user chooses start the quiz, set:
 ```python
 {
   "learning_stage": "objective_test_generation",
@@ -679,7 +681,7 @@ If no next node:
 
 ### Task 13: Implement `continue_or_homework_selector`
 
-**Objective:** Ask whether to start next node or stop today.
+**Objective:** Ask whether to start next node or generate homework and end the current learning round.
 
 **Files:**
 - Create: `ai_tutor_agent/nodes/continue_or_homework.py`
@@ -689,7 +691,7 @@ Options:
 ```python
 [
   {"value": "continue", "label": "开始下一个节点"},
-  {"value": "stop_today", "label": "今天不学了，生成作业"},
+  {"value": "end_current_round", "label": "结束本轮学习，生成作业"},
 ]
 ```
 
@@ -707,10 +709,10 @@ Outputs:
   "learning_stage": "node_content_loading",
 }
 ```
-- If stop today:
+- If generate homework and end the current learning round:
 ```python
 {
-  "continue_learning_choice": "stop_today",
+  "continue_learning_choice": "end_current_round",
   "learning_stage": "homework_generation",
 }
 ```
@@ -729,9 +731,9 @@ Outputs:
 
 Strategy v1:
 - Candidate nodes:
-  - nodes learned today;
-  - previous mastered nodes related to today's nodes;
-  - nodes with recent wrong items;
+  - nodes learned in the current round;
+  - previous mastered nodes related to nodes in the current learning round;
+  - nodes with current or historical wrong items;
   - major questions whose `node_ids` overlap these nodes.
 - If major question bank unavailable, fallback to generated homework summary/questions and mark source as `fallback_llm`.
 - Save homework to student record.
@@ -852,7 +854,7 @@ tutor -> post_lesson_choice
 ```python
 interruption_tutor -> post_lesson_choice
 ```
-for temporary questions asked after lesson.
+for follow-up questions asked after lesson.
 
 5. Objective testing:
 ```python
@@ -901,7 +903,7 @@ New `pending_interaction_kind` values:
 Expected frontend payloads:
 - post lesson: `temporary_question` with question text OR `start_test`
 - objective test: answer dict `{question_id: option}`
-- continue/homework: `continue` OR `stop_today`
+- continue/homework: `continue` OR `end_current_round`
 - consolidation: `consolidate` OR `continue_next_node`
 
 **Important:** Existing resume/pending interaction patch logic must update `pending_interaction_answer` and preserve checkpoint thread_id.
@@ -921,16 +923,16 @@ Fake providers:
 - Fake knowledge provider with graph nodes: `2.1`, `2.2`, `2.3`.
 - Fake question bank provider returning 10 objective questions.
 - Fake answer provider returning:
-  - no temporary question/start_test;
+  - no follow-up question/start_test;
   - 10 answers;
   - continue or stop.
 - Fake student record provider in memory.
 
 Scenarios:
-1. New topic → diagnostic → initial node → teach → start test → pass → next node → continue.
-2. Teach → temporary question → return to post lesson → start test.
+1. New topic → diagnostic → initial node → teach → start the quiz → pass → next node → continue.
+2. Teach → follow-up question → return to post lesson → start the quiz.
 3. Objective test fail → wrong explanation → variant → pass.
-4. Pass → stop today → homework generated → END.
+4. Pass → generate homework and end the current learning round → homework generated → END.
 5. Second login with homework → homework_review.
 6. Second login without homework → consolidation choice → continue next node.
 
@@ -995,14 +997,14 @@ The redesign is complete when:
 
 1. A new user can enter `自动控制原理` and reach an initial graph node after diagnostic assessment.
 2. The system teaches one graph node using graph/RAG content.
-3. After teaching, the only main choices are temporary question or start test.
-4. Temporary questions use graph/RAG search and return to the post-lesson choice.
+3. After teaching, the only main choices are follow-up question or start the quiz.
+4. Follow-up questions use graph/RAG search and return to the post-lesson choice.
 5. Objective test generation produces 10 questions with answer keys.
 6. Objective scoring is deterministic.
 7. Failed scoring triggers wrong-question explanation and variant questions.
 8. Passing triggers next-node planning.
-9. User can choose to continue next node or stop today.
-10. Stopping today generates homework and saves it to durable student record.
+9. User can choose to continue next node or generate homework and end the current learning round.
+10. Ending the current learning round generates homework and saves it to durable student record.
 11. Second login detects pending homework.
 12. Second login without homework asks consolidation vs continue.
 13. Existing tests still pass or are intentionally updated to the new main-flow contract.

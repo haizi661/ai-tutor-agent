@@ -8,7 +8,7 @@ from langchain_core.messages import HumanMessage, SystemMessage
 from ..core.events import make_event
 from ..core.output_format import parse_json_object
 from ..core.text import content_to_text
-from ..core.learning_support import update_student_state_after_evaluation
+from ..core.learning_support import update_student_state_after_evaluation, trim_message_history
 from ..core.ports import RuntimeContext
 from ..core.state import AgentState
 from ..knowledge_map.student_state import now_ts
@@ -478,6 +478,10 @@ def build_objective_test_scorer_node(runtime: RuntimeContext, *, pass_score: int
             node_id=node_id,
             score=score,
             passed=passed,
+            teaching_strategy=str(state.get("teaching_strategy") or "").strip(),
+            difficulty_level=int(state.get("difficulty_level") or 0),
+            wrong_items=wrong_items,
+            node_title=str(state.get("graph_anchor_title") or state.get("current_node_name") or "").strip(),
         )
         attempt_snapshot = _record_question_attempts(state, items, answers, score, passed)
         if attempt_snapshot:
@@ -509,6 +513,20 @@ def build_objective_test_scorer_node(runtime: RuntimeContext, *, pass_score: int
         )
         message_history = list(state.get("message_history", []))
         message_history.append(review_entry)
+
+        # ── Update user_knowledge_graph based on quiz result ──
+        user_kg = dict(state.get("user_knowledge_graph") or {})
+        if node_id:
+            for _concept, entry in user_kg.items():
+                entry_id = str(entry.get("id") or "").strip()
+                if entry_id == node_id:
+                    if passed:
+                        entry["status"] = "mastered"
+                    else:
+                        entry["status"] = "in_progress"
+                    entry["turn_count"] = int(entry.get("turn_count") or 0) + 1
+                    break
+
         if not passed:
             return {
                 "node_quiz_answers": answers,
@@ -528,7 +546,8 @@ def build_objective_test_scorer_node(runtime: RuntimeContext, *, pass_score: int
                 "pending_interaction_answer": "",
                 "current_node_status": "quizzing",
                 "student_state_snapshot": updated_snapshot or state.get("student_state_snapshot") or {},
-                "message_history": message_history,
+                "user_knowledge_graph": user_kg,
+                "message_history": trim_message_history(message_history),
             }
 
         return {
@@ -544,7 +563,8 @@ def build_objective_test_scorer_node(runtime: RuntimeContext, *, pass_score: int
             "learning_resume_reason": "objective_quiz_passed",
             "current_node_status": "passed",
             "student_state_snapshot": updated_snapshot or state.get("student_state_snapshot") or {},
-            "message_history": message_history,
+            "user_knowledge_graph": user_kg,
+            "message_history": trim_message_history(message_history),
         }
 
     return node
