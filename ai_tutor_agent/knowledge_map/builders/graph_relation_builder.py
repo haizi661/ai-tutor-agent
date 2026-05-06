@@ -103,6 +103,121 @@ class GraphRelationBuilder:
 
         return edges
 
+    def _collect_connected_node_ids(self, edges: list[dict[str, Any]]) -> set[str]:
+        connected: set[str] = set()
+        for edge in edges:
+            source = edge.get("source", "")
+            target = edge.get("target", "")
+            if source:
+                connected.add(source)
+            if target:
+                connected.add(target)
+        return connected
+
+    def _append_edge(
+        self,
+        edges: list[dict[str, Any]],
+        edge: dict[str, Any],
+        existing_pairs: set[tuple[str, str, str]],
+    ) -> None:
+        key = (edge["source"], edge["target"], edge["relation_type"])
+        if key in existing_pairs:
+            return
+        existing_pairs.add(key)
+        edges.append(edge)
+
+    def _write_relation_debug_info(
+        self,
+        nodes: list[dict[str, Any]],
+        edges: list[dict[str, Any]],
+        node_id_map: dict[str, dict[str, Any]],
+    ) -> None:
+        """
+        只回填"事实关系"，不在这里生成学习推荐路径。
+
+        注意 prerequisite_of 的方向：
+        source 是前置知识，target 是依赖该前置知识的后续知识。
+        因此：
+        - target.prerequisite_nodes 应包含 source
+        - source 不能因为是前置知识，就自动把 target 当成 next_nodes
+        """
+        prerequisite_by_target: dict[str, list[str]] = {}
+        dependent_by_source: dict[str, list[str]] = {}
+        related_targets: dict[str, list[str]] = {}
+        weak_targets: dict[str, list[str]] = {}
+
+        for edge in edges:
+            source = edge.get("source", "")
+            target = edge.get("target", "")
+            relation_type = edge.get("relation_type", edge.get("relation", ""))
+
+            if not source or not target:
+                continue
+
+            if relation_type == "prerequisite_of":
+                prerequisite_by_target.setdefault(target, []).append(source)
+                dependent_by_source.setdefault(source, []).append(target)
+            elif relation_type in {"related_to", "parallel_to", "extends_to", "easy_to_confuse_with"}:
+                related_targets.setdefault(source, []).append(target)
+                if edge.get("direction_type") == "undirected":
+                    related_targets.setdefault(target, []).append(source)
+            elif relation_type == "weak_related_to":
+                weak_targets.setdefault(source, []).append(target)
+                if edge.get("direction_type") == "undirected":
+                    weak_targets.setdefault(target, []).append(source)
+
+        for node in nodes:
+            node_id = node["node_id"]
+            extra = node.setdefault("extra", {})
+
+            prerequisites = self._dedup_keep_order(prerequisite_by_target.get(node_id, []))
+            related = sorted(set(related_targets.get(node_id, []) + weak_targets.get(node_id, [])))
+
+            extra["resolved_prerequisite_nodes"] = prerequisites
+            extra["resolved_related_nodes"] = self._dedup_keep_order(related_targets.get(node_id, []))
+            extra["resolved_weak_related_nodes"] = self._dedup_keep_order(weak_targets.get(node_id, []))
+            extra["resolved_dependent_nodes"] = self._dedup_keep_order(dependent_by_source.get(node_id, []))
+
+            node["prerequisite_nodes"] = prerequisites
+            node["related_nodes"] = related
+
+            # 这里不再写 next_nodes / recommended_next_nodes。
+            # 学习顺序统一交给 LearningPathBuilder 处理。
+            node.setdefault("next_nodes", [])
+            node.setdefault("recommended_next_nodes", [])
+
+            extra["resolved_prerequisite_names"] = self._node_names_from_ids(
+                prerequisites, node_id_map
+            )
+            extra["resolved_related_names"] = self._node_names_from_ids(
+                extra["resolved_related_nodes"], node_id_map
+            )
+            extra["resolved_weak_related_names"] = self._node_names_from_ids(
+                extra["resolved_weak_related_nodes"], node_id_map
+            )
+            extra["resolved_dependent_names"] = self._node_names_from_ids(
+                extra["resolved_dependent_nodes"], node_id_map
+            )
+
+    @staticmethod
+    def _dedup_keep_order(items: list[str]) -> list[str]:
+        results: list[str] = []
+        for item in items:
+            if item and item not in results:
+                results.append(item)
+        return results
+
+    def _node_names_from_ids(
+        self,
+        node_ids: list[str],
+        node_id_map: dict[str, dict[str, Any]],
+    ) -> list[str]:
+        names: list[str] = []
+        for node_id in node_ids:
+            node = node_id_map.get(node_id)
+            if node is not None:
+                names.append(node.get("name", node_id))
+        return names
     def _next_edge_id(self) -> str:
         self._edge_counter += 1
         return f"E{self._edge_counter:03d}"

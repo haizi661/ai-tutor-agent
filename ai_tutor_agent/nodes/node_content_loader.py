@@ -11,6 +11,8 @@ from ..core.state import AgentState
 def _string_list(values: Any) -> list[str]:
     if isinstance(values, list):
         return [str(item).strip() for item in values if str(item).strip()]
+    if isinstance(values, tuple):
+        return [str(item).strip() for item in values if str(item).strip()]
     return []
 
 
@@ -23,53 +25,183 @@ def _common_errors(node: dict[str, Any]) -> list[str]:
     return _string_list(extra.get("common_errors")) or _string_list(node.get("common_errors"))
 
 
-PEDAGOGICAL_EVIDENCE_ATTRIBUTES = {
-    "summary",
-    "definition",
-    "key_points",
-    "core_concepts",
-    "must_know",
-    "learning_objectives",
-    "common_errors",
-    "prerequisite_nodes",
-}
+def _compact_text(value: Any, *, max_len: int = 360) -> str:
+    text = " ".join(str(value or "").replace("\n", " ").split()).strip()
+    if not text:
+        return ""
+    if len(text) <= max_len:
+        return text
+    return text[: max_len - 1].rstrip() + "…"
 
 
-def _looks_like_relation_path_text(text: str) -> bool:
-    value = str(text or "").strip()
-    if not value:
-        return False
-    lowered = value.lower()
-    return (
-        "--[" in value
-        or "relation_path" in lowered
-        or "parallel_to" in lowered
-        or "related_to" in lowered
-        or ("关系强度" in value and "边权重" in value)
-        or ("方向：" in value and "证据：" in value and "--[" in value)
+def _dedupe_texts(values: Any, *, limit: int = 6, max_len: int = 360) -> list[str]:
+    cleaned: list[str] = []
+    seen: set[str] = set()
+    for value in _string_list(values):
+        text = _compact_text(value, max_len=max_len)
+        if not text:
+            continue
+        key = text[:80]
+        if key in seen:
+            continue
+        seen.add(key)
+        cleaned.append(text)
+        if len(cleaned) >= limit:
+            break
+    return cleaned
+
+
+def _format_section(title: str, values: Any, *, limit: int = 6, max_len: int = 360) -> list[str]:
+    items = _dedupe_texts(values, limit=limit, max_len=max_len)
+    if not items:
+        return []
+    lines = [f"## {title}"]
+    for idx, item in enumerate(items, start=1):
+        lines.append(f"{idx}. {item}")
+    return lines
+
+
+def _resolve_node_names(node_ids: Any, node_map: dict[str, dict[str, Any]]) -> list[str]:
+    resolved: list[str] = []
+    for node_id in _string_list(node_ids):
+        node = node_map.get(node_id) or {}
+        name = _node_name(node, node_id) if node else node_id
+        if node_id and name and node_id != name:
+            resolved.append(f"{node_id}（{name}）")
+        elif node_id:
+            resolved.append(node_id)
+    return resolved
+
+
+def _format_figures(figures: Any, *, limit: int = 8) -> list[str]:
+    items: list[str] = []
+    seen: set[str] = set()
+    for value in _string_list(figures):
+        text = _compact_text(value, max_len=260)
+        if not text or text in seen:
+            continue
+        seen.add(text)
+        items.append(text)
+        if len(items) >= limit:
+            break
+    if not items:
+        return []
+    lines = ["## figures_refs（图表引用，讲解时只在必要处提及）"]
+    for idx, item in enumerate(items, start=1):
+        lines.append(f"{idx}. {item}")
+    return lines
+
+
+def _build_rich_teaching_context(
+    *,
+    node_id: str,
+    node: dict[str, Any],
+    node_map: dict[str, dict[str, Any]],
+) -> str:
+    """把当前节点的所有可教学字段压成一个稳定的 LLM 输入包。
+
+    注意：这里不改知识图谱字段，只改变主流程传给 tutor LLM 的上下文。
+    """
+    name = _node_name(node, node_id)
+    extra = node.get("extra") if isinstance(node.get("extra"), dict) else {}
+
+    lines: list[str] = [
+        "# 当前图谱节点综合讲授素材包",
+        f"节点：{name}（{node_id}）",
+    ]
+
+    chapter = str(node.get("chapter") or "").strip()
+    summary = _compact_text(node.get("summary"), max_len=420)
+    requirement = str(node.get("requirement_level") or "").strip()
+    importance = str(node.get("importance_level") or "").strip()
+    focus = str(node.get("assessment_focus") or "").strip()
+    threshold = node.get("mastery_threshold")
+    page_refs = _string_list(node.get("page_refs"))
+    refined_pages = _string_list(extra.get("page_refs_refined"))
+
+    basic_parts = []
+    if chapter:
+        basic_parts.append(f"章节：{chapter}")
+    if requirement:
+        basic_parts.append(f"课程要求：{requirement}")
+    if importance:
+        basic_parts.append(f"重要程度：{importance}")
+    if focus:
+        basic_parts.append(f"考查重点：{focus}")
+    if threshold not in (None, ""):
+        basic_parts.append(f"建议掌握门槛：{threshold}")
+    if refined_pages:
+        basic_parts.append(f"精炼页码：{', '.join(refined_pages[:8])}")
+    elif page_refs:
+        basic_parts.append(f"页码范围：{', '.join(page_refs[:8])}")
+    if basic_parts:
+        lines.append("## 节点基本信息")
+        lines.extend(f"- {item}" for item in basic_parts)
+    if summary:
+        lines.append("## summary")
+        lines.append(summary)
+
+    prerequisites = _resolve_node_names(node.get("prerequisite_nodes"), node_map)
+    next_nodes = _resolve_node_names(node.get("recommended_next_nodes") or node.get("next_nodes"), node_map)
+    related = _resolve_node_names(node.get("related_nodes"), node_map)
+    if prerequisites or next_nodes or related:
+        lines.append("## 图谱关系提示")
+        if prerequisites:
+            lines.append(f"- 前置节点：{'；'.join(prerequisites[:6])}")
+        if next_nodes:
+            lines.append(f"- 推荐下一节点：{'；'.join(next_nodes[:4])}")
+        if related:
+            lines.append(f"- 相关节点：{'；'.join(related[:6])}")
+
+    teacher_text = _compact_text(node.get("explanation_teacher_style"), max_len=1400)
+    raw_text = _compact_text(node.get("explanation_raw"), max_len=1000)
+    if teacher_text:
+        lines.append("## explanation_teacher_style（原始教师风格讲解，可作为主线但不要原样照搬）")
+        lines.append(teacher_text)
+    if raw_text and raw_text != teacher_text:
+        lines.append("## explanation_raw（教材原始解释材料）")
+        lines.append(raw_text)
+
+    for title, field, limit, max_len in [
+        ("core_concepts", "core_concepts", 10, 220),
+        ("key_points", "key_points", 12, 520),
+        ("formulas", "formulas", 16, 420),
+        ("examples", "examples", 12, 760),
+        ("definition_candidates", "definition_candidates", 10, 620),
+        ("key_point_candidates", "key_point_candidates", 14, 620),
+        ("formula_candidates", "formula_candidates", 16, 420),
+        ("example_candidates", "example_candidates", 12, 760),
+    ]:
+        lines.extend(_format_section(title, node.get(field), limit=limit, max_len=max_len))
+
+    lines.extend(_format_figures(node.get("figures_refs"), limit=8))
+
+    common_errors = _common_errors(node)
+    if common_errors:
+        lines.extend(_format_section("common_errors", common_errors, limit=5, max_len=240))
+
+    lines.append("## 讲授生成要求")
+    lines.extend(
+        [
+            "- 必须综合上面的多个字段组织讲解，不能只复述 explanation_teacher_style。",
+            "- 讲授要详实，优先形成完整教学单元：主线、定义、关键点、公式、例子、图表、常见误区都要尽量覆盖。",
+            "- 公式和图表可以交叉使用：公式讲定量关系，图表讲结构/趋势/直观现象，例子负责落地。",
+            "- 如果材料中有多个公式或例子，不要全部罗列，要挑最能支撑当前节点的内容串联讲。",
+            "- 输出面向学生，避免输出字段名、CSV 痕迹、调试信息和 raw id。",
+            "- 讲完后保留课后停顿，由后续 post_lesson_choice 接管。",
+        ]
     )
+    return "\n".join(lines).strip()
 
 
-def _filter_pedagogical_evidence(items: list[dict[str, Any]]) -> list[dict[str, Any]]:
-    filtered: list[dict[str, Any]] = []
-    for item in items or []:
-        attribute = str(item.get("attribute") or "").strip().lower()
-        text = str(item.get("text") or "").strip()
-        if attribute not in PEDAGOGICAL_EVIDENCE_ATTRIBUTES:
-            continue
-        if _looks_like_relation_path_text(text):
-            continue
-        filtered.append(dict(item))
-    return filtered
-
-
-def _build_structured_context(node_id: str, node: dict[str, Any]) -> str:
+def _build_structured_context(node_id: str, node: dict[str, Any], node_map: dict[str, dict[str, Any]]) -> str:
+    # 兼容兜底：如果节点字段非常少，也至少给 tutor 一个结构化上下文。
     name = _node_name(node, node_id)
     objectives = _string_list(node.get("learning_objectives")) or _string_list(node.get("key_points"))
     must_know = _string_list(node.get("core_concepts")) or _string_list(node.get("must_know"))
     common_errors = _common_errors(node)
-    prerequisites = _string_list(node.get("prerequisite_nodes"))
-    next_nodes = _string_list(node.get("recommended_next_nodes") or node.get("next_nodes"))
+    prerequisites = _resolve_node_names(node.get("prerequisite_nodes"), node_map)
+    next_nodes = _resolve_node_names(node.get("recommended_next_nodes") or node.get("next_nodes"), node_map)
     lines = [f"当前图谱节点：{name}（{node_id}）"]
     if prerequisites:
         lines.append(f"前置节点：{'；'.join(prerequisites)}")
@@ -84,15 +216,6 @@ def _build_structured_context(node_id: str, node: dict[str, Any]) -> str:
     return "\n".join(lines)
 
 
-def _teacher_explanation(node: dict[str, Any]) -> str:
-    """Return the prebuilt node teaching text used by the main learning flow.
-
-    主流程中，节点选定后的教学内容只允许来自节点内已沉淀的
-    explanation_teacher_style 字段；不再调用图谱搜索/路径检索来拼接讲解正文。
-    """
-    return str(node.get("explanation_teacher_style") or "").strip()
-
-
 def build_node_content_loader_node(runtime: RuntimeContext):
     event_sink = runtime.event_sink
 
@@ -105,9 +228,9 @@ def build_node_content_loader_node(runtime: RuntimeContext):
         topic = str(state.get("current_topic") or state.get("current_user_goal") or "").strip()
 
         graph_patch = build_graph_state_patch(graph_pipeline, node_id) if node_id else {}
-        teacher_explanation = _teacher_explanation(node) if node else ""
-        structured_context = _build_structured_context(node_id, node) if node else ""
-        node_content_context = teacher_explanation or structured_context
+        rich_context = _build_rich_teaching_context(node_id=node_id, node=node, node_map=node_map) if node else ""
+        structured_context = _build_structured_context(node_id, node, node_map) if node else ""
+        node_content_context = rich_context or structured_context
         citations: list[dict[str, Any]] = []
         evidence: list[dict[str, Any]] = []
 
@@ -115,12 +238,14 @@ def build_node_content_loader_node(runtime: RuntimeContext):
             make_event(
                 "node.complete",
                 "node_content_loader",
-                message=f"已抽取图谱节点【{node_name or node_id}】的讲解材料。",
+                message=f"已抽取图谱节点【{node_name or node_id}】的综合讲授素材包。",
                 data={
                     "node_id": node_id,
                     "node_name": node_name,
-                    "has_teacher_explanation": bool(teacher_explanation),
-                    "teaching_source": "explanation_teacher_style" if teacher_explanation else "structured_node_context",
+                    "has_teacher_explanation": bool(node.get("explanation_teacher_style")) if node else False,
+                    "teaching_source": "rich_node_teaching_context" if rich_context else "structured_node_context",
+                    "context_length": len(node_content_context),
+                    "has_figures_refs": bool(_string_list(node.get("figures_refs"))) if node else False,
                 },
             )
         )
@@ -140,6 +265,7 @@ def build_node_content_loader_node(runtime: RuntimeContext):
             "current_node_name": node_name,
             "current_node_status": "content_loaded" if node_id else state.get("current_node_status", ""),
             "node_content_context": node_content_context,
+            "node_content_source": "rich_node_material" if rich_context else "structured_node_context",
             "tutor_citations": citations,
             "tutor_evidence": evidence,
             "learning_phase": "node_content_loaded",

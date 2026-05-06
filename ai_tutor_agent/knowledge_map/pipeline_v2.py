@@ -85,15 +85,16 @@ class KnowledgeMapPipelineV2:
     ) -> list[dict[str, Any]]:
         """
         根据统一边关系回填节点内部的兼容字段。
-        说明：
-        1. 新版图谱以边为主，不再依赖 level / part_of / HAS_SUBTOPIC。
-        2. 为兼容后续 learning_path / companion / QA 逻辑，继续回填
-           prerequisite_nodes / next_nodes / related_nodes / recommended_next_nodes。
+
+        重要约束：
+        prerequisite_of 只表示“target 依赖 source 作为前置知识”。
+        它不能反推出 source 的 next_nodes / recommended_next_nodes。
+        学习顺序统一由 LearningPathBuilder 根据章节顺序生成。
         """
         node_map = {node["node_id"]: node for node in nodes}
 
         def _append_unique(node_id: str, field: str, value: str) -> None:
-            if node_id not in node_map:
+            if node_id not in node_map or not value:
                 return
             node = node_map[node_id]
             node.setdefault(field, [])
@@ -110,17 +111,23 @@ class KnowledgeMapPipelineV2:
                 continue
 
             if relation_type == "prerequisite_of":
+                # source 是 target 的前置知识。只回填 target.prerequisite_nodes。
                 _append_unique(target, "prerequisite_nodes", source)
-                _append_unique(source, "next_nodes", target)
-                _append_unique(source, "recommended_next_nodes", target)
-            elif relation_type in {"related_to", "parallel_to", "extends_to", "easy_to_confuse_with", "weak_related_to"}:
+
+            elif relation_type in {"related_to", "parallel_to", "easy_to_confuse_with", "weak_related_to"}:
                 _append_unique(source, "related_nodes", target)
-                _append_unique(source, "recommended_next_nodes", target)
                 if direction_type == "undirected":
                     _append_unique(target, "related_nodes", source)
-                    _append_unique(target, "recommended_next_nodes", source)
-                elif relation_type == "extends_to":
-                    _append_unique(source, "next_nodes", target)
+
+            elif relation_type == "extends_to":
+                _append_unique(source, "related_nodes", target)
+                _append_unique(source, "next_nodes", target)
+                if direction_type == "undirected":
+                    _append_unique(target, "related_nodes", source)
+
+            elif relation_type in {"leads_to", "recommended_next", "LEADS_TO", "RECOMMENDED_NEXT"}:
+                _append_unique(source, "next_nodes", target)
+                _append_unique(source, "recommended_next_nodes", target)
 
         return list(node_map.values())
 
