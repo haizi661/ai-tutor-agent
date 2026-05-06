@@ -323,23 +323,59 @@ class ApiRuntime:
         return self.settings
 
 
-def build_runtime(settings: Optional[Settings] = None) -> ApiRuntime:
-    settings = settings or get_settings()
-    apply_network_environment(settings)
-    graph_rag_pipeline = None
-    question_bank_provider = None
-    student_state_store = StudentStateStore()
+def _build_readonly_knowledge_provider(settings: Settings) -> KnowledgeProvider:
+    """只读加载已有普通 RAG 索引，禁止扫描 data/knowledge 和触发 MinerU。
 
+    这个函数用于“知识图谱主库 + 普通 RAG 补充库”模式：
+    - 主教学仍以 GraphRAGPipeline 为核心；
+    - 普通 RAG 只尝试读取已经存在的 chroma_db / bm25_cache / retrieval_state；
+    - 启动 main.py 时不扫描 data/knowledge，不解析 PDF，不上传 MinerU，不重建索引。
+    """
     try:
-        knowledge_provider = LocalFileKnowledgeProvider(settings)
-        if getattr(knowledge_provider, "vector_store", None):
-            print("📚 Web: 知识库加载成功，已启用 RAG 增强。")
-        else:
-            print("⚠️ Web: 知识库已初始化，但当前处于无 RAG 回退模式。")
-    except Exception as exc:
-        knowledge_provider = NoopKnowledgeProvider()
-        print(f"⚠️ Web: 知识库加载失败: {exc}")
+        original_sync = getattr(LocalFileKnowledgeProvider, "_sync_knowledge_dir", None)
+        original_add = getattr(LocalFileKnowledgeProvider, "add_local_file", None)
+        original_parse = getattr(LocalFileKnowledgeProvider, "_parse_file", None)
 
+        def _skip_sync(self):
+            print("📚 Web: 普通补充资料 RAG 只读模式：跳过 data/knowledge 扫描，不触发 MinerU。")
+
+        def _blocked_add(self, source_path: str):
+            print(f"📚 Web: 普通补充资料 RAG 只读模式：忽略新增文件 {source_path}。")
+            return {"success": False, "chunks": 0, "readonly": True}
+
+        def _blocked_parse(self, file_path: str):
+            raise RuntimeError("普通补充资料 RAG 当前为只读模式，禁止启动 MinerU 解析。")
+
+        # 部分旧版 LocalFileKnowledgeProvider 会在 __init__ 中直接调用 _sync_knowledge_dir。
+        # 临时猴子补丁可以阻断扫描；实例化完成后立即恢复，避免影响其他调试脚本。
+        if original_sync is not None:
+            LocalFileKnowledgeProvider._sync_knowledge_dir = _skip_sync
+        if original_add is not None:
+            LocalFileKnowledgeProvider.add_local_file = _blocked_add
+        if original_parse is not None:
+            LocalFileKnowledgeProvider._parse_file = _blocked_parse
+        try:
+            provider = LocalFileKnowledgeProvider(settings)
+        finally:
+            if original_sync is not None:
+                LocalFileKnowledgeProvider._sync_knowledge_dir = original_sync
+            if original_add is not None:
+                LocalFileKnowledgeProvider.add_local_file = original_add
+            if original_parse is not None:
+                LocalFileKnowledgeProvider._parse_file = original_parse
+
+        has_vector = bool(getattr(provider, "vector_store", None))
+        if has_vector:
+            print("📚 Web: 普通补充资料 RAG 已以只读方式加载已有索引。")
+        else:
+            print("⚠️ Web: 普通补充资料 RAG 只读加载完成，但未检测到可用向量库。")
+        return provider
+    except Exception as exc:
+        print(f"⚠️ Web: 普通补充资料 RAG 只读加载失败，主流程继续使用知识图谱: {exc}")
+        return NoopKnowledgeProvider()
+
+
+def _build_graph_rag_pipeline(settings: Settings) -> GraphRAGPipeline | None:
     try:
         graph_llm_profile = settings.graph_rag_llm_profile or settings.chat_profile
         graph_rag_pipeline = GraphRAGPipeline(
@@ -348,19 +384,39 @@ def build_runtime(settings: Optional[Settings] = None) -> ApiRuntime:
         )
         mode = f"LLM={'开启' if settings.graph_rag_enable_llm else '关闭'}"
         print(f"🕸️ Web: 图谱搜索 2.2 已加载（{mode}, profile={graph_llm_profile or 'default'}）。")
+        return graph_rag_pipeline
     except Exception as exc:
-        graph_rag_pipeline = None
-        print(f"⚠️ Web: 图谱搜索 2.2 加载失败，将回退到普通检索: {exc}")
+        print(f"⚠️ Web: 图谱搜索 2.2 加载失败，将只保留普通检索回退: {exc}")
+        return None
 
+
+def _build_question_bank_provider(settings: Settings):
     try:
-        question_bank_provider = LocalQuestionBankProvider(
+        provider = LocalQuestionBankProvider(
             settings.question_bank_dir,
             course_id=settings.default_course_id,
         )
         print("🧾 Web: 本地题库 Provider 已加载。")
+        return provider
     except Exception as exc:
-        question_bank_provider = None
         print(f"⚠️ Web: 本地题库 Provider 加载失败，将使用 AI/fallback 出题: {exc}")
+        return None
+
+
+def build_runtime(settings: Optional[Settings] = None) -> ApiRuntime:
+    settings = settings or get_settings()
+    apply_network_environment(settings)
+
+    student_state_store = StudentStateStore()
+
+    # 主库：知识图谱运行资产。
+    graph_rag_pipeline = _build_graph_rag_pipeline(settings)
+
+    # 补充库：只读加载已有普通 RAG 索引。
+    # 注意：不会扫描 data/knowledge，不会解析 PDF，不会调用 MinerU。
+    knowledge_provider = _build_readonly_knowledge_provider(settings)
+
+    question_bank_provider = _build_question_bank_provider(settings)
 
     return ApiRuntime(
         settings=settings,
@@ -376,37 +432,9 @@ def refresh_runtime(runtime: ApiRuntime) -> Settings:
     runtime.settings = get_settings()
     apply_network_environment(runtime.settings)
 
-    try:
-        knowledge_provider = LocalFileKnowledgeProvider(runtime.settings)
-        if getattr(knowledge_provider, "vector_store", None):
-            print("📚 Web: 已按最新配置重建知识库检索引擎。")
-        else:
-            print("⚠️ Web: 已重载配置，但知识库检索处于回退模式。")
-    except Exception as exc:
-        knowledge_provider = NoopKnowledgeProvider()
-        print(f"⚠️ Web: 重载配置后知识库初始化失败: {exc}")
-
-    runtime.knowledge_provider = knowledge_provider
-    try:
-        graph_llm_profile = runtime.settings.graph_rag_llm_profile or runtime.settings.chat_profile
-        runtime.graph_rag_pipeline = GraphRAGPipeline(
-            enable_llm=runtime.settings.graph_rag_enable_llm,
-            llm_profile=graph_llm_profile,
-        )
-        mode = f"LLM={'开启' if runtime.settings.graph_rag_enable_llm else '关闭'}"
-        print(f"🕸️ Web: 已按最新配置重建图谱搜索 2.2 引擎（{mode}, profile={graph_llm_profile or 'default'}）。")
-    except Exception as exc:
-        runtime.graph_rag_pipeline = None
-        print(f"⚠️ Web: 重载配置后图谱搜索 2.2 初始化失败: {exc}")
-    try:
-        runtime.question_bank_provider = LocalQuestionBankProvider(
-            runtime.settings.question_bank_dir,
-            course_id=runtime.settings.default_course_id,
-        )
-        print("🧾 Web: 已按最新配置重建本地题库 Provider。")
-    except Exception as exc:
-        runtime.question_bank_provider = None
-        print(f"⚠️ Web: 重载配置后本地题库 Provider 初始化失败: {exc}")
+    runtime.graph_rag_pipeline = _build_graph_rag_pipeline(runtime.settings)
+    runtime.knowledge_provider = _build_readonly_knowledge_provider(runtime.settings)
+    runtime.question_bank_provider = _build_question_bank_provider(runtime.settings)
     runtime.student_state_store = StudentStateStore()
     return runtime.settings
 

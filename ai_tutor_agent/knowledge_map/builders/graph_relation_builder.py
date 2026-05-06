@@ -194,7 +194,17 @@ class GraphRelationBuilder:
         edges: list[dict[str, Any]],
         node_id_map: dict[str, dict[str, Any]],
     ) -> None:
-        prerequisite_targets: dict[str, list[str]] = {}
+        """
+        只回填“事实关系”，不在这里生成学习推荐路径。
+
+        注意 prerequisite_of 的方向：
+        source 是前置知识，target 是依赖该前置知识的后续知识。
+        因此：
+        - target.prerequisite_nodes 应包含 source
+        - source 不能因为是前置知识，就自动把 target 当成 next_nodes
+        """
+        prerequisite_by_target: dict[str, list[str]] = {}
+        dependent_by_source: dict[str, list[str]] = {}
         related_targets: dict[str, list[str]] = {}
         weak_targets: dict[str, list[str]] = {}
 
@@ -203,8 +213,12 @@ class GraphRelationBuilder:
             target = edge.get("target", "")
             relation_type = edge.get("relation_type", edge.get("relation", ""))
 
+            if not source or not target:
+                continue
+
             if relation_type == "prerequisite_of":
-                prerequisite_targets.setdefault(source, []).append(target)
+                prerequisite_by_target.setdefault(target, []).append(source)
+                dependent_by_source.setdefault(source, []).append(target)
             elif relation_type in {"related_to", "parallel_to", "extends_to", "easy_to_confuse_with"}:
                 related_targets.setdefault(source, []).append(target)
                 if edge.get("direction_type") == "undirected":
@@ -218,26 +232,42 @@ class GraphRelationBuilder:
             node_id = node["node_id"]
             extra = node.setdefault("extra", {})
 
-            extra["resolved_prerequisite_nodes"] = prerequisite_targets.get(node_id, [])
-            extra["resolved_related_nodes"] = related_targets.get(node_id, [])
-            extra["resolved_weak_related_nodes"] = weak_targets.get(node_id, [])
+            prerequisites = self._dedup_keep_order(prerequisite_by_target.get(node_id, []))
+            related = sorted(set(related_targets.get(node_id, []) + weak_targets.get(node_id, [])))
 
-            node["prerequisite_nodes"] = prerequisite_targets.get(node_id, [])
-            node["related_nodes"] = sorted(
-                set(related_targets.get(node_id, []) + weak_targets.get(node_id, []))
-            )
-            node["next_nodes"] = prerequisite_targets.get(node_id, [])
-            node["recommended_next_nodes"] = node["related_nodes"][:]
+            extra["resolved_prerequisite_nodes"] = prerequisites
+            extra["resolved_related_nodes"] = self._dedup_keep_order(related_targets.get(node_id, []))
+            extra["resolved_weak_related_nodes"] = self._dedup_keep_order(weak_targets.get(node_id, []))
+            extra["resolved_dependent_nodes"] = self._dedup_keep_order(dependent_by_source.get(node_id, []))
+
+            node["prerequisite_nodes"] = prerequisites
+            node["related_nodes"] = related
+
+            # 这里不再写 next_nodes / recommended_next_nodes。
+            # 学习顺序统一交给 LearningPathBuilder 处理。
+            node.setdefault("next_nodes", [])
+            node.setdefault("recommended_next_nodes", [])
 
             extra["resolved_prerequisite_names"] = self._node_names_from_ids(
-                prerequisite_targets.get(node_id, []), node_id_map
+                prerequisites, node_id_map
             )
             extra["resolved_related_names"] = self._node_names_from_ids(
-                related_targets.get(node_id, []), node_id_map
+                extra["resolved_related_nodes"], node_id_map
             )
             extra["resolved_weak_related_names"] = self._node_names_from_ids(
-                weak_targets.get(node_id, []), node_id_map
+                extra["resolved_weak_related_nodes"], node_id_map
             )
+            extra["resolved_dependent_names"] = self._node_names_from_ids(
+                extra["resolved_dependent_nodes"], node_id_map
+            )
+
+    @staticmethod
+    def _dedup_keep_order(items: list[str]) -> list[str]:
+        results: list[str] = []
+        for item in items:
+            if item and item not in results:
+                results.append(item)
+        return results
 
     def _node_names_from_ids(
         self,

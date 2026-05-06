@@ -36,6 +36,8 @@ class GraphRAGPipeline:
         self.config = config or GraphRAGConfig()
         self.nodes_csv_path = resolve_project_path(nodes_csv_path)
         self.edges_csv_path = resolve_project_path(edges_csv_path)
+        mineru_cache_root = self._resolve_cache_root(mineru_cache_root)
+        annotated_assets_path = self._resolve_optional_asset_root(annotated_assets_path)
         self.nodes = self._load_nodes()
         self.edges = self._load_edges()
         self.node_map = {node["node_id"]: node for node in self.nodes}
@@ -141,6 +143,20 @@ class GraphRAGPipeline:
             "context_text": context_payload["context_text"],
             "answer": answer,
         }
+
+    def _resolve_cache_root(self, configured: str) -> str:
+        """兼容 data/minerU_cache 与 data/mineru_cache 两种目录名。"""
+        candidates = [configured, "data/minerU_cache", "data/mineru_cache"]
+        for item in candidates:
+            path = resolve_project_path(item)
+            if path.exists():
+                return str(path)
+        return str(resolve_project_path(configured))
+
+    def _resolve_optional_asset_root(self, configured: str) -> str:
+        """媒体索引可选；不存在时仍让下游用 MinerU 缓存兜底。"""
+        path = resolve_project_path(configured)
+        return str(path)
 
     def _build_tutor_llm(self, *, enable_llm: bool, llm_profile: str | None) -> Any | None:
         if not enable_llm:

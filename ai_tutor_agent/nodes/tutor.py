@@ -388,7 +388,7 @@ def _build_graph_instruction_block(
         "- aligned_high：减少铺垫，直接进入变体、边界和挑战。",
         "",
         "# 格式规范",
-        "- 正常教学轮控制在 80-150 字，优先用 2-4 句纯文字，不用列表。",
+        "- 主流程节点讲授默认 650-1000 字，必须充分使用节点素材包中的定义、关键点、公式、例子、图表线索和前后置关系。",
         "- 纠错轮可到 200 字，但一次只纠正一个错误层面。",
         "- 列表只在步骤明确或并列项超过 3 个且必须比较时使用。",
         "- 如果有资料证据，保留系统要求的 [1]/[2] 行内引用；不要伪造来源。",
@@ -979,63 +979,10 @@ def build_tutor_node(tutor_llm, runtime: RuntimeContext):
         # 主流程当前节点讲解：已由 node_content_loader 固定写入 explanation_teacher_style。
         # 这里必须直接输出该字段，不再调用图谱搜索、通用检索或 LLM 改写，避免 relation_path 等检索产物混入教学正文。
         direct_node_content = str(state.get("node_content_context") or "").strip()
-        if direct_node_content:
-            active_graph_context = _coalesce_graph_context(state, {})
-            graph_anchor = str(active_graph_context.get("anchor_title") or state.get("current_node_name") or "").strip()
-            graph_anchor_id = str(active_graph_context.get("anchor_id") or state.get("current_node_id") or graph_anchor).strip()
-            if graph_anchor:
-                user_kg[graph_anchor] = {
-                    **(user_kg.get(graph_anchor, {}) if isinstance(user_kg.get(graph_anchor), dict) else {}),
-                    "status": "in_progress",
-                    "turn_count": int((user_kg.get(graph_anchor, {}).get("turn_count") or 0) if isinstance(user_kg.get(graph_anchor), dict) else 0) + 1,
-                }
-                event_sink.emit(
-                    make_event(
-                        "graph.node_update",
-                        "tutor",
-                        message=f"当前节点：{graph_anchor}",
-                        data={"title": graph_anchor, "id": graph_anchor_id, "status": "in_progress", "type": "current"},
-                    )
-                )
-                started_snapshot = mark_student_node_started(
-                    student_state_store,
-                    student_id=student_id,
-                    node_id=graph_anchor_id,
-                    question=learning_target or topic,
-                    title=graph_anchor,
-                )
-            else:
-                started_snapshot = {}
-            stream_text_chunks(event_sink, "tutor", direct_node_content)
-            event_sink.emit(
-                make_event(
-                    "node.complete",
-                    "tutor",
-                    message="这一步先讲到这里，接下来你可以自己决定是继续讲、换例子、先总结，还是来一道题。",
-                    data={"content_length": len(direct_node_content), "strategy": strategy, "evidence": []},
-                )
-            )
-            return {
-                "tutor_content": direct_node_content,
-                "teaching_strategy": strategy,
-                "next_step_choice": "",
-                "post_eval_choice": "",
-                "practice_generation_mode": "",
-                "tutor_citations": [],
-                "tutor_evidence": [],
-                "user_knowledge_graph": user_kg,
-                "graph_anchor_id": graph_anchor_id,
-                "graph_anchor_title": graph_anchor,
-                "graph_anchor_filename": str(active_graph_context.get("anchor_filename") or ""),
-                "learning_phase": "lesson_presented",
-                "learning_resume_target": "post_lesson_choice",
-                "flow_status": "awaiting_post_lesson_choice",
-                "pending_interaction_kind": "post_lesson_choice",
-                "pending_interaction_prompt": "这一步先讲到这里。你想继续深入、换个例子、先总结，还是开始测试？",
-                "student_state_snapshot": started_snapshot or dict(state.get("student_state_snapshot") or {}),
-                "llm_stream_disabled": llm_stream_disabled,
-                "llm_stream_failures": llm_stream_failures,
-            }
+        # 主流程节点讲授不能再把 node_content_context 原样输出。
+        # 这里仅记录“有节点素材包”，后面统一交给 tutor LLM 生成详实讲解，
+        # 并通过 GraphRAG 的 media_items 渲染公式/图/表卡片。
+        has_direct_node_content = bool(direct_node_content)
 
         # RAG: 非主流程节点讲解的回退路径才允许检索相关知识
         citations = []
@@ -1066,14 +1013,24 @@ def build_tutor_node(tutor_llm, runtime: RuntimeContext):
         )
         if graph_rag_pipeline is not None:
             try:
-                graph_result = graph_rag_pipeline.ask(search_query, traversal_mode="balanced")
+                if has_direct_node_content:
+                    graph_query = " ".join(
+                        part for part in [
+                            str(state.get("current_node_name") or state.get("graph_anchor_title") or learning_target or "").strip(),
+                            str(state.get("current_node_id") or state.get("graph_anchor_id") or "").strip(),
+                            "定义 关键点 公式 图表 表格 例子 工程意义 常见误区",
+                        ] if part
+                    ) or search_query
+                else:
+                    graph_query = search_query
+                graph_result = graph_rag_pipeline.ask(graph_query, traversal_mode="balanced")
             except Exception as exc:
                 graph_result = None
                 event_sink.emit(
                     make_event(
                         "session.warning",
                         "tutor",
-                        message="图谱 2.2 检索失败，已回退到常规知识库讲解。",
+                        message="图谱 2.2 检索失败，已仅使用当前已有图谱节点材料继续讲解。",
                         data={"error": str(exc)},
                     )
                 )
@@ -1297,7 +1254,7 @@ def build_tutor_node(tutor_llm, runtime: RuntimeContext):
         elif next_step_choice == "summarize_now":
             transition_hint = "\n【用户要求】这次先不要展开新内容，优先把刚才那一步压成一个短总结，方便学生抓住主线。"
 
-        if citation_plan:
+        if citation_plan and not has_node_content_context:
             human_content = f"""请讲解主题：【{topic}】
 当前用户这次最想解决的问题：【{updated_goal or topic}】
 当前会话目标：【{session_goal or updated_goal or topic}】
@@ -1325,10 +1282,15 @@ def build_tutor_node(tutor_llm, runtime: RuntimeContext):
 
 输出格式要求：
 - 直接输出 Markdown 或纯文本，不要输出 JSON，不要输出代码块
-- 正常情况控制在 80-150 字，优先用 2~4 句纯文字
-- 不要默认使用列表，不要写“好的”“当然”“总结一下”“希望这有帮助”
-- 每轮只推进一个概念，必须带一个具体例子、物理直觉或工程场景
-- 如果要提问，只问一个能暴露理解边界的问题"""
+- 主流程节点讲授必须详实，建议 650-1000 字；不要压缩成 2~4 句短回答
+- 必须按“主线解释 -> 定义归纳 -> 关键点拆解 -> 公式/图表/例子交叉说明 -> 常见误区 -> 小检查问题”的顺序组织
+- 必须综合当前节点素材包中的 explanation_teacher_style、key_points、formulas、examples、figures_refs、definition_candidates、key_point_candidates、formula_candidates、example_candidates 等字段
+- 如果素材包中有公式/公式候选，至少选择 1~3 个最有代表性的公式解释变量含义、适用场景和直观意义
+- 如果素材包中有例子/例子候选，至少给出 1 个教材例子或工程类比，并说明它对应哪个关键点
+- 如果素材包中有图表线索或图谱媒体结果，请在正文真正讲到该图/式/表的位置单独输出一行 [[MEDIA:媒体reference]]；不要把所有媒体堆到最后
+- 可以使用小标题，但不要暴露字段名、CSV 痕迹、raw id 或调试信息
+- 不要写“好的”“当然”“总结一下”“希望这有帮助”
+- 结尾只问一个能暴露理解边界的小问题"""
 
         if graph_result is not None and not has_node_content_context:
             graph_answer_text = normalize_graph_answer(
@@ -1355,7 +1317,7 @@ def build_tutor_node(tutor_llm, runtime: RuntimeContext):
                 llm_stream_disabled = True
                 llm_stream_failures += 1
 
-            if citation_plan:
+            if citation_plan and not has_node_content_context:
                 full_response = _filter_cited_lines(raw_response, len(citation_plan))
                 if not full_response:
                     full_response = _build_evidence_backed_fallback(topic, citation_plan)
@@ -1368,7 +1330,26 @@ def build_tutor_node(tutor_llm, runtime: RuntimeContext):
                         graph_context=active_graph_context,
                     )
 
-            stream_text_chunks(event_sink, "tutor", full_response)
+            if has_node_content_context:
+                graph_payload = dict(graph_result or {})
+                graph_payload["answer"] = full_response
+                graph_payload.setdefault("question", updated_goal or learning_target or topic)
+                graph_payload.setdefault("media_items", list((graph_result or {}).get("media_items", []) or []))
+                graph_payload.setdefault("evidence_items", list((graph_result or {}).get("evidence_items", []) or []))
+                rich_html = build_learning_answer_html(graph_payload).strip()
+                if rich_html:
+                    full_response = rich_html
+                    event_sink.emit(
+                        make_event(
+                            "node.stream",
+                            "tutor",
+                            data={"text": full_response, "kind": "graph_rag_answer"},
+                        )
+                    )
+                else:
+                    stream_text_chunks(event_sink, "tutor", full_response)
+            else:
+                stream_text_chunks(event_sink, "tutor", full_response)
 
         # ── 提取并处理教学标记（掌握度更新、节点跳转）──
         full_response, teaching_markers = _extract_teaching_markers(full_response)
