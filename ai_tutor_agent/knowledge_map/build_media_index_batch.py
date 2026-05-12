@@ -82,6 +82,7 @@ def main() -> None:
     )
 
     batch_summary: list[dict[str, object]] = []
+    expected_output_names: set[str] = {"batch_summary.json"}
     for doc_dir in docs:
         chapter_key = build_chapter_key(doc_dir.name)
         raw_candidates = scanner.scan_document(doc_dir)
@@ -96,6 +97,7 @@ def main() -> None:
         candidate_filter.write_jsonl(filtered_candidates, filtered_path)
         linker.write_jsonl(linked_candidates, linked_path)
         annotator.write_jsonl(annotated_assets, annotated_path)
+        expected_output_names.update({filtered_path.name, linked_path.name, annotated_path.name})
 
         batch_summary.append(
             {
@@ -124,6 +126,7 @@ def main() -> None:
         ),
         encoding="utf-8",
     )
+    cleanup_stale_outputs(output_dir, expected_output_names)
     print(json.dumps({"processed": len(batch_summary), "summary_path": project_relative_path(summary_path)}, ensure_ascii=False, indent=2))
 
 
@@ -140,6 +143,8 @@ def collect_docs(
 
     for doc_dir in sorted(path for path in mineru_cache_root.iterdir() if path.is_dir()):
         name = doc_dir.name
+        if not name.startswith("chapter_"):
+            continue
         if skip_chapter03 and name.startswith("chapter_03_"):
             continue
         if include_patterns and not any(pattern in name for pattern in include_patterns):
@@ -153,6 +158,19 @@ def collect_docs(
 def build_chapter_key(doc_dir_name: str) -> str:
     match = re.match(r"^(chapter_\d+)", doc_dir_name)
     return match.group(1) if match else doc_dir_name
+
+
+def cleanup_stale_outputs(output_dir: Path, expected_output_names: set[str]) -> None:
+    patterns = ("*_filtered_candidates.jsonl", "*_linked_candidates.jsonl", "*_annotated_assets.jsonl")
+    for pattern in patterns:
+        for path in output_dir.glob(pattern):
+            if path.name in expected_output_names:
+                continue
+            try:
+                path.unlink()
+            except OSError:
+                # Keep build resilient when a stale file is locked by the environment.
+                continue
 
 
 if __name__ == "__main__":

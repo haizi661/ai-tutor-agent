@@ -298,7 +298,8 @@
                 const latex = node.getAttribute('data-latex') || node.textContent || '';
                 if (!latex.trim()) return;
                 try {
-                    katex.render(latex, node, { displayMode: true, throwOnError: false, strict: 'ignore' });
+                    const displayMode = node.getAttribute('data-display-mode') !== 'false';
+                    katex.render(latex, node, { displayMode, throwOnError: false, strict: 'ignore' });
                     updateFormulaViewportOverflow(node.closest('.formula-scroll, .learning-formula-viewport') || node);
                 } catch (err) {
                     console.warn('KaTeX formula-render failed', err);

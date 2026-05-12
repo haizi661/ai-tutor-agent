@@ -98,11 +98,11 @@ PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 pytest -q tests/test_graph_integrity.py
 当前图谱口径：
 
 ```text
-graph nodes: 85
-graph edges: 240
+graph nodes: 42
+graph edges: 95
 internal dangling refs: 0
 dangling edges: 0
-external_node_reference: 36
+external_node_reference: 0
 ```
 
 说明：当前主教学图谱是 2026-04-27 图谱 B 运行资产，不再把历史 A2 / Graph A 的 `graph.json` 表述为当前主图谱。

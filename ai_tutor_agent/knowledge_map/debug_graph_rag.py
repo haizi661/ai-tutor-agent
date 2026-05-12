@@ -152,8 +152,14 @@ def _media_hint(item: dict) -> str:
         item.get("relation_statement", ""),
     ]
     caption = str(item.get("caption", "") or item.get("title", "") or "").strip()
+    asset_type = str(item.get("asset_type", "") or "").strip()
+    formula_text = str(item.get("text", "") or item.get("raw_text", "") or "").strip()
     for value in candidates:
-        text = str(value or "").strip()
+        text = _sanitize_media_hint_text(
+            str(value or ""),
+            asset_type=asset_type,
+            formula_text=formula_text,
+        )
         if text and text != caption:
             return text
     return ""
@@ -167,6 +173,40 @@ def _learning_source_label(item: dict) -> str:
     if caption:
         return f"来源：{caption}"
     return "来源：知识图谱检索结果"
+
+
+def _sanitize_media_hint_text(
+    value: str,
+    *,
+    asset_type: str = "",
+    formula_text: str = "",
+) -> str:
+    text = str(value or "").replace("\x00", " ").strip()
+    if not text:
+        return ""
+    text = html.unescape(text)
+    text = re.sub(r"<[^>]+>", " ", text)
+    text = re.sub(r"\[\[MEDIA:.+?\]\]", " ", text)
+    text = re.sub(r"\[[^\]]+:[^\]]+\]", " ", text)
+    text = re.sub(r"```(?:latex|math|tex)?", " ", text, flags=re.IGNORECASE)
+    text = text.replace("```", " ")
+    text = re.sub(r"\$\$.*?\$\$", " ", text)
+    text = re.sub(r"\\\[.*?\\\]", " ", text)
+    text = re.sub(r"\\\(.*?\\\)", " ", text)
+    if formula_text:
+        formula_key = _canonical_plain_text(_normalize_latex_text(formula_text))
+        if formula_key:
+            pieces = re.split(r"(?<=[,，。；;：:])|\s+", text)
+            kept_pieces = [piece for piece in pieces if _canonical_plain_text(piece) != formula_key]
+            text = " ".join(piece for piece in kept_pieces if piece.strip())
+    text = re.sub(r"\s+", " ", text).strip(" ,，。；;：:")
+    if asset_type == "formula":
+        if "\\" in text or "$" in text:
+            return ""
+        alpha_num = len(re.findall(r"[\w\u4e00-\u9fff]", text))
+        if alpha_num and len(re.findall(r"[{}_^]", text)) > alpha_num / 2:
+            return ""
+    return text.strip()
 
 
 def _learning_debug_details(raw_ref: str, *, latex: str = "") -> str:
@@ -524,6 +564,7 @@ def build_html_report(result: dict) -> str:
     .figure-viewport {{ margin-top: 10px; overflow: auto; max-width: 100%; max-height: 70vh; border-radius: 6px; background: #f8fafc; }}
     .formula-scroll.is-overflowing, .formula-viewport.is-overflowing {{ justify-content: flex-start; }}
     .formula-math {{ min-width: max-content; max-width: none; line-height: 1.8; text-align: center; white-space: nowrap; }}
+    .inline-formula-render {{ display: inline-block; vertical-align: middle; margin: 0 0.15em; max-width: 100%; }}
     .formula-math .katex {{ white-space: nowrap; }}
     .formula-full {{ font-size: 18px; }}
     .formula-raw {{ margin-top: 12px; }}
@@ -559,7 +600,8 @@ def build_html_report(result: dict) -> str:
         const latex = el.getAttribute('data-latex') || el.textContent || '';
         if (!latex.trim()) return;
         try {{
-          katex.render(latex, el, {{ displayMode: true, throwOnError: false, strict: 'ignore' }});
+          const displayMode = el.getAttribute('data-display-mode') !== 'false';
+          katex.render(latex, el, {{ displayMode, throwOnError: false, strict: 'ignore' }});
           const scroller = el.closest('.formula-scroll');
           if (scroller && el.scrollWidth > scroller.clientWidth) {{
             scroller.classList.add('is-overflowing');
@@ -823,7 +865,6 @@ def _render_answer_html(
         }
         remaining_refs = [ref for ref in media_cards_by_ref if ref not in used_refs and ref not in planned_refs]
         if remaining_refs:
-            insert_at = _find_primary_media_insert_index([block_html for _, block_html, _, _ in raw_blocks])
             media_block = _build_media_block_for_refs(
                 remaining_refs,
                 media_cards_by_ref,
@@ -832,7 +873,7 @@ def _render_answer_html(
                 media_block_renderer=media_block_renderer,
             )
             if media_block:
-                raw_blocks.insert(insert_at, ("media", media_block, [], False))
+                raw_blocks.append(("media", media_block, [], False))
 
     merged_blocks: list[str] = []
     pending_refs: list[str] = []
@@ -1203,7 +1244,47 @@ def _render_answer_line(line: str, media_labels_by_ref: dict[str, str], refs: li
             )
             cleaned = cleaned.replace(f"[[MEDIA:{ref_text}]]", label_text)
             cleaned = cleaned.replace(f"[{ref_text}]", label_text)
-    return html.escape(cleaned)
+    return _render_text_with_inline_math(cleaned)
+
+
+def _render_text_with_inline_math(text: str) -> str:
+    if not text:
+        return ""
+    pattern = re.compile(
+        r"(\$\$(.+?)\$\$|\\\[(.+?)\\\]|\\\((.+?)\\\)|(?<!\$)\$(.+?)(?<!\\)\$)"
+    )
+    parts: list[str] = []
+    last_end = 0
+    for match in pattern.finditer(text):
+        start, end = match.span(1)
+        if start > last_end:
+            parts.append(html.escape(text[last_end:start]))
+        latex = (
+            match.group(2)
+            or match.group(3)
+            or match.group(4)
+            or match.group(5)
+            or ""
+        )
+        rendered = _render_inline_formula_span(latex)
+        parts.append(rendered if rendered else html.escape(match.group(1)))
+        last_end = end
+    if last_end < len(text):
+        parts.append(html.escape(text[last_end:]))
+    return "".join(parts)
+
+
+def _render_inline_formula_span(latex: str) -> str:
+    formula_raw = _normalize_latex_text(latex)
+    if not formula_raw:
+        return ""
+    formula_text = html.escape(formula_raw)
+    formula_attr = html.escape(formula_raw, quote=True)
+    return (
+        '<span class="inline-formula-render formula-render" '
+        'data-display-mode="false" '
+        f'data-latex="{formula_attr}">{formula_text}</span>'
+    )
 
 
 def _strip_stray_brackets(line: str) -> str:

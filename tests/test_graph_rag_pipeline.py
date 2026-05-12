@@ -66,6 +66,80 @@ def test_node_selector_prefers_graph_21_teaching_attributes():
     assert selected["node_id"] == "KM001"
 
 
+def test_node_selector_matches_chinese_query_to_english_domain_alias():
+    selector = NodeSelector()
+    nodes = [
+        {
+            "node_id": "KM012",
+            "name": "线性系统的时域分析法",
+            "summary": "研究时间响应和稳态误差。",
+            "tags": ["时域分析", "时间响应"],
+            "core_concepts": ["时域分析", "时间响应"],
+            "assessment_focus": "分析",
+            "importance_level": "核心",
+            "extra": {
+                "retrieval_keywords": ["时域分析", "时间响应"],
+                "node_role": "chapter_anchor",
+            },
+        },
+        {
+            "node_id": "KM029",
+            "name": "频率域稳定判据",
+            "summary": "介绍 Nyquist 稳定性判据等频域稳定分析方法。",
+            "tags": ["Nyquist", "稳定判据"],
+            "core_concepts": ["频率域稳定判据", "Nyquist", "频率特性"],
+            "assessment_focus": "分析",
+            "importance_level": "重要",
+            "extra": {
+                "retrieval_keywords": ["频域分析", "Nyquist", "频率响应"],
+                "node_role": "topic",
+            },
+        },
+    ]
+
+    selected = selector.select_node("奈奎斯特曲线有什么作用？", nodes)
+
+    assert selected is not None
+    assert selected["node_id"] == "KM029"
+
+
+def test_node_selector_prefers_feedback_control_topic_over_generic_disturbance_overlap():
+    selector = NodeSelector()
+    nodes = [
+        {
+            "node_id": "KM002",
+            "name": "自动控制的基本原理与方式",
+            "summary": "介绍反馈控制原理、开环控制方式和复合控制方式。",
+            "tags": ["反馈控制", "开环控制"],
+            "core_concepts": ["反馈控制", "闭环控制", "按偏差控制"],
+            "assessment_focus": "原理",
+            "importance_level": "核心",
+            "extra": {
+                "retrieval_keywords": ["反馈控制", "负反馈控制", "控制方式"],
+                "node_role": "topic",
+            },
+        },
+        {
+            "node_id": "KM018",
+            "name": "线性系统的稳态误差计算",
+            "summary": "研究稳态误差的概念、类型及计算方法。",
+            "tags": ["稳态误差", "误差系数"],
+            "core_concepts": ["稳态误差", "反馈", "扰动"],
+            "assessment_focus": "计算",
+            "importance_level": "核心",
+            "extra": {
+                "retrieval_keywords": ["稳态误差", "误差系数", "扰动"],
+                "node_role": "topic",
+            },
+        },
+    ]
+
+    selected = selector.select_node("为什么反馈控制能够抑制扰动？", nodes)
+
+    assert selected is not None
+    assert selected["node_id"] == "KM002"
+
+
 def test_graph_traverser_prefers_graph_21_relations_and_edge_metadata():
     node_map = {
         "KM001": {"node_id": "KM001", "name": "自动控制", "importance_level": "核心"},
