@@ -65,3 +65,32 @@ def test_media_asset_annotator_builds_retrieval_keywords_and_confidence():
     assert len(annotated) == 2
     assert all(item["retrieval_keywords"] for item in annotated)
     assert all(0.0 <= float(item["confidence"]) <= 1.0 for item in annotated)
+
+
+def test_media_asset_annotator_persists_structured_vision_fields_for_figures():
+    class FakeVisualAnalyzer:
+        def analyze_figure(self, *args, **kwargs):
+            return {
+                "visual_summary": "该图展示反馈控制系统中信号比较、控制器和反馈通道的关系。",
+                "visual_key_elements": ["输入端", "比较环节", "控制器", "反馈通道"],
+                "visual_relations": ["输出经反馈后再次与输入比较形成闭环调节。"],
+                "teaching_focus": ["强调闭环结构如何抑制扰动。"],
+                "confidence": 0.82,
+                "vision_model": "fake-qwen-vl",
+            }
+
+    config, linked = _load_linked_assets()
+    annotator = MediaAssetAnnotator(config=config, visual_analyzer=FakeVisualAnalyzer())
+
+    target = next(item for item in linked if item["asset_type"] == "figure")
+    annotated = annotator.annotate_assets([target], enable_visual=True)[0]
+
+    assert annotated["visual_summary"]
+    assert annotated["visual_key_elements"]
+    assert annotated["visual_relations"]
+    assert annotated["teaching_focus"]
+    assert float(annotated["vision_confidence"]) == 0.82
+    assert annotated["vision_model"] == "fake-qwen-vl"
+    assert "visual_summary" in annotated["llm_generated_fields"]
+    assert "visual_relations" in annotated["llm_generated_fields"]
+    assert annotated["extra"]["visual_summary"] == annotated["visual_summary"]

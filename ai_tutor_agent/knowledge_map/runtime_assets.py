@@ -4,6 +4,8 @@ import argparse
 import json
 from pathlib import Path
 from typing import Any
+
+from ai_tutor_agent.knowledge_map.runtime_defaults import DEFAULT_MEDIA_EVIDENCE_INDEX_DIR
 from ai_tutor_agent.platform_paths import project_relative_path, resolve_project_path
 
 
@@ -85,14 +87,14 @@ def assert_media_evidence_index_ready(path: str | Path) -> dict[str, Any]:
             "python -m ai_tutor_agent.knowledge_map.build_media_index_batch "
             "--mineru-cache-root data/mineru_cache "
             "--nodes-csv data/knowledge_map_outputs/auto_control_knowledge_map_v2_nodes.csv "
-            "--output-dir data/media_evidence_index"
+            f"--output-dir {DEFAULT_MEDIA_EVIDENCE_INDEX_DIR}"
         )
     return report
 
 
 def main() -> None:
     parser = argparse.ArgumentParser(description="Inspect runtime knowledge-map assets.")
-    parser.add_argument("--media-index", default="data/media_evidence_index")
+    parser.add_argument("--media-index", default=DEFAULT_MEDIA_EVIDENCE_INDEX_DIR)
     parser.add_argument("--require-media-index", action="store_true")
     args = parser.parse_args()
     report = assert_media_evidence_index_ready(args.media_index) if args.require_media_index else inspect_media_evidence_index(args.media_index)

@@ -5,6 +5,7 @@ import re
 from pathlib import Path
 from typing import Any
 
+from ai_tutor_agent.knowledge_map.runtime_defaults import DEFAULT_MEDIA_EVIDENCE_INDEX_DIR
 from ai_tutor_agent.platform_paths import resolve_existing_path, resolve_project_path
 
 
@@ -14,7 +15,7 @@ class GraphMediaEnricher:
         mineru_cache_root: str | Path = "data/mineru_cache",
         *,
         visual_analyzer: Any | None = None,
-        annotated_assets_path: str | Path = "data/media_evidence_index",
+        annotated_assets_path: str | Path = DEFAULT_MEDIA_EVIDENCE_INDEX_DIR,
     ) -> None:
         self.mineru_cache_root = resolve_project_path(mineru_cache_root)
         self.chapter_docs = self._load_chapter_docs()
@@ -139,11 +140,16 @@ class GraphMediaEnricher:
             return None
 
         visual_summary = str((asset.get("extra", {}) or {}).get("visual_summary", "") or "").strip()
+        visual_summary = visual_summary or str(asset.get("visual_summary", "") or "").strip()
+        visual_relations = [str(item).strip() for item in (asset.get("visual_relations", []) or []) if str(item).strip()]
+        visual_key_elements = [str(item).strip() for item in (asset.get("visual_key_elements", []) or []) if str(item).strip()]
+        teaching_focus = [str(item).strip() for item in (asset.get("teaching_focus", []) or []) if str(item).strip()]
         relation_statement = str(asset.get("relation_statement", "") or "").strip()
         direct_claims = [str(item).strip() for item in (asset.get("direct_readable_claims", []) or []) if str(item).strip()]
         formula_meaning = str(asset.get("formula_meaning", "") or "").strip()
         analysis_hint = (
             relation_statement
+            or (visual_relations[0] if visual_relations else "")
             or formula_meaning
             or (direct_claims[0] if direct_claims else "")
             or self._build_analysis_hint_from_asset(asset)
@@ -156,6 +162,9 @@ class GraphMediaEnricher:
             "text": str(asset.get("raw_text", "") or "").strip(),
             "analysis_hint": analysis_hint,
             "visual_summary": visual_summary or (direct_claims[0] if direct_claims and asset_type == "figure" else ""),
+            "visual_relations": visual_relations,
+            "visual_key_elements": visual_key_elements,
+            "teaching_focus": teaching_focus,
             "placement_hint": "analysis",
             "evidence_role": str(asset.get("evidence_role", "") or ""),
             "question_affordances": list(asset.get("question_affordances", []) or []),
@@ -165,6 +174,7 @@ class GraphMediaEnricher:
             "variables": list(asset.get("variables", []) or []),
             "domain_terms": list(asset.get("domain_terms", []) or []),
             "confidence": float(asset.get("confidence", 0.0) or 0.0),
+            "vision_confidence": float(asset.get("vision_confidence", 0.0) or 0.0),
             "source_path": str(asset.get("source_path", "") or "").strip(),
             "visual_type": str(asset.get("visual_type", "") or "").strip(),
             "asset_anchor_node_id": str(asset.get("anchor_node_id", "") or "").strip(),
@@ -386,6 +396,9 @@ class GraphMediaEnricher:
             " ".join(str(x) for x in (item.get("retrieval_keywords", []) or [])),
             " ".join(str(x) for x in (item.get("domain_terms", []) or [])),
             " ".join(str(x) for x in (item.get("variables", []) or [])),
+            " ".join(str(x) for x in (item.get("visual_relations", []) or [])),
+            " ".join(str(x) for x in (item.get("visual_key_elements", []) or [])),
+            " ".join(str(x) for x in (item.get("teaching_focus", []) or [])),
             str(item.get("chapter_title", "") or ""),
             str(item.get("asset_anchor_node_name", "") or ""),
         ]
@@ -452,8 +465,13 @@ class GraphMediaEnricher:
                 score += 2.4
             if item.get("visual_summary"):
                 score += 0.8
+            if item.get("visual_relations"):
+                score += 0.8
+            if item.get("teaching_focus"):
+                score += 0.5
 
         score += min(float(item.get("confidence", 0.0) or 0.0), 1.0)
+        score += min(float(item.get("vision_confidence", 0.0) or 0.0), 1.0) * 0.6
         score -= int(item.get("hop", 99)) * 0.6
         return round(score, 4)
 

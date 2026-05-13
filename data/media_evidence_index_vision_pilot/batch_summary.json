@@ -1,0 +1,72 @@
+{
+  "count": 4,
+  "chapters": [
+    {
+      "doc_dir": "chapter_01_p009-032_自动控制的一般概念__8a418239",
+      "chapter_key": "chapter_01",
+      "raw_count": 41,
+      "filtered_count": 37,
+      "linked_count": 37,
+      "annotated_count": 37,
+      "asset_type_counts": {
+        "figure": 31,
+        "formula": 6
+      },
+      "vision_enabled": true,
+      "filtered_path": "data/media_evidence_index_vision_pilot/chapter_01_filtered_candidates.jsonl",
+      "linked_path": "data/media_evidence_index_vision_pilot/chapter_01_linked_candidates.jsonl",
+      "annotated_path": "data/media_evidence_index_vision_pilot/chapter_01_annotated_assets.jsonl"
+    },
+    {
+      "doc_dir": "chapter_02_p033-081_控制系统的数学模型__9294ff3f",
+      "chapter_key": "chapter_02",
+      "raw_count": 305,
+      "filtered_count": 248,
+      "linked_count": 248,
+      "annotated_count": 248,
+      "asset_type_counts": {
+        "figure": 72,
+        "formula": 173,
+        "table": 3
+      },
+      "vision_enabled": true,
+      "filtered_path": "data/media_evidence_index_vision_pilot/chapter_02_filtered_candidates.jsonl",
+      "linked_path": "data/media_evidence_index_vision_pilot/chapter_02_linked_candidates.jsonl",
+      "annotated_path": "data/media_evidence_index_vision_pilot/chapter_02_annotated_assets.jsonl"
+    },
+    {
+      "doc_dir": "chapter_03_p082-159_线性系统的时域分析法__082fadd0",
+      "chapter_key": "chapter_03",
+      "raw_count": 436,
+      "filtered_count": 392,
+      "linked_count": 392,
+      "annotated_count": 392,
+      "asset_type_counts": {
+        "figure": 87,
+        "formula": 298,
+        "table": 7
+      },
+      "vision_enabled": true,
+      "filtered_path": "data/media_evidence_index_vision_pilot/chapter_03_filtered_candidates.jsonl",
+      "linked_path": "data/media_evidence_index_vision_pilot/chapter_03_linked_candidates.jsonl",
+      "annotated_path": "data/media_evidence_index_vision_pilot/chapter_03_annotated_assets.jsonl"
+    },
+    {
+      "doc_dir": "chapter_04_p160-204_线性系统的根轨迹法__151976f6",
+      "chapter_key": "chapter_04",
+      "raw_count": 250,
+      "filtered_count": 215,
+      "linked_count": 215,
+      "annotated_count": 215,
+      "asset_type_counts": {
+        "figure": 61,
+        "formula": 151,
+        "table": 3
+      },
+      "vision_enabled": true,
+      "filtered_path": "data/media_evidence_index_vision_pilot/chapter_04_filtered_candidates.jsonl",
+      "linked_path": "data/media_evidence_index_vision_pilot/chapter_04_linked_candidates.jsonl",
+      "annotated_path": "data/media_evidence_index_vision_pilot/chapter_04_annotated_assets.jsonl"
+    }
+  ]
+}

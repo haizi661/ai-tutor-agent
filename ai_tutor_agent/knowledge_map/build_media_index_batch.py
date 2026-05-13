@@ -7,11 +7,14 @@ from collections import Counter
 from dataclasses import replace
 from pathlib import Path
 
+from ai_tutor_agent.config import get_settings
+from ai_tutor_agent.knowledge_map.builders.qwen_visual_analyzer import QwenVisualAnalyzer
 from ai_tutor_agent.knowledge_map.config.media_index_config import MediaIndexConfig
 from ai_tutor_agent.knowledge_map.media_index.media_asset_annotator import MediaAssetAnnotator
 from ai_tutor_agent.knowledge_map.media_index.media_asset_scanner import MediaAssetScanner
 from ai_tutor_agent.knowledge_map.media_index.media_candidate_filter import MediaCandidateFilter
 from ai_tutor_agent.knowledge_map.media_index.media_node_linker import MediaNodeLinker
+from ai_tutor_agent.knowledge_map.runtime_defaults import DEFAULT_MEDIA_EVIDENCE_INDEX_DIR
 from ai_tutor_agent.platform_paths import project_relative_path, resolve_project_path
 
 
@@ -32,7 +35,7 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     parser.add_argument(
         "--output-dir",
         type=str,
-        default="data/media_evidence_index",
+        default=DEFAULT_MEDIA_EVIDENCE_INDEX_DIR,
         help="Directory for generated jsonl and summary files.",
     )
     parser.add_argument(
@@ -51,6 +54,11 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
         "--skip-chapter03",
         action="store_true",
         help="Skip chapter_03 directory.",
+    )
+    parser.add_argument(
+        "--enable-vision",
+        action="store_true",
+        help="Enable visual LLM annotation for figure assets.",
     )
     return parser.parse_args(argv)
 
@@ -72,7 +80,8 @@ def main() -> None:
     scanner = MediaAssetScanner(config=config)
     candidate_filter = MediaCandidateFilter(config=config)
     linker = MediaNodeLinker(nodes_csv_path=resolve_project_path(args.nodes_csv), config=config)
-    annotator = MediaAssetAnnotator(config=config)
+    visual_analyzer = build_visual_analyzer() if args.enable_vision else None
+    annotator = MediaAssetAnnotator(config=config, visual_analyzer=visual_analyzer)
 
     docs = collect_docs(
         config.mineru_cache_root,
@@ -81,53 +90,31 @@ def main() -> None:
         skip_chapter03=args.skip_chapter03,
     )
 
-    batch_summary: list[dict[str, object]] = []
-    expected_output_names: set[str] = {"batch_summary.json"}
-    for doc_dir in docs:
-        chapter_key = build_chapter_key(doc_dir.name)
-        raw_candidates = scanner.scan_document(doc_dir)
-        filtered_candidates = candidate_filter.filter_candidates(raw_candidates)
-        linked_candidates = linker.link_candidates(filtered_candidates)
-        annotated_assets = annotator.annotate_assets(linked_candidates, enable_visual=False)
-
-        filtered_path = output_dir / f"{chapter_key}_filtered_candidates.jsonl"
-        linked_path = output_dir / f"{chapter_key}_linked_candidates.jsonl"
-        annotated_path = output_dir / f"{chapter_key}_annotated_assets.jsonl"
-
-        candidate_filter.write_jsonl(filtered_candidates, filtered_path)
-        linker.write_jsonl(linked_candidates, linked_path)
-        annotator.write_jsonl(annotated_assets, annotated_path)
-        expected_output_names.update({filtered_path.name, linked_path.name, annotated_path.name})
-
-        batch_summary.append(
-            {
-                "doc_dir": doc_dir.name,
-                "chapter_key": chapter_key,
-                "raw_count": len(raw_candidates),
-                "filtered_count": len(filtered_candidates),
-                "linked_count": len(linked_candidates),
-                "annotated_count": len(annotated_assets),
-                "asset_type_counts": dict(Counter(item.get("asset_type", "") for item in annotated_assets)),
-                "filtered_path": project_relative_path(filtered_path),
-                "linked_path": project_relative_path(linked_path),
-                "annotated_path": project_relative_path(annotated_path),
-            }
-        )
-
-    summary_path = output_dir / "batch_summary.json"
-    summary_path.write_text(
-        json.dumps(
-            {
-                "count": len(batch_summary),
-                "chapters": batch_summary,
-            },
-            ensure_ascii=False,
-            indent=2,
-        ),
-        encoding="utf-8",
+    batch_summary, expected_output_names = process_documents(
+        docs=docs,
+        output_dir=output_dir,
+        scanner=scanner,
+        candidate_filter=candidate_filter,
+        linker=linker,
+        annotator=annotator,
+        enable_visual=args.enable_vision,
     )
+    summary_path = write_batch_summary(output_dir, batch_summary)
     cleanup_stale_outputs(output_dir, expected_output_names)
     print(json.dumps({"processed": len(batch_summary), "summary_path": project_relative_path(summary_path)}, ensure_ascii=False, indent=2))
+
+
+def build_visual_analyzer() -> QwenVisualAnalyzer | None:
+    try:
+        settings = get_settings()
+    except Exception:
+        return None
+    if not settings.qwen_api_key:
+        return None
+    try:
+        return QwenVisualAnalyzer(api_key=settings.qwen_api_key)
+    except Exception:
+        return None
 
 
 def collect_docs(
@@ -171,6 +158,68 @@ def cleanup_stale_outputs(output_dir: Path, expected_output_names: set[str]) -> 
             except OSError:
                 # Keep build resilient when a stale file is locked by the environment.
                 continue
+
+
+def process_documents(
+    *,
+    docs: list[Path],
+    output_dir: Path,
+    scanner: MediaAssetScanner,
+    candidate_filter: MediaCandidateFilter,
+    linker: MediaNodeLinker,
+    annotator: MediaAssetAnnotator,
+    enable_visual: bool,
+) -> tuple[list[dict[str, object]], set[str]]:
+    batch_summary: list[dict[str, object]] = []
+    expected_output_names: set[str] = {"batch_summary.json"}
+    for doc_dir in docs:
+        chapter_key = build_chapter_key(doc_dir.name)
+        raw_candidates = scanner.scan_document(doc_dir)
+        filtered_candidates = candidate_filter.filter_candidates(raw_candidates)
+        linked_candidates = linker.link_candidates(filtered_candidates)
+        annotated_assets = annotator.annotate_assets(linked_candidates, enable_visual=enable_visual)
+
+        filtered_path = output_dir / f"{chapter_key}_filtered_candidates.jsonl"
+        linked_path = output_dir / f"{chapter_key}_linked_candidates.jsonl"
+        annotated_path = output_dir / f"{chapter_key}_annotated_assets.jsonl"
+
+        candidate_filter.write_jsonl(filtered_candidates, filtered_path)
+        linker.write_jsonl(linked_candidates, linked_path)
+        annotator.write_jsonl(annotated_assets, annotated_path)
+        expected_output_names.update({filtered_path.name, linked_path.name, annotated_path.name})
+
+        batch_summary.append(
+            {
+                "doc_dir": doc_dir.name,
+                "chapter_key": chapter_key,
+                "raw_count": len(raw_candidates),
+                "filtered_count": len(filtered_candidates),
+                "linked_count": len(linked_candidates),
+                "annotated_count": len(annotated_assets),
+                "asset_type_counts": dict(Counter(item.get("asset_type", "") for item in annotated_assets)),
+                "vision_enabled": bool(enable_visual),
+                "filtered_path": project_relative_path(filtered_path),
+                "linked_path": project_relative_path(linked_path),
+                "annotated_path": project_relative_path(annotated_path),
+            }
+        )
+    return batch_summary, expected_output_names
+
+
+def write_batch_summary(output_dir: Path, batch_summary: list[dict[str, object]]) -> Path:
+    summary_path = output_dir / "batch_summary.json"
+    summary_path.write_text(
+        json.dumps(
+            {
+                "count": len(batch_summary),
+                "chapters": batch_summary,
+            },
+            ensure_ascii=False,
+            indent=2,
+        ),
+        encoding="utf-8",
+    )
+    return summary_path
 
 
 if __name__ == "__main__":

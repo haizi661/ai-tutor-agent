@@ -17,6 +17,7 @@ from ai_tutor_agent.knowledge_map.builders.graph_traverser import GraphTraverser
 from ai_tutor_agent.knowledge_map.builders.node_selector import NodeSelector
 from ai_tutor_agent.knowledge_map.builders.qwen_visual_analyzer import QwenVisualAnalyzer
 from ai_tutor_agent.knowledge_map.config.graph_rag_config import GraphRAGConfig
+from ai_tutor_agent.knowledge_map.runtime_defaults import DEFAULT_MEDIA_EVIDENCE_INDEX_DIR
 from ai_tutor_agent.platform_paths import resolve_project_path
 
 
@@ -27,7 +28,7 @@ class GraphRAGPipeline:
         nodes_csv_path: str = "data/knowledge_map_outputs/auto_control_knowledge_map_v2_nodes.csv",
         edges_csv_path: str = "data/knowledge_map_outputs/auto_control_knowledge_map_v2_edges.csv",
         mineru_cache_root: str = "data/mineru_cache",
-        annotated_assets_path: str = "data/media_evidence_index",
+        annotated_assets_path: str = DEFAULT_MEDIA_EVIDENCE_INDEX_DIR,
         enable_llm: bool = True,
         enable_visual_llm: bool = False,
         llm_profile: str | None = "qwen",

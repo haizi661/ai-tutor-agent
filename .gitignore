@@ -45,6 +45,12 @@ data/media_evidence_index/
 !data/media_evidence_index/*_annotated_assets.jsonl
 !data/media_evidence_index/*_linked_candidates.jsonl
 !data/media_evidence_index/*_filtered_candidates.jsonl
+data/media_evidence_index_vision_pilot/
+!data/media_evidence_index_vision_pilot/
+!data/media_evidence_index_vision_pilot/batch_summary.json
+!data/media_evidence_index_vision_pilot/*_annotated_assets.jsonl
+!data/media_evidence_index_vision_pilot/*_linked_candidates.jsonl
+!data/media_evidence_index_vision_pilot/*_filtered_candidates.jsonl
 data/minerU_cache/
 data/mineru_cache/
 data/retrieval_state.json

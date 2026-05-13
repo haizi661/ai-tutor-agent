@@ -135,17 +135,15 @@ class MediaAssetAnnotator:
         asset["formula_meaning"] = formula_meaning
         asset["retrieval_keywords"] = retrieval_keywords
         asset["dedup_group"] = str((asset.get("extra", {}) or {}).get("dedup_group", "") or "")
+        asset["visual_summary"] = str(asset.get("visual_summary", "") or "").strip()
+        asset["visual_key_elements"] = list(asset.get("visual_key_elements", []) or [])
+        asset["visual_relations"] = list(asset.get("visual_relations", []) or [])
+        asset["teaching_focus"] = list(asset.get("teaching_focus", []) or [])
+        asset["vision_confidence"] = float(asset.get("vision_confidence", 0.0) or 0.0)
+        asset["vision_model"] = str(asset.get("vision_model", "") or "").strip()
 
-        if enable_visual:
-            visual_summary = self._describe_figure(asset)
-            if visual_summary:
-                asset["extra"]["visual_summary"] = visual_summary
-                if "visual_summary" not in asset["llm_generated_fields"]:
-                    asset["llm_generated_fields"].append("visual_summary")
-                if visual_summary not in asset["direct_readable_claims"]:
-                    asset["direct_readable_claims"].append(visual_summary)
-                if not asset["relation_statement"]:
-                    asset["relation_statement"] = visual_summary
+        if enable_visual and asset.get("asset_type") == "figure":
+            self._apply_visual_annotation(asset)
 
         confidence = self._estimate_confidence(asset)
         asset["confidence"] = confidence
@@ -376,25 +374,81 @@ class MediaAssetAnnotator:
                 claims.append(cleaned)
         return self._dedup_list(claims)[:4]
 
-    def _describe_figure(self, asset: dict[str, Any]) -> str:
+    def _apply_visual_annotation(self, asset: dict[str, Any]) -> None:
+        vision = self._analyze_figure(asset)
+        if not vision:
+            return
+
+        summary = str(vision.get("visual_summary", "") or "").strip()
+        key_elements = self._dedup_list([str(item).strip() for item in (vision.get("visual_key_elements", []) or [])])
+        relations = self._dedup_list([str(item).strip() for item in (vision.get("visual_relations", []) or [])])
+        focus = self._dedup_list([str(item).strip() for item in (vision.get("teaching_focus", []) or [])])
+
+        asset["visual_summary"] = summary
+        asset["visual_key_elements"] = key_elements
+        asset["visual_relations"] = relations
+        asset["teaching_focus"] = focus
+        asset["vision_confidence"] = max(0.0, min(float(vision.get("confidence", 0.0) or 0.0), 1.0))
+        asset["vision_model"] = str(vision.get("vision_model", "") or "").strip()
+
+        if summary:
+            asset["extra"]["visual_summary"] = summary
+            if summary not in asset["direct_readable_claims"]:
+                asset["direct_readable_claims"].append(summary)
+        for relation in relations[:2]:
+            if relation and relation not in asset["direct_readable_claims"]:
+                asset["direct_readable_claims"].append(relation)
+        if not asset["relation_statement"]:
+            asset["relation_statement"] = relations[0] if relations else summary
+        asset["retrieval_keywords"] = self._dedup_list(
+            list(asset.get("retrieval_keywords", []) or []) + key_elements + focus
+        )[:24]
+        asset["question_affordances"] = self._dedup_list(
+            list(asset.get("question_affordances", []) or []) + self._infer_visual_affordances(key_elements, relations, focus)
+        )
+        for field_name, field_value in [
+            ("visual_summary", summary),
+            ("visual_key_elements", key_elements),
+            ("visual_relations", relations),
+            ("teaching_focus", focus),
+        ]:
+            if field_value and field_name not in asset["llm_generated_fields"]:
+                asset["llm_generated_fields"].append(field_name)
+
+    def _analyze_figure(self, asset: dict[str, Any]) -> dict[str, Any]:
         if asset.get("asset_type") != "figure" or self.visual_analyzer is None:
-            return ""
+            return {}
         path = str(asset.get("source_path", "") or "").strip()
         if not path:
-            return ""
+            return {}
         cache_key = str(Path(path).resolve())
         if cache_key in self._visual_cache:
             return self._visual_cache[cache_key]
-        summary = self.visual_analyzer.describe_image(
+        result = self.visual_analyzer.analyze_figure(
             path,
             node_name=str(asset.get("anchor_node_name", "") or asset.get("anchor_node_id", "")),
             caption=str(asset.get("caption_text", "") or ""),
             question="请提取图中可直接支持教学解释的视觉信息。",
         )
-        summary = str(summary or "").strip()
-        if summary:
-            self._visual_cache[cache_key] = summary
-        return summary
+        if result:
+            self._visual_cache[cache_key] = result
+        return result
+
+    def _infer_visual_affordances(
+        self,
+        key_elements: list[str],
+        relations: list[str],
+        focus: list[str],
+    ) -> list[str]:
+        text = " ".join(key_elements + relations + focus)
+        affordances: list[str] = []
+        if any(keyword in text for keyword in ["坐标", "曲线", "峰值", "超调", "趋势", "变化"]):
+            affordances.extend(["explain_trend", "compare_parameters"])
+        if any(keyword in text for keyword in ["结构", "模块", "反馈", "比较", "控制器", "方框图", "原理图"]):
+            affordances.extend(["identify_structure", "explain_signal_flow"])
+        if any(keyword in text for keyword in ["参数", "增大", "减小", "影响"]):
+            affordances.append("connect_variables")
+        return affordances
 
     def _estimate_confidence(self, asset: dict[str, Any]) -> float:
         score = 0.2
@@ -412,6 +466,12 @@ class MediaAssetAnnotator:
             score += 0.15
         if asset.get("extra", {}).get("visual_summary"):
             score += 0.1
+        if asset.get("visual_key_elements"):
+            score += 0.05
+        if asset.get("visual_relations"):
+            score += 0.05
+        if asset.get("vision_confidence"):
+            score += min(float(asset.get("vision_confidence", 0.0) or 0.0), 1.0) * 0.15
         return min(round(score, 4), 1.0)
 
     def _extract_keywords_from_text(self, text: str, *, max_count: int) -> list[str]:
