@@ -96,3 +96,6 @@ backend/runtime_data/
 backend/runtime_data.zip
 backend/workflow.log
 backend/__pycache__/
+
+#claude
+.claude
