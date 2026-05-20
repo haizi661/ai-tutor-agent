@@ -1,5 +1,5 @@
 from ...application.session import run_learning_session
-from ...config import get_settings
+from ...config import apply_network_environment, get_settings
 from ...core.events import make_event
 from ...core.ports import RuntimeContext, UserAbortError
 from ...infrastructure.retriever import LocalFileKnowledgeProvider
@@ -9,13 +9,17 @@ from .adapter import CliAnswerProvider, CliEventSink
 
 def run_cli() -> None:
     settings = get_settings()
+    apply_network_environment(settings)
     event_sink = CliEventSink()
     answer_provider = CliAnswerProvider()
     
     # Initialize KnowledgeProvider (RAG)
     try:
         knowledge_provider = LocalFileKnowledgeProvider(settings)
-        print("📚 知识库加载成功，已启用 RAG 增强。")
+        if getattr(knowledge_provider, "vector_store", None):
+            print("📚 知识库加载成功，已启用 RAG 增强。")
+        else:
+            print("⚠️ 知识库已初始化，但当前处于无 RAG 回退模式。")
     except Exception as e:
         from ...core.ports import NoopKnowledgeProvider
         knowledge_provider = NoopKnowledgeProvider()
@@ -70,6 +74,7 @@ def run_cli() -> None:
             thread_id=thread_id,
             topic=topic_input,
             current_state=current_state,
+            runtime_context=runtime,
         )
     except UserAbortError as exc:
         event_sink.emit(

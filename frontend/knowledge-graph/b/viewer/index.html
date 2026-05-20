@@ -1,0 +1,590 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>知识图谱 B · 自动控制原理</title>
+  <script src="https://unpkg.com/vis-network/standalone/umd/vis-network.min.js"></script>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #f8fafc; color: #0f172a; }
+    /* Embedded mode: no panel, full graph */
+    body.embedded { overflow: hidden; }
+    body.embedded .panel { display: none; }
+    body.embedded .main { border-radius: 0; box-shadow: none; }
+    body.embedded .wrap { grid-template-columns: 1fr; padding: 0; gap: 0; }
+    body.embedded #network { height: 100vh; }
+    body.embedded .detail { display: none; }
+    body.embedded .toolbar { display: flex; }
+    /* Normal mode */
+    .wrap { display: grid; grid-template-columns: 320px 1fr; gap: 12px; padding: 12px; min-height: 100vh; }
+    .panel, .main { background: #fff; border-radius: 16px; box-shadow: 0 2px 12px rgba(15,23,42,0.06); overflow: hidden; }
+    .section { padding: 14px; border-bottom: 1px solid #e2e8f0; }
+    .section:last-child { border-bottom: none; }
+    h1 { font-size: 18px; font-weight: 700; }
+    h2 { font-size: 14px; font-weight: 600; margin-bottom: 8px; }
+    .muted { color: #64748b; font-size: 12px; line-height: 1.5; }
+    .stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+    .stat { border: 1px solid #e2e8f0; border-radius: 12px; padding: 10px; text-align: center; }
+    .stat .num { font-size: 22px; font-weight: 700; color: #0f766e; }
+    input[type="text"] { width: 100%; padding: 8px 10px; border: 1px solid #cbd5e1; border-radius: 10px; font-size: 13px; }
+    .checks { display: grid; grid-template-columns: 1fr 1fr; gap: 4px; margin-top: 8px; }
+    .checks label { font-size: 12px; display: flex; align-items: center; gap: 4px; cursor: pointer; }
+    .row { margin-top: 8px; display: flex; gap: 6px; align-items: center; }
+    button { border: none; border-radius: 10px; padding: 7px 12px; cursor: pointer; font-size: 12px; font-weight: 500; }
+    button.primary { background: #0f766e; color: #fff; }
+    button.ghost { background: #e2e8f0; color: #334155; }
+    button.learn { background: #2563eb; color: #fff; }
+    #network { width: 100%; height: 65vh; background: #fff; }
+    .detail { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; padding: 12px; border-top: 1px solid #e2e8f0; }
+    .card { border: 1px solid #e2e8f0; border-radius: 14px; padding: 12px; background: #fff; min-height: 140px; }
+    .card h2 { margin-bottom: 6px; }
+    .edge-item { border: 1px solid #e2e8f0; border-radius: 10px; padding: 8px; margin-top: 6px; background: #f8fafc; font-size: 12px; }
+    .scroll { max-height: 240px; overflow: auto; }
+    .toolbar { display: none; position: fixed; top: 8px; right: 8px; z-index: 10; gap: 6px; }
+    .toolbar button { box-shadow: 0 2px 8px rgba(0,0,0,0.12); }
+    .loading { display: flex; align-items: center; justify-content: center; height: 60vh; color: #64748b; font-size: 15px; }
+    body.embedded .loading { height: 100vh; }
+    .loading-card { max-width: 420px; border: 1px solid #e2e8f0; border-radius: 16px; background: #fff; padding: 18px; text-align: center; box-shadow: 0 12px 28px rgba(15,23,42,0.08); }
+    .loading-title { color: #334155; font-weight: 700; font-size: 15px; }
+    .loading-detail { margin-top: 8px; color: #64748b; line-height: 1.6; font-size: 13px; }
+    .loading-actions { margin-top: 12px; display: flex; justify-content: center; gap: 8px; }
+    .badge { display: inline-block; padding: 2px 7px; border-radius: 999px; background: #eef2ff; color: #4338ca; font-size: 11px; margin-right: 4px; margin-top: 4px; }
+    details.legend { border: 1px solid #e2e8f0; border-radius: 12px; padding: 10px; background: #f8fafc; }
+    details.legend summary { cursor: pointer; font-size: 13px; font-weight: 700; color: #0f172a; }
+    .legend-note { margin-top: 8px; color: #64748b; font-size: 12px; line-height: 1.5; }
+    .legend-list { margin-top: 8px; display: grid; gap: 7px; }
+    .legend-item { display: grid; grid-template-columns: 18px 1fr; gap: 8px; align-items: start; font-size: 12px; line-height: 1.45; }
+    .legend-line { width: 18px; height: 3px; border-radius: 999px; margin-top: 7px; background: #94a3b8; }
+    .legend-title { font-weight: 700; color: #0f172a; }
+    .legend-desc { color: #64748b; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="panel">
+      <div class="section">
+        <h1>知识图谱 B</h1>
+        <p class="muted">自动控制原理 · 27 号版本（42 节点 / 95 边）</p>
+      </div>
+      <div class="section">
+        <h2>统计</h2>
+        <div class="stats">
+          <div class="stat"><div class="num" id="nodeCount">-</div><div class="muted">节点</div></div>
+          <div class="stat"><div class="num" id="edgeCount">-</div><div class="muted">边</div></div>
+          <div class="stat"><div class="num" id="isolatedCount">-</div><div class="muted">孤立点</div></div>
+        </div>
+      </div>
+      <div class="section">
+        <h2>筛选</h2>
+        <input id="searchInput" type="text" placeholder="搜索节点名 / ID / 章节">
+        <div class="checks" id="relationChecks"></div>
+        <div class="row">
+          <button class="primary" id="fitBtn">适配视图</button>
+          <button class="ghost" id="resetBtn">重置</button>
+        </div>
+      </div>
+      <div class="section">
+        <details class="legend" id="relationLegendDetails">
+          <summary>关系说明</summary>
+          <div class="legend-note">节点同级展示；线段颜色和箭头只表示知识点之间的关系类型，不表示层级。</div>
+          <div class="legend-list" id="relationLegendList"></div>
+        </details>
+      </div>
+      <div class="section" id="nodeActionSection" style="display:none;">
+        <h2>选中节点</h2>
+        <div id="selectedNodeName" style="font-weight:600; margin-bottom:6px;"></div>
+        <button class="learn" id="learnNodeBtn">带回聊天学习这个节点</button>
+      </div>
+    </div>
+
+    <div class="main">
+      <div id="loading" class="loading">正在从服务器加载图谱数据…</div>
+      <div id="network" style="display:none;"></div>
+      <div class="detail">
+        <div class="card">
+          <h2>节点详情</h2>
+          <div id="nodeDetail" class="muted" style="margin-top:6px; line-height:1.6;">点击图中的节点查看详情。</div>
+        </div>
+        <div class="card">
+          <h2>关联边</h2>
+          <div id="edgeDetail" class="muted scroll" style="margin-top:6px; line-height:1.6;">点击图中的节点查看关联边。</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Embedded mode toolbar (search + learn) -->
+  <div class="toolbar" id="embeddedToolbar">
+    <input id="embeddedSearch" type="text" placeholder="搜索节点…" style="border-radius:10px; border:1px solid #cbd5e1; padding:6px 10px; font-size:12px; width:160px;">
+    <button class="learn" id="embeddedLearnBtn" style="display:none;">带回学习</button>
+    <button class="ghost" id="embeddedFitBtn">适配</button>
+  </div>
+
+  <script>
+    const params = new URLSearchParams(location.search);
+    const embedded = params.get('embedded') === '1';
+    const focusHint = (params.get('focus') || '').trim();
+    const topicHint = (params.get('topic') || '').trim();
+
+    if (embedded) document.body.classList.add('embedded');
+
+    const relationColors = {
+      prerequisite_of: '#2563eb',
+      parallel_to: '#059669',
+      extends_to: '#7c3aed',
+      easy_to_confuse_with: '#dc2626',
+      related_to: '#6b7280',
+      weak_related_to: '#94a3b8',
+      tested_together: '#d97706',
+    };
+
+    const relationMeanings = {
+      prerequisite_of: { title: '前置关系', desc: '箭头从先学知识点指向依赖它的后续知识点。' },
+      parallel_to: { title: '并列关系', desc: '两个知识点地位相近，可对照学习，不表示先后。' },
+      extends_to: { title: '拓展关系', desc: '从基础知识点延伸到更深入或更应用化的知识点。' },
+      easy_to_confuse_with: { title: '易混淆关系', desc: '两个知识点容易被混用，需要辨析差异。' },
+      related_to: { title: '相关关系', desc: '两个知识点内容有关，可互相辅助理解。' },
+      weak_related_to: { title: '弱相关', desc: '存在较弱联系，只作为背景或补充参考。' },
+      tested_together: { title: '同测关系', desc: '两个知识点常在同一题组或同一学习检测中一起出现。' },
+    };
+
+    let rawNodes = [];
+    let rawEdges = [];
+    let network = null;
+    let currentNodeId = null;
+    let parentFocusHint = focusHint;
+    let parentGraphState = { currentNode: '', currentNodeId: '', userKnowledgeGraph: {} };
+    let graphStabilized = false;
+    let isUserDraggingGraph = false;
+    let lastAppliedFocusHint = '';
+    let lastAppliedStateSignature = '';
+
+    function parseMaybe(value, fallback) {
+      if (value == null || value === '') return fallback;
+      if (Array.isArray(value) || typeof value === 'object') return value;
+      try { return JSON.parse(String(value).replace(/'/g, '"')); } catch { return fallback; }
+    }
+
+    function normalizeNode(n) {
+      return {
+        node_id: String(n.node_id || n.id || '').trim(),
+        id: String(n.node_id || n.id || '').trim(),
+        label: String(n.name || n.node_id || n.id || ''),
+        name: String(n.name || '').trim(),
+        chapter: String(n.chapter || n.category || '').trim(),
+        source_type: String(n.source_type || '').trim(),
+        summary: String(n.summary || '').trim(),
+        requirement_level: String(n.requirement_level || '').trim(),
+        importance_level: String(n.importance_level || '').trim(),
+        mastery_threshold: Number(n.mastery_threshold || 0),
+        tags: parseMaybe(n.tags, []),
+        core_concepts: parseMaybe(n.core_concepts, []),
+        key_points: parseMaybe(n.key_points, []),
+      };
+    }
+
+    function normalizeEdge(e) {
+      const rt = String(e.relation_type || e.relation || 'related_to').trim();
+      const strength = Number(e.relation_strength ?? e.weight ?? 0.5);
+      return {
+        edge_id: String(e.edge_id || '').trim(),
+        from: String(e.source || '').trim(),
+        to: String(e.target || '').trim(),
+        source: String(e.source || '').trim(),
+        target: String(e.target || '').trim(),
+        relation_type: rt,
+        relation_label: String(e.relation_label || rt).trim(),
+        relation_strength: Number.isFinite(strength) ? strength : 0.5,
+        direction_type: String(e.direction_type || 'undirected').trim(),
+        relation_note: String(e.relation_note || e.evidence || '').trim(),
+        arrows: String(e.direction_type || '').trim() === 'directed' ? 'to' : '',
+        color: { color: relationColors[rt] || '#94a3b8' },
+        width: Math.max(1, (Number.isFinite(strength) ? strength : 0.5) * 3),
+        smooth: String(e.direction_type || '').trim() === 'directed',
+      };
+    }
+
+    function updateStats(nodes, edges) {
+      const degree = {};
+      nodes.forEach(n => degree[n.node_id] = 0);
+      edges.forEach(e => {
+        if (degree[e.source] !== undefined) degree[e.source]++;
+        if (degree[e.target] !== undefined) degree[e.target]++;
+      });
+      const isolated = nodes.filter(n => !degree[n.node_id]).length;
+      document.getElementById('nodeCount').textContent = nodes.length;
+      document.getElementById('edgeCount').textContent = edges.length;
+      document.getElementById('isolatedCount').textContent = isolated;
+      notifyParent('a2-graph-viewer:status', { message: `${nodes.length} 节点 · ${edges.length} 边` });
+    }
+
+    function buildRelationChecks(edges) {
+      const box = document.getElementById('relationChecks');
+      if (!box) return;
+      box.innerHTML = '';
+      const types = [...new Set(edges.map(e => e.relation_type))];
+      types.forEach(type => {
+        const id = `rel_${type}`;
+        const label = document.createElement('label');
+        label.innerHTML = `<input type="checkbox" id="${id}" checked> ${type}`;
+        box.appendChild(label);
+        document.getElementById(id).addEventListener('change', renderGraph);
+      });
+      buildRelationLegend(types);
+    }
+
+    function buildRelationLegend(types) {
+      const box = document.getElementById('relationLegendList');
+      if (!box) return;
+      const ordered = types.length ? types : Object.keys(relationMeanings);
+      box.innerHTML = ordered.map(type => {
+        const meaning = relationMeanings[type] || { title: type, desc: '自定义关系类型。' };
+        const color = relationColors[type] || '#94a3b8';
+        return `
+          <div class="legend-item">
+            <span class="legend-line" style="background:${color}"></span>
+            <span>
+              <span class="legend-title">${type} · ${meaning.title}</span><br>
+              <span class="legend-desc">${meaning.desc}</span>
+            </span>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function getEnabledRelations() {
+      const box = document.getElementById('relationChecks');
+      if (!box) return new Set();
+      const checks = box.querySelectorAll('input[type="checkbox"]');
+      const enabled = new Set();
+      checks.forEach(c => { if (c.checked) enabled.add(c.id.replace('rel_', '')); });
+      return enabled;
+    }
+
+    function getSearchQuery() {
+      if (embedded) return (document.getElementById('embeddedSearch')?.value || '').trim().toLowerCase();
+      return (document.getElementById('searchInput')?.value || '').trim().toLowerCase();
+    }
+
+    function normalizeText(value) {
+      return String(value || '').trim().toLowerCase();
+    }
+
+    function buildGraphStateSignature(payload = {}) {
+      const currentNode = String(payload.currentNode || '').trim();
+      const currentNodeId = String(payload.currentNodeId || '').trim();
+      const kg = payload.userKnowledgeGraph || {};
+      const kgSignature = Object.keys(kg)
+        .sort()
+        .map(key => {
+          const entry = kg[key] || {};
+          return `${key}:${entry.status || ''}:${entry.id || ''}`;
+        })
+        .join('|');
+      return `${currentNode}::${currentNodeId}::${kgSignature}`;
+    }
+
+    function escapeHtml(value) {
+      return String(value || '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+    }
+
+    function showGraphLoadMessage(title, detail = '', retry = false) {
+      const loading = document.getElementById('loading');
+      const networkEl = document.getElementById('network');
+      if (!loading) return;
+      if (networkEl) networkEl.style.display = 'none';
+      loading.style.display = 'flex';
+      loading.innerHTML = `
+        <div class="loading-card">
+          <div class="loading-title">${escapeHtml(title)}</div>
+          ${detail ? `<div class="loading-detail">${escapeHtml(detail)}</div>` : ''}
+          ${retry ? '<div class="loading-actions"><button type="button" class="primary" id="retryLoadGraphBtn">重新加载</button></div>' : ''}
+        </div>
+      `;
+      document.getElementById('retryLoadGraphBtn')?.addEventListener('click', loadGraphData);
+    }
+
+    function getNodeLearningState(node) {
+      const kg = parentGraphState.userKnowledgeGraph || {};
+      const entries = Object.entries(kg);
+      const matched = entries.find(([title, value]) =>
+        normalizeText(title) === normalizeText(node.name)
+        || normalizeText(title) === normalizeText(node.node_id)
+        || normalizeText(value?.id) === normalizeText(node.node_id)
+      );
+      const status = String(matched?.[1]?.status || '').trim();
+      const isCurrent = normalizeText(parentGraphState.currentNodeId) === normalizeText(node.node_id)
+        || normalizeText(parentGraphState.currentNode) === normalizeText(node.name)
+        || normalizeText(parentFocusHint) === normalizeText(node.node_id)
+        || (parentFocusHint && normalizeText(node.name).includes(normalizeText(parentFocusHint)));
+      return { status, isCurrent };
+    }
+
+    function nodeStyle(node) {
+      const { status, isCurrent } = getNodeLearningState(node);
+      if (isCurrent) {
+        return {
+          color: { background: '#f97316', border: '#9a3412', highlight: { background: '#fb923c', border: '#7c2d12' } },
+          size: 20,
+          borderWidth: 4,
+        };
+      }
+      if (status === 'mastered' || status === 'passed') {
+        return {
+          color: { background: '#22c55e', border: '#15803d' },
+          size: 14,
+          borderWidth: 2,
+        };
+      }
+      if (status === 'in_progress' || status === 'selected' || status === 'content_loaded' || status === 'quizzing') {
+        return {
+          color: { background: '#38bdf8', border: '#0369a1' },
+          size: 15,
+          borderWidth: 3,
+        };
+      }
+      if (status === 'skipped') {
+        return {
+          color: { background: '#cbd5e1', border: '#64748b' },
+          size: 11,
+          borderWidth: 1,
+        };
+      }
+      return {
+        color: node.source_type.includes('chapter_anchor') ? '#111827' : '#0f766e',
+        size: node.source_type.includes('chapter_anchor') ? 16 : 10,
+        borderWidth: 1,
+      };
+    }
+
+    function renderGraph() {
+      const q = getSearchQuery();
+      const enabled = getEnabledRelations();
+
+      let nodes = rawNodes.slice();
+      let edges = rawEdges.slice();
+      edges = edges.filter(e => enabled.size === 0 || enabled.has(e.relation_type));
+
+      if (q) {
+        nodes = nodes.filter(n =>
+          n.node_id.toLowerCase().includes(q) ||
+          n.name.toLowerCase().includes(q) ||
+          n.chapter.toLowerCase().includes(q) ||
+          (Array.isArray(n.tags) && n.tags.join(' ').toLowerCase().includes(q))
+        );
+      }
+
+      const nodeIds = new Set(nodes.map(n => n.node_id));
+      edges = edges.filter(e => nodeIds.has(e.source) && nodeIds.has(e.target));
+      updateStats(nodes, edges);
+
+      const data = {
+        nodes: new vis.DataSet(nodes.map(n => ({
+          ...n,
+          ...nodeStyle(n),
+          shape: 'dot',
+          font: { size: 14, face: '-apple-system, sans-serif', color: '#1e293b' },
+        }))),
+        edges: new vis.DataSet(edges),
+      };
+
+      const options = {
+        physics: { stabilization: { iterations: 80 }, barnesHut: { gravitationalConstant: -2500, springLength: 120, springConstant: 0.02 } },
+        interaction: {
+          hover: true,
+          navigationButtons: !embedded,
+          keyboard: true,
+          tooltipDelay: 200,
+          dragNodes: true,
+          dragView: true,
+          zoomView: true,
+        },
+        edges: { font: { align: 'top', size: 9 } },
+      };
+
+      if (!network) {
+        network = new vis.Network(document.getElementById('network'), data, options);
+        network.on('click', onNodeClick);
+        network.on('dragStart', () => {
+          isUserDraggingGraph = true;
+        });
+        network.on('dragEnd', () => {
+          window.setTimeout(() => {
+            isUserDraggingGraph = false;
+          }, 180);
+        });
+        network.on('stabilizationIterationsDone', () => {
+          graphStabilized = true;
+          network.setOptions({ physics: false });
+          if (parentFocusHint && !lastAppliedFocusHint) {
+            focusOnNode(parentFocusHint);
+            lastAppliedFocusHint = parentFocusHint;
+          }
+        });
+      } else {
+        network.setData(data);
+      }
+    }
+
+    function onNodeClick(params) {
+      if (!params.nodes.length) return;
+      currentNodeId = params.nodes[0];
+      showNodeDetail(currentNodeId);
+      showEdgeDetail(currentNodeId);
+      const node = rawNodes.find(n => n.node_id === currentNodeId);
+      const name = node?.name || currentNodeId;
+      // Show learn button
+      const actionSection = document.getElementById('nodeActionSection');
+      if (actionSection) { actionSection.style.display = 'block'; document.getElementById('selectedNodeName').textContent = name; }
+      const embLearn = document.getElementById('embeddedLearnBtn');
+      if (embLearn) { embLearn.style.display = 'inline-block'; embLearn.textContent = `学习: ${name}`; }
+    }
+
+    function learnCurrentNode() {
+      if (!currentNodeId) return;
+      const node = rawNodes.find(n => n.node_id === currentNodeId);
+      notifyParent('a2-graph-viewer:learn-node', { nodeId: node?.name || currentNodeId, nodeRawId: currentNodeId });
+    }
+
+    function focusOnNode(hint) {
+      const lower = normalizeText(hint);
+      if (!lower) return;
+      const node = rawNodes.find(n =>
+        normalizeText(n.node_id) === lower
+        || normalizeText(n.name) === lower
+        || normalizeText(n.name).includes(lower)
+        || normalizeText(n.node_id).includes(lower)
+      );
+      if (node && network) {
+        network.selectNodes([node.node_id]);
+        network.focus(node.node_id, { scale: 1.2, animation: { duration: 400, easingFunction: 'easeInOutQuad' } });
+        onNodeClick({ nodes: [node.node_id] });
+      }
+    }
+
+    function notifyParent(type, data) {
+      try { window.parent.postMessage({ type, ...data }, '*'); } catch {}
+    }
+
+    function showNodeDetail(nodeId) {
+      const node = rawNodes.find(n => n.node_id === nodeId);
+      const box = document.getElementById('nodeDetail');
+      if (!node || !box) return;
+      const concepts = Array.isArray(node.core_concepts) ? node.core_concepts : [];
+      const points = Array.isArray(node.key_points) ? node.key_points : [];
+      box.innerHTML = `
+        <div style="font-weight:600; font-size:14px;">${node.name}</div>
+        <div class="muted" style="margin:4px 0;">${node.node_id} · ${node.chapter || '无章节'} · ${node.requirement_level || ''}</div>
+        <div style="margin:6px 0;">${node.summary || '暂无摘要'}</div>
+        ${concepts.length ? '<div style="margin-top:6px;"><b>核心概念</b></div><div>' + concepts.map(c => '<span class="badge">' + c + '</span>').join('') + '</div>' : ''}
+        ${points.length ? '<div style="margin-top:6px;"><b>要点</b></div><ul style="margin:4px 0 0 16px; font-size:12px;">' + points.map(p => '<li>' + p + '</li>').join('') + '</ul>' : ''}
+      `;
+    }
+
+    function showEdgeDetail(nodeId) {
+      const related = rawEdges.filter(e => e.source === nodeId || e.target === nodeId);
+      const box = document.getElementById('edgeDetail');
+      if (!box) return;
+      if (!related.length) { box.innerHTML = '该节点当前没有关联边。'; return; }
+      box.innerHTML = related.map(e => `
+        <div class="edge-item">
+          <div><b>${e.relation_type}</b> <span class="muted">(${e.relation_strength})</span></div>
+          <div>${e.source} → ${e.target}</div>
+          ${e.relation_note ? '<div class="muted">' + e.relation_note + '</div>' : ''}
+        </div>
+      `).join('');
+    }
+
+    // Auto-load from API
+    async function loadGraphData() {
+      try {
+        showGraphLoadMessage('正在从服务器加载图谱数据…');
+        const resp = await fetch('/api/graph/b/data.json');
+        if (!resp.ok) {
+          let serverText = '';
+          try {
+            serverText = (await resp.text()).replace(/\s+/g, ' ').trim().slice(0, 220);
+          } catch (_error) {}
+          throw new Error(`HTTP ${resp.status}${serverText ? `：${serverText}` : ''}`);
+        }
+        const data = await resp.json();
+        rawNodes = (data.nodes || []).map(normalizeNode);
+        rawEdges = (data.edges || []).map(normalizeEdge);
+        if (!rawNodes.length) {
+          showGraphLoadMessage(
+            '图谱数据未加载',
+            data.meta?.error || '服务器返回了空节点列表。请确认图谱搜索 2.2 已加载，或稍后重试。',
+            true
+          );
+          notifyParent('a2-graph-viewer:status', { message: '图谱数据未加载' });
+          return;
+        }
+        document.getElementById('loading').style.display = 'none';
+        document.getElementById('network').style.display = 'block';
+        buildRelationChecks(rawEdges);
+        renderGraph();
+        notifyParent('a2-graph-viewer:ready', {});
+        if (parentFocusHint) window.setTimeout(() => focusOnNode(parentFocusHint), 250);
+      } catch (err) {
+        showGraphLoadMessage(
+          '知识图谱加载失败',
+          `${err.message || err}。这通常是后端图谱 JSON 中存在 NaN/Infinity 或服务未重启导致，请修复后点击重新加载。`,
+          true
+        );
+        notifyParent('a2-graph-viewer:status', { message: `加载失败: ${err.message || err}` });
+      }
+    }
+
+    function applyParentGraphState(payload = {}) {
+      const nextStateSignature = buildGraphStateSignature(payload);
+      const nextFocusHint = String(payload.currentNode || payload.currentNodeId || parentFocusHint || '').trim();
+      parentGraphState = {
+        currentNode: String(payload.currentNode || parentGraphState.currentNode || '').trim(),
+        currentNodeId: String(payload.currentNodeId || parentGraphState.currentNodeId || '').trim(),
+        userKnowledgeGraph: payload.userKnowledgeGraph || parentGraphState.userKnowledgeGraph || {},
+      };
+      parentFocusHint = nextFocusHint;
+      if (!network || !rawNodes.length) return;
+      if (nextStateSignature === lastAppliedStateSignature) return;
+      lastAppliedStateSignature = nextStateSignature;
+      renderGraph();
+      if (parentFocusHint && parentFocusHint !== lastAppliedFocusHint && !isUserDraggingGraph) {
+        window.setTimeout(() => {
+          if (isUserDraggingGraph) return;
+          focusOnNode(parentFocusHint);
+          lastAppliedFocusHint = parentFocusHint;
+        }, graphStabilized ? 60 : 180);
+      }
+    }
+
+    window.addEventListener('message', event => {
+      const payload = event.data || {};
+      if (payload.type === 'a2-parent:graph-state') {
+        applyParentGraphState(payload);
+      }
+    });
+
+    // Bind events
+    document.getElementById('searchInput')?.addEventListener('input', renderGraph);
+    document.getElementById('embeddedSearch')?.addEventListener('input', renderGraph);
+    document.getElementById('fitBtn')?.addEventListener('click', () => network?.fit());
+    document.getElementById('embeddedFitBtn')?.addEventListener('click', () => network?.fit());
+    document.getElementById('resetBtn')?.addEventListener('click', () => {
+      const si = document.getElementById('searchInput'); if (si) si.value = '';
+      document.querySelectorAll('#relationChecks input[type="checkbox"]').forEach(c => c.checked = true);
+      renderGraph();
+      network?.fit();
+    });
+    document.getElementById('learnNodeBtn')?.addEventListener('click', learnCurrentNode);
+    document.getElementById('embeddedLearnBtn')?.addEventListener('click', learnCurrentNode);
+
+    loadGraphData();
+  </script>
+</body>
+</html>

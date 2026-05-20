@@ -8,6 +8,9 @@ venv/
 
 # Env / secrets
 .env
+.env.*
+!.env.example
+!.env.sample
 
 # Local runtime data
 *.db
@@ -19,8 +22,36 @@ venv/
 *.sqlite-wal
 *.log
 *.pid
+data/*
+!data/.gitkeep
+!data/question_bank/
+!data/question_bank/**
+!data/knowledge/
 data/knowledge/*
 !data/knowledge/.gitkeep
+data/bm25_cache*.json
+data/chroma_db/
+data/knowledge_map_outputs/
+!data/knowledge_map_outputs/
+!data/knowledge_map_outputs/auto_control_knowledge_map_v2_nodes.csv
+!data/knowledge_map_outputs/auto_control_knowledge_map_v2_edges.csv
+!data/knowledge_map_outputs/auto_control_knowledge_map_v2.json
+data/knowledge_splits/
+data/knowledge_map_vector_db/
+data/knowledge_index__*.json
+data/media_evidence_index/
+!data/media_evidence_index/
+!data/media_evidence_index/batch_summary.json
+!data/media_evidence_index/*_annotated_assets.jsonl
+!data/media_evidence_index/*_linked_candidates.jsonl
+!data/media_evidence_index/*_filtered_candidates.jsonl
+data/minerU_cache/
+data/mineru_cache/
+data/retrieval_state.json
+data/student_states/
+data/test_outputs/
+data/tutor_memory.db
+data/vector_store/
 
 # Tool caches
 .pytest_cache/
@@ -32,6 +63,24 @@ htmlcov/
 # OS artifacts
 .DS_Store
 Thumbs.db
+*~
+*.tmp
+*.temp
+*.bak
+*.orig
 
 # AI Agent Context
-GEMINI.md
+.codex
+.hermes/
+docs/GEMINI_CONTEXT.md
+
+# Editor / IDE
+.idea/
+.vscode/
+
+# Local presentation / report materials
+ppt/
+*.pptx
+*.docx
+*.doc
+~$*

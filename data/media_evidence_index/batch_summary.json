@@ -1,0 +1,168 @@
+{
+  "count": 11,
+  "chapters": [
+    {
+      "doc_dir": "chapter_01_p009-032_自动控制的一般概念__8a418239",
+      "chapter_key": "chapter_01",
+      "raw_count": 7,
+      "filtered_count": 7,
+      "linked_count": 7,
+      "annotated_count": 7,
+      "asset_type_counts": {
+        "formula": 7
+      },
+      "filtered_path": "/home/haizi/ai-tutor-agent/data/media_evidence_index/chapter_01_filtered_candidates.jsonl",
+      "linked_path": "/home/haizi/ai-tutor-agent/data/media_evidence_index/chapter_01_linked_candidates.jsonl",
+      "annotated_path": "/home/haizi/ai-tutor-agent/data/media_evidence_index/chapter_01_annotated_assets.jsonl"
+    },
+    {
+      "doc_dir": "chapter_02_p033-081_控制系统的数学模型__9294ff3f",
+      "chapter_key": "chapter_02",
+      "raw_count": 185,
+      "filtered_count": 185,
+      "linked_count": 185,
+      "annotated_count": 185,
+      "asset_type_counts": {
+        "formula": 182,
+        "table": 3
+      },
+      "filtered_path": "/home/haizi/ai-tutor-agent/data/media_evidence_index/chapter_02_filtered_candidates.jsonl",
+      "linked_path": "/home/haizi/ai-tutor-agent/data/media_evidence_index/chapter_02_linked_candidates.jsonl",
+      "annotated_path": "/home/haizi/ai-tutor-agent/data/media_evidence_index/chapter_02_annotated_assets.jsonl"
+    },
+    {
+      "doc_dir": "chapter_03_p082-159_线性系统的时域分析法__082fadd0",
+      "chapter_key": "chapter_03",
+      "raw_count": 330,
+      "filtered_count": 317,
+      "linked_count": 317,
+      "annotated_count": 317,
+      "asset_type_counts": {
+        "formula": 310,
+        "table": 7
+      },
+      "filtered_path": "/home/haizi/ai-tutor-agent/data/media_evidence_index/chapter_03_filtered_candidates.jsonl",
+      "linked_path": "/home/haizi/ai-tutor-agent/data/media_evidence_index/chapter_03_linked_candidates.jsonl",
+      "annotated_path": "/home/haizi/ai-tutor-agent/data/media_evidence_index/chapter_03_annotated_assets.jsonl"
+    },
+    {
+      "doc_dir": "chapter_04_p160-204_线性系统的根轨迹法__151976f6",
+      "chapter_key": "chapter_04",
+      "raw_count": 170,
+      "filtered_count": 162,
+      "linked_count": 162,
+      "annotated_count": 162,
+      "asset_type_counts": {
+        "formula": 159,
+        "table": 3
+      },
+      "filtered_path": "/home/haizi/ai-tutor-agent/data/media_evidence_index/chapter_04_filtered_candidates.jsonl",
+      "linked_path": "/home/haizi/ai-tutor-agent/data/media_evidence_index/chapter_04_linked_candidates.jsonl",
+      "annotated_path": "/home/haizi/ai-tutor-agent/data/media_evidence_index/chapter_04_annotated_assets.jsonl"
+    },
+    {
+      "doc_dir": "chapter_05_p205-262_线性系统的频域分析法__df0165aa",
+      "chapter_key": "chapter_05",
+      "raw_count": 225,
+      "filtered_count": 225,
+      "linked_count": 225,
+      "annotated_count": 225,
+      "asset_type_counts": {
+        "formula": 222,
+        "table": 3
+      },
+      "filtered_path": "/home/haizi/ai-tutor-agent/data/media_evidence_index/chapter_05_filtered_candidates.jsonl",
+      "linked_path": "/home/haizi/ai-tutor-agent/data/media_evidence_index/chapter_05_linked_candidates.jsonl",
+      "annotated_path": "/home/haizi/ai-tutor-agent/data/media_evidence_index/chapter_05_annotated_assets.jsonl"
+    },
+    {
+      "doc_dir": "chapter_06_p263-311_线性系统的校正方法__7c23f6ec",
+      "chapter_key": "chapter_06",
+      "raw_count": 188,
+      "filtered_count": 186,
+      "linked_count": 186,
+      "annotated_count": 186,
+      "asset_type_counts": {
+        "formula": 181,
+        "table": 5
+      },
+      "filtered_path": "/home/haizi/ai-tutor-agent/data/media_evidence_index/chapter_06_filtered_candidates.jsonl",
+      "linked_path": "/home/haizi/ai-tutor-agent/data/media_evidence_index/chapter_06_linked_candidates.jsonl",
+      "annotated_path": "/home/haizi/ai-tutor-agent/data/media_evidence_index/chapter_06_annotated_assets.jsonl"
+    },
+    {
+      "doc_dir": "chapter_07_p312-392_线性离散系统的分析与校正__cc614019",
+      "chapter_key": "chapter_07",
+      "raw_count": 440,
+      "filtered_count": 421,
+      "linked_count": 421,
+      "annotated_count": 421,
+      "asset_type_counts": {
+        "formula": 411,
+        "table": 10
+      },
+      "filtered_path": "/home/haizi/ai-tutor-agent/data/media_evidence_index/chapter_07_filtered_candidates.jsonl",
+      "linked_path": "/home/haizi/ai-tutor-agent/data/media_evidence_index/chapter_07_linked_candidates.jsonl",
+      "annotated_path": "/home/haizi/ai-tutor-agent/data/media_evidence_index/chapter_07_annotated_assets.jsonl"
+    },
+    {
+      "doc_dir": "chapter_08_p393-454_线性系统的状态空间分析与综合__bda93de4",
+      "chapter_key": "chapter_08",
+      "raw_count": 189,
+      "filtered_count": 188,
+      "linked_count": 188,
+      "annotated_count": 188,
+      "asset_type_counts": {
+        "formula": 187,
+        "table": 1
+      },
+      "filtered_path": "/home/haizi/ai-tutor-agent/data/media_evidence_index/chapter_08_filtered_candidates.jsonl",
+      "linked_path": "/home/haizi/ai-tutor-agent/data/media_evidence_index/chapter_08_linked_candidates.jsonl",
+      "annotated_path": "/home/haizi/ai-tutor-agent/data/media_evidence_index/chapter_08_annotated_assets.jsonl"
+    },
+    {
+      "doc_dir": "chapter_09_p455-560_非线性控制系统分析__c084338b",
+      "chapter_key": "chapter_09",
+      "raw_count": 752,
+      "filtered_count": 720,
+      "linked_count": 720,
+      "annotated_count": 720,
+      "asset_type_counts": {
+        "formula": 717,
+        "table": 3
+      },
+      "filtered_path": "/home/haizi/ai-tutor-agent/data/media_evidence_index/chapter_09_filtered_candidates.jsonl",
+      "linked_path": "/home/haizi/ai-tutor-agent/data/media_evidence_index/chapter_09_linked_candidates.jsonl",
+      "annotated_path": "/home/haizi/ai-tutor-agent/data/media_evidence_index/chapter_09_annotated_assets.jsonl"
+    },
+    {
+      "doc_dir": "chapter_10_p561-632_动态系统的最优控制方法__743729db",
+      "chapter_key": "chapter_10",
+      "raw_count": 564,
+      "filtered_count": 516,
+      "linked_count": 516,
+      "annotated_count": 516,
+      "asset_type_counts": {
+        "formula": 508,
+        "table": 8
+      },
+      "filtered_path": "/home/haizi/ai-tutor-agent/data/media_evidence_index/chapter_10_filtered_candidates.jsonl",
+      "linked_path": "/home/haizi/ai-tutor-agent/data/media_evidence_index/chapter_10_linked_candidates.jsonl",
+      "annotated_path": "/home/haizi/ai-tutor-agent/data/media_evidence_index/chapter_10_annotated_assets.jsonl"
+    },
+    {
+      "doc_dir": "chapter_p33-81",
+      "chapter_key": "chapter_p33-81",
+      "raw_count": 2,
+      "filtered_count": 1,
+      "linked_count": 1,
+      "annotated_count": 1,
+      "asset_type_counts": {
+        "formula": 1
+      },
+      "filtered_path": "/home/haizi/ai-tutor-agent/data/media_evidence_index/chapter_p33-81_filtered_candidates.jsonl",
+      "linked_path": "/home/haizi/ai-tutor-agent/data/media_evidence_index/chapter_p33-81_linked_candidates.jsonl",
+      "annotated_path": "/home/haizi/ai-tutor-agent/data/media_evidence_index/chapter_p33-81_annotated_assets.jsonl"
+    }
+  ]
+}

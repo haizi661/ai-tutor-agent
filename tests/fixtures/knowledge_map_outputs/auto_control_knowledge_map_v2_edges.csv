@@ -1,0 +1,5 @@
+edge_id,source,target,relation,relation_type,relation_label,relation_strength,direction_type,weight,source_type,evidence,relation_note
+E001,KM001,KM002,prerequisite_of,prerequisite_of,前置关系,1.0,directed,1.0,config_prerequisite,自动控制的一般概念是控制系统的数学模型的前置知识,显式配置的前置知识关系
+E002,KM002,KM003,prerequisite_of,prerequisite_of,前置关系,1.0,directed,1.0,config_prerequisite,控制系统的数学模型是控制系统的复数域数学模型的前置知识,显式配置的前置知识关系
+E003,KM002,KM004,prerequisite_of,prerequisite_of,前置关系,1.0,directed,1.0,config_prerequisite,控制系统的数学模型是线性系统的时域分析法的前置知识,显式配置的前置知识关系
+E004,KM002,KM003,related_to,related_to,相关关系,0.85,undirected,0.85,rule_chapter_anchor,章节概览节点与本章知识点建立主题关联,章节概览节点与本章知识点的主题关联

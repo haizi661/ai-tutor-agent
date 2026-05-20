@@ -6,6 +6,11 @@ from ..core.state import AgentState
 def build_topic_confirm_node(event_sink: EventSink):
     def node(state: AgentState) -> dict:
         proposed_topic = state.get("proposed_topic", "").strip()
+        detail_summary = str(state.get("topic_detail_summary") or "").strip()
+        topic_focus = str(state.get("topic_focus") or "").strip()
+        topic_background = str(state.get("topic_background") or "").strip()
+        starter_options = list(state.get("topic_starter_options") or [])
+        clarify_rounds = int(state.get("topic_clarify_rounds") or 0)
         if not proposed_topic:
             event_sink.emit(
                 make_event(
@@ -20,17 +25,42 @@ def build_topic_confirm_node(event_sink: EventSink):
             make_event(
                 "topic.confirmation_needed",
                 "topic_confirmer",
-                message=f"我理解你想学的是【{proposed_topic}】。请确认或修改主题。",
-                data={"proposed_topic": proposed_topic},
+                message=f"识别到学习主题：【{proposed_topic}】，请确认。",
+                data={
+                    "proposed_topic": proposed_topic,
+                    "detail_summary": detail_summary,
+                    "topic_focus": topic_focus,
+                    "topic_background": topic_background,
+                    "topic_starter_options": starter_options,
+                    "clarify_rounds": clarify_rounds,
+                },
             )
         )
         event_sink.emit(
             make_event(
                 "node.complete",
                 "topic_confirmer",
-                message="等待用户确认学习主题。",
+                message="等你确认学习主题。",
             )
         )
-        return {"flow_status": "awaiting_topic_confirmation"}
+        return {
+            "flow_status": "awaiting_topic_confirmation",
+            "message_history": list(state.get("message_history", []))[-199:]
+            + [
+                {
+                    "role": "assistant",
+                    "kind": "topic_confirmation_card",
+                    "content": f"识别到学习主题：【{proposed_topic}】，请确认。",
+                    "data": {
+                        "proposed_topic": proposed_topic,
+                        "detail_summary": detail_summary,
+                        "topic_focus": topic_focus,
+                        "topic_background": topic_background,
+                        "topic_starter_options": starter_options,
+                        "clarify_rounds": clarify_rounds,
+                    },
+                }
+            ],
+        }
 
     return node

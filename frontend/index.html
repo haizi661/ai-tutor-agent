@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI Tutor - 极致伴学系统</title>
+    <title>AI Tutor</title>
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
@@ -12,162 +12,846 @@
     <link rel="stylesheet" href="/assets/styles.css">
 </head>
 <body>
+    <div class="page-shell">
+        <div class="container">
+            <!-- ═══ SIDEBAR ═══ -->
+            <aside class="sidebar" id="sidebar" aria-label="侧边栏">
+                <div class="sb-header">
+                    <div class="sb-brand">
+                        <span class="sb-brand-mark" aria-hidden="true">伴</span>
+                        <span class="sb-brand-copy">
+                            <span class="sb-brand-title">AI Tutor</span>
+                            <span class="sb-brand-subtitle">控制理论陪练</span>
+                        </span>
+                    </div>
+                    <button type="button" class="sb-collapse-btn" id="sidebar-toggle-btn" onclick="toggleSidebar()" aria-label="收起侧边栏" aria-expanded="true" aria-controls="sidebar" title="收起侧边栏">
+                        <svg width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden="true">
+                            <rect x="2.25" y="3" width="13.5" height="12" rx="2" stroke="currentColor" stroke-width="1.35"/>
+                            <path d="M6.65 4.1V13.9" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/>
+                        </svg>
+                    </button>
+                </div>
 
-    <div class="header">
-        <div class="header-left">
-            <div style="background:var(--accent-green); padding:5px; border-radius:6px; color:white;">🎓</div>
-            AI Tutor <span style="font-weight:300; font-size:0.9rem; color:var(--text-secondary);">伴学智能体</span>
-        </div>
-        <div class="header-right">
-            <div class="model-select-wrapper">
-                <span style="font-size:11px; color:var(--text-secondary);">快速切换:</span>
-                <select id="model-select" class="model-select"></select>
-                <button class="config-save-btn" onclick="updateModelConfig()">应用</button>
-            </div>
-            <div id="config-status" class="config-status">这里只切换当前使用的厂商档案；详细模型与 API Key 请在“本地配置”里设置</div>
-            <button id="open-config-btn" class="btn-ghost" onclick="openLocalConfigPanel()">本地配置</button>
-            <button class="btn-ghost" onclick="pauseCurrentSession()">暂停会话</button>
-            <button class="btn-new" onclick="startNewSession()" style="width:auto; padding: 5px 15px;">新建会话</button>
+                <div class="sb-scroll">
+                    <div class="sb-actions">
+                        <button type="button" class="sb-new-chat" onclick="startNewSession()">
+                            <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M7 2v10M2 7h10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+                            <span>新对话</span>
+                        </button>
+                        <div class="sb-search-row" id="sidebar-search-wrap">
+                            <button type="button" class="sb-nav-item" id="sidebar-search-toggle" onclick="openChatSearch()">
+                                <svg class="sb-nav-icon" width="15" height="15" viewBox="0 0 15 15" fill="none"><circle cx="6.5" cy="6.5" r="4.5" stroke="currentColor" stroke-width="1.3"/><path d="M10 10l3.5 3.5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
+                                <span>搜索</span>
+                            </button>
+                            <input id="history-search-input" class="sb-search-input" type="search" placeholder="搜索最近目录…" aria-label="搜索最近目录" hidden>
+                        </div>
+                    </div>
+
+                    <nav class="sb-primary-nav" aria-label="主导航">
+                        <button type="button" class="sb-nav-item" onclick="openLibraryPanel()" aria-label="打开资料库">
+                            <svg class="sb-nav-icon" width="15" height="15" viewBox="0 0 15 15" fill="none"><path d="M3.2 3.2H11.8V11.8H3.2V3.2Z" stroke="currentColor" stroke-width="1.2"/><path d="M5.1 5.2H9.9M5.1 7.5H9.9M5.1 9.8H8.2" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
+                            <span>资料库</span>
+                        </button>
+                        <button type="button" id="open-graph-modal-btn" class="sb-nav-item" onclick="openKnowledgeGraphModal()" aria-label="打开知识图谱">
+                            <svg class="sb-nav-icon" width="15" height="15" viewBox="0 0 15 15" fill="none"><circle cx="3.5" cy="3.5" r="1.3" stroke="currentColor" stroke-width="1.2"/><circle cx="11.5" cy="3.5" r="1.3" stroke="currentColor" stroke-width="1.2"/><circle cx="7.5" cy="11.5" r="1.3" stroke="currentColor" stroke-width="1.2"/><path d="M4.7 4.1L6.5 10.5M10.3 4.1L8.5 10.5M4.8 3.5H10.2" stroke="currentColor" stroke-width="1.1" stroke-linecap="round"/></svg>
+                            <span>知识图谱</span>
+                        </button>
+                        <button type="button" id="open-radar-modal-btn" class="sb-nav-item" onclick="openRadarModal()" aria-label="打开学习进度">
+                            <svg class="sb-nav-icon" width="15" height="15" viewBox="0 0 15 15" fill="none"><path d="M7.5 2L11.5 4.2V8.8L7.5 11L3.5 8.8V4.2L7.5 2Z" stroke="currentColor" stroke-width="1.2"/><path d="M7.5 2V11M3.5 4.2L11.5 8.8M11.5 4.2L3.5 8.8" stroke="currentColor" stroke-width="1"/></svg>
+                            <span>学习进度</span>
+                        </button>
+                    </nav>
+
+                    <div class="sb-divider"></div>
+
+                    <div class="sb-recents">
+                            <div class="sb-section-label">最近</div>
+                        <div id="history-list" class="sb-history-list"></div>
+                    </div>
+
+                        <input type="file" id="file-input" hidden multiple accept=".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt,.md,.png,.jpg,.jpeg">
+                        <div id="upload-status" class="status-inline upload-status" aria-live="polite" hidden></div>
+                </div><!-- /.sb-scroll -->
+
+                <div class="sb-user-slot" id="sb-user-slot">
+                    <div class="sb-user-menu" id="sb-user-menu-panel" role="menu" aria-label="账户菜单" hidden>
+                        <div class="sb-user-menu-header">
+                            <span class="sb-user-menu-avatar" aria-hidden="true"></span>
+                            <span class="sb-user-menu-header-copy">
+                                <span class="sb-user-menu-name">学习者</span>
+                                <span class="sb-user-menu-plan">Plus</span>
+                            </span>
+                            <span class="sb-user-menu-header-arrow" aria-hidden="true">
+                                <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M6 3.5L10.5 8L6 12.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                            </span>
+                        </div>
+
+                        <div class="sb-user-menu-group">
+                            <button type="button" class="sb-user-menu-item" role="menuitem" onclick="handleUserMenuAction('personalize')">
+                                <span class="sb-user-menu-icon" aria-hidden="true">
+                                    <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><circle cx="9" cy="9" r="7" stroke="currentColor" stroke-width="1.5"/><path d="M9 5.1V9L11.8 10.7" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M6.3 2.9L5.2 1.8M12.8 16.2L11.7 15.1" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
+                                </span>
+                                <span>个性化</span>
+                            </button>
+                            <button type="button" class="sb-user-menu-item" role="menuitem" onclick="handleUserMenuAction('profile')">
+                                <span class="sb-user-menu-icon" aria-hidden="true">
+                                    <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><circle cx="9" cy="6.2" r="3" stroke="currentColor" stroke-width="1.5"/><path d="M3.8 14.7C4.8 11.9 6.7 10.6 9 10.6C11.3 10.6 13.2 11.9 14.2 14.7" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><circle cx="9" cy="9" r="7" stroke="currentColor" stroke-width="1.5"/></svg>
+                                </span>
+                                <span>个人资料</span>
+                            </button>
+                            <button type="button" class="sb-user-menu-item" role="menuitem" onclick="handleUserMenuAction('settings')">
+                                <span class="sb-user-menu-icon" aria-hidden="true">
+                                    <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M9 2.7V4.1M9 13.9V15.3M13.1 4.4L12.1 5.4M5.9 12.6L4.9 13.6M14.9 9H13.5M4.5 9H3.1M13.1 13.6L12.1 12.6M5.9 5.4L4.9 4.4" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/><circle cx="9" cy="9" r="2.9" stroke="currentColor" stroke-width="1.5"/></svg>
+                                </span>
+                                <span>设置</span>
+                            </button>
+                        </div>
+
+                        <div class="sb-user-menu-divider"></div>
+
+                        <div class="sb-user-menu-group">
+                            <button type="button" class="sb-user-menu-item" role="menuitem" onclick="handleUserMenuAction('help')">
+                                <span class="sb-user-menu-icon" aria-hidden="true">
+                                    <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><circle cx="9" cy="9" r="7" stroke="currentColor" stroke-width="1.5"/><path d="M6.6 11.7C7.1 10.5 8.1 9.8 9 9.2C9.8 8.7 10.7 8.1 10.7 6.9C10.7 5.8 9.9 5 8.8 5C7.7 5 6.9 5.7 6.7 6.8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><circle cx="9" cy="12.9" r="0.8" fill="currentColor"/></svg>
+                                </span>
+                                <span>帮助</span>
+                                <span class="sb-user-menu-trailing" aria-hidden="true">
+                                    <svg width="15" height="15" viewBox="0 0 15 15" fill="none"><path d="M5.5 3.5L9.5 7.5L5.5 11.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                                </span>
+                            </button>
+                            <button type="button" class="sb-user-menu-item" role="menuitem" onclick="handleUserMenuAction('signout')">
+                                <span class="sb-user-menu-icon" aria-hidden="true">
+                                    <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M8 4.4H5.8C4.81 4.4 4 5.21 4 6.2V11.8C4 12.79 4.81 13.6 5.8 13.6H8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><path d="M8.5 9H14.1M11.8 6.7L14.1 9L11.8 11.3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                                </span>
+                                <span>退出登录</span>
+                                <span class="sb-user-menu-trailing" aria-hidden="true">
+                                    <svg width="15" height="15" viewBox="0 0 15 15" fill="none"><path d="M5.5 3.5L9.5 7.5L5.5 11.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                                </span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <button
+                        type="button"
+                        class="sb-userbar"
+                        id="sb-userbar-btn"
+                        onclick="toggleUserMenu()"
+                        aria-label="打开账户菜单"
+                        aria-haspopup="menu"
+                        aria-expanded="false"
+                    >
+                        <span class="sb-user-avatar" aria-hidden="true"></span>
+                        <span class="sb-user-copy">
+                            <span class="sb-user-name">学习者</span>
+                            <span class="sb-user-plan">Plus</span>
+                        </span>
+                        <span class="sb-userbar-arrow" aria-hidden="true">
+                            <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M6 3.5L10.5 8L6 12.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                        </span>
+                    </button>
+                </div>
+            </aside>
+
+            <!-- ═══ MAIN CHAT ═══ -->
+            <main class="chat-main chat-main--landing">
+                <header class="chat-header chat-locator" id="chat-locator">
+                    <div class="chat-header-left">
+                        <div class="model-select-wrapper model-picker chat-header-picker" id="model-picker">
+                            <button type="button" id="model-picker-trigger" class="model-picker-trigger chat-title-trigger" aria-haspopup="listbox" aria-expanded="false">
+                                <span class="model-picker-trigger-copy chat-title-copy">
+                                    <span id="header-thread-title" class="chat-title-text">新对话</span>
+                                    <span class="chat-title-meta">
+                                        <span id="model-picker-vendor" class="model-picker-trigger-kicker">档案</span>
+                                        <span id="model-picker-current" class="model-picker-trigger-label">选择模型</span>
+                                    </span>
+                                </span>
+                                <span class="model-picker-trigger-caret" aria-hidden="true">
+                                    <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M4 5.5L7 8.5L10 5.5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                                </span>
+                            </button>
+                            <div id="model-picker-menu" class="model-picker-menu" hidden>
+                                <div id="model-picker-list" class="model-picker-list" role="listbox" aria-label="模型档案列表"></div>
+                                <div class="model-picker-footer">
+                                    <button type="button" class="model-picker-footer-btn" onclick="openLocalConfigPanel()">更多设置</button>
+                                </div>
+                            </div>
+                            <select id="model-select" class="model-select" aria-label="切换当前使用的模型档案" hidden></select>
+                        </div>
+                        <button type="button" class="cl-node-chip" id="cl-node-chip" onclick="openKnowledgeGraphModal()" title="打开知识图谱" hidden>
+                            <span class="cl-node-dot"></span>
+                            <span id="cl-node-text">等待开始</span>
+                        </button>
+                    </div>
+                    <div class="chat-header-right">
+                        <button type="button" class="chat-header-btn" id="share-session-btn" onclick="shareCurrentSession()">分享</button>
+                        <div class="chat-header-more">
+                            <button type="button" class="chat-header-icon-btn" id="header-more-btn" onclick="toggleHeaderMoreMenu()" aria-label="更多操作" aria-haspopup="menu" aria-expanded="false">
+                                <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><circle cx="3.25" cy="8" r="1.15" fill="currentColor"/><circle cx="8" cy="8" r="1.15" fill="currentColor"/><circle cx="12.75" cy="8" r="1.15" fill="currentColor"/></svg>
+                            </button>
+                            <div class="chat-header-menu" id="header-more-menu" role="menu" hidden>
+                                <button type="button" class="chat-header-menu-item" role="menuitem" id="menu-new-session" onclick="menuNewSession(); toggleHeaderMoreMenu(false)">
+                                    <span class="chat-header-menu-icon" aria-hidden="true"><svg width="17" height="17" viewBox="0 0 17 17" fill="none"><circle cx="7" cy="7" r="4.5" stroke="currentColor" stroke-width="1.4"/><path d="M7 5v4M5 7h4" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/><circle cx="12.5" cy="12.5" r="3" fill="currentColor" opacity="0.15"/><path d="M11 12.5h3M12.5 11v3" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg></span>
+                                    <span>开始新对话</span>
+                                </button>
+                                <button type="button" class="chat-header-menu-item" role="menuitem" id="menu-pin-session" onclick="menuPinSession(); toggleHeaderMoreMenu(false)">
+                                    <span class="chat-header-menu-icon" aria-hidden="true"><svg width="17" height="17" viewBox="0 0 17 17" fill="none"><path d="M10.5 2.5L14.5 6.5L11 8.5L9.5 12L8 10.5L5 13.5L3.5 12L6.5 9L5 7.5L8.5 6L10.5 2.5Z" stroke="currentColor" stroke-width="1.35" stroke-linejoin="round"/></svg></span>
+                                    <span id="menu-pin-label">置顶聊天</span>
+                                </button>
+                                <button type="button" class="chat-header-menu-item" role="menuitem" id="menu-archive-session" onclick="menuArchiveSession(); toggleHeaderMoreMenu(false)">
+                                    <span class="chat-header-menu-icon" aria-hidden="true"><svg width="17" height="17" viewBox="0 0 17 17" fill="none"><rect x="2" y="3" width="13" height="3" rx="1" stroke="currentColor" stroke-width="1.35"/><path d="M3 6v7a1 1 0 001 1h9a1 1 0 001-1V6" stroke="currentColor" stroke-width="1.35"/><path d="M6.5 9.5h4" stroke="currentColor" stroke-width="1.35" stroke-linecap="round"/></svg></span>
+                                    <span>归档</span>
+                                </button>
+                                <div class="chat-header-menu-divider"></div>
+                                <button type="button" class="chat-header-menu-item chat-header-menu-item--danger" role="menuitem" id="menu-delete-session" onclick="menuDeleteSession(); toggleHeaderMoreMenu(false)">
+                                    <span class="chat-header-menu-icon" aria-hidden="true"><svg width="17" height="17" viewBox="0 0 17 17" fill="none"><path d="M3 4.5H14M6.5 4.5V3.5H10.5V4.5M5.5 4.5V13H11.5V4.5" stroke="currentColor" stroke-width="1.35" stroke-linecap="round" stroke-linejoin="round"/><path d="M7 7v4M10 7v4" stroke="currentColor" stroke-width="1.35" stroke-linecap="round"/></svg></span>
+                                    <span>删除</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="cl-session-strip" id="cl-session-strip" aria-live="polite" hidden>
+                        <span class="cl-stat-pill"><span class="cl-pill-label">进行中</span><strong id="cl-progress">—</strong></span>
+                        <span class="cl-stat-pill"><span class="cl-pill-label">已掌握</span><strong id="cl-mastered">—</strong></span>
+                        <span class="cl-stat-pill"><span class="cl-pill-label">未开始</span><strong id="cl-pending">—</strong></span>
+                        <span class="cl-stat-pill cl-stat-pill--next"><span class="cl-pill-label">下一步</span><span id="cl-next-node" class="cl-next-node">—</span></span>
+                    </div>
+                </header>
+
+                <section class="landing-stage" id="landing-stage" aria-labelledby="landing-title">
+                    <div class="landing-copy">
+                        <div class="landing-eyebrow">AI Tutor</div>
+                        <h1 id="landing-title" class="landing-title">今天想先学哪一块控制理论？</h1>
+                        <p class="landing-subtitle">直接输入问题、上传讲义，或者从下面几个起点开始。进入对话后，左侧保留你的学习页，顶部只显示当前进度。</p>
+                    </div>
+                    <div class="landing-grid" aria-label="推荐起点">
+                        <button type="button" class="landing-chip" data-starter-prompt="根轨迹法怎么快速入门？">
+                            <span class="landing-chip-kicker">经典控制 / 起步</span>
+                            <span class="landing-chip-title">根轨迹快速入门</span>
+                            <span class="landing-chip-copy">从极点、零点、增益变化开始，讲到怎么看趋势。</span>
+                            <span class="landing-chip-tail">从图形规则切进去</span>
+                        </button>
+                        <button type="button" class="landing-chip" data-starter-prompt="用二阶系统解释超调量、调节时间和阻尼比的关系。">
+                            <span class="landing-chip-kicker">时域分析 / 核心指标</span>
+                            <span class="landing-chip-title">二阶系统性能指标</span>
+                            <span class="landing-chip-copy">把超调、峰值时间、阻尼比放在一张图里讲清楚。</span>
+                            <span class="landing-chip-tail">把公式和直觉接起来</span>
+                        </button>
+                        <button type="button" class="landing-chip" data-starter-prompt="状态空间和传递函数是什么关系？什么时候该用哪一个？">
+                            <span class="landing-chip-kicker">现代控制 / 视角切换</span>
+                            <span class="landing-chip-title">状态空间 vs 传递函数</span>
+                            <span class="landing-chip-copy">从经典控制到现代控制的切换点开始梳理。</span>
+                            <span class="landing-chip-tail">先理解何时该换表达</span>
+                        </button>
+                        <button type="button" class="landing-chip landing-chip--ghost" data-landing-action="graph">
+                            <span class="landing-chip-kicker">课程全景 / 导航</span>
+                            <span class="landing-chip-title">先看课程图谱</span>
+                            <span class="landing-chip-copy">从整张知识图里选一个节点，再回到这里继续讲。</span>
+                            <span class="landing-chip-tail">从整张图里挑入口</span>
+                        </button>
+                    </div>
+                    <div class="landing-meta">新建学习页会回到这里；开始对话后，界面会自动切到专注讲解模式，左侧保留学习页和资料入口。</div>
+                </section>
+
+                <div id="messages" class="messages chat-area"></div>
+
+                <div class="input-sticky inputbar">
+                    <div class="composer-shell">
+                        <textarea id="chat-input" class="chat-textarea" rows="1" placeholder="给 AI Tutor 发送消息" aria-label="输入学习主题或回答问题"></textarea>
+                        <div class="input-toolbar toolbar-row">
+                            <div class="input-tools" aria-label="快捷操作">
+                                <button type="button" class="toolbar-btn tool-chip tool-chip--icon" onclick="triggerKnowledgeUpload()" aria-label="上传资料">+</button>
+                                <button type="button" id="thinking-toggle-btn" class="toolbar-btn tool-chip thinking-toggle" onclick="toggleThinkingMode()" aria-label="切换思考模式" aria-pressed="false">
+                                    <span class="thinking-toggle-label">思考</span>
+                                </button>
+                                <button type="button" id="pause-btn" class="toolbar-btn tool-chip btn-pause" onclick="pauseCurrentSession()" aria-label="暂停当前学习页" hidden>暂停</button>
+                            </div>
+                            <div class="input-actions input-actions--dock" aria-label="输入区操作">
+                                <button type="button" id="mic-btn" class="toolbar-btn tool-chip btn-mic" onclick="toggleVoiceInput()" aria-label="开始或停止语音输入" aria-pressed="false">语音</button>
+                                <button type="button" id="send-btn" class="btn-send send-btn" onclick="handlePrimaryAction()" aria-label="输入内容后发送">
+                                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    <div id="status-banner" class="status-banner status-ready" role="status" aria-live="polite" hidden></div>
+                    <div class="composer-disclaimer">AI 也可能会犯错，请核查重要信息。</div>
+                </div>
+            </main>
         </div>
     </div>
 
-    <div class="container">
-        <!-- Sidebar -->
-        <div class="sidebar">
-            <div class="sidebar-header">
-                <div class="sidebar-title" style="font-size:12px; color:var(--text-secondary); margin-bottom:10px;">最近学习记录</div>
+    <!-- Chat Search Modal -->
+    <div id="chat-search-modal" class="unified-modal" aria-hidden="true" role="dialog" aria-modal="true" aria-label="搜索聊天" onclick="closeChatSearch(event)">
+        <div class="unified-dialog unified-dialog--search" onclick="event.stopPropagation()">
+            <div class="unified-search-header">
+                <svg class="unified-search-icon" width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><circle cx="7" cy="7" r="4.8" stroke="currentColor" stroke-width="1.4"/><path d="M10.5 10.5L14 14" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
+                <input id="chat-search-input" class="unified-search-input" type="search" placeholder="搜索聊天..." autocomplete="off" aria-label="搜索聊天" oninput="onChatSearchInput(this.value)">
+                <button type="button" class="unified-close-btn" onclick="closeChatSearch()" aria-label="关闭">
+                    <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2 2L12 12M12 2L2 12" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+                </button>
             </div>
-            <div id="history-list" class="history-container">
-                <!-- Thread IDs will go here -->
-            </div>
-            <div class="sidebar-header" style="border-top:1px solid var(--border);">
-                <input type="file" id="file-input" hidden>
-                <button class="btn-new" onclick="document.getElementById('file-input').click()">📁 注入本地知识库</button>
-                <div id="upload-status" style="font-size:11px; margin-top:8px; text-align:center;"></div>
-            </div>
+            <div class="unified-search-body" id="chat-search-body"></div>
         </div>
+    </div>
 
-        <!-- Chat -->
-        <div class="chat-main">
-            <div id="messages" class="messages">
-                <div class="msg-wrapper agent">
-                    <div class="avatar agent">T</div>
-                    <div class="msg-content">你好！我是你的私人伴学导师。你想开始学习哪个知识点？或者选择左侧的历史进度。</div>
+    <!-- Knowledge Graph Modal -->
+    <div id="knowledge-graph-modal" class="unified-modal" aria-hidden="true" onclick="closeKnowledgeGraphModal(event)">
+        <div class="unified-dialog unified-dialog--graph" role="dialog" aria-modal="true" aria-labelledby="knowledge-graph-title" onclick="event.stopPropagation()">
+            <div class="unified-dialog-header">
+                <div class="unified-dialog-title-group">
+                    <h3 id="knowledge-graph-title" class="unified-dialog-title">知识图谱</h3>
+                    <span id="knowledge-graph-subtitle" class="unified-dialog-subtitle">控制理论 · 当前图谱 B</span>
+                </div>
+                <div class="unified-dialog-actions">
+                    <button type="button" class="unified-action-btn" onclick="refreshKnowledgeGraphModal()">
+                        <svg width="15" height="15" viewBox="0 0 15 15" fill="none"><path d="M2 7.5C2 4.46 4.46 2 7.5 2c1.8 0 3.4.85 4.4 2.15M13 7.5c0 3.04-2.46 5.5-5.5 5.5-1.8 0-3.4-.85-4.4-2.15" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/><path d="M11.5 1.5v3h-3" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                        <span>定位</span>
+                    </button>
+                    <button type="button" class="unified-action-btn" onclick="openKnowledgeGraphStandalone()">
+                        <svg width="15" height="15" viewBox="0 0 15 15" fill="none"><path d="M6 2H3a1 1 0 00-1 1v9a1 1 0 001 1h9a1 1 0 001-1V9" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/><path d="M9 2h4v4M13 2L8 7" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                        <span>新开页</span>
+                    </button>
+                    <button type="button" class="unified-close-btn" onclick="closeKnowledgeGraphModal()" aria-label="关闭">
+                        <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2 2L12 12M12 2L2 12" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+                    </button>
                 </div>
             </div>
-
-            <div class="input-sticky">
-                <div class="input-inner">
-                    <textarea id="chat-input" class="chat-textarea" rows="1" placeholder="输入学习主题或回答问题..."></textarea>
-                    <button id="send-btn" class="btn-send" onclick="handleSend()">发送</button>
-                </div>
-                <div id="status-banner" style="font-size:11px; color:var(--text-secondary); margin-top:8px; text-align:center;">
-                    系统就绪
-                </div>
-            </div>
-        </div>
-
-        <!-- Profile -->
-        <div id="profile-panel" class="profile-panel hidden">
-            <div class="panel-header">📊 学习画像</div>
-            <div class="radar-box">
-                <canvas id="radarChart"></canvas>
-            </div>
-            <div style="font-size:12px; color:var(--text-secondary); margin-top:20px; line-height:1.6; background:rgba(255,255,255,0.02); padding:15px; border-radius:10px;">
-                💡 <b>导师提示：</b> 这是根据你的测评生成的六维能力图。我将据此动态调整后续讲解的难度。
+            <div class="insight-frame-wrap">
+                <iframe id="knowledge-graph-frame" class="insight-frame" title="控制理论知识图谱 B" loading="lazy"></iframe>
             </div>
         </div>
     </div>
 
-    <div id="config-overlay" class="config-overlay" onclick="closeLocalConfigPanel(event)">
-        <div class="config-panel" onclick="event.stopPropagation()">
-            <h3>本地配置</h3>
-            <p>此面板适合个人本地使用。你只需要选择厂商、模型并填写对应 API Key；`provider/base_url` 会由系统自动匹配。保存后会写入服务端本地 `.env`，新的聊天档案会在下一次启动学习或恢复暂停流程时生效；RAG 配置会立即重建。</p>
-            <div class="config-grid">
-                <div class="config-group">
-                    <div class="config-group-title">聊天模型</div>
-                    <div class="config-field">
-                        <label for="local-chat-profile">厂商 / 档案</label>
-                        <select id="local-chat-profile" onchange="renderVendorModels(this.value, '')">
-                            <option value="gemini">Gemini</option>
-                            <option value="qwen">Qwen</option>
-                            <option value="deepseek">DeepSeek</option>
-                            <option value="openai">OpenAI / GPT</option>
-                            <option value="minimax">MiniMax</option>
-                            <option value="glm">GLM</option>
-                            <option value="custom">Custom</option>
-                        </select>
-                        <small>已知厂商会自动匹配接口地址和 provider，只有 Custom 才手动配置。</small>
-                    </div>
-                    <div class="config-field">
-                        <label for="local-model-select">模型</label>
-                        <select id="local-model-select"></select>
-                    </div>
-                    <div class="config-field">
-                        <label id="local-api-key-label" for="local-api-key">API Key</label>
-                        <input id="local-api-key" type="password" placeholder="仅本地保存">
-                    </div>
+    <!-- Radar / Learning Progress Modal -->
+    <div id="radar-modal" class="unified-modal" aria-hidden="true" onclick="closeRadarModal(event)">
+        <div class="unified-dialog unified-dialog--radar" role="dialog" aria-modal="true" aria-labelledby="radar-modal-title" onclick="event.stopPropagation()">
+            <div class="unified-dialog-header">
+                <div class="unified-dialog-title-group">
+                    <h3 id="radar-modal-title" class="unified-dialog-title">学习画像</h3>
+                    <span id="radar-modal-subtitle" class="unified-dialog-subtitle">查看当前知识掌握状态</span>
                 </div>
-
-                <details id="local-advanced-details">
-                    <summary>高级设置</summary>
-                    <div id="custom-provider-field" class="config-field">
-                        <label for="local-llm-provider">Custom Provider</label>
-                        <select id="local-llm-provider">
-                            <option value="openai">openai-compatible</option>
-                            <option value="google">google</option>
-                        </select>
-                    </div>
-                    <div id="custom-model-field" class="config-field">
-                        <label for="local-model-name">Custom Model Name</label>
-                        <input id="local-model-name" type="text" placeholder="例如 qwen-plus">
-                    </div>
-                    <div id="custom-base-field" class="config-field">
-                        <label for="local-openai-base">Custom Base URL</label>
-                        <input id="local-openai-base" type="text" placeholder="https://...">
-                    </div>
-                    <div class="config-group-title" style="margin-top:16px;">RAG</div>
-                    <div class="config-field">
-                        <label for="local-embedding-provider">Embedding Provider</label>
-                        <select id="local-embedding-provider">
-                            <option value="local">local</option>
-                            <option value="google">google</option>
-                            <option value="openai">openai</option>
-                        </select>
-                    </div>
-                    <div class="config-field">
-                        <label for="local-embedding-model">Embedding Model</label>
-                        <input id="local-embedding-model" type="text" placeholder="sentence-transformers/all-MiniLM-L6-v2">
-                    </div>
-                    <div class="config-field">
-                        <label for="local-top-k">Top K</label>
-                        <input id="local-top-k" type="number" min="1">
-                    </div>
-                    <div class="config-field">
-                        <label for="local-chunk-size">Chunk Size</label>
-                        <input id="local-chunk-size" type="number" min="100">
-                    </div>
-                    <div class="config-field">
-                        <label for="local-chunk-overlap">Chunk Overlap</label>
-                        <input id="local-chunk-overlap" type="number" min="0">
-                    </div>
-
-                    <div class="config-group-title" style="margin-top:16px;">网络</div>
-                    <div class="config-field">
-                        <label for="local-http-proxy">HTTP Proxy</label>
-                        <input id="local-http-proxy" type="text" placeholder="http://127.0.0.1:7897">
-                    </div>
-                    <div class="config-field">
-                        <label for="local-https-proxy">HTTPS Proxy</label>
-                        <input id="local-https-proxy" type="text" placeholder="http://127.0.0.1:7897">
-                    </div>
-                </details>
+                <div class="unified-dialog-actions">
+                    <button type="button" class="unified-close-btn" onclick="closeRadarModal()" aria-label="关闭">
+                        <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2 2L12 12M12 2L2 12" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+                    </button>
+                </div>
             </div>
-            <div class="config-actions">
-                <button class="topic-confirm-btn primary" onclick="saveLocalConfig()">保存本地配置</button>
-                <button class="topic-confirm-btn secondary" onclick="closeLocalConfigPanel()">关闭</button>
+            <div class="radar-modal-body">
+                <div class="radar-box radar-box-modal">
+                    <canvas id="radarChart"></canvas>
+                </div>
+                <div id="radar-breakdown" class="radar-breakdown"></div>
             </div>
-            <div id="local-config-status" style="font-size:12px; color:var(--text-secondary); margin-top:12px;"></div>
+        </div>
+    </div>
+
+    <div id="config-overlay" class="config-overlay" aria-hidden="true" onclick="closeLocalConfigPanel(event)">
+        <div class="config-panel" role="dialog" aria-modal="true" aria-labelledby="local-config-title" onclick="event.stopPropagation()">
+            <div class="settings-layout">
+                <aside class="settings-sidebar" aria-label="设置分类">
+                    <button type="button" class="settings-close-btn" onclick="closeLocalConfigPanel()" aria-label="关闭设置">
+                        <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M4 4L14 14M14 4L4 14" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+                    </button>
+
+                    <nav class="settings-nav" id="local-config-nav">
+                        <button type="button" class="settings-nav-item" data-config-section-tab="general" onclick="switchLocalConfigSection('general')">
+                            <span class="settings-nav-icon" aria-hidden="true">
+                                <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M9 2.7V4.1M9 13.9V15.3M13.1 4.4L12.1 5.4M5.9 12.6L4.9 13.6M14.9 9H13.5M4.5 9H3.1M13.1 13.6L12.1 12.6M5.9 5.4L4.9 4.4" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/><circle cx="9" cy="9" r="2.9" stroke="currentColor" stroke-width="1.5"/></svg>
+                            </span>
+                            <span>常规</span>
+                        </button>
+                        <button type="button" class="settings-nav-item" data-config-section-tab="notifications" onclick="switchLocalConfigSection('notifications')">
+                            <span class="settings-nav-icon" aria-hidden="true">
+                                <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M9 15.2C10.1 15.2 11 14.3 11 13.2H7C7 14.3 7.9 15.2 9 15.2Z" stroke="currentColor" stroke-width="1.4"/><path d="M4.8 12.8H13.2C12.4 11.9 12 10.7 12 9.4V8.1C12 6.2 10.7 4.6 9 4.2C7.3 4.6 6 6.2 6 8.1V9.4C6 10.7 5.6 11.9 4.8 12.8Z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg>
+                            </span>
+                            <span>通知</span>
+                        </button>
+                        <button type="button" class="settings-nav-item" data-config-section-tab="personalization" onclick="switchLocalConfigSection('personalization')">
+                            <span class="settings-nav-icon" aria-hidden="true">
+                                <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><circle cx="9" cy="9" r="7" stroke="currentColor" stroke-width="1.5"/><path d="M9 5.1V9L11.8 10.7" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M6.3 2.9L5.2 1.8M12.8 16.2L11.7 15.1" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
+                            </span>
+                            <span>个性化</span>
+                        </button>
+                        <button type="button" class="settings-nav-item is-active" data-config-section-tab="applications" onclick="switchLocalConfigSection('applications')">
+                            <span class="settings-nav-icon" aria-hidden="true">
+                                <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><rect x="3" y="3" width="4.2" height="4.2" rx="1.1" stroke="currentColor" stroke-width="1.5"/><rect x="10.8" y="3" width="4.2" height="4.2" rx="1.1" stroke="currentColor" stroke-width="1.5"/><rect x="3" y="10.8" width="4.2" height="4.2" rx="1.1" stroke="currentColor" stroke-width="1.5"/><rect x="10.8" y="10.8" width="4.2" height="4.2" rx="1.1" stroke="currentColor" stroke-width="1.5"/></svg>
+                            </span>
+                            <span>应用</span>
+                        </button>
+                        <button type="button" class="settings-nav-item" data-config-section-tab="data" onclick="switchLocalConfigSection('data')">
+                            <span class="settings-nav-icon" aria-hidden="true">
+                                <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><ellipse cx="9" cy="4.6" rx="4.8" ry="2.1" stroke="currentColor" stroke-width="1.5"/><path d="M4.2 4.6V9.1C4.2 10.3 6.35 11.2 9 11.2C11.65 11.2 13.8 10.3 13.8 9.1V4.6" stroke="currentColor" stroke-width="1.5"/><path d="M4.2 9.1V13.4C4.2 14.6 6.35 15.5 9 15.5C11.65 15.5 13.8 14.6 13.8 13.4V9.1" stroke="currentColor" stroke-width="1.5"/></svg>
+                            </span>
+                            <span>数据管理</span>
+                        </button>
+                        <button type="button" class="settings-nav-item" data-config-section-tab="security" onclick="switchLocalConfigSection('security')">
+                            <span class="settings-nav-icon" aria-hidden="true">
+                                <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M9 2.8L13.8 4.6V8.8C13.8 11.8 11.9 14.5 9 15.5C6.1 14.5 4.2 11.8 4.2 8.8V4.6L9 2.8Z" stroke="currentColor" stroke-width="1.5"/><path d="M7.2 8.8L8.4 10L10.9 7.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                            </span>
+                            <span>安全</span>
+                        </button>
+                        <button type="button" class="settings-nav-item" data-config-section-tab="account" onclick="switchLocalConfigSection('account')">
+                            <span class="settings-nav-icon" aria-hidden="true">
+                                <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><circle cx="9" cy="6.2" r="3" stroke="currentColor" stroke-width="1.5"/><path d="M3.8 14.7C4.8 11.9 6.7 10.6 9 10.6C11.3 10.6 13.2 11.9 14.2 14.7" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><circle cx="9" cy="9" r="7" stroke="currentColor" stroke-width="1.5"/></svg>
+                            </span>
+                            <span>帐户</span>
+                        </button>
+                    </nav>
+                </aside>
+
+                <section class="settings-content">
+                    <header class="settings-content-header">
+                        <h3 id="local-config-title" class="settings-content-title">应用</h3>
+                        <p id="local-config-subtitle" class="settings-content-subtitle">管理模型来源、接口连接和本地运行方式。</p>
+                    </header>
+
+                    <div class="settings-content-body">
+                        <section class="settings-section" data-config-section="general">
+                            <div class="settings-block">
+                                <div class="settings-block-title">常规</div>
+                                <p class="settings-block-copy">当前版本的核心设置集中在“应用 / 数据管理 / 安全”。这里保留全局偏好位，后续会接入默认入口、学习偏好和恢复策略。</p>
+                                <div class="settings-note-grid">
+                                    <div class="settings-note-card">
+                                        <div class="settings-note-title">当前运行模式</div>
+                                        <div class="settings-note-value">本地模式</div>
+                                    </div>
+                                    <div class="settings-note-card">
+                                        <div class="settings-note-title">资料检索</div>
+                                        <div class="settings-note-value">已启用</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </section>
+
+                        <section class="settings-section" data-config-section="notifications">
+                            <div class="settings-block">
+                                <div class="settings-block-title">会话提醒</div>
+                                <label class="settings-switch-row" for="settings-notify-banner">
+                                    <span class="settings-switch-copy">
+                                        <span class="settings-switch-title">显示状态横幅</span>
+                                        <span class="settings-switch-desc">保留发送、暂停、识别和连接状态提示。</span>
+                                    </span>
+                                    <span class="settings-switch">
+                                        <input id="settings-notify-banner" type="checkbox">
+                                        <span class="settings-switch-track"></span>
+                                    </span>
+                                </label>
+                                <label class="settings-switch-row" for="settings-notify-progress">
+                                    <span class="settings-switch-copy">
+                                        <span class="settings-switch-title">显示流程事件</span>
+                                        <span class="settings-switch-desc">保留掌握度更新、节点切换和教学标记提醒。</span>
+                                    </span>
+                                    <span class="settings-switch">
+                                        <input id="settings-notify-progress" type="checkbox">
+                                        <span class="settings-switch-track"></span>
+                                    </span>
+                                </label>
+                                <label class="settings-switch-row" for="settings-notify-desktop">
+                                    <span class="settings-switch-copy">
+                                        <span class="settings-switch-title">浏览器桌面通知</span>
+                                        <span class="settings-switch-desc">支持时可在关键完成节点弹出系统通知。</span>
+                                    </span>
+                                    <span class="settings-switch">
+                                        <input id="settings-notify-desktop" type="checkbox">
+                                        <span class="settings-switch-track"></span>
+                                    </span>
+                                </label>
+                                <label class="settings-switch-row" for="settings-notify-sound">
+                                    <span class="settings-switch-copy">
+                                        <span class="settings-switch-title">轻提示音</span>
+                                        <span class="settings-switch-desc">完成关键步骤时播放轻量提示音。</span>
+                                    </span>
+                                    <span class="settings-switch">
+                                        <input id="settings-notify-sound" type="checkbox">
+                                        <span class="settings-switch-track"></span>
+                                    </span>
+                                </label>
+                            </div>
+
+                            <div class="settings-block">
+                                <div class="settings-block-title">提醒频率</div>
+                                <div class="config-field">
+                                    <label for="settings-notify-reminder-cycle">学习提醒</label>
+                                    <select id="settings-notify-reminder-cycle">
+                                        <option value="off">关闭</option>
+                                        <option value="daily">每天一次</option>
+                                        <option value="weekly">每周一次</option>
+                                    </select>
+                                    <small id="settings-notify-permission">桌面通知权限状态：未检测。</small>
+                                </div>
+                            </div>
+                        </section>
+
+                        <section class="settings-section" data-config-section="personalization">
+                            <div class="settings-block">
+                                <div class="settings-block-title">聊天界面</div>
+                                <div class="config-field">
+                                    <label for="settings-ui-density">对话密度</label>
+                                    <select id="settings-ui-density">
+                                        <option value="comfortable">舒展</option>
+                                        <option value="compact">紧凑</option>
+                                    </select>
+                                    <small>会同步影响消息间距、气泡留白和附件卡间距。</small>
+                                </div>
+                                <label class="settings-switch-row" for="settings-ui-show-landing">
+                                    <span class="settings-switch-copy">
+                                        <span class="settings-switch-title">显示开场推荐</span>
+                                        <span class="settings-switch-desc">保留首页的推荐起点和引导说明。</span>
+                                    </span>
+                                    <span class="settings-switch">
+                                        <input id="settings-ui-show-landing" type="checkbox">
+                                        <span class="settings-switch-track"></span>
+                                    </span>
+                                </label>
+                                <label class="settings-switch-row" for="settings-ui-show-event-chips">
+                                    <span class="settings-switch-copy">
+                                        <span class="settings-switch-title">显示流程事件标签</span>
+                                        <span class="settings-switch-desc">在对话中保留节点切换、掌握和跳转提示。</span>
+                                    </span>
+                                    <span class="settings-switch">
+                                        <input id="settings-ui-show-event-chips" type="checkbox">
+                                        <span class="settings-switch-track"></span>
+                                    </span>
+                                </label>
+                                <label class="settings-switch-row" for="settings-ui-hide-status-banner">
+                                    <span class="settings-switch-copy">
+                                        <span class="settings-switch-title">弱化顶部状态条</span>
+                                        <span class="settings-switch-desc">关闭后只保留对话主区域，减少系统提示干扰。</span>
+                                    </span>
+                                    <span class="settings-switch">
+                                        <input id="settings-ui-hide-status-banner" type="checkbox">
+                                        <span class="settings-switch-track"></span>
+                                    </span>
+                                </label>
+                                <label class="settings-switch-row" for="settings-ui-reduce-motion">
+                                    <span class="settings-switch-copy">
+                                        <span class="settings-switch-title">减少动效</span>
+                                        <span class="settings-switch-desc">关闭缩放、浮层和卡片出现动画。</span>
+                                    </span>
+                                    <span class="settings-switch">
+                                        <input id="settings-ui-reduce-motion" type="checkbox">
+                                        <span class="settings-switch-track"></span>
+                                    </span>
+                                </label>
+                            </div>
+                        </section>
+
+                        <section class="settings-section is-active" data-config-section="applications">
+                            <div class="settings-block">
+                                <div class="settings-block-title">AI模型</div>
+                                <div class="config-field">
+                                    <label for="local-chat-profile">服务来源 / 档案</label>
+                                    <select id="local-chat-profile" onchange="renderVendorModels(this.value, ''); syncLocalConfigAccountSummary()">
+                                        <option value="gemini">Gemini</option>
+                                        <option value="qwen">Qwen</option>
+                                        <option value="deepseek">DeepSeek</option>
+                                        <option value="openai">OpenAI / GPT</option>
+                                        <option value="minimax">MiniMax</option>
+                                        <option value="glm">GLM</option>
+                                        <option value="custom">Custom</option>
+                                    </select>
+                                    <small>已知服务会自动补齐常用接口信息；只有 Custom 需要你手动指定。</small>
+                                </div>
+                                <div class="config-field">
+                                    <label for="local-model-select">具体模型</label>
+                                    <select id="local-model-select" onchange="syncLocalConfigAccountSummary()"></select>
+                                </div>
+                                <div class="config-field">
+                                    <label id="local-api-key-label" for="local-api-key">API Key</label>
+                                    <input id="local-api-key" type="password" placeholder="只保存在本地环境">
+                                </div>
+                            </div>
+
+                            <div class="settings-block">
+                                <details id="local-advanced-details" class="settings-advanced">
+                                    <summary class="settings-advanced-summary">
+                                        <span class="settings-advanced-title">高级设置</span>
+                                        <span class="settings-advanced-desc">切换到 Custom 或兼容接口时展开这里。</span>
+                                    </summary>
+                                    <div class="settings-advanced-body">
+                                        <div id="custom-provider-field" class="config-field">
+                                            <label for="local-llm-provider">Custom Provider</label>
+                                            <select id="local-llm-provider">
+                                                <option value="openai">openai-compatible</option>
+                                                <option value="google">google</option>
+                                            </select>
+                                        </div>
+                                        <div id="custom-model-field" class="config-field">
+                                            <label for="local-model-name">Custom Model Name</label>
+                                            <input id="local-model-name" type="text" placeholder="例如 qwen-plus" oninput="syncLocalConfigAccountSummary()">
+                                        </div>
+                                        <div id="custom-base-field" class="config-field">
+                                            <label for="local-openai-base">Custom Base URL</label>
+                                            <input id="local-openai-base" type="text" placeholder="https://...">
+                                        </div>
+                                    </div>
+                                </details>
+                            </div>
+                        </section>
+
+
+                        <section class="settings-section" data-config-section="data">
+                            <div class="settings-block">
+                                <div class="settings-block-title">资料检索</div>
+                                <div class="config-field">
+                                    <label for="local-embedding-provider">检索模型</label>
+                                    <select id="local-embedding-provider">
+                                        <option value="local">local</option>
+                                        <option value="google">google</option>
+                                        <option value="openai">openai</option>
+                                    </select>
+                                </div>
+                                <div class="config-field">
+                                    <label for="local-embedding-model">检索模型名称</label>
+                                    <input id="local-embedding-model" type="text" placeholder="sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2">
+                                </div>
+                                <div class="config-field">
+                                    <label for="local-pdf-parse-backend">PDF解析方式</label>
+                                    <select id="local-pdf-parse-backend">
+                                        <option value="auto">auto：先试 MinerU，失败回退本地</option>
+                                        <option value="mineru">mineru：只用 MinerU</option>
+                                        <option value="local">local：只用本地 PyMuPDF</option>
+                                    </select>
+                                    <small>推荐默认 `auto`。如果 MinerU 经常超时但本地解析足够用，就改成 `local`。</small>
+                                </div>
+                                <div class="config-field">
+                                    <label for="local-top-k">Top K</label>
+                                    <input id="local-top-k" type="number" min="1">
+                                </div>
+                                <div class="config-field">
+                                    <label for="local-chunk-size">Chunk Size</label>
+                                    <input id="local-chunk-size" type="number" min="100">
+                                </div>
+                                <div class="config-field">
+                                    <label for="local-chunk-overlap">Chunk Overlap</label>
+                                    <input id="local-chunk-overlap" type="number" min="0">
+                                </div>
+                                <div class="config-field">
+                                    <label for="local-vector-store-dir">向量目录</label>
+                                    <input id="local-vector-store-dir" type="text" placeholder="data/chroma_db">
+                                    <small>默认推荐 `data/chroma_db`。清空书架会删除当前知识向量，但目录本身可能保留为空数据库目录。</small>
+                                </div>
+                            </div>
+                        </section>
+
+                        <section class="settings-section" data-config-section="security">
+                            <div class="settings-block">
+                                <div class="settings-block-title">网络代理</div>
+                                <div class="config-field">
+                                    <label for="local-proxy-port">常用代理端口</label>
+                                    <input id="local-proxy-port" type="number" min="1" placeholder="7897">
+                                    <small>日常最常改这一项。你的梯子如果从 `7897` 换到 `7892`，通常只需要改这里。</small>
+                                </div>
+                                <div class="config-field">
+                                    <label for="local-proxy-host">代理主机</label>
+                                    <input id="local-proxy-host" type="text" placeholder="127.0.0.1">
+                                </div>
+                                <div class="config-field">
+                                    <label for="local-proxy-scheme">代理协议</label>
+                                    <select id="local-proxy-scheme">
+                                        <option value="http">http</option>
+                                        <option value="https">https</option>
+                                    </select>
+                                </div>
+                                <div class="config-field">
+                                    <label for="local-http-proxy">HTTP Proxy</label>
+                                    <input id="local-http-proxy" type="text" placeholder="http://127.0.0.1:7897">
+                                    <small>高级覆盖项。正常情况下留空，让系统自动根据上面的 host/port/scheme 推导即可。</small>
+                                </div>
+                                <div class="config-field">
+                                    <label for="local-https-proxy">HTTPS Proxy</label>
+                                    <input id="local-https-proxy" type="text" placeholder="http://127.0.0.1:7897">
+                                </div>
+                                <div class="config-field">
+                                    <label for="local-no-proxy">直连域名（NO_PROXY）</label>
+                                    <textarea id="local-no-proxy" rows="3" placeholder="127.0.0.1,localhost,dashscope.aliyuncs.com,.aliyuncs.com,hf-mirror.com"></textarea>
+                                    <small>留空也会自动合并国内模型、HuggingFace 镜像、PyPI/npm 镜像和本机地址，避免国内服务被代理绕远。</small>
+                                </div>
+                            </div>
+
+                            <div class="settings-block">
+                                <div class="settings-block-title">MinerU / PDF</div>
+                                <div class="config-field">
+                                    <label for="local-mineru-proxy-mode">MinerU 网络模式</label>
+                                    <select id="local-mineru-proxy-mode">
+                                        <option value="inherit">inherit：跟随全局代理</option>
+                                        <option value="direct">direct：MinerU 直连</option>
+                                    </select>
+                                    <small>如果 HuggingFace 正常，但 MinerU 老超时，优先把这里改成 `direct`。</small>
+                                </div>
+                                <div class="config-field">
+                                    <label for="local-mineru-connect-timeout">MinerU 连接超时（秒）</label>
+                                    <input id="local-mineru-connect-timeout" type="number" min="1" placeholder="5">
+                                </div>
+                                <div class="config-field">
+                                    <label for="local-mineru-http-proxy">MinerU HTTP Proxy</label>
+                                    <input id="local-mineru-http-proxy" type="text" placeholder="通常留空，必要时单独覆盖">
+                                </div>
+                                <div class="config-field">
+                                    <label for="local-mineru-https-proxy">MinerU HTTPS Proxy</label>
+                                    <input id="local-mineru-https-proxy" type="text" placeholder="通常留空，必要时单独覆盖">
+                                </div>
+                            </div>
+                        </section>
+
+
+                        <section class="settings-section" data-config-section="account">
+                            <div class="settings-block">
+                                <div class="settings-block-title">个人资料</div>
+                                <div class="config-field">
+                                    <label for="settings-account-name">显示名称</label>
+                                    <input id="settings-account-name" type="text" placeholder="学习者">
+                                    <small>会同步更新左下角账户卡和设置页的本地身份显示。</small>
+                                </div>
+                                <div class="config-field">
+                                    <label for="settings-account-plan">方案标签</label>
+                                    <select id="settings-account-plan">
+                                        <option value="Plus">Plus</option>
+                                        <option value="Local">Local</option>
+                                        <option value="Pro">Pro</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="settings-block">
+                                <div class="settings-block-title">当前环境</div>
+                                <p class="settings-block-copy">当前版本是本地运行模式，没有独立云端账户系统。模型、密钥和资料索引都保存在这台机器上。</p>
+                                <div class="settings-note-grid">
+                                    <div class="settings-note-card">
+                                        <div class="settings-note-title">当前档案</div>
+                                        <div class="settings-note-value" id="config-account-profile">未选择</div>
+                                    </div>
+                                    <div class="settings-note-card">
+                                        <div class="settings-note-title">当前模型</div>
+                                        <div class="settings-note-value" id="config-account-model">未选择</div>
+                                    </div>
+                                    <div class="settings-note-card">
+                                        <div class="settings-note-title">显示名称</div>
+                                        <div class="settings-note-value" id="config-account-display-name">学习者</div>
+                                    </div>
+                                    <div class="settings-note-card">
+                                        <div class="settings-note-title">资料索引目录</div>
+                                        <div class="settings-note-value" id="config-account-store">data/chroma_db</div>
+                                    </div>
+                                </div>
+                                <div class="settings-inline-actions">
+                                    <button type="button" class="settings-link-chip" onclick="switchLocalConfigSection('applications')">去改模型</button>
+                                    <button type="button" class="settings-link-chip" onclick="switchLocalConfigSection('data')">去看数据管理</button>
+                                    <button type="button" class="settings-link-chip" onclick="switchLocalConfigSection('security')">去看网络设置</button>
+                                </div>
+                            </div>
+                        </section>
+                    </div>
+
+                    <div class="settings-footer">
+                        <div class="config-actions">
+                            <button type="button" class="chip chip-primary" onclick="saveLocalConfig()">保存设置</button>
+                            <button type="button" class="chip" onclick="testConnection()">试一下连接</button>
+                            <button type="button" class="chip chip-muted" onclick="closeLocalConfigPanel()">关闭</button>
+                        </div>
+                        <div id="local-config-status" class="status-inline config-panel-status" aria-live="polite"></div>
+                    </div>
+                </section>
+            </div>
+        </div>
+    </div>
+
+    <!-- Library Modal -->
+    <div id="library-overlay" class="config-overlay library-overlay" aria-hidden="true" onclick="closeLibraryPanel(event)">
+        <div class="config-panel library-panel" role="dialog" aria-modal="true" aria-labelledby="library-title" onclick="event.stopPropagation()">
+            <div class="settings-layout library-layout">
+                <!-- Left sidebar -->
+                <aside class="settings-sidebar library-sidebar" aria-label="资料分类">
+                    <button type="button" class="settings-close-btn" onclick="closeLibraryPanel()" aria-label="关闭资料库">
+                        <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M4 4L14 14M14 4L4 14" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+                    </button>
+                    <nav class="settings-nav library-nav" id="library-nav">
+                        <button type="button" class="settings-nav-item is-active" data-lib-filter="all" onclick="switchLibraryFilter('all')">
+                            <span class="settings-nav-icon" aria-hidden="true">
+                                <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><rect x="2.5" y="2.5" width="13" height="13" rx="2.5" stroke="currentColor" stroke-width="1.5"/><path d="M5.5 6.5H12.5M5.5 9H12.5M5.5 11.5H9.5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
+                            </span>
+                            <span>全部文件</span>
+                            <span class="library-nav-badge" id="lib-count-all">0</span>
+                        </button>
+                        <button type="button" class="settings-nav-item" data-lib-filter="pdf" onclick="switchLibraryFilter('pdf')">
+                            <span class="settings-nav-icon" aria-hidden="true">
+                                <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M4.5 2.5H11.5L13.5 4.5V15.5H4.5V2.5Z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/><path d="M11.5 2.5V4.5H13.5" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/><path d="M6.5 8.5H8.5C9.05 8.5 9.5 8.95 9.5 9.5C9.5 10.05 9.05 10.5 8.5 10.5H6.5V8.5Z" stroke="currentColor" stroke-width="1.2"/><path d="M6.5 12.5H11.5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
+                            </span>
+                            <span>PDF</span>
+                            <span class="library-nav-badge" id="lib-count-pdf">0</span>
+                        </button>
+                        <button type="button" class="settings-nav-item" data-lib-filter="doc" onclick="switchLibraryFilter('doc')">
+                            <span class="settings-nav-icon" aria-hidden="true">
+                                <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M4.5 2.5H11.5L13.5 4.5V15.5H4.5V2.5Z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/><path d="M11.5 2.5V4.5H13.5" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/><path d="M6.5 8H11.5M6.5 10.5H11.5M6.5 13H9.5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
+                            </span>
+                            <span>文档</span>
+                            <span class="library-nav-badge" id="lib-count-doc">0</span>
+                        </button>
+                        <button type="button" class="settings-nav-item" data-lib-filter="excel" onclick="switchLibraryFilter('excel')">
+                            <span class="settings-nav-icon" aria-hidden="true">
+                                <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M4.5 2.5H11.5L13.5 4.5V15.5H4.5V2.5Z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/><path d="M11.5 2.5V4.5H13.5" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/><path d="M6.5 7H11.5V14H6.5V7Z" stroke="currentColor" stroke-width="1.2"/><path d="M9 7V14M6.5 10H11.5" stroke="currentColor" stroke-width="1.1"/></svg>
+                            </span>
+                            <span>表格</span>
+                            <span class="library-nav-badge" id="lib-count-excel">0</span>
+                        </button>
+                        <button type="button" class="settings-nav-item" data-lib-filter="image" onclick="switchLibraryFilter('image')">
+                            <span class="settings-nav-icon" aria-hidden="true">
+                                <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><rect x="2.5" y="3.5" width="13" height="11" rx="2" stroke="currentColor" stroke-width="1.5"/><circle cx="6.5" cy="7.5" r="1.2" stroke="currentColor" stroke-width="1.3"/><path d="M2.5 12L6.5 9L9 11L11.5 8.5L15.5 12" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                            </span>
+                            <span>图片</span>
+                            <span class="library-nav-badge" id="lib-count-image">0</span>
+                        </button>
+                        <button type="button" class="settings-nav-item" data-lib-filter="other" onclick="switchLibraryFilter('other')">
+                            <span class="settings-nav-icon" aria-hidden="true">
+                                <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M4.5 2.5H11.5L13.5 4.5V15.5H4.5V2.5Z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/><path d="M11.5 2.5V4.5H13.5" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/><circle cx="9" cy="10.5" r="1" fill="currentColor"/><circle cx="6.5" cy="10.5" r="1" fill="currentColor"/><circle cx="11.5" cy="10.5" r="1" fill="currentColor"/></svg>
+                            </span>
+                            <span>其他</span>
+                            <span class="library-nav-badge" id="lib-count-other">0</span>
+                        </button>
+                    </nav>
+                    <div class="library-storage-info">
+                        <div class="library-storage-label">
+                            <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><rect x="1.5" y="3" width="11" height="8" rx="1.5" stroke="currentColor" stroke-width="1.3"/><path d="M4.5 6H9.5M4.5 8H7.5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
+                            <span id="library-storage-text">共 0 份文件</span>
+                        </div>
+                    </div>
+                </aside>
+                <!-- Right content -->
+                <section class="settings-content library-content">
+                    <div class="library-content-header">
+                        <div class="library-content-title-row">
+                            <h2 class="settings-content-title" id="library-title">全部文件</h2>
+                            <button type="button" class="library-upload-btn" onclick="triggerKnowledgeUpload()" aria-label="上传文件">
+                                <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M8 3v8M4 7l4-4 4 4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M2.5 13h11" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+                                上传文件
+                            </button>
+                        </div>
+                        <div class="library-search-row">
+                            <svg class="library-search-icon" width="15" height="15" viewBox="0 0 15 15" fill="none"><circle cx="6.5" cy="6.5" r="4.5" stroke="currentColor" stroke-width="1.3"/><path d="M10 10l3.5 3.5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
+                            <input type="text" id="library-search-input" class="library-search-input" placeholder="搜索文件名…" oninput="filterLibrarySearch(this.value)" aria-label="搜索文件">
+                        </div>
+                    </div>
+                    <div class="library-body">
+                        <!-- Drop zone for empty state -->
+                        <div id="library-dropzone" class="library-dropzone" hidden>
+                            <div class="library-dropzone-inner">
+                                <svg width="40" height="40" viewBox="0 0 40 40" fill="none"><rect x="5" y="8" width="30" height="24" rx="4" stroke="currentColor" stroke-width="2"/><path d="M20 18V28M15 22l5-5 5 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M12 34h16" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+                                <div class="library-dropzone-title">还没有文件</div>
+                                <div class="library-dropzone-hint">点击"上传文件"或拖拽文件到这里</div>
+                                <button type="button" class="library-upload-btn library-upload-btn--ghost" onclick="triggerKnowledgeUpload()">选择文件上传</button>
+                            </div>
+                        </div>
+                        <!-- File list -->
+                        <div id="library-file-list" class="library-file-list" role="list" aria-label="文件列表"></div>
+                    </div>
+                    <div class="library-footer">
+                        <div id="library-status" class="library-status" aria-live="polite"></div>
+                        <div class="library-footer-actions">
+                            <button type="button" class="chip chip-danger-ghost" id="library-clear-btn" onclick="clearKnowledgeFiles()" hidden>清空全部</button>
+                        </div>
+                    </div>
+                </section>
+            </div>
         </div>
     </div>
 
@@ -175,6 +859,7 @@
     <script defer src="/assets/js/ui.js"></script>
     <script defer src="/assets/js/config.js"></script>
     <script defer src="/assets/js/history.js"></script>
+    <script defer src="/assets/js/knowledge.js"></script>
     <script defer src="/assets/js/session.js"></script>
     <script defer src="/assets/app.js"></script>
 </body>

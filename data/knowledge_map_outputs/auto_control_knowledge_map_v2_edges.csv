@@ -1,0 +1,96 @@
+﻿edge_id,source,target,relation,relation_type,relation_label,relation_strength,direction_type,keep,weight,source_type,evidence,relation_note,extra
+E001,KM001,KM007,prerequisite_of,prerequisite_of,prerequisite_of,1.0,directed,True,1.0,config_prerequisite,自动控制的一般概念 is prerequisite of 控制系统的数学模型,显式配置的前置知识关系,{}
+E002,KM002,KM008,prerequisite_of,prerequisite_of,prerequisite_of,1.0,directed,True,1.0,config_prerequisite,自动控制的基本原理与方式 is prerequisite of 控制系统的时域数学模型,显式配置的前置知识关系,{}
+E003,KM008,KM009,prerequisite_of,prerequisite_of,prerequisite_of,1.0,directed,True,1.0,config_prerequisite,控制系统的时域数学模型 is prerequisite of 控制系统的复数域数学模型,显式配置的前置知识关系,{}
+E004,KM009,KM010,prerequisite_of,prerequisite_of,prerequisite_of,1.0,directed,True,1.0,config_prerequisite,控制系统的复数域数学模型 is prerequisite of 控制系统的结构图与信号流图,显式配置的前置知识关系,{}
+E005,KM010,KM011,prerequisite_of,prerequisite_of,prerequisite_of,1.0,directed,True,1.0,config_prerequisite,控制系统的结构图与信号流图 is prerequisite of 控制系统建模实例,显式配置的前置知识关系,{}
+E006,KM007,KM012,prerequisite_of,prerequisite_of,prerequisite_of,1.0,directed,True,1.0,config_prerequisite,控制系统的数学模型 is prerequisite of 线性系统的时域分析法,显式配置的前置知识关系,{}
+E007,KM007,KM013,prerequisite_of,prerequisite_of,prerequisite_of,1.0,directed,True,1.0,config_prerequisite,控制系统的数学模型 is prerequisite of 系统时间响应的性能指标,显式配置的前置知识关系,{}
+E008,KM013,KM014,prerequisite_of,prerequisite_of,prerequisite_of,1.0,directed,True,1.0,config_prerequisite,系统时间响应的性能指标 is prerequisite of 一阶系统的时域分析,显式配置的前置知识关系,{}
+E009,KM014,KM015,prerequisite_of,prerequisite_of,prerequisite_of,1.0,directed,True,1.0,config_prerequisite,一阶系统的时域分析 is prerequisite of 二阶系统的时域分析,显式配置的前置知识关系,{}
+E010,KM015,KM016,prerequisite_of,prerequisite_of,prerequisite_of,1.0,directed,True,1.0,config_prerequisite,二阶系统的时域分析 is prerequisite of 高阶系统的时域分析,显式配置的前置知识关系,{}
+E011,KM016,KM017,prerequisite_of,prerequisite_of,prerequisite_of,1.0,directed,True,1.0,config_prerequisite,高阶系统的时域分析 is prerequisite of 线性系统的稳定性分析,显式配置的前置知识关系,{}
+E012,KM017,KM018,prerequisite_of,prerequisite_of,prerequisite_of,1.0,directed,True,1.0,config_prerequisite,线性系统的稳定性分析 is prerequisite of 线性系统的稳态误差计算,显式配置的前置知识关系,{}
+E013,KM018,KM019,prerequisite_of,prerequisite_of,prerequisite_of,1.0,directed,True,1.0,config_prerequisite,线性系统的稳态误差计算 is prerequisite of 控制系统时域设计,显式配置的前置知识关系,{}
+E014,KM012,KM020,prerequisite_of,prerequisite_of,prerequisite_of,1.0,directed,True,1.0,config_prerequisite,线性系统的时域分析法 is prerequisite of 线性系统的根轨迹法,显式配置的前置知识关系,{}
+E015,KM009,KM021,prerequisite_of,prerequisite_of,prerequisite_of,1.0,directed,True,1.0,config_prerequisite,控制系统的复数域数学模型 is prerequisite of 根轨迹法的基本概念,显式配置的前置知识关系,{}
+E016,KM021,KM022,prerequisite_of,prerequisite_of,prerequisite_of,1.0,directed,True,1.0,config_prerequisite,根轨迹法的基本概念 is prerequisite of 根轨迹绘制的基本法则,显式配置的前置知识关系,{}
+E017,KM022,KM023,prerequisite_of,prerequisite_of,prerequisite_of,1.0,directed,True,1.0,config_prerequisite,根轨迹绘制的基本法则 is prerequisite of 广义根轨迹,显式配置的前置知识关系,{}
+E018,KM023,KM024,prerequisite_of,prerequisite_of,prerequisite_of,1.0,directed,True,1.0,config_prerequisite,广义根轨迹 is prerequisite of 系统性能的分析,显式配置的前置知识关系,{}
+E019,KM024,KM025,prerequisite_of,prerequisite_of,prerequisite_of,1.0,directed,True,1.0,config_prerequisite,系统性能的分析 is prerequisite of 控制系统复域设计,显式配置的前置知识关系,{}
+E020,KM007,KM026,prerequisite_of,prerequisite_of,prerequisite_of,1.0,directed,True,1.0,config_prerequisite,控制系统的数学模型 is prerequisite of 线性系统的频域分析法,显式配置的前置知识关系,{}
+E021,KM012,KM026,prerequisite_of,prerequisite_of,prerequisite_of,1.0,directed,True,1.0,config_prerequisite,线性系统的时域分析法 is prerequisite of 线性系统的频域分析法,显式配置的前置知识关系,{}
+E022,KM009,KM027,prerequisite_of,prerequisite_of,prerequisite_of,1.0,directed,True,1.0,config_prerequisite,控制系统的复数域数学模型 is prerequisite of 频率特性,显式配置的前置知识关系,{}
+E023,KM027,KM028,prerequisite_of,prerequisite_of,prerequisite_of,1.0,directed,True,1.0,config_prerequisite,频率特性 is prerequisite of 典型环节与开环系统的频率特性,显式配置的前置知识关系,{}
+E024,KM028,KM029,prerequisite_of,prerequisite_of,prerequisite_of,1.0,directed,True,1.0,config_prerequisite,典型环节与开环系统的频率特性 is prerequisite of 频率域稳定判据,显式配置的前置知识关系,{}
+E025,KM017,KM029,prerequisite_of,prerequisite_of,prerequisite_of,1.0,directed,True,1.0,config_prerequisite,线性系统的稳定性分析 is prerequisite of 频率域稳定判据,显式配置的前置知识关系,{}
+E026,KM020,KM030,prerequisite_of,prerequisite_of,prerequisite_of,1.0,directed,True,1.0,config_prerequisite,线性系统的根轨迹法 is prerequisite of 线性系统的校正方法,显式配置的前置知识关系,{}
+E027,KM026,KM030,prerequisite_of,prerequisite_of,prerequisite_of,1.0,directed,True,1.0,config_prerequisite,线性系统的频域分析法 is prerequisite of 线性系统的校正方法,显式配置的前置知识关系,{}
+E028,KM027,KM031,prerequisite_of,prerequisite_of,prerequisite_of,1.0,directed,True,1.0,config_prerequisite,频率特性 is prerequisite of 常用校正装置及其特性,显式配置的前置知识关系,{}
+E029,KM031,KM032,prerequisite_of,prerequisite_of,prerequisite_of,1.0,directed,True,1.0,config_prerequisite,常用校正装置及其特性 is prerequisite of 串联校正,显式配置的前置知识关系,{}
+E030,KM032,KM033,prerequisite_of,prerequisite_of,prerequisite_of,1.0,directed,True,1.0,config_prerequisite,串联校正 is prerequisite of 反馈校正,显式配置的前置知识关系,{}
+E031,KM033,KM034,prerequisite_of,prerequisite_of,prerequisite_of,1.0,directed,True,1.0,config_prerequisite,反馈校正 is prerequisite of 复合校正,显式配置的前置知识关系,{}
+E032,KM001,KM002,related_to,related_to,related_to,0.7,undirected,True,0.7,rule_chapter_anchor,chapter anchor links topic node,章节概览节点与本章知识点的主题关联,{}
+E033,KM001,KM003,related_to,related_to,related_to,0.7,undirected,True,0.7,rule_chapter_anchor,chapter anchor links topic node,章节概览节点与本章知识点的主题关联,{}
+E034,KM001,KM004,related_to,related_to,related_to,0.7,undirected,True,0.7,rule_chapter_anchor,chapter anchor links topic node,章节概览节点与本章知识点的主题关联,{}
+E035,KM001,KM005,related_to,related_to,related_to,0.7,undirected,True,0.7,rule_chapter_anchor,chapter anchor links topic node,章节概览节点与本章知识点的主题关联,{}
+E036,KM001,KM006,related_to,related_to,related_to,0.7,undirected,True,0.7,rule_chapter_anchor,chapter anchor links topic node,章节概览节点与本章知识点的主题关联,{}
+E037,KM007,KM008,related_to,related_to,related_to,0.7,undirected,True,0.7,rule_chapter_anchor,chapter anchor links topic node,章节概览节点与本章知识点的主题关联,{}
+E038,KM007,KM009,related_to,related_to,related_to,0.7,undirected,True,0.7,rule_chapter_anchor,chapter anchor links topic node,章节概览节点与本章知识点的主题关联,{}
+E039,KM007,KM010,related_to,related_to,related_to,0.7,undirected,True,0.7,rule_chapter_anchor,chapter anchor links topic node,章节概览节点与本章知识点的主题关联,{}
+E040,KM007,KM011,related_to,related_to,related_to,0.7,undirected,True,0.7,rule_chapter_anchor,chapter anchor links topic node,章节概览节点与本章知识点的主题关联,{}
+E041,KM012,KM013,related_to,related_to,related_to,0.7,undirected,True,0.7,rule_chapter_anchor,chapter anchor links topic node,章节概览节点与本章知识点的主题关联,{}
+E042,KM012,KM014,related_to,related_to,related_to,0.7,undirected,True,0.7,rule_chapter_anchor,chapter anchor links topic node,章节概览节点与本章知识点的主题关联,{}
+E043,KM012,KM015,related_to,related_to,related_to,0.7,undirected,True,0.7,rule_chapter_anchor,chapter anchor links topic node,章节概览节点与本章知识点的主题关联,{}
+E044,KM012,KM016,related_to,related_to,related_to,0.7,undirected,True,0.7,rule_chapter_anchor,chapter anchor links topic node,章节概览节点与本章知识点的主题关联,{}
+E045,KM012,KM017,related_to,related_to,related_to,0.7,undirected,True,0.7,rule_chapter_anchor,chapter anchor links topic node,章节概览节点与本章知识点的主题关联,{}
+E046,KM012,KM018,related_to,related_to,related_to,0.7,undirected,True,0.7,rule_chapter_anchor,chapter anchor links topic node,章节概览节点与本章知识点的主题关联,{}
+E047,KM012,KM019,related_to,related_to,related_to,0.7,undirected,True,0.7,rule_chapter_anchor,chapter anchor links topic node,章节概览节点与本章知识点的主题关联,{}
+E048,KM020,KM021,related_to,related_to,related_to,0.7,undirected,True,0.7,rule_chapter_anchor,chapter anchor links topic node,章节概览节点与本章知识点的主题关联,{}
+E049,KM020,KM022,related_to,related_to,related_to,0.7,undirected,True,0.7,rule_chapter_anchor,chapter anchor links topic node,章节概览节点与本章知识点的主题关联,{}
+E050,KM020,KM023,related_to,related_to,related_to,0.7,undirected,True,0.7,rule_chapter_anchor,chapter anchor links topic node,章节概览节点与本章知识点的主题关联,{}
+E051,KM020,KM024,related_to,related_to,related_to,0.7,undirected,True,0.7,rule_chapter_anchor,chapter anchor links topic node,章节概览节点与本章知识点的主题关联,{}
+E052,KM020,KM025,related_to,related_to,related_to,0.7,undirected,True,0.7,rule_chapter_anchor,chapter anchor links topic node,章节概览节点与本章知识点的主题关联,{}
+E053,KM026,KM027,related_to,related_to,related_to,0.7,undirected,True,0.7,rule_chapter_anchor,chapter anchor links topic node,章节概览节点与本章知识点的主题关联,{}
+E054,KM026,KM028,related_to,related_to,related_to,0.7,undirected,True,0.7,rule_chapter_anchor,chapter anchor links topic node,章节概览节点与本章知识点的主题关联,{}
+E055,KM026,KM029,related_to,related_to,related_to,0.7,undirected,True,0.7,rule_chapter_anchor,chapter anchor links topic node,章节概览节点与本章知识点的主题关联,{}
+E056,KM030,KM031,related_to,related_to,related_to,0.7,undirected,True,0.7,rule_chapter_anchor,chapter anchor links topic node,章节概览节点与本章知识点的主题关联,{}
+E057,KM030,KM032,related_to,related_to,related_to,0.7,undirected,True,0.7,rule_chapter_anchor,chapter anchor links topic node,章节概览节点与本章知识点的主题关联,{}
+E058,KM030,KM033,related_to,related_to,related_to,0.7,undirected,True,0.7,rule_chapter_anchor,chapter anchor links topic node,章节概览节点与本章知识点的主题关联,{}
+E059,KM030,KM034,related_to,related_to,related_to,0.7,undirected,True,0.7,rule_chapter_anchor,chapter anchor links topic node,章节概览节点与本章知识点的主题关联,{}
+E060,KM035,KM036,related_to,related_to,related_to,0.7,undirected,True,0.7,rule_chapter_anchor,chapter anchor links topic node,章节概览节点与本章知识点的主题关联,{}
+E061,KM035,KM037,related_to,related_to,related_to,0.7,undirected,True,0.7,rule_chapter_anchor,chapter anchor links topic node,章节概览节点与本章知识点的主题关联,{}
+E062,KM038,KM039,related_to,related_to,related_to,0.7,undirected,True,0.7,rule_chapter_anchor,chapter anchor links topic node,章节概览节点与本章知识点的主题关联,{}
+E063,KM038,KM040,related_to,related_to,related_to,0.7,undirected,True,0.7,rule_chapter_anchor,chapter anchor links topic node,章节概览节点与本章知识点的主题关联,{}
+E064,KM002,KM003,parallel_to,parallel_to,parallel_to,0.7,undirected,True,0.7,rule_parallel_topic_neighbors,same chapter ordered neighbors under KM001,同章节相邻知识点，适合并列展示与比较学习,{}
+E065,KM003,KM004,parallel_to,parallel_to,parallel_to,0.7,undirected,True,0.7,rule_parallel_topic_neighbors,same chapter ordered neighbors under KM001,同章节相邻知识点，适合并列展示与比较学习,{}
+E066,KM004,KM005,parallel_to,parallel_to,parallel_to,0.7,undirected,True,0.7,rule_parallel_topic_neighbors,same chapter ordered neighbors under KM001,同章节相邻知识点，适合并列展示与比较学习,{}
+E067,KM005,KM006,parallel_to,parallel_to,parallel_to,0.7,undirected,True,0.7,rule_parallel_topic_neighbors,same chapter ordered neighbors under KM001,同章节相邻知识点，适合并列展示与比较学习,{}
+E068,KM008,KM009,parallel_to,parallel_to,parallel_to,0.7,undirected,True,0.7,rule_parallel_topic_neighbors,same chapter ordered neighbors under KM007,同章节相邻知识点，适合并列展示与比较学习,{}
+E069,KM009,KM010,parallel_to,parallel_to,parallel_to,0.7,undirected,True,0.7,rule_parallel_topic_neighbors,same chapter ordered neighbors under KM007,同章节相邻知识点，适合并列展示与比较学习,{}
+E070,KM010,KM011,parallel_to,parallel_to,parallel_to,0.7,undirected,True,0.7,rule_parallel_topic_neighbors,same chapter ordered neighbors under KM007,同章节相邻知识点，适合并列展示与比较学习,{}
+E071,KM013,KM014,parallel_to,parallel_to,parallel_to,0.7,undirected,True,0.7,rule_parallel_topic_neighbors,same chapter ordered neighbors under KM012,同章节相邻知识点，适合并列展示与比较学习,{}
+E072,KM014,KM015,parallel_to,parallel_to,parallel_to,0.7,undirected,True,0.7,rule_parallel_topic_neighbors,same chapter ordered neighbors under KM012,同章节相邻知识点，适合并列展示与比较学习,{}
+E073,KM015,KM016,parallel_to,parallel_to,parallel_to,0.7,undirected,True,0.7,rule_parallel_topic_neighbors,same chapter ordered neighbors under KM012,同章节相邻知识点，适合并列展示与比较学习,{}
+E074,KM016,KM017,parallel_to,parallel_to,parallel_to,0.7,undirected,True,0.7,rule_parallel_topic_neighbors,same chapter ordered neighbors under KM012,同章节相邻知识点，适合并列展示与比较学习,{}
+E075,KM017,KM018,parallel_to,parallel_to,parallel_to,0.7,undirected,True,0.7,rule_parallel_topic_neighbors,same chapter ordered neighbors under KM012,同章节相邻知识点，适合并列展示与比较学习,{}
+E076,KM018,KM019,parallel_to,parallel_to,parallel_to,0.7,undirected,True,0.7,rule_parallel_topic_neighbors,same chapter ordered neighbors under KM012,同章节相邻知识点，适合并列展示与比较学习,{}
+E077,KM021,KM022,parallel_to,parallel_to,parallel_to,0.7,undirected,True,0.7,rule_parallel_topic_neighbors,same chapter ordered neighbors under KM020,同章节相邻知识点，适合并列展示与比较学习,{}
+E078,KM022,KM023,parallel_to,parallel_to,parallel_to,0.7,undirected,True,0.7,rule_parallel_topic_neighbors,same chapter ordered neighbors under KM020,同章节相邻知识点，适合并列展示与比较学习,{}
+E079,KM023,KM024,parallel_to,parallel_to,parallel_to,0.7,undirected,True,0.7,rule_parallel_topic_neighbors,same chapter ordered neighbors under KM020,同章节相邻知识点，适合并列展示与比较学习,{}
+E080,KM024,KM025,parallel_to,parallel_to,parallel_to,0.7,undirected,True,0.7,rule_parallel_topic_neighbors,same chapter ordered neighbors under KM020,同章节相邻知识点，适合并列展示与比较学习,{}
+E081,KM027,KM028,parallel_to,parallel_to,parallel_to,0.7,undirected,True,0.7,rule_parallel_topic_neighbors,same chapter ordered neighbors under KM026,同章节相邻知识点，适合并列展示与比较学习,{}
+E082,KM028,KM029,parallel_to,parallel_to,parallel_to,0.7,undirected,True,0.7,rule_parallel_topic_neighbors,same chapter ordered neighbors under KM026,同章节相邻知识点，适合并列展示与比较学习,{}
+E083,KM031,KM032,parallel_to,parallel_to,parallel_to,0.7,undirected,True,0.7,rule_parallel_topic_neighbors,same chapter ordered neighbors under KM030,同章节相邻知识点，适合并列展示与比较学习,{}
+E084,KM032,KM033,parallel_to,parallel_to,parallel_to,0.7,undirected,True,0.7,rule_parallel_topic_neighbors,same chapter ordered neighbors under KM030,同章节相邻知识点，适合并列展示与比较学习,{}
+E085,KM033,KM034,parallel_to,parallel_to,parallel_to,0.7,undirected,True,0.7,rule_parallel_topic_neighbors,same chapter ordered neighbors under KM030,同章节相邻知识点，适合并列展示与比较学习,{}
+E086,KM036,KM037,parallel_to,parallel_to,parallel_to,0.7,undirected,True,0.7,rule_parallel_topic_neighbors,same chapter ordered neighbors under KM035,同章节相邻知识点，适合并列展示与比较学习,{}
+E087,KM039,KM040,parallel_to,parallel_to,parallel_to,0.7,undirected,True,0.7,rule_parallel_topic_neighbors,same chapter ordered neighbors under KM038,同章节相邻知识点，适合并列展示与比较学习,{}
+E088,KM001,KM035,weak_related_to,weak_related_to,weak_related_to,0.2,undirected,True,0.2,rule_chapter_bridge,adjacent chapter anchors bridged for graph connectivity,章节级弱桥接关系，用于保证整图连通和可视化连续性,{}
+E089,KM035,KM012,prerequisite_of,prerequisite_of,prerequisite_of,0.7,directed,True,0.7,config_chapter_prerequisite,线性离散系统的分析与校正 precedes 线性系统的时域分析法,章节概览节点的显式前置关系,{}
+E090,KM012,KM041,weak_related_to,weak_related_to,weak_related_to,0.2,undirected,True,0.2,rule_chapter_bridge,adjacent chapter anchors bridged for graph connectivity,章节级弱桥接关系，用于保证整图连通和可视化连续性,{}
+E091,KM041,KM007,prerequisite_of,prerequisite_of,prerequisite_of,0.7,directed,True,0.7,config_chapter_prerequisite,非线性控制系统分析 precedes 控制系统的数学模型,章节概览节点的显式前置关系,{}
+E093,KM026,KM038,weak_related_to,weak_related_to,weak_related_to,0.2,undirected,True,0.2,rule_chapter_bridge,adjacent chapter anchors bridged for graph connectivity,章节级弱桥接关系，用于保证整图连通和可视化连续性,{}
+E094,KM038,KM030,prerequisite_of,prerequisite_of,prerequisite_of,0.7,directed,True,0.7,config_chapter_prerequisite,线性系统的状态空间分析与综合 precedes 线性系统的校正方法,章节概览节点的显式前置关系,{}
+E095,KM030,KM042,weak_related_to,weak_related_to,weak_related_to,0.2,undirected,True,0.2,rule_chapter_bridge,adjacent chapter anchors bridged for graph connectivity,章节级弱桥接关系，用于保证整图连通和可视化连续性,{}
+E096,KM042,KM020,prerequisite_of,prerequisite_of,prerequisite_of,0.7,directed,True,0.7,config_chapter_prerequisite,动态系统的最优控制方法 precedes 线性系统的根轨迹法,章节概览节点的显式前置关系,{}

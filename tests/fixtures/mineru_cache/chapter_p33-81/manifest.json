@@ -1,0 +1,9 @@
+{
+  "pdf_name": "chapter_p33-81.pdf",
+  "cache_dir": "tests/fixtures/mineru_cache/chapter_p33-81",
+  "images": {
+    "images/figure1.png": {
+      "original_name": "figure1.png"
+    }
+  }
+}
