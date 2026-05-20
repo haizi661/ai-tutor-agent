@@ -1,14 +1,15 @@
 from __future__ import annotations
 
 from ..core.events import make_event
+from ..core.homework_bank import build_curated_homework_items
 from ..core.learning_flow import build_learning_flow_scaffold
 from ..core.learning_support import (
     assign_homework_items,
     build_graph_state_patch,
-    build_homework_items,
     recommend_next_node,
 )
 from ..core.state import build_initial_state
+from ..infrastructure.llm import build_llms
 
 
 PRE_TOPIC_FLOW_STATUSES = {
@@ -57,6 +58,35 @@ CONSOLIDATE_COMMANDS = {
     "先巩固",
     "需要巩固",
 }
+
+
+def _build_selector_llm(runtime_context=None):
+    settings = getattr(runtime_context, "settings", None) if runtime_context is not None else None
+    if settings is None:
+        return None
+    try:
+        tutor_llm, _, _ = build_llms(settings)
+        return tutor_llm
+    except Exception:
+        return None
+
+
+def _homework_query_terms(state_values: dict) -> list[str]:
+    values = [
+        state_values.get("current_user_goal"),
+        state_values.get("turn_goal"),
+        state_values.get("topic_focus"),
+        state_values.get("current_topic"),
+        state_values.get("current_node_name"),
+        state_values.get("graph_anchor_title"),
+        state_values.get("next_node_candidate_name"),
+    ]
+    seen: list[str] = []
+    for raw in values:
+        text = " ".join(str(raw or "").split()).strip()
+        if text and text not in seen:
+            seen.append(text)
+    return seen
 
 
 def _is_skip_command(text: str) -> bool:
@@ -141,11 +171,17 @@ def _resume_next_node_payload(state_values: dict, runtime_context=None) -> dict 
 def _build_consolidation_homework(state_values: dict, runtime_context=None) -> tuple[list[dict], dict]:
     graph_rag_pipeline = getattr(runtime_context, "graph_rag_pipeline", None) if runtime_context is not None else None
     student_state_store = getattr(runtime_context, "student_state_store", None) if runtime_context is not None else None
+    question_bank_provider = getattr(runtime_context, "question_bank_provider", None) if runtime_context is not None else None
     student_id = str(state_values.get("student_id") or "default_student").strip() or "default_student"
-    homework_items = build_homework_items(
+    homework_items = build_curated_homework_items(
+        question_bank_provider=question_bank_provider,
         graph_pipeline=graph_rag_pipeline,
         student_state_snapshot=state_values.get("student_state_snapshot"),
-        limit=5,
+        query_terms=_homework_query_terms(state_values),
+        llm=_build_selector_llm(runtime_context),
+        current_node_id=str(state_values.get("current_node_id") or "").strip(),
+        graph_anchor_id=str(state_values.get("graph_anchor_id") or "").strip(),
+        limit=2,
     )
     updated_snapshot = assign_homework_items(
         student_state_store,

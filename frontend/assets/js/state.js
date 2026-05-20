@@ -46,6 +46,7 @@ window.AITutorApp.state = {
     latestNodeStartMessage: '',
     latestRouteDecisionSummary: '',
     knowledgeFiles: [],
+    questionBankItems: [],
     knowledgeBackend: '',
     headerCollapsed: false,
     profilePanelCollapsed: false,

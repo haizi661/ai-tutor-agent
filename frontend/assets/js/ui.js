@@ -83,7 +83,8 @@
         const template = document.createElement('template');
         template.innerHTML = source;
         const allowedTags = [
-            'a', 'b', 'blockquote', 'br', 'button', 'caption', 'code', 'details', 'div', 'em',
+            'a', 'article', 'b', 'blockquote', 'br', 'button', 'caption', 'code', 'details', 'div', 'em',
+            'figure',
             'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'hr', 'img', 'li', 'main', 'ol', 'p', 'pre',
             'section', 'span', 'strong', 'sub', 'summary', 'sup', 'table', 'tbody', 'td', 'th',
             'thead', 'tr', 'ul',
@@ -140,7 +141,19 @@
             'homework-item-meta',
             'homework-item-index',
             'homework-item-id',
+            'homework-tag-row',
+            'homework-tag-chip',
             'homework-question-text',
+            'homework-question-body',
+            'homework-question-richtext',
+            'homework-question-image-card',
+            'homework-question-image',
+            'homework-option-list',
+            'homework-option-item',
+            'homework-option-key',
+            'homework-option-text',
+            'homework-option-image-wrap',
+            'homework-option-image',
             'homework-answer-viewport',
             'homework-reference',
             'homework-rubric-list',
@@ -318,6 +331,8 @@
         }
         updateFormulaViewportOverflow(el);
     };
+    app.sanitizeLearningHtml = sanitizeLearningHtml;
+    app.sanitizeRenderedHtml = sanitizeRenderedHtml;
 
     function updateFormulaViewportOverflow(root) {
         const scope = root || document;
@@ -1346,6 +1361,7 @@
         if (kind === 'tutor_citations' || kind === 'tutor_evidence') return 'tutor';
         if (kind === 'coach') return 'coach';
         if (kind === 'tester_question') return 'tester';
+        if (kind === 'homework_learning_html') return 'graph_rag_answer';
         if (kind === 'graph_rag_answer') return 'graph_rag_answer';
         if (kind === 'graph_rag_debug_report') return 'graph_rag_debug_report';
         if (kind === 'evaluator_card') return 'evaluation';
@@ -1696,7 +1712,7 @@
             }
             const turnRole = options.turnRole || app.roleFromMessageKind(options.kind);
             app.appendAgentTurnShell(text, turnRole, {
-                allowLearningHtml: options.allowLearningHtml === true || options.kind === 'graph_rag_answer' || options.kind === 'homework_answer_prompt',
+                allowLearningHtml: options.allowLearningHtml === true || options.kind === 'graph_rag_answer' || options.kind === 'homework_answer_prompt' || options.kind === 'homework_learning_html',
                 allowGraphRagHtml: options.allowGraphRagHtml === true || options.kind === 'graph_rag_debug_report',
             });
             app.finalizeAgentTurn();
@@ -3282,8 +3298,9 @@
                 app.renderHomeworkAnswerCard?.(data.homework_items || data.items || stateSnapshot?.homework_items || [], data);
                 return;
             }
-            if (item.kind === 'graph_rag_answer' || item.kind === 'graph_rag_debug_report') {
+            if (item.kind === 'graph_rag_answer' || item.kind === 'graph_rag_debug_report' || item.kind === 'homework_learning_html') {
                 const fallbackHtml = item.kind === 'graph_rag_answer'
+                    || item.kind === 'homework_learning_html'
                     ? '<section class="learning-answer-content"><p></p></section>'
                     : '<section class="graph-rag-answer-panel"><div class="answer"></div></section>';
                 app.appendMessage('agent', content || fallbackHtml, { kind: item.kind });
@@ -3447,7 +3464,12 @@
             }
         }
 
-        if (stateSnapshot.tutor_content) app.appendMessage('agent', stateSnapshot.tutor_content, { kind: 'tutor' });
+        if (stateSnapshot.tutor_content) {
+            const tutorKind = String(stateSnapshot.tutor_content || '').includes('homework-answer-content')
+                ? 'homework_learning_html'
+                : 'tutor';
+            app.appendMessage('agent', stateSnapshot.tutor_content, { kind: tutorKind });
+        }
         if ((stateSnapshot.tutor_evidence || []).length) {
             app.renderEvidencePanel(stateSnapshot.tutor_evidence, { role: 'tutor', tone: 'info' });
         }

@@ -66,6 +66,52 @@ class FakeStudentStateStore:
         self.saved.append(state.to_dict())
 
 
+class FakeRuntimeQuestionBankProvider:
+    def list_runtime_question_bank_items(self):
+        return [
+            {
+                "library_id": "lib-001",
+                "question_id": "Q-001",
+                "section_title": "劳斯判据综合题",
+                "question_type": "解答题",
+                "knowledge_tags": ["劳斯判据", "稳定性"],
+                "content_blocks": [
+                    {"block_type": "text", "content": "<p>已知闭环特征方程，使用劳斯判据判断系统稳定性。</p>"}
+                ],
+                "answer": "写出劳斯表，并检查首列符号是否变化。",
+                "source_files": ["demo.pdf"],
+                "image_refs": [],
+            },
+            {
+                "library_id": "lib-002",
+                "question_id": "Q-002",
+                "section_title": "稳定性定义题",
+                "question_type": "解答题",
+                "knowledge_tags": ["稳定性定义"],
+                "content_blocks": [
+                    {"block_type": "text", "content": "<p>说明稳定性的定义，并结合系统响应解释。</p>"}
+                ],
+                "answer": "给出稳定性的定义，并说明响应有界收敛。",
+                "source_files": ["demo.pdf"],
+                "image_refs": [],
+            },
+        ]
+
+    def get_homework_questions(self, node_ids, k=5):
+        del node_ids, k
+        return [
+            {
+                "question_id": "LEGACY-HW-001",
+                "node_id": "KM001",
+                "graph_node_id": "KM001",
+                "title": "旧作业题",
+                "type": "subjective_review",
+                "source": "legacy_homework_bank",
+                "prompt": "这是一道旧 homework_questions.jsonl 里的题。",
+            }
+        ]
+
+
 def test_homework_generator_builds_homework_and_persists_to_student_state():
     store = FakeStudentStateStore()
     sink = BufferedEventSink()
@@ -136,6 +182,84 @@ def test_homework_generator_falls_back_without_question_bank_or_graph_pipeline()
     assert result["homework_status"] == "assigned"
     assert result["homework_items"][0]["source"] == "ai_generated_template"
     assert result["homework_items"][0]["node_id"] == "KM001"
+
+
+def test_homework_generator_prefers_processed_question_bank_items():
+    store = FakeStudentStateStore()
+    sink = BufferedEventSink()
+    runtime = RuntimeContext(
+        event_sink=sink,
+        graph_rag_pipeline=FakeGraphPipeline(),
+        student_state_store=store,
+        question_bank_provider=FakeRuntimeQuestionBankProvider(),
+    )
+    node = build_homework_generator_node(runtime)
+
+    result = node(
+        {
+            "student_id": "student_a",
+            "current_node_id": "KM002",
+            "graph_anchor_id": "KM002",
+            "student_state_snapshot": {
+                "visited_nodes": ["KM001", "KM002"],
+                "wrong_nodes": ["KM002"],
+            },
+        }
+    )
+
+    assert result["homework_items"]
+    assert len(result["homework_items"]) <= 2
+    assert result["homework_items"][0]["source"] == "processed_question_bank"
+    assert result["homework_items"][0]["question_id"].startswith("QB-")
+    assert result["homework_items"][0]["node_id"] == "KM002"
+    assert result["homework_items"][0]["knowledge_tags"] == ["劳斯判据", "稳定性"]
+    assert result["homework_items"][0]["content_blocks"]
+    assert "劳斯判据判断系统稳定性" in result["tutor_content"]
+    assert "参考答案要点" not in result["tutor_content"]
+    assert all(item["source"] == "processed_question_bank" for item in result["homework_items"])
+
+
+def test_homework_generator_uses_topic_context_to_match_runtime_question_bank():
+    class TopicDrivenProvider:
+        def list_runtime_question_bank_items(self):
+            return [
+                {
+                    "library_id": "lib-topic-1",
+                    "question_id": "T-1",
+                    "section_title": "稳定性专题",
+                    "question_type": "解答题",
+                    "knowledge_tags": ["稳定性"],
+                    "content_blocks": [{"block_type": "text", "content": "<p>说明系统稳定性的定义。</p>"}],
+                    "answer": "输出有界并回到平衡状态。",
+                    "source_files": ["topic.pdf"],
+                    "image_refs": [],
+                }
+            ]
+
+        def get_homework_questions(self, node_ids, k=5):
+            del node_ids, k
+            return [{"question_id": "LEGACY-HW-002", "source": "legacy_homework_bank", "prompt": "旧题"}]
+
+    runtime = RuntimeContext(
+        event_sink=BufferedEventSink(),
+        graph_rag_pipeline=FakeGraphPipeline(),
+        question_bank_provider=TopicDrivenProvider(),
+    )
+    node = build_homework_generator_node(runtime)
+
+    result = node(
+        {
+            "student_id": "student_a",
+            "current_node_id": "KM001",
+            "graph_anchor_id": "KM001",
+            "current_topic": "稳定性分析",
+            "current_user_goal": "理解稳定性的定义",
+            "student_state_snapshot": {"visited_nodes": ["KM001"], "wrong_nodes": []},
+        }
+    )
+
+    assert result["homework_items"][0]["question_id"] == "QB-lib-topic-1"
+    assert result["homework_items"][0]["source"] == "processed_question_bank"
 
 
 def test_workflow_stop_today_routes_to_independent_homework_generator_node():

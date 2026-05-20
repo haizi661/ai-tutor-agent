@@ -12,6 +12,9 @@ def _clear_runtime_env(monkeypatch):
         "QWEN_API_KEY",
         "DEEPSEEK_API_KEY",
         "DASHSCOPE_API_KEY",
+        "PADDLEOCR_API_URL",
+        "PADDLEOCR_API_TOKEN",
+        "PADDLEOCR_MODEL",
         "LLM_PROVIDER",
         "MODEL_NAME",
         "EMBEDDING_PROVIDER",
@@ -97,6 +100,24 @@ def test_settings_parse_mineru_proxy_overrides(monkeypatch):
     assert settings.mineru_proxy_mode == "direct"
     assert settings.mineru_http_proxy == "http://127.0.0.1:7897"
     assert settings.mineru_https_proxy == "http://127.0.0.1:7897"
+    get_settings.cache_clear()
+
+
+def test_settings_parse_paddleocr_overrides(monkeypatch):
+    monkeypatch.setattr(config_module, "load_dotenv", lambda *args, **kwargs: None)
+    monkeypatch.setattr(config_module, "read_local_config_values", lambda: {})
+    _clear_runtime_env(monkeypatch)
+    monkeypatch.setenv("GOOGLE_API_KEY", "google-key")
+    monkeypatch.setenv("PADDLEOCR_API_URL", "https://ocr.example.com/jobs")
+    monkeypatch.setenv("PADDLEOCR_API_TOKEN", "ocr-token")
+    monkeypatch.setenv("PADDLEOCR_MODEL", "PaddleOCR-VL-1.5")
+    get_settings.cache_clear()
+
+    settings = get_settings()
+
+    assert settings.paddleocr_api_url == "https://ocr.example.com/jobs"
+    assert settings.paddleocr_api_token == "ocr-token"
+    assert settings.paddleocr_model == "PaddleOCR-VL-1.5"
     get_settings.cache_clear()
 
 

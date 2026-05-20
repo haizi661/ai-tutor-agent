@@ -70,6 +70,25 @@ class StubGraphPipeline:
         }
 
 
+class FakeRuntimeQuestionBankProvider:
+    def list_runtime_question_bank_items(self):
+        return [
+            {
+                "library_id": "lib-101",
+                "question_id": "Q-101",
+                "section_title": "稳定性复习题",
+                "question_type": "解答题",
+                "knowledge_tags": ["稳定性定义"],
+                "content_blocks": [
+                    {"block_type": "text", "content": "<p>结合系统响应，说明稳定性的定义。</p>"}
+                ],
+                "answer": "说明输出有界并收敛回平衡状态。",
+                "source_files": ["wrapped.pdf"],
+                "image_refs": [],
+            }
+        ]
+
+
 def test_post_eval_selector_waits_for_explicit_choice_and_recommends_next_node():
     sink = BufferedEventSink()
     provider = FakeAnswerProvider("继续拔高")
@@ -156,6 +175,7 @@ def test_post_eval_wrapup_clears_selector_flags_and_assigns_homework(tmp_path):
         event_sink=sink,
         graph_rag_pipeline=StubGraphPipeline(),
         student_state_store=StudentStateStore(tmp_path / "student_states"),
+        question_bank_provider=FakeRuntimeQuestionBankProvider(),
     )
     node = build_post_eval_wrapup_node(llm, runtime)
 
@@ -182,3 +202,5 @@ def test_post_eval_wrapup_clears_selector_flags_and_assigns_homework(tmp_path):
     assert "今日作业" in result["tutor_content"]
     assert result["homework_status"] == "assigned"
     assert len(result["homework_items"]) >= 1
+    assert result["homework_items"][0]["source"] == "processed_question_bank"
+    assert result["homework_items"][0]["question_id"].startswith("QB-")

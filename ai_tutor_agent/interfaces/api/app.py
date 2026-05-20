@@ -7,6 +7,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 
 from .config import router as config_router
+from .error_correction import router as error_correction_router
 from .history import messages_router, router as history_router
 from .knowledge import router as knowledge_router
 from .runtime import ApiRuntime, create_lifespan, get_frontend_dir
@@ -32,6 +33,7 @@ def create_api_app(
         return {"status": "ok"}
 
     app.include_router(config_router)
+    app.include_router(error_correction_router)
     app.include_router(history_router)
     app.include_router(messages_router)
     app.include_router(knowledge_router)

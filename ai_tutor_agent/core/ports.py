@@ -40,6 +40,9 @@ class QuestionBankProvider(Protocol):
     def get_homework_questions(self, node_ids: list[str], k: int = 5) -> list[dict[str, Any]]:
         """Return homework questions for selected graph nodes."""
 
+    def list_runtime_question_bank_items(self) -> list[dict[str, Any]]:
+        """Return processed question-bank items imported from the workbook pipeline."""
+
     def get_assessment_questions(self, node_ids: list[str], k: int = 10) -> list[dict[str, Any]]:
         """Return pre-assessment subjective-choice questions for given graph node ids."""
 
