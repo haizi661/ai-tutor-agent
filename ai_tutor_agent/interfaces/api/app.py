@@ -12,7 +12,9 @@ from .history import messages_router, router as history_router
 from .knowledge import router as knowledge_router
 from .runtime import ApiRuntime, create_lifespan, get_frontend_dir
 from .session import router as session_router
-
+from ai_tutor_agent.ai_learning_path.ai_path_routes import (
+    router as ai_path_bp,
+)
 
 def create_api_app(
     runtime_factory: Optional[Callable[[], ApiRuntime]] = None,
@@ -38,6 +40,7 @@ def create_api_app(
     app.include_router(messages_router)
     app.include_router(knowledge_router)
     app.include_router(session_router)
+    app.include_router(ai_path_bp)
 
     frontend_dir = get_frontend_dir()
     os.makedirs(frontend_dir, exist_ok=True)
