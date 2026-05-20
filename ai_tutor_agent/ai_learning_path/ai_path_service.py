@@ -132,44 +132,6 @@ def _load_deepseek_key() -> str:
     return api_key or ""
 
 
-
-def advance_to_next_node(self, thread_id: str) -> Dict[str, Any]:
-    student = _load_student_state()
-    path = student.get("current_path", [])
-    current = student.get("current_node") or (path[0] if path else "")
-
-    if not path or current not in path:
-        return {
-            "status": "error",
-            "message": "当前没有可推进的学习路径。",
-        }
-
-    learned = student.setdefault("learned_nodes", {})
-    mastery_scores = student.setdefault("mastery_scores", {})
-
-    learned[current] = {
-        "mastery": 0.85,
-        "status": "completed",
-        "finish_time": datetime.now().isoformat(timespec="seconds"),
-    }
-    mastery_scores[current] = 0.85
-
-    idx = path.index(current)
-    if idx + 1 >= len(path):
-        student["current_node"] = ""
-        _save_student_state(student)
-        return {
-            "status": "success",
-            "type": "complete",
-            "message": "这条学习路径已经完成。你可以重新规划新的人工智能学习方向。",
-            "options": ["重新规划", "调整路径"],
-        }
-
-    student["current_node"] = path[idx + 1]
-    _save_student_state(student)
-
-    return self.teach_current_node(thread_id)
-
 def _call_deepseek_json(prompt: str) -> Dict[str, Any]:
     api_key = _load_deepseek_key()
 
@@ -908,8 +870,8 @@ class AILearningPathService:
                 ],
             }
 
-        if stage == "planned":
-            if user_text and any(k in user_text for k in ["调整", "重新", "不对", "换", "更偏"]):
+        if stage in {"planned", "learning"}:
+            if user_text and any(k in user_text for k in ["调整", "重新规划", "不对", "换方向", "更偏"]):
                 dialogue["stage"] = "intent_refining"
                 dialogue.setdefault("intent_history", []).append(user_text)
                 self._save_dialogue(thread_id, dialogue)
@@ -927,14 +889,17 @@ class AILearningPathService:
                     ],
                 }
 
+            if user_text:
+                return self.answer_current_node_question(thread_id, user_text)
+
             return {
                 "status": "success",
                 "type": "question",
-                "message": "当前路径已经生成。你可以说“调整路径”“重新规划”，也可以点击路径中的节点查看详情。",
+                "message": "当前路径已经生成。你可以点击“开始学习当前节点”，也可以直接问我当前节点里的任何问题。",
                 "options": [
+                    "开始学习当前节点",
                     "调整路径",
                     "重新规划",
-                    "我就确定是现在的方向了",
                 ],
             }
 
@@ -952,6 +917,10 @@ class AILearningPathService:
         }
     def teach_current_node(self, thread_id: str) -> Dict[str, Any]:
         student = _load_student_state()
+
+        dialogue = self._get_dialogue(thread_id)
+        dialogue["stage"] = "learning"
+        self._save_dialogue(thread_id, dialogue)
 
         path = student.get("current_path", [])
         current_node_id = student.get("current_node") or (path[0] if path else "")
@@ -996,6 +965,153 @@ class AILearningPathService:
                 "重新调整路径",
             ],
         }
+    
+    def answer_current_node_question(self, thread_id: str, question: str) -> Dict[str, Any]:
+        student = _load_student_state()
+        path = student.get("current_path", [])
+        current_node_id = student.get("current_node") or (path[0] if path else "")
+
+        if not current_node_id or current_node_id not in self.node_by_id:
+            return {
+                "status": "error",
+                "message": "当前还没有正在学习的 AI 节点，请先生成路径并开始学习。",
+            }
+
+        node = self._format_node(current_node_id)
+
+        prompt = f"""
+你是人工智能课程伴学老师。请基于当前知识点回答学生追问。
+
+当前节点：
+{node["name"]}
+
+节点讲解：
+{node.get("explanation_teacher_style", "")}
+
+学习要点：
+{node.get("key_points", [])}
+
+典型例子：
+{node.get("examples", [])}
+
+学生问题：
+{question}
+
+要求：
+1. 用中文回答。
+2. 不要泛泛而谈，要围绕当前节点。
+3. 如果学生问“再详细区分”“再讲简单点”“换个例子”，要直接响应。
+4. 回答控制在 300 到 600 字。
+5. 结尾给出一个自然的下一步建议。
+"""
+
+        result = _call_deepseek_json(f"""
+请输出 JSON，不要 Markdown。
+
+JSON 格式：
+{{
+  "answer": "",
+  "options": []
+}}
+
+根据下面任务生成：
+{prompt}
+
+options 给 3 到 4 个下一步按钮，例如：
+["我懂了，进入下一个节点", "再讲简单一点", "换一个例子", "重新调整路径"]
+""")
+
+        if result and result.get("answer"):
+            return {
+                "status": "success",
+                "type": "lesson_qa",
+                "message": result.get("answer", ""),
+                "options": result.get("options") or [
+                    "我懂了，进入下一个节点",
+                    "再讲简单一点",
+                    "换一个例子",
+                    "重新调整路径",
+                ],
+            }
+
+        return {
+            "status": "success",
+            "type": "lesson_qa",
+            "message": f"围绕“{node['name']}”来看，你这个问题可以从它的定义、作用和应用场景三方面理解。{node.get('explanation_teacher_style', '')}",
+            "options": [
+                "我懂了，进入下一个节点",
+                "再讲简单一点",
+                "换一个例子",
+                "重新调整路径",
+            ],
+        }
+
+    def advance_to_next_node(self, thread_id: str) -> Dict[str, Any]:
+        student = _load_student_state()
+
+        path = student.get("current_path", [])
+        current = student.get("current_node") or (path[0] if path else "")
+
+        if not path or current not in path:
+            return {
+                "status": "error",
+                "message": "当前没有可推进的学习路径。",
+            }
+
+        learned = student.setdefault("learned_nodes", {})
+        mastery_scores = student.setdefault("mastery_scores", {})
+
+        learned[current] = {
+            "mastery": 0.85,
+            "status": "completed",
+            "finish_time": datetime.now().isoformat(timespec="seconds"),
+        }
+        mastery_scores[current] = 0.85
+
+        idx = path.index(current)
+
+        if idx + 1 >= len(path):
+            student["current_node"] = ""
+            _save_student_state(student)
+
+            return {
+                "status": "success",
+                "type": "complete",
+                "message": "这条学习路径已经完成。你可以重新规划新的人工智能学习方向。",
+                "path": [
+                    self._format_node(node_id, mastery_scores.get(node_id, 0.0), "mastered", "已完成")
+                    for node_id in path
+                    if node_id in self.node_by_id
+                ],
+                "options": ["重新规划", "调整路径"],
+            }
+
+        next_node = path[idx + 1]
+        student["current_node"] = next_node
+        _save_student_state(student)
+
+        lesson = self.teach_current_node(thread_id)
+
+        lesson["path"] = []
+        for node_id in path:
+            mastery = float(mastery_scores.get(node_id, 0.0) or 0.0)
+
+            if node_id == next_node:
+                status = "current"
+                reason = "当前正在学习的节点"
+            elif node_id in learned:
+                status = "mastered"
+                reason = "已经完成学习"
+            else:
+                status = "not_started"
+                reason = "后续待学习节点"
+
+            lesson["path"].append(
+                self._format_node(node_id, mastery, status, reason)
+            )
+
+        lesson["current_node"] = next_node
+        return lesson
 
 _service = None
 

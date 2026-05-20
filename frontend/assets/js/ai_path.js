@@ -158,6 +158,16 @@
             appendAgent(data.message || '已进入下一个节点。');
             renderOptions(data.options || []);
     
+            if (data.path?.length) {
+                updateAiPathSidePanel(data.path);
+            }
+    
+            if (data.current_node) {
+                app.patchState?.({
+                    currentGraphNodeId: data.current_node,
+                }, 'ai-path-next');
+            }
+    
             if (data.type === 'complete') {
                 app.setStatusBanner?.('AI学习路径已完成', 'success');
             } else {
@@ -388,13 +398,18 @@
                 ${path.map((node, index) => `
                     <button
                         type="button"
-                        class="ai-path-side-node ${node.status === 'current' ? 'is-current' : ''} ${node.status === 'goal' ? 'is-goal' : ''}"
+                        class="ai-path-side-node ${node.status === 'current' ? 'is-current' : ''} ${node.status === 'goal' ? 'is-goal' : ''} ${node.status === 'mastered' ? 'is-mastered' : ''}"
                         data-node-id="${escapeHtml(node.node_id)}"
                     >
                         <span>${index + 1}</span>
                         <div>
                             <strong>${escapeHtml(node.name)}</strong>
-                            <small>${escapeHtml(node.node_id)} · ${node.status === 'current' ? '当前' : node.status === 'goal' ? '目标' : '待学'}</small>
+                            <small>${escapeHtml(node.node_id)} · ${
+                                node.status === 'current' ? '当前'
+                                : node.status === 'goal' ? '目标'
+                                : node.status === 'mastered' ? '已学'
+                                : '待学'
+                            }</small>
                         </div>
                     </button>
                 `).join('')}

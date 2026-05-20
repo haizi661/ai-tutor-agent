@@ -14379,3 +14379,13 @@ body.ui-reduce-motion-pref *::after {
     border-color: color-mix(in oklab, var(--accent-moss) 32%, var(--line));
     background: color-mix(in oklab, var(--accent-moss) 9%, var(--paper));
 }
+.ai-path-side-node.is-mastered {
+    border-color: color-mix(in oklab, var(--accent-moss) 36%, var(--line));
+    background: color-mix(in oklab, var(--accent-moss) 12%, var(--paper));
+    opacity: 0.82;
+}
+
+.ai-path-side-node.is-mastered > span {
+    background: color-mix(in oklab, var(--accent-moss) 20%, var(--paper));
+    color: color-mix(in oklab, var(--accent-moss-strong) 78%, var(--ink-strong));
+}
