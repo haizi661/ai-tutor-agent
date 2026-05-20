@@ -74,6 +74,9 @@ class LocalConfigUpdateRequest(BaseModel):
     embedding_provider: str = "local"
     embedding_model_name: str = ""
     pdf_parse_backend: str = "auto"
+    paddleocr_api_url: str = ""
+    paddleocr_api_token: str = ""
+    paddleocr_model: str = "PaddleOCR-VL-1.5"
     knowledge_chunk_size: int = 1000
     knowledge_chunk_overlap: int = 150
     knowledge_top_k: int = 3
@@ -168,6 +171,10 @@ async def get_local_config(request: Request):
         "embedding_provider": raw_values.get("EMBEDDING_PROVIDER", settings.embedding_provider),
         "embedding_model_name": raw_values.get("EMBEDDING_MODEL_NAME", settings.embedding_model_name),
         "pdf_parse_backend": raw_values.get("PDF_PARSE_BACKEND", settings.pdf_parse_backend),
+        "paddleocr_api_url": raw_values.get("PADDLEOCR_API_URL", settings.paddleocr_api_url or ""),
+        "paddleocr_api_token": _mask_secret(raw_values.get("PADDLEOCR_API_TOKEN", settings.paddleocr_api_token or "")),
+        "has_paddleocr_api_token": bool(raw_values.get("PADDLEOCR_API_TOKEN", settings.paddleocr_api_token or "")),
+        "paddleocr_model": raw_values.get("PADDLEOCR_MODEL", settings.paddleocr_model),
         "knowledge_chunk_size": _coerce_int(raw_values.get("KNOWLEDGE_CHUNK_SIZE"), settings.knowledge_chunk_size),
         "knowledge_chunk_overlap": _coerce_int(raw_values.get("KNOWLEDGE_CHUNK_OVERLAP"), settings.knowledge_chunk_overlap),
         "knowledge_top_k": _coerce_int(raw_values.get("KNOWLEDGE_TOP_K"), settings.knowledge_top_k),
@@ -240,6 +247,9 @@ async def update_local_config(req: LocalConfigUpdateRequest, request: Request):
         "EMBEDDING_PROVIDER": req.embedding_provider.strip() or "local",
         "EMBEDDING_MODEL_NAME": req.embedding_model_name.strip(),
         "PDF_PARSE_BACKEND": req.pdf_parse_backend.strip() or raw_values.get("PDF_PARSE_BACKEND", "auto"),
+        "PADDLEOCR_API_URL": req.paddleocr_api_url.strip() or raw_values.get("PADDLEOCR_API_URL", ""),
+        "PADDLEOCR_API_TOKEN": req.paddleocr_api_token.strip() or raw_values.get("PADDLEOCR_API_TOKEN", ""),
+        "PADDLEOCR_MODEL": req.paddleocr_model.strip() or raw_values.get("PADDLEOCR_MODEL", "PaddleOCR-VL-1.5"),
         "KNOWLEDGE_CHUNK_SIZE": str(req.knowledge_chunk_size),
         "KNOWLEDGE_CHUNK_OVERLAP": str(req.knowledge_chunk_overlap),
         "KNOWLEDGE_TOP_K": str(req.knowledge_top_k),

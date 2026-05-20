@@ -212,6 +212,9 @@ class Settings:
     # RAG 2.0 新增字段
     dashscope_api_key: Optional[str] = None
     mineru_api_token: Optional[str] = None
+    paddleocr_api_url: Optional[str] = None
+    paddleocr_api_token: Optional[str] = None
+    paddleocr_model: str = "PaddleOCR-VL-1.5"
     chroma_dir: str = "data/chroma_db"
     pdf_parse_backend: str = "auto"
     mineru_proxy_mode: str = "inherit"
@@ -253,6 +256,9 @@ LOCAL_CONFIG_KEYS = [
     "EMBEDDING_MODEL_NAME",
     "PDF_PARSE_BACKEND",
     "MINERU_API_TOKEN",
+    "PADDLEOCR_API_URL",
+    "PADDLEOCR_API_TOKEN",
+    "PADDLEOCR_MODEL",
     "COURSE_PRIMARY_ENABLED",
     "COURSE_PRIMARY_DIR",
     "KNOWLEDGE_CHUNK_SIZE",
@@ -366,6 +372,9 @@ def get_settings() -> Settings:
     glm_api_key = os.getenv("GLM_API_KEY", "").strip() or None
     dashscope_api_key = os.getenv("DASHSCOPE_API_KEY", "").strip() or None
     mineru_api_token = os.getenv("MINERU_API_TOKEN", "").strip() or None
+    paddleocr_api_url = os.getenv("PADDLEOCR_API_URL", "").strip() or None
+    paddleocr_api_token = os.getenv("PADDLEOCR_API_TOKEN", "").strip() or None
+    paddleocr_model = os.getenv("PADDLEOCR_MODEL", "").strip() or "PaddleOCR-VL-1.5"
     pdf_parse_backend = os.getenv("PDF_PARSE_BACKEND", "auto").strip().lower() or "auto"
     mineru_proxy_mode = os.getenv("MINERU_PROXY_MODE", "inherit").strip().lower() or "inherit"
     mineru_http_proxy = os.getenv("MINERU_HTTP_PROXY", "").strip() or None
@@ -554,6 +563,9 @@ def get_settings() -> Settings:
         no_proxy=no_proxy,
         dashscope_api_key=dashscope_api_key,
         mineru_api_token=mineru_api_token,
+        paddleocr_api_url=paddleocr_api_url,
+        paddleocr_api_token=paddleocr_api_token,
+        paddleocr_model=paddleocr_model,
         chroma_dir=resolved_vector_store_dir,
         pdf_parse_backend=pdf_parse_backend,
         mineru_proxy_mode=mineru_proxy_mode,

@@ -2,10 +2,10 @@ from __future__ import annotations
 
 from langchain_core.messages import HumanMessage, SystemMessage
 
+from ..core.homework_bank import build_curated_homework_items
 from ..core.learning_support import (
     assign_homework_items,
     build_graph_state_patch,
-    build_homework_items,
     recommend_next_node,
 )
 from ..core.events import make_event
@@ -13,6 +13,7 @@ from ..core.ports import AnswerProvider, EventSink, RuntimeContext
 from ..core.state import AgentState
 from ..core.teacher_voice import build_teacher_voice
 from ..core.text import content_to_text
+from ..infrastructure.llm import build_llms
 
 
 POST_EVAL_OPTIONS = [
@@ -20,6 +21,35 @@ POST_EVAL_OPTIONS = [
     {"value": "same_type_practice", "label": "换一道同类型"},
     {"value": "summarize_wrapup", "label": "总结本轮收获"},
 ]
+
+
+def _build_selector_llm(runtime: RuntimeContext) -> object | None:
+    settings = getattr(runtime, "settings", None)
+    if settings is None:
+        return None
+    try:
+        tutor_llm, _, _ = build_llms(settings)
+        return tutor_llm
+    except Exception:
+        return None
+
+
+def _homework_query_terms(state: AgentState) -> list[str]:
+    values = [
+        state.get("current_user_goal"),
+        state.get("turn_goal"),
+        state.get("topic_focus"),
+        state.get("current_topic"),
+        state.get("current_node_name"),
+        state.get("graph_anchor_title"),
+        state.get("feedback"),
+    ]
+    seen: list[str] = []
+    for raw in values:
+        text = " ".join(str(raw or "").split()).strip()
+        if text and text not in seen:
+            seen.append(text)
+    return seen
 
 
 def _normalize_choice(text: str) -> str:
@@ -300,10 +330,12 @@ def build_post_eval_selector_node(
 
 def build_post_eval_wrapup_node(llm, runtime_or_event_sink: RuntimeContext | EventSink):
     if isinstance(runtime_or_event_sink, RuntimeContext):
+        runtime = runtime_or_event_sink
         event_sink = runtime_or_event_sink.event_sink
         graph_rag_pipeline = getattr(runtime_or_event_sink, "graph_rag_pipeline", None)
         student_state_store = getattr(runtime_or_event_sink, "student_state_store", None)
     else:
+        runtime = None
         event_sink = runtime_or_event_sink
         graph_rag_pipeline = None
         student_state_store = None
@@ -355,10 +387,15 @@ def build_post_eval_wrapup_node(llm, runtime_or_event_sink: RuntimeContext | Eve
             event_sink.emit(make_event("node.stream", "post_eval_wrapup", data={"text": text}))
 
         full_text = (full_text or "").strip() or "### 本轮收获\n- 这一步的判断主线已经拿稳了。\n- 你现在更清楚先看什么、再判断什么。\n- 下次遇到同类问题，先抓主线，再代回场景。"
-        homework_items = build_homework_items(
+        homework_items = build_curated_homework_items(
+            question_bank_provider=getattr(runtime, "question_bank_provider", None),
             graph_pipeline=graph_rag_pipeline,
             student_state_snapshot=student_state_snapshot,
-            limit=5,
+            query_terms=_homework_query_terms(state),
+            llm=_build_selector_llm(runtime),
+            current_node_id=str(state.get("current_node_id") or "").strip(),
+            graph_anchor_id=str(state.get("graph_anchor_id") or "").strip(),
+            limit=2,
         )
         updated_snapshot = assign_homework_items(
             student_state_store,

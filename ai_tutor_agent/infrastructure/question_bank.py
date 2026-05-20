@@ -4,11 +4,14 @@ import json
 from pathlib import Path
 from typing import Any
 
+from ..platform_paths import resolve_project_path
+
 
 class LocalQuestionBankProvider:
     def __init__(self, base_dir: str | Path = "data/question_bank", *, course_id: str = "a2-control-theory") -> None:
         self.base_dir = Path(base_dir)
         self.course_id = course_id
+        self.runtime_question_bank_path = resolve_project_path("data/error_correction_runtime/question_bank/questions.json")
         self.objective_questions = self._load_items("objective_questions.jsonl")
         self.variant_questions = self._load_items("variant_questions.jsonl")
         self.homework_questions = self._load_items("homework_questions.jsonl")
@@ -28,6 +31,17 @@ class LocalQuestionBankProvider:
 
     def get_homework_questions(self, node_ids: list[str], k: int = 5) -> list[dict[str, Any]]:
         return self._take_for_nodes(self.homework_questions, node_ids, k)
+
+    def list_runtime_question_bank_items(self) -> list[dict[str, Any]]:
+        if not self.runtime_question_bank_path.exists():
+            return []
+        try:
+            payload = json.loads(self.runtime_question_bank_path.read_text(encoding="utf-8"))
+        except (OSError, json.JSONDecodeError):
+            return []
+        if not isinstance(payload, list):
+            return []
+        return [self._normalize_runtime_question(item) for item in payload if isinstance(item, dict)]
 
     def get_assessment_questions(self, node_ids: list[str], k: int = 10) -> list[dict[str, Any]]:
         return self._take_for_nodes(self.assessment_questions_pool, node_ids, k)
@@ -88,4 +102,31 @@ class LocalQuestionBankProvider:
             normalized["prompt"] = prompt
         normalized["node_id"] = str(normalized.get("node_id") or "").strip()
         normalized["source"] = str(normalized.get("source") or "local_question_bank").strip()
+        return normalized
+
+    def _normalize_runtime_asset(self, value: Any) -> str:
+        raw = str(value or "").strip()
+        if not raw:
+            return ""
+        if raw.startswith("http://") or raw.startswith("https://") or raw.startswith("/api/error-correction/assets/"):
+            return raw
+        normalized = raw.replace("\\", "/").lstrip("/")
+        return f"/api/error-correction/assets/{normalized}"
+
+    def _normalize_runtime_question(self, item: dict[str, Any]) -> dict[str, Any]:
+        normalized = dict(item)
+        blocks = []
+        for block in list(normalized.get("content_blocks") or []):
+            payload = dict(block or {})
+            if str(payload.get("block_type") or "") == "image":
+                payload["content"] = self._normalize_runtime_asset(payload.get("content"))
+            blocks.append(payload)
+        normalized["content_blocks"] = blocks
+
+        option_images = normalized.get("option_images")
+        if isinstance(option_images, list):
+            normalized["option_images"] = [self._normalize_runtime_asset(item) if item else "" for item in option_images]
+        image_refs = normalized.get("image_refs")
+        if isinstance(image_refs, list):
+            normalized["image_refs"] = [self._normalize_runtime_asset(item) if item else "" for item in image_refs]
         return normalized

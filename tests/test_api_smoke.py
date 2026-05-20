@@ -469,6 +469,9 @@ def build_test_settings(tmp_path):
         http_proxy=None,
         https_proxy=None,
         local_config_enabled=True,
+        paddleocr_api_url="https://ocr.example.com/jobs",
+        paddleocr_api_token="ocr-token",
+        paddleocr_model="PaddleOCR-VL-1.5",
     )
 
 
@@ -1522,6 +1525,8 @@ def test_local_config_round_trip(monkeypatch, tmp_path):
         assert any(vendor["id"] == "glm" for vendor in current.json()["vendors"])
         assert current.json()["gemini_api_key"] == "****-key"
         assert current.json()["has_gemini_api_key"] is True
+        assert current.json()["paddleocr_api_url"] == "https://ocr.example.com/jobs"
+        assert current.json()["paddleocr_model"] == "PaddleOCR-VL-1.5"
 
         updated = client.post(
             "/api/config/local",
@@ -1540,6 +1545,9 @@ def test_local_config_round_trip(monkeypatch, tmp_path):
                 "embedding_provider": "local",
                 "embedding_model_name": "sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2",
                 "pdf_parse_backend": "auto",
+                "paddleocr_api_url": "https://ocr-updated.example.com/jobs",
+                "paddleocr_api_token": "ocr-token-new",
+                "paddleocr_model": "PaddleOCR-VL-2.0",
                 "knowledge_chunk_size": 800,
                 "knowledge_chunk_overlap": 100,
                 "knowledge_top_k": 5,
@@ -1563,6 +1571,9 @@ def test_local_config_round_trip(monkeypatch, tmp_path):
         assert payload["local"]["vector_store_dir"] == "data/chroma_db"
         assert payload["local"]["proxy_port"] == "7892"
         assert payload["local"]["mineru_proxy_mode"] == "direct"
+        assert payload["local"]["paddleocr_api_url"] == "https://ocr-updated.example.com/jobs"
+        assert payload["local"]["paddleocr_model"] == "PaddleOCR-VL-2.0"
+        assert payload["local"]["has_paddleocr_api_token"] is True
 
         glm_update = client.post(
             "/api/config/local",
@@ -1583,6 +1594,9 @@ def test_local_config_round_trip(monkeypatch, tmp_path):
                 "embedding_provider": "local",
                 "embedding_model_name": "sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2",
                 "pdf_parse_backend": "local",
+                "paddleocr_api_url": "https://ocr-updated.example.com/jobs",
+                "paddleocr_api_token": "",
+                "paddleocr_model": "PaddleOCR-VL-2.0",
                 "knowledge_chunk_size": 800,
                 "knowledge_chunk_overlap": 100,
                 "knowledge_top_k": 5,

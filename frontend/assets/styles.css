@@ -11213,6 +11213,10 @@ body,
     backdrop-filter: blur(10px);
 }
 
+#config-overlay {
+    z-index: 1300;
+}
+
 .config-panel {
     width: min(1024px, calc(100vw - 40px));
     max-height: calc(100vh - 40px);
@@ -12381,6 +12385,537 @@ body.ui-reduce-motion-pref *::after {
     }
 }
 
+/* ================================================================
+   Error Correction Workbench
+   ================================================================ */
+
+.error-workbench-panel {
+    width: min(1120px, calc(100vw - 36px));
+}
+
+.error-workbench-layout {
+    grid-template-columns: 250px minmax(0, 1fr);
+}
+
+.error-workbench-sidebar {
+    background:
+        radial-gradient(circle at top left, color-mix(in oklab, var(--accent-slate) 12%, transparent), transparent 42%),
+        linear-gradient(180deg, color-mix(in oklab, var(--paper) 88%, white 8%), color-mix(in oklab, var(--paper-muted) 90%, white 6%));
+}
+
+.error-workbench-sidebar-copy {
+    display: grid;
+    gap: 8px;
+    padding: 4px 8px 10px;
+}
+
+.error-workbench-sidebar-note {
+    font-size: 12.5px;
+    line-height: 1.6;
+    color: var(--ink-muted);
+}
+
+.error-workbench-content {
+    background:
+        linear-gradient(180deg, color-mix(in oklab, var(--paper) 98%, white), color-mix(in oklab, var(--paper-muted) 94%, white 4%));
+}
+
+.error-workbench-header {
+    gap: 14px;
+}
+
+.error-workbench-subtitle {
+    margin-top: 6px;
+    font-size: 13px;
+    line-height: 1.6;
+    color: var(--ink-muted);
+}
+
+.error-workbench-toolbar {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.error-workbench-chip-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.error-workbench-chip {
+    min-width: 118px;
+    padding: 10px 12px;
+    border-radius: 14px;
+    border: 1px solid color-mix(in oklab, var(--accent-slate) 14%, var(--line));
+    background: color-mix(in oklab, var(--paper) 88%, var(--state-info-bg));
+    display: grid;
+    gap: 4px;
+}
+
+.error-workbench-chip-label {
+    font-size: 11px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--ink-muted);
+}
+
+.error-workbench-chip-value {
+    font-size: 16px;
+    color: var(--ink-strong);
+}
+
+.error-workbench-body {
+    display: grid;
+    gap: 16px;
+    padding: 18px;
+    background:
+        radial-gradient(circle at right top, color-mix(in oklab, var(--accent-brass) 8%, transparent), transparent 30%),
+        transparent;
+}
+
+.error-workbench-section {
+    display: grid;
+    gap: 16px;
+}
+
+.error-workbench-section[hidden] {
+    display: none !important;
+}
+
+.error-workbench-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 14px;
+}
+
+.error-workbench-card {
+    padding: 18px;
+    border-radius: 18px;
+    border: 1px solid color-mix(in oklab, var(--accent-slate) 12%, var(--line));
+    background: color-mix(in oklab, var(--paper) 94%, white 4%);
+    box-shadow: 0 12px 30px color-mix(in oklab, var(--shadow-soft) 30%, transparent);
+}
+
+.error-workbench-card h3 {
+    margin-top: 6px;
+    font-size: 1.08rem;
+    line-height: 1.35;
+}
+
+.error-workbench-card p {
+    margin-top: 10px;
+    font-size: 13px;
+    line-height: 1.7;
+    color: var(--ink);
+}
+
+.error-workbench-card--hero {
+    background:
+        radial-gradient(circle at top right, color-mix(in oklab, var(--accent-brass) 10%, transparent), transparent 34%),
+        linear-gradient(180deg, color-mix(in oklab, var(--paper) 96%, white 4%), color-mix(in oklab, var(--paper-muted) 96%, white 2%));
+}
+
+.error-workbench-action-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 16px;
+}
+
+.error-workbench-runtime {
+    margin-top: 14px;
+    padding-top: 14px;
+    border-top: 1px solid color-mix(in oklab, var(--accent-slate) 10%, var(--line));
+    font-size: 12.5px;
+    line-height: 1.7;
+    color: var(--ink-muted);
+}
+
+.error-workbench-section-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 14px;
+    margin-bottom: 14px;
+}
+
+.error-workbench-upload-list,
+.error-workbench-page-list,
+.error-workbench-question-list {
+    display: grid;
+    gap: 12px;
+}
+
+.error-workbench-upload-row,
+.error-workbench-page-card,
+.error-workbench-question-card,
+.error-workbench-layout-card,
+.error-workbench-page-selection-card,
+.error-workbench-export-card {
+    padding: 14px 16px;
+    border-radius: 16px;
+    border: 1px solid color-mix(in oklab, var(--accent-slate) 10%, var(--line));
+    background: color-mix(in oklab, var(--paper) 96%, white 4%);
+}
+
+.error-workbench-upload-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 14px;
+}
+
+.error-workbench-upload-row.is-selected {
+    border-color: color-mix(in oklab, var(--brand) 34%, var(--line));
+    background: color-mix(in oklab, var(--brand-soft) 18%, var(--paper) 82%);
+    box-shadow: 0 0 0 1px color-mix(in oklab, var(--brand) 14%, transparent);
+}
+
+.error-workbench-upload-name,
+.error-workbench-page-title,
+.error-workbench-layout-title,
+.error-workbench-question-title {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--ink-strong);
+}
+
+.error-workbench-upload-meta,
+.error-workbench-page-meta,
+.error-workbench-question-meta,
+.error-workbench-layout-copy,
+.error-workbench-page-preview,
+.error-workbench-export-copy,
+.error-workbench-page-selection-copy {
+    margin-top: 4px;
+    font-size: 12.5px;
+    line-height: 1.65;
+    color: var(--ink-muted);
+}
+
+.error-workbench-upload-actions,
+.error-workbench-export-meta {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.error-workbench-mini-btn {
+    min-height: 34px;
+    padding: 0 12px;
+    border-radius: 10px;
+    border: 1px solid color-mix(in oklab, var(--accent-slate) 12%, var(--line));
+    background: color-mix(in oklab, var(--paper) 88%, white);
+    color: var(--ink-strong);
+    font-size: 12.5px;
+    font-weight: 600;
+}
+
+.error-workbench-mini-btn:hover {
+    background: color-mix(in oklab, var(--paper-muted) 90%, white 4%);
+}
+
+.error-workbench-mini-btn--danger {
+    color: #b42318;
+    border-color: color-mix(in oklab, #f04438 28%, var(--line));
+}
+
+.error-workbench-mini-btn--selected {
+    color: var(--brand);
+    border-color: color-mix(in oklab, var(--brand) 32%, var(--line));
+    background: color-mix(in oklab, var(--brand-soft) 22%, white 78%);
+}
+
+.error-workbench-layout-summary,
+.error-workbench-page-selection {
+    display: grid;
+    gap: 12px;
+    margin-bottom: 12px;
+}
+
+.error-workbench-page-toggle-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 14px;
+}
+
+.error-workbench-page-toggle {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    min-height: 38px;
+    padding: 0 12px;
+    border-radius: 999px;
+    border: 1px solid color-mix(in oklab, var(--accent-slate) 14%, var(--line));
+    background: color-mix(in oklab, var(--paper) 90%, white);
+    font-size: 12.5px;
+    color: var(--ink-strong);
+}
+
+.error-workbench-page-card-header,
+.error-workbench-question-header,
+.error-workbench-export-card {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+}
+
+.error-workbench-block-list {
+    display: grid;
+    gap: 8px;
+    margin-top: 14px;
+}
+
+.error-workbench-block-row {
+    display: grid;
+    grid-template-columns: 96px minmax(0, 1fr);
+    gap: 10px;
+    padding: 10px 12px;
+    border-radius: 12px;
+    background: color-mix(in oklab, var(--paper-muted) 88%, white 4%);
+}
+
+.error-workbench-block-label {
+    font-size: 11px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--ink-muted);
+}
+
+.error-workbench-block-content {
+    font-size: 12.5px;
+    line-height: 1.65;
+    color: var(--ink);
+    word-break: break-word;
+}
+
+.error-workbench-question-select {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    flex: 1;
+}
+
+.error-workbench-question-select input {
+    margin-top: 2px;
+}
+
+.error-workbench-question-title-wrap {
+    display: grid;
+    gap: 3px;
+}
+
+.error-workbench-question-body {
+    margin-top: 12px;
+    display: grid;
+    gap: 10px;
+}
+
+.error-workbench-question-copy {
+    font-size: 13px;
+    line-height: 1.75;
+    color: var(--ink);
+}
+
+.error-workbench-rich-content,
+.error-workbench-option-grid {
+    display: grid;
+    gap: 10px;
+}
+
+.error-workbench-rich-text,
+.error-workbench-option-text,
+.error-workbench-answer-copy {
+    font-size: 13px;
+    line-height: 1.78;
+    color: var(--ink);
+    word-break: break-word;
+    white-space: pre-wrap;
+}
+
+.error-workbench-rich-text table,
+.error-workbench-option-text table,
+.error-workbench-answer-copy table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.error-workbench-rich-text td,
+.error-workbench-rich-text th,
+.error-workbench-option-text td,
+.error-workbench-option-text th,
+.error-workbench-answer-copy td,
+.error-workbench-answer-copy th {
+    padding: 8px 10px;
+    border: 1px solid color-mix(in oklab, var(--accent-slate) 12%, var(--line));
+}
+
+.error-workbench-image-card {
+    margin: 0;
+    padding: 10px;
+    border-radius: 14px;
+    border: 1px solid color-mix(in oklab, var(--accent-slate) 10%, var(--line));
+    background: color-mix(in oklab, var(--paper-muted) 90%, white 4%);
+}
+
+.error-workbench-image-link {
+    display: block;
+}
+
+.error-workbench-image {
+    display: block;
+    width: 100%;
+    max-height: 360px;
+    object-fit: contain;
+    border-radius: 10px;
+    background: #fff;
+}
+
+.error-workbench-option-grid {
+    margin-top: 2px;
+}
+
+.error-workbench-option-card,
+.error-workbench-answer-card {
+    padding: 12px 14px;
+    border-radius: 14px;
+    border: 1px solid color-mix(in oklab, var(--accent-slate) 10%, var(--line));
+    background: color-mix(in oklab, var(--paper-muted) 88%, white 5%);
+}
+
+.error-workbench-badge-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.error-workbench-badge {
+    display: inline-flex;
+    align-items: center;
+    min-height: 28px;
+    padding: 0 10px;
+    border-radius: 999px;
+    background: color-mix(in oklab, var(--accent-slate) 10%, var(--paper));
+    color: var(--ink-strong);
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.error-workbench-option-list {
+    display: grid;
+    gap: 6px;
+    padding-left: 18px;
+}
+
+.error-workbench-question-card--clickable {
+    cursor: pointer;
+    transition: transform 0.14s ease, box-shadow 0.14s ease, border-color 0.14s ease;
+}
+
+.error-workbench-question-card--clickable:hover,
+.error-workbench-question-card--clickable:focus-visible {
+    transform: translateY(-1px);
+    border-color: color-mix(in oklab, var(--brand) 22%, var(--line));
+    box-shadow: 0 16px 28px color-mix(in oklab, var(--shadow-soft) 24%, transparent);
+    outline: none;
+}
+
+.error-workbench-preview-content {
+    width: min(92vw, 980px);
+    max-width: min(92vw, 980px);
+    max-height: min(90vh, 860px);
+}
+
+.error-workbench-preview-header {
+    align-items: flex-start;
+    gap: 16px;
+}
+
+.error-workbench-preview-title-group {
+    display: grid;
+    gap: 6px;
+    min-width: 0;
+}
+
+.error-workbench-preview-subtitle {
+    font-size: 12.5px;
+    line-height: 1.65;
+    color: var(--ink-muted);
+    word-break: break-word;
+}
+
+.error-workbench-preview-body {
+    align-items: stretch;
+    justify-content: flex-start;
+    padding: 22px;
+    background:
+        radial-gradient(circle at top right, color-mix(in oklab, var(--accent-brass) 8%, transparent), transparent 30%),
+        color-mix(in oklab, var(--paper-muted) 94%, white 3%);
+}
+
+.error-workbench-question-card--preview {
+    width: min(100%, 880px);
+    margin: 0 auto;
+    padding: 20px 22px;
+    border-radius: 20px;
+    box-shadow: 0 14px 28px color-mix(in oklab, var(--shadow-soft) 18%, transparent);
+}
+
+.error-workbench-option-item {
+    font-size: 12.5px;
+    line-height: 1.6;
+    color: var(--ink-muted);
+}
+
+.error-workbench-empty {
+    padding: 28px 18px;
+    border-radius: 16px;
+    border: 1px dashed color-mix(in oklab, var(--accent-slate) 18%, var(--line));
+    background: color-mix(in oklab, var(--paper) 92%, white);
+    text-align: center;
+}
+
+.error-workbench-empty-title {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--ink-strong);
+}
+
+.error-workbench-empty-copy {
+    margin-top: 8px;
+    font-size: 12.5px;
+    line-height: 1.7;
+    color: var(--ink-muted);
+}
+
+.error-workbench-footer-actions {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+@media (max-width: 980px) {
+    .error-workbench-layout {
+        grid-template-columns: 1fr;
+    }
+
+    .error-workbench-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .error-workbench-section-header,
+    .error-workbench-page-card-header,
+    .error-workbench-question-header,
+    .error-workbench-export-card,
+    .error-workbench-upload-row {
+        flex-direction: column;
+        align-items: stretch;
+    }
+}
+
 /* ============================================================
    UNIFIED MODAL SYSTEM
    ============================================================ */
@@ -13217,6 +13752,8 @@ body.ui-reduce-motion-pref *::after {
 
 .homework-item-card,
 .homework-result-card {
+    display: grid;
+    gap: 0.85rem;
     min-width: 0;
     width: 100%;
     max-width: 100%;
@@ -13240,9 +13777,26 @@ body.ui-reduce-motion-pref *::after {
     align-items: center;
     flex-wrap: wrap;
     gap: 0.45rem;
-    margin-bottom: 0.55rem;
     color: var(--muted);
     font-size: 0.86rem;
+}
+
+.homework-tag-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.45rem;
+}
+
+.homework-tag-chip {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.26rem 0.62rem;
+    border-radius: 999px;
+    border: 1px solid color-mix(in srgb, var(--accent-slate) 18%, var(--line));
+    background: color-mix(in srgb, var(--paper) 82%, var(--bg-main) 18%);
+    color: var(--ink);
+    font-size: 0.79rem;
+    line-height: 1.2;
 }
 
 .homework-item-index,
@@ -13290,6 +13844,63 @@ body.ui-reduce-motion-pref *::after {
     min-width: 0;
     overflow-wrap: anywhere;
     line-height: 1.72;
+}
+
+.homework-question-body {
+    display: grid;
+    gap: 0.7rem;
+    min-width: 0;
+    padding: 0.8rem 0.9rem;
+    border-radius: 12px;
+    border: 1px solid color-mix(in srgb, var(--line) 84%, transparent);
+    background: color-mix(in srgb, var(--paper) 88%, white 12%);
+}
+
+.homework-question-richtext {
+    margin: 0;
+    min-width: 0;
+    overflow-wrap: anywhere;
+    line-height: 1.78;
+    color: var(--ink);
+}
+
+.homework-question-image-card {
+    margin: 0;
+}
+
+.homework-question-image {
+    display: block;
+    width: 100%;
+    height: auto;
+}
+
+.homework-option-list {
+    display: grid;
+    gap: 0.75rem;
+    margin: 0;
+    padding-left: 1.35rem;
+}
+
+.homework-option-item {
+    min-width: 0;
+    overflow-wrap: anywhere;
+}
+
+.homework-option-key {
+    font-weight: 700;
+    margin-right: 0.35rem;
+}
+
+.homework-option-image-wrap {
+    margin-top: 0.55rem;
+}
+
+.homework-option-image {
+    display: block;
+    max-width: 100%;
+    height: auto;
+    border-radius: 10px;
+    border: 1px solid color-mix(in srgb, var(--line) 78%, transparent);
 }
 
 .homework-answer-viewport {

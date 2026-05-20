@@ -31,6 +31,10 @@
             title: '设置',
             subtitle: '管理AI模型和连接设置。',
         },
+        error_correction: {
+            title: '题库加工',
+            subtitle: '管理题库加工链路使用的大模型档案和 PaddleOCR 接口配置。',
+        },
         schedule: {
             title: '安排',
             subtitle: '后续会把学习日程和自动复习计划接到这里。',
@@ -231,6 +235,31 @@
         if (storeEl) {
             storeEl.textContent = state.localConfig?.vector_store_dir || document.getElementById('local-vector-store-dir')?.value || 'data/chroma_db';
         }
+        const ecProfile = document.getElementById('config-ec-profile');
+        if (ecProfile) {
+            const vendorId = document.getElementById('local-chat-profile')?.value || state.localConfig?.selected_vendor || state.currentChatProfile || '';
+            const vendor = app.getVendorCatalog(vendorId);
+            ecProfile.textContent = vendor?.label || vendorId || '未选择';
+        }
+        const ecModel = document.getElementById('config-ec-model');
+        if (ecModel) {
+            const vendorId = document.getElementById('local-chat-profile')?.value || state.localConfig?.selected_vendor || state.currentChatProfile || '';
+            const vendor = app.getVendorCatalog(vendorId);
+            const modelName = document.getElementById('local-model-select')?.value || state.localConfig?.selected_model || state.localConfig?.model_name || state.currentModelName || '';
+            ecModel.textContent = getProfileModelLabel(vendor, modelName) || '未选择';
+        }
+        const ecOcrEndpoint = document.getElementById('config-ec-ocr-endpoint');
+        if (ecOcrEndpoint) {
+            ecOcrEndpoint.textContent = document.getElementById('local-paddleocr-api-url')?.value?.trim()
+                || state.localConfig?.paddleocr_api_url
+                || '未填写';
+        }
+        const ecOcrModel = document.getElementById('config-ec-ocr-model');
+        if (ecOcrModel) {
+            ecOcrModel.textContent = document.getElementById('local-paddleocr-model')?.value?.trim()
+                || state.localConfig?.paddleocr_model
+                || 'PaddleOCR-VL-1.5';
+        }
     }
 
     function persistNotificationPrefs(notify = readNotificationPrefsFromDom()) {
@@ -302,6 +331,21 @@
         document.getElementById('settings-account-plan')?.addEventListener('change', () => {
             persistAccountPrefs();
         });
+
+        [
+            'local-chat-profile',
+            'local-model-select',
+            'local-model-name',
+            'local-paddleocr-api-url',
+            'local-paddleocr-model',
+        ].forEach(id => {
+            document.getElementById(id)?.addEventListener('input', () => {
+                updateAccountEnvironmentSummary();
+            });
+            document.getElementById(id)?.addEventListener('change', () => {
+                updateAccountEnvironmentSummary();
+            });
+        });
     }
 
     app.hydrateLocalClientSettings = function hydrateLocalClientSettings() {
@@ -313,8 +357,18 @@
         bindLocalPreferenceControls();
     };
 
+    function normalizeConfigSectionId(sectionId) {
+        const normalized = String(sectionId || '').trim();
+        if (!normalized) return 'applications';
+        if (normalized === 'error-correction') return 'error_correction';
+        return normalized;
+    }
+
     function getResolvedConfigSection(sectionId) {
-        return CONFIG_SECTION_META[sectionId] ? sectionId : 'applications';
+        const normalized = normalizeConfigSectionId(sectionId);
+        if (CONFIG_SECTION_META[normalized]) return normalized;
+        if (document.querySelector(`[data-config-section="${normalized}"]`)) return normalized;
+        return 'applications';
     }
 
     function focusLocalConfigSection(sectionId) {
@@ -325,15 +379,33 @@
             document.getElementById('local-chat-profile')?.focus();
             return;
         }
+        if (sectionId === 'error_correction') {
+            document.getElementById('local-paddleocr-api-url')?.focus();
+            return;
+        }
         primaryField?.focus?.() || activeTab?.focus?.();
     }
 
     function updateConfigHeader(sectionId) {
-        const meta = CONFIG_SECTION_META[getResolvedConfigSection(sectionId)];
+        const resolvedSection = getResolvedConfigSection(sectionId);
+        const meta = CONFIG_SECTION_META[resolvedSection];
         const title = document.getElementById('local-config-title');
         const subtitle = document.getElementById('local-config-subtitle');
-        if (title) title.textContent = meta.title;
-        if (subtitle) subtitle.textContent = meta.subtitle;
+        if (title) title.textContent = meta?.title || document.querySelector(`[data-config-section-tab="${resolvedSection}"] span:last-child`)?.textContent || '设置';
+        if (subtitle) subtitle.textContent = meta?.subtitle || '管理当前本地配置。';
+    }
+
+    function bindLocalConfigSectionNav() {
+        const nav = document.getElementById('local-config-nav');
+        if (!nav || nav.dataset.bound === '1') return;
+        nav.dataset.bound = '1';
+        nav.querySelectorAll('[data-config-section-tab]').forEach(tab => {
+            tab.addEventListener('click', event => {
+                event.preventDefault();
+                const sectionId = tab.dataset.configSectionTab || 'applications';
+                app.switchLocalConfigSection?.(sectionId, { focus: true });
+            });
+        });
     }
 
     function syncLocalConfigAccountSummary(vendorId) {
@@ -650,6 +722,13 @@
         document.getElementById('local-embedding-provider').value = data.embedding_provider || 'local';
         document.getElementById('local-embedding-model').value = data.embedding_model_name || '';
         document.getElementById('local-pdf-parse-backend').value = data.pdf_parse_backend || 'auto';
+        document.getElementById('local-paddleocr-api-url').value = data.paddleocr_api_url || '';
+        document.getElementById('local-paddleocr-model').value = data.paddleocr_model || 'PaddleOCR-VL-1.5';
+        const paddleTokenInput = document.getElementById('local-paddleocr-api-token');
+        if (paddleTokenInput) {
+            paddleTokenInput.value = '';
+            paddleTokenInput.placeholder = data.paddleocr_api_token ? `已保存：${data.paddleocr_api_token}` : '只保存在本地环境';
+        }
         document.getElementById('local-top-k').value = data.knowledge_top_k || 3;
         document.getElementById('local-chunk-size').value = data.knowledge_chunk_size || 1000;
         document.getElementById('local-chunk-overlap').value = data.knowledge_chunk_overlap || 150;
@@ -673,7 +752,9 @@
             alert('当前服务端已关闭本地设置编辑。');
             return;
         }
+        const preferredSection = getResolvedConfigSection(sectionId || state.activeLocalConfigSection || 'applications');
         state.lastFocusedElement = document.activeElement;
+        state.activeLocalConfigSection = preferredSection;
         const overlay = document.getElementById('config-overlay');
         overlay.classList.add('open');
         overlay.setAttribute('aria-hidden', 'false');
@@ -681,7 +762,15 @@
         app.setInlineStatus('local-config-status', '', 'muted');
         if (state.localConfig) app.populateLocalConfigForm(state.localConfig);
         app.hydrateLocalClientSettings?.();
-        app.switchLocalConfigSection?.(sectionId || state.activeLocalConfigSection || 'applications', { focus: true });
+        bindLocalConfigSectionNav();
+        app.switchLocalConfigSection?.(preferredSection, { focus: true });
+    };
+
+    app.focusPaddleOcrConfig = function focusPaddleOcrConfig() {
+        app.switchLocalConfigSection?.('applications', { focus: false });
+        const target = document.getElementById('paddleocr-config-block');
+        target?.scrollIntoView?.({ behavior: 'smooth', block: 'start' });
+        document.getElementById('local-paddleocr-api-url')?.focus();
     };
 
     app.closeLocalConfigPanel = function closeLocalConfigPanel(event) {
@@ -732,6 +821,9 @@
             embedding_provider: document.getElementById('local-embedding-provider').value,
             embedding_model_name: document.getElementById('local-embedding-model').value.trim(),
             pdf_parse_backend: document.getElementById('local-pdf-parse-backend').value,
+            paddleocr_api_url: document.getElementById('local-paddleocr-api-url').value.trim(),
+            paddleocr_api_token: document.getElementById('local-paddleocr-api-token').value.trim(),
+            paddleocr_model: document.getElementById('local-paddleocr-model').value.trim(),
             knowledge_top_k: Number(document.getElementById('local-top-k').value || 3),
             knowledge_chunk_size: Number(document.getElementById('local-chunk-size').value || 1000),
             knowledge_chunk_overlap: Number(document.getElementById('local-chunk-overlap').value || 150),
@@ -786,6 +878,11 @@
         app.setInlineStatus('local-config-status', '已保存并重建。', 'success');
     };
 
+    window.openLocalConfigPanel = sectionId => app.openLocalConfigPanel(sectionId);
+    window.closeLocalConfigPanel = event => app.closeLocalConfigPanel(event);
+    window.saveLocalConfig = () => app.saveLocalConfig();
+    window.testConnection = () => app.testConnection();
+    window.focusPaddleOcrConfig = () => app.focusPaddleOcrConfig();
     window.switchLocalConfigSection = (sectionId) => app.switchLocalConfigSection(sectionId, { focus: true });
     window.syncLocalConfigAccountSummary = () => syncLocalConfigAccountSummary();
 

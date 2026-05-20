@@ -600,7 +600,8 @@ def _reconstruct_messages(checkpoint_store, thread_id: str, *, limit: int = 240)
 
         tutor_content = values.get("tutor_content", "")
         if tutor_content and tutor_content != previous_values.get("tutor_content", ""):
-            push("agent", "tutor", tutor_content, updated_at)
+            tutor_kind = "homework_learning_html" if "homework-answer-content" in str(tutor_content) else "tutor"
+            push("agent", tutor_kind, tutor_content, updated_at)
 
         tutor_evidence = values.get("tutor_evidence") or []
         if tutor_evidence and tutor_evidence != previous_values.get("tutor_evidence", []):

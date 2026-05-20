@@ -443,6 +443,7 @@
 
             const streamKind = String(data.data?.kind || '').trim();
             const role = streamKind === 'graph_rag_answer'
+                || streamKind === 'homework_learning_html'
                 ? 'graph_rag_answer'
                 : streamKind === 'graph_rag_debug_report'
                 ? 'graph_rag_debug_report'

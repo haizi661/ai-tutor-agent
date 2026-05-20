@@ -708,6 +708,7 @@
         document.body.style.overflow = 'hidden';
         app.switchLibraryFilter?.('all');
         app.fetchKnowledgeFiles?.();
+        app.fetchQuestionBankItems?.();
     };
 
     app.closeLibraryPanel = function closeLibraryPanel(e) {
@@ -763,6 +764,7 @@
         await app.fetchHistory();
         await app.restoreLastSessionIfAny?.();
         await app.fetchKnowledgeFiles?.();
+        await app.fetchQuestionBankItems?.();
         await app.fetchConfig();
         await app.fetchLocalConfig();
         app.renderUserKnowledgeMap?.();

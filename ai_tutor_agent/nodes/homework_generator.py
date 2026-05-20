@@ -4,9 +4,13 @@ import html
 from typing import Any
 
 from ..core.events import make_event
-from ..core.learning_support import assign_homework_items, build_homework_items
+from ..core.homework_bank import (
+    build_curated_homework_items,
+)
+from ..core.learning_support import assign_homework_items
 from ..core.ports import RuntimeContext
 from ..core.state import AgentState
+from ..infrastructure.llm import build_llms
 from .homework_review import HOMEWORK_REVIEW_OPTIONS
 
 
@@ -93,6 +97,115 @@ def _html_escape(value: Any) -> str:
     return html.escape(str(value or "").strip())
 
 
+def _build_selector_llm(runtime: RuntimeContext) -> Any:
+    settings = getattr(runtime, "settings", None)
+    if settings is None:
+        return None
+    try:
+        tutor_llm, _, _ = build_llms(settings)
+        return tutor_llm
+    except Exception:
+        return None
+
+
+def _homework_query_terms(state: AgentState) -> list[str]:
+    values = [
+        state.get("current_user_goal"),
+        state.get("turn_goal"),
+        state.get("topic_focus"),
+        state.get("current_topic"),
+        state.get("current_node_name"),
+        state.get("graph_anchor_title"),
+    ]
+    seen: list[str] = []
+    for raw in values:
+        text = " ".join(str(raw or "").split()).strip()
+        if text and text not in seen:
+            seen.append(text)
+    return seen
+
+
+def _render_homework_block_html(block: dict[str, Any]) -> str:
+    payload = dict(block or {})
+    block_type = str(payload.get("block_type") or "").strip()
+    content = payload.get("content")
+    if block_type == "image":
+        src = _html_escape(content)
+        if not src:
+            return ""
+        alt = _html_escape(payload.get("alt") or "作业题图")
+        return (
+            '<figure class="learning-figure-card homework-question-image-card">'
+            '<div class="learning-figure-viewport">'
+            f'<img src="{src}" alt="{alt}" class="homework-question-image" loading="lazy" />'
+            "</div>"
+            "</figure>"
+        )
+    text = str(content or "").strip()
+    if not text:
+        return ""
+    return f'<p class="homework-question-richtext">{text}</p>'
+
+
+def _render_homework_prompt_html(item: dict[str, Any]) -> str:
+    blocks = list(item.get("content_blocks") or [])
+    rendered_blocks = "".join(
+        _render_homework_block_html(block)
+        for block in blocks
+        if isinstance(block, dict)
+    )
+
+    options = item.get("options")
+    option_images = list(item.get("option_images") or [])
+    option_html = ""
+    if isinstance(options, dict) and options:
+        option_items: list[str] = []
+        for index, (key, value) in enumerate(options.items()):
+            image_html = ""
+            if index < len(option_images):
+                option_src = _html_escape(option_images[index])
+                if option_src:
+                    image_html = (
+                        '<div class="homework-option-image-wrap">'
+                        f'<img src="{option_src}" alt="选项 { _html_escape(key) }" class="homework-option-image" loading="lazy" />'
+                        "</div>"
+                    )
+            option_items.append(
+                '<li class="homework-option-item">'
+                f'<span class="homework-option-key">{_html_escape(key)}.</span>'
+                f'<span class="homework-option-text">{_html_escape(value)}</span>'
+                f"{image_html}"
+                "</li>"
+            )
+        option_html = f'<ol class="homework-option-list">{"".join(option_items)}</ol>'
+
+    if rendered_blocks or option_html:
+        return (
+            '<div class="homework-question-body">'
+            f"{rendered_blocks}"
+            f"{option_html}"
+            "</div>"
+        )
+
+    prompt = _html_escape(item.get("prompt"))
+    return f'<div class="homework-question-text">{prompt}</div>' if prompt else ""
+
+
+def _render_homework_tags_html(item: dict[str, Any]) -> str:
+    tags = _string_list(item.get("knowledge_tags"))
+    if not tags:
+        fallback = str(item.get("section_title") or "").strip()
+        if fallback:
+            tags = [fallback]
+    if not tags:
+        return ""
+    chips = "".join(
+        f'<span class="homework-tag-chip">{_html_escape(tag)}</span>'
+        for tag in tags[:6]
+    )
+    return f'<div class="homework-tag-row">{chips}</div>'
+
+
 def build_homework_assignment_html(items: list[dict[str, Any]]) -> str:
     if not items:
         return (
@@ -106,20 +219,31 @@ def build_homework_assignment_html(items: list[dict[str, Any]]) -> str:
     cards: list[str] = []
     for index, item in enumerate(items, start=1):
         qid = _html_escape(item.get("question_id") or item.get("id") or f"HW-{index}")
-        prompt = _html_escape(item.get("prompt"))
         title = _html_escape(item.get("title") or item.get("node_id") or f"第 {index} 题")
         reference = _html_escape(item.get("reference_answer"))
+        prompt_html = _render_homework_prompt_html(item)
+        tags_html = _render_homework_tags_html(item)
         rubric_items = "".join(f"<li>{_html_escape(term)}</li>" for term in _string_list(item.get("rubric")))
-        reference_html = f'<div class="homework-reference"><strong>参考答案要点：</strong>{reference}</div>' if reference else ""
-        rubric_html = f'<ul class="homework-rubric-list">{rubric_items}</ul>' if rubric_items else ""
+        reference_html = ""
+        if reference and not item.get("suppress_reference_answer"):
+            reference_html = f'<div class="homework-reference"><strong>参考答案要点：</strong>{reference}</div>'
+        rubric_html = ""
+        if rubric_items and str(item.get("source") or "") != "processed_question_bank":
+            rubric_html = f'<ul class="homework-rubric-list">{rubric_items}</ul>'
+        answer_viewport_html = ""
+        if reference_html or rubric_html:
+            answer_viewport_html = (
+                '<div class="homework-answer-viewport">'
+                f'{reference_html}'
+                f'{rubric_html}'
+                '</div>'
+            )
         cards.append(
             '<article class="homework-item-card">'
             f'<div class="homework-item-meta"><span class="homework-item-index">{index}</span><span class="homework-item-id">{qid}</span><span>{title}</span></div>'
-            f'<div class="homework-question-text">{prompt}</div>'
-            '<div class="homework-answer-viewport">'
-            f'{reference_html}'
-            f'{rubric_html}'
-            '</div>'
+            f'{tags_html}'
+            f'{prompt_html}'
+            f'{answer_viewport_html}'
             '</article>'
         )
     return (
@@ -150,24 +274,6 @@ def _format_homework_content(items: list[dict[str, Any]]) -> str:
     return "\n".join(lines)
 
 
-def _collect_relevant_node_ids(state: AgentState, snapshot: dict[str, Any]) -> list[str]:
-    node_ids: list[str] = []
-    current = str(state.get("current_node_id") or state.get("graph_anchor_id") or "").strip()
-    if current:
-        node_ids.append(current)
-    for nid in list(snapshot.get("visited_nodes") or []):
-        nid_str = str(nid).strip()
-        if nid_str and nid_str not in node_ids:
-            node_ids.append(nid_str)
-    daily = dict(snapshot.get("daily_learning_records") or {})
-    for day_nodes in daily.values():
-        for nid in list(day_nodes or []):
-            nid_str = str(nid).strip()
-            if nid_str and nid_str not in node_ids:
-                node_ids.append(nid_str)
-    return node_ids
-
-
 def build_homework_generator_node(runtime: RuntimeContext):
     event_sink = runtime.event_sink
 
@@ -175,6 +281,7 @@ def build_homework_generator_node(runtime: RuntimeContext):
         graph_pipeline = getattr(runtime, "graph_rag_pipeline", None)
         student_state_store = getattr(runtime, "student_state_store", None)
         question_bank = getattr(runtime, "question_bank_provider", None)
+        selector_llm = _build_selector_llm(runtime)
         student_id = str(state.get("student_id") or "default_student").strip() or "default_student"
         snapshot = dict(state.get("student_state_snapshot") or {})
 
@@ -187,19 +294,16 @@ def build_homework_generator_node(runtime: RuntimeContext):
             )
         )
 
-        homework_items: list[dict[str, Any]] = []
-        # 优先从题库取大题
-        if question_bank is not None and hasattr(question_bank, "get_homework_questions"):
-            relevant_nodes = _collect_relevant_node_ids(state, snapshot)
-            if relevant_nodes:
-                homework_items = question_bank.get_homework_questions(relevant_nodes, k=5)
-        # 题库不足时，用图谱生成补充
-        if not homework_items:
-            homework_items = build_homework_items(
-                graph_pipeline=graph_pipeline,
-                student_state_snapshot=snapshot,
-                limit=5,
-            )
+        homework_items = build_curated_homework_items(
+            question_bank_provider=question_bank,
+            graph_pipeline=graph_pipeline,
+            student_state_snapshot=snapshot,
+            query_terms=_homework_query_terms(state),
+            llm=selector_llm,
+            current_node_id=str(state.get("current_node_id") or "").strip(),
+            graph_anchor_id=str(state.get("graph_anchor_id") or "").strip(),
+            limit=2,
+        )
         if not homework_items:
             homework_items = _build_fallback_homework_item(graph_pipeline, state)
         homework_items = _enrich_homework_items(homework_items, graph_pipeline)
@@ -219,7 +323,7 @@ def build_homework_generator_node(runtime: RuntimeContext):
             make_event(
                 "node.stream",
                 "homework_generator",
-                data={"text": tutor_content},
+                data={"text": tutor_content, "kind": "homework_learning_html"},
             )
         )
         event_sink.emit(

@@ -29,7 +29,13 @@ def _normalize_choice(text: str) -> str:
         "stop": "stop_today",
         "stop_today": "stop_today",
     }
-    return mapping.get(lowered, lowered)
+    if lowered in mapping:
+        return mapping[lowered]
+    if "生成作业" in lowered or "不学了" in lowered or "先到这里" in lowered:
+        return "stop_today"
+    if "继续学习" in lowered or "下一个节点" in lowered or "下一节点" in lowered:
+        return "continue_next_node"
+    return lowered
 
 
 def build_continue_or_homework_selector_node(runtime: RuntimeContext):
