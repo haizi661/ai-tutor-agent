@@ -1,6 +1,7 @@
 (() => {
     const app = window.AITutorApp || {};
     let activeAgentJobId = '';
+    let lastAgentTrace = [];
 
     function qs(id) {
         return document.getElementById(id);
@@ -30,11 +31,14 @@
         }
     }
 
-    function renderTrace(trace = []) {
-        const mount = qs('matlab-experiment-results');
-        if (!mount) return;
-        if (!trace.length) return;
-        mount.innerHTML = '';
+    function buildTracePanel(trace = [], open = false) {
+        if (!trace.length) return null;
+        const details = document.createElement('details');
+        details.className = 'matlab-experiment-trace-panel';
+        details.open = Boolean(open);
+        const summary = document.createElement('summary');
+        summary.textContent = `执行过程（${trace.length} 步）`;
+        details.appendChild(summary);
         const list = createEl('div', 'matlab-experiment-trace');
         trace.forEach(item => {
             const row = createEl('div', `matlab-experiment-trace-item matlab-experiment-trace-item--${item.phase || 'step'}`);
@@ -47,7 +51,18 @@
             }
             list.appendChild(row);
         });
-        mount.appendChild(list);
+        details.appendChild(list);
+        return details;
+    }
+
+    function renderTrace(trace = []) {
+        const mount = qs('matlab-experiment-results');
+        if (!mount) return;
+        if (!trace.length) return;
+        lastAgentTrace = trace.slice();
+        mount.innerHTML = '';
+        const panel = buildTracePanel(lastAgentTrace, true);
+        if (panel) mount.appendChild(panel);
     }
 
     function phaseLabel(phase) {
@@ -144,6 +159,24 @@
         const mount = qs('matlab-experiment-results');
         if (!mount) return;
         mount.innerHTML = '';
+
+        const trace = Array.isArray(payload.trace) && payload.trace.length
+            ? payload.trace
+            : lastAgentTrace;
+        if (trace.length) {
+            lastAgentTrace = trace.slice();
+            const tracePanel = buildTracePanel(trace, false);
+            if (tracePanel) mount.appendChild(tracePanel);
+        } else if (payload.mode === 'agent') {
+            const missingTrace = document.createElement('details');
+            missingTrace.className = 'matlab-experiment-trace-panel';
+            const summary = document.createElement('summary');
+            summary.textContent = '执行过程（未返回）';
+            missingTrace.appendChild(summary);
+            const note = createEl('div', 'matlab-experiment-trace-missing', '本次结果未包含执行过程。请查看本地 run_trace.json，或刷新页面后重新运行。');
+            missingTrace.appendChild(note);
+            mount.appendChild(missingTrace);
+        }
 
         const result = payload.result || {};
         const titleRow = createEl('div', 'matlab-experiment-result-header');
@@ -256,6 +289,7 @@
             setStatus('请先输入自然语言仿真需求。', 'warning');
             return;
         }
+        lastAgentTrace = [];
         setBusy(true);
         setStatus('Agent 正在生成 MATLAB 代码并执行仿真...', 'info');
         const startedAt = Date.now();

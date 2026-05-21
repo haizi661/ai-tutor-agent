@@ -12220,6 +12220,31 @@ body.ui-reduce-motion-pref *::after {
     margin-top: 1rem;
 }
 
+.matlab-experiment-trace-panel {
+    margin-bottom: 1rem;
+    border: 1px solid var(--line-soft);
+    border-radius: 0.5rem;
+    background: var(--paper-muted);
+}
+
+.matlab-experiment-trace-panel summary {
+    cursor: pointer;
+    padding: 0.75rem 0.85rem;
+    color: var(--ink-strong);
+    font-weight: 650;
+}
+
+.matlab-experiment-trace-panel .matlab-experiment-trace {
+    margin: 0;
+    padding: 0 0.75rem 0.75rem;
+}
+
+.matlab-experiment-trace-missing {
+    padding: 0 0.85rem 0.85rem;
+    color: var(--ink-muted);
+    font-size: 0.84rem;
+}
+
 .matlab-experiment-attempt {
     padding: 0.55rem 0.65rem;
     border: 1px solid var(--line-soft);

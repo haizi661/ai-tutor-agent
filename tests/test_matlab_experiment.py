@@ -427,10 +427,18 @@ def test_frontend_exposes_matlab_experiment_workbench():
     assert "app.runMatlabPresetExperiment = runPresetExperiment;" in script
     assert "app.cancelMatlabExperiment = cancelExperiment;" in script
     assert "renderTrace" in script
+    assert "buildTracePanel" in script
+    assert "lastAgentTrace" in script
+    assert "执行过程（未返回）" in script
     assert "matlab-experiment-code" in script
     assert 'id="matlab-cancel-btn"' in html
+    assert "MATLAB 仿真 Agent" in html
+    assert "根据自然语言需求生成 MATLAB 代码" in html
+    assert "matlab-trace-panel-1" in html
     assert "MATLAB Experiment Workbench" in styles
     assert "library-upload-btn--danger" in styles
+    assert ".matlab-experiment-trace-panel" in styles
+    assert ".matlab-experiment-trace-missing" in styles
     assert ".matlab-experiment-trace" in styles
     assert "matlab-experiment-overlay" in app_js
     assert "runMatlabPresetExperiment" in app_js

@@ -479,24 +479,40 @@ class MatlabExperimentService:
                 self._write_json(run_dir / "run_summary.json", payload)
                 return payload
 
-            previous_code = code
-            previous_error = "\n".join(
-                part
-                for part in [
-                    execution.get("message", ""),
-                    execution.get("stdout", ""),
-                    execution.get("stderr", ""),
-                    "result.json missing" if not has_result else "",
-                    "png plot missing" if not png_paths else "",
-                ]
-                if part
-            )
-            emit(
-                "execution_error",
-                f"第 {attempt_index} 轮：MATLAB 执行未通过，准备把错误反馈给代码生成器修复。",
-                attempt=attempt_index,
-                error_summary=previous_error[-1200:],
-            )
+            # Distinguish startup crashes from script-level errors.
+            # A startup crash means MATLAB never reached the user script —
+            # do NOT feed it to the LLM as a code bug.
+            if self._is_startup_crash(execution):
+                emit(
+                    "execution_error",
+                    f"第 {attempt_index} 轮：MATLAB 启动失败（{execution.get('elapsed_ms')}ms），"
+                    "非脚本代码问题，将在下一轮直接重试运行而不是让 LLM 修改代码。",
+                    attempt=attempt_index,
+                    error_summary=execution.get("stderr", "")[-800:],
+                )
+                # Re-use the same code; keep previous_error empty so the LLM
+                # does not try to "fix" the runtime environment.
+                previous_code = ""
+                previous_error = ""
+            else:
+                previous_code = code
+                previous_error = "\n".join(
+                    part
+                    for part in [
+                        execution.get("message", ""),
+                        execution.get("stdout", ""),
+                        execution.get("stderr", ""),
+                        "result.json missing" if not has_result else "",
+                        "png plot missing" if not png_paths else "",
+                    ]
+                    if part
+                )
+                emit(
+                    "execution_error",
+                    f"第 {attempt_index} 轮：MATLAB 执行未通过，准备把错误反馈给代码生成器修复。",
+                    attempt=attempt_index,
+                    error_summary=previous_error[-1200:],
+                )
 
         emit("failed", "MATLAB Agent 达到最大重试次数，仍未得到完整仿真产物。")
         payload = {
@@ -526,6 +542,32 @@ class MatlabExperimentService:
     def _write_json(path: Path, payload: Any) -> None:
         path.write_text(json.dumps(payload, ensure_ascii=False, indent=2, default=str), encoding="utf-8")
 
+    # Maximum retries for MATLAB startup failures (fast crashes before script runs)
+    _STARTUP_RETRY_LIMIT = 2
+    # If MATLAB exits this fast, it likely never reached the user script
+    _STARTUP_CRASH_THRESHOLD_MS = 5000
+    # Seconds to wait between startup retries
+    _STARTUP_RETRY_DELAY_S = 3.0
+    # Error patterns that indicate a MATLAB startup/runtime crash (not script bug)
+    _STARTUP_CRASH_PATTERNS = [
+        "Fatal Startup Error",
+        "File system inconsistency",
+        "failed to load settings",
+        "System Error",
+    ]
+
+    @classmethod
+    def _is_startup_crash(cls, execution: dict[str, Any]) -> bool:
+        """Return True if the execution looks like a MATLAB runtime crash,
+        not a user-script error."""
+        elapsed = execution.get("elapsed_ms") or 0
+        if elapsed >= cls._STARTUP_CRASH_THRESHOLD_MS:
+            return False
+        if execution.get("returncode") in (None, 0):
+            return False
+        stderr = str(execution.get("stderr") or "")
+        return any(pattern.lower() in stderr.lower() for pattern in cls._STARTUP_CRASH_PATTERNS)
+
     def _run_matlab_script(
         self,
         *,
@@ -540,77 +582,107 @@ class MatlabExperimentService:
             "-batch",
             f"run('{self._matlab_path(script_path)}')",
         ]
-        started = time.monotonic()
-        if cancel_event is not None and self.runner is subprocess.run:
-            process = subprocess.Popen(
-                command,
-                cwd=str(run_dir),
-                text=True,
-                stdout=subprocess.PIPE,
-                stderr=subprocess.PIPE,
-            )
-            try:
-                while process.poll() is None:
-                    if cancel_event.is_set():
-                        process.kill()
-                        stdout, stderr = process.communicate(timeout=5)
-                        return {
-                            "status": "cancelled",
-                            "message": "MATLAB execution cancelled by user.",
-                            "returncode": process.returncode,
-                            "stdout": stdout or "",
-                            "stderr": stderr or "",
-                            "elapsed_ms": int((time.monotonic() - started) * 1000),
-                        }
-                    if time.monotonic() - started > timeout_seconds:
-                        process.kill()
-                        stdout, stderr = process.communicate(timeout=5)
-                        return {
-                            "status": "error",
-                            "message": f"MATLAB execution timed out after {timeout_seconds} seconds.",
-                            "returncode": process.returncode,
-                            "stdout": stdout or "",
-                            "stderr": stderr or "",
-                            "elapsed_ms": int((time.monotonic() - started) * 1000),
-                        }
-                    time.sleep(0.5)
-                stdout, stderr = process.communicate(timeout=5)
-            except Exception:
-                process.kill()
-                raise
-            return {
-                "status": "success" if process.returncode == 0 else "error",
-                "message": "" if process.returncode == 0 else "MATLAB execution failed.",
-                "returncode": process.returncode,
-                "stdout": stdout or "",
-                "stderr": stderr or "",
-                "elapsed_ms": int((time.monotonic() - started) * 1000),
-            }
-        try:
-            completed = self.runner(
-                command,
-                cwd=str(run_dir),
-                text=True,
-                capture_output=True,
-                timeout=timeout_seconds,
-            )
-        except subprocess.TimeoutExpired as exc:
-            return {
-                "status": "error",
-                "message": f"MATLAB execution timed out after {timeout_seconds} seconds.",
-                "returncode": None,
-                "stdout": exc.stdout or "",
-                "stderr": exc.stderr or "",
-                "elapsed_ms": int((time.monotonic() - started) * 1000),
-            }
-        return {
-            "status": "success" if completed.returncode == 0 else "error",
-            "message": "" if completed.returncode == 0 else "MATLAB execution failed.",
-            "returncode": completed.returncode,
-            "stdout": completed.stdout,
-            "stderr": completed.stderr,
-            "elapsed_ms": int((time.monotonic() - started) * 1000),
-        }
+
+        for retry in range(self._STARTUP_RETRY_LIMIT + 1):
+            started = time.monotonic()
+            if cancel_event is not None and cancel_event.is_set():
+                return {
+                    "status": "cancelled",
+                    "message": "MATLAB execution cancelled by user.",
+                    "returncode": None,
+                    "stdout": "",
+                    "stderr": "",
+                    "elapsed_ms": 0,
+                }
+            if cancel_event is not None and self.runner is subprocess.run:
+                process = subprocess.Popen(
+                    command,
+                    cwd=str(run_dir),
+                    text=True,
+                    stdout=subprocess.PIPE,
+                    stderr=subprocess.PIPE,
+                )
+                try:
+                    while process.poll() is None:
+                        if cancel_event.is_set():
+                            process.kill()
+                            stdout, stderr = process.communicate(timeout=5)
+                            return {
+                                "status": "cancelled",
+                                "message": "MATLAB execution cancelled by user.",
+                                "returncode": process.returncode,
+                                "stdout": stdout or "",
+                                "stderr": stderr or "",
+                                "elapsed_ms": int((time.monotonic() - started) * 1000),
+                            }
+                        if time.monotonic() - started > timeout_seconds:
+                            process.kill()
+                            stdout, stderr = process.communicate(timeout=5)
+                            return {
+                                "status": "error",
+                                "message": f"MATLAB execution timed out after {timeout_seconds} seconds.",
+                                "returncode": process.returncode,
+                                "stdout": stdout or "",
+                                "stderr": stderr or "",
+                                "elapsed_ms": int((time.monotonic() - started) * 1000),
+                            }
+                        time.sleep(0.5)
+                    stdout, stderr = process.communicate(timeout=5)
+                except Exception:
+                    process.kill()
+                    raise
+                elapsed_ms = int((time.monotonic() - started) * 1000)
+                result = {
+                    "status": "success" if process.returncode == 0 else "error",
+                    "message": "" if process.returncode == 0 else "MATLAB execution failed.",
+                    "returncode": process.returncode,
+                    "stdout": stdout or "",
+                    "stderr": stderr or "",
+                    "elapsed_ms": elapsed_ms,
+                }
+            else:
+                try:
+                    completed = self.runner(
+                        command,
+                        cwd=str(run_dir),
+                        text=True,
+                        capture_output=True,
+                        timeout=timeout_seconds,
+                    )
+                except subprocess.TimeoutExpired as exc:
+                    elapsed_ms = int((time.monotonic() - started) * 1000)
+                    result = {
+                        "status": "error",
+                        "message": f"MATLAB execution timed out after {timeout_seconds} seconds.",
+                        "returncode": None,
+                        "stdout": exc.stdout or "",
+                        "stderr": exc.stderr or "",
+                        "elapsed_ms": elapsed_ms,
+                    }
+                else:
+                    elapsed_ms = int((time.monotonic() - started) * 1000)
+                    result = {
+                        "status": "success" if completed.returncode == 0 else "error",
+                        "message": "" if completed.returncode == 0 else "MATLAB execution failed.",
+                        "returncode": completed.returncode,
+                        "stdout": completed.stdout,
+                        "stderr": completed.stderr,
+                        "elapsed_ms": elapsed_ms,
+                    }
+
+            # If MATLAB ran long enough to reach the user script, do not retry —
+            # the error (if any) belongs to the generated code, not the runtime.
+            if result["status"] == "success":
+                return result
+            if elapsed_ms >= self._STARTUP_CRASH_THRESHOLD_MS:
+                return result
+
+            # Fast crash: retry after a short delay to let transient file‑system
+            # contention (preference dir locks, AV scanning) resolve.
+            if retry < self._STARTUP_RETRY_LIMIT:
+                time.sleep(self._STARTUP_RETRY_DELAY_S)
+
+        return result
 
     def _generate_agent_matlab_code(
         self,
