@@ -11968,6 +11968,340 @@ body.ui-reduce-motion-pref *::after {
     box-shadow: none;
 }
 
+.library-upload-btn--danger {
+    background: var(--accent-rust);
+    color: #ffffff;
+}
+
+.library-upload-btn--danger:hover {
+    background: color-mix(in oklab, var(--accent-rust) 86%, #000000);
+}
+
+/* MATLAB Experiment Workbench */
+.matlab-experiment-panel {
+    width: min(86rem, calc(100vw - 1.25rem));
+    height: min(54rem, calc(100vh - 1.25rem));
+    max-height: calc(100vh - 1.25rem);
+    overflow: hidden;
+}
+
+.matlab-experiment-layout {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    min-height: 0;
+}
+
+.matlab-experiment-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 1.25rem 1.35rem;
+    border-bottom: 1px solid var(--line-soft);
+}
+
+.matlab-experiment-header h2 {
+    margin-top: 0.25rem;
+    font-size: 1.45rem;
+    line-height: 1.2;
+}
+
+.matlab-experiment-header p {
+    margin-top: 0.35rem;
+    color: var(--ink);
+    font-size: 0.92rem;
+    line-height: 1.5;
+}
+
+.matlab-experiment-body {
+    display: grid;
+    grid-template-columns: minmax(17rem, 23rem) minmax(0, 1fr);
+    gap: 1rem;
+    padding: 1.2rem;
+    min-height: 0;
+    flex: 1;
+    overflow: hidden;
+}
+
+.matlab-experiment-form,
+.matlab-experiment-results {
+    border: 1px solid var(--line-soft);
+    background: var(--paper);
+    border-radius: 0.5rem;
+    padding: 1rem;
+}
+
+.matlab-experiment-form {
+    display: flex;
+    flex-direction: column;
+    gap: 0.85rem;
+    min-height: 0;
+    max-height: none;
+    overflow: auto;
+}
+
+.matlab-experiment-form label {
+    display: grid;
+    gap: 0.35rem;
+    color: var(--ink);
+    font-size: 0.85rem;
+}
+
+.matlab-experiment-form input {
+    min-height: 2.3rem;
+    border: 1px solid var(--line);
+    border-radius: 0.35rem;
+    padding: 0.35rem 0.5rem;
+    color: var(--ink-strong);
+    background: var(--bg-elev);
+}
+
+.matlab-experiment-form textarea {
+    min-height: 7rem;
+    resize: vertical;
+    border: 1px solid var(--line);
+    border-radius: 0.35rem;
+    padding: 0.55rem 0.6rem;
+    color: var(--ink-strong);
+    background: var(--bg-elev);
+    line-height: 1.5;
+}
+
+.matlab-experiment-mode-note {
+    padding: 0.6rem 0.7rem;
+    border-left: 3px solid var(--accent-moss);
+    background: var(--paper-muted);
+    color: var(--ink);
+    font-size: 0.82rem;
+    line-height: 1.45;
+}
+
+.matlab-experiment-status {
+    padding: 0.65rem 0.75rem;
+    border: 1px solid var(--line-soft);
+    border-radius: 0.45rem;
+    background: var(--paper-muted);
+    color: var(--ink);
+    font-size: 0.84rem;
+    line-height: 1.45;
+    word-break: break-word;
+}
+
+.matlab-experiment-status--success {
+    border-color: var(--state-success-border);
+    background: var(--state-success-bg);
+}
+
+.matlab-experiment-status--warning {
+    border-color: var(--state-warning-border);
+    background: var(--state-warning-bg);
+}
+
+.matlab-experiment-status--danger {
+    border-color: var(--state-danger-border);
+    background: var(--state-danger-bg);
+}
+
+.matlab-experiment-actions,
+.matlab-experiment-links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+.matlab-experiment-actions--primary {
+    position: sticky;
+    top: 0;
+    z-index: 1;
+    padding: 0.35rem 0 0.55rem;
+    background: var(--paper);
+}
+
+.matlab-experiment-actions--primary .library-upload-btn {
+    flex: 1 1 7rem;
+    justify-content: center;
+}
+
+.matlab-experiment-results {
+    min-height: 0;
+    overflow: auto;
+}
+
+.matlab-experiment-empty {
+    display: grid;
+    min-height: 18rem;
+    place-items: center;
+    color: var(--ink-muted);
+    text-align: center;
+}
+
+.matlab-experiment-result-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-bottom: 1rem;
+}
+
+.matlab-experiment-links a {
+    color: var(--accent-moss-strong);
+    font-size: 0.86rem;
+    text-decoration: none;
+}
+
+.matlab-experiment-figure {
+    margin: 0 0 1rem;
+    border: 1px solid var(--line-soft);
+    border-radius: 0.5rem;
+    overflow: hidden;
+    background: white;
+}
+
+.matlab-experiment-figure img {
+    display: block;
+    width: 100%;
+    height: auto;
+}
+
+.matlab-experiment-metrics {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(8rem, 1fr));
+    gap: 0.6rem;
+}
+
+.matlab-experiment-metric {
+    display: grid;
+    gap: 0.2rem;
+    padding: 0.7rem;
+    border: 1px solid var(--line-soft);
+    border-radius: 0.45rem;
+    background: var(--paper-muted);
+}
+
+.matlab-experiment-metric span {
+    color: var(--ink-muted);
+    font-size: 0.78rem;
+}
+
+.matlab-experiment-metric strong {
+    color: var(--ink-strong);
+    font-size: 1rem;
+}
+
+.matlab-experiment-log {
+    margin-top: 1rem;
+    max-height: 12rem;
+    overflow: auto;
+    border: 1px solid var(--line-soft);
+    border-radius: 0.45rem;
+    padding: 0.75rem;
+    background: color-mix(in oklab, var(--ink-strong) 4%, var(--paper));
+    color: var(--ink);
+    font-size: 0.78rem;
+    white-space: pre-wrap;
+}
+
+.matlab-experiment-analysis {
+    margin-top: 1rem;
+    padding: 0.9rem;
+    border: 1px solid var(--state-info-border);
+    border-radius: 0.5rem;
+    background: var(--state-info-bg);
+    color: var(--ink);
+    line-height: 1.65;
+    white-space: pre-wrap;
+}
+
+.matlab-experiment-attempts,
+.matlab-experiment-trace {
+    display: grid;
+    gap: 0.45rem;
+    margin-top: 1rem;
+}
+
+.matlab-experiment-attempt {
+    padding: 0.55rem 0.65rem;
+    border: 1px solid var(--line-soft);
+    border-radius: 0.45rem;
+    background: var(--paper-muted);
+    color: var(--ink);
+    font-size: 0.82rem;
+}
+
+.matlab-experiment-attempt summary {
+    cursor: pointer;
+    color: var(--ink-strong);
+}
+
+.matlab-experiment-code {
+    margin-top: 0.65rem;
+    max-height: 24rem;
+    overflow: auto;
+    border: 1px solid var(--line-soft);
+    border-radius: 0.45rem;
+    padding: 0.75rem;
+    background: #fbfaf8;
+    color: var(--ink-strong);
+    font-size: 0.78rem;
+    line-height: 1.5;
+    white-space: pre;
+}
+
+.matlab-experiment-trace-item {
+    display: grid;
+    grid-template-columns: 6.2rem minmax(0, 1fr);
+    gap: 0.6rem;
+    align-items: start;
+    padding: 0.6rem 0.7rem;
+    border: 1px solid var(--line-soft);
+    border-radius: 0.45rem;
+    background: var(--paper-muted);
+}
+
+.matlab-experiment-trace-phase {
+    color: var(--accent-moss-strong);
+    font-weight: 650;
+    font-size: 0.8rem;
+}
+
+.matlab-experiment-trace-copy {
+    color: var(--ink);
+    line-height: 1.5;
+}
+
+.matlab-experiment-trace-error {
+    grid-column: 1 / -1;
+    margin-top: 0.2rem;
+    max-height: 9rem;
+    overflow: auto;
+    border: 1px solid var(--state-danger-border);
+    border-radius: 0.4rem;
+    padding: 0.55rem;
+    background: var(--state-danger-bg);
+    white-space: pre-wrap;
+    font-size: 0.76rem;
+}
+
+@media (max-width: 760px) {
+    .matlab-experiment-panel {
+        width: calc(100vw - 0.5rem);
+        height: calc(100vh - 0.5rem);
+        max-height: calc(100vh - 0.5rem);
+    }
+
+    .matlab-experiment-body {
+        grid-template-columns: 1fr;
+        overflow: auto;
+    }
+
+    .matlab-experiment-form,
+    .matlab-experiment-results {
+        max-height: none;
+        overflow: visible;
+    }
+}
+
 /* Search row */
 .library-search-row {
     display: flex;

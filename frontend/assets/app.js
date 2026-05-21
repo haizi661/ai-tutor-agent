@@ -815,6 +815,9 @@
             if (e.key === 'Escape' && document.getElementById('library-overlay')?.classList.contains('open')) {
                 app.closeLibraryPanel();
             }
+            if (e.key === 'Escape' && document.getElementById('matlab-experiment-overlay')?.classList.contains('open')) {
+                app.closeMatlabExperimentPanel?.();
+            }
         });
 
         document.addEventListener('visibilitychange', () => {
@@ -956,6 +959,12 @@
     window.openChatSearch = () => app.openChatSearch();
     window.closeChatSearch = event => app.closeChatSearch(event);
     window.onChatSearchInput = value => app.onChatSearchInput(value);
+    window.openMatlabExperimentPanel = () => app.openMatlabExperimentPanel?.();
+    window.closeMatlabExperimentPanel = event => app.closeMatlabExperimentPanel?.(event);
+    window.refreshMatlabExperimentStatus = () => app.refreshMatlabExperimentStatus?.();
+    window.runMatlabExperiment = () => app.runMatlabExperiment?.();
+    window.runMatlabPresetExperiment = () => app.runMatlabPresetExperiment?.();
+    window.fillMatlabExamplePrompt = () => app.fillMatlabExamplePrompt?.();
 
     window.onload = async () => {
         bindDomEvents();
