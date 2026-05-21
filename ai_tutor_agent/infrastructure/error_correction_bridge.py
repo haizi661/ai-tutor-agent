@@ -221,21 +221,56 @@ class ErrorCorrectionService:
     def list_question_bank(self) -> list[dict[str, Any]]:
         return self._serialize_questions_for_frontend(self.read_question_bank())
 
+    def _legacy_backend_candidates(self) -> list[Path]:
+        return [
+            resolve_project_path("backend"),
+            resolve_project_path("error_correction/backend"),
+        ]
+
     def _legacy_backend_root(self) -> Path:
-        return resolve_project_path("error_correction/backend")
+        for candidate in self._legacy_backend_candidates():
+            if (
+                candidate.exists()
+                and (candidate / "core").is_dir()
+                and (candidate / "src").is_dir()
+            ):
+                return candidate
+        return self._legacy_backend_candidates()[-1]
+
+    def _legacy_backend_available(self) -> bool:
+        return any(
+            candidate.exists()
+            and (candidate / "core").is_dir()
+            and (candidate / "src").is_dir()
+            for candidate in self._legacy_backend_candidates()
+        )
+
+    def _missing_legacy_backend_message(self) -> str:
+        searched = "、".join(str(path) for path in self._legacy_backend_candidates())
+        return (
+            "题库加工依赖旧版 backend 目录，但当前仓库缺少该依赖。"
+            f" 已检查：{searched} 。请补齐其中任意一个后再使用“开始执行”。"
+        )
 
     def _load_legacy(self) -> _LegacyModules:
         if self._legacy_modules is not None:
             return self._legacy_modules
 
         backend_root = self._legacy_backend_root()
+        if not self._legacy_backend_available():
+            raise RuntimeError(self._missing_legacy_backend_message())
         backend_root_str = str(backend_root)
         if backend_root_str not in sys.path:
             sys.path.insert(0, backend_root_str)
 
-        legacy_settings = importlib.import_module("core.config").settings
-        legacy_utils = importlib.import_module("src.utils")
-        legacy_workflow = importlib.import_module("src.workflow")
+        try:
+            legacy_settings = importlib.import_module("core.config").settings
+            legacy_utils = importlib.import_module("src.utils")
+            legacy_workflow = importlib.import_module("src.workflow")
+        except ModuleNotFoundError as exc:
+            if exc.name in {"core", "src"}:
+                raise RuntimeError(self._missing_legacy_backend_message()) from exc
+            raise
 
         self._legacy_modules = _LegacyModules(
             settings=legacy_settings,
@@ -387,6 +422,7 @@ class ErrorCorrectionService:
                 "llm_model_name": settings.model_name,
                 "paddleocr_api_url": settings.paddleocr_api_url or "",
                 "paddleocr_model": settings.paddleocr_model or "PaddleOCR-VL-1.5",
+                "legacy_backend_available": self._legacy_backend_available(),
             },
         }
 

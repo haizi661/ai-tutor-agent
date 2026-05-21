@@ -90,3 +90,9 @@ ppt/
 *.docx
 *.doc
 ~$*
+
+# Legacy error-correction runtime artifacts
+backend/runtime_data/
+backend/runtime_data.zip
+backend/workflow.log
+backend/__pycache__/
