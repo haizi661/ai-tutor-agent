@@ -14372,3 +14372,379 @@ body.ui-reduce-motion-pref *::after {
         max-height: 90vh;
     }
 }
+.course-choice-card,
+.ai-candidate-mini-card,
+.ai-path-plan-card {
+    width: min(calc(100% - 2rem), 48rem);
+    margin: 1.2rem auto;
+    padding: 1.05rem 1.15rem;
+    border-radius: 1.1rem;
+    border: 1px solid color-mix(in oklab, var(--accent-slate) 14%, var(--line));
+    background: color-mix(in oklab, var(--paper) 95%, transparent);
+}
+
+.course-choice-kicker {
+    font-size: 0.68rem;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--ink-muted);
+    margin-bottom: 0.35rem;
+}
+
+.course-choice-card h2 {
+    font-size: 1.35rem;
+    margin-bottom: 0.4rem;
+}
+
+.course-choice-card p {
+    color: var(--ink);
+    line-height: 1.7;
+}
+
+.course-choice-actions {
+    margin-top: 1rem;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.8rem;
+}
+
+.course-choice-actions button {
+    min-height: 6.2rem;
+    display: grid;
+    align-content: center;
+    gap: 0.35rem;
+    text-align: left;
+    padding: 1rem;
+    border-radius: 1rem;
+    border: 1px solid color-mix(in oklab, var(--accent-slate) 14%, var(--line));
+    background: color-mix(in oklab, var(--paper) 96%, transparent);
+    color: var(--ink-strong);
+}
+
+.course-choice-actions button:hover {
+    transform: translateY(-1px);
+    background: color-mix(in oklab, var(--accent-slate) 7%, var(--paper));
+}
+
+.course-choice-actions strong {
+    font-size: 1.05rem;
+}
+
+.course-choice-actions span {
+    font-size: 0.84rem;
+    color: var(--ink-muted);
+    line-height: 1.55;
+}
+
+.ai-path-option-row {
+    width: min(calc(100% - 2rem), 48rem);
+    margin: -0.5rem auto 1rem;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.45rem;
+}
+
+.ai-path-option-row button {
+    padding: 0.42rem 0.72rem;
+    border-radius: 999px;
+    border: 1px solid color-mix(in oklab, var(--accent-slate) 18%, var(--line));
+    background: color-mix(in oklab, var(--paper) 92%, transparent);
+    color: var(--ink);
+    font-size: 0.82rem;
+}
+
+.ai-path-option-row button:hover {
+    background: color-mix(in oklab, var(--accent-slate) 10%, var(--paper));
+}
+
+.ai-card-title {
+    font-size: 0.95rem;
+    font-weight: 700;
+    margin-bottom: 0.65rem;
+}
+
+.ai-mini-list {
+    display: grid;
+    gap: 0.5rem;
+}
+
+.ai-mini-item {
+    padding: 0.62rem 0.7rem;
+    border-radius: 0.8rem;
+    border: 1px solid var(--line-soft);
+    background: color-mix(in oklab, var(--paper) 94%, transparent);
+}
+
+.ai-mini-item strong {
+    display: block;
+    font-size: 0.9rem;
+}
+
+.ai-mini-item span {
+    display: block;
+    margin-top: 0.18rem;
+    font-size: 0.72rem;
+    color: var(--ink-muted);
+}
+
+.ai-path-plan-summary {
+    color: var(--ink);
+    line-height: 1.7;
+    margin-bottom: 0.8rem;
+}
+
+.ai-path-roadmap-chat {
+    display: grid;
+    gap: 0.62rem;
+}
+
+.ai-path-step {
+    width: 100%;
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 0.7rem;
+    padding: 0.78rem 0.85rem;
+    border-radius: 0.95rem;
+    border: 1px solid color-mix(in oklab, var(--accent-slate) 12%, var(--line));
+    background: color-mix(in oklab, var(--paper) 96%, transparent);
+    text-align: left;
+}
+
+.ai-path-step:hover {
+    transform: translateY(-1px);
+    background: color-mix(in oklab, var(--accent-slate) 6%, var(--paper));
+}
+
+.ai-path-step.is-current {
+    border-color: color-mix(in oklab, var(--accent-slate) 34%, var(--line));
+    background: color-mix(in oklab, var(--accent-slate) 10%, var(--paper));
+}
+
+.ai-path-step.is-goal {
+    border-color: color-mix(in oklab, var(--accent-moss) 34%, var(--line));
+    background: color-mix(in oklab, var(--accent-moss) 10%, var(--paper));
+}
+
+.ai-path-step-index {
+    width: 2rem;
+    height: 2rem;
+    display: grid;
+    place-items: center;
+    border-radius: 999px;
+    background: color-mix(in oklab, var(--accent-slate) 12%, var(--paper));
+    color: color-mix(in oklab, var(--accent-slate) 70%, var(--ink-strong));
+    font-weight: 700;
+}
+
+.ai-path-step-main {
+    min-width: 0;
+    display: grid;
+    gap: 0.16rem;
+}
+
+.ai-path-step-main strong {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.ai-path-step-main small,
+.ai-path-step-status {
+    color: var(--ink-muted);
+    font-size: 0.72rem;
+}
+
+.ai-path-step-status {
+    border: 1px solid var(--line-soft);
+    border-radius: 999px;
+    padding: 0.16rem 0.48rem;
+}
+
+.ai-path-node-detail {
+    margin-top: 0.9rem;
+    padding-top: 0.8rem;
+    border-top: 1px solid var(--line-soft);
+    font-size: 0.88rem;
+    line-height: 1.75;
+}
+
+.ai-detail-title {
+    font-weight: 700;
+    font-size: 1rem;
+    margin-bottom: 0.3rem;
+}
+
+.ai-detail-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.35rem;
+    margin-bottom: 0.6rem;
+}
+
+.ai-detail-meta span {
+    padding: 0.14rem 0.45rem;
+    border: 1px solid var(--line-soft);
+    border-radius: 999px;
+    color: var(--ink-muted);
+    font-size: 0.72rem;
+}
+
+.ai-path-node-detail h4 {
+    margin-top: 0.75rem;
+    margin-bottom: 0.28rem;
+}
+
+.ai-path-node-detail ul {
+    padding-left: 1.1rem;
+}
+
+.ai-muted {
+    color: var(--ink-muted);
+}
+
+@media (max-width: 760px) {
+    .course-choice-actions {
+        grid-template-columns: 1fr;
+    }
+}
+.ai-mini-item--clickable {
+    width: 100%;
+    text-align: left;
+    cursor: pointer;
+}
+
+.ai-mini-item--clickable:hover {
+    background: color-mix(in oklab, var(--accent-slate) 8%, var(--paper));
+    transform: translateY(-1px);
+}
+
+.ai-path-side-panel {
+    position: fixed;
+    right: 1.2rem;
+    top: 5.2rem;
+    bottom: 7.2rem;
+    width: 18.5rem;
+    z-index: 12;
+    display: none;
+    border: 1px solid color-mix(in oklab, var(--accent-slate) 14%, var(--line));
+    border-radius: 1.1rem;
+    background: color-mix(in oklab, var(--paper) 96%, transparent);
+    box-shadow: 0 18px 46px rgba(33, 28, 55, 0.12);
+    overflow: hidden;
+}
+
+.ai-path-chat-mode .ai-path-side-panel {
+    display: block;
+}
+
+.ai-path-side-panel.is-collapsed {
+    width: 7.8rem;
+}
+
+.ai-path-side-panel.is-collapsed .ai-path-side-body {
+    display: none;
+}
+
+.ai-path-side-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 0.6rem;
+    padding: 0.85rem 0.9rem;
+    border-bottom: 1px solid var(--line-soft);
+}
+
+.ai-path-side-kicker {
+    font-size: 0.64rem;
+    letter-spacing: 0.16em;
+    color: var(--ink-muted);
+}
+
+.ai-path-side-head strong {
+    font-size: 0.95rem;
+}
+
+.ai-path-side-head button {
+    padding: 0.24rem 0.55rem;
+    border-radius: 999px;
+    border: 1px solid var(--line-soft);
+    background: color-mix(in oklab, var(--paper) 92%, transparent);
+    color: var(--ink-muted);
+    font-size: 0.72rem;
+}
+
+.ai-path-side-body {
+    height: calc(100% - 3.6rem);
+    overflow-y: auto;
+    padding: 0.75rem;
+}
+
+.ai-path-side-list {
+    display: grid;
+    gap: 0.5rem;
+}
+
+.ai-path-side-node {
+    width: 100%;
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    gap: 0.55rem;
+    align-items: center;
+    padding: 0.62rem;
+    border-radius: 0.8rem;
+    border: 1px solid var(--line-soft);
+    background: color-mix(in oklab, var(--paper) 94%, transparent);
+    text-align: left;
+}
+
+.ai-path-side-node:hover {
+    background: color-mix(in oklab, var(--accent-slate) 7%, var(--paper));
+}
+
+.ai-path-side-node > span {
+    width: 1.65rem;
+    height: 1.65rem;
+    display: grid;
+    place-items: center;
+    border-radius: 999px;
+    background: color-mix(in oklab, var(--accent-slate) 10%, var(--paper));
+    color: color-mix(in oklab, var(--accent-slate) 72%, var(--ink-strong));
+    font-weight: 700;
+    font-size: 0.76rem;
+}
+
+.ai-path-side-node strong {
+    display: block;
+    font-size: 0.82rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.ai-path-side-node small {
+    display: block;
+    margin-top: 0.12rem;
+    color: var(--ink-muted);
+    font-size: 0.68rem;
+}
+
+.ai-path-side-node.is-current {
+    border-color: color-mix(in oklab, var(--accent-slate) 36%, var(--line));
+    background: color-mix(in oklab, var(--accent-slate) 10%, var(--paper));
+}
+
+.ai-path-side-node.is-goal {
+    border-color: color-mix(in oklab, var(--accent-moss) 32%, var(--line));
+    background: color-mix(in oklab, var(--accent-moss) 9%, var(--paper));
+}
+.ai-path-side-node.is-mastered {
+    border-color: color-mix(in oklab, var(--accent-moss) 36%, var(--line));
+    background: color-mix(in oklab, var(--accent-moss) 12%, var(--paper));
+    opacity: 0.82;
+}
+
+.ai-path-side-node.is-mastered > span {
+    background: color-mix(in oklab, var(--accent-moss) 20%, var(--paper));
+    color: color-mix(in oklab, var(--accent-moss-strong) 78%, var(--ink-strong));
+}
