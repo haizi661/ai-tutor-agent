@@ -74,8 +74,106 @@
     
         const panel = document.getElementById('ai-path-side-panel');
         if (panel) {
-            panel.style.display = active ? 'block' : 'none';
+            panel.style.display = active ? 'flex' : 'none';
         }
+    }
+
+    let aiPathProgressTimer = null;
+    let aiPathProgressRow = null;
+    let aiPathProgressSteps = [];
+    let aiPathProgressIndex = 0;
+
+    function createAiPathProgressRow(text) {
+        const messages = document.getElementById('messages');
+        if (!messages) return null;
+
+        const row = document.createElement('div');
+        row.className = 'ai-path-progress-row';
+        row.innerHTML = `
+            <span class="ai-path-progress-dot" aria-hidden="true"></span>
+            <span class="ai-path-progress-text">${escapeHtml(text || '')}</span>
+        `;
+
+        messages.appendChild(row);
+        messages.scrollTop = messages.scrollHeight;
+        return row;
+    }
+
+    function updateAiPathProgressText(text) {
+        const el = document.getElementById('ai-path-progress');
+        if (el) {
+            el.textContent = text || '';
+        }
+
+        if (!aiPathProgressRow) return;
+        const label = aiPathProgressRow.querySelector('.ai-path-progress-text');
+        if (label) {
+            label.textContent = text || '';
+        }
+    }
+
+    function startAiPathProgress(steps) {
+        if (aiPathProgressTimer) {
+            clearInterval(aiPathProgressTimer);
+        }
+
+        aiPathProgressSteps = Array.isArray(steps) ? steps.filter(Boolean) : [];
+        aiPathProgressIndex = 0;
+        aiPathProgressRow = createAiPathProgressRow(aiPathProgressSteps[0] || '正在思考');
+        updateAiPathProgressText(aiPathProgressSteps[0] || '正在思考');
+
+        if (aiPathProgressSteps.length <= 1) return;
+
+        aiPathProgressTimer = setInterval(() => {
+            if (aiPathProgressIndex + 1 >= aiPathProgressSteps.length) return;
+            aiPathProgressIndex += 1;
+            updateAiPathProgressText(aiPathProgressSteps[aiPathProgressIndex]);
+        }, 1800);
+    }
+
+    function finishAiPathProgress(text, status = 'done') {
+        if (aiPathProgressTimer) {
+            clearInterval(aiPathProgressTimer);
+            aiPathProgressTimer = null;
+        }
+
+        updateAiPathProgressText(text || '已完成');
+
+        if (!aiPathProgressRow) return;
+        aiPathProgressRow.classList.remove('is-done', 'is-error');
+        aiPathProgressRow.classList.add(status === 'error' ? 'is-error' : 'is-done');
+    }
+
+    async function submitAiPathReplan(goalText) {
+        const text = String(goalText || '').trim();
+        if (!text) return;
+
+        appendUser(text);
+        app.setStatusBanner?.('正在理解新的学习方向', 'processing');
+        startAiPathProgress([
+            '正在解析新目标',
+            '正在搜索知识图谱',
+            '知识图谱搜索完成',
+            '正在组织输出',
+        ]);
+
+        try {
+            const data = await postJson('/api/ai-path/chat', {
+                thread_id: state.currentThreadId || makeThreadId(),
+                message: text,
+                choice: 'restart_keep_progress',
+            });
+
+            renderAiAgentTurn(data);
+            app.setStatusBanner?.('已收到新的学习方向', 'awaiting');
+            finishAiPathProgress('组织输出完成');
+        } catch (error) {
+            appendAgent(`更改学习路径失败：${error.message}`);
+            app.setStatusBanner?.('更改学习路径失败', 'danger');
+            finishAiPathProgress('更改路径失败', 'error');
+        }
+
+        app.applyPrimaryActionState?.();
     }
 
     function renderCourseChoice() {
@@ -133,22 +231,36 @@
         app.updateSidebarState?.();
         app.setChatInputPlaceholder?.('例如：我想学习自动驾驶目标检测 / 机器人强化学习 / 大语言模型RAG');
         app.setStatusBanner?.('AI路径规划模式：请描述你想学习的方向', 'awaiting');
+        updateAiPathProgressText('等待输入学习方向');
 
         try {
+            startAiPathProgress([
+                '正在初始化 AI 路径',
+                '正在准备对话',
+            ]);
             const data = await postJson('/api/ai-path/chat', {
                 thread_id: state.currentThreadId,
                 message: '',
             });
 
             renderAiAgentTurn(data);
+            finishAiPathProgress('对话已就绪');
         } catch (error) {
             appendAgent(`AI路径规划启动失败：${error.message}`);
             app.setStatusBanner?.('AI路径规划启动失败', 'danger');
+            finishAiPathProgress('启动失败', 'error');
         }
     }
 
     async function advanceAiPathNode() {
         app.setStatusBanner?.('正在进入下一个节点', 'processing');
+        startAiPathProgress([
+            '正在更新学习进度',
+            '学习进度更新完成',
+            '正在定位下一个节点',
+            '下一个节点已定位',
+            '正在组织输出',
+        ]);
     
         try {
             const data = await postJson('/api/ai-path/next', {
@@ -170,12 +282,15 @@
     
             if (data.type === 'complete') {
                 app.setStatusBanner?.('AI学习路径已完成', 'success');
+                finishAiPathProgress('路径已完成');
             } else {
                 app.setStatusBanner?.('已进入下一个节点', 'success');
+                finishAiPathProgress('组织输出完成');
             }
         } catch (error) {
             appendAgent(`进入下一个节点失败：${error.message}`);
             app.setStatusBanner?.('进入下一个节点失败', 'danger');
+            finishAiPathProgress('进入下一节点失败', 'error');
         }
     }
 
@@ -315,8 +430,55 @@
             startLearningCurrentNode();
         });
     }
+
+    function renderAiPathReplanCard() {
+        const messages = document.getElementById('messages');
+        if (!messages) return;
+
+        const card = document.createElement('section');
+        card.className = 'ai-path-replan-card';
+        card.innerHTML = `
+            <div class="ai-path-replan-title">更改学习方向</div>
+            <div class="ai-path-replan-copy">填写你想调整到的新方向，我会只更新未学部分的路径。</div>
+            <div class="ai-path-replan-form">
+                <input type="text" class="ai-path-replan-input" placeholder="例如：机器人强化学习 / 大模型RAG" />
+                <button type="button" class="ai-path-replan-submit">确认更改</button>
+            </div>
+            <div class="ai-path-replan-history"></div>
+        `;
+
+        messages.appendChild(card);
+        messages.scrollTop = messages.scrollHeight;
+
+        const input = card.querySelector('.ai-path-replan-input');
+        const submit = card.querySelector('.ai-path-replan-submit');
+        const history = card.querySelector('.ai-path-replan-history');
+
+        const submitValue = () => {
+            const value = String(input?.value || '').trim();
+            if (!value) return;
+            const row = document.createElement('div');
+            row.className = 'ai-path-replan-history-item';
+            row.textContent = `已提交：${value}`;
+            history?.appendChild(row);
+            submitAiPathReplan(value);
+            if (input) input.value = '';
+        };
+
+        submit?.addEventListener('click', submitValue);
+        input?.addEventListener('keydown', (event) => {
+            if (event.key !== 'Enter') return;
+            event.preventDefault();
+            submitValue();
+        });
+    }
     async function startLearningCurrentNode() {
         app.setStatusBanner?.('正在生成当前节点讲解', 'processing');
+        startAiPathProgress([
+            '正在检索当前节点重点知识',
+            '当前节点重点知识检索完成',
+            '正在组织输出',
+        ]);
     
         try {
             const data = await postJson('/api/ai-path/teach', {
@@ -326,9 +488,11 @@
             appendAgent(data.message || '已进入当前节点学习。');
             renderOptions(data.options || []);
             app.setStatusBanner?.('正在学习当前节点', 'success');
+            finishAiPathProgress('组织输出完成');
         } catch (error) {
             appendAgent(`当前节点讲解失败：${error.message}`);
             app.setStatusBanner?.('当前节点讲解失败', 'danger');
+            finishAiPathProgress('讲解失败', 'error');
         }
     }
     function applyPlanToGraph(data) {
@@ -364,20 +528,34 @@
                 <div>
                     <div class="ai-path-side-kicker">AI PATH</div>
                     <strong>路径总览</strong>
+                    <div class="ai-path-progress" id="ai-path-progress">等待输入学习方向</div>
                 </div>
-                <button type="button" id="ai-path-side-close">收起</button>
+                <div class="ai-path-side-actions">
+                    <button type="button" id="ai-path-replan-btn">更改学习路径</button>
+                    <button type="button" id="ai-path-side-close">收起</button>
+                </div>
             </div>
             <div id="ai-path-side-body" class="ai-path-side-body">
                 <div class="ai-muted">生成路径后这里会显示当前 AI 学习主线。</div>
             </div>
         `;
-    
-        document.body.appendChild(panel);
+
+        const container = document.querySelector('.container');
+        if (container) {
+            container.appendChild(panel);
+        } else {
+            document.body.appendChild(panel);
+        }
     
         document.getElementById('ai-path-side-close')?.addEventListener('click', () => {
             panel.classList.toggle('is-collapsed');
             const btn = document.getElementById('ai-path-side-close');
             if (btn) btn.textContent = panel.classList.contains('is-collapsed') ? '展开' : '收起';
+        });
+
+        const replanBtn = document.getElementById('ai-path-replan-btn');
+        replanBtn?.addEventListener('click', () => {
+            renderAiPathReplanCard();
         });
     
         return panel;
@@ -482,6 +660,12 @@
 
         appendUser(message);
         app.setStatusBanner?.('正在理解你的学习目标', 'processing');
+        startAiPathProgress([
+            '正在解析学习目标',
+            '正在搜索知识图谱',
+            '知识图谱搜索完成',
+            '正在组织输出',
+        ]);
 
         try {
             const data = await postJson('/api/ai-path/chat', {
@@ -492,6 +676,12 @@
 
             renderAiAgentTurn(data);
 
+            if (data.type === 'plan') {
+                finishAiPathProgress('组织输出完成');
+            } else {
+                finishAiPathProgress('等待你确认方向');
+            }
+
             app.setStatusBanner?.(
                 data.type === 'plan' ? 'AI学习路径已生成' : '等待你继续补充',
                 data.type === 'plan' ? 'success' : 'awaiting'
@@ -499,6 +689,7 @@
         } catch (error) {
             appendAgent(`AI路径规划失败：${error.message}`);
             app.setStatusBanner?.('AI路径规划失败', 'danger');
+            finishAiPathProgress('路径规划失败', 'error');
         }
 
         app.applyPrimaryActionState?.();

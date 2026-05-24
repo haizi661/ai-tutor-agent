@@ -179,6 +179,53 @@ def _call_deepseek_json(prompt: str) -> Dict[str, Any]:
         return {}
 
 
+def _call_deepseek_json_with_system(system_prompt: str, user_prompt: str) -> Dict[str, Any]:
+    api_key = _load_deepseek_key()
+
+    if not api_key:
+        return {}
+
+    headers = {
+        "Content-Type": "application/json",
+        "Authorization": f"Bearer {api_key}",
+    }
+
+    payload = {
+        "model": DEEPSEEK_MODEL,
+        "messages": [
+            {
+                "role": "system",
+                "content": system_prompt,
+            },
+            {
+                "role": "user",
+                "content": user_prompt,
+            },
+        ],
+        "temperature": 0.35,
+        "stream": False,
+    }
+
+    try:
+        resp = requests.post(
+            DEEPSEEK_API_URL,
+            headers=headers,
+            json=payload,
+            timeout=80,
+        )
+        resp.raise_for_status()
+
+        text = resp.json()["choices"][0]["message"]["content"].strip()
+
+        if text.startswith("```"):
+            text = text.replace("```json", "").replace("```", "").strip()
+
+        return json.loads(text)
+
+    except Exception:
+        return {}
+
+
 class AILearningPathService:
     def __init__(self):
         self.nodes: List[Dict[str, Any]] = []
@@ -320,11 +367,17 @@ class AILearningPathService:
             "mastery_threshold": float(n.get("mastery_threshold") or 0.75),
             "importance_level": n.get("importance_level", ""),
             "assessment_focus": n.get("assessment_focus", ""),
+            "explanation_raw": n.get("explanation_raw", ""),
             "explanation_teacher_style": n.get("explanation_teacher_style", ""),
             "core_concepts": _safe_list(n.get("core_concepts", "")),
             "key_points": _safe_list(n.get("key_points", "")),
             "formulas": _safe_list(n.get("formulas", "")),
             "examples": _safe_list(n.get("examples", "")),
+            "figures_refs": _safe_list(n.get("figures_refs", "")),
+            "definition_candidates": _safe_list(n.get("definition_candidates", "")),
+            "key_point_candidates": _safe_list(n.get("key_point_candidates", "")),
+            "formula_candidates": _safe_list(n.get("formula_candidates", "")),
+            "example_candidates": _safe_list(n.get("example_candidates", "")),
             "prerequisite_nodes": _safe_list(n.get("prerequisite_nodes", "")),
             "next_nodes": _safe_list(n.get("next_nodes", "")),
             "related_nodes": _safe_list(n.get("related_nodes", "")),
@@ -335,6 +388,56 @@ class AILearningPathService:
             "status": status,
             "reason": reason,
         }
+
+    def _build_node_lesson_with_llm(self, node: Dict[str, Any]) -> Dict[str, Any]:
+        payload = {
+            "node_id": node.get("node_id", ""),
+            "name": node.get("name", ""),
+            "summary": node.get("summary", ""),
+            "explanation_raw": node.get("explanation_raw", ""),
+            "key_points": node.get("key_points", []),
+            "formulas": node.get("formulas", []),
+            "examples": node.get("examples", []),
+            "figures_refs": node.get("figures_refs", []),
+            "definition_candidates": node.get("definition_candidates", []),
+            "key_point_candidates": node.get("key_point_candidates", []),
+            "formula_candidates": node.get("formula_candidates", []),
+            "example_candidates": node.get("example_candidates", []),
+            "prerequisite_nodes": node.get("prerequisite_nodes", []),
+            "next_nodes": node.get("next_nodes", []),
+            "related_nodes": node.get("related_nodes", []),
+            "application_nodes": node.get("application_nodes", []),
+            "recommended_next_nodes": node.get("recommended_next_nodes", []),
+        }
+
+        system_prompt = (
+            "你是一位人工智能课程讲解老师。"
+            "请基于给定的知识图谱节点内容进行二次整理、补充和结构化讲解。"
+            "只输出合法 JSON，不要输出 Markdown 代码块，不要解释。"
+        )
+
+        user_prompt = f"""
+请根据下面的节点数据生成讲解内容。
+
+节点数据(JSON)：
+{json.dumps(payload, ensure_ascii=False)}
+
+输出格式：
+{{
+  "lesson_markdown": "",
+  "options": []
+}}
+
+要求：
+1. lesson_markdown 用中文，允许使用 Markdown 标题和列表。
+2. 讲解顺序：核心概念 -> 关键点 -> 公式与直觉 -> 典型例子 -> 易错点/边界 -> 关联与下一步。
+3. 必须覆盖 explanation_raw、key_points、formulas、examples 中的关键信息。
+4. 如果 figures_refs 或候选字段为空，不要编造。
+5. options 给 3 到 4 个下一步按钮，例如：
+   ["我懂了，进入下一个节点", "再讲简单一点", "换一个例子", "重新调整路径"]
+"""
+
+        return _call_deepseek_json_with_system(system_prompt, user_prompt)
 
     def _normalize_query(self, text: str) -> str:
         text = (text or "").strip().lower()
@@ -486,6 +589,7 @@ class AILearningPathService:
         self,
         target_ids: List[str],
         skip_mastered: bool = True,
+        keep_completed: bool = False,
     ) -> Dict[str, Any]:
         valid_targets = [tid for tid in target_ids if tid in self.node_by_id]
 
@@ -501,6 +605,43 @@ class AILearningPathService:
         learned = student.get("learned_nodes", {}) or {}
         mastery_scores = student.get("mastery_scores", {}) or {}
 
+        frozen_path = []
+        frozen_ids = set()
+        current_node = str(student.get("current_node") or "").strip()
+        has_current_frozen = False
+
+        if keep_completed and isinstance(learned, dict):
+            learned_items = []
+            for node_id, record in learned.items():
+                if node_id not in self.node_by_id:
+                    continue
+                finish_time = str(record.get("finish_time") or "")
+                learned_items.append((finish_time, node_id))
+
+            learned_items.sort(key=lambda item: item[0])
+
+            for _, node_id in learned_items:
+                mastery = float(
+                    learned.get(node_id, {}).get("mastery", mastery_scores.get(node_id, 0.0))
+                    or 0.0
+                )
+                frozen_path.append(
+                    self._format_node(node_id, mastery, "mastered", "已完成学习")
+                )
+                frozen_ids.add(node_id)
+
+        if keep_completed and current_node and current_node in self.node_by_id and current_node not in frozen_ids:
+            mastery = float(
+                learned.get(current_node, {}).get("mastery", mastery_scores.get(current_node, 0.0))
+                or mastery_scores.get(current_node, 0.0)
+                or 0.0
+            )
+            frozen_path.append(
+                self._format_node(current_node, mastery, "current", "当前正在学习的节点")
+            )
+            frozen_ids.add(current_node)
+            has_current_frozen = True
+
         prereq_nodes = self._collect_prerequisites(valid_targets)
         ordered = self._topological_order(prereq_nodes, valid_targets)
 
@@ -508,6 +649,8 @@ class AILearningPathService:
         skipped = []
 
         for node_id in ordered:
+            if keep_completed and node_id in frozen_ids:
+                continue
             record = learned.get(node_id, {}) if isinstance(learned, dict) else {}
 
             mastery = float(
@@ -542,8 +685,13 @@ class AILearningPathService:
             path.append(self._format_node(node_id, mastery, status, reason))
 
         if path:
-            path[0]["status"] = "current"
-            student["current_node"] = path[0]["node_id"]
+            if not has_current_frozen:
+                path[0]["status"] = "current"
+                student["current_node"] = path[0]["node_id"]
+        elif has_current_frozen:
+            student["current_node"] = current_node
+        else:
+            student["current_node"] = ""
 
         target_names = [
             self.node_by_id[tid].get("name", tid)
@@ -552,7 +700,8 @@ class AILearningPathService:
 
         student["current_goal"] = "、".join(target_names)
         student["confirmed_target_nodes"] = valid_targets
-        student["current_path"] = [n["node_id"] for n in path]
+        full_path = frozen_path + path
+        student["current_path"] = [n["node_id"] for n in full_path]
 
         student.setdefault("path_versions", []).append(
             {
@@ -567,7 +716,7 @@ class AILearningPathService:
 
         user_knowledge_graph = {}
 
-        for n in path:
+        for n in full_path:
             if n["status"] == "current":
                 graph_status = "in_progress"
             elif n["status"] == "goal":
@@ -584,11 +733,11 @@ class AILearningPathService:
         return {
             "status": "success",
             "target_nodes": [self._format_node(tid) for tid in valid_targets],
-            "path": path,
+            "path": full_path,
             "skipped": skipped,
             "userKnowledgeGraph": user_knowledge_graph,
             "summary": {
-                "total": len(path),
+                "total": len(full_path),
                 "skipped": len(skipped),
                 "target_ids": valid_targets,
                 "target_names": target_names,
@@ -739,7 +888,7 @@ class AILearningPathService:
 
         dialogue = self._get_dialogue(thread_id)
 
-        if choice == "restart" or user_text in {"重新开始", "重新规划"}:
+        if choice in {"restart", "restart_keep_progress"} or user_text in {"重新开始", "重新规划"}:
             dialogue = {
                 "stage": "intent_refining",
                 "intent_history": [],
@@ -749,6 +898,8 @@ class AILearningPathService:
                 "preference": {},
                 "created_at": datetime.now().isoformat(timespec="seconds"),
             }
+            if choice == "restart_keep_progress":
+                dialogue["replan_keep_progress"] = True
 
         stage = dialogue.get("stage", "intent_refining")
 
@@ -793,9 +944,14 @@ class AILearningPathService:
                         ],
                     }
 
-                plan = self.build_plan(selected_nodes, skip_mastered=True)
+                plan = self.build_plan(
+                    selected_nodes,
+                    skip_mastered=True,
+                    keep_completed=bool(dialogue.get("replan_keep_progress")),
+                )
                 dialogue["stage"] = "planned"
                 dialogue["latest_plan"] = plan.get("summary", {})
+                dialogue["replan_keep_progress"] = False
                 self._save_dialogue(thread_id, dialogue)
 
                 return {
@@ -933,25 +1089,29 @@ class AILearningPathService:
 
         node = self._format_node(current_node_id)
 
-        key_points = node.get("key_points", [])[:5]
-        examples = node.get("examples", [])[:3]
+        llm_result = self._build_node_lesson_with_llm(node)
+        content = (llm_result or {}).get("lesson_markdown", "").strip()
 
-        key_points_text = "\n".join([f"- {x}" for x in key_points]) if key_points else "- 暂无"
-        examples_text = "\n".join([f"- {x}" for x in examples]) if examples else "- 暂无"
+        if not content:
+            key_points = node.get("key_points", [])[:5]
+            examples = node.get("examples", [])[:3]
 
-        content = f"""
-### {node["name"]}
+            key_points_text = "\n".join([f"- {x}" for x in key_points]) if key_points else "- 暂无"
+            examples_text = "\n".join([f"- {x}" for x in examples]) if examples else "- 暂无"
 
-{node.get("explanation_teacher_style", "")}
+            content = f"""
+    ### {node["name"]}
 
-#### 这个节点你需要重点掌握：
+    {node.get("explanation_teacher_style", "")}
 
-{key_points_text}
+    #### 这个节点你需要重点掌握：
 
-#### 典型例子：
+    {key_points_text}
 
-{examples_text}
-"""
+    #### 典型例子：
+
+    {examples_text}
+    """
 
         return {
             "status": "success",
@@ -959,10 +1119,12 @@ class AILearningPathService:
             "node": node,
             "message": content,
             "options": [
-                "我懂了，进入下一个节点",
-                "再讲简单一点",
-                "换一个例子",
-                "重新调整路径",
+                *((llm_result or {}).get("options") or [
+                    "我懂了，进入下一个节点",
+                    "再讲简单一点",
+                    "换一个例子",
+                    "重新调整路径",
+                ])
             ],
         }
     
