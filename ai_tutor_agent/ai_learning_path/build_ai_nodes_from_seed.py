@@ -14,6 +14,7 @@ from .config import (
     AI_CONCEPTS_20,
     AI_CONCEPTS_200,
     AI_NODES_CSV,
+    AI_NODE_CHAPTER_MAP,
     DEEPSEEK_API_URL,
     DEEPSEEK_MODEL,
 )
@@ -307,12 +308,48 @@ def _merge_extra(existing: str, updates: Dict[str, Any]) -> str:
     return json.dumps(merged, ensure_ascii=False)
 
 
+def _load_node_chapter_map() -> Dict[str, List[str]]:
+    if not AI_NODE_CHAPTER_MAP.exists():
+        return {}
+    try:
+        payload = json.loads(AI_NODE_CHAPTER_MAP.read_text(encoding="utf-8"))
+    except Exception:
+        return {}
+    if isinstance(payload, dict) and isinstance(payload.get("nodes"), dict):
+        return {
+            str(name): [str(x) for x in (chapter_ids or []) if str(x)]
+            for name, chapter_ids in payload["nodes"].items()
+        }
+    return {}
+
+
+def _filter_docs_by_chapter_ids(
+    docs: List[Dict[str, Any]],
+    chapter_ids: List[str],
+) -> List[Dict[str, Any]]:
+    if not chapter_ids:
+        return []
+    filtered: List[Dict[str, Any]] = []
+    for doc in docs:
+        pdf_name = str(doc.get("pdf_name", ""))
+        cache_dir = str(doc.get("cache_dir", ""))
+        if any(chapter_id in pdf_name or chapter_id in cache_dir for chapter_id in chapter_ids):
+            filtered.append(doc)
+    return filtered
+
+
 def _build_retrieval_payload(
     name: str,
     builder: NodeRetrievalBuilder,
     docs: List[Dict[str, Any]],
+    chapter_ids: List[str] | None = None,
 ) -> Dict[str, Any]:
     if not docs:
+        return {}
+
+    chapter_ids = chapter_ids or []
+    target_docs = _filter_docs_by_chapter_ids(docs, chapter_ids)
+    if not target_docs:
         return {}
 
     node_stub = {
@@ -328,7 +365,7 @@ def _build_retrieval_payload(
     best_scored = []
     best_score = -1
 
-    for doc in docs:
+    for doc in target_docs:
         blocks = builder._split_md_into_blocks(doc["full_md"])
         scored = builder._score_blocks_for_node(node_stub, blocks)
         score = int(scored[0]["score"]) if scored else 0
@@ -409,6 +446,7 @@ def main():
     assets = get_course_assets("artificial_intelligence")
     retrieval_builder = NodeRetrievalBuilder(mineru_cache_root=assets.mineru_cache_root)
     retrieval_docs = retrieval_builder._load_mineru_chapter_docs()
+    node_chapter_map = _load_node_chapter_map()
 
     concepts = read_concepts(input_path)
     existing_nodes = load_existing_nodes(AI_NODES_CSV)
@@ -427,7 +465,13 @@ def main():
 
         print(f"[{idx}/{len(concepts)}] 生成节点: {node_id} {name}")
 
-        retrieval_payload = _build_retrieval_payload(name, retrieval_builder, retrieval_docs)
+        chapter_ids = node_chapter_map.get(name, [])
+        retrieval_payload = _build_retrieval_payload(
+            name,
+            retrieval_builder,
+            retrieval_docs,
+            chapter_ids=chapter_ids,
+        )
         prompt = build_node_prompt(node_id, name, concepts, retrieval_payload)
         raw = call_deepseek(prompt)
         node = normalize_node(raw, node_id, name)
@@ -471,10 +515,11 @@ def main():
                 },
             )
         else:
+            status = "no_chapter_match" if not chapter_ids else "mineru_cache_missing"
             node["extra"] = _merge_extra(
                 node.get("extra", ""),
                 {
-                    "retrieval_status": "mineru_cache_missing",
+                    "retrieval_status": status,
                 },
             )
 

@@ -11,6 +11,7 @@ AI_STUDENT_STATE_DIR = AI_STUDENT_STATE_JSON.parent
 AI_SEED_DIR = PROJECT_ROOT / "data" / "ai_knowledge_seed"
 AI_CONCEPTS_20 = AI_SEED_DIR / "ai_concepts.txt"
 AI_CONCEPTS_200 = AI_SEED_DIR / "ai_concepts200.txt"
+AI_NODE_CHAPTER_MAP = AI_SEED_DIR / "ai_node_chapter_map.json"
 
 AI_NODES_CSV = AI_COURSE_ASSETS.resolve("nodes_csv_path")
 AI_EDGES_CSV = AI_COURSE_ASSETS.resolve("edges_csv_path")
