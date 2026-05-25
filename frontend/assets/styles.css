@@ -14526,6 +14526,12 @@ body.ui-reduce-motion-pref *::after {
     background: color-mix(in oklab, var(--accent-moss) 10%, var(--paper));
 }
 
+.ai-path-step.is-mastered {
+    opacity: 0.72;
+    border-color: color-mix(in oklab, var(--accent-moss) 20%, var(--line));
+    background: color-mix(in oklab, var(--accent-moss) 6%, var(--paper));
+}
+
 .ai-path-step-index {
     width: 2rem;
     height: 2rem;

@@ -116,6 +116,117 @@ def _save_student_state(state: Dict[str, Any]) -> None:
         json.dump(state, f, ensure_ascii=False, indent=2)
 
 
+_COMPLETED_STATUSES = {
+    "completed",
+    "complete",
+    "mastered",
+    "passed",
+    "done",
+}
+
+
+def _score_to_unit(value: Any) -> float:
+    """Normalize 0-1 and 0-100 mastery scores to the AI path 0-1 scale."""
+    try:
+        score = float(value)
+    except (TypeError, ValueError):
+        return 0.0
+    if score < 0:
+        return 0.0
+    if score > 1:
+        score = score / 100.0
+    return max(0.0, min(score, 1.0))
+
+
+def _status_completed(value: Any) -> bool:
+    return str(value or "").strip().lower() in _COMPLETED_STATUSES
+
+
+def _contains_node(container: Any, node_id: str) -> bool:
+    if isinstance(container, dict):
+        return node_id in container
+    if isinstance(container, list):
+        return node_id in {str(item) for item in container}
+    return False
+
+
+def _node_progress_from_student(
+    student: Dict[str, Any],
+    node_id: str,
+    *,
+    threshold: float = 0.75,
+) -> Dict[str, Any]:
+    threshold = _score_to_unit(threshold)
+    learned = student.get("learned_nodes", {}) or {}
+    mastery_scores = student.get("mastery_scores", {}) or {}
+    knowledge_graph = student.get("knowledge_graph", {}) or {}
+    node_records = student.get("node_learning_records", {}) or {}
+
+    mastery_candidates: List[float] = []
+    sources: List[str] = []
+    completed = False
+
+    learned_record = learned.get(node_id, {}) if isinstance(learned, dict) else {}
+    if isinstance(learned_record, dict):
+        if "mastery" in learned_record:
+            mastery_candidates.append(_score_to_unit(learned_record.get("mastery")))
+            sources.append("learned_nodes.mastery")
+        if _status_completed(learned_record.get("status")):
+            completed = True
+            sources.append("learned_nodes.status")
+
+    if isinstance(mastery_scores, dict) and node_id in mastery_scores:
+        mastery_candidates.append(_score_to_unit(mastery_scores.get(node_id)))
+        sources.append("mastery_scores")
+
+    kg_record = knowledge_graph.get(node_id, {}) if isinstance(knowledge_graph, dict) else {}
+    if isinstance(kg_record, dict):
+        if "score" in kg_record:
+            mastery_candidates.append(_score_to_unit(kg_record.get("score")))
+            sources.append("knowledge_graph.score")
+        if "mastery" in kg_record:
+            mastery_candidates.append(_score_to_unit(kg_record.get("mastery")))
+            sources.append("knowledge_graph.mastery")
+        if _status_completed(kg_record.get("status")):
+            completed = True
+            sources.append("knowledge_graph.status")
+
+    learning_record = node_records.get(node_id, {}) if isinstance(node_records, dict) else {}
+    if isinstance(learning_record, dict):
+        for key in ("mastery", "score", "best_score"):
+            if key in learning_record:
+                mastery_candidates.append(_score_to_unit(learning_record.get(key)))
+                sources.append(f"node_learning_records.{key}")
+        if _status_completed(learning_record.get("status")):
+            completed = True
+            sources.append("node_learning_records.status")
+
+    visited = _contains_node(student.get("visited_nodes", []), node_id)
+    weak = (
+        _contains_node(student.get("weak_nodes", {}), node_id)
+        or _contains_node(student.get("wrong_nodes", []), node_id)
+    )
+
+    mastery = max(mastery_candidates) if mastery_candidates else 0.0
+    if completed and mastery <= 0:
+        mastery = max(threshold, 0.85)
+
+    mastered = completed or (mastery >= threshold and not weak)
+    if visited:
+        sources.append("visited_nodes")
+    if weak:
+        sources.append("weak_or_wrong_nodes")
+
+    return {
+        "mastery": mastery,
+        "completed": completed,
+        "visited": visited,
+        "weak": weak,
+        "mastered": mastered,
+        "sources": sources,
+    }
+
+
 def _load_deepseek_key() -> str:
     api_key = os.getenv("DEEPSEEK_API_KEY")
 
@@ -615,27 +726,41 @@ class AILearningPathService:
             for node_id, record in learned.items():
                 if node_id not in self.node_by_id:
                     continue
+                progress = _node_progress_from_student(
+                    student,
+                    node_id,
+                    threshold=float(
+                        self.node_by_id.get(node_id, {}).get("mastery_threshold") or 0.75
+                    ),
+                )
+                if not progress["mastered"]:
+                    continue
                 finish_time = str(record.get("finish_time") or "")
                 learned_items.append((finish_time, node_id))
 
             learned_items.sort(key=lambda item: item[0])
 
             for _, node_id in learned_items:
-                mastery = float(
-                    learned.get(node_id, {}).get("mastery", mastery_scores.get(node_id, 0.0))
-                    or 0.0
-                )
+                mastery = _node_progress_from_student(
+                    student,
+                    node_id,
+                    threshold=float(
+                        self.node_by_id.get(node_id, {}).get("mastery_threshold") or 0.75
+                    ),
+                )["mastery"]
                 frozen_path.append(
                     self._format_node(node_id, mastery, "mastered", "已完成学习")
                 )
                 frozen_ids.add(node_id)
 
         if keep_completed and current_node and current_node in self.node_by_id and current_node not in frozen_ids:
-            mastery = float(
-                learned.get(current_node, {}).get("mastery", mastery_scores.get(current_node, 0.0))
-                or mastery_scores.get(current_node, 0.0)
-                or 0.0
-            )
+            mastery = _node_progress_from_student(
+                student,
+                current_node,
+                threshold=float(
+                    self.node_by_id.get(current_node, {}).get("mastery_threshold") or 0.75
+                ),
+            )["mastery"]
             frozen_path.append(
                 self._format_node(current_node, mastery, "current", "当前正在学习的节点")
             )
@@ -651,17 +776,15 @@ class AILearningPathService:
         for node_id in ordered:
             if keep_completed and node_id in frozen_ids:
                 continue
-            record = learned.get(node_id, {}) if isinstance(learned, dict) else {}
-
-            mastery = float(
-                record.get("mastery", mastery_scores.get(node_id, 0.0)) or 0.0
-            )
-
             threshold = float(
                 self.node_by_id.get(node_id, {}).get("mastery_threshold") or 0.75
             )
+            if threshold > 1:
+                threshold = threshold / 100.0
+            progress = _node_progress_from_student(student, node_id, threshold=threshold)
+            mastery = progress["mastery"]
 
-            if skip_mastered and mastery >= threshold:
+            if skip_mastered and progress["mastered"]:
                 skipped.append(
                     self._format_node(
                         node_id,
@@ -700,7 +823,7 @@ class AILearningPathService:
 
         student["current_goal"] = "、".join(target_names)
         student["confirmed_target_nodes"] = valid_targets
-        full_path = frozen_path + path
+        full_path = frozen_path + skipped + path
         student["current_path"] = [n["node_id"] for n in full_path]
 
         student.setdefault("path_versions", []).append(
@@ -721,6 +844,8 @@ class AILearningPathService:
                 graph_status = "in_progress"
             elif n["status"] == "goal":
                 graph_status = "goal"
+            elif n["status"] == "mastered":
+                graph_status = "mastered"
             else:
                 graph_status = "upcoming"
 
@@ -1231,8 +1356,31 @@ options 给 3 到 4 个下一步按钮，例如：
         mastery_scores[current] = 0.85
 
         idx = path.index(current)
+        next_idx = idx + 1
+        auto_skipped = []
 
-        if idx + 1 >= len(path):
+        while next_idx < len(path):
+            candidate_node = path[next_idx]
+            if candidate_node not in self.node_by_id:
+                next_idx += 1
+                continue
+            threshold = float(
+                self.node_by_id.get(candidate_node, {}).get("mastery_threshold") or 0.75
+            )
+            progress = _node_progress_from_student(student, candidate_node, threshold=threshold)
+            if not progress["mastered"]:
+                break
+            auto_skipped.append(
+                self._format_node(
+                    candidate_node,
+                    progress["mastery"],
+                    "mastered",
+                    "auto skipped because the node is already mastered",
+                )
+            )
+            next_idx += 1
+
+        if next_idx >= len(path):
             student["current_node"] = ""
             _save_student_state(student)
 
@@ -1248,7 +1396,7 @@ options 给 3 到 4 个下一步按钮，例如：
                 "options": ["重新规划", "调整路径"],
             }
 
-        next_node = path[idx + 1]
+        next_node = path[next_idx]
         student["current_node"] = next_node
         _save_student_state(student)
 
@@ -1256,12 +1404,19 @@ options 给 3 到 4 个下一步按钮，例如：
 
         lesson["path"] = []
         for node_id in path:
-            mastery = float(mastery_scores.get(node_id, 0.0) or 0.0)
+            progress = _node_progress_from_student(
+                student,
+                node_id,
+                threshold=float(
+                    self.node_by_id.get(node_id, {}).get("mastery_threshold") or 0.75
+                ),
+            )
+            mastery = progress["mastery"]
 
             if node_id == next_node:
                 status = "current"
                 reason = "当前正在学习的节点"
-            elif node_id in learned:
+            elif node_id in learned or progress["mastered"]:
                 status = "mastered"
                 reason = "已经完成学习"
             else:
@@ -1273,6 +1428,7 @@ options 给 3 到 4 个下一步按钮，例如：
             )
 
         lesson["current_node"] = next_node
+        lesson["skipped"] = auto_skipped
         return lesson
 
 _service = None

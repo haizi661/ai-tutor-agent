@@ -393,7 +393,7 @@
                 ${path.map((node, index) => `
                     <button
                         type="button"
-                        class="ai-path-step ${node.status === 'current' ? 'is-current' : ''} ${node.status === 'goal' ? 'is-goal' : ''}"
+                        class="ai-path-step ${node.status === 'current' ? 'is-current' : ''} ${node.status === 'goal' ? 'is-goal' : ''} ${node.status === 'mastered' ? 'is-mastered' : ''}"
                         data-node-id="${escapeHtml(node.node_id)}"
                     >
                         <span class="ai-path-step-index">${index + 1}</span>
@@ -402,7 +402,7 @@
                             <small>${escapeHtml(node.node_id)} · ${escapeHtml(node.reason || '')}</small>
                         </span>
                         <span class="ai-path-step-status">
-                            ${node.status === 'current' ? '当前' : node.status === 'goal' ? '目标' : '待学'}
+                            ${node.status === 'current' ? '当前' : node.status === 'goal' ? '目标' : node.status === 'mastered' ? '已学' : '待学'}
                         </span>
                     </button>
                 `).join('')}
