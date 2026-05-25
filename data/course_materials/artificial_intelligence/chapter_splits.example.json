@@ -118,6 +118,101 @@
           "end_page": 322
         }
       ]
+    },
+    {
+      "source": "神经网络与深度学习.pdf",
+      "chapters": [
+        {
+          "chapter_id": "nn_dl_chapter_01",
+          "title": "第 1 章 绪论",
+          "start_page": 17,
+          "end_page": 36
+        },
+        {
+          "chapter_id": "nn_dl_chapter_02",
+          "title": "第 2 章 机器学习概述",
+          "start_page": 37,
+          "end_page": 67
+        },
+        {
+          "chapter_id": "nn_dl_chapter_03",
+          "title": "第 3 章 线性模型",
+          "start_page": 68,
+          "end_page": 92
+        },
+        {
+          "chapter_id": "nn_dl_chapter_04",
+          "title": "第 4 章 前馈神经网络",
+          "start_page": 93,
+          "end_page": 119
+        },
+        {
+          "chapter_id": "nn_dl_chapter_05",
+          "title": "第 5 章 卷积神经网络",
+          "start_page": 120,
+          "end_page": 143
+        },
+        {
+          "chapter_id": "nn_dl_chapter_06",
+          "title": "第 6 章 循环神经网络",
+          "start_page": 144,
+          "end_page": 167
+        },
+        {
+          "chapter_id": "nn_dl_chapter_07",
+          "title": "第 7 章 网络优化与正则化",
+          "start_page": 168,
+          "end_page": 206
+        },
+        {
+          "chapter_id": "nn_dl_chapter_08",
+          "title": "第 8 章 注意力机制与外部记忆",
+          "start_page": 207,
+          "end_page": 227
+        },
+        {
+          "chapter_id": "nn_dl_chapter_09",
+          "title": "第 9 章 无监督学习",
+          "start_page": 228,
+          "end_page": 242
+        },
+        {
+          "chapter_id": "nn_dl_chapter_10",
+          "title": "第 10 章 模型独立的学习方式",
+          "start_page": 243,
+          "end_page": 267
+        },
+        {
+          "chapter_id": "nn_dl_chapter_11",
+          "title": "第 11 章 概率图模型",
+          "start_page": 268,
+          "end_page": 302
+        },
+        {
+          "chapter_id": "nn_dl_chapter_12",
+          "title": "第 12 章 深度信念网络",
+          "start_page": 303,
+          "end_page": 322
+        },
+        {
+          "chapter_id": "nn_dl_chapter_13",
+          "title": "第 13 章 深度生成模型",
+          "start_page": 323,
+          "end_page": 343
+        },
+        {
+          "chapter_id": "nn_dl_chapter_14",
+          "title": "第 14 章 深度强化学习",
+          "start_page": 344,
+          "end_page": 369
+        },
+        {
+          "chapter_id": "nn_dl_chapter_15",
+          "title": "第 15 章 序列生成模型",
+          "start_page": 370,
+          "end_page": 395
+        }
+      ]
     }
   ]
 }
