@@ -24,6 +24,12 @@ venv/
 *.pid
 data/*
 !data/.gitkeep
+!data/course_materials/
+!data/course_materials/**
+data/course_materials/**/*.pdf
+data/course_materials/**/*.PDF
+data/course_materials/**/chapter_splits.json
+data/course_materials/**/splits/
 !data/question_bank/
 !data/question_bank/**
 !data/knowledge/

@@ -167,6 +167,8 @@ def replay_graph_markers(values: dict[str, Any]) -> list[dict[str, Any]]:
 
 def _serialize_state(values: dict[str, Any]) -> dict[str, Any]:
     return {
+        "active_course": values.get("active_course", ""),
+        "ai_path_mode": values.get("ai_path_mode", False),
         "learning_phase": values.get("learning_phase", ""),
         "learning_resume_target": values.get("learning_resume_target", ""),
         "learning_resume_reason": values.get("learning_resume_reason", ""),

@@ -1,0 +1,123 @@
+{
+  "documents": [
+    {
+      "source": "LeeDL_Tutorial_v.1.1.8.pdf",
+      "chapters": [
+        {
+          "chapter_id": "leedl_chapter_01",
+          "title": "第 1 章 机器学习基础",
+          "start_page": 9,
+          "end_page": 28
+        },
+        {
+          "chapter_id": "leedl_chapter_02",
+          "title": "第 2 章 实践方法论",
+          "start_page": 29,
+          "end_page": 38
+        },
+        {
+          "chapter_id": "leedl_chapter_03",
+          "title": "第 3 章 深度学习基础",
+          "start_page": 39,
+          "end_page": 71
+        },
+        {
+          "chapter_id": "leedl_chapter_04",
+          "title": "第 4 章 卷积神经网络",
+          "start_page": 72,
+          "end_page": 89
+        },
+        {
+          "chapter_id": "leedl_chapter_05",
+          "title": "第 5 章 循环神经网络",
+          "start_page": 90,
+          "end_page": 113
+        },
+        {
+          "chapter_id": "leedl_chapter_06",
+          "title": "第 6 章 自注意力机制",
+          "start_page": 114,
+          "end_page": 134
+        },
+        {
+          "chapter_id": "leedl_chapter_07",
+          "title": "第 7 章 Transformer",
+          "start_page": 135,
+          "end_page": 155
+        },
+        {
+          "chapter_id": "leedl_chapter_08",
+          "title": "第 8 章 生成模型",
+          "start_page": 156,
+          "end_page": 181
+        },
+        {
+          "chapter_id": "leedl_chapter_09",
+          "title": "第 9 章 扩散模型",
+          "start_page": 182,
+          "end_page": 185
+        },
+        {
+          "chapter_id": "leedl_chapter_10",
+          "title": "第 10 章 自监督学习",
+          "start_page": 186,
+          "end_page": 210
+        },
+        {
+          "chapter_id": "leedl_chapter_11",
+          "title": "第 11 章 自编码器",
+          "start_page": 211,
+          "end_page": 220
+        },
+        {
+          "chapter_id": "leedl_chapter_12",
+          "title": "第 12 章 对抗攻击",
+          "start_page": 221,
+          "end_page": 235
+        },
+        {
+          "chapter_id": "leedl_chapter_13",
+          "title": "第 13 章 迁移学习",
+          "start_page": 236,
+          "end_page": 244
+        },
+        {
+          "chapter_id": "leedl_chapter_14",
+          "title": "第 14 章 强化学习",
+          "start_page": 245,
+          "end_page": 264
+        },
+        {
+          "chapter_id": "leedl_chapter_15",
+          "title": "第 15 章 元学习",
+          "start_page": 265,
+          "end_page": 274
+        },
+        {
+          "chapter_id": "leedl_chapter_16",
+          "title": "第 16 章 终身学习",
+          "start_page": 275,
+          "end_page": 281
+        },
+        {
+          "chapter_id": "leedl_chapter_17",
+          "title": "第 17 章 网络压缩",
+          "start_page": 282,
+          "end_page": 299
+        },
+        {
+          "chapter_id": "leedl_chapter_18",
+          "title": "第 18 章 可解释性人工智能",
+          "start_page": 300,
+          "end_page": 312
+        },
+        {
+          "chapter_id": "leedl_chapter_19",
+          "title": "第 19 章 ChatGPT",
+          "start_page": 313,
+          "end_page": 322
+        }
+      ]
+    }
+  ]
+}

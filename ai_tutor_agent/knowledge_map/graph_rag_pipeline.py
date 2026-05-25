@@ -1,4 +1,4 @@
-﻿from __future__ import annotations
+from __future__ import annotations
 
 import ast
 from dataclasses import replace
@@ -8,6 +8,7 @@ from typing import Any
 import pandas as pd
 
 from ai_tutor_agent.config import get_settings
+from ai_tutor_agent.course_assets import get_course_assets
 from ai_tutor_agent.infrastructure.llm import build_llms
 from ai_tutor_agent.knowledge_map.builders.graph_answer_generator_v2 import GraphAnswerGeneratorV2
 from ai_tutor_agent.knowledge_map.builders.graph_context_builder import GraphContextBuilder
@@ -29,11 +30,20 @@ class GraphRAGPipeline:
         edges_csv_path: str = "data/knowledge_map_outputs/auto_control_knowledge_map_v2_edges.csv",
         mineru_cache_root: str = "data/mineru_cache",
         annotated_assets_path: str = DEFAULT_MEDIA_EVIDENCE_INDEX_DIR,
+        course_id: str | None = None,
         enable_llm: bool = True,
         enable_visual_llm: bool = False,
         llm_profile: str | None = "qwen",
         config: GraphRAGConfig | None = None,
     ) -> None:
+        course_assets = get_course_assets(course_id) if course_id else None
+        if course_assets is not None:
+            nodes_csv_path = course_assets.nodes_csv_path
+            edges_csv_path = course_assets.edges_csv_path
+            mineru_cache_root = course_assets.mineru_cache_root
+            annotated_assets_path = course_assets.media_evidence_index_dir
+
+        self.course_assets = course_assets
         self.config = config or GraphRAGConfig()
         self.nodes_csv_path = resolve_project_path(nodes_csv_path)
         self.edges_csv_path = resolve_project_path(edges_csv_path)

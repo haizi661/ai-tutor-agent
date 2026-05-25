@@ -14889,3 +14889,29 @@ body.ui-reduce-motion-pref *::after {
     background: color-mix(in oklab, var(--accent-moss) 20%, var(--paper));
     color: color-mix(in oklab, var(--accent-moss-strong) 78%, var(--ink-strong));
 }
+
+body.course-ai-mode .sb-primary-nav,
+body.course-ai-mode #cl-node-chip,
+body.course-ai-mode #open-graph-modal-btn,
+body.course-ai-mode #open-radar-modal-btn,
+body.course-ai-mode .landing-stage {
+    display: none !important;
+}
+
+body.course-ai-mode .sb-recents {
+    margin-top: 0.75rem;
+}
+
+body.course-ai-mode .sb-section-label::after {
+    content: " · AI";
+}
+
+body.course-ai-mode .chat-title-meta {
+    display: none;
+}
+
+body.course-ai-mode .chat-main {
+    background:
+        linear-gradient(180deg, rgba(255, 255, 255, 0.72), rgba(248, 250, 252, 0.68)),
+        var(--page-bg);
+}

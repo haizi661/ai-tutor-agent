@@ -1,9 +1,14 @@
 (() => {
     const app = window.AITutorApp || {};
     const state = app.state || {};
+    const COURSE_MODE_STORAGE_KEY = 'ai_tutor_course_mode';
+    const COURSE_MODE_AUTO = 'auto_control';
+    const COURSE_MODE_AI = 'artificial_intelligence';
 
     const originalStartNewSession = app.startNewSession?.bind(app);
     const originalHandleSend = app.handleSend?.bind(app);
+    const originalRestoreSessionState = app.restoreSessionState?.bind(app);
+    const originalRestoreMessageTimeline = app.restoreMessageTimeline?.bind(app);
 
     function escapeHtml(text) {
         return String(text || '')
@@ -67,11 +72,68 @@
         return app.makeThreadId ? app.makeThreadId() : `ai_path_${Date.now()}`;
     }
 
-    function setAiMode(active) {
-        state.aiPathMode = Boolean(active);
-        document.body.classList.toggle('ai-path-chat-mode', Boolean(active));
-        app.patchState?.({ aiPathMode: Boolean(active) }, 'ai-path-mode');
-    
+    function syncCourseUrl(mode) {
+        if (!window.history?.replaceState) return;
+
+        const url = new URL(window.location.href);
+        if (mode === COURSE_MODE_AI) {
+            url.searchParams.set('mode', 'ai_path');
+            url.hash = '';
+        } else if (mode === COURSE_MODE_AUTO) {
+            url.searchParams.set('mode', 'auto_control');
+            url.hash = '';
+        } else {
+            url.searchParams.delete('mode');
+            if (url.hash === '#ai-path') url.hash = '';
+        }
+
+        window.history.replaceState(window.history.state, '', url);
+    }
+
+    function applyCourseChrome(mode) {
+        const subtitle = document.querySelector('.sb-brand-subtitle');
+        if (subtitle) {
+            if (mode === COURSE_MODE_AI) subtitle.textContent = '人工智能路径规划';
+            else if (mode === COURSE_MODE_AUTO) subtitle.textContent = '控制理论陪练';
+            else subtitle.textContent = '课程选择';
+        }
+
+        const title = document.getElementById('header-thread-title');
+        if (title && mode === COURSE_MODE_AI) {
+            title.textContent = '人工智能学习路径';
+        }
+    }
+
+    function setCourseMode(mode, options = {}) {
+        const nextMode = mode || '';
+        const aiActive = nextMode === COURSE_MODE_AI;
+
+        state.activeCourse = nextMode;
+        state.aiPathMode = aiActive;
+        document.body.classList.toggle('ai-path-chat-mode', aiActive);
+        document.body.classList.toggle('course-auto-control-mode', nextMode === COURSE_MODE_AUTO);
+        document.body.classList.toggle('course-ai-mode', aiActive);
+        applyCourseChrome(nextMode);
+        app.patchState?.({ activeCourse: nextMode, aiPathMode: aiActive }, 'course-mode');
+
+        try {
+            if (nextMode) {
+                localStorage.setItem(COURSE_MODE_STORAGE_KEY, nextMode);
+            } else {
+                localStorage.removeItem(COURSE_MODE_STORAGE_KEY);
+            }
+        } catch (_) {
+            // Storage can be unavailable in private browsing or locked-down webviews.
+        }
+
+        if (options.updateUrl !== false) {
+            syncCourseUrl(nextMode);
+        }
+    }
+
+    function setAiMode(active, options = {}) {
+        setCourseMode(active ? COURSE_MODE_AI : COURSE_MODE_AUTO, options);
+
         const panel = document.getElementById('ai-path-side-panel');
         if (panel) {
             panel.style.display = active ? 'flex' : 'none';
@@ -82,6 +144,31 @@
     let aiPathProgressRow = null;
     let aiPathProgressSteps = [];
     let aiPathProgressIndex = 0;
+
+    function resetAiPathRuntimeUi() {
+        if (aiPathProgressTimer) {
+            clearInterval(aiPathProgressTimer);
+            aiPathProgressTimer = null;
+        }
+
+        if (aiPathProgressRow) {
+            aiPathProgressRow.remove();
+            aiPathProgressRow = null;
+        }
+
+        aiPathProgressSteps = [];
+        aiPathProgressIndex = 0;
+
+        const progress = document.getElementById('ai-path-progress');
+        if (progress) {
+            progress.textContent = '';
+        }
+
+        const panel = document.getElementById('ai-path-side-panel');
+        if (panel) {
+            panel.style.display = 'none';
+        }
+    }
 
     function createAiPathProgressRow(text) {
         const messages = document.getElementById('messages');
@@ -165,6 +252,7 @@
             });
 
             renderAiAgentTurn(data);
+            app.fetchHistory?.();
             app.setStatusBanner?.('已收到新的学习方向', 'awaiting');
             finishAiPathProgress('组织输出完成');
         } catch (error) {
@@ -177,7 +265,8 @@
     }
 
     function renderCourseChoice() {
-        setAiMode(false);
+        resetAiPathRuntimeUi();
+        setCourseMode('', { updateUrl: true });
         clearMessages();
 
         const messages = document.getElementById('messages');
@@ -204,7 +293,8 @@
         messages.appendChild(card);
 
         document.getElementById('course-choice-auto')?.addEventListener('click', () => {
-            setAiMode(false);
+            resetAiPathRuntimeUi();
+            setAiMode(false, { updateUrl: true });
             if (originalStartNewSession) originalStartNewSession();
             app.setStatusBanner?.('已选择自动控制原理', 'success');
         });
@@ -217,7 +307,7 @@
     }
 
     async function startAiPathDialogue() {
-        setAiMode(true);
+        setAiMode(true, { updateUrl: true });
         clearMessages();
         ensureAiPathSidePanel();
 
@@ -245,6 +335,7 @@
 
             renderAiAgentTurn(data);
             finishAiPathProgress('对话已就绪');
+            app.fetchHistory?.();
         } catch (error) {
             appendAgent(`AI路径规划启动失败：${error.message}`);
             app.setStatusBanner?.('AI路径规划启动失败', 'danger');
@@ -287,6 +378,7 @@
                 app.setStatusBanner?.('已进入下一个节点', 'success');
                 finishAiPathProgress('组织输出完成');
             }
+            app.fetchHistory?.();
         } catch (error) {
             appendAgent(`进入下一个节点失败：${error.message}`);
             app.setStatusBanner?.('进入下一个节点失败', 'danger');
@@ -489,6 +581,7 @@
             renderOptions(data.options || []);
             app.setStatusBanner?.('正在学习当前节点', 'success');
             finishAiPathProgress('组织输出完成');
+            app.fetchHistory?.();
         } catch (error) {
             appendAgent(`当前节点讲解失败：${error.message}`);
             app.setStatusBanner?.('当前节点讲解失败', 'danger');
@@ -686,6 +779,7 @@
                 data.type === 'plan' ? 'AI学习路径已生成' : '等待你继续补充',
                 data.type === 'plan' ? 'success' : 'awaiting'
             );
+            app.fetchHistory?.();
         } catch (error) {
             appendAgent(`AI路径规划失败：${error.message}`);
             app.setStatusBanner?.('AI路径规划失败', 'danger');
@@ -693,6 +787,38 @@
         }
 
         app.applyPrimaryActionState?.();
+    }
+
+    function snapshotIsAiPath(stateSnapshot) {
+        return Boolean(
+            stateSnapshot?.ai_path_mode
+            || stateSnapshot?.active_course === COURSE_MODE_AI
+            || stateSnapshot?.flow_status === 'ai_path'
+        );
+    }
+
+    if (originalRestoreSessionState) {
+        app.restoreSessionState = function patchedRestoreSessionState(stateSnapshot) {
+            originalRestoreSessionState(stateSnapshot);
+            if (snapshotIsAiPath(stateSnapshot)) {
+                setAiMode(true, { updateUrl: true });
+                ensureAiPathSidePanel();
+            } else {
+                setAiMode(false, { updateUrl: false });
+            }
+        };
+    }
+
+    if (originalRestoreMessageTimeline) {
+        app.restoreMessageTimeline = function patchedRestoreMessageTimeline(items, stateSnapshot) {
+            originalRestoreMessageTimeline(items, stateSnapshot);
+            if (snapshotIsAiPath(stateSnapshot)) {
+                setAiMode(true, { updateUrl: true });
+                ensureAiPathSidePanel();
+            } else {
+                setAiMode(false, { updateUrl: false });
+            }
+        };
     }
 
     app.startNewSession = function patchedStartNewSession() {
@@ -718,9 +844,12 @@
 
     document.addEventListener('DOMContentLoaded', () => {
         const url = new URL(window.location.href);
+        const mode = url.searchParams.get('mode');
 
-        if (url.searchParams.get('mode') === 'ai_path' || url.hash === '#ai-path') {
+        if (mode === 'ai_path' || url.hash === '#ai-path') {
             startAiPathDialogue();
+        } else if (mode === 'auto_control') {
+            setAiMode(false, { updateUrl: false });
         }
     });
 })();
