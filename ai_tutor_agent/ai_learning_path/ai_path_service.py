@@ -485,6 +485,7 @@ class AILearningPathService:
             "formulas": _safe_list(n.get("formulas", "")),
             "examples": _safe_list(n.get("examples", "")),
             "figures_refs": _safe_list(n.get("figures_refs", "")),
+            "page_refs": _safe_list(n.get("page_refs", "")),
             "definition_candidates": _safe_list(n.get("definition_candidates", "")),
             "key_point_candidates": _safe_list(n.get("key_point_candidates", "")),
             "formula_candidates": _safe_list(n.get("formula_candidates", "")),
@@ -549,6 +550,88 @@ class AILearningPathService:
 """
 
         return _call_deepseek_json_with_system(system_prompt, user_prompt)
+
+    def _reference_section(self, node: Dict[str, Any]) -> str:
+        groups = [
+            ("页码", node.get("page_refs", [])),
+            ("图表", node.get("figures_refs", [])),
+            ("公式", node.get("formulas", [])),
+        ]
+        lines = []
+        for label, values in groups:
+            cleaned = [
+                str(item).strip()
+                for item in (values or [])
+                if str(item).strip() and str(item).strip() not in {"无", "none", "None", "null", "[]"}
+            ]
+            if cleaned:
+                lines.append(f"- {label}: {'；'.join(cleaned[:8])}")
+        if not lines:
+            return ""
+        return "\n\n#### 参考资料\n" + "\n".join(lines)
+
+    def _with_reference_section(self, content: str, node: Dict[str, Any]) -> str:
+        text = (content or "").strip()
+        refs = self._reference_section(node)
+        if not refs:
+            return text
+        if "参考资料" in text:
+            return text
+        return text + refs
+
+    def _polish_learning_output(
+        self,
+        *,
+        node: Dict[str, Any],
+        draft: str,
+        output_type: str,
+        question: str = "",
+    ) -> str:
+        draft = (draft or "").strip()
+        if not draft:
+            return ""
+
+        payload = {
+            "node_id": node.get("node_id", ""),
+            "name": node.get("name", ""),
+            "summary": node.get("summary", ""),
+            "key_points": node.get("key_points", []),
+            "formulas": node.get("formulas", []),
+            "examples": node.get("examples", []),
+            "figures_refs": node.get("figures_refs", []),
+            "page_refs": node.get("page_refs", []),
+            "question": question,
+            "draft": draft,
+        }
+
+        system_prompt = (
+            "你是人工智能课程伴学老师，负责把已经生成的节点讲解做最后一遍自然化润色。"
+            "你可以调整表达顺序、加入过渡句、换一个例子角度，让同一节点每次讲解不完全一样。"
+            "不要编造节点数据中没有的页码、图表、公式和来源。"
+            "只输出合法 JSON，不要输出 Markdown 代码块。"
+        )
+        user_prompt = f"""
+请对下面的人工智能课程{output_type}做最终润色。
+
+节点与草稿(JSON):
+{json.dumps(payload, ensure_ascii=False)}
+
+输出格式:
+{{
+  "content_markdown": ""
+}}
+
+要求:
+1. 使用中文 Markdown。
+2. 保留草稿中的核心知识，不要删掉关键定义、关键步骤、公式名和例子。
+3. 语气像老师现场讲解，少一点模板感，多一点自然过渡。
+4. 如果是追问回答，要直接回应学生问题，不要重新完整讲一遍节点。
+5. 不要在正文里编造“来自第几页”“见图几”等不存在的来源。
+6. 不要输出“参考资料”小节；参考资料会由系统根据节点字段追加。
+"""
+        result = _call_deepseek_json_with_system(system_prompt, user_prompt)
+        polished = str(result.get("content_markdown") or "").strip() if result else ""
+        return polished or draft
 
     def _normalize_query(self, text: str) -> str:
         text = (text or "").strip().lower()
@@ -1238,6 +1321,13 @@ class AILearningPathService:
     {examples_text}
     """
 
+        content = self._polish_learning_output(
+            node=node,
+            draft=content,
+            output_type="节点讲解",
+        )
+        content = self._with_reference_section(content, node)
+
         return {
             "status": "success",
             "type": "lesson",
@@ -1309,10 +1399,17 @@ options 给 3 到 4 个下一步按钮，例如：
 """)
 
         if result and result.get("answer"):
+            answer = self._polish_learning_output(
+                node=node,
+                draft=str(result.get("answer", "")),
+                output_type="追问回答",
+                question=question,
+            )
+            answer = self._with_reference_section(answer, node)
             return {
                 "status": "success",
                 "type": "lesson_qa",
-                "message": result.get("answer", ""),
+                "message": answer,
                 "options": result.get("options") or [
                     "我懂了，进入下一个节点",
                     "再讲简单一点",
@@ -1321,10 +1418,22 @@ options 给 3 到 4 个下一步按钮，例如：
                 ],
             }
 
+        fallback_answer = (
+            f"围绕“{node['name']}”来看，你这个问题可以从它的定义、作用和应用场景三方面理解。"
+            f"{node.get('explanation_teacher_style', '')}"
+        )
+        fallback_answer = self._polish_learning_output(
+            node=node,
+            draft=fallback_answer,
+            output_type="追问回答",
+            question=question,
+        )
+        fallback_answer = self._with_reference_section(fallback_answer, node)
+
         return {
             "status": "success",
             "type": "lesson_qa",
-            "message": f"围绕“{node['name']}”来看，你这个问题可以从它的定义、作用和应用场景三方面理解。{node.get('explanation_teacher_style', '')}",
+            "message": fallback_answer,
             "options": [
                 "我懂了，进入下一个节点",
                 "再讲简单一点",

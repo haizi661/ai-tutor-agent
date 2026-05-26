@@ -1,6 +1,6 @@
 {
   "course_id": "artificial_intelligence",
-  "built_at": "2026-05-25T19:47:19",
+  "built_at": "2026-05-25T23:22:59",
   "mode": "full",
   "input_dir": "data/course_materials/artificial_intelligence",
   "split_manifest": "data/course_materials/artificial_intelligence/chapter_splits.json",
