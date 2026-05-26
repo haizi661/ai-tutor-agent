@@ -416,6 +416,19 @@ def _reconstruct_messages(checkpoint_store, thread_id: str, *, limit: int = 240)
         text = (content or "").strip()
         if not text:
             return
+        if kind == "topic_confirmation_card":
+            proposed_topic = ""
+            if isinstance(data, dict):
+                proposed_topic = str(data.get("proposed_topic") or "").strip()
+            for existing in messages:
+                if existing.get("kind") != "topic_confirmation_card":
+                    continue
+                existing_data = existing.get("data")
+                existing_topic = ""
+                if isinstance(existing_data, dict):
+                    existing_topic = str(existing_data.get("proposed_topic") or "").strip()
+                if proposed_topic and existing_topic == proposed_topic:
+                    return
         if messages:
             last = messages[-1]
             if last["role"] == normalized_role and last["kind"] == kind and last["content"] == text:
@@ -543,7 +556,6 @@ def _reconstruct_messages(checkpoint_store, thread_id: str, *, limit: int = 240)
                 updated_at,
                 data={"interaction_kind": pending_kind, "homework_items": values.get("homework_items", [])},
             )
-
         current_message_history = values.get("message_history") or []
         previous_message_history = previous_values.get("message_history") or []
         if len(current_message_history) > len(previous_message_history):
@@ -557,6 +569,22 @@ def _reconstruct_messages(checkpoint_store, thread_id: str, *, limit: int = 240)
                     data=entry.get("data"),
                 )
             lock_open_assessment_forms_when_skipped(values)
+        if (
+            pending_kind in {"objective_test_answers", "variant_test_answers"}
+            and pending_options
+            and pending_kind != str(previous_values.get("pending_interaction_kind") or "").strip()
+        ):
+            push(
+                "agent",
+                "objective_test_card",
+                pending_prompt or "请逐题作答。",
+                updated_at,
+                data={
+                    "interaction_kind": pending_kind,
+                    "questions": pending_options,
+                    "options": pending_options,
+                },
+            )
 
         assessment_questions = values.get("assessment_questions") or []
         previous_assessment_questions = previous_values.get("assessment_questions") or []
@@ -572,7 +600,7 @@ def _reconstruct_messages(checkpoint_store, thread_id: str, *, limit: int = 240)
         awaiting_topic_confirmation = values.get("flow_status") == "awaiting_topic_confirmation"
         previous_awaiting_topic_confirmation = previous_values.get("flow_status") == "awaiting_topic_confirmation"
         proposed_topic = str(values.get("proposed_topic", "") or "").strip()
-        if proposed_topic and (
+        if awaiting_topic_confirmation and proposed_topic and (
             not previous_awaiting_topic_confirmation
             or proposed_topic != str(previous_values.get("proposed_topic", "") or "").strip()
         ):

@@ -336,6 +336,113 @@ def test_reconstruct_messages_keeps_objective_review_after_wrong_explanations():
     assert review_item["data"]["answers"] == {"Q1": "B"}
 
 
+def test_reconstruct_messages_does_not_duplicate_topic_confirmation_after_confirmation():
+    store = FakeCheckpointStore(
+        [
+            _checkpoint(
+                {
+                    "flow_status": "awaiting_topic_confirmation",
+                    "proposed_topic": "自动控制原理",
+                    "topic_detail_summary": "学习自动控制原理",
+                    "topic_focus": "自动控制原理",
+                },
+                "2026-04-12T10:01:00+00:00",
+            ),
+            _checkpoint(
+                {
+                    "flow_status": "normal",
+                    "current_topic": "自动控制原理",
+                    "proposed_topic": "自动控制原理",
+                    "message_history": [
+                        {
+                            "role": "assistant",
+                            "kind": "topic_confirmation_locked",
+                            "content": "学习主题【自动控制原理】已确认。",
+                            "data": {"topic": "自动控制原理", "label": "已确认"},
+                        }
+                    ],
+                },
+                "2026-04-12T10:02:00+00:00",
+            ),
+            _checkpoint(
+                {
+                    "flow_status": "normal",
+                    "current_topic": "自动控制原理",
+                    "proposed_topic": "自动控制原理",
+                    "tutor_content": "开始讲自动控制系统示例。",
+                    "message_history": [
+                        {
+                            "role": "assistant",
+                            "kind": "topic_confirmation_locked",
+                            "content": "学习主题【自动控制原理】已确认。",
+                            "data": {"topic": "自动控制原理", "label": "已确认"},
+                        }
+                    ],
+                },
+                "2026-04-12T10:03:00+00:00",
+            ),
+        ]
+    )
+
+    items = _reconstruct_messages(store, "thread-topic-duplicate")
+    kinds = [item["kind"] for item in items]
+
+    assert kinds.count("topic_confirmation_card") == 1
+    assert kinds.count("topic_confirmation_locked") == 1
+
+
+def test_reconstruct_messages_restores_pending_objective_test_card():
+    questions = [
+        {
+            "question_id": "Q1",
+            "stem": "判断反馈是否参与比较的关键依据是什么？",
+            "options": {"A": "测量输出并回送比较", "B": "只看执行机构", "C": "只看题目名称", "D": "只看扰动"},
+            "answer_key": "A",
+        }
+    ]
+    store = FakeCheckpointStore(
+        [
+            _checkpoint(
+                {
+                    "flow_status": "awaiting_post_lesson_choice",
+                    "pending_interaction_kind": "post_lesson_choice",
+                    "pending_interaction_prompt": "节点讲完了，接下来做什么？",
+                    "pending_interaction_options": [
+                        {"value": "temporary_question", "label": "继续追问"},
+                        {"value": "start_test", "label": "我懂了，进入小测"},
+                    ],
+                },
+                "2026-04-12T10:05:00+00:00",
+            ),
+            _checkpoint(
+                {
+                    "flow_status": "awaiting_objective_answers",
+                    "pending_interaction_kind": "objective_test_answers",
+                    "pending_interaction_prompt": "请完成节点【自动控制系统示例】的 1 道客观选择题。",
+                    "pending_interaction_options": questions,
+                    "message_history": [
+                        {
+                            "role": "user",
+                            "kind": "post_lesson_choice",
+                            "content": "start_test",
+                            "data": {"selected_value": "start_test"},
+                        },
+                    ],
+                },
+                "2026-04-12T10:06:00+00:00",
+            ),
+        ]
+    )
+
+    items = _reconstruct_messages(store, "thread-pending-objective")
+    kinds = [item["kind"] for item in items]
+    quiz_item = next(item for item in items if item["kind"] == "objective_test_card")
+
+    assert kinds.index("post_lesson_choice") < kinds.index("objective_test_card")
+    assert quiz_item["data"]["interaction_kind"] == "objective_test_answers"
+    assert quiz_item["data"]["questions"][0]["question_id"] == "Q1"
+
+
 def test_reconstruct_messages_locks_pending_choice_card_after_answer():
     store = FakeCheckpointStore(
         [

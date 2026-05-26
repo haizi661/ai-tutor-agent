@@ -4,6 +4,7 @@ from pathlib import Path
 UI_JS = Path("frontend/assets/js/ui.js")
 SESSION_JS = Path("frontend/assets/js/session.js")
 STYLES = Path("frontend/assets/styles.css")
+INDEX_HTML = Path("frontend/index.html")
 
 
 def test_main_learning_answer_html_is_supported_without_graphrag_debug_role():
@@ -15,6 +16,8 @@ def test_main_learning_answer_html_is_supported_without_graphrag_debug_role():
     assert "learning-answer-content" in ui_content
     assert "learning-reference-block" in ui_content
     assert "learning-media-ref" in ui_content
+    assert "learning-citation" in ui_content
+    assert "learning-citation-index" in ui_content
     assert "learning-evidence-card--formula" in ui_content
     assert "learning-evidence-card--figure" in ui_content
     assert "learning-debug-details" in ui_content
@@ -22,13 +25,16 @@ def test_main_learning_answer_html_is_supported_without_graphrag_debug_role():
     assert "learning-inline-formula-card" in ui_content
     assert "learning-figure-card" in ui_content
     assert "learning-table-card" in ui_content
+    assert "learning-table-empty" in ui_content
     assert "learning-derivation-card" in ui_content
+    assert "renderLearningHtmlOrMarkdown" in ui_content
 
     render_start = ui_content.index("function renderMarkdown")
     render_end = ui_content.index("function extractGraphRagReportBody", render_start)
     render_body = ui_content[render_start:render_end]
     assert "allowLearningHtml" in render_body
     assert "sanitizeLearningHtml" in render_body
+    assert "renderLearningHtmlOrMarkdown(rawText)" in render_body
     assert "extractGraphRagReportBody" in render_body
     assert "if (kind === 'graph_rag_answer') return 'graph_rag_answer';" in ui_content
     assert "streamKind === 'graph_rag_answer'" in session_content
@@ -42,10 +48,13 @@ def test_learning_content_components_have_readable_width_and_local_overflow_only
     assert "max-width: min(100%, 1040px);" in styles
     assert "overflow-x: hidden;" in styles
     assert ".learning-media-ref" in styles
+    assert ".learning-citation" in styles
+    assert ".learning-source-item" in styles
     assert ".learning-evidence-type" in styles
     assert ".learning-source-line" in styles
     assert ".learning-debug-details" in styles
     assert ".learning-figure-unavailable" in styles
+    assert ".learning-table-empty" in styles
 
     for selector in [
         ".learning-formula-card",
@@ -75,6 +84,8 @@ def test_learning_content_components_have_readable_width_and_local_overflow_only
     assert ".learning-answer-content .learning-formula-card" in styles
     assert ".learning-media-group" in styles
     assert "grid-template-columns: repeat(auto-fit, minmax(min(100%, 340px), 1fr));" in styles
+    assert ".learning-media-temporary" in styles
+    assert "grid-template-columns: minmax(0, 1fr);" in styles
     assert ".learning-media-group > .learning-formula-card" in styles
     assert "overflow-wrap: anywhere;" in styles
     assert "word-break: break-word;" in styles
@@ -85,6 +96,52 @@ def test_learning_content_components_have_readable_width_and_local_overflow_only
     assert "min-width: 0 !important;" in styles
     assert "width: 100% !important;" in styles
     assert "box-sizing: border-box;" in styles
+
+
+def test_plain_markdown_math_uses_cases_spacing_and_local_overflow():
+    ui_content = UI_JS.read_text(encoding="utf-8")
+    styles = STYLES.read_text(encoding="utf-8")
+
+    assert "function normalizeLatexSource" in ui_content
+    assert "function normalizeCasesBody" in ui_content
+    assert "\\\\begin{cases}" in ui_content
+    assert "', & $1'" in ui_content
+    assert "mathBlocks.push(normalizeMathBlock(match))" in ui_content
+    assert "normalizeLatexSource(node.getAttribute('data-latex')" in ui_content
+    assert "markTaggedMathDisplays(el)" in ui_content
+    assert "display.classList.add('katex-display--tagged')" in ui_content
+    assert "--katex-tag-space" in ui_content
+
+    assert ".agent-body .katex-display" in styles
+    assert ".msg-content .katex-display" in styles
+    assert "overflow-x: auto;" in styles
+    assert "min-width: max-content;" in styles
+    assert ".msg-row.agent:has(.katex-display--tagged) .bubble-wrap" in styles
+    assert ".agent-body:has(.katex-display--tagged)" in styles
+    assert ".katex-display.katex-display--tagged > .katex" in styles
+    assert "padding-right: var(--katex-tag-space, 4.5em);" in styles
+    assert ".agent-body .katex-display .arraycolsep" in styles
+    assert "width: 1.45em !important;" in styles
+    assert ".learning-formula-viewport .katex-display" in styles
+    assert "overflow: visible;" in styles
+
+
+def test_frontend_uses_local_marked_and_katex_assets_for_offline_math_rendering():
+    html = INDEX_HTML.read_text(encoding="utf-8")
+
+    assert "/assets/vendor/marked/marked.umd.js" in html
+    assert "/assets/vendor/katex/katex.min.css" in html
+    assert "/assets/vendor/katex/katex.min.js" in html
+    assert "/assets/vendor/katex/contrib/auto-render.min.js" in html
+    assert "cdn.jsdelivr.net/npm/katex" not in html
+    assert "cdn.jsdelivr.net/npm/marked" not in html
+    for path in [
+        "frontend/assets/vendor/marked/marked.umd.js",
+        "frontend/assets/vendor/katex/katex.min.css",
+        "frontend/assets/vendor/katex/katex.min.js",
+        "frontend/assets/vendor/katex/contrib/auto-render.min.js",
+    ]:
+        assert Path(path).exists()
 
 
 def test_frontend_limits_restored_related_media_overview_noise():
@@ -106,6 +163,10 @@ def test_learning_evidence_cards_hide_debug_details_and_keep_local_overflow_cont
         "learning-evidence-card--figure",
         "learning-evidence-card--table",
         "learning-evidence-type",
+        "learning-citation",
+        "learning-citation-index",
+        "learning-source-item",
+        "learning-source-body",
         "learning-source-line",
         "learning-debug-details",
         "learning-latex-details",
@@ -165,6 +226,9 @@ def test_learning_viewer_modal_and_copy_actions_are_available():
     assert "max-width: min(1120px, calc(100vw - 48px));" in styles
     assert "max-height: min(86vh, 760px);" in styles
     assert "overflow: auto;" in styles
+    assert ".learning-viewer-body .learning-figure-viewport" in styles
+    assert ".learning-viewer-body .learning-table-viewport" in styles
+    assert "max-height: none;" in styles
 
 
 def test_existing_graphrag_debug_media_contract_is_not_removed():

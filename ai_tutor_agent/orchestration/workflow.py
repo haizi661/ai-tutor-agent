@@ -25,6 +25,7 @@ from ..nodes.objective_remediation import (
     build_variant_test_answer_dialog_node,
     build_wrong_question_explainer_node,
 )
+from ..nodes.remediation_decision import build_remediation_decision_node, route_after_remediation_decision
 from ..nodes.next_node_planner import build_next_node_planner_node
 from ..nodes.continue_or_homework_selector import build_continue_or_homework_selector_node
 from ..nodes.homework_generator import build_homework_generator_node
@@ -86,6 +87,8 @@ def get_entry_node(state: AgentState) -> str:
         return "objective_test_scorer"
     if state.get("flow_status") == "awaiting_variant_answers":
         return "variant_test_answer_dialog"
+    if state.get("flow_status") == "awaiting_remediation_decision":
+        return "remediation_decision"
     if state.get("flow_status") == "awaiting_continue_or_homework_choice":
         return "continue_or_homework_selector"
     if state.get("flow_status") == "homework_assigned":
@@ -102,6 +105,8 @@ def get_entry_node(state: AgentState) -> str:
         return "node_content_loader"
     if state.get("learning_resume_target") == "next_node_planner":
         return "next_node_planner"
+    if state.get("learning_resume_target") == "remediation_decision":
+        return "remediation_decision"
     if state.get("learning_resume_target") == "continue_or_homework_selector":
         return "continue_or_homework_selector"
     if state.get("flow_status") == "awaiting_post_eval_selector":
@@ -175,6 +180,8 @@ def route_after_topic_confirmer(state: AgentState) -> str:
         return "pause"
     if state.get("flow_status") == "greeting":
         return "greeter"
+    if normalize_resume_target(state.get("learning_resume_target", "")) == "initial_node_selector":
+        return "initial_node_selector"
     if state.get("flow_status") == "direct_tutor":
         return "tutor"
     return "assessment_generator"
@@ -182,6 +189,8 @@ def route_after_topic_confirmer(state: AgentState) -> str:
 
 # ── assessment_generator 之后的条件边 ──
 def route_after_assessment_generator(state: AgentState) -> str:
+    if normalize_resume_target(state.get("learning_resume_target", "")) == "initial_node_selector":
+        return "initial_node_selector"
     if state.get("flow_status") == "awaiting_assessment":
         return "pause"
     if state.get("flow_status") == "assessment_dialog":
@@ -244,13 +253,23 @@ def route_after_objective_test_scorer(state: AgentState) -> str:
         return "next_node_planner"
     if state.get("flow_status") == "awaiting_objective_answers":
         return "pause"
-    if normalize_resume_target(state.get("learning_resume_target", "")) == "wrong_question_explainer":
+    target = normalize_resume_target(state.get("learning_resume_target", ""))
+    if target == "wrong_question_explainer":
         return "wrong_question_explainer"
+    if target == "remediation_decision":
+        return "remediation_decision"
+    if target == "objective_test_generator":
+        return "objective_test_generator"
+    if target == "next_node_planner":
+        return "next_node_planner"
     return "pause"
 
 
 def route_after_wrong_question_explainer(state: AgentState) -> str:
-    if normalize_resume_target(state.get("learning_resume_target", "")) == "variant_question_generator":
+    target = normalize_resume_target(state.get("learning_resume_target", ""))
+    if target == "remediation_decision":
+        return "remediation_decision"
+    if target == "variant_question_generator":
         return "variant_question_generator"
     return "pause"
 
@@ -295,6 +314,7 @@ def route_after_session_resume_router(state: AgentState) -> str:
         "temporary_question_collector",
         "objective_test_scorer",
         "wrong_question_explainer",
+        "remediation_decision",
         "variant_question_generator",
         "variant_test_answer_dialog",
         "continue_or_homework_selector",
@@ -406,6 +426,7 @@ def build_workflow(
     workflow.add_node("objective_test_generator", build_objective_test_generator_node(runtime, tester_llm))
     workflow.add_node("objective_test_scorer", build_objective_test_scorer_node(runtime, pass_score=settings.pass_score))
     workflow.add_node("wrong_question_explainer", build_wrong_question_explainer_node(runtime, tutor_llm))
+    workflow.add_node("remediation_decision", build_remediation_decision_node(runtime.event_sink, runtime.answer_provider))
     workflow.add_node("variant_question_generator", build_variant_question_generator_node(runtime, tutor_llm))
     workflow.add_node("variant_test_answer_dialog", build_variant_test_answer_dialog_node(runtime))
     workflow.add_node("next_node_planner", build_next_node_planner_node(runtime))
@@ -489,6 +510,7 @@ def build_workflow(
             "pause": END,
             "greeter": "greeter",
             "tutor": "tutor",
+            "initial_node_selector": "initial_node_selector",
             "assessment_generator": "assessment_generator",
         }
     )
@@ -497,7 +519,7 @@ def build_workflow(
     workflow.add_conditional_edges(
         "assessment_generator",
         route_after_assessment_generator,
-        {"pause": END, "user_profiler": "user_profiler"},
+        {"pause": END, "user_profiler": "user_profiler", "initial_node_selector": "initial_node_selector"},
     )
     workflow.add_conditional_edges(
         "assessment_dialog",
@@ -560,13 +582,25 @@ def build_workflow(
         {
             "pause": END,
             "wrong_question_explainer": "wrong_question_explainer",
+            "remediation_decision": "remediation_decision",
+            "objective_test_generator": "objective_test_generator",
             "next_node_planner": "next_node_planner",
         },
     )
     workflow.add_conditional_edges(
         "wrong_question_explainer",
         route_after_wrong_question_explainer,
-        {"pause": END, "variant_question_generator": "variant_question_generator"},
+        {"pause": END, "remediation_decision": "remediation_decision", "variant_question_generator": "variant_question_generator"},
+    )
+    workflow.add_conditional_edges(
+        "remediation_decision",
+        route_after_remediation_decision,
+        {
+            "pause": END,
+            "variant_question_generator": "variant_question_generator",
+            "node_content_loader": "node_content_loader",
+            "continue_or_homework_selector": "continue_or_homework_selector",
+        },
     )
     workflow.add_conditional_edges(
         "variant_question_generator",
@@ -603,14 +637,9 @@ def build_workflow(
             "temporary_question_collector": "temporary_question_collector",
             "objective_test_scorer": "objective_test_scorer",
             "wrong_question_explainer": "wrong_question_explainer",
+            "remediation_decision": "remediation_decision",
             "variant_question_generator": "variant_question_generator",
             "variant_test_answer_dialog": "variant_test_answer_dialog",
-            "continue_or_homework_selector": "continue_or_homework_selector",
-            "node_content_loader": "node_content_loader",
-            "next_node_planner": "next_node_planner",
-            "tutor": "tutor",
-            "post_lesson_choice": "post_lesson_choice",
-            "homework_answer_dialog": "homework_answer_dialog",
         },
     )
     workflow.add_conditional_edges(
@@ -711,6 +740,7 @@ def build_workflow(
             "objective_test_generator": "objective_test_generator",
             "objective_test_scorer": "objective_test_scorer",
             "wrong_question_explainer": "wrong_question_explainer",
+            "remediation_decision": "remediation_decision",
             "variant_question_generator": "variant_question_generator",
             "variant_test_answer_dialog": "variant_test_answer_dialog",
             "next_node_planner": "next_node_planner",

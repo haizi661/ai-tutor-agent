@@ -61,6 +61,17 @@ class FakeLLM:
         return AIMessage(content=self.content)
 
 
+class SequenceLLM:
+    def __init__(self, contents):
+        self.contents = list(contents)
+        self.calls = []
+
+    def invoke(self, messages):
+        self.calls.append(messages)
+        index = min(len(self.calls) - 1, len(self.contents) - 1)
+        return AIMessage(content=self.contents[index])
+
+
 AI_OBJECTIVE_JSON = """
 {
   "questions": [
@@ -127,6 +138,8 @@ def test_post_lesson_direct_question_routes_to_temporary_question_channel():
     assert resumed["interrupt_query"] == "为什么稳定系统也会出现振荡？"
     assert resumed["learning_resume_target"] == "temporary_question_collector"
     assert resumed["learning_phase"] == "temporary_question_collecting"
+    assert resumed["message_history"][-1]["data"]["selected_value"] == "temporary_question"
+    assert resumed["message_history"][-1]["data"]["direct_question"] is True
 
 
 def test_post_lesson_choice_accepts_freeform_hesitation_as_temporary_question():
@@ -178,6 +191,10 @@ def test_objective_test_generator_uses_ai_to_create_objective_questions_without_
     assert len(result["node_quiz_items"]) == 2
     assert result["node_quiz_items"][0]["source"] == "ai_generated"
     assert result["node_quiz_items"][0]["answer_key"] == "A"
+    assert result["node_quiz_items"][0]["assessment_focus"]
+    assert result["node_quiz_items"][0]["target_objective"]
+    assert result["node_quiz_items"][0]["misconception"]
+    assert 1 <= result["node_quiz_items"][0]["difficulty"] <= 5
     assert result["node_quiz_items"][1]["answer_key"] == "B"
     assert result["flow_status"] == "awaiting_objective_answers"
     assert result["learning_resume_target"] == "objective_test_scorer"
@@ -195,7 +212,135 @@ def test_objective_test_generator_falls_back_when_no_bank_and_ai_fails():
     assert len(llm.calls) == 1
     assert len(result["node_quiz_items"]) == 10
     assert result["node_quiz_items"][0]["source"] == "contextual_fallback"
+    assert result["node_quiz_items"][0]["assessment_focus"] in {"概念辨析", "判断依据", "常见误区", "应用迁移"}
+    assert result["node_quiz_items"][0]["target_objective"]
+    assert result["node_quiz_items"][0]["misconception"]
+    assert isinstance(result["node_quiz_items"][0]["wrong_option_analysis"], dict)
+    visible_lines = []
+    for q in result["node_quiz_items"]:
+        visible_lines.extend([q["stem"], *(q["options"].values())])
+    visible_text = "\n".join(visible_lines)
+    assert "这是判断" not in visible_text
+    assert "符合本节点" not in visible_text
+    assert "把目标任务说成" not in visible_text
+    assert "当作唯一依据" not in visible_text
+    assert "具有一定功能的各种基本元件" not in visible_text
     assert result["flow_status"] == "awaiting_objective_answers"
+
+
+def test_fallback_objective_questions_do_not_repeat_stems_when_generating_ten_items():
+    sink = BufferedEventSink()
+    llm = FakeLLM("not json")
+    runtime = RuntimeContext(event_sink=sink)
+    node = build_objective_test_generator_node(runtime, llm=llm, count=10)
+
+    result = node({"current_node_id": "KM001", "current_node_name": "自动控制系统示例"})
+
+    stems = [item["stem"] for item in result["node_quiz_items"]]
+    assert len(stems) == 10
+    assert len(set(stems)) == 10
+
+
+def test_fallback_objective_questions_keep_metadata_concise_when_node_fields_are_long():
+    sink = BufferedEventSink()
+    llm = FakeLLM("not json")
+    runtime = RuntimeContext(event_sink=sink)
+    node = build_objective_test_generator_node(runtime, llm=llm, count=2)
+    long_objective = (
+        "反馈控制系统是由各种结构不同的元部件组成的。从完成自动控制这一功能来看，"
+        "一个系统必然包含被控对象和控制装置两大部分，而控制装置又由具有一定功能的"
+        "各种基本元件组成；图1-5典型反馈控制系统方框图还包含有用输入和扰动。"
+    )
+
+    result = node(
+        {
+            "current_node_id": "KM-LONG",
+            "current_node_name": "自动控制系统示例",
+            "graph_learning_objectives": [long_objective],
+        }
+    )
+
+    for item in result["node_quiz_items"]:
+        assert len(item["target_objective"]) <= 82
+        assert len(item["explanation"]) <= 150
+        assert all(len(text) <= 95 for text in item["options"].values())
+        metadata_text = "\n".join(
+            [
+                item.get("target_objective", ""),
+                item.get("misconception", ""),
+                item.get("explanation", ""),
+                *list((item.get("wrong_option_analysis") or {}).values()),
+            ]
+        )
+        assert "反馈控制系统是由各种结构不同的元部件组成" not in metadata_text
+        assert "从完成自动控制这一功能来看" not in metadata_text
+        assert "具有一定功能的各种基本元件" not in metadata_text
+        assert "图1-5" not in metadata_text
+
+
+def test_fallback_objective_explanations_are_actionable_not_generic_templates():
+    runtime = RuntimeContext(event_sink=BufferedEventSink())
+    node = build_objective_test_generator_node(runtime, llm=FakeLLM("not json"), count=3)
+
+    result = node(
+        {
+            "current_node_id": "KM003",
+            "current_node_name": "自动控制系统示例",
+            "graph_must_know": ["测量输出并送回输入端参与比较"],
+            "graph_common_errors": ["只看到执行机构而忽略测量反馈"],
+        }
+    )
+
+    for item in result["node_quiz_items"]:
+        explanation = item.get("explanation", "")
+        analysis_text = "\n".join((item.get("wrong_option_analysis") or {}).values())
+        assert "正确项体现了" not in explanation
+        assert "该项没有准确体现" not in analysis_text
+        assert "判断依据" in explanation
+        assert "正确理解" in explanation
+        assert "易错点" in explanation
+        assert item.get("target_objective")
+        assert item.get("misconception")
+
+
+def test_ai_question_metadata_replaces_generic_or_raw_textbook_objectives():
+    ai_json = """
+    {
+      "questions": [
+        {
+          "question_id": "AI-Q1",
+          "stem": "在恒温箱温度控制中，哪一项说明反馈参与了控制？",
+          "options": {
+            "A": "测量实际温度，并与设定温度比较后调节加热功率",
+            "B": "只按固定功率加热，不测量实际温度",
+            "C": "只记录室外温度，不改变控制动作",
+            "D": "把设定温度直接改成当前温度"
+          },
+          "answer_key": "A",
+          "target_objective": "反馈控制系统是由各种结构不同的元部件组成的。从完成自动控制这一功能来看，一个系统必然包含被控对象和控制装置两大部分。",
+          "misconception": "一般概念",
+          "explanation": "反馈控制要把输出测量结果送回比较环节。"
+        }
+      ]
+    }
+    """
+    runtime = RuntimeContext(event_sink=BufferedEventSink())
+    node = build_objective_test_generator_node(runtime, llm=FakeLLM(ai_json), count=1)
+
+    result = node(
+        {
+            "current_node_id": "KM003",
+            "current_node_name": "自动控制系统示例",
+            "graph_must_know": ["测量输出并送回输入端参与比较"],
+            "graph_common_errors": ["只看到执行机构而忽略测量反馈"],
+        }
+    )
+
+    item = result["node_quiz_items"][0]
+    assert item["target_objective"] == "测量输出并送回输入端参与比较"
+    assert item["misconception"] == "只看到执行机构而忽略测量反馈"
+    assert "反馈控制系统是由各种结构不同的元部件组成" not in item["target_objective"]
+    assert item["misconception"] != "一般概念"
 
 
 def test_objective_test_scorer_scores_deterministically_and_generates_variants_for_wrong_items():
@@ -221,6 +366,8 @@ def test_objective_test_scorer_scores_deterministically_and_generates_variants_f
     assert result["current_node_status"] == "passed"
     assert result["learning_resume_target"] == "next_node_planner"
     assert result["node_quiz_wrong_items"][0]["question_id"] == "Q-9"
+    assert result["node_quiz_wrong_items"][0]["target_objective"]
+    assert result["node_quiz_wrong_items"][0]["misconception"]
     assert len(result["node_quiz_wrong_items"]) == 2
     assert result["student_state_snapshot"]["visited_nodes"] == ["KM001"]
 
@@ -253,7 +400,18 @@ def test_objective_test_scorer_failing_score_routes_to_explicit_remediation_node
     event = runtime.event_sink.events[-1]
     assert event.source == "objective_test_scorer"
     assert event.data["review"]["kind"] == "objective_test_answers"
-    assert event.data["review"]["questions"] == items
+    assert event.data["review"]["review_state"] == "graded"
+    assert event.data["review"]["locked"] is True
+    assert event.data["review"]["node_id"] == "KM001"
+    assert event.data["review"]["pass_score"] == 80
+    assert event.data["review"]["question_count"] == 10
+    assert event.data["review"]["correct_count"] == 2
+    assert event.data["review"]["wrong_count"] == 8
+    assert event.data["review"]["questions"][0]["question_id"] == items[0]["question_id"]
+    assert event.data["review"]["questions"][0]["target_objective"]
+    assert event.data["review"]["questions"][0]["locked"] is True
+    assert "chosen_answer" in event.data["review"]["questions"][0]
+    assert "is_correct" in event.data["review"]["questions"][0]
     assert "客观测评批改" in event.data["review_content"]
 
 
@@ -293,6 +451,32 @@ def test_objective_test_scorer_second_variant_round_can_pass_and_reach_post_eval
     assert result["node_quiz_score"] == 100
     assert result["current_node_status"] == "passed"
     assert result["learning_resume_target"] == "next_node_planner"
+
+
+def test_objective_scorer_uses_variant_quiz_kind_after_dialog_collected_answers():
+    runtime = RuntimeContext(event_sink=BufferedEventSink())
+    node = build_objective_test_scorer_node(runtime, pass_score=80)
+    variant_items = [
+        {"question_id": "V-Q1", "node_id": "KM001", "stem": "变式1", "options": {"A": "对", "B": "错"}, "answer_key": "A"}
+    ]
+
+    result = node(
+        {
+            "current_node_id": "KM001",
+            "current_node_name": "自动控制系统示例",
+            "node_quiz_items": variant_items,
+            "node_quiz_answers": {"V-Q1": "A"},
+            "node_quiz_kind": "variant_test_answers",
+            "pending_interaction_kind": "",
+        }
+    )
+
+    reviews = [item for item in result["message_history"] if item.get("kind") == "objective_quiz_review"]
+    assert len(reviews) == 1
+    assert reviews[0]["data"]["kind"] == "variant_test_answers"
+    assert reviews[0]["data"]["title"] == "变式练习"
+    assert reviews[0]["data"]["questions"][0]["locked"] is True
+    assert result["pending_interaction_kind"] == ""
 
 
 def test_scorer_accepts_json_dict_answers_from_frontend():
@@ -377,9 +561,14 @@ def test_fallback_objective_questions_are_contextualized_by_current_node_fields(
 
     stems = [item["stem"] for item in result["node_quiz_items"]]
     options_text = "\n".join("\n".join(item["options"].values()) for item in result["node_quiz_items"])
+    analysis_text = "\n".join("\n".join((item.get("wrong_option_analysis") or {}).values()) for item in result["node_quiz_items"])
     assert all("第 " not in stem or "核心判断" not in stem for stem in stems)
-    assert "给定值与测量值比较形成偏差" in options_text
-    assert "只看到执行机构而忽略测量反馈" in options_text
+    assert "关键在于" not in options_text
+    assert "典型误区是" not in options_text
+    assert "一般概念" not in options_text
+    assert "反馈控制系统" not in options_text
+    assert "给定值与测量值比较形成偏差" in analysis_text or result["node_quiz_items"][0]["target_objective"]
+    assert "只看到执行机构而忽略测量反馈" in analysis_text
     assert {item["source"] for item in result["node_quiz_items"]} == {"contextual_fallback"}
 
 
@@ -440,13 +629,131 @@ def test_objective_generator_rejects_low_quality_ai_questions_and_uses_stronger_
         assert all("符合本节点" not in option for option in option_values)
         assert all("围绕“" not in option for option in option_values)
         assert all("结论方向和节点要点相反" not in option for option in option_values)
+        assert all("关键在于" not in option for option in option_values)
+        assert all("典型误区是" not in option for option in option_values)
+        assert all("一般概念" not in option for option in option_values)
+        assert all("反馈控制系统" not in option for option in option_values)
         assert all(len(option) <= 95 for option in option_values)
         assert len(set(option_values)) == 4
         assert item["answer_key"] in item["options"]
     all_text = "\n".join(item["stem"] + "\n" + "\n".join(item["options"].values()) for item in result["node_quiz_items"])
-    assert "比较元件" in all_text
-    assert "主反馈通路" in all_text
-    assert "只看到输出记录动作" in all_text
+    analysis_text = "\n".join("\n".join((item.get("wrong_option_analysis") or {}).values()) for item in result["node_quiz_items"])
+    metadata_text = "\n".join(
+        "\n".join([item.get("target_objective", ""), item.get("misconception", "")])
+        for item in result["node_quiz_items"]
+    )
+    assert "比较元件" in metadata_text or "比较元件" in analysis_text or "比较元件" in all_text
+    assert "主反馈通路" in metadata_text or "主反馈通路" in analysis_text
+    assert "只看到输出记录动作" in metadata_text or "只看到输出记录动作" in analysis_text
+
+
+def test_objective_generator_repairs_missing_ai_questions_before_fallback():
+    first_response = """
+    {
+      "questions": [
+        {
+          "question_id": "AI-BAD-1",
+          "stem": "在“自动控制系统示例”中，哪一项最能体现本节点要求掌握的“实例”？",
+          "options": {
+            "A": "符合本节点：实例",
+            "B": "只看表面动作",
+            "C": "与本节点无关",
+            "D": "结论方向和节点要点相反"
+          },
+          "answer_key": "A"
+        },
+        {
+          "question_id": "AI-GOOD-1",
+          "stem": "在液位自动控制中，哪一项最能说明反馈已经参与控制？",
+          "options": {
+            "A": "只设置目标液位，不测量实际液位",
+            "B": "测量实际液位，并与给定液位比较后调节阀门",
+            "C": "人工观察液位后手动关阀",
+            "D": "只按固定时间开关阀门"
+          },
+          "answer_key": "B",
+          "target_objective": "识别液位控制中的反馈闭环",
+          "misconception": "把手动调节误认为自动反馈",
+          "explanation": "反馈控制必须把实际输出送回比较环节。"
+        }
+      ]
+    }
+    """
+    repair_response = """
+    {
+      "questions": [
+        {
+          "question_id": "AI-REPAIR-1",
+          "stem": "在温度自动控制中，哪一项最准确说明比较元件的作用？",
+          "options": {
+            "A": "把设定温度与测量温度比较，形成偏差信号",
+            "B": "直接改变被控对象，不需要测量",
+            "C": "只记录室外扰动，不参与控制器输入",
+            "D": "把执行机构输出当成给定量"
+          },
+          "answer_key": "A",
+          "target_objective": "说明比较元件如何形成偏差信号",
+          "misconception": "忽略测量反馈参与比较",
+          "explanation": "比较元件根据给定量和反馈量形成偏差。"
+        },
+        {
+          "question_id": "AI-REPAIR-2",
+          "stem": "判断一个转速系统是否为闭环控制，关键证据是什么？",
+          "options": {
+            "A": "控制器按固定程序输出",
+            "B": "电机功率足够大",
+            "C": "测量实际转速并送回与目标转速比较",
+            "D": "存在外部负载扰动"
+          },
+          "answer_key": "C",
+          "target_objective": "判断反馈信号是否参与比较",
+          "misconception": "只看执行机构而忽略测量反馈",
+          "explanation": "闭环控制的关键是输出测量回到输入比较环节。"
+        }
+      ]
+    }
+    """
+    llm = SequenceLLM([first_response, repair_response])
+    runtime = RuntimeContext(event_sink=BufferedEventSink())
+    node = build_objective_test_generator_node(runtime, llm=llm, count=3)
+
+    result = node({
+        "current_node_id": "KM001",
+        "current_node_name": "自动控制系统示例",
+        "graph_learning_objectives": ["识别液位控制中的反馈闭环", "说明比较元件如何形成偏差信号"],
+        "graph_common_errors": ["把手动调节误认为自动反馈", "忽略测量反馈参与比较"],
+        "node_content_context": "液位传感器测量实际液位，与给定液位比较形成偏差后调节阀门。",
+    })
+
+    assert len(llm.calls) == 2
+    assert [item["source"] for item in result["node_quiz_items"]] == ["ai_generated", "ai_generated", "ai_generated"]
+    assert [item["question_id"] for item in result["node_quiz_items"]] == ["AI-GOOD-1", "AI-REPAIR-1", "AI-REPAIR-2"]
+    assert "符合本节点" not in "\n".join(
+        item["stem"] + "\n" + "\n".join(item["options"].values())
+        for item in result["node_quiz_items"]
+    )
+
+
+def test_objective_generator_prompt_contains_blueprint_and_balanced_answer_keys():
+    llm = FakeLLM(AI_OBJECTIVE_JSON)
+    runtime = RuntimeContext(event_sink=BufferedEventSink())
+    node = build_objective_test_generator_node(runtime, llm=llm, count=4)
+
+    node({
+        "current_node_id": "KM001",
+        "current_node_name": "自动控制系统示例",
+        "graph_learning_objectives": ["识别闭环结构"],
+        "graph_must_know": ["反馈量与给定量比较形成偏差"],
+        "graph_common_errors": ["只看执行机构而忽略测量反馈"],
+    })
+
+    prompt_content = llm.calls[0][1].content
+    assert "【出题蓝图】" in prompt_content
+    assert '"assessment_focus": "概念辨析"' in prompt_content
+    assert '"answer_key": "A"' in prompt_content
+    assert '"answer_key": "B"' in prompt_content
+    assert '"answer_key": "C"' in prompt_content
+    assert '"answer_key": "D"' in prompt_content
 
 
 def test_workflow_routes_tutor_to_post_lesson_choice_and_objective_scorer_to_next_node_planner():

@@ -1482,6 +1482,8 @@ def test_local_config_round_trip(monkeypatch, tmp_path):
         "MINIMAX_API_KEY",
         "GLM_API_KEY",
         "MODEL_NAME",
+        "QUESTION_HELP_MODEL_NAME",
+        "QUESTION_HELP_OPENAI_API_BASE",
         "LLM_PROVIDER",
     ]:
         monkeypatch.delenv(key, raising=False)
@@ -1522,6 +1524,7 @@ def test_local_config_round_trip(monkeypatch, tmp_path):
         assert any(vendor["id"] == "glm" for vendor in current.json()["vendors"])
         assert current.json()["gemini_api_key"] == "****-key"
         assert current.json()["has_gemini_api_key"] is True
+        assert current.json()["question_help_model_name"] == "qwen-vl-max-latest"
 
         updated = client.post(
             "/api/config/local",
@@ -1537,6 +1540,7 @@ def test_local_config_round_trip(monkeypatch, tmp_path):
                 "openai_api_key": "",
                 "openai_api_base": "",
                 "model_name": "qwen-plus",
+                "question_help_model_name": "qwen-vl-plus-latest",
                 "embedding_provider": "local",
                 "embedding_model_name": "sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2",
                 "pdf_parse_backend": "auto",
@@ -1559,6 +1563,7 @@ def test_local_config_round_trip(monkeypatch, tmp_path):
         assert payload["config"]["model_name"] == "qwen-plus"
         assert payload["local"]["qwen_api_key"] == "****-new"
         assert payload["local"]["has_qwen_api_key"] is True
+        assert payload["local"]["question_help_model_name"] == "qwen-vl-plus-latest"
         assert payload["local"]["knowledge_top_k"] == 5
         assert payload["local"]["vector_store_dir"] == "data/chroma_db"
         assert payload["local"]["proxy_port"] == "7892"
@@ -1580,6 +1585,7 @@ def test_local_config_round_trip(monkeypatch, tmp_path):
                 "openai_api_key": "",
                 "openai_api_base": "",
                 "model_name": "glm-5",
+                "question_help_model_name": "qwen-vl-plus-latest",
                 "embedding_provider": "local",
                 "embedding_model_name": "sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2",
                 "pdf_parse_backend": "local",
@@ -1606,6 +1612,7 @@ def test_local_config_round_trip(monkeypatch, tmp_path):
         assert "CHAT_PROFILE=glm" in content
         assert "QWEN_API_KEY=qwen-key-new" in content
         assert "GLM_API_KEY=glm-key-new" in content
+        assert "QUESTION_HELP_MODEL_NAME=qwen-vl-plus-latest" in content
         assert "VECTOR_STORE_DIR=data/chroma_db" in content
         assert "CHROMA_DIR=data/chroma_db" in content
         assert "PROXY_PORT=7892" in content

@@ -92,4 +92,4 @@ def test_wrong_question_explanations_are_persisted_before_variant_generation():
     explanation_entry = entries[kinds.index("wrong_question_explanations")]
     assert "错题订正讲解" in explanation_entry["content"]
     assert "比较点" in explanation_entry["content"]
-    assert result["learning_resume_target"] == "variant_question_generator"
+    assert result["learning_resume_target"] == "remediation_decision"

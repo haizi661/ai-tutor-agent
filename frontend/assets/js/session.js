@@ -417,16 +417,13 @@
             }
             if (data.source === 'wrong_question_explainer') {
                 const explanations = Array.isArray(data.data?.explanations) ? data.data.explanations : [];
-                const lines = ['错题订正讲解'];
-                explanations.forEach((item, index) => {
-                    const qid = item.question_id || `Q${index + 1}`;
-                    const stem = item.stem || '';
-                    const userAnswer = String(item.user_answer || '').toUpperCase() || '未作答';
-                    const answerKey = String(item.answer_key || '').toUpperCase() || '未提供';
-                    const explanation = item.explanation || '这题需要回到题干中的关键条件，重新区分正确概念与误区。';
-                    lines.push('', stem ? `${qid}. ${stem}` : `${qid}.`, `你的答案：${userAnswer}；正确答案：${answerKey}`, explanation);
+                app.renderWrongQuestionExplanationCard?.(explanations, { ...(data.data || {}), kind: 'wrong_question_explanations' });
+            }
+            if (data.source === 'remediation_decision' && data.data?.options) {
+                const payload = state.pendingInteractionData || data.data || {};
+                app.renderRemediationDecisionCard?.(payload, {
+                    options: data.data.options,
                 });
-                app.appendMessage?.('agent', lines.join('\n'), { kind: 'wrong_question_explanations' });
             }
             app.clearTypingIndicator?.();
         });
@@ -509,6 +506,15 @@
             appendThinking(summary, 'info', 'route.decision');
         });
 
+        state.eventSource.addEventListener('session.thinking_mode', e => {
+            const data = safelyParseEventData(e.data);
+            const thinkingMode = Boolean(data.data?.thinking_mode);
+            if (state.thinkingMode !== thinkingMode) {
+                state.thinkingMode = thinkingMode;
+                app.toggleThinkingMode?.(thinkingMode, { silent: true });
+            }
+        });
+
         state.eventSource.addEventListener('assessment.form_ready', e => {
             const data = safelyParseEventData(e.data);
             const message = data.message || '小测已准备好。';
@@ -571,6 +577,16 @@
             if (payload.primary) {
                 appendThinking(`情绪信号：${payload.primary}`, 'info', 'affect');
             }
+        });
+
+        state.eventSource.addEventListener('thinking.step', e => {
+            const data = safelyParseEventData(e.data);
+            const message = data.message || '';
+            const payload = data.data || {};
+            const category = payload.category || 'general';
+            const toneMap = { teaching_strategy: 'info', route_decision: 'success', prerequisite_gap: 'warning', general: 'info' };
+            const tone = toneMap[category] || 'info';
+            if (message) appendThinking(message, tone, 'thinking.step');
         });
 
         state.eventSource.addEventListener('topic.confirmation_needed', e => {
@@ -689,6 +705,28 @@
                 });
                 return;
             }
+            if (payload.interaction_kind === 'remediation_decision') {
+                consumeAwaitingTurn(message, '等你决定补救方式', {
+                    role: 'prompt',
+                    awaitingInput: true,
+                    showInChat: false,
+                    render: () => {
+                        const moreData = {
+                            score: payload.score,
+                            wrong_count: payload.wrong_count,
+                            variant_rounds: payload.variant_rounds,
+                            tier: payload.tier,
+                            paused: payload.paused,
+                            extra_remediation_question_count: payload.extra_remediation_question_count,
+                        };
+                        app.renderRemediationDecisionCard?.(moreData, {
+                            options: payload.options || [],
+                        });
+                    },
+                    placeholder: '也可以直接输入选项',
+                });
+                return;
+            }
             if (payload.interaction_kind === 'consolidation_choice') {
                 consumeAwaitingTurn(message, '等你决定是否巩固复习', {
                     role: 'prompt',
@@ -778,6 +816,19 @@
                     showInChat: false,
                     render: () => app.renderObjectiveTestCard?.(endPayload.options || [], endKind),
                     placeholder: '也可以直接输入答案，如 ABCD',
+                });
+                app.fetchHistory();
+                return;
+            }
+            if (endKind === 'remediation_decision') {
+                consumeAwaitingTurn(endPayload.prompt || message, '等你决定补救方式', {
+                    role: 'prompt',
+                    awaitingInput: true,
+                    showInChat: false,
+                    render: () => app.renderRemediationDecisionCard?.(endPayload.data || {}, {
+                        options: endPayload.options || [],
+                    }),
+                    placeholder: '也可以直接输入选项',
                 });
                 app.fetchHistory();
                 return;

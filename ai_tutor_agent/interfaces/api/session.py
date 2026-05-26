@@ -30,6 +30,7 @@ PENDING_INTERACTION_FLOW_STATUSES = {
     "awaiting_temporary_question",
     "awaiting_objective_answers",
     "awaiting_variant_answers",
+    "awaiting_remediation_decision",
     "awaiting_continue_or_homework_choice",
     "awaiting_consolidation_choice",
     "awaiting_homework_review_choice",
@@ -76,6 +77,11 @@ class TopicConfirmRequest(BaseModel):
 class InterruptConfirmRequest(BaseModel):
     thread_id: str
     confirmed: bool
+
+
+class ThinkingModeRequest(BaseModel):
+    thread_id: str
+    thinking_mode: bool
 
 
 def _thread_config(thread_id: str) -> dict:
@@ -190,6 +196,23 @@ def _run_graph_session(
                     "options": values.get("pending_interaction_options", []),
                     "recommended": values.get("pending_interaction_recommended", ""),
                 }
+                if pending_kind == "remediation_decision":
+                    rem_state = values.get("node_remediation_state") or {}
+                    wrong_explanations = values.get("wrong_question_explanations") or []
+                    end_data["data"] = {
+                        "score": rem_state.get("original_score", values.get("node_quiz_score", 0)),
+                        "pass_score": 80,
+                        "tier": "pass" if (rem_state.get("original_score", values.get("node_quiz_score", 0))) >= 80
+                                else "partial" if (rem_state.get("original_score", values.get("node_quiz_score", 0))) >= 60
+                                else "low",
+                        "wrong_count": len(wrong_explanations) or len(values.get("node_quiz_wrong_items") or []),
+                        "variant_rounds": rem_state.get("variant_rounds", 0),
+                        "max_variant_rounds": 2,
+                        "extra_remediation_question_count": rem_state.get("extra_remediation_question_count", 0),
+                        "max_extra_questions": 10,
+                        "same_objective_failures": rem_state.get("same_objective_failures", {}),
+                        "paused": False,
+                    }
         except Exception:
             end_data = {}
         runtime_context.event_sink.emit(make_event("session.end", "api", message="这一轮处理完成。", data=end_data))
@@ -711,6 +734,22 @@ async def confirm_interrupt(req: InterruptConfirmRequest, request: Request):
         req.confirmed,
     )
     return {"status": "ok", "message": "Interrupt confirmation received."}
+
+
+@router.post("/sessions/{thread_id}/thinking-mode")
+async def set_thinking_mode(thread_id: str, req: ThinkingModeRequest, request: Request):
+    """Toggle teaching reasoning transparency mode on/off."""
+    runtime = get_runtime(request)
+    _checkpoint_state_patch(
+        thread_id,
+        runtime,
+        {"thinking_mode": req.thinking_mode},
+    )
+    return {
+        "status": "ok",
+        "thinking_mode": req.thinking_mode,
+        "message": "已切换到思考模式" if req.thinking_mode else "已切换到标准模式",
+    }
 
 
 @router.get("/students/{student_id}/knowledge-graph")

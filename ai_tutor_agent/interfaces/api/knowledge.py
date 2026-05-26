@@ -10,6 +10,9 @@ from pathlib import Path, PureWindowsPath
 
 from fastapi import APIRouter, File, Request, UploadFile
 
+from ai_tutor_agent.core.learning_support import graph_node_sort_key
+
+from .error_correction import get_error_correction_service
 from .runtime import get_runtime
 
 
@@ -104,6 +107,10 @@ def _sanitize_graph_record(record: object, *, edge: bool = False) -> dict:
         for key in ("relation_strength", "weight"):
             if key in sanitized and sanitized[key] is None:
                 sanitized[key] = _graph_numeric_default(key)
+    else:
+        node_id = str(sanitized.get("node_id") or sanitized.get("id") or "").strip()
+        if node_id:
+            sanitized["display_index"] = graph_node_sort_key(node_id)[0]
     return sanitized
 
 
@@ -132,6 +139,53 @@ async def list_knowledge_files(request: Request):
     if not hasattr(knowledge_provider, "list_documents"):
         return {"items": []}
     return {"items": knowledge_provider.list_documents()}
+
+
+@router.get("/knowledge/question-bank")
+async def list_question_bank_items():
+    service = get_error_correction_service()
+    return {"items": service.list_question_bank()}
+
+
+@router.post("/knowledge/question-bank")
+async def save_question_bank_items(request: Request):
+    payload = await request.json() if request.headers.get("content-type", "").startswith("application/json") else {}
+    selected_ids = payload.get("selected_ids") or []
+    source_files = payload.get("source_files") or []
+    if selected_ids and not isinstance(selected_ids, list):
+        return {"status": "error", "message": "selected_ids 必须是数组"}
+    if source_files and not isinstance(source_files, list):
+        return {"status": "error", "message": "source_files 必须是数组"}
+
+    service = get_error_correction_service()
+    try:
+        result = service.save_questions_to_library(selected_ids=selected_ids, source_files=source_files)
+        return {
+            "status": "success",
+            "message": f"已保存 {result.get('saved_count', 0)} 道题目到题库",
+            **result,
+        }
+    except RuntimeError as exc:
+        return {"status": "error", "message": str(exc)}
+
+
+@router.delete("/knowledge/question-bank")
+async def clear_question_bank_items():
+    service = get_error_correction_service()
+    removed = service.clear_question_bank()
+    return {"status": "success", "removed": removed}
+
+
+@router.delete("/knowledge/question-bank/{library_id}")
+async def delete_question_bank_item(library_id: str):
+    service = get_error_correction_service()
+    try:
+        deleted = service.delete_question_bank_entry(library_id)
+    except ValueError as exc:
+        return {"status": "error", "message": str(exc)}
+    if not deleted:
+        return {"status": "error", "message": "题目不存在"}
+    return {"status": "success", "library_id": library_id}
 
 
 @router.post("/upload")
@@ -207,7 +261,10 @@ async def get_graph_b_data(request: Request):
     pipeline = getattr(runtime, "graph_rag_pipeline", None)
     if pipeline is None:
         return {"nodes": [], "edges": [], "meta": {"error": "GraphRAGPipeline not loaded"}}
-    nodes = [_sanitize_graph_record(node) for node in (pipeline.nodes or [])]
+    nodes = sorted(
+        (_sanitize_graph_record(node) for node in (pipeline.nodes or [])),
+        key=lambda node: graph_node_sort_key(node.get("node_id") or node.get("id")),
+    )
     edges = [_sanitize_graph_record(edge, edge=True) for edge in (pipeline.edges or [])]
     return {
         "nodes": nodes,

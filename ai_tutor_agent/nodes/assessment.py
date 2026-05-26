@@ -42,6 +42,17 @@ ASSESSMENT_DIMENSIONS = [
 
 SELF_SCORE_MAP = {"A": 25, "B": 50, "C": 75, "D": 100}
 
+
+def _is_insufficient_balance_error(exc: Exception) -> bool:
+    text = str(exc).lower()
+    return "insufficient balance" in text or "error code: 402" in text or "余额不足" in text
+
+
+def _friendly_llm_error_message(exc: Exception) -> str:
+    if _is_insufficient_balance_error(exc):
+        return "模型服务余额不足，本次先使用本地规则完成分析；请在设置中切换可用模型或充值后再继续使用 AI 增强。"
+    return "模型服务暂时不可用，本次先使用本地规则完成分析；你可以稍后重试或检查 API Key、模型和网络配置。"
+
 # ===========================================================================
 # 内部辅助：从图谱节点构建概念候选列表
 # ===========================================================================
@@ -288,7 +299,7 @@ dimension 必须是以下六者之一：
             make_event(
                 "session.warning",
                 "assessment_generator",
-                message=f"LLM 出题请求失败: {exc}",
+                message=f"{_friendly_llm_error_message(exc)}（测评题将使用本地兜底模板补齐。）",
             )
         )
         return []
@@ -1243,13 +1254,53 @@ def _generate_profile_report(
         )
     )
 
+    fallback_report = _fallback_profile_report(topic, concept_gaps, difficulty_level, strategy, start_label)
+    if llm is None:
+        event_sink.emit(make_event("node.stream", "user_profiler", message=fallback_report))
+        return fallback_report
+
     full_report = ""
-    for chunk in llm.stream([system_msg, human_msg]):
-        text = content_to_text(chunk.content)
-        if text:
-            full_report += text
-            event_sink.emit(
-                make_event("node.stream", "user_profiler", message=text)
+    try:
+        for chunk in llm.stream([system_msg, human_msg]):
+            text = content_to_text(chunk.content)
+            if text:
+                full_report += text
+                event_sink.emit(
+                    make_event("node.stream", "user_profiler", message=text)
+                )
+    except Exception as exc:
+        warning = _friendly_llm_error_message(exc)
+        event_sink.emit(
+            make_event(
+                "session.warning",
+                "user_profiler",
+                message=warning,
             )
+        )
+        event_sink.emit(make_event("node.stream", "user_profiler", message=fallback_report))
+        return fallback_report
+
+    if not full_report.strip():
+        event_sink.emit(make_event("node.stream", "user_profiler", message=fallback_report))
+        return fallback_report
 
     return full_report
+
+
+def _fallback_profile_report(
+    topic: str,
+    concept_gaps: dict,
+    difficulty_level: int,
+    strategy: str,
+    start_label: str,
+) -> str:
+    del strategy
+    weak = [c for c, v in concept_gaps.items() if v.get("gap_type") in {"overconfident", "aligned_low", "underconfident"}]
+    if weak:
+        finding = f"你在「{weak[0]}」附近还需要校准理解"
+    else:
+        finding = f"你对「{topic}」已有一定基础"
+    return (
+        f"我现在大致知道从哪里开始了，{finding}。"
+        f"接下来先从「{start_label or topic}」开始，把课程起点打稳。"
+    )

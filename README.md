@@ -241,14 +241,14 @@ PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 pytest -q
 
 ```bash
 PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 pytest -q
-# 424 passed, 5 warnings
+# 452 passed, 5 warnings
 ```
 
 2026-05-02 用户知识图谱、evidence 架构统一后完整回归：
 
 ```bash
 PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 pytest -q
-# 450 passed, 5 warnings
+# 452 passed, 5 warnings
 ```
 
 ## 离线检索评测（Recall@k / MRR / nDCG）

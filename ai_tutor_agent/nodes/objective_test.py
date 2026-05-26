@@ -8,7 +8,7 @@ from langchain_core.messages import HumanMessage, SystemMessage
 from ..core.events import make_event
 from ..core.output_format import parse_json_object
 from ..core.text import content_to_text
-from ..core.learning_support import update_student_state_after_evaluation, trim_message_history
+from ..core.learning_support import mutate_student_state_snapshot, update_student_state_after_evaluation, trim_message_history
 from ..core.ports import RuntimeContext
 from ..core.state import AgentState
 from ..knowledge_map.student_state import now_ts
@@ -52,11 +52,16 @@ def _normalize_question(raw: dict[str, Any], index: int, node_id: str) -> dict[s
     return {
         "question_id": str(raw.get("question_id") or raw.get("id") or f"AI-Q{index}").strip(),
         "node_id": str(raw.get("node_id") or node_id).strip(),
+        "node_name": str(raw.get("node_name") or "").strip(),
         "stem": stem,
         "options": options,
         "answer_key": answer_key,
         "explanation": str(raw.get("explanation") or raw.get("analysis") or "").strip(),
         "wrong_option_analysis": raw.get("wrong_option_analysis") or {},
+        "assessment_focus": str(raw.get("assessment_focus") or "").strip(),
+        "target_objective": str(raw.get("target_objective") or raw.get("objective") or "").strip(),
+        "misconception": str(raw.get("misconception") or raw.get("common_error") or "").strip(),
+        "difficulty": raw.get("difficulty") or raw.get("difficulty_level") or "",
         "source": str(raw.get("source") or "ai_generated").strip(),
     }
 
@@ -83,11 +88,116 @@ def _join_list(values: Any, *, limit: int = 6) -> str:
     return "；".join(_string_list(values)[:limit])
 
 
+def _first_nonempty(values: Any, *, fallback: str = "") -> str:
+    for value in _string_list(values):
+        if value:
+            return value
+    return fallback
+
+
+def _default_assessment_focus(state: AgentState | dict[str, Any], index: int = 1) -> str:
+    focuses = ["概念辨析", "判断依据", "常见误区", "应用迁移"]
+    explicit = str(state.get("assessment_focus") or state.get("graph_assessment_focus") or "").strip()
+    return explicit or focuses[(max(index, 1) - 1) % len(focuses)]
+
+
+def _default_target_objective(
+    state: AgentState | dict[str, Any],
+    *,
+    node_name: str = "",
+    concept: str = "",
+    index: int = 1,
+) -> str:
+    must_know = _clean_focus_candidates(state.get("graph_must_know"), limit=70)
+    if must_know:
+        return must_know[(max(index, 1) - 1) % len(must_know)]
+    objectives = _clean_focus_candidates(state.get("graph_learning_objectives"), limit=70)
+    if objectives:
+        return objectives[(max(index, 1) - 1) % len(objectives)]
+    if concept and not _is_unsuitable_focus_text(concept):
+        return _clip_text(str(concept), limit=70)
+    return _FALLBACK_TARGET_OBJECTIVES[(max(index, 1) - 1) % len(_FALLBACK_TARGET_OBJECTIVES)]
+
+
+def _default_misconception(
+    state: AgentState | dict[str, Any],
+    *,
+    fallback: str = "",
+    index: int = 1,
+) -> str:
+    errors = _clean_focus_candidates(state.get("graph_common_errors"), limit=70)
+    if errors:
+        return errors[(max(index, 1) - 1) % len(errors)]
+    if fallback and not _is_unsuitable_focus_text(fallback):
+        return _clip_text(fallback, limit=70)
+    return "混淆题干条件与当前节点的核心判断依据"
+
+
+def _question_difficulty(state: AgentState | dict[str, Any], index: int = 1) -> int:
+    raw = state.get("difficulty_level") or state.get("difficulty") or 3
+    try:
+        base = int(raw)
+    except (TypeError, ValueError):
+        base = 3
+    # 同一批题轻微错开难度，避免全部同质。
+    return max(1, min(5, base + ((max(index, 1) - 1) % 3) - 1))
+
+
+def _enrich_question_metadata(
+    item: dict[str, Any],
+    *,
+    state: AgentState | dict[str, Any],
+    index: int,
+    node_id: str,
+    node_name: str,
+) -> dict[str, Any]:
+    enriched = dict(item)
+    options = _normalize_options(enriched.get("options"))
+    if options:
+        enriched["options"] = options
+    concept = _first_nonempty(
+        _clean_focus_candidates(state.get("graph_must_know"), limit=70),
+        fallback=str(enriched.get("target_objective") or ""),
+    )
+    explicit_target = str(enriched.get("target_objective") or "").strip()
+    if _is_unsuitable_focus_text(explicit_target):
+        explicit_target = ""
+    explicit_misconception = str(enriched.get("misconception") or "").strip()
+    if _is_unsuitable_focus_text(explicit_misconception):
+        explicit_misconception = ""
+    enriched.setdefault("node_id", node_id)
+    enriched.setdefault("node_name", node_name)
+    enriched["assessment_focus"] = str(enriched.get("assessment_focus") or _default_assessment_focus(state, index)).strip()
+    enriched["target_objective"] = _clip_text(str(
+        explicit_target
+        or _default_target_objective(state, node_name=node_name, concept=concept, index=index)
+    ).strip(), limit=82)
+    enriched["misconception"] = _clip_text(str(
+        explicit_misconception
+        or _default_misconception(state, fallback=str(enriched.get("explanation") or ""), index=index)
+    ).strip(), limit=82)
+    enriched["difficulty"] = _question_difficulty({**dict(state), **enriched}, index)
+    enriched["wrong_option_analysis"] = dict(enriched.get("wrong_option_analysis") or {})
+    answer_key = _answer_key(enriched)
+    for key in ("A", "B", "C", "D"):
+        if key == answer_key or key in enriched["wrong_option_analysis"]:
+            continue
+        if key in options:
+            enriched["wrong_option_analysis"][key] = _build_actionable_wrong_option_analysis(
+                focus=enriched["target_objective"],
+                misconception=enriched["misconception"],
+                option_text=options.get(key, ""),
+            )
+    return enriched
+
+
 _PLACEHOLDER_TERMS = {
     "实例",
     "示例",
     "系统示例",
     "自动控制",
+    "一般概念",
+    "反馈控制系统",
     "核心概念",
     "核心判断",
     "本节点",
@@ -105,12 +215,85 @@ _LOW_QUALITY_PHRASES = (
     "第 4 个核心判断",
 )
 
+_MATERIAL_COPY_MARKERS = (
+    "由各种结构不同的元部件组成",
+    "从完成自动控制这一功能来看",
+    "具有一定功能的各种基本元件",
+    "图1-5",
+    "图 1-5",
+    "通常加到反馈控制系统上的外作用",
+)
+
+_FALLBACK_TARGET_OBJECTIVES = (
+    "区分被控对象与控制装置",
+    "识别给定量、输出量与扰动",
+    "判断反馈信号是否参与比较",
+    "说明比较元件如何形成偏差信号",
+    "判断前向通路与主反馈通路",
+)
+
 
 def _clip_text(value: str, *, limit: int = 82) -> str:
     text = " ".join(str(value or "").replace("\n", " ").split()).strip(" ；;。")
     if len(text) <= limit:
         return text
     return text[: limit - 1].rstrip("，、；;。 ") + "…"
+
+
+def _build_actionable_explanation(*, focus: str, misconception: str, correct_text: str = "") -> str:
+    target = _clip_text(focus or "当前节点的核心判断关系", limit=58)
+    trap = _clip_text(misconception or "只看表面元件名称，忽略题干给出的输入、输出和反馈关系", limit=58)
+    answer = _clip_text(correct_text, limit=60)
+    correct_part = f"正确理解：应先确定{target}"
+    if answer:
+        correct_part += f"，所以正确项是“{answer}”"
+    return _clip_text(
+        f"判断依据：从题干中的对象、信号方向和反馈/比较关系入手，而不是只看部件名称。"
+        f"{correct_part}。"
+        f"易错点：{trap}。",
+        limit=190,
+    )
+
+
+def _build_actionable_wrong_option_analysis(*, focus: str, misconception: str, option_text: str = "") -> str:
+    target = _clip_text(focus or "当前节点的核心判断关系", limit=52)
+    trap = _clip_text(misconception or "把题干表面描述当成判断依据", limit=48)
+    option = _clip_text(option_text, limit=44)
+    prefix = f"这个选项把“{option}”当成结论，" if option else "这个选项的问题在于"
+    return _clip_text(
+        f"{prefix}没有按{target}来判断；容易对应的误区是：{trap}。",
+        limit=96,
+    )
+
+
+def _is_unsuitable_focus_text(value: Any) -> bool:
+    text = " ".join(str(value or "").replace("\n", " ").split()).strip(" ；;。")
+    if not text or len(text) < 3:
+        return True
+    normalized = text.strip("“”\"'：:，,。；; ")
+    if normalized in _PLACEHOLDER_TERMS:
+        return True
+    if _has_low_quality_marker(text):
+        return True
+    if any(marker in text for marker in _MATERIAL_COPY_MARKERS):
+        return True
+    punctuation_count = sum(text.count(mark) for mark in ("，", "。", "；", ";", ","))
+    if len(text) > 72 and punctuation_count >= 2:
+        return True
+    return False
+
+
+def _clean_focus_candidates(values: Any, *, limit: int = 70) -> list[str]:
+    cleaned: list[str] = []
+    for raw in _string_list(values):
+        if _is_unsuitable_focus_text(raw):
+            continue
+        text = _clip_text(raw, limit=limit)
+        if _is_unsuitable_focus_text(text):
+            continue
+        if text not in cleaned:
+            cleaned.append(text)
+    return cleaned
 
 
 def _has_low_quality_marker(text: str) -> bool:
@@ -135,6 +318,27 @@ def _looks_like_placeholder_question(item: dict[str, Any]) -> bool:
         return True
     generic_hits = sum(1 for term in _PLACEHOLDER_TERMS if f"“{term}”" in combined or term in short_correct)
     return generic_hits >= 3 and not any(keyword in combined for keyword in ("比较元件", "反馈", "扰动", "前向通路", "测量", "被控"))
+
+
+def _question_quality_errors(item: dict[str, Any]) -> list[str]:
+    errors: list[str] = []
+    stem = str(item.get("stem") or "").strip()
+    options = _normalize_options(item.get("options"))
+    answer_key = _answer_key(item)
+    option_values = [str(value or "").strip() for value in options.values()]
+    if not stem:
+        errors.append("missing_stem")
+    if set(options.keys()) != {"A", "B", "C", "D"}:
+        errors.append("invalid_options")
+    if answer_key not in options:
+        errors.append("invalid_answer_key")
+    if len(set(option_values)) < len(option_values):
+        errors.append("duplicate_options")
+    if any(len(value) > 95 for value in option_values):
+        errors.append("option_too_long")
+    if _looks_like_placeholder_question(item):
+        errors.append("placeholder_or_template_text")
+    return errors
 
 
 def _build_objective_generation_context(state: AgentState, node_id: str, node_name: str) -> str:
@@ -171,11 +375,69 @@ def _build_objective_generation_context(state: AgentState, node_id: str, node_na
     return "\n".join(lines)
 
 
-def _generate_ai_questions(llm: Any, state: AgentState, node_id: str, node_name: str, count: int) -> list[dict[str, Any]]:
-    if llm is None:
-        return []
-    topic = str(state.get("current_topic") or state.get("turn_goal") or "").strip()
-    node_context = _build_objective_generation_context(state, node_id, node_name)
+def _build_question_blueprints(state: AgentState, node_id: str, node_name: str, count: int, *, start_index: int = 1) -> list[dict[str, Any]]:
+    must_know = _clean_focus_candidates(state.get("graph_must_know"), limit=70)
+    objectives = _clean_focus_candidates(state.get("graph_learning_objectives"), limit=70)
+    common_errors = _clean_focus_candidates(state.get("graph_common_errors"), limit=70)
+    concepts = must_know or objectives or list(_FALLBACK_TARGET_OBJECTIVES)
+    errors = common_errors or ["混淆题干条件与当前节点的核心判断依据"]
+    answer_keys = ("A", "B", "C", "D")
+    blueprints: list[dict[str, Any]] = []
+    for offset in range(max(0, count)):
+        index = start_index + offset
+        concept = concepts[offset % len(concepts)]
+        misconception = errors[offset % len(errors)]
+        blueprints.append(
+            {
+                "question_id": f"AI-Q{index}",
+                "assessment_focus": _default_assessment_focus(state, index),
+                "target_objective": _default_target_objective(state, node_name=node_name, concept=concept, index=index),
+                "misconception": _default_misconception(state, fallback=misconception, index=index),
+                "difficulty": _question_difficulty(state, index),
+                "answer_key": answer_keys[(index - 1) % len(answer_keys)],
+            }
+        )
+    return blueprints
+
+
+def _format_question_blueprints(blueprints: list[dict[str, Any]]) -> str:
+    return json.dumps(blueprints, ensure_ascii=False, indent=2)
+
+
+def _normalize_ai_question_batch(
+    raw_questions: list[dict[str, Any]],
+    *,
+    state: AgentState,
+    node_id: str,
+    node_name: str,
+    start_index: int = 1,
+) -> tuple[list[dict[str, Any]], list[dict[str, Any]]]:
+    accepted: list[dict[str, Any]] = []
+    rejected: list[dict[str, Any]] = []
+    for offset, raw in enumerate(raw_questions, start=0):
+        index = start_index + offset
+        item = _normalize_question(raw, index, node_id)
+        if item is None:
+            rejected.append({"index": index, "question_id": str(raw.get("question_id") or f"AI-Q{index}"), "errors": ["invalid_schema"]})
+            continue
+        enriched = _enrich_question_metadata(item, state=state, index=index, node_id=node_id, node_name=node_name)
+        errors = _question_quality_errors(enriched)
+        if errors:
+            rejected.append({"index": index, "question_id": enriched.get("question_id") or f"AI-Q{index}", "errors": errors})
+            continue
+        accepted.append(enriched)
+    return accepted, rejected
+
+
+def _build_objective_generation_messages(
+    *,
+    topic: str,
+    node_context: str,
+    node_id: str,
+    count: int,
+    blueprints: list[dict[str, Any]],
+    repair_rejections: list[dict[str, Any]] | None = None,
+) -> list[object]:
     system_msg = SystemMessage(
         content=(
             "你是严谨的课程测评出题专家。请只输出合法 JSON，不要 Markdown。"
@@ -183,11 +445,23 @@ def _generate_ai_questions(llm: Any, state: AgentState, node_id: str, node_name:
             "题目必须紧扣当前节点字段，检验学习者是否理解本节点的具体概念、条件、因果关系和常见误区。"
         )
     )
+    repair_note = ""
+    if repair_rejections:
+        repair_note = (
+            "\n\n【上一轮被拒绝的题目】\n"
+            + json.dumps(repair_rejections, ensure_ascii=False, indent=2)
+            + "\n请只补这些缺口，不要复用被拒绝题目的题干或选项。"
+        )
     human_msg = HumanMessage(
         content=f"""请为当前知识图谱节点生成 {count} 道四选一客观题。
 主题：{topic or '未指定'}
 当前节点结构化字段：
 {node_context or '无'}
+
+【出题蓝图】
+下面每一项就是一道题的命题约束。必须逐条遵守 assessment_focus、target_objective、misconception、difficulty 和 answer_key；尤其 answer_key 不能自行改成全 A。
+{_format_question_blueprints(blueprints)}
+{repair_note}
 
 要求：
 1. 每题必须是 A/B/C/D 四选一。
@@ -208,57 +482,273 @@ def _generate_ai_questions(llm: Any, state: AgentState, node_id: str, node_name:
       "stem": "题干",
       "options": {{"A": "...", "B": "...", "C": "...", "D": "..."}},
       "answer_key": "A",
-      "explanation": "为什么正确答案成立，以及各干扰项对应的常见误区"
+      "assessment_focus": "概念辨析/判断依据/常见误区/应用迁移之一",
+      "target_objective": "本题检验的具体学习目标或必会点",
+      "misconception": "本题主要针对的常见误区",
+      "difficulty": 1-5,
+      "explanation": "为什么正确答案成立",
+      "wrong_option_analysis": {{"A":"若 A 错，说明错在哪里", "B":"...", "C":"...", "D":"..."}}
     }}
   ]
 }}
 """,
     )
+    return [system_msg, human_msg]
+
+
+def _generate_ai_questions(llm: Any, state: AgentState, node_id: str, node_name: str, count: int) -> list[dict[str, Any]]:
+    if llm is None:
+        return []
+    topic = str(state.get("current_topic") or state.get("turn_goal") or "").strip()
+    node_context = _build_objective_generation_context(state, node_id, node_name)
+    blueprints = _build_question_blueprints(state, node_id, node_name, count)
+    messages = _build_objective_generation_messages(
+        topic=topic,
+        node_context=node_context,
+        node_id=node_id,
+        count=count,
+        blueprints=blueprints,
+    )
     try:
-        response = llm.invoke([system_msg, human_msg])
+        response = llm.invoke(messages)
     except Exception:
         return []
     response_text = content_to_text(getattr(response, "content", response))
     parsed = parse_json_object(response_text)
-    normalized: list[dict[str, Any]] = []
-    for index, raw in enumerate(_extract_question_list(parsed), start=1):
-        item = _normalize_question(raw, index, node_id)
-        if item and not _looks_like_placeholder_question(item):
-            normalized.append(item)
+    normalized, rejected = _normalize_ai_question_batch(
+        _extract_question_list(parsed),
+        state=state,
+        node_id=node_id,
+        node_name=node_name,
+        start_index=1,
+    )
+    if rejected and len(normalized) < count:
+        repair_count = count - len(normalized)
+        repair_blueprints = _build_question_blueprints(
+            state,
+            node_id,
+            node_name,
+            repair_count,
+            start_index=len(normalized) + 1,
+        )
+        repair_messages = _build_objective_generation_messages(
+            topic=topic,
+            node_context=node_context,
+            node_id=node_id,
+            count=repair_count,
+            blueprints=repair_blueprints,
+            repair_rejections=rejected,
+        )
+        try:
+            repair_response = llm.invoke(repair_messages)
+        except Exception:
+            repair_response = None
+        if repair_response is not None:
+            repair_text = content_to_text(getattr(repair_response, "content", repair_response))
+            repair_parsed = parse_json_object(repair_text)
+            repaired, _repair_rejected = _normalize_ai_question_batch(
+                _extract_question_list(repair_parsed),
+                state=state,
+                node_id=node_id,
+                node_name=node_name,
+                start_index=len(normalized) + 1,
+            )
+            normalized.extend(repaired)
     return normalized[:count]
 
 
 def _fallback_questions(node_id: str, node_name: str, k: int = 10, state: AgentState | None = None) -> list[dict[str, Any]]:
     state = state or {}
     title = node_name or node_id or "当前节点"
-    objectives = [_clip_text(item, limit=72) for item in _string_list(state.get("graph_learning_objectives"))]
-    must_know = [_clip_text(item, limit=76) for item in _string_list(state.get("graph_must_know"))]
-    common_errors = [_clip_text(item, limit=76) for item in _string_list(state.get("graph_common_errors"))]
-    content = str(state.get("node_content_context") or "").strip()
-    content_sentences = [
-        _clip_text(part, limit=76)
-        for part in content.replace("；", "。").replace(";", "。").split("。")
-        if _clip_text(part, limit=76)
+    objectives = _clean_focus_candidates(state.get("graph_learning_objectives"), limit=46)
+    must_know = _clean_focus_candidates(state.get("graph_must_know"), limit=46)
+    common_errors = _clean_focus_candidates(state.get("graph_common_errors"), limit=46)
+
+    has_explicit_focuses = bool(must_know or objectives)
+    focuses = must_know or objectives
+    if not focuses:
+        focuses = list(_FALLBACK_TARGET_OBJECTIVES)
+    errors = common_errors or [
+        "只看外部动作，忽略测量反馈",
+        "把开环控制误认为闭环控制",
+        "把扰动当成有用输入",
+        "忽略比较元件形成偏差信号的作用",
+        "只按元件名称判断，不分析信号通路",
     ]
 
-    seeds = must_know or objectives or content_sentences or [f"识别{title}中的关键反馈关系"]
-    objectives = objectives or [f"能依据材料判断{title}的组成关系"]
-    common_errors = common_errors or ["只看外部动作，忽略测量反馈和比较环节"]
-    context_a = content_sentences[0] if content_sentences else seeds[0]
-    context_b = content_sentences[1] if len(content_sentences) > 1 else objectives[0]
+    templates = [
+        {
+            "focus": "区分被控对象与控制装置",
+            "stem": "分析一个恒温箱自动调温系统时，哪一项最准确地区分了被控对象和控制装置？",
+            "correct": "恒温箱内温度变化过程是被控对象，温控器和执行加热机构属于控制装置",
+            "distractors": [
+                "设定温度是被控对象，箱体材料是控制装置",
+                "只要能发热的部件都是被控对象，传感器不参与控制",
+                "外界气温扰动越大，被控对象和控制装置就可以互换",
+            ],
+        },
+        {
+            "focus": "识别输入、输出与扰动",
+            "stem": "在水箱液位控制系统中，下列哪组对应关系最合理？",
+            "correct": "期望液位是给定输入，实际液位是输出，进水压力波动可视为扰动",
+            "distractors": [
+                "实际液位是给定输入，期望液位是扰动",
+                "只要水泵工作，系统就没有输出量",
+                "进水压力波动是有用输入，不会影响控制效果",
+            ],
+        },
+        {
+            "focus": "判断反馈是否参与比较",
+            "stem": "判断一个速度控制系统是否属于反馈控制时，最关键的依据是什么？",
+            "correct": "是否测量实际速度，并将测量结果送回与给定速度比较",
+            "distractors": [
+                "是否使用了电动机作为执行元件",
+                "是否存在人为设定的目标速度，但不关心实际速度",
+                "是否控制器名称中出现“自动”二字",
+            ],
+        },
+        {
+            "focus": "理解偏差信号",
+            "stem": "典型负反馈控制中，比较元件的主要作用是什么？",
+            "correct": "比较给定量与反馈量，形成用于调节控制器的偏差信号",
+            "distractors": [
+                "直接放大输出量，使输出越大越稳定",
+                "只记录扰动大小，不影响控制器动作",
+                "把传感器信号完全丢弃，避免影响输入",
+            ],
+        },
+        {
+            "focus": "判断闭环控制特征",
+            "stem": "下列哪种描述最能体现闭环控制区别于开环控制的特点？",
+            "correct": "控制动作会根据输出测量结果与目标值之间的偏差不断调整",
+            "distractors": [
+                "控制器只按预设时间表动作，不需要检测输出",
+                "系统越复杂就一定是闭环控制",
+                "只要存在扰动，系统就自动成为闭环控制",
+            ],
+        },
+        {
+            "focus": "识别测量元件作用",
+            "stem": "在电机转速自动调节系统中，测速发电机或编码器的核心作用是什么？",
+            "correct": "测量实际转速，并把测量结果作为反馈信号送回比较环节",
+            "distractors": [
+                "直接产生目标转速，不需要控制器参与",
+                "只负责提供电源，和转速调节无关",
+                "把负载扰动完全消除，因此系统不再需要反馈",
+            ],
+        },
+        {
+            "focus": "区分有用输入与扰动",
+            "stem": "在室温控制系统中，哪一项最准确地区分了有用输入和扰动？",
+            "correct": "设定温度是有用输入，室外温度突然变化可视为扰动",
+            "distractors": [
+                "室外温度变化是有用输入，设定温度是扰动",
+                "只要空调能运行，系统就不存在扰动",
+                "扰动只会作用在输入端，不可能影响被控对象",
+            ],
+        },
+        {
+            "focus": "理解前向通路",
+            "stem": "在典型反馈系统方框图中，前向通路通常指什么？",
+            "correct": "信号从输入端经过控制装置到达输出端的传输路径",
+            "distractors": [
+                "输出信号经测量元件回到输入端的路径",
+                "只包含扰动进入系统的路径",
+                "只要有箭头的线都称为前向通路",
+            ],
+        },
+        {
+            "focus": "理解主反馈通路",
+            "stem": "一个系统的输出经测量元件送回输入端参与比较，这条路径通常称为什么？",
+            "correct": "主反馈通路",
+            "distractors": [
+                "前向通路",
+                "有用输入通路",
+                "扰动补偿通路",
+            ],
+        },
+        {
+            "focus": "判断负反馈方向",
+            "stem": "如果实际温度高于设定温度，负反馈温控系统通常应如何调节加热功率？",
+            "correct": "降低加热功率，使温度逐步回到设定值附近",
+            "distractors": [
+                "继续增大加热功率，使温度更快升高",
+                "完全忽略实际温度，只按固定功率加热",
+                "把设定温度改成当前实际温度，避免产生偏差",
+            ],
+        },
+    ]
+
+    def template_match_score(template: dict[str, Any], focus: str) -> int:
+        focus_text = str(focus or "")
+        if not focus_text:
+            return 0
+        template_text = " ".join(
+            [
+                str(template.get("focus") or ""),
+                str(template.get("stem") or ""),
+                str(template.get("correct") or ""),
+                *(str(item) for item in template.get("distractors", [])),
+            ]
+        )
+        keywords = (
+            "被控对象",
+            "控制装置",
+            "给定",
+            "输入",
+            "输出",
+            "扰动",
+            "反馈",
+            "测量",
+            "比较",
+            "偏差",
+            "闭环",
+            "开环",
+            "前向通路",
+            "主反馈",
+            "负反馈",
+            "控制器",
+            "执行",
+        )
+        return sum(1 for keyword in keywords if keyword in focus_text and keyword in template_text)
+
+    used_templates: set[int] = set()
+
+    def choose_template(focus: str, fallback_index: int) -> tuple[int, dict[str, Any]]:
+        scored = [
+            (
+                template_match_score(template, focus),
+                0 if index not in used_templates else -1,
+                -abs(index - fallback_index),
+                index,
+            )
+            for index, template in enumerate(templates)
+        ]
+        scored.sort(reverse=True)
+        best_score, _unused_bonus, _distance, best_index = scored[0]
+        best_template = templates[best_index]
+        if best_score <= 0:
+            best_index = fallback_index % len(templates)
+            best_template = templates[best_index]
+        used_templates.add(best_index)
+        if len(used_templates) >= len(templates):
+            used_templates.clear()
+        return best_index, best_template
 
     questions: list[dict[str, Any]] = []
     for i in range(1, k + 1):
-        concept = seeds[(i - 1) % len(seeds)]
-        objective = objectives[(i - 1) % len(objectives)]
-        error_seed = common_errors[(i - 1) % len(common_errors)]
+        focus_seed = focuses[(i - 1) % len(focuses)] if focuses else ""
+        if has_explicit_focuses:
+            _template_index, base = choose_template(focus_seed, i - 1)
+            focus = focus_seed if template_match_score(base, focus_seed) > 0 else base["focus"]
+        else:
+            base = templates[(i - 1) % len(templates)]
+            focus = base["focus"]
+        error_seed = errors[(i - 1) % len(errors)]
         correct_key = ("A", "B", "C", "D")[(i - 1) % 4]
-        correct_text = _clip_text(f"{concept}，这是判断{title}是否成立的关键关系", limit=88)
-        distractors = [
-            _clip_text(f"只保留外部动作描述，忽略{error_seed}", limit=88),
-            _clip_text(f"把目标任务说成{objective}，但没有说明{concept}", limit=88),
-            _clip_text(f"把{context_b}当作唯一依据，遗漏{concept}这一判据", limit=88),
-        ]
+        # 学生可见选项必须是自然答案；不要把“关键在于/典型误区是”等命题元信息写进选项。
+        correct_text = _clip_text(str(base["correct"]), limit=88)
+        distractors = [_clip_text(text, limit=88) for text in base["distractors"]]
         option_keys = ["A", "B", "C", "D"]
         options: dict[str, str] = {}
         distractor_iter = iter(distractors)
@@ -268,12 +758,24 @@ def _fallback_questions(node_id: str, node_name: str, k: int = 10, state: AgentS
             {
                 "question_id": f"AUTO-{node_id or 'NODE'}-{i}",
                 "node_id": node_id,
-                "stem": _clip_text(f"根据{title}的材料，下列哪项最准确体现“{concept}”？", limit=90),
+                "stem": _clip_text(str(base["stem"]), limit=96),
                 "options": options,
                 "answer_key": correct_key,
-                "explanation": _clip_text(f"正确项点明了{concept}。本题易错点是{error_seed}。材料依据：{context_a}", limit=150),
+                "assessment_focus": _default_assessment_focus(state, i),
+                "target_objective": _default_target_objective(state, node_name=title, concept=focus, index=i),
+                "misconception": _default_misconception(state, fallback=error_seed, index=i),
+                "difficulty": _question_difficulty(state, i),
+                "explanation": _build_actionable_explanation(
+                    focus=focus,
+                    misconception=error_seed,
+                    correct_text=correct_text,
+                ),
                 "wrong_option_analysis": {
-                    key: _clip_text(f"该项缺少或误用了“{concept}”这一判断条件。", limit=80)
+                    key: _build_actionable_wrong_option_analysis(
+                        focus=focus,
+                        misconception=error_seed,
+                        option_text=options.get(key, ""),
+                    )
                     for key in ("A", "B", "C", "D")
                     if key != correct_key
                 },
@@ -338,7 +840,34 @@ def _quiz_review_history_entry(
     answers: dict[str, str],
     score: int,
     passed: bool,
+    pass_score: int = 80,
+    node_id: str = "",
+    node_name: str = "",
 ) -> dict[str, Any]:
+    reviewed_items: list[dict[str, Any]] = []
+    correct_count = 0
+    for index, item in enumerate(items, start=1):
+        qid = _question_id(item, index)
+        expected = _answer_key(item)
+        user_answer = _normalize_answer(answers.get(qid) or answers.get(str(index)) or answers.get(f"Q{index}"))
+        is_correct = bool(expected) and user_answer == expected
+        if is_correct:
+            correct_count += 1
+        reviewed_items.append(
+            {
+                **item,
+                "question_id": qid,
+                "display_index": index,
+                "chosen_answer": user_answer,
+                "correct_answer": expected,
+                "is_correct": is_correct,
+                "locked": True,
+                "submitted": True,
+                "explanation_ready": bool(item.get("explanation")),
+            }
+        )
+    question_count = len(items)
+    wrong_count = max(0, question_count - correct_count)
     return {
         "role": "assistant",
         "kind": "objective_quiz_review",
@@ -352,10 +881,21 @@ def _quiz_review_history_entry(
         "data": {
             "kind": kind,
             "title": title,
-            "questions": items,
+            "quiz_id": f"{kind}-{node_id or 'node'}-{now_ts()}",
+            "quiz_kind": kind,
+            "node_id": node_id,
+            "node_name": node_name,
+            "submitted_at": now_ts(),
+            "questions": reviewed_items,
             "answers": answers,
             "score": score,
+            "pass_score": pass_score,
             "passed": passed,
+            "question_count": question_count,
+            "correct_count": correct_count,
+            "wrong_count": wrong_count,
+            "locked": True,
+            "review_state": "graded",
         },
     }
 
@@ -366,15 +906,22 @@ def build_objective_test_generator_node(runtime: RuntimeContext, llm: Any | None
     def node(state: AgentState) -> dict:
         node_id = str(state.get("current_node_id") or state.get("graph_anchor_id") or "").strip()
         node_name = str(state.get("current_node_name") or state.get("graph_anchor_title") or "").strip()
+        quiz_kind = str(state.get("node_quiz_kind") or "").strip()
+        # 短复测只出 5 题
+        effective_count = 5 if quiz_kind == "node_retest" else count
         provider = getattr(runtime, "question_bank_provider", None)
         questions: list[dict[str, Any]] = []
         if provider is not None and hasattr(provider, "get_objective_questions"):
-            questions = list(provider.get_objective_questions(node_id, k=count) or [])
+            questions = list(provider.get_objective_questions(node_id, k=effective_count) or [])
         if not questions:
-            questions = _generate_ai_questions(llm, state, node_id, node_name, count)
+            questions = _generate_ai_questions(llm, state, node_id, node_name, effective_count)
         if not questions:
-            questions = _fallback_questions(node_id, node_name, count, state)
-        questions = questions[:count]
+            questions = _fallback_questions(node_id, node_name, effective_count, state)
+        questions = [
+            _enrich_question_metadata(dict(item), state=state, index=index, node_id=node_id, node_name=node_name)
+            for index, item in enumerate(questions[:effective_count], start=1)
+            if isinstance(item, dict)
+        ]
 
         prompt = f"请完成节点【{node_name or node_id}】的 {len(questions)} 道客观选择题。"
         event_sink.emit(
@@ -385,16 +932,18 @@ def build_objective_test_generator_node(runtime: RuntimeContext, llm: Any | None
                 data={"questions": questions, "requires_input": True},
             )
         )
+        used_kind = "objective_test_answers" if quiz_kind != "node_retest" else "node_retest"
         return {
             "node_quiz_items": questions,
             "node_quiz_answers": {},
             "node_quiz_wrong_items": [],
             "node_quiz_score": 0,
+            "node_quiz_kind": used_kind,
             "variant_questions": [],
             "flow_status": "awaiting_objective_answers",
-            "learning_phase": "node_quiz_batch",
+            "learning_phase": "node_quiz_retest" if quiz_kind == "node_retest" else "node_quiz_batch",
             "learning_resume_target": "objective_test_scorer",
-            "learning_resume_reason": "objective_questions_generated",
+            "learning_resume_reason": "retest_questions_generated" if quiz_kind == "node_retest" else "objective_questions_generated",
             "pending_interaction_kind": "objective_test_answers",
             "pending_interaction_prompt": prompt,
             "pending_interaction_options": questions,
@@ -415,33 +964,35 @@ def build_objective_test_scorer_node(runtime: RuntimeContext, *, pass_score: int
             return {}
         student_id = str(state.get("student_id") or "default_student").strip() or "default_student"
         node_id = str(state.get("current_node_id") or state.get("graph_anchor_id") or "").strip()
-        student_state = store.load(student_id)
-        attempts = list(getattr(student_state, "question_attempts", []) or [])
-        for index, item in enumerate(items, start=1):
-            qid = _question_id(item, index)
-            answer = answers.get(qid) or answers.get(str(index)) or answers.get(f"Q{index}") or ""
-            attempts.append(
-                {
-                    "question_id": qid,
-                    "node_id": node_id,
-                    "answer": answer,
-                    "expected": _answer_key(item),
-                    "quiz_score": score,
-                    "quiz_passed": passed,
-                    "created_at": now_ts(),
-                }
-            )
-        try:
+
+        def apply_patch(student_state) -> None:
+            attempts = list(getattr(student_state, "question_attempts", []) or [])
+            for index, item in enumerate(items, start=1):
+                qid = _question_id(item, index)
+                answer = answers.get(qid) or answers.get(str(index)) or answers.get(f"Q{index}") or ""
+                attempts.append(
+                    {
+                        "question_id": qid,
+                        "node_id": node_id,
+                        "answer": answer,
+                        "expected": _answer_key(item),
+                        "quiz_score": score,
+                        "quiz_passed": passed,
+                        "created_at": now_ts(),
+                    }
+                )
             student_state.question_attempts = attempts[-200:]
-        except Exception:
-            return {}
-        store.save(student_state)
-        if hasattr(student_state, "to_dict"):
-            return dict(student_state.to_dict() or {})
-        return {}
+
+        return mutate_student_state_snapshot(store, student_id, apply_patch)
 
     def node(state: AgentState) -> dict:
-        items = list(state.get("node_quiz_items") or [])
+        raw_items = [item for item in list(state.get("node_quiz_items") or []) if isinstance(item, dict)]
+        node_id = str(state.get("current_node_id") or state.get("graph_anchor_id") or "").strip()
+        node_name = str(state.get("current_node_name") or state.get("graph_anchor_title") or "").strip()
+        items = [
+            _enrich_question_metadata(dict(item), state=state, index=index, node_id=node_id, node_name=node_name)
+            for index, item in enumerate(raw_items, start=1)
+        ]
         answers = dict(state.get("node_quiz_answers") or {})
         pending_answer = state.get("pending_interaction_answer")
         if pending_answer and not answers:
@@ -470,7 +1021,6 @@ def build_objective_test_scorer_node(runtime: RuntimeContext, *, pass_score: int
 
         score = int(round((correct / total) * 100)) if total else 0
         passed = score >= pass_score
-        node_id = str(state.get("current_node_id") or state.get("graph_anchor_id") or "").strip()
         student_id = str(state.get("student_id") or "default_student").strip() or "default_student"
         updated_snapshot = update_student_state_after_evaluation(
             getattr(runtime, "student_state_store", None),
@@ -487,7 +1037,11 @@ def build_objective_test_scorer_node(runtime: RuntimeContext, *, pass_score: int
         if attempt_snapshot:
             updated_snapshot = {**updated_snapshot, "question_attempts": attempt_snapshot.get("question_attempts", [])}
 
-        quiz_kind = str(state.get("pending_interaction_kind") or "objective_test_answers").strip() or "objective_test_answers"
+        quiz_kind = str(
+            state.get("node_quiz_kind")
+            or state.get("pending_interaction_kind")
+            or "objective_test_answers"
+        ).strip() or "objective_test_answers"
         review_title = "变式练习" if quiz_kind == "variant_test_answers" else "客观测评"
         review_entry = _quiz_review_history_entry(
             title=review_title,
@@ -496,6 +1050,9 @@ def build_objective_test_scorer_node(runtime: RuntimeContext, *, pass_score: int
             answers=answers,
             score=score,
             passed=passed,
+            pass_score=pass_score,
+            node_id=node_id,
+            node_name=node_name,
         )
         event_sink.emit(
             make_event(
@@ -527,7 +1084,81 @@ def build_objective_test_scorer_node(runtime: RuntimeContext, *, pass_score: int
                     entry["turn_count"] = int(entry.get("turn_count") or 0) + 1
                     break
 
+        # ── 根据 quiz_kind 和分数设定补救状态 ──
+        is_variant = quiz_kind == "variant_test_answers"
+        is_retest = quiz_kind == "node_retest"
+        current_remediation = dict(state.get("node_remediation_state") or {})
         if not passed:
+            if is_variant:
+                # 变式未通过：递增轮次和额外题数
+                current_remediation["variant_rounds"] = current_remediation.get("variant_rounds", 0) + 1
+                current_remediation["extra_remediation_question_count"] = current_remediation.get(
+                    "extra_remediation_question_count", 0
+                ) + len(wrong_items)
+                current_remediation["status"] = "variant_failed"
+            elif is_retest:
+                # 短复测未通过 → 回到补救决策
+                current_remediation["status"] = "retest_failed"
+                return {
+                    "node_quiz_answers": answers,
+                    "node_quiz_wrong_items": wrong_items,
+                    "node_quiz_score": score,
+                    "score": score,
+                    "feedback": f"短复测得分 {score}，未达到 80 分。需返回补救决策。",
+                    "wrong_question_explanations": [],
+                    "variant_questions": [],
+                    "flow_status": "normal",
+                    "learning_phase": "node_quiz_retry",
+                    "learning_resume_target": "remediation_decision",
+                    "learning_resume_reason": "retest_failed",
+                    "pending_interaction_kind": "",
+                    "pending_interaction_prompt": "",
+                    "pending_interaction_options": [],
+                    "pending_interaction_recommended": "",
+                    "pending_interaction_answer": "",
+                    "node_quiz_kind": "",
+                    "current_node_status": "quizzing",
+                    "student_state_snapshot": updated_snapshot or state.get("student_state_snapshot") or {},
+                    "user_knowledge_graph": user_kg,
+                    "node_remediation_state": current_remediation,
+                    "message_history": trim_message_history(message_history),
+                }
+            else:
+                # 原始测试未通过：记录原始分数
+                current_remediation["original_score"] = score
+                current_remediation["extra_remediation_question_count"] = current_remediation.get(
+                    "extra_remediation_question_count", 0
+                ) + len(wrong_items)
+                current_remediation["status"] = "scored"
+
+            if is_variant:
+                # 变式未通过 → 回到补救决策（不再重复讲解）
+                feedback = f"变式得分 {score}，未达到 {pass_score}。已记录变式失败，将决定是否继续补救或暂停。"
+                return {
+                    "node_quiz_answers": answers,
+                    "node_quiz_wrong_items": wrong_items,
+                    "node_quiz_score": score,
+                    "score": score,
+                    "feedback": feedback,
+                    "wrong_question_explanations": [],
+                    "variant_questions": [],
+                    "flow_status": "normal",
+                    "learning_phase": "node_quiz_variant_retry",
+                    "learning_resume_target": "remediation_decision",
+                    "learning_resume_reason": "variant_quiz_failed",
+                    "pending_interaction_kind": "",
+                    "pending_interaction_prompt": "",
+                    "pending_interaction_options": [],
+                    "pending_interaction_recommended": "",
+                    "pending_interaction_answer": "",
+                    "node_quiz_kind": "",
+                    "current_node_status": "quizzing",
+                    "student_state_snapshot": updated_snapshot or state.get("student_state_snapshot") or {},
+                    "user_knowledge_graph": user_kg,
+                    "node_remediation_state": current_remediation,
+                    "message_history": trim_message_history(message_history),
+                }
+
             return {
                 "node_quiz_answers": answers,
                 "node_quiz_wrong_items": wrong_items,
@@ -543,13 +1174,82 @@ def build_objective_test_scorer_node(runtime: RuntimeContext, *, pass_score: int
                 "pending_interaction_kind": "",
                 "pending_interaction_prompt": "",
                 "pending_interaction_options": [],
+                "pending_interaction_recommended": "",
                 "pending_interaction_answer": "",
+                "node_quiz_kind": "",
                 "current_node_status": "quizzing",
                 "student_state_snapshot": updated_snapshot or state.get("student_state_snapshot") or {},
                 "user_knowledge_graph": user_kg,
+                "node_remediation_state": current_remediation,
                 "message_history": trim_message_history(message_history),
             }
 
+        # ── 测验通过 ──
+        if is_variant:
+            # 变式通过 → 检查原始分数决定是否短复测
+            original_score = current_remediation.get("original_score", state.get("node_quiz_score", 0))
+            current_remediation["status"] = "passed_after_remediation"
+            if original_score >= 70:
+                feedback = f"变式得分 {score}，通过。原测验 {original_score} 分 >= 70，可以进入下一节点。"
+                next_target = "next_node_planner"
+                next_reason = "variant_passed_next_node"
+            else:
+                feedback = f"变式得分 {score}，通过。但原测验 {original_score} 分 < 70，需完成 5 题短复测。"
+                next_target = "objective_test_generator"
+                next_reason = "variant_passed_needs_retest"
+            return {
+                "node_quiz_answers": answers,
+                "node_quiz_wrong_items": wrong_items,
+                "node_quiz_score": score,
+                "score": score,
+                "feedback": feedback,
+                "variant_questions": [],
+                "flow_status": "normal",
+                "learning_phase": "node_passed" if original_score >= 70 else "node_quiz_retest",
+                "learning_resume_target": next_target,
+                "learning_resume_reason": next_reason,
+                "pending_interaction_kind": "",
+                "pending_interaction_prompt": "",
+                "pending_interaction_options": [],
+                "pending_interaction_recommended": "",
+                "pending_interaction_answer": "",
+                "node_quiz_kind": "node_retest" if original_score < 70 else "",
+                "current_node_status": "passed" if original_score >= 70 else "quizzing",
+                "student_state_snapshot": updated_snapshot or state.get("student_state_snapshot") or {},
+                "user_knowledge_graph": user_kg,
+                "node_remediation_state": current_remediation,
+                "message_history": trim_message_history(message_history),
+            }
+
+        if is_retest:
+            # 短复测通过 → 允许进入下一节点
+            current_remediation["status"] = "passed_after_retest"
+            feedback = f"短复测得分 {score}，通过。可以进入下一节点。"
+            return {
+                "node_quiz_answers": answers,
+                "node_quiz_wrong_items": wrong_items,
+                "node_quiz_score": score,
+                "score": score,
+                "feedback": feedback,
+                "variant_questions": [],
+                "flow_status": "normal",
+                "learning_phase": "node_passed",
+                "learning_resume_target": "next_node_planner",
+                "learning_resume_reason": "retest_passed",
+                "pending_interaction_kind": "",
+                "pending_interaction_prompt": "",
+                "pending_interaction_options": [],
+                "pending_interaction_recommended": "",
+                "pending_interaction_answer": "",
+                "node_quiz_kind": "",
+                "current_node_status": "passed",
+                "student_state_snapshot": updated_snapshot or state.get("student_state_snapshot") or {},
+                "user_knowledge_graph": user_kg,
+                "node_remediation_state": current_remediation,
+                "message_history": trim_message_history(message_history),
+            }
+
+        # 原始测验通过
         return {
             "node_quiz_answers": answers,
             "node_quiz_wrong_items": wrong_items,
@@ -561,6 +1261,12 @@ def build_objective_test_scorer_node(runtime: RuntimeContext, *, pass_score: int
             "learning_phase": "node_passed",
             "learning_resume_target": "next_node_planner",
             "learning_resume_reason": "objective_quiz_passed",
+            "pending_interaction_kind": "",
+            "pending_interaction_prompt": "",
+            "pending_interaction_options": [],
+            "pending_interaction_recommended": "",
+            "pending_interaction_answer": "",
+            "node_quiz_kind": "",
             "current_node_status": "passed",
             "student_state_snapshot": updated_snapshot or state.get("student_state_snapshot") or {},
             "user_knowledge_graph": user_kg,

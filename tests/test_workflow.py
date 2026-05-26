@@ -76,6 +76,22 @@ def test_route_after_topic_confirmer_can_go_directly_to_tutor():
     assert decision == "tutor"
 
 
+def test_route_after_topic_confirmer_can_skip_assessment_to_initial_node_selector():
+    decision = workflow_module.route_after_topic_confirmer(
+        {"flow_status": "normal", "learning_resume_target": "initial_node_selector"}
+    )
+
+    assert decision == "initial_node_selector"
+
+
+def test_route_after_assessment_generator_can_skip_existing_assessment_to_initial_node_selector():
+    decision = workflow_module.route_after_assessment_generator(
+        {"flow_status": "normal", "learning_resume_target": "initial_node_selector"}
+    )
+
+    assert decision == "initial_node_selector"
+
+
 def test_route_after_tutor_now_goes_to_post_lesson_choice():
     decision = workflow_module.route_after_tutor({"interrupt_query": ""})
 

@@ -140,7 +140,7 @@ class KnowledgeMapDebugger:
         print("  set_current KM007")
         print("  mark_visited KM007")
         print("  mark_wrong KM012")
-        print("  mastery KM007 0.75")
+        print("  mastery KM007 75")
         print("  recommend")
         print("  review")
         print("  exit")
@@ -450,7 +450,7 @@ class KnowledgeMapDebugger:
     def _set_mastery(self, arg: str) -> None:
         parts = arg.split()
         if len(parts) != 2:
-            print("⚠️ 用法: mastery KM007 0.75")
+            print("⚠️ 用法: mastery KM007 75")
             return
 
         node_key, score_text = parts
@@ -459,7 +459,7 @@ class KnowledgeMapDebugger:
         try:
             score = float(score_text)
         except ValueError:
-            print("⚠️ 掌握度必须是数字，比如 0.75")
+            print("⚠️ 掌握度必须是 0-100 的数字，比如 75")
             return
 
         self.student_state.update_mastery(node["node_id"], score)

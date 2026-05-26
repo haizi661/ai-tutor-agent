@@ -54,6 +54,7 @@ data/tutor_memory.db
 data/vector_store/
 
 # Tool caches
+node_modules/
 .pytest_cache/
 .ruff_cache/
 .mypy_cache/

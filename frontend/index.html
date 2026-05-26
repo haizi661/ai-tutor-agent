@@ -4,11 +4,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AI Tutor</title>
-    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <script src="/assets/vendor/marked/marked.umd.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
-    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
-    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
+    <link rel="stylesheet" href="/assets/vendor/katex/katex.min.css">
+    <script defer src="/assets/vendor/katex/katex.min.js"></script>
+    <script defer src="/assets/vendor/katex/contrib/auto-render.min.js"></script>
     <link rel="stylesheet" href="/assets/styles.css">
 </head>
 <body>
@@ -52,6 +52,14 @@
                             <svg class="sb-nav-icon" width="15" height="15" viewBox="0 0 15 15" fill="none"><path d="M3.2 3.2H11.8V11.8H3.2V3.2Z" stroke="currentColor" stroke-width="1.2"/><path d="M5.1 5.2H9.9M5.1 7.5H9.9M5.1 9.8H8.2" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
                             <span>资料库</span>
                         </button>
+                        <button type="button" class="sb-nav-item" onclick="openErrorCorrectionPanel()" aria-label="打开题库加工">
+                            <svg class="sb-nav-icon" width="15" height="15" viewBox="0 0 15 15" fill="none"><rect x="2.3" y="2.5" width="10.4" height="10" rx="2" stroke="currentColor" stroke-width="1.2"/><path d="M4.8 5.2H10.2M4.8 7.5H10.2M4.8 9.8H8.8" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/><path d="M10.9 10.7L12.9 12.7" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/><circle cx="10.2" cy="10.1" r="1.6" stroke="currentColor" stroke-width="1.1"/></svg>
+                            <span>题库加工</span>
+                        </button>
+                        <button type="button" class="sb-nav-item" onclick="openMatlabExperimentPanel()" aria-label="打开 MATLAB 实验">
+                            <svg class="sb-nav-icon" width="15" height="15" viewBox="0 0 15 15" fill="none"><path d="M2.4 11.6L5.5 3.4L8 8.8L9.8 5.5L12.6 11.6" stroke="currentColor" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round"/><path d="M3.6 9.2H11.4" stroke="currentColor" stroke-width="1.1" stroke-linecap="round"/></svg>
+                            <span>MATLAB 实验</span>
+                        </button>
                         <button type="button" id="open-graph-modal-btn" class="sb-nav-item" onclick="openKnowledgeGraphModal()" aria-label="打开知识图谱">
                             <svg class="sb-nav-icon" width="15" height="15" viewBox="0 0 15 15" fill="none"><circle cx="3.5" cy="3.5" r="1.3" stroke="currentColor" stroke-width="1.2"/><circle cx="11.5" cy="3.5" r="1.3" stroke="currentColor" stroke-width="1.2"/><circle cx="7.5" cy="11.5" r="1.3" stroke="currentColor" stroke-width="1.2"/><path d="M4.7 4.1L6.5 10.5M10.3 4.1L8.5 10.5M4.8 3.5H10.2" stroke="currentColor" stroke-width="1.1" stroke-linecap="round"/></svg>
                             <span>知识图谱</span>
@@ -59,6 +67,14 @@
                         <button type="button" id="open-radar-modal-btn" class="sb-nav-item" onclick="openRadarModal()" aria-label="打开学习进度">
                             <svg class="sb-nav-icon" width="15" height="15" viewBox="0 0 15 15" fill="none"><path d="M7.5 2L11.5 4.2V8.8L7.5 11L3.5 8.8V4.2L7.5 2Z" stroke="currentColor" stroke-width="1.2"/><path d="M7.5 2V11M3.5 4.2L11.5 8.8M11.5 4.2L3.5 8.8" stroke="currentColor" stroke-width="1"/></svg>
                             <span>学习进度</span>
+                        </button>
+                        <button type="button" id="open-wrong-book-btn" class="sb-nav-item" onclick="openWrongBookModal()" aria-label="打开错题本" aria-controls="wrong-book-modal" aria-haspopup="dialog" aria-expanded="false">
+                            <svg class="sb-nav-icon" width="15" height="15" viewBox="0 0 15 15" fill="none"><path d="M2.5 2H12.5V13H2.5V2Z" stroke="currentColor" stroke-width="1.2"/><path d="M5 4.5H10M5 7H10M5 9.5H8" stroke="currentColor" stroke-width="1.1" stroke-linecap="round"/></svg>
+                            <span>错题本</span>
+                        </button>
+                        <button type="button" id="open-question-help-btn" class="sb-nav-item" onclick="openQuestionHelpModal()" aria-label="打开题目答疑" aria-controls="question-help-modal" aria-haspopup="dialog" aria-expanded="false">
+                            <svg class="sb-nav-icon" width="15" height="15" viewBox="0 0 15 15" fill="none"><path d="M3 2.5H12V9.5H8.2L5.2 12.2V9.5H3V2.5Z" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/><path d="M5.2 5H9.8M5.2 7H8.4" stroke="currentColor" stroke-width="1.1" stroke-linecap="round"/></svg>
+                            <span>题目答疑</span>
                         </button>
                     </nav>
 
@@ -70,6 +86,7 @@
                     </div>
 
                         <input type="file" id="file-input" hidden multiple accept=".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt,.md,.png,.jpg,.jpeg">
+                        <input type="file" id="error-correction-file-input" hidden multiple accept=".pdf,application/pdf">
                         <div id="upload-status" class="status-inline upload-status" aria-live="polite" hidden></div>
                 </div><!-- /.sb-scroll -->
 
@@ -135,10 +152,8 @@
                         type="button"
                         class="sb-userbar"
                         id="sb-userbar-btn"
-                        onclick="toggleUserMenu()"
-                        aria-label="打开账户菜单"
-                        aria-haspopup="menu"
-                        aria-expanded="false"
+                        onclick="handleUserMenuAction('profile')"
+                        aria-label="配置个人资料"
                     >
                         <span class="sb-user-avatar" aria-hidden="true"></span>
                         <span class="sb-user-copy">
@@ -260,8 +275,8 @@
                         <div class="input-toolbar toolbar-row">
                             <div class="input-tools" aria-label="快捷操作">
                                 <button type="button" class="toolbar-btn tool-chip tool-chip--icon" onclick="triggerKnowledgeUpload()" aria-label="上传资料">+</button>
-                                <button type="button" id="thinking-toggle-btn" class="toolbar-btn tool-chip thinking-toggle" onclick="toggleThinkingMode()" aria-label="切换思考模式" aria-pressed="false">
-                                    <span class="thinking-toggle-label">思考</span>
+                                <button type="button" id="thinking-toggle-btn" class="toolbar-btn tool-chip thinking-toggle" onclick="toggleThinkingMode()" aria-label="切换教学推理透明模式" aria-pressed="false" title="查看 AI 的教学决策过程">
+                                    <span class="thinking-toggle-label">推理</span>
                                 </button>
                                 <button type="button" id="pause-btn" class="toolbar-btn tool-chip btn-pause" onclick="pauseCurrentSession()" aria-label="暂停当前学习页" hidden>暂停</button>
                             </div>
@@ -345,6 +360,153 @@
         </div>
     </div>
 
+    <!-- Thinking Mode Guide Modal -->
+    <div id="thinking-mode-guide-modal" class="unified-modal" aria-hidden="true" onclick="closeThinkingModeGuideModal(event)">
+        <div class="unified-dialog unified-dialog--thinking-guide" role="dialog" aria-modal="true" aria-labelledby="thinking-guide-title" onclick="event.stopPropagation()">
+            <div class="unified-dialog-header">
+                <div class="unified-dialog-title-group">
+                    <h3 id="thinking-guide-title" class="unified-dialog-title">推理模式</h3>
+                    <span id="thinking-guide-subtitle" class="unified-dialog-subtitle">查看 AI 的教学决策过程</span>
+                </div>
+                <div class="unified-dialog-actions">
+                    <button type="button" class="unified-close-btn" onclick="closeThinkingModeGuideModal()" aria-label="关闭">
+                        <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2 2L12 12M12 2L2 12" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+                    </button>
+                </div>
+            </div>
+            <div class="thinking-guide-body">
+                <div class="thinking-guide-intro">
+                    <p>开启推理模式后，AI 的每个教学决策都会以卡片形式展示在聊天区顶部。你可以看到：</p>
+                </div>
+                <div class="thinking-guide-features">
+                    <div class="thinking-guide-feature">
+                        <span class="feature-icon">🎯</span>
+                        <div class="feature-text">
+                            <strong>意图识别</strong>
+                            <span>系统如何理解你的输入：学习主题、系统问题还是闲聊</span>
+                        </div>
+                    </div>
+                    <div class="thinking-guide-feature">
+                        <span class="feature-icon">📍</span>
+                        <div class="feature-text">
+                            <strong>节点选择</strong>
+                            <span>为什么推荐从这个知识点开始学，前置关系是什么</span>
+                        </div>
+                    </div>
+                    <div class="thinking-guide-feature">
+                        <span class="feature-icon">🧠</span>
+                        <div class="feature-text">
+                            <strong>教学策略</strong>
+                            <span>为什么选择逐步讲解、类比、还是苏格拉底问答法</span>
+                        </div>
+                    </div>
+                    <div class="thinking-guide-feature">
+                        <span class="feature-icon">🔀</span>
+                        <div class="feature-text">
+                            <strong>路由决策</strong>
+                            <span>为什么通过、补讲还是重讲，分数和阈值是多少</span>
+                        </div>
+                    </div>
+                    <div class="thinking-guide-feature">
+                        <span class="feature-icon">📝</span>
+                        <div class="feature-text">
+                            <strong>作业设计</strong>
+                            <span>作业覆盖哪些已学节点，为什么这样出题</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="thinking-guide-footer">
+                    <p>随时点击底部「推理」按钮可以关闭此模式。</p>
+                    <button type="button" class="thinking-guide-ok-btn" onclick="closeThinkingModeGuideModal()">我知道了</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Wrong Book Modal -->
+    <div id="wrong-book-modal" class="unified-modal" aria-hidden="true" onclick="closeWrongBookModal(event)">
+        <div class="unified-dialog unified-dialog--wrong-book" role="dialog" aria-modal="true" aria-labelledby="wrong-book-title" onclick="event.stopPropagation()">
+            <div class="unified-dialog-header">
+                <div class="unified-dialog-title-group">
+                    <h3 id="wrong-book-title" class="unified-dialog-title">错题本</h3>
+                    <span id="wrong-book-subtitle" class="unified-dialog-subtitle">按节点分组查看错题，方便回顾与复习</span>
+                </div>
+                <div class="unified-dialog-actions">
+                    <button type="button" class="unified-close-btn" onclick="closeWrongBookModal()" aria-label="关闭">
+                        <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2 2L12 12M12 2L2 12" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+                    </button>
+                </div>
+            </div>
+            <div id="wrong-book-body" class="wrong-book-body">
+                <div class="wrong-book-loading">加载中…</div>
+            </div>
+            <div id="wrong-book-footer" class="wrong-book-footer" hidden>
+                <span id="wrong-book-summary"></span>
+                <div class="wrong-book-pagination">
+                    <button type="button" class="chip" id="wb-prev-page" onclick="wbChangePage(-1)">上一页</button>
+                    <span id="wb-page-info"></span>
+                    <button type="button" class="chip" id="wb-next-page" onclick="wbChangePage(1)">下一页</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Question Help Modal -->
+    <div id="question-help-modal" class="unified-modal" aria-hidden="true" onclick="closeQuestionHelpModal(event)">
+        <div class="unified-dialog unified-dialog--question-help" role="dialog" aria-modal="true" aria-labelledby="question-help-title" onclick="event.stopPropagation()">
+            <div class="unified-dialog-header">
+                <div class="unified-dialog-title-group">
+                    <h3 id="question-help-title" class="unified-dialog-title">题目答疑</h3>
+                    <span id="question-help-subtitle" class="unified-dialog-subtitle">上传图片题目或粘贴文字题干，保留每次解答记录</span>
+                </div>
+                <div class="unified-dialog-actions">
+                    <button type="button" class="unified-close-btn" onclick="closeQuestionHelpModal()" aria-label="关闭">
+                        <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2 2L12 12M12 2L2 12" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+                    </button>
+                </div>
+            </div>
+            <div class="question-help-layout">
+                <section class="qh-composer" aria-label="提交题目">
+                    <label class="qh-label" for="question-help-text">题目内容</label>
+                    <textarea id="question-help-text" class="qh-textarea" rows="6" placeholder="粘贴题目文字，或上传题目图片" aria-label="输入题目文字"></textarea>
+                    <label class="qh-label" for="question-help-answer-mode">解答方式</label>
+                    <select id="question-help-answer-mode" class="qh-mode-select" aria-label="选择题目解答方式">
+                        <option value="quick">快速解答</option>
+                        <option value="deep">深度解析</option>
+                        <option value="vision">图片题专用</option>
+                    </select>
+                    <div class="qh-upload-row">
+                        <input id="question-help-images" type="file" accept="image/png,image/jpeg,image/webp,image/gif" multiple hidden onchange="QuestionHelp.onImagesChanged()">
+                        <button type="button" class="chip" onclick="QuestionHelp.chooseImages()">上传图片</button>
+                        <span id="question-help-file-summary" class="qh-file-summary">未选择图片</span>
+                    </div>
+                    <div class="qh-actions">
+                        <button type="button" class="chip chip-primary" id="question-help-submit" onclick="QuestionHelp.submit()">开始解答</button>
+                    </div>
+                    <div id="question-help-status" class="qh-status" aria-live="polite"></div>
+                </section>
+                <section class="qh-workspace" aria-label="当前解答与最近记录">
+                    <section id="question-help-current" class="qh-current-answer" aria-label="当前解答" aria-live="polite">
+                        <div class="qh-current-head">
+                            <div>
+                                <div class="qh-current-kicker">当前解答</div>
+                                <div class="qh-current-title">提交题目后在这里显示解答</div>
+                            </div>
+                            <span id="question-help-current-mode" class="qh-current-mode">未开始</span>
+                        </div>
+                        <div id="question-help-current-body" class="qh-current-body">
+                            <div id="question-help-current-empty" class="qh-current-empty">粘贴题目或上传图片后，点击“开始解答”。</div>
+                        </div>
+                    </section>
+                    <section class="qh-history qh-history--recent" aria-label="最近解答">
+                        <div class="qh-history-title">最近解答</div>
+                        <div id="question-help-records" class="qh-record-list"></div>
+                    </section>
+                </section>
+            </div>
+        </div>
+    </div>
+
     <div id="config-overlay" class="config-overlay" aria-hidden="true" onclick="closeLocalConfigPanel(event)">
         <div class="config-panel" role="dialog" aria-modal="true" aria-labelledby="local-config-title" onclick="event.stopPropagation()">
             <div class="settings-layout">
@@ -377,6 +539,12 @@
                                 <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><rect x="3" y="3" width="4.2" height="4.2" rx="1.1" stroke="currentColor" stroke-width="1.5"/><rect x="10.8" y="3" width="4.2" height="4.2" rx="1.1" stroke="currentColor" stroke-width="1.5"/><rect x="3" y="10.8" width="4.2" height="4.2" rx="1.1" stroke="currentColor" stroke-width="1.5"/><rect x="10.8" y="10.8" width="4.2" height="4.2" rx="1.1" stroke="currentColor" stroke-width="1.5"/></svg>
                             </span>
                             <span>应用</span>
+                        </button>
+                        <button type="button" class="settings-nav-item" data-config-section-tab="error_correction" onclick="switchLocalConfigSection('error_correction')">
+                            <span class="settings-nav-icon" aria-hidden="true">
+                                <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><rect x="2.5" y="3" width="13" height="11.5" rx="2.3" stroke="currentColor" stroke-width="1.5"/><path d="M5.5 6.8H12.5M5.5 9.3H10.2M5.5 11.8H9" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
+                            </span>
+                            <span>题库加工</span>
                         </button>
                         <button type="button" class="settings-nav-item" data-config-section-tab="data" onclick="switchLocalConfigSection('data')">
                             <span class="settings-nav-icon" aria-hidden="true">
@@ -557,6 +725,16 @@
                                     <select id="local-model-select" onchange="syncLocalConfigAccountSummary()"></select>
                                 </div>
                                 <div class="config-field">
+                                    <label for="question-help-model-select">题目答疑模型</label>
+                                    <select id="question-help-model-select">
+                                        <option value="qwen-vl-max-latest">Qwen VL Max Latest</option>
+                                        <option value="qwen-vl-plus-latest">Qwen VL Plus Latest</option>
+                                        <option value="qwen3-vl-plus">Qwen3 VL Plus</option>
+                                        <option value="qwen3-vl-flash">Qwen3 VL Flash</option>
+                                    </select>
+                                    <small>用于图片/文字题目答疑，默认走 Qwen 多模态，不影响主聊天模型。</small>
+                                </div>
+                                <div class="config-field">
                                     <label id="local-api-key-label" for="local-api-key">API Key</label>
                                     <input id="local-api-key" type="password" placeholder="只保存在本地环境">
                                 </div>
@@ -590,6 +768,26 @@
                         </section>
 
 
+                        <section class="settings-section" data-config-section="error_correction">
+                            <div class="settings-block">
+                                <div class="settings-block-title">题库加工当前模型</div>
+                                <p class="settings-block-copy">题目分割、OCR 后纠错和保存链路当前默认沿用 AI Tutor 的聊天模型档案，不额外维护第二套大模型配置。</p>
+                                <div class="settings-note-grid">
+                                    <div class="settings-note-card" id="paddleocr-config-block">
+                                        <div class="settings-note-title">PaddleOCR</div>
+                                        <div class="settings-note-value">本地 OCR / 版面识别</div>
+                                    </div>
+                                    <div class="settings-note-card">
+                                        <div class="settings-note-title">题库视图</div>
+                                        <div class="settings-note-value">资料库 question_bank 分类</div>
+                                    </div>
+                                </div>
+                                <div class="settings-inline-actions">
+                                    <button type="button" class="settings-link-chip" onclick="focusPaddleOcrConfig()">查看 OCR 配置</button>
+                                    <button type="button" class="settings-link-chip" onclick="openErrorCorrectionPanel()">打开题库加工</button>
+                                </div>
+                            </div>
+                        </section>
                         <section class="settings-section" data-config-section="data">
                             <div class="settings-block">
                                 <div class="settings-block-title">资料检索</div>
@@ -698,6 +896,26 @@
                         <section class="settings-section" data-config-section="account">
                             <div class="settings-block">
                                 <div class="settings-block-title">个人资料</div>
+                                <div class="account-profile-editor">
+                                    <div class="account-avatar-preview" id="settings-account-avatar-preview" aria-hidden="true"></div>
+                                    <div class="account-avatar-controls">
+                                        <div class="account-avatar-title">头像</div>
+                                        <div class="account-avatar-grid" id="settings-account-avatar-grid" aria-label="选择头像">
+                                            <button type="button" class="account-avatar-choice" data-avatar-choice="default" aria-label="默认头像"></button>
+                                            <button type="button" class="account-avatar-choice account-avatar-choice--initial" data-avatar-choice="initial" aria-label="文字头像">学</button>
+                                            <button type="button" class="account-avatar-choice account-avatar-choice--blue" data-avatar-choice="blue" aria-label="蓝色头像"></button>
+                                            <button type="button" class="account-avatar-choice account-avatar-choice--green" data-avatar-choice="green" aria-label="绿色头像"></button>
+                                            <button type="button" class="account-avatar-choice account-avatar-choice--rose" data-avatar-choice="rose" aria-label="红色头像"></button>
+                                            <button type="button" class="account-avatar-choice account-avatar-choice--amber" data-avatar-choice="amber" aria-label="黄色头像"></button>
+                                        </div>
+                                        <div class="account-avatar-actions">
+                                            <input id="settings-account-avatar-upload" type="file" accept="image/png,image/jpeg,image/webp,image/gif" hidden>
+                                            <button type="button" class="settings-link-chip" onclick="triggerAccountAvatarUpload()">上传头像</button>
+                                            <button type="button" class="settings-link-chip" onclick="resetAccountAvatar()">恢复默认</button>
+                                        </div>
+                                        <small>头像只保存在当前浏览器本地。建议上传小于 1MB 的正方形图片。</small>
+                                    </div>
+                                </div>
                                 <div class="config-field">
                                     <label for="settings-account-name">显示名称</label>
                                     <input id="settings-account-name" type="text" placeholder="学习者">
@@ -801,6 +1019,13 @@
                             <span>图片</span>
                             <span class="library-nav-badge" id="lib-count-image">0</span>
                         </button>
+                        <button type="button" class="settings-nav-item" data-lib-filter="question_bank" onclick="switchLibraryFilter('question_bank')">
+                            <span class="settings-nav-icon" aria-hidden="true">
+                                <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M4 3.2H11L14 6V14.8H4V3.2Z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/><path d="M10.9 3.2V6H14" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/><path d="M6.2 8.2H11.8M6.2 10.6H11.8" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
+                            </span>
+                            <span>题库</span>
+                            <span class="library-nav-badge" id="lib-count-question_bank">0</span>
+                        </button>
                         <button type="button" class="settings-nav-item" data-lib-filter="other" onclick="switchLibraryFilter('other')">
                             <span class="settings-nav-icon" aria-hidden="true">
                                 <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M4.5 2.5H11.5L13.5 4.5V15.5H4.5V2.5Z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/><path d="M11.5 2.5V4.5H13.5" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/><circle cx="9" cy="10.5" r="1" fill="currentColor"/><circle cx="6.5" cy="10.5" r="1" fill="currentColor"/><circle cx="11.5" cy="10.5" r="1" fill="currentColor"/></svg>
@@ -855,12 +1080,190 @@
         </div>
     </div>
 
+    <div id="error-correction-overlay" class="config-overlay library-overlay" aria-hidden="true" onclick="closeErrorCorrectionPanel(event)">
+        <div class="config-panel library-panel error-workbench-panel" role="dialog" aria-modal="true" aria-labelledby="error-correction-title" onclick="event.stopPropagation()">
+            <div class="settings-layout library-layout error-workbench-layout">
+                <aside class="settings-sidebar library-sidebar error-workbench-sidebar" aria-label="题库加工导航">
+                    <button type="button" class="settings-close-btn" onclick="closeErrorCorrectionPanel()" aria-label="关闭题库加工">
+                        <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M4 4L14 14M14 4L4 14" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+                    </button>
+                    <div class="error-workbench-sidebar-copy">
+                        <div class="brand-eyebrow">AI Tutor Tooling</div>
+                        <div class="sidebar-title">题库加工</div>
+                        <p class="error-workbench-sidebar-note">把上传、自动识别、分割入库和成品题卡查看收在同一条工作线上，供伴学主流程旁路使用。</p>
+                    </div>
+                    <nav class="settings-nav error-workbench-nav" id="error-workbench-nav">
+                        <button type="button" class="settings-nav-item is-active" data-ec-tab="workspace" onclick="switchErrorCorrectionTab('workspace')">
+                            <span class="settings-nav-icon" aria-hidden="true">
+                                <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><rect x="2.5" y="3" width="13" height="11.5" rx="2.3" stroke="currentColor" stroke-width="1.5"/><path d="M5.5 6.8H12.5M5.5 9.3H10.2M5.5 11.8H9" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
+                            </span>
+                            <span>工作台</span>
+                        </button>
+                        <button type="button" class="settings-nav-item" data-ec-tab="uploads" onclick="switchErrorCorrectionTab('uploads')">
+                            <span class="settings-nav-icon" aria-hidden="true">
+                                <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M9 3.2V11.2M5.8 6.3L9 3.2L12.2 6.3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M3 13.5H15" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
+                            </span>
+                            <span>已上传文件</span>
+                        </button>
+                        <button type="button" class="settings-nav-item" data-ec-tab="library" onclick="switchErrorCorrectionTab('library')">
+                            <span class="settings-nav-icon" aria-hidden="true">
+                                <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M4 3.2H11L14 6V14.8H4V3.2Z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/><path d="M10.9 3.2V6H14" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/><path d="M6.2 8.2H11.8M6.2 10.6H11.8" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/><path d="M6.2 13H9.2" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
+                            </span>
+                            <span>已有题库</span>
+                        </button>
+                    </nav>
+                    <div class="library-storage-info error-workbench-storage">
+                        <div class="library-storage-label">
+                            <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><rect x="1.5" y="3" width="11" height="8" rx="1.5" stroke="currentColor" stroke-width="1.3"/><path d="M4.5 6H9.5M4.5 8H7.5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
+                            <span id="error-workbench-summary-text">等待导入题库文件</span>
+                        </div>
+                    </div>
+                </aside>
+
+                <section class="settings-content library-content error-workbench-content">
+                    <div class="library-content-header error-workbench-header">
+                        <div class="library-content-title-row">
+                            <div>
+                                <h2 class="settings-content-title" id="error-correction-title">题库加工工作台</h2>
+                                <p class="error-workbench-subtitle" id="error-workbench-subtitle">上传 PDF 后一键执行加工链路，生成的题目会直接沉淀到“已有题库”。</p>
+                            </div>
+                            <div class="error-workbench-toolbar">
+                                <button type="button" class="library-upload-btn library-upload-btn--ghost" onclick="openErrorCorrectionConfig()">配置</button>
+                                <button type="button" class="library-upload-btn library-upload-btn--ghost" onclick="refreshErrorCorrectionWorkspace()">刷新</button>
+                                <button type="button" class="library-upload-btn" onclick="triggerErrorCorrectionUpload()">上传 PDF</button>
+                            </div>
+                        </div>
+                        <div class="error-workbench-chip-row" id="error-workbench-chip-row" aria-label="题库加工摘要"></div>
+                    </div>
+
+                    <div class="library-body error-workbench-body">
+                        <div class="error-workbench-section" data-ec-panel="workspace">
+                            <div class="error-workbench-card error-workbench-card--hero">
+                                <div class="brand-eyebrow">Current Route</div>
+                                <h3>把习题 PDF 加工成可复用的成品题卡</h3>
+                                <p>这里会复用当前 `error_correction` 的识别与分割主链路，但界面只保留题库加工真正需要的入口。上传后先选择 1 份 PDF 作为加工对象，再点击“开始执行”，系统只会处理这一份文件并写入“已有题库”。</p>
+                                <div class="error-workbench-action-row">
+                                    <button type="button" class="library-upload-btn" onclick="triggerErrorCorrectionUpload()">上传文件</button>
+                                    <button type="button" class="library-upload-btn library-upload-btn--ghost" onclick="runErrorCorrectionPipeline()">开始执行</button>
+                                    <button type="button" class="library-upload-btn library-upload-btn--ghost" onclick="switchErrorCorrectionTab('library')">查看已有题库</button>
+                                </div>
+                                <div class="error-workbench-runtime" id="error-workbench-runtime-copy"></div>
+                            </div>
+                            <div class="error-workbench-grid">
+                                <div class="error-workbench-card">
+                                    <div class="panel-kicker">上传</div>
+                                    <h3>先整理这批 PDF</h3>
+                                    <p>上传页只保留本批次 PDF 清单，方便先确认哪些试卷已经进入工作台，并明确指定当前要加工的那一份。</p>
+                                </div>
+                                <div class="error-workbench-card">
+                                    <div class="panel-kicker">执行</div>
+                                    <h3>一键跑完整个加工链</h3>
+                                    <p>开始执行后会顺序完成 OCR、答案版式判断、题目分割和入库，但对象只会是你当前选中的那 1 份 PDF。</p>
+                                </div>
+                                <div class="error-workbench-card">
+                                        <div class="panel-kicker">成品</div>
+                                        <h3>直接沉淀为渲染题卡</h3>
+                                        <p>每道题会以独立卡片的方式展示在“已有题库”，优先保留渲染后的题目效果与知识标签，方便后续伴学主流程复用。</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="error-workbench-section" data-ec-panel="uploads" hidden>
+                            <div class="error-workbench-card">
+                                <div class="error-workbench-section-header">
+                                    <div>
+                                        <div class="panel-kicker">Source Files</div>
+                                        <h3>本批次已上传 PDF</h3>
+                                    </div>
+                                    <div class="error-workbench-action-row">
+                                        <button type="button" class="library-upload-btn library-upload-btn--ghost" onclick="triggerErrorCorrectionUpload()">继续上传</button>
+                                        <button type="button" class="chip chip-danger-ghost" onclick="clearErrorCorrectionWorkspace()">清空批次</button>
+                                    </div>
+                                </div>
+                                <div id="error-correction-upload-list" class="error-workbench-upload-list" role="list"></div>
+                            </div>
+                        </div>
+
+                        <div class="error-workbench-section" data-ec-panel="library" hidden>
+                            <div class="error-workbench-card">
+                                <div class="error-workbench-section-header">
+                                    <div>
+                                        <div class="panel-kicker">Rendered Question Bank</div>
+                                        <h3>已有题库</h3>
+                                    </div>
+                                    <div class="error-workbench-action-row">
+                                        <button type="button" class="library-upload-btn library-upload-btn--ghost" onclick="refreshErrorCorrectionWorkspace()">刷新</button>
+                                        <button type="button" class="chip chip-danger-ghost" onclick="clearQuestionBankFromWorkbench()">清空题库</button>
+                                    </div>
+                                </div>
+                                <div id="error-correction-library-summary" class="error-workbench-layout-summary"></div>
+                                <div id="error-correction-library-list" class="error-workbench-question-list"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="library-footer">
+                        <div id="error-correction-status" class="library-status" aria-live="polite"></div>
+                        <div class="library-footer-actions error-workbench-footer-actions">
+                            <button type="button" class="library-upload-btn library-upload-btn--ghost" onclick="triggerErrorCorrectionUpload()">上传 PDF</button>
+                            <button type="button" class="library-upload-btn" onclick="runErrorCorrectionPipeline()">开始执行</button>
+                            <button type="button" class="library-upload-btn library-upload-btn--ghost" onclick="switchErrorCorrectionTab('library')">已有题库</button>
+                        </div>
+                    </div>
+                </section>
+            </div>
+        </div>
+    </div>
+
+    <div id="matlab-experiment-overlay" class="config-overlay matlab-experiment-overlay" aria-hidden="true" onclick="closeMatlabExperimentPanel(event)">
+        <div class="config-panel matlab-experiment-panel" role="dialog" aria-modal="true" aria-labelledby="matlab-experiment-title" onclick="event.stopPropagation()">
+            <div class="matlab-experiment-layout">
+                <header class="matlab-experiment-header">
+                    <div>
+                        <div class="brand-eyebrow">MATLAB Runtime</div>
+                        <h2 id="matlab-experiment-title">MATLAB 仿真 Agent</h2>
+                        <p>根据自然语言需求生成 MATLAB 代码，调用本机 MATLAB 执行，收集原始数据、图像、脚本与结果分析。</p>
+                    </div>
+                    <button type="button" class="settings-close-btn" onclick="closeMatlabExperimentPanel()" aria-label="关闭 MATLAB 实验">
+                        <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M4 4L14 14M14 4L4 14" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+                    </button>
+                </header>
+
+                <section class="matlab-experiment-body">
+                    <form class="matlab-experiment-form" onsubmit="event.preventDefault(); runMatlabExperiment();">
+                        <div class="matlab-experiment-status" id="matlab-experiment-status">等待检测 MATLAB 环境</div>
+                        <label>
+                            <span>自然语言仿真需求</span>
+                            <textarea id="matlab-agent-prompt-input" rows="6">生成一个单位负反馈二阶系统的阶跃响应仿真，阻尼比 0.4，自然频率 3 rad/s，画出响应曲线并计算超调量、峰值时间、调节时间。</textarea>
+                        </label>
+                        <div class="matlab-experiment-mode-note">优先使用 Agent 模式：生成 MATLAB 代码、执行、报错修复重试、收集结果并分析。</div>
+                        <div class="matlab-experiment-actions matlab-experiment-actions--primary">
+                            <button type="submit" class="library-upload-btn" id="matlab-run-btn">发送并执行</button>
+                            <button type="button" class="library-upload-btn library-upload-btn--danger" id="matlab-cancel-btn" onclick="cancelMatlabExperiment()" hidden>中断</button>
+                            <button type="button" class="library-upload-btn library-upload-btn--ghost" onclick="refreshMatlabExperimentStatus()">检测环境</button>
+                        </div>
+                        <div class="matlab-experiment-actions">
+                            <button type="button" class="library-upload-btn library-upload-btn--ghost" onclick="fillMatlabExamplePrompt()">填入示例需求</button>
+                        </div>
+                    </form>
+
+                    <div class="matlab-experiment-results" id="matlab-experiment-results">
+                        <div class="matlab-experiment-empty">运行后将在这里展示曲线、指标、脚本与 MATLAB 输出。</div>
+                    </div>
+                </section>
+            </div>
+
     <script defer src="/assets/js/state.js"></script>
     <script defer src="/assets/js/ui.js"></script>
     <script defer src="/assets/js/config.js"></script>
     <script defer src="/assets/js/history.js"></script>
     <script defer src="/assets/js/knowledge.js"></script>
+    <script defer src="/assets/js/error_correction.js?v=20260525-integrated"></script>
+    <script defer src="/assets/js/matlab_experiment.js?v=20260521-matlab-trace-panel-1"></script>
     <script defer src="/assets/js/session.js"></script>
+    <script defer src="/assets/js/wrong-book.js?v=20260521-wb-filter"></script>
+    <script defer src="/assets/js/question-help.js"></script>
     <script defer src="/assets/app.js"></script>
+    <script defer src="/assets/js/ai_path.js?v=20260525-ai-path-progress"></script>
 </body>
 </html>

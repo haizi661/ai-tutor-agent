@@ -266,6 +266,17 @@ def test_b_viewer_html_exists_and_references_api_graph_b():
     assert "a2-graph-viewer:learn-node" in content, "B viewer must emit learn-node postMessage for parent"
 
 
+def test_b_viewer_has_local_vis_network_fallback():
+    content = B_VIEWER_HTML.read_text(encoding="utf-8")
+    vendor_path = Path("frontend/assets/vendor/vis-network.min.js")
+
+    assert vendor_path.exists(), "B viewer must not depend only on an external vis-network CDN"
+    assert "/assets/vendor/vis-network.min.js" in content
+    assert "https://cdn.jsdelivr.net/npm/vis-network@" in content
+    assert "ensureVisNetworkLoaded" in content
+    assert "window.vis" in content
+
+
 def test_frontend_app_js_points_to_b_viewer():
     assert FRONTEND_APP_JS.exists()
     content = FRONTEND_APP_JS.read_text(encoding="utf-8")

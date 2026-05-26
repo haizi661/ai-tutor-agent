@@ -53,10 +53,20 @@ def test_wrong_question_explainer_creates_auditable_explanations_and_routes_to_v
     result = node({"node_quiz_wrong_items": WRONG_ITEMS, "node_quiz_score": 0})
 
     assert result["learning_phase"] == "node_quiz_remediation_explaining"
-    assert result["learning_resume_target"] == "variant_question_generator"
+    assert result["learning_resume_target"] == "remediation_decision"
     assert result["wrong_question_explanations"][0]["question_id"] == "Q1"
     assert "B" in result["wrong_question_explanations"][0]["user_answer"]
     assert "A" in result["wrong_question_explanations"][0]["answer_key"]
+    assert result["wrong_question_explanations"][0]["wrong_reason"] == "concept_confusion"
+    assert result["wrong_question_explanations"][0]["recommended_review"]["suggestion"]
+    assert result["wrong_question_explanations"][0]["review_state"] == "explained"
+    assert result["wrong_question_explanations"][0]["next_action_type"] == "remediation_decision"
+    assert result["wrong_question_explanations"][0]["locked"] is True
+    assert "错因类型：concept_confusion" in result["message_history"][-1]["content"]
+    assert result["message_history"][-1]["data"]["review_state"] == "explained"
+    event = runtime.event_sink.events[-1]
+    assert event.data["review_state"] == "explained"
+    assert event.data["next_resume_target"] == "remediation_decision"
 
 
 def test_variant_question_generator_uses_provider_and_pauses_for_variant_answers():
@@ -95,7 +105,9 @@ def test_variant_test_answer_dialog_collects_answers_then_routes_to_objective_sc
     assert resumed["flow_status"] == "normal"
     assert resumed["node_quiz_answers"] == {"V-Q1": "A"}
     assert resumed["node_quiz_items"] == variant_questions
+    assert resumed["node_quiz_kind"] == "variant_test_answers"
     assert resumed["learning_resume_target"] == "objective_test_scorer"
+    assert [item.get("kind") for item in resumed.get("message_history", [])].count("objective_quiz_review") == 0
 
 
 def test_objective_scorer_failure_routes_to_wrong_question_explainer_not_inline_variant_loop():

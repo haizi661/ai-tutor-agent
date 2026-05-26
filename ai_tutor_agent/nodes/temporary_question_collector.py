@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from ..core.events import make_event
+from ..core.learning_support import trim_message_history
 from ..core.ports import EventSink
 from ..core.state import AgentState
 
@@ -16,6 +17,23 @@ def _append_interrupt_user_message(history: list, query: str) -> list:
     updated = list(history or [])
     updated.append({"role": "user", "kind": "interruption_user", "content": query})
     return updated
+
+
+def _append_interrupt_user_message_history(history: list, query: str) -> list:
+    updated = list(history or [])
+    normalized_query = str(query or "").strip()
+    if not normalized_query:
+        return updated
+    if updated:
+        last = updated[-1] if isinstance(updated[-1], dict) else {}
+        if (
+            str(last.get("role") or "").strip() == "user"
+            and str(last.get("content") or "").strip() == normalized_query
+            and str(last.get("kind") or "").strip() in {"interruption_user", "post_lesson_choice"}
+        ):
+            return updated
+    updated.append({"role": "user", "kind": "interruption_user", "content": normalized_query})
+    return trim_message_history(updated)
 
 
 def build_temporary_question_collector_node(event_sink: EventSink):
@@ -93,6 +111,7 @@ def build_temporary_question_collector_node(event_sink: EventSink):
             "pending_interaction_answer": "",
             "resume_tester": bool(state.get("resume_tester", False)),
             "conversation_history": _append_interrupt_user_message(state.get("conversation_history", []), query),
+            "message_history": _append_interrupt_user_message_history(state.get("message_history", []), query),
         }
 
     return node

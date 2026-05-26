@@ -976,6 +976,35 @@ def build_tutor_node(tutor_llm, runtime: RuntimeContext):
                 )
             )
 
+        # ── 教学推理透明：向学生解释当前教学决策 ──
+        thinking_mode = bool(state.get("thinking_mode", False))
+        if thinking_mode:
+            strategy_reason = {
+                "explain": "标准讲解法：适合初次接触，直接给出定义和核心要点",
+                "analogy": "类比法：用生活中熟悉的例子类比抽象概念，降低理解门槛",
+                "stepbystep": "逐步分析法：把复杂概念拆成小步骤，逐步推进",
+                "socratic": "苏格拉底问答法：通过提问引导学生自己推导出结论",
+            }.get(strategy, "根据当前情况定制的讲解方式")
+            prereq_names = [str(p) for p in (state.get("graph_prerequisites") or [])[:3] if str(p)]
+            prerequisite_info = f"；前置知识：{'、'.join(prereq_names)}" if prereq_names else ""
+            affect_info = f"；检测到情绪信号「{affect_label}」，教学节奏会相应调整" if affect_signals else ""
+            event_sink.emit(
+                make_event(
+                    "thinking.step",
+                    "tutor",
+                    message=f"教学决策：{strategy_reason}{prerequisite_info}{affect_info}",
+                    data={
+                        "category": "teaching_strategy",
+                        "strategy": strategy,
+                        "difficulty_level": difficulty_level,
+                        "attempt_count": attempt_count,
+                        "affect": affect_label if affect_signals else "",
+                        "node_name": state.get("current_node_name", ""),
+                        "node_id": state.get("current_node_id", ""),
+                    },
+                )
+            )
+
         # 主流程当前节点讲解：已由 node_content_loader 固定写入 explanation_teacher_style。
         # 这里必须直接输出该字段，不再调用图谱搜索、通用检索或 LLM 改写，避免 relation_path 等检索产物混入教学正文。
         direct_node_content = str(state.get("node_content_context") or "").strip()

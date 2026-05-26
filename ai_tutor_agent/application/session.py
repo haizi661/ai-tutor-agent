@@ -236,6 +236,18 @@ def run_learning_session(
     if state_snapshot and state_snapshot.values:
         state_values = dict(state_snapshot.values)
         state_values.update(build_learning_flow_scaffold(state_values))
+
+        # ── 同步推理模式状态到前端 ──
+        thinking_mode = bool(state_values.get("thinking_mode", False))
+        event_sink.emit(
+            make_event(
+                "session.thinking_mode",
+                "session",
+                message="推理模式已开启" if thinking_mode else "推理模式已关闭",
+                data={"thinking_mode": thinking_mode},
+            )
+        )
+
         homework_items = list(state_values.get("homework_items") or [])
         homework_status = str(state_values.get("homework_status") or "").strip()
 
@@ -603,6 +615,14 @@ def run_learning_session(
             "session",
             message="\n这是一个全新的学习页，我们从头把这轮内容理顺。",
             data={"thread_id": thread_id},
+        )
+    )
+    event_sink.emit(
+        make_event(
+            "session.thinking_mode",
+            "session",
+            message="推理模式已关闭",
+            data={"thinking_mode": False},
         )
     )
     app.invoke(build_initial_state(topic), config=thread_config)

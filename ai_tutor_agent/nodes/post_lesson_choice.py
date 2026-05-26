@@ -113,6 +113,10 @@ def build_post_lesson_choice_node(event_sink: EventSink, answer_provider: Answer
                 },
             ).strip()
         normalized = _normalize_choice(choice)
+        direct_question = _looks_like_direct_question(choice)
+        selected_value = normalized if normalized in {"temporary_question", "start_test"} else ""
+        if direct_question and not selected_value:
+            selected_value = "temporary_question"
 
         base = {
             "flow_status": "normal",
@@ -128,12 +132,16 @@ def build_post_lesson_choice_node(event_sink: EventSink, answer_provider: Answer
                     "role": "user",
                     "kind": "post_lesson_choice",
                     "content": choice or normalized,
-                    "data": {"selected_value": normalized if normalized in {"temporary_question", "start_test"} else ""},
+                    "data": {
+                        "selected_value": selected_value,
+                        "direct_question": direct_question,
+                        "question": choice if direct_question else "",
+                    },
                 }
             ],
         }
 
-        if normalized == "temporary_question" or _looks_like_direct_question(choice):
+        if normalized == "temporary_question" or direct_question:
             event_sink.emit(make_event("node.complete", "post_lesson_choice", message="好，先处理你的临时问题。"))
             patch = {
                 **base,

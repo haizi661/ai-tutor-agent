@@ -10,6 +10,8 @@ from .platform_paths import project_root
 
 
 PROJECT_ROOT = str(project_root())
+QWEN_OPENAI_COMPATIBLE_BASE = "https://dashscope.aliyuncs.com/compatible-mode/v1"
+DEFAULT_QUESTION_HELP_MODEL = "qwen-vl-max-latest"
 
 SMART_PROXY_DIRECT_HOSTS = (
     "127.0.0.1",
@@ -205,6 +207,8 @@ class Settings:
     https_proxy: Optional[str]
     local_config_enabled: bool
     no_proxy: str = ""
+    question_help_model_name: str = DEFAULT_QUESTION_HELP_MODEL
+    question_help_openai_api_base: str = QWEN_OPENAI_COMPATIBLE_BASE
     course_primary_enabled: bool = False
     course_primary_dir: str = "docs/archive/a2-control-theory/source-notes"
     vector_store_backend: str = "chroma"
@@ -234,6 +238,9 @@ class Settings:
     question_bank_dir: str = "data/question_bank"
     default_course_id: str = "a2-control-theory"
     default_course_topic: str = "自动控制原理"
+    paddleocr_api_url: str = ""
+    paddleocr_api_token: Optional[str] = None
+    paddleocr_model: str = "PaddleOCR-VL-1.5"
 
 
 LOCAL_CONFIG_KEYS = [
@@ -249,6 +256,8 @@ LOCAL_CONFIG_KEYS = [
     "OPENAI_API_KEY",
     "OPENAI_API_BASE",
     "MODEL_NAME",
+    "QUESTION_HELP_MODEL_NAME",
+    "QUESTION_HELP_OPENAI_API_BASE",
     "EMBEDDING_PROVIDER",
     "EMBEDDING_MODEL_NAME",
     "PDF_PARSE_BACKEND",
@@ -288,6 +297,9 @@ LOCAL_CONFIG_KEYS = [
     "QUESTION_BANK_DIR",
     "DEFAULT_COURSE_ID",
     "DEFAULT_COURSE_TOPIC",
+    "PADDLEOCR_API_URL",
+    "PADDLEOCR_API_TOKEN",
+    "PADDLEOCR_MODEL",
     "LOCAL_CONFIG_ENABLED",
 ]
 
@@ -511,6 +523,17 @@ def get_settings() -> Settings:
     # Explicitly check for MODEL_NAME
     env_model_name = os.getenv("MODEL_NAME", "").strip()
     model_name = env_model_name or default_model
+    question_help_model_name = (
+        os.getenv("QUESTION_HELP_MODEL_NAME", "").strip()
+        or DEFAULT_QUESTION_HELP_MODEL
+    )
+    question_help_openai_api_base = (
+        os.getenv("QUESTION_HELP_OPENAI_API_BASE", "").strip()
+        or QWEN_OPENAI_COMPATIBLE_BASE
+    )
+    paddleocr_api_url = os.getenv("PADDLEOCR_API_URL", "").strip()
+    paddleocr_api_token = os.getenv("PADDLEOCR_API_TOKEN", "").strip() or None
+    paddleocr_model = os.getenv("PADDLEOCR_MODEL", "").strip() or "PaddleOCR-VL-1.5"
     resolved_vector_store_dir = (
         os.getenv("VECTOR_STORE_DIR", "").strip()
         or os.getenv("CHROMA_DIR", "").strip()
@@ -552,6 +575,8 @@ def get_settings() -> Settings:
         https_proxy=https_proxy,
         local_config_enabled=os.getenv("LOCAL_CONFIG_ENABLED", "true").strip().lower() != "false",
         no_proxy=no_proxy,
+        question_help_model_name=question_help_model_name,
+        question_help_openai_api_base=question_help_openai_api_base,
         dashscope_api_key=dashscope_api_key,
         mineru_api_token=mineru_api_token,
         chroma_dir=resolved_vector_store_dir,
@@ -579,4 +604,7 @@ def get_settings() -> Settings:
             or "a2-control-theory"
         ),
         default_course_topic=os.getenv("DEFAULT_COURSE_TOPIC", "自动控制原理").strip() or "自动控制原理",
+        paddleocr_api_url=paddleocr_api_url,
+        paddleocr_api_token=paddleocr_api_token,
+        paddleocr_model=paddleocr_model,
     )

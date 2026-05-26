@@ -2,6 +2,7 @@
     const app = window.AITutorApp;
     const state = app.state;
     const HEADER_COLLAPSE_STORAGE_KEY = 'ai_tutor_header_collapsed';
+    const THINKING_MODE_GUIDE_STORAGE_KEY = 'ai-tutor:thinking-mode-guide-v3';
 
     function getSpeechRecognitionCtor() {
         return window.SpeechRecognition || window.webkitSpeechRecognition || null;
@@ -721,7 +722,7 @@
 
     app.focusKnowledgeShelf = app.openLibraryPanel;
 
-    app.toggleThinkingMode = function toggleThinkingMode(force, { silent = false } = {}) {
+    app.toggleThinkingMode = async function toggleThinkingMode(force, { silent = false } = {}) {
         const nextThinkingMode = typeof force === 'boolean' ? force : !Boolean(state.thinkingMode);
         state.thinkingMode = nextThinkingMode;
         const button = document.getElementById('thinking-toggle-btn');
@@ -733,6 +734,33 @@
         if (!silent) {
             app.setStatusBanner(nextThinkingMode ? '已切换到思考模式' : '已切换到标准模式', 'info');
         }
+        // Persist to backend
+        if (state.currentThreadId) {
+            try {
+                await fetch(`/api/sessions/${state.currentThreadId}/thinking-mode`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ thread_id: state.currentThreadId, thinking_mode: nextThinkingMode }),
+                });
+            } catch (_) { /* best-effort */ }
+        }
+        // Sync current trace drawer visibility
+        app.syncThinkDrawerVisibility?.();
+        // Show guide modal on first enable. Mark as seen only when user closes it.
+        if (nextThinkingMode && !silent && !window.localStorage.getItem(THINKING_MODE_GUIDE_STORAGE_KEY)) {
+            app.openThinkingModeGuideModal();
+        }
+    };
+
+    app.openThinkingModeGuideModal = function openThinkingModeGuideModal() {
+        setModalOpen('thinking-mode-guide-modal', true);
+    };
+
+    app.closeThinkingModeGuideModal = function closeThinkingModeGuideModal(event) {
+        if (event && event.target && event.target !== event.currentTarget) return;
+        window.localStorage.setItem(THINKING_MODE_GUIDE_STORAGE_KEY, '1');
+        setModalOpen('thinking-mode-guide-modal', false);
+        focusChatInput();
     };
 
     app.toggleSidebar = function toggleSidebar(force) {
@@ -763,6 +791,7 @@
         await app.fetchHistory();
         await app.restoreLastSessionIfAny?.();
         await app.fetchKnowledgeFiles?.();
+        await app.fetchQuestionBankItems?.();
         await app.fetchConfig();
         await app.fetchLocalConfig();
         app.renderUserKnowledgeMap?.();
@@ -812,6 +841,9 @@
             }
             if (e.key === 'Escape' && document.getElementById('library-overlay')?.classList.contains('open')) {
                 app.closeLibraryPanel();
+            }
+            if (e.key === 'Escape' && document.getElementById('matlab-experiment-overlay')?.classList.contains('open')) {
+                app.closeMatlabExperimentPanel?.();
             }
         });
 
@@ -930,6 +962,8 @@
     window.focusKnowledgeShelf = () => app.focusKnowledgeShelf();
     window.toggleHistorySearch = force => app.toggleHistorySearch(force);
     window.toggleThinkingMode = force => app.toggleThinkingMode(force);
+    window.openThinkingModeGuideModal = () => app.openThinkingModeGuideModal();
+    window.closeThinkingModeGuideModal = event => app.closeThinkingModeGuideModal(event);
     window.toggleUserMenu = force => app.toggleUserMenu(force);
     window.handleUserMenuAction = action => app.handleUserMenuAction(action);
     window.openKnowledgeGraphModal = () => app.openKnowledgeGraphModal();
@@ -954,6 +988,7 @@
     window.openChatSearch = () => app.openChatSearch();
     window.closeChatSearch = event => app.closeChatSearch(event);
     window.onChatSearchInput = value => app.onChatSearchInput(value);
+    window.runMatlabPresetExperiment = () => app.runMatlabPresetExperiment?.();
 
     window.onload = async () => {
         bindDomEvents();

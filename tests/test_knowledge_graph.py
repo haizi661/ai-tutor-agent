@@ -15,11 +15,13 @@ The knowledge graph must:
 from __future__ import annotations
 
 import json
+import threading
 from pathlib import Path
 
 import pytest
 
 from ai_tutor_agent.core.learning_support import (
+    enrich_wrong_question_book,
     mark_student_node_started,
     update_student_state_after_evaluation,
 )
@@ -376,3 +378,286 @@ def test_api_endpoint_empty_student(store: StudentStateStore):
     assert kg == {}
     assert mastered == 0
     assert in_progress == 0
+
+
+def test_student_state_store_update_preserves_concurrent_writes(store: StudentStateStore):
+    threads = []
+
+    def worker(index: int) -> None:
+        def apply_patch(state: StudentState) -> None:
+            state.question_attempts.append({"question_id": f"Q{index}"})
+
+        store.update("s1", apply_patch)
+
+    for index in range(20):
+        thread = threading.Thread(target=worker, args=(index,))
+        threads.append(thread)
+        thread.start()
+
+    for thread in threads:
+        thread.join()
+
+    state = store.load("s1")
+    assert len(state.question_attempts) == 20
+    question_ids = [item["question_id"] for item in state.question_attempts]
+    assert sorted(question_ids, key=lambda item: int(item[1:])) == [f"Q{i}" for i in range(20)]
+
+
+def test_student_state_store_caps_large_history_fields(store: StudentStateStore):
+    state = StudentState(student_id="s1")
+    state.homework_history = [{"index": index} for index in range(120)]
+    state.question_attempts = [{"index": index} for index in range(220)]
+    state.daily_learning_records = {
+        f"2026-{index // 30 + 1:02d}-{index % 30 + 1:02d}": [f"KM{index:03d}"]
+        for index in range(120)
+    }
+
+    store.save(state)
+    loaded = store.load("s1")
+
+    assert len(loaded.homework_history) == 100
+    assert loaded.homework_history[0]["index"] == 20
+    assert len(loaded.question_attempts) == 200
+    assert loaded.question_attempts[0]["index"] == 20
+    assert len(loaded.daily_learning_records) == 90
+    assert list(sorted(loaded.daily_learning_records.keys()))[0] == "2026-02-01"
+    assert not list(store.state_dir.glob("*.tmp"))
+
+
+# ── Wrong Question Book ────────────────────────────────────────────────────
+
+
+def test_wb_add_or_update_creates_minimal_entry(store: StudentStateStore):
+    state = StudentState(student_id="s1")
+    wrong_items = [
+        {
+            "question_id": "AUTO-KM001-1",
+            "stem": "测试题干",
+            "options": {"A": "opt1", "B": "opt2", "C": "opt3", "D": "opt4"},
+            "user_answer": "B",
+            "answer_key": "A",
+        }
+    ]
+    state.wb_add_or_update(wrong_items, "KM001", "自动控制系统示例")
+    assert len(state.wrong_question_book) == 1
+    entry = state.wrong_question_book[0]
+    assert entry["question_id"] == "AUTO-KM001-1"
+    assert entry["node_id"] == "KM001"
+    assert entry["wrong_count"] == 1
+    assert entry["mastered"] is False
+    assert entry["user_answer"] == "B"
+    assert entry["correct_answer"] == "A"
+    assert entry["time_wrong"] == entry["time_latest"]
+
+
+def test_wb_add_or_update_increments_wrong_count(store: StudentStateStore):
+    state = StudentState(student_id="s1")
+    wrong = {
+        "question_id": "AUTO-KM001-1",
+        "stem": "题干",
+        "options": {"A": "x", "B": "y"},
+        "user_answer": "B",
+        "answer_key": "A",
+    }
+    state.wb_add_or_update([wrong], "KM001", "节点")
+    state.wb_add_or_update([wrong], "KM001", "节点")
+    assert len(state.wrong_question_book) == 1
+    assert state.wrong_question_book[0]["wrong_count"] == 2
+
+
+def test_wb_add_or_update_replaces_user_answer(store: StudentStateStore):
+    state = StudentState(student_id="s1")
+    wrong = {
+        "question_id": "AUTO-KM001-1", "stem": "题干",
+        "options": {"A": "x", "B": "y"}, "user_answer": "B", "answer_key": "A",
+    }
+    state.wb_add_or_update([wrong], "KM001", "节点")
+    state.wb_add_or_update([{**wrong, "user_answer": "C"}], "KM001", "节点")
+    assert state.wrong_question_book[0]["user_answer"] == "C"
+    assert state.wrong_question_book[0]["wrong_count"] == 2
+
+
+def test_wb_enrich_populates_explanation_fields(store: StudentStateStore):
+    state = StudentState(student_id="s1")
+    wrong = {
+        "question_id": "AUTO-KM001-1", "stem": "题干",
+        "options": {"A": "x", "B": "y"}, "user_answer": "B", "answer_key": "A",
+    }
+    state.wb_add_or_update([wrong], "KM001", "节点")
+
+    state.wb_enrich([
+        {
+            "question_id": "AUTO-KM001-1",
+            "wrong_reason": "concept_confusion",
+            "misconception": "误解了概念",
+            "target_objective": "区分输入输出",
+            "explanation": "这里需要…",
+            "why_user_wrong": "你把输出量当成了输入量",
+            "why_correct": "正确答案体现了输入输出关系",
+            "key_rule": "先找输入，再找输出",
+            "review_action": "回看输入输出定义",
+            "recommended_review": {"suggestion": "回去看第一章"},
+            "wrong_option_analysis": {"B": "混淆了", "C": "错了", "D": "不对"},
+        }
+    ])
+    entry = state.wrong_question_book[0]
+    assert entry["wrong_reason"] == "concept_confusion"
+    assert entry["explanation"] == "这里需要…"
+    assert entry["recommended_review"]["suggestion"] == "回去看第一章"
+    assert entry["why_user_wrong"] == "你把输出量当成了输入量"
+    assert entry["why_correct"] == "正确答案体现了输入输出关系"
+    assert entry["key_rule"] == "先找输入，再找输出"
+    assert entry["review_action"] == "回看输入输出定义"
+
+
+def test_wb_mark_mastered_toggles_flag(store: StudentStateStore):
+    state = StudentState(student_id="s1")
+    wrong = {
+        "question_id": "AUTO-KM001-1", "stem": "题干",
+        "options": {"A": "x", "B": "y"}, "user_answer": "B", "answer_key": "A",
+    }
+    state.wb_add_or_update([wrong], "KM001", "节点")
+    assert state.wb_mark_mastered("AUTO-KM001-1", True) is True
+    assert state.wrong_question_book[0]["mastered"] is True
+    assert state.wb_unmastered_count() == 0
+    # toggle back
+    state.wb_mark_mastered("AUTO-KM001-1", False)
+    assert state.wrong_question_book[0]["mastered"] is False
+    assert state.wb_unmastered_count() == 1
+
+
+def test_wb_mark_reviewed_increments_count(store: StudentStateStore):
+    state = StudentState(student_id="s1")
+    wrong = {
+        "question_id": "AUTO-KM001-1", "stem": "题干",
+        "options": {"A": "x", "B": "y"}, "user_answer": "B", "answer_key": "A",
+    }
+    state.wb_add_or_update([wrong], "KM001", "节点")
+    state.wb_mark_reviewed("AUTO-KM001-1")
+    assert state.wrong_question_book[0]["review_count"] == 1
+    assert state.wrong_question_book[0]["last_reviewed"] is not None
+
+
+def test_wb_persists_across_save_load(store: StudentStateStore):
+    state = StudentState(student_id="wb_persist")
+    wrong = {
+        "question_id": "AUTO-KM001-1", "stem": "题干",
+        "options": {"A": "x", "B": "y"}, "user_answer": "B", "answer_key": "A",
+    }
+    state.wb_add_or_update([wrong], "KM001", "节点")
+    state.wb_enrich([
+        {
+            "question_id": "AUTO-KM001-1",
+            "wrong_reason": "condition_missing",
+            "misconception": "",
+            "target_objective": "",
+            "explanation": "漏了条件",
+            "why_user_wrong": "忽略了适用条件",
+            "why_correct": "满足条件时结论才成立",
+            "key_rule": "先验条件，再套公式",
+            "review_action": "复习适用条件",
+            "recommended_review": {},
+            "wrong_option_analysis": {},
+        }
+    ])
+    store.save(state)
+
+    loaded = store.load("wb_persist")
+    assert len(loaded.wrong_question_book) == 1
+    entry = loaded.wrong_question_book[0]
+    assert entry["question_id"] == "AUTO-KM001-1"
+    assert entry["wrong_reason"] == "condition_missing"
+    assert entry["explanation"] == "漏了条件"
+    assert entry["why_user_wrong"] == "忽略了适用条件"
+    assert entry["key_rule"] == "先验条件，再套公式"
+
+
+def test_wb_capped_at_max(store: StudentStateStore):
+    state = StudentState(student_id="s1")
+    for i in range(210):
+        state.wb_add_or_update([
+            {
+                "question_id": f"AUTO-Q{i:03d}", "stem": f"题{i}",
+                "options": {"A": "x"}, "user_answer": "B", "answer_key": "A",
+            }
+        ], "KM001", "节点")
+
+    store.save(state)
+    loaded = store.load("s1")
+    assert len(loaded.wrong_question_book) <= 200
+
+
+def test_wb_empty_student_returns_empty_list(store: StudentStateStore):
+    state = store.load("empty_student")
+    assert state.wrong_question_book == []
+
+
+def test_update_student_state_after_evaluation_also_writes_wrong_book(store: StudentStateStore):
+    """验证批改后 knowledge_graph 和 wrong_question_book 同时写入。"""
+    store.save(StudentState(student_id="s1"))
+    update_student_state_after_evaluation(
+        store,
+        student_id="s1",
+        node_id="KM001",
+        score=40,
+        passed=False,
+        wrong_items=[
+            {
+                "question_id": "AUTO-KM001-1",
+                "stem": "恒温箱",
+                "options": {"A": "a", "B": "b", "C": "c", "D": "d"},
+                "user_answer": "B",
+                "answer_key": "A",
+            }
+        ],
+        node_title="自动控制示例",
+    )
+    loaded = store.load("s1")
+    # knowledge_graph 应照常写入
+    assert "KM001" in loaded.knowledge_graph
+    assert len(loaded.knowledge_graph["KM001"]["wrong_questions"]) == 1
+    # wrong_question_book 也应写入
+    assert len(loaded.wrong_question_book) == 1
+    assert loaded.wrong_question_book[0]["question_id"] == "AUTO-KM001-1"
+    assert loaded.wrong_question_book[0]["node_id"] == "KM001"
+    assert loaded.wrong_question_book[0]["wrong_count"] == 1
+
+
+def test_enrich_wrong_question_book_round_trip(store: StudentStateStore):
+    """验证 enrich_wrong_question_book 能正确补充富字段。"""
+    # 先写入一条最小错题
+    state = StudentState(student_id="s1")
+    state.wb_add_or_update([
+        {
+            "question_id": "AUTO-KM001-1", "stem": "题",
+            "options": {"A": "a", "B": "b"}, "user_answer": "B", "answer_key": "A",
+        }
+    ], "KM001", "节点")
+    store.save(state)
+
+    # 通过 enrich 补充
+    enrich_wrong_question_book(
+        store,
+        student_id="s1",
+        explanations=[
+            {
+                "question_id": "AUTO-KM001-1",
+                "wrong_reason": "formula_misuse",
+                "misconception": "公式记错",
+                "target_objective": "传递函数",
+                "explanation": "公式不对",
+                "why_user_wrong": "把一阶系统公式套到了二阶系统",
+                "why_correct": "传递函数阶次应由系统结构决定",
+                "key_rule": "先判阶次，再选公式",
+                "review_action": "复习传递函数阶次判断",
+                "recommended_review": {"suggestion": "复习传递函数"},
+                "wrong_option_analysis": {"B": "公式记错了"},
+            }
+        ],
+    )
+    loaded = store.load("s1")
+    assert len(loaded.wrong_question_book) == 1
+    assert loaded.wrong_question_book[0]["wrong_reason"] == "formula_misuse"
+    assert loaded.wrong_question_book[0]["explanation"] == "公式不对"
+    assert loaded.wrong_question_book[0]["why_user_wrong"] == "把一阶系统公式套到了二阶系统"
+    assert loaded.wrong_question_book[0]["review_action"] == "复习传递函数阶次判断"

@@ -1,6 +1,6 @@
 # AI Tutor Agent 下一步迭代计划
 
-更新时间：2026-05-02
+更新时间：2026-05-03
 项目根目录：本文所有命令与路径均以本仓库根目录为基准，统一使用项目内相对路径。
 
 ## 1. 计划目标
@@ -32,6 +32,7 @@
 - 2026-05-01 历史恢复与显示体验收敛：恢复页标题/当前节点/状态横幅同步，当前待处理卡片自动进入可视区，对话态输入框压缩，GraphRAG 相关媒体去重并限量到 3 张；全量测试 424 passed, 5 warnings，浏览器布局检查无横向溢出和输入框重叠。
 - 2026-05-02 用户知识图谱实现、evidence 架构统一、死代码清理：knowledge_graph 空图谱起点、学了才加节点、节点级 evidence 单一来源（移除全局 evidence_events 冗余日志和 record_evidence 死代码）、_persist_homework_result 精简；集成测试重写为走真实函数路径；全量测试 445 passed, 5 warnings。
 - 2026-05-02 会话恢复准确性 + 聊天记录命名：history.py fallback 链改为 `custom_title` → `proposed_topic` → `current_topic` → 首条用户消息 → "新对话"（不再显示 UUID）；history.js stateLabel 改为基于 flow_status；`_has_homework` 改为黑名单模式（状态缺失默认有作业）；`infer_learning_phase` 合并重复 homework 判断；+5 测试；450 passed。
+- 2026-05-03 post_lesson_choice 残留状态修复（首次运行重置 `post_lesson_choice: ""`）、`_START_TEST_MARKERS` 补全（新增 `"start_test"` 和 `"temporary_question"`）、前端 `stripRedundantTextAfterTables()` 表格冗余文本隐藏；+2 测试；452 passed。
 
 当前主要风险：
 

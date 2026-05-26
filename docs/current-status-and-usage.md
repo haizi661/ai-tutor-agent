@@ -1,6 +1,6 @@
 # AI Tutor Agent 当前完成情况与使用说明
 
-更新时间：2026-05-02
+更新时间：2026-05-03
 项目根目录：本文所有命令默认都在本仓库根目录执行，路径统一使用项目内相对路径。
 
 ## 1. 当前一句话结论
@@ -212,7 +212,7 @@ PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 pytest -q
 结果：
 
 ```text
-424 passed, 5 warnings
+452 passed, 5 warnings
 ```
 
 2026-05-02 用户知识图谱（KG）实现、evidence 架构统一、死代码清理后运行：
@@ -224,7 +224,7 @@ PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 pytest -q
 结果：
 
 ```text
-450 passed, 5 warnings
+452 passed, 5 warnings
 ```
 
 同日浏览器实测恢复 `awaiting_post_lesson_choice` 历史页：
@@ -234,6 +234,19 @@ PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 pytest -q
 - 底部交流框不遮挡当前卡片，页面无横向溢出；
 - 旧历史中的 GraphRAG 补充媒体被限制为 3 张，重复媒体为 0；
 - 宽表格和公式仍在局部 viewport 内滚动。
+
+2026-05-03 post_lesson_choice 残留状态修复、_START_TEST_MARKERS 补全、表格冗余文本隐藏后运行：
+
+```bash
+PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 pytest -q
+# 452 passed, 5 warnings
+```
+
+修复内容：
+
+- `post_lesson_choice` 节点首次运行时重置 `post_lesson_choice: ""`，防止从临时问答返回后残留旧值导致路由错误进入临时问答。
+- `_START_TEST_MARKERS` 新增 `"start_test"` 和 `"temporary_question"`，修复系统内部命令被误判为自由提问。
+- 前端新增 `stripRedundantTextAfterTables()`：当答案含 `<table>` 时隐藏后续纯文本段落，遇到下一个结构化元素恢复显示。
 
 ## 3. 当前主要缺口
 

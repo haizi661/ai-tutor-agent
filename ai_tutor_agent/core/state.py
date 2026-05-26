@@ -101,6 +101,10 @@ class AgentState(TypedDict):
     affect_signals: dict               # 最近一轮情绪信号 {frustrated: 0.8, curious: 0.4}
     llm_stream_disabled: bool          # 当前会话是否禁用流式输出
     llm_stream_failures: int           # 当前会话累计流式失败次数
+    thinking_mode: bool                # 教学推理透明模式开关
+    # ── 节点补救闭环状态 ──
+    node_remediation_state: dict       # {original_score, variant_rounds, same_objective_failures, extra_count, status}
+    remediation_decision: str          # 用户选择的补救决策: continue_variant/review_node/do_later/still_do_variant
 
 
 def build_initial_state(topic: str = "") -> AgentState:
@@ -201,4 +205,7 @@ def build_initial_state(topic: str = "") -> AgentState:
         "affect_signals": {},
         "llm_stream_disabled": False,
         "llm_stream_failures": 0,
+        "thinking_mode": False,
+        "node_remediation_state": {},
+        "remediation_decision": "",
     }

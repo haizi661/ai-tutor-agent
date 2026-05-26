@@ -40,10 +40,73 @@ def test_objective_and_variant_cards_are_not_globally_removed_when_next_card_ren
 def test_frontend_restores_persistent_quiz_review_and_wrong_explanations_from_timeline():
     content = UI_JS.read_text(encoding="utf-8")
 
+    assert "item.kind === 'objective_test_card'" in content
+    assert "app.renderObjectiveTestCard?.(data.questions || data.options || [], data.interaction_kind || 'objective_test_answers')" in content
     assert "item.kind === 'objective_quiz_review'" in content
     assert "app.renderObjectiveQuizReviewCard" in content
     assert "item.kind === 'wrong_question_explanations'" in content
-    assert "错题订正讲解" in content
+    assert "app.renderWrongQuestionExplanationCard" in content
+    assert "wrong-explain-card" in content
+
+
+def test_objective_review_card_uses_overview_and_locked_state():
+    content = UI_JS.read_text(encoding="utf-8")
+    styles = Path("frontend/assets/styles.css").read_text(encoding="utf-8")
+
+    assert "obj-quiz-review-summary" in content
+    assert "已批改" in content
+    assert "review_state" in content
+    assert "review-locked" in content
+    assert "已批改${title}，点击展开逐题结果" in content
+    assert ".obj-quiz-review-summary" in styles
+    assert ".obj-review-score" in styles
+
+
+def test_objective_question_layout_handles_long_options_and_shows_explanations():
+    content = UI_JS.read_text(encoding="utf-8")
+    styles = Path("frontend/assets/styles.css").read_text(encoding="utf-8")
+
+    assert "obj-test-opt-key" in content
+    assert "obj-test-opt-text" in content
+    assert "obj-test-explanation" in content
+    assert "wrong_option_analysis" in content
+    assert "target_objective" in content
+    assert ".obj-test-q-opts" in styles
+    assert "grid-template-columns: minmax(0, 1fr);" in styles
+    assert ".obj-test-opt" in styles
+    assert "white-space: normal;" in styles
+    assert ".obj-test-opt-key" in styles
+    assert ".obj-test-explanation" in styles
+
+
+def test_objective_review_explanation_is_structured_as_review_card():
+    content = UI_JS.read_text(encoding="utf-8")
+    styles = Path("frontend/assets/styles.css").read_text(encoding="utf-8")
+
+    assert "obj-test-explanation-head" in content
+    assert "obj-test-explanation-title" in content
+    assert "obj-test-explanation-row" in content
+    assert "本题解析" in content
+    assert "下一步" in content
+    assert ".obj-test-explanation-head" in styles
+    assert ".obj-test-explanation-row" in styles
+    assert "grid-template-columns: 4.6rem minmax(0, 1fr);" in styles
+
+
+def test_wrong_question_explanation_card_is_structured_and_collapsible():
+    content = UI_JS.read_text(encoding="utf-8")
+    session_content = SESSION_JS.read_text(encoding="utf-8")
+    styles = Path("frontend/assets/styles.css").read_text(encoding="utf-8")
+
+    assert "app.renderWrongQuestionExplanationCard = function renderWrongQuestionExplanationCard" in content
+    assert "wrong-explain-summary" in content
+    assert "wrong-explain-detail" in content
+    assert "你错在" in content
+    assert "正确理解" in content
+    assert "下次判断依据" in content
+    assert "app.renderWrongQuestionExplanationCard?.(explanations" in session_content
+    assert ".wrong-explain-card" in styles
+    assert ".wrong-explain-detail" in styles
 
 
 def test_frontend_allows_graphrag_debug_report_html_and_math_assets():
@@ -160,7 +223,7 @@ def test_frontend_renders_wrong_question_explanations_immediately_from_sse_befor
     assert "app.renderObjectiveQuizReviewCard?.(data.data.review" in complete_handler
     assert "data.source === 'wrong_question_explainer'" in complete_handler
     assert "wrong_question_explanations" in complete_handler
-    assert "app.appendMessage?.('agent'" in complete_handler
+    assert "app.renderWrongQuestionExplanationCard?.(explanations" in complete_handler
     assert complete_handler.index("data.source === 'objective_test_scorer'") < complete_handler.index("data.source === 'wrong_question_explainer'")
     assert complete_handler.index("data.source === 'wrong_question_explainer'") < complete_handler.index("app.clearTypingIndicator")
 
@@ -173,7 +236,7 @@ def test_frontend_quiz_review_reuses_submitted_card_before_rendering_variant_car
 
     assert "candidate.dataset.quizKind === kind && !candidate.dataset.reviewRendered" in review_body
     assert "reviewCard.dataset.reviewRendered = 'true'" in review_body
-    assert "reviewCard.classList.add('submitted-collapsed')" in review_body
+    assert "reviewCard.classList.add('submitted-collapsed', 'review-locked')" in review_body
     assert "app.renderObjectiveTestCard(questions, kind)" in review_body
     assert review_body.index("existingCards.find") < review_body.index("app.renderObjectiveTestCard(questions, kind)")
     assert "card.dataset.quizKind = kind" in content

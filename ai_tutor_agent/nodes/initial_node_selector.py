@@ -3,7 +3,7 @@ from __future__ import annotations
 from typing import Any
 
 from ..core.events import make_event
-from ..core.learning_support import build_graph_state_patch
+from ..core.learning_support import build_graph_state_patch, graph_node_sort_key
 from ..core.ports import RuntimeContext
 from ..core.state import AgentState
 
@@ -15,8 +15,7 @@ def _string_list(values: Any) -> list[str]:
 
 
 def _node_numeric_key(node_id: str) -> tuple[int, str]:
-    digits = "".join(ch for ch in str(node_id or "") if ch.isdigit())
-    return (int(digits) if digits else 999999, str(node_id or ""))
+    return graph_node_sort_key(node_id)
 
 
 def _node_name(node: dict[str, Any], node_id: str) -> str:
@@ -148,6 +147,30 @@ def build_initial_node_selector_node(runtime: RuntimeContext):
                     data={"title": selected_name, "id": selected_id, "status": "selected", "type": "current"},
                 )
             )
+
+            # ── 教学推理透明：解释节点选择原因 ──
+            if state.get("thinking_mode", False):
+                reason_explain = {
+                    "course_root_start": "选择课程起点：无前置依赖的入门章节，适合作为学习起点",
+                    "lowest_gap_unvisited": "根据前测薄弱点：该概念在前测中得分最低，优先补齐",
+                    "smallest_unvisited": "选择最小未学节点：按图谱顺序推进，从最基础的未学节点开始",
+                }.get(reason, f"选择原因：{reason}")
+                prereq_count = len(_string_list(selected_node.get("prerequisite_nodes")))
+                prereq_note = f"；该节点有 {prereq_count} 个前置知识" if prereq_count > 0 else "；无前置依赖，可直接学习"
+                event_sink.emit(
+                    make_event(
+                        "thinking.step",
+                        "initial_node_selector",
+                        message=f"节点选择：{reason_explain}【{selected_name}】{prereq_note}",
+                        data={
+                            "category": "node_selection",
+                            "node_id": selected_id,
+                            "node_name": selected_name,
+                            "reason": reason,
+                            "prerequisite_count": prereq_count,
+                        },
+                    )
+                )
 
         return {
             "current_node_id": selected_id,

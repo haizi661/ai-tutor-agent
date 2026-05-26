@@ -26,6 +26,69 @@
     const LONG_VISIBLE_FALLBACK_MS = 5200;
     const MAX_VISIBLE_FALLBACKS = 2;
 
+    function escapeHtml(value) {
+        return String(value || '')
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#39;');
+    }
+
+    function normalizeCasesBody(body) {
+        return String(body || '')
+            .split(/(\\\\(?:\s*\[[^\]]+\])?)/)
+            .map((part) => {
+                if (part.startsWith('\\\\') || part.includes('&')) return part;
+                return part.replace(
+                    /,\s*((?:(?:\\?[a-zA-Z]|[^\s,])[\s\S]*?(?:\\leq?|\\geq?|[<>≤≥=])[\s\S]*))$/,
+                    ', & $1'
+                );
+            })
+            .join('');
+    }
+
+    function normalizeLatexSource(latex) {
+        return String(latex || '').replace(
+            /\\left\\\{\s*\\begin\{array\}\{[^}]*\}([\s\S]*?)\\end\{array\}\s*\\right\.?/g,
+            (_match, body) => `\\begin{cases}${normalizeCasesBody(body)}\\end{cases}`
+        ).replace(
+            /\\begin\{cases\}([\s\S]*?)\\end\{cases\}/g,
+            (_match, body) => `\\begin{cases}${normalizeCasesBody(body)}\\end{cases}`
+        );
+    }
+
+    function normalizeMathBlock(block) {
+        const value = String(block || '');
+        const wrappers = [
+            ['$$', '$$'],
+            ['\\[', '\\]'],
+            ['\\(', '\\)'],
+            ['$', '$'],
+        ];
+        const wrapper = wrappers.find(([left, right]) => value.startsWith(left) && value.endsWith(right));
+        if (!wrapper) return normalizeLatexSource(value);
+        const [left, right] = wrapper;
+        const inner = value.slice(left.length, value.length - right.length);
+        return `${left}${normalizeLatexSource(inner)}${right}`;
+    }
+
+    function parseMarkdown(text) {
+        if (typeof marked === 'undefined') return text;
+        const mathBlocks = [];
+        let processed = String(text || '').replace(/(\$\$[\s\S]*?\$\$|\$[\s\S]*?\$|\\\[[\s\S]*?\\\]|\\\([\s\S]*?\\\))/g, (match) => {
+            mathBlocks.push(normalizeMathBlock(match));
+            return `@@MATH_BLOCK_${mathBlocks.length - 1}@@`;
+        });
+
+        let html = marked.parse(processed);
+
+        html = html.replace(/@@MATH_BLOCK_(\d+)@@/g, (match, i) => {
+            return mathBlocks[i];
+        });
+        return html;
+    }
+
     function renderMarkdown(target, text, options = {}) {
         const rawText = String(text || '');
         const allowGraphRagHtml = options.allowGraphRagHtml === true;
@@ -33,13 +96,25 @@
         if (allowGraphRagHtml) {
             target.innerHTML = sanitizeLearningHtml(extractGraphRagReportBody(rawText), { allowDebugClasses: true });
         } else if (allowLearningHtml) {
-            target.innerHTML = sanitizeLearningHtml(rawText);
+            target.innerHTML = sanitizeLearningHtml(renderLearningHtmlOrMarkdown(rawText));
         } else {
-            target.innerHTML = sanitizeRenderedHtml(marked.parse(rawText));
+            target.innerHTML = sanitizeRenderedHtml(parseMarkdown(rawText));
         }
         normalizeLearningRelatedOverview(target);
         stripRedundantTextAfterTables(target);
         app.renderMath(target);
+    }
+
+    app.renderMarkdownContent = function renderMarkdownContent(target, text, options = {}) {
+        renderMarkdown(target, text, options);
+    };
+
+    function renderLearningHtmlOrMarkdown(rawText = '') {
+        const text = String(rawText || '');
+        if (/<(?:div|section)\b[^>]*class=["'][^"']*(?:learning-answer-content|homework-answer-content|learning-reference-block|learning-evidence-card|learning-formula-card|learning-figure-card|learning-table-card)/i.test(text)) {
+            return text;
+        }
+        return parseMarkdown(text);
     }
 
     /**
@@ -107,7 +182,11 @@
             'learning-evidence-type',
             'learning-evidence-title',
             'learning-evidence-summary',
+            'learning-citation',
+            'learning-citation-index',
             'learning-source-line',
+            'learning-source-item',
+            'learning-source-body',
             'learning-debug-details',
             'learning-latex-details',
             'learning-figure-unavailable',
@@ -125,6 +204,7 @@
             'learning-figure-viewport',
             'learning-table-card',
             'learning-table-viewport',
+            'learning-table-empty',
             'learning-derivation-card',
             'learning-derivation-steps',
             'learning-code-viewport',
@@ -295,7 +375,7 @@
     app.renderMath = function renderMath(el) {
         if (window.katex) {
             el.querySelectorAll?.('.formula-render[data-latex]').forEach((node) => {
-                const latex = node.getAttribute('data-latex') || node.textContent || '';
+                const latex = normalizeLatexSource(node.getAttribute('data-latex') || node.textContent || '');
                 if (!latex.trim()) return;
                 try {
                     katex.render(latex, node, { displayMode: true, throwOnError: false, strict: 'ignore' });
@@ -316,8 +396,20 @@
                 throwOnError: false,
             });
         }
+        markTaggedMathDisplays(el);
         updateFormulaViewportOverflow(el);
     };
+
+    function markTaggedMathDisplays(root) {
+        const scope = root || document;
+        scope.querySelectorAll?.('.katex-display .tag').forEach((tag) => {
+            const display = tag.closest('.katex-display');
+            if (!display) return;
+            const tagWidth = Math.ceil(tag.getBoundingClientRect().width || tag.offsetWidth || 0);
+            display.classList.add('katex-display--tagged');
+            display.style.setProperty('--katex-tag-space', `${Math.max(tagWidth + 16, 56)}px`);
+        });
+    }
 
     function updateFormulaViewportOverflow(root) {
         const scope = root || document;
@@ -1258,15 +1350,75 @@
         return true;
     }
 
+    function _ensureThinkDrawer() {
+        if (!state.currentAgentTurnEl) return null;
+        const existing = state.currentAgentTurnEl.querySelector('.trace-drawer');
+        if (existing) return existing;
+
+        const bubble = state.currentAgentTurnEl.querySelector('.bubble.ai') || state.currentAgentTurnEl.querySelector('.agent-turn');
+        if (!bubble) return null;
+
+        const drawer = document.createElement('details');
+        drawer.className = 'trace-drawer';
+        drawer.dataset.thinkDrawer = '1';
+        if (!state.thinkingMode) drawer.setAttribute('hidden', '');
+
+        const summary = document.createElement('summary');
+        summary.innerHTML = '<span class="meta-title">教学推理</span><span class="meta-badge">0</span>';
+        drawer.appendChild(summary);
+
+        const list = document.createElement('ol');
+        list.className = 'trace-list';
+        drawer.appendChild(list);
+
+        bubble.insertBefore(drawer, bubble.firstChild);
+        return drawer;
+    }
+
+    function _updateThinkDrawerVisibility() {
+        if (!state.currentAgentTurnEl) return;
+        const drawer = state.currentAgentTurnEl.querySelector('.trace-drawer');
+        if (!drawer) return;
+        if (state.thinkingMode) {
+            drawer.removeAttribute('hidden');
+        } else {
+            drawer.setAttribute('hidden', '');
+        }
+    }
+
+    app.syncThinkDrawerVisibility = _updateThinkDrawerVisibility;
+
     app.addThinkingStep = function addThinkingStep(text, tone = 'info') {
         if (!text) return false;
         if (tone === 'warning' || tone === 'danger') app.setStatusBanner(text, tone);
+        // 推理模式关闭时静默吞掉推理事件，避免 appendMeta() fallback 成聊天区系统消息。
+        if (!state.thinkingMode) return true;
+        const drawer = _ensureThinkDrawer();
+        if (!drawer) return false;
+        const list = drawer.querySelector('.trace-list');
+        if (!list) return false;
+        const appended = appendMetaItem(list, text, tone, 'thinking');
+        if (appended) {
+            const badge = drawer.querySelector('.meta-badge');
+            if (badge) badge.textContent = String(list.children.length);
+        }
         return true;
     };
 
     app.addNote = function addNote(text, tone = 'info') {
         if (!text) return false;
         if (tone === 'warning' || tone === 'danger') app.setStatusBanner(text, tone);
+        // 推理模式关闭时静默吞掉注记事件，避免 appendMeta() fallback 成聊天区系统消息。
+        if (!state.thinkingMode) return true;
+        const drawer = _ensureThinkDrawer();
+        if (!drawer) return false;
+        const list = drawer.querySelector('.trace-list');
+        if (!list) return false;
+        const appended = appendMetaItem(list, text, tone, 'note');
+        if (appended) {
+            const badge = drawer.querySelector('.meta-badge');
+            if (badge) badge.textContent = String(list.children.length);
+        }
         return true;
     };
 
@@ -1718,7 +1870,7 @@
         bubbleWrap.className = 'bubble-wrap';
         const bubble = document.createElement('div');
         bubble.className = role === 'user' ? 'bubble user' : 'bubble ai';
-        bubble.innerHTML = sanitizeRenderedHtml(marked.parse(text));
+        bubble.innerHTML = sanitizeRenderedHtml(parseMarkdown(text));
         bubbleWrap.appendChild(bubble);
 
         if (role === 'user') {
@@ -1742,7 +1894,7 @@
             <div class="bubble-wrap">
                 <div class="msg-content system prompt-card">
                     <div class="system-kicker prompt-label">提示</div>
-                    <div class="system-body">${sanitizeRenderedHtml(marked.parse(text))}</div>
+                    <div class="system-body">${sanitizeRenderedHtml(parseMarkdown(text))}</div>
                 </div>
             </div>
         `;
@@ -2181,6 +2333,15 @@
 
     function _parseOptionKey(optText) {
         return (optText || '').trim().charAt(0).toUpperCase();
+    }
+
+    function _stripObjectiveOptionLabel(optText, key = '') {
+        const text = String(optText || '').trim();
+        const normalizedKey = String(key || '').trim().toUpperCase();
+        if (normalizedKey && text.toUpperCase().startsWith(normalizedKey)) {
+            return text.slice(normalizedKey.length).replace(/^[\s.．、:：-]+/, '').trim() || text;
+        }
+        return text.replace(/^[A-Da-d][\s.．、:：-]+/, '').trim() || text;
     }
 
     /**
@@ -2967,13 +3128,22 @@
             const qText = q.question || q.stem || `第 ${idx + 1} 题`;
             const rawOpts = q.options || [];
             const optEntries = Array.isArray(rawOpts)
-                ? rawOpts.map(o => ({ key: _parseOptionKey(o), text: o }))
-                : Object.entries(rawOpts).map(([k, v]) => ({ key: k.toUpperCase(), text: `${k}. ${v}` }));
-            qEl.innerHTML = `
-                <div class="obj-test-q-text">${idx + 1}. ${qText}</div>
-                <div class="obj-test-q-opts"></div>
-            `;
-            const optContainer = qEl.querySelector('.obj-test-q-opts');
+                ? rawOpts.map((o, optIdx) => {
+                    const parsedKey = _parseOptionKey(o);
+                    const key = ['A', 'B', 'C', 'D'].includes(parsedKey) ? parsedKey : String.fromCharCode(65 + optIdx);
+                    return { key, text: _stripObjectiveOptionLabel(o, key) };
+                })
+                : Object.entries(rawOpts).map(([k, v]) => {
+                    const key = String(k || '').trim().toUpperCase();
+                    return { key, text: _stripObjectiveOptionLabel(v, key) };
+                });
+            const qTextEl = document.createElement('div');
+            qTextEl.className = 'obj-test-q-text';
+            qTextEl.textContent = `${idx + 1}. ${qText}`;
+            const optContainer = document.createElement('div');
+            optContainer.className = 'obj-test-q-opts';
+            qEl.appendChild(qTextEl);
+            qEl.appendChild(optContainer);
             optEntries.forEach(({ key, text }) => {
                 const btn = document.createElement('button');
                 btn.type = 'button';
@@ -2981,7 +3151,14 @@
                 btn.dataset.qIdx = String(idx);
                 btn.dataset.qid = qid;
                 btn.dataset.v = key;
-                btn.textContent = text;
+                const keyEl = document.createElement('span');
+                keyEl.className = 'obj-test-opt-key';
+                keyEl.textContent = key;
+                const textEl = document.createElement('span');
+                textEl.className = 'obj-test-opt-text';
+                textEl.textContent = text;
+                btn.appendChild(keyEl);
+                btn.appendChild(textEl);
                 btn.onclick = () => {
                     optContainer.querySelectorAll('.obj-test-opt').forEach(o => o.classList.remove('selected'));
                     btn.classList.add('selected');
@@ -3046,8 +3223,15 @@
         app.finalizeAgentTurn?.();
         const questions = Array.isArray(data.questions) ? data.questions : [];
         const answers = data.answers || {};
-        const kind = data.kind || 'objective_test_answers';
+        const kind = data.kind || data.quiz_kind || 'objective_test_answers';
         const title = data.title || (kind === 'variant_test_answers' ? '变式练习' : '客观测评');
+        const score = Number.isFinite(Number(data.score)) ? Number(data.score) : 0;
+        const passScore = Number.isFinite(Number(data.pass_score)) ? Number(data.pass_score) : 80;
+        const passed = Boolean(data.passed);
+        const questionCount = Number(data.question_count || questions.length || 0);
+        const correctCount = Number(data.correct_count || questions.filter(q => q.is_correct).length || 0);
+        const wrongCount = Number(data.wrong_count ?? Math.max(0, questionCount - correctCount));
+        const nodeName = data.node_name || '';
         const existingCards = Array.from(document.querySelectorAll('.obj-test-card'));
         const card = existingCards.find(candidate => candidate.dataset.quizKind === kind && !candidate.dataset.reviewRendered)
             || existingCards.find(candidate => !candidate.dataset.reviewRendered)
@@ -3061,42 +3245,175 @@
             return;
         }
         reviewCard.dataset.reviewRendered = 'true';
+        reviewCard.dataset.reviewState = data.review_state || 'graded';
         reviewCard.closest('.msg-wrapper')?.setAttribute('data-contains-objective-review', 'true');
         const qContainer = reviewCard.querySelector('.obj-test-questions');
         const submitBtn = reviewCard.querySelector('.obj-test-submit');
         const toggle = reviewCard.querySelector('.obj-test-review-toggle');
         const body = reviewCard.querySelector('.obj-test-review-body');
         const heading = reviewCard.querySelector('.prompt-label');
-        if (heading) heading.textContent = title;
+        const titleEl = reviewCard.querySelector('.prompt-title');
+        const copyEl = reviewCard.querySelector('.prompt-copy');
+        if (heading) heading.textContent = `${title} · 已批改`;
+        if (titleEl) titleEl.textContent = passed ? '本轮已通过，可以继续推进' : `本轮未通过，需要订正 ${wrongCount} 道错题`;
+        if (copyEl) copyEl.textContent = nodeName ? `节点：${nodeName}` : '提交后答案已锁定，下面是本轮复盘。';
         if (submitBtn) submitBtn.remove();
         reviewCard.querySelectorAll('.obj-test-opt').forEach(o => {
             o.style.pointerEvents = 'none';
             o.classList.add('locked');
         });
+
+        reviewCard.querySelectorAll('.obj-quiz-review-summary').forEach(el => el.remove());
+        reviewCard.querySelectorAll('.obj-test-answer-summary, .obj-test-explanation').forEach(el => el.remove());
+        const summary = document.createElement('section');
+        summary.className = `obj-quiz-review-summary ${passed ? 'is-passed' : 'is-failed'}`;
+        summary.innerHTML = `
+            <div class="obj-review-kicker">${passed ? '已通过' : '需要订正'} · 已锁定</div>
+            <div class="obj-review-score-row">
+                <div class="obj-review-score"><strong>${score}</strong><span>/100</span></div>
+                <div class="obj-review-result">通过线 ${passScore} · ${correctCount}/${questionCount} 正确</div>
+            </div>
+            <div class="obj-review-stats">
+                <span>错题 ${wrongCount} 道</span>
+                <span>${passed ? '下一步：进入后续节点决策' : '下一步：先看错题讲解，再做变式练习'}</span>
+            </div>
+        `;
+        reviewCard.querySelector('.prompt-card')?.after(summary);
+
         questions.forEach((q, idx) => {
             const qid = q.question_id || q.id || `Q${idx + 1}`;
-            const userKey = String(answers[qid] || answers[String(idx + 1)] || answers[`Q${idx + 1}`] || '').toUpperCase();
-            const correctKey = String(q.answer_key || q.correct_answer || q.correct || '').toUpperCase();
+            const userKey = String(q.chosen_answer || answers[qid] || answers[String(idx + 1)] || answers[`Q${idx + 1}`] || '').toUpperCase();
+            const correctKey = String(q.correct_answer || q.answer_key || q.correct || '').toUpperCase();
+            const isCorrect = typeof q.is_correct === 'boolean' ? q.is_correct : Boolean(correctKey && userKey === correctKey);
             const qEl = qContainer?.children?.[idx];
             if (!qEl) return;
+            qEl.classList.toggle('is-correct', isCorrect);
+            qEl.classList.toggle('is-wrong', !isCorrect);
             qEl.querySelectorAll('.obj-test-opt').forEach(o => {
                 const v = String(o.dataset.v || '').toUpperCase();
                 if (correctKey && v === correctKey) o.classList.add('correct-answer');
                 if (userKey && correctKey && v === userKey && userKey !== correctKey) o.classList.add('wrong-answer');
                 if (userKey && v === userKey) o.classList.add('selected');
             });
-            const summary = document.createElement('div');
-            summary.className = 'obj-test-answer-summary';
-            summary.textContent = `你的答案：${userKey || '未作答'}；正确答案：${correctKey || '未提供'}`;
-            qEl.appendChild(summary);
+            const itemSummary = document.createElement('div');
+            itemSummary.className = 'obj-test-answer-summary';
+            itemSummary.innerHTML = `
+                <span class="obj-result-pill ${isCorrect ? 'ok' : 'bad'}">${isCorrect ? '正确' : '错误'}</span>
+                <span>你的答案：${escapeHtml(userKey || '未作答')}</span>
+                <span>正确答案：${escapeHtml(correctKey || '未提供')}</span>
+                ${q.wrong_reason ? `<span>错因：${escapeHtml(q.wrong_reason)}</span>` : ''}
+            `;
+            qEl.appendChild(itemSummary);
+
+            const targetObjective = String(q.target_objective || q.objective || '').trim();
+            const explanationText = String(q.explanation || q.analysis || '').trim();
+            const wrong_option_analysis = q.wrong_option_analysis || {};
+            const chosenWrongAnalysis = !isCorrect ? String(wrong_option_analysis[userKey] || '').trim() : '';
+            const misconception = String(q.misconception || '').trim();
+            if (targetObjective || explanationText || chosenWrongAnalysis || misconception) {
+                const explanation = document.createElement('div');
+                explanation.className = 'obj-test-explanation';
+                const head = document.createElement('div');
+                head.className = 'obj-test-explanation-head';
+                const title = document.createElement('span');
+                title.className = 'obj-test-explanation-title';
+                title.textContent = '本题解析';
+                const state = document.createElement('span');
+                state.className = `obj-test-explanation-state ${isCorrect ? 'ok' : 'bad'}`;
+                state.textContent = isCorrect ? '已掌握' : '需订正';
+                head.appendChild(title);
+                head.appendChild(state);
+                explanation.appendChild(head);
+                const addLine = (label, value) => {
+                    const cleanValue = String(value || '').trim();
+                    if (!cleanValue) return;
+                    const line = document.createElement('div');
+                    line.className = 'obj-test-explanation-row';
+                    const labelEl = document.createElement('span');
+                    labelEl.className = 'obj-test-explanation-label';
+                    labelEl.textContent = label;
+                    const valueEl = document.createElement('span');
+                    valueEl.className = 'obj-test-explanation-value';
+                    valueEl.textContent = cleanValue;
+                    line.appendChild(labelEl);
+                    line.appendChild(valueEl);
+                    explanation.appendChild(line);
+                };
+                addLine('考察目标', targetObjective);
+                addLine('判断依据', explanationText);
+                addLine('所选项问题', chosenWrongAnalysis);
+                addLine('常见误区', misconception);
+                addLine('下一步', isCorrect ? '保留这条判断依据，后续遇到同类题先按这个条件定位。' : '先回看考察目标和所选项问题，再重做同类题验证是否真正掌握。');
+                qEl.appendChild(explanation);
+                app.renderMath?.(explanation);
+            }
         });
-        reviewCard.classList.add('submitted-collapsed');
+        reviewCard.classList.add('submitted-collapsed', 'review-locked');
         if (body) body.hidden = true;
         if (toggle) {
             toggle.hidden = false;
             toggle.setAttribute('aria-expanded', 'false');
-            toggle.textContent = `已提交${title}，点击展开查看作答情况`;
+            toggle.textContent = `已批改${title}，点击展开逐题结果`;
         }
+    };
+
+    app.renderWrongQuestionExplanationCard = function renderWrongQuestionExplanationCard(explanations = [], options = {}) {
+        app.finalizeAgentTurn?.();
+        const items = Array.isArray(explanations) ? explanations : [];
+        const container = document.getElementById('messages');
+        if (!container) return;
+        const row = createAssistantCardRow('wrong-explanation-card');
+        const card = document.createElement('section');
+        card.className = 'topic-confirm-card prompt-flow-card wrong-explain-card';
+        card.dataset.reviewState = options.review_state || 'explained';
+        const count = items.length;
+        card.innerHTML = `
+            <div class="prompt-card prompt-flow-shell wrong-explain-head">
+                <div class="prompt-label">错题讲解 · 已生成</div>
+                <div class="prompt-title">${count ? `已整理 ${count} 道错题的订正思路` : '暂无需要订正的错题'}</div>
+                <div class="prompt-copy">默认收起详细讲解，展开后查看错因、判断依据和复习动作。</div>
+            </div>
+            <div class="wrong-explain-list"></div>
+        `;
+        const list = card.querySelector('.wrong-explain-list');
+        items.forEach((item, idx) => {
+            const qid = String(item.question_id || `Q${idx + 1}`);
+            const stem = String(item.stem || '未提供题干');
+            const userAnswer = String(item.user_answer || '').toUpperCase() || '未作答';
+            const answerKey = String(item.answer_key || item.correct_answer || '').toUpperCase() || '未提供';
+            const wrongReason = String(item.wrong_reason || '未分类');
+            const target = String(item.target_objective || '');
+            const block = document.createElement('article');
+            block.className = 'wrong-explain-item';
+            block.innerHTML = `
+                <button type="button" class="wrong-explain-summary" aria-expanded="false">
+                    <span class="wrong-explain-index">${idx + 1}</span>
+                    <span class="wrong-explain-main">
+                        <strong>${escapeHtml(stem)}</strong>
+                        <span>你的答案 ${escapeHtml(userAnswer)} · 正确答案 ${escapeHtml(answerKey)}${target ? ` · 考察：${escapeHtml(target)}` : ''}</span>
+                    </span>
+                    <span class="wrong-explain-reason">${escapeHtml(wrongReason)}</span>
+                </button>
+                <div class="wrong-explain-detail" hidden>
+                    ${item.why_user_wrong ? `<section><b>你错在</b><p>${escapeHtml(item.why_user_wrong)}</p></section>` : ''}
+                    ${item.why_correct ? `<section><b>正确理解</b><p>${escapeHtml(item.why_correct)}</p></section>` : ''}
+                    ${item.key_rule ? `<section><b>下次判断依据</b><p>${escapeHtml(item.key_rule)}</p></section>` : ''}
+                    <section><b>完整讲解</b><p>${escapeHtml(item.explanation || '这题需要回到题干条件和节点核心概念重新判断。')}</p></section>
+                    ${item.review_action ? `<section><b>下一步</b><p>${escapeHtml(item.review_action)}</p></section>` : ''}
+                </div>
+            `;
+            const btn = block.querySelector('.wrong-explain-summary');
+            const detail = block.querySelector('.wrong-explain-detail');
+            btn.onclick = () => {
+                const expanded = btn.getAttribute('aria-expanded') === 'true';
+                btn.setAttribute('aria-expanded', expanded ? 'false' : 'true');
+                detail.hidden = expanded;
+            };
+            list.appendChild(block);
+        });
+        row.body.appendChild(card);
+        container.appendChild(row.wrap);
+        app.scrollMessagesToBottom();
     };
 
     function applySessionArtifacts(stateSnapshot) {
@@ -3198,7 +3515,10 @@
             app.setChatInputPlaceholder?.('请输入你的作业答案');
         }
         if (pik === 'objective_test_answers' || pik === 'variant_test_answers') {
-            app.renderObjectiveTestCard?.(pio, pik);
+            const selector = `.obj-test-card[data-quiz-kind="${pik}"]:not(.submitted-collapsed)`;
+            if (!document.querySelector(selector)) {
+                app.renderObjectiveTestCard?.(pio, pik);
+            }
         }
         app.updateSidebarState?.(stateSnapshot);
         app.refreshChatSurfaceState?.();
@@ -3274,6 +3594,10 @@
                 app.renderInterruptConfirmation?.();
                 return;
             }
+            if (item.kind === 'objective_test_card') {
+                app.renderObjectiveTestCard?.(data.questions || data.options || [], data.interaction_kind || 'objective_test_answers');
+                return;
+            }
             if (item.kind === 'objective_quiz_review') {
                 app.renderObjectiveQuizReviewCard?.(data, content);
                 return;
@@ -3290,7 +3614,12 @@
                 return;
             }
             if (item.kind === 'wrong_question_explanations') {
-                app.appendMessage('agent', content || '错题订正讲解', { kind: 'wrong_question_explanations' });
+                const explanations = Array.isArray(data.explanations) ? data.explanations : [];
+                if (explanations.length) {
+                    app.renderWrongQuestionExplanationCard?.(explanations, data);
+                } else {
+                    app.appendMessage('agent', content || '错题订正讲解', { kind: 'wrong_question_explanations' });
+                }
                 return;
             }
             if (item.kind === 'next_step_selector') {
@@ -3499,5 +3828,109 @@
 
     app.toggleUserKgMap = function toggleUserKgMap() {
         app.focusUserKgMap();
+    };
+
+    // ── 补救决策卡 ────────────────────────────────────────────────────────────
+    app.renderRemediationDecisionCard = function renderRemediationDecisionCard(data = {}, renderOptions = {}) {
+        document.querySelector('.remediation-decision-card')?.remove();
+        const container = document.getElementById('messages');
+        const row = createAssistantCardRow('remediation-decision-card');
+        const card = document.createElement('div');
+        card.className = 'remediation-decision-card prompt-flow-card';
+        card.dataset.cardKind = 'remediation_decision';
+
+        const score = data.score ?? 0;
+        const passScore = data.pass_score ?? 80;
+        const tier = data.tier || (score >= passScore ? 'pass' : score >= 60 ? 'partial' : 'low');
+        const paused = data.paused || false;
+        const wrongCount = data.wrong_count ?? 0;
+        const variantRounds = data.variant_rounds ?? 0;
+        const maxVariantRounds = data.max_variant_rounds ?? 2;
+        const extraCount = data.extra_remediation_question_count ?? 0;
+        const maxExtra = data.max_extra_questions ?? 10;
+        const failures = data.same_objective_failures || {};
+        const pausedReasons = Array.isArray(data.paused_reasons) ? data.paused_reasons : [];
+        const options = Array.isArray(renderOptions.options) ? renderOptions.options : [];
+
+        let title, summary, recommendation;
+        if (paused) {
+            title = '补救已暂停';
+            summary = `本轮得分 ${score} / ${passScore}`;
+            recommendation = '这类错因已经连续出现，继续刷题效果不高。建议先回到节点讲解重点复习。';
+        } else if (tier === 'pass') {
+            title = '测验通过';
+            summary = `得分 ${score} / ${passScore}，已通过`;
+            recommendation = '可以进入下一节点。';
+        } else if (tier === 'partial') {
+            title = '需要补救';
+            summary = `得分 ${score} / ${passScore}，未通过 · 共 ${wrongCount} 个错因`;
+            recommendation = '已为你整理错因。建议先做变式训练巩固，如果感觉基础不稳也可以先复习本节点。';
+        } else {
+            title = '基础不牢';
+            summary = `得分 ${score} / ${passScore}，说明当前节点基础理解还不稳`;
+            recommendation = '建议先回到节点讲解重新学习，再做变式题。';
+        }
+
+        let html = `
+            <div class="prompt-card prompt-flow-shell remediation-decision-shell">
+                <div class="prompt-label">${title}</div>
+                <div class="prompt-title">节点补救决策</div>
+                <div class="prompt-copy">${summary}</div>
+        `;
+
+        if (paused && pausedReasons.length) {
+            html += '<div class="remediation-paused-reasons">';
+            pausedReasons.forEach(r => {
+                html += `<div class="remediation-paused-reason">⚠️ ${escapeHtml(r)}</div>`;
+            });
+            html += '</div>';
+        }
+
+        html += `
+                <div class="remediation-recommendation">${escapeHtml(recommendation)}</div>
+                <div class="remediation-stats">
+                    <span>错因 ${wrongCount} 个</span>
+                    <span>变式轮次 ${variantRounds}/${maxVariantRounds}</span>
+                    <span>补救题 ${extraCount}/${maxExtra}</span>
+                </div>
+        `;
+
+        if (Object.keys(failures).length > 0) {
+            html += '<div class="remediation-failures">';
+            for (const [obj, count] of Object.entries(failures)) {
+                html += `<div class="remediation-failure-item">「${escapeHtml(obj)}」错 ${count} 次</div>`;
+            }
+            html += '</div>';
+        }
+
+        html += '</div>';
+
+        if (options.length) {
+            html += '<div class="suggestion-row topic-confirm-chip-list selector-chip-list remediation-actions"></div>';
+        }
+
+        card.innerHTML = html;
+
+        const actions = card.querySelector('.remediation-actions');
+        if (actions) {
+            options.forEach(option => {
+                const button = document.createElement('button');
+                button.type = 'button';
+                button.className = 'chip topic-confirm-chip selector-chip';
+                button.textContent = option.label || option.value;
+                button.dataset.choiceValue = option.value;
+                button.dataset.choiceLabel = option.label || option.value;
+                button.onclick = () => app.submitAwaitingChoice?.(option.value, option.label || option.value);
+                actions.appendChild(button);
+            });
+        }
+
+        if (renderOptions.locked) {
+            app.lockChoiceCard(card, renderOptions.selectedValue || '', renderOptions.selectedLabel || renderOptions.statusText || '');
+        }
+
+        row.body.appendChild(card);
+        container.appendChild(row.wrap);
+        app.scrollMessagesToBottom();
     };
 })();

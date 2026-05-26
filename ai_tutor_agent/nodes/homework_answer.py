@@ -6,6 +6,7 @@ import re
 from typing import Any
 
 from ..core.events import make_event
+from ..core.learning_support import mutate_student_state_snapshot
 from ..core.ports import RuntimeContext
 from ..core.state import AgentState
 from ..core.text import content_to_text
@@ -218,54 +219,51 @@ def _persist_homework_result(runtime: RuntimeContext, state: AgentState, patch: 
     student_id = str(state.get("student_id") or "default_student").strip() or "default_student"
     if not (hasattr(store, "load") and hasattr(store, "save")):
         return {}
-    student_state = store.load(student_id)
-    if student_state is None:
-        return {}
-    if hasattr(student_state, "homework"):
-        student_state.homework = []
-    history = list(getattr(student_state, "homework_history", []) or [])
-    history.append(
-        {
-            "items": patch["homework_items"],
-            "answers": patch["homework_answers"],
-            "score": patch["homework_score"],
-            "results": patch["homework_results"],
-        }
-    )
-    try:
-        setattr(student_state, "homework_history", history)
-    except Exception:
-        pass
-    # Blend homework scores into mastery (70% existing + 30% homework)
-    # and update knowledge_graph per node (evidence recorded per-node via kg_update_score)
-    for result in (patch.get("homework_results") or []):
-        nid = str(result.get("node_id") or "").strip()
-        if not nid:
-            continue
-        hw_score = float(result.get("score") or 0)
-        old_mastery = float(student_state.mastery_scores.get(nid, 0))
-        blended = round(0.7 * old_mastery + 0.3 * hw_score, 1)
-        student_state.update_mastery(nid, blended)
-        # Collect wrong homework items for knowledge_graph
-        hw_wrong = []
-        if not result.get("is_correct"):
-            hw_wrong.append({
-                "question_id": str(result.get("question_id") or ""),
-                "stem": str(result.get("prompt") or "")[:200],
-                "student_answer": str(result.get("answer") or ""),
-                "correct_answer": str(result.get("expected") or ""),
-                "feedback": str(result.get("feedback") or "")[:200],
-            })
-        student_state.kg_update_score(
-            nid, int(round(hw_score)),
-            passed=bool(result.get("is_correct")),
-            wrong_items=hw_wrong or None,
-            source="homework",
+
+    def apply_patch(student_state) -> None:
+        if hasattr(student_state, "homework"):
+            student_state.homework = []
+        history = list(getattr(student_state, "homework_history", []) or [])
+        history.append(
+            {
+                "items": patch["homework_items"],
+                "answers": patch["homework_answers"],
+                "score": patch["homework_score"],
+                "results": patch["homework_results"],
+            }
         )
-    store.save(student_state)
-    if hasattr(student_state, "to_dict"):
-        return dict(student_state.to_dict() or {})
-    return {}
+        try:
+            setattr(student_state, "homework_history", history)
+        except Exception:
+            pass
+        # Blend homework scores into mastery (70% existing + 30% homework)
+        # and update knowledge_graph per node (evidence recorded per-node via kg_update_score)
+        for result in (patch.get("homework_results") or []):
+            nid = str(result.get("node_id") or "").strip()
+            if not nid:
+                continue
+            hw_score = float(result.get("score") or 0)
+            old_mastery = float(student_state.mastery_scores.get(nid, 0))
+            blended = round(0.7 * old_mastery + 0.3 * hw_score, 1)
+            student_state.update_mastery(nid, blended)
+            # Collect wrong homework items for knowledge_graph
+            hw_wrong = []
+            if not result.get("is_correct"):
+                hw_wrong.append({
+                    "question_id": str(result.get("question_id") or ""),
+                    "stem": str(result.get("prompt") or "")[:200],
+                    "student_answer": str(result.get("answer") or ""),
+                    "correct_answer": str(result.get("expected") or ""),
+                    "feedback": str(result.get("feedback") or "")[:200],
+                })
+            student_state.kg_update_score(
+                nid, int(round(hw_score)),
+                passed=bool(result.get("is_correct")),
+                wrong_items=hw_wrong or None,
+                source="homework",
+            )
+
+    return mutate_student_state_snapshot(store, student_id, apply_patch)
 
 
 def build_homework_answer_dialog_node(runtime: RuntimeContext):

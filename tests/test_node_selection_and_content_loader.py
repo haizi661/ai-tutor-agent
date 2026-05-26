@@ -113,6 +113,23 @@ def test_initial_node_selector_skips_visited_and_picks_next():
     assert result["next_node_candidate_reason"] == "smallest_unvisited"
 
 
+def test_initial_node_selector_sorts_by_km_number_not_all_digits():
+    class MixedPrefixGraphPipeline:
+        def __init__(self):
+            self.node_map = {
+                "chapter_02_KM010": {"node_id": "chapter_02_KM010", "name": "第十节点", "prerequisite_nodes": ["KM001"]},
+                "chapter_10_KM002": {"node_id": "chapter_10_KM002", "name": "第二节点", "prerequisite_nodes": ["KM001"]},
+            }
+
+    runtime = RuntimeContext(event_sink=BufferedEventSink(), graph_rag_pipeline=MixedPrefixGraphPipeline())
+    node = build_initial_node_selector_node(runtime)
+
+    result = node({"current_topic": "自动控制原理", "student_state_snapshot": {"visited_nodes": ["KM001"]}})
+
+    assert result["current_node_id"] == "chapter_10_KM002"
+    assert result["current_node_name"] == "第二节点"
+
+
 def test_initial_node_selector_prefers_course_root_over_lower_numeric_non_root():
     class RootAwareGraphPipeline:
         def __init__(self):

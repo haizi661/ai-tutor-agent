@@ -252,7 +252,7 @@ def build_evaluator_node(
             student_state_store,
             student_id=student_id,
             node_id=current_node_id,
-            score=max(0.0, min(float(total_score) / 100.0, 1.0)),
+            score=total_score,
             passed=passed,
         )
         if updated_snapshot:

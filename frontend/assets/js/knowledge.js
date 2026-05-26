@@ -3,6 +3,7 @@
 
     let currentFilter = 'all';
     let currentSearch = '';
+    let questionBankItems = [];
 
     const FILE_TYPES = [
         { type: 'pdf',   exts: ['pdf'],                            color: '#e03e3e', bg: 'rgba(224,62,62,0.12)',   border: 'rgba(224,62,62,0.22)',  label: 'PDF' },
@@ -38,11 +39,13 @@
     }
 
     function getItemType(item) {
+        if (item && item.__libraryType === 'question_bank') return 'question_bank';
         return getFileType(item && item.filename ? item.filename : '').type;
     }
 
     function matchesFilter(item) {
         if (currentFilter === 'all') return true;
+        if (currentFilter === 'question_bank') return getItemType(item) === 'question_bank';
         const type = getItemType(item);
         if (currentFilter === 'other') return !['pdf','doc','excel','ppt','image'].includes(type);
         if (currentFilter === 'doc') return ['doc','ppt'].includes(type);
@@ -51,7 +54,9 @@
 
     function matchesSearch(item) {
         if (!currentSearch.trim()) return true;
-        const name = (item && item.filename) ? item.filename.toLowerCase() : '';
+        const name = (item && (item.filename || item.title || item.question_id || item.content_text))
+            ? String(item.filename || item.title || item.question_id || item.content_text).toLowerCase()
+            : '';
         return name.includes(currentSearch.trim().toLowerCase());
     }
 
@@ -60,6 +65,9 @@
 
     function renderLibraryPanel() {
         const files = (app.state && app.state.knowledgeFiles) ? app.state.knowledgeFiles : [];
+        const libraryItems = currentFilter === 'question_bank'
+            ? questionBankItems.map(item => ({ ...item, __libraryType: 'question_bank' }))
+            : files;
         const fileList   = document.getElementById('library-file-list');
         const dropzone   = document.getElementById('library-dropzone');
         const clearBtn   = document.getElementById('library-clear-btn');
@@ -68,12 +76,14 @@
         if (!fileList) return;
 
         updateBadges(files);
-        if (storageText) storageText.textContent = `共 ${files.length} 份文件`;
-        if (clearBtn) clearBtn.hidden = files.length === 0;
+        if (storageText) storageText.textContent = currentFilter === 'question_bank'
+            ? `共 ${questionBankItems.length} 道题`
+            : `共 ${files.length} 份文件`;
+        if (clearBtn) clearBtn.hidden = currentFilter === 'question_bank' || files.length === 0;
 
         let filtered;
         try {
-            filtered = files.filter(f => f && matchesFilter(f) && matchesSearch(f));
+            filtered = libraryItems.filter(f => f && matchesFilter(f) && matchesSearch(f));
         } catch (e) {
             filtered = [];
         }
@@ -83,8 +93,25 @@
             showEl(dropzone);
         } else {
             hideEl(dropzone);
-            fileList.innerHTML = filtered.map(item => buildFileRow(item)).join('');
+            fileList.innerHTML = filtered.map(item => (
+                getItemType(item) === 'question_bank' ? renderQuestionBankCard(item) : buildFileRow(item)
+            )).join('');
         }
+    }
+
+    function renderQuestionBankCard(item) {
+        const title = item.title || item.question_id || '待补充知识板块';
+        const body = item.content_text || item.stem || item.question_text || '待补充知识板块';
+        const tags = Array.isArray(item.tags) ? item.tags.slice(0, 4).join(' · ') : '';
+        return `<article class="lib-file-row question-bank-row" role="listitem" data-library-id="${escapeHtml(item.library_id || '')}">
+            <div class="lib-file-icon" style="background:rgba(22,163,74,0.12);border:1px solid rgba(22,163,74,0.22)" aria-hidden="true">
+                <span class="lib-file-ext" style="color:#16a34a">题</span>
+            </div>
+            <div class="lib-file-info">
+                <div class="lib-file-name" title="${escapeHtml(title)}">${escapeHtml(title)}</div>
+                <div class="lib-file-meta">${escapeHtml(tags || body).slice(0, 120)}</div>
+            </div>
+        </article>`;
     }
 
     function buildFileRow(item) {
@@ -117,7 +144,7 @@
     }
 
     function updateBadges(files) {
-        const counts = { all: files.length, pdf: 0, doc: 0, excel: 0, image: 0, other: 0 };
+        const counts = { all: files.length, pdf: 0, doc: 0, excel: 0, image: 0, other: 0, question_bank: questionBankItems.length };
         for (const f of files) {
             if (!f) continue;
             const type = getItemType(f);
@@ -165,6 +192,19 @@
         } catch (_) {
             app.patchState({ knowledgeFiles: [] }, 'knowledge.fetch.error');
             setLibraryStatus('加载失败，请检查网络连接', 'danger');
+        }
+    }
+
+    async function fetchQuestionBankItems() {
+        try {
+            const res = await fetch('/api/knowledge/question-bank');
+            const data = await res.json();
+            questionBankItems = Array.isArray(data.items) ? data.items : [];
+            renderLibraryPanel();
+            return questionBankItems;
+        } catch (_) {
+            questionBankItems = [];
+            return [];
         }
     }
 
@@ -291,7 +331,7 @@
         document.querySelectorAll('#library-nav [data-lib-filter]').forEach(btn => {
             btn.classList.toggle('is-active', btn.getAttribute('data-lib-filter') === filter);
         });
-        const TITLES = { all:'全部文件', pdf:'PDF', doc:'文档', excel:'表格', image:'图片', other:'其他' };
+        const TITLES = { all:'全部文件', pdf:'PDF', doc:'文档', excel:'表格', image:'图片', question_bank:'题库', other:'其他' };
         const title = document.getElementById('library-title');
         if (title) title.textContent = TITLES[filter] || '全部文件';
         renderLibraryPanel();
@@ -303,6 +343,7 @@
     }
 
     app.fetchKnowledgeFiles  = fetchKnowledgeFiles;
+    app.fetchQuestionBankItems = fetchQuestionBankItems;
     app.uploadKnowledgeFile  = uploadKnowledgeFile;
     app.clearKnowledgeFiles  = clearKnowledgeFiles;
     app.switchLibraryFilter  = switchLibraryFilter;

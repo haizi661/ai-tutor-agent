@@ -128,6 +128,8 @@ def test_interruption_polishes_graph_rag_context_with_tutor_llm_when_graph_answe
     assert "追问" in prompt_text
     assert "不要机械套固定的“结论 -> 分析 -> 举例 -> 拓展 -> 依据”模板" in prompt_text
     assert "[[MEDIA:媒体reference]]" in prompt_text
+    assert "不要输出裸数字引用" in prompt_text
+    assert "不要引入图谱结果中没有出现的节点编号" in prompt_text
     assert result["flow_status"] == "awaiting_post_lesson_choice"
     assert result["pending_interaction_kind"] == "post_lesson_choice"
     assert result["pending_interaction_recommended"] == "start_test"
@@ -221,8 +223,11 @@ def test_interruption_preserves_graph_rag_media_answer_for_llm_graph_answers(tmp
     assert stream_kinds == ["graph_rag_answer"]
     assert "learning-answer-content" in streamed
     assert "graph-rag-answer-panel" not in streamed
-    assert "相关公式与图表" in streamed
-    assert "KM015.summary" in streamed
+    assert "相关公式与图表" not in streamed
+    assert "参考依据" in streamed
+    assert "learning-evidence-card--source" in streamed
+    assert "KM015.summary" not in streamed.split("<details", 1)[0]
+    assert "查看来源详情" not in streamed
     assert "answer-media-block" not in streamed
     assert "media-card" not in streamed
     assert "learning-figure-card" in streamed
@@ -236,7 +241,83 @@ def test_interruption_preserves_graph_rag_media_answer_for_llm_graph_answers(tmp
         item.get("reference") == "KM013.figure_asset[1]"
         for item in result["message_history"][-1]["data"]["graph_rag_result"]["media_items"]
     )
-    assert "KM015.summary" in streamed
     assert "不应该吞掉" not in streamed
     assert result["message_history"][-1]["kind"] == "graph_rag_answer"
     assert result["message_history"][-1]["data"]["graph_rag_result"]["media_items"]
+
+
+class FakeProblematicTemporaryGraphRAGPipeline:
+    def __init__(self, figure_path: str = ""):
+        self.calls = []
+        self.figure_path = figure_path
+
+    def ask(self, question, **kwargs):
+        self.calls.append((question, kwargs))
+        return {
+            "question": question,
+            "answer": (
+                "结论：自动控制原理是研究反馈控制系统的学问。\n\n"
+                "分析：知识图谱中\n4\n明确指出反馈控制，而\n6\n阐明常见控制方式。"
+                "从图1-8可以看到输入信号与反馈信号比较。\n\n"
+                "// 图1-8 函数记录仪原理示意图\n\n"
+                "相关公式与图表\n图表\n图一 · 图 1-8 函数记录仪原理示意图\n放大\n复制引用\n"
+                "图 1-8 函数记录仪原理示意图\n来源：自动控制系统示例\n查看来源详情\n\n"
+                "拓展：后续可看[KM012.summary]和[KM026.summary]。\n\n"
+                "依据：\n1. \n1\n 通过典型实例理解自动控制系统的构成和工作过程。"
+            ),
+            "context_text": "自动控制系统示例上下文",
+            "evidence_items": [
+                {"reference": "KM003.summary", "node_id": "KM003", "node_name": "自动控制系统示例", "text": "通过典型实例理解自动控制系统的构成和工作过程。"},
+                {"reference": "KM006.summary", "node_id": "KM006", "node_name": "自动控制的基本原理与方式", "text": "说明自动控制实现的基本机制与常见控制方式。"},
+            ],
+            "media_items": [
+                {
+                    "reference": "KM003.figure_asset[1]",
+                    "display_label": "图一",
+                    "asset_type": "figure",
+                    "node_name": "自动控制系统示例",
+                    "caption": "图 1-8 函数记录仪原理示意图",
+                    "image_paths_abs": [self.figure_path] if self.figure_path else [],
+                }
+            ],
+            "plan": {"used_llm": True},
+        }
+
+
+def test_temporary_graph_rag_answer_strips_report_artifacts_and_debug_details(tmp_path):
+    image_path = tmp_path / "figure.png"
+    image_path.write_bytes(
+        b"\x89PNG\r\n\x1a\n\x00\x00\x00\rIHDR\x00\x00\x00\x01\x00\x00\x00\x01\x08\x02\x00\x00\x00\x90wS\xde"
+    )
+    tutor_llm = FakeTutorLLM("不应该二次调用")
+    graph = FakeProblematicTemporaryGraphRAGPipeline(str(image_path))
+    sink = BufferedEventSink()
+    runtime = RuntimeContext(event_sink=sink, knowledge_provider=NoopKnowledgeProvider(), graph_rag_pipeline=graph)
+    node = build_interruption_node(tutor_llm, runtime)
+
+    result = node(
+        {
+            "current_topic": "自动控制原理",
+            "interrupt_query": "自动控制原理到底是什么？",
+            "learning_resume_target": "temporary_question_collector",
+        }
+    )
+
+    assert tutor_llm.calls == []
+    assert result["flow_status"] == "awaiting_post_lesson_choice"
+    streamed = "".join(str(e.data.get("text", "")) for e in sink.events if e.type == "node.stream")
+    visible_text = streamed.split("<details", 1)[0]
+    assert "// 图" not in streamed
+    assert "相关公式与图表" not in streamed
+    assert "查看来源详情" not in streamed
+    assert "参考依据" in streamed
+    assert "learning-evidence-card--source" in streamed
+    assert "[KM012.summary]" not in visible_text
+    assert "[KM026.summary]" not in visible_text
+    assert "KM012.summary" not in visible_text
+    assert "KM026.summary" not in visible_text
+    assert "\n4\n" not in streamed
+    assert "\n6\n" not in streamed
+    assert "依据：" not in streamed
+    assert streamed.count("learning-figure-card") == 1
+    assert streamed.count("图 1-8 函数记录仪原理示意图") <= 2

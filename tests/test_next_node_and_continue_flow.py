@@ -91,6 +91,25 @@ def test_next_node_planner_selects_related_unvisited_node_after_objective_pass()
     assert result["student_state_snapshot"]["visited_nodes"] == ["KM001"]
 
 
+def test_next_node_planner_fallback_sorts_by_km_number_not_all_digits():
+    class MixedPrefixGraphPipeline:
+        def __init__(self):
+            self.node_map = {
+                "KM001": {"node_id": "KM001", "name": "起点", "recommended_next_nodes": [], "related_nodes": []},
+                "chapter_02_KM010": {"node_id": "chapter_02_KM010", "name": "第十节点", "recommended_next_nodes": [], "related_nodes": []},
+                "chapter_10_KM002": {"node_id": "chapter_10_KM002", "name": "第二节点", "recommended_next_nodes": [], "related_nodes": []},
+            }
+
+    runtime = RuntimeContext(event_sink=BufferedEventSink(), graph_rag_pipeline=MixedPrefixGraphPipeline(), student_state_store=FakeStudentStateStore())
+    node = build_next_node_planner_node(runtime)
+
+    result = node({"student_id": "student_a", "current_node_id": "KM001", "current_node_status": "passed"})
+
+    assert result["next_node_candidate_id"] == "chapter_10_KM002"
+    assert result["next_node_candidate_name"] == "第二节点"
+    assert result["next_node_candidate_reason"] == "smallest_unvisited"
+
+
 def test_continue_or_homework_selector_pauses_with_two_strict_options():
     runtime = RuntimeContext(event_sink=BufferedEventSink(), answer_provider=FakeAnswerProvider(""))
     node = build_continue_or_homework_selector_node(runtime)

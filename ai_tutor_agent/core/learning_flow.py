@@ -57,6 +57,7 @@ RESUME_TARGETS = {
     "objective_test_generator",
     "objective_test_scorer",
     "wrong_question_explainer",
+    "remediation_decision",
     "variant_question_generator",
     "variant_test_answer_dialog",
     "next_node_planner",
