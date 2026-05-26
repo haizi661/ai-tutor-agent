@@ -1,0 +1,17 @@
+{
+  "version": 1,
+  "source_path": "E:\\ai_code\\ai-tutor-agent\\data\\knowledge\\自动控制原理课程大纲-上海交通大学.pdf",
+  "source_filename": "自动控制原理课程大纲-上海交通大学.pdf",
+  "source_size_bytes": 351655,
+  "source_mtime": 1775229785,
+  "cache_key": "e0bb03c84b08",
+  "batch_id": "9915c22f-ebab-450e-9c2b-ced85216dfbe",
+  "full_zip_url": "https://cdn-mineru.openxlab.org.cn/pdf/2026-04-07/b2565b28-e87d-400c-8f8d-012195d43c3b.zip",
+  "saved_at": 1778070043,
+  "proxy_mode": "inherit",
+  "proxy_desc": "继承环境变量 HTTP_PROXY / HTTPS_PROXY",
+  "full_md_path": "full.md",
+  "relative_md_path_in_extract": "full.md",
+  "result_zip_path": "result.zip",
+  "extract_dir": "extracted"
+}

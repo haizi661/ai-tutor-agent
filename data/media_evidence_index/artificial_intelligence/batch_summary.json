@@ -1,4 +1,558 @@
 {
-  "count": 0,
-  "chapters": []
+  "count": 34,
+  "chapters": [
+    {
+      "doc_dir": "leedl_chapter_01_p009-028_第_1_章_机器学习基础__a639417c7a76",
+      "chapter_key": "leedl_chapter_01_p009-028_第_1_章_机器学习基础_a639417c7a76",
+      "raw_count": 63,
+      "filtered_count": 57,
+      "linked_count": 57,
+      "annotated_count": 57,
+      "asset_type_counts": {
+        "figure": 20,
+        "formula": 33,
+        "table": 4
+      },
+      "vision_enabled": false,
+      "filtered_path": "data/media_evidence_index/artificial_intelligence/leedl_chapter_01_p009-028_第_1_章_机器学习基础_a639417c7a76_filtered_candidates.jsonl",
+      "linked_path": "data/media_evidence_index/artificial_intelligence/leedl_chapter_01_p009-028_第_1_章_机器学习基础_a639417c7a76_linked_candidates.jsonl",
+      "annotated_path": "data/media_evidence_index/artificial_intelligence/leedl_chapter_01_p009-028_第_1_章_机器学习基础_a639417c7a76_annotated_assets.jsonl"
+    },
+    {
+      "doc_dir": "leedl_chapter_02_p029-038_第_2_章_实践方法论__83f5dfb89fc6",
+      "chapter_key": "leedl_chapter_02_p029-038_第_2_章_实践方法论_83f5dfb89fc6",
+      "raw_count": 16,
+      "filtered_count": 16,
+      "linked_count": 16,
+      "annotated_count": 16,
+      "asset_type_counts": {
+        "figure": 14,
+        "table": 2
+      },
+      "vision_enabled": false,
+      "filtered_path": "data/media_evidence_index/artificial_intelligence/leedl_chapter_02_p029-038_第_2_章_实践方法论_83f5dfb89fc6_filtered_candidates.jsonl",
+      "linked_path": "data/media_evidence_index/artificial_intelligence/leedl_chapter_02_p029-038_第_2_章_实践方法论_83f5dfb89fc6_linked_candidates.jsonl",
+      "annotated_path": "data/media_evidence_index/artificial_intelligence/leedl_chapter_02_p029-038_第_2_章_实践方法论_83f5dfb89fc6_annotated_assets.jsonl"
+    },
+    {
+      "doc_dir": "leedl_chapter_03_p039-071_第_3_章_深度学习基础__20567613c5eb",
+      "chapter_key": "leedl_chapter_03_p039-071_第_3_章_深度学习基础_20567613c5eb",
+      "raw_count": 93,
+      "filtered_count": 90,
+      "linked_count": 90,
+      "annotated_count": 90,
+      "asset_type_counts": {
+        "figure": 55,
+        "formula": 34,
+        "table": 1
+      },
+      "vision_enabled": false,
+      "filtered_path": "data/media_evidence_index/artificial_intelligence/leedl_chapter_03_p039-071_第_3_章_深度学习基础_20567613c5eb_filtered_candidates.jsonl",
+      "linked_path": "data/media_evidence_index/artificial_intelligence/leedl_chapter_03_p039-071_第_3_章_深度学习基础_20567613c5eb_linked_candidates.jsonl",
+      "annotated_path": "data/media_evidence_index/artificial_intelligence/leedl_chapter_03_p039-071_第_3_章_深度学习基础_20567613c5eb_annotated_assets.jsonl"
+    },
+    {
+      "doc_dir": "leedl_chapter_04_p072-089_第_4_章_卷积神经网络__314467abc540",
+      "chapter_key": "leedl_chapter_04_p072-089_第_4_章_卷积神经网络_314467abc540",
+      "raw_count": 36,
+      "filtered_count": 36,
+      "linked_count": 36,
+      "annotated_count": 36,
+      "asset_type_counts": {
+        "figure": 34,
+        "formula": 2
+      },
+      "vision_enabled": false,
+      "filtered_path": "data/media_evidence_index/artificial_intelligence/leedl_chapter_04_p072-089_第_4_章_卷积神经网络_314467abc540_filtered_candidates.jsonl",
+      "linked_path": "data/media_evidence_index/artificial_intelligence/leedl_chapter_04_p072-089_第_4_章_卷积神经网络_314467abc540_linked_candidates.jsonl",
+      "annotated_path": "data/media_evidence_index/artificial_intelligence/leedl_chapter_04_p072-089_第_4_章_卷积神经网络_314467abc540_annotated_assets.jsonl"
+    },
+    {
+      "doc_dir": "leedl_chapter_05_p090-113_第_5_章_循环神经网络__4d6c76fa0b2b.tmp",
+      "chapter_key": "leedl_chapter_05_p090-113_第_5_章_循环神经网络_4d6c76fa0b2b.tmp",
+      "raw_count": 53,
+      "filtered_count": 53,
+      "linked_count": 53,
+      "annotated_count": 53,
+      "asset_type_counts": {
+        "figure": 47,
+        "formula": 6
+      },
+      "vision_enabled": false,
+      "filtered_path": "data/media_evidence_index/artificial_intelligence/leedl_chapter_05_p090-113_第_5_章_循环神经网络_4d6c76fa0b2b.tmp_filtered_candidates.jsonl",
+      "linked_path": "data/media_evidence_index/artificial_intelligence/leedl_chapter_05_p090-113_第_5_章_循环神经网络_4d6c76fa0b2b.tmp_linked_candidates.jsonl",
+      "annotated_path": "data/media_evidence_index/artificial_intelligence/leedl_chapter_05_p090-113_第_5_章_循环神经网络_4d6c76fa0b2b.tmp_annotated_assets.jsonl"
+    },
+    {
+      "doc_dir": "leedl_chapter_06_p114-134_第_6_章_自注意力机制__b51ebc16a0fd.tmp",
+      "chapter_key": "leedl_chapter_06_p114-134_第_6_章_自注意力机制_b51ebc16a0fd.tmp",
+      "raw_count": 55,
+      "filtered_count": 55,
+      "linked_count": 55,
+      "annotated_count": 55,
+      "asset_type_counts": {
+        "figure": 43,
+        "formula": 12
+      },
+      "vision_enabled": false,
+      "filtered_path": "data/media_evidence_index/artificial_intelligence/leedl_chapter_06_p114-134_第_6_章_自注意力机制_b51ebc16a0fd.tmp_filtered_candidates.jsonl",
+      "linked_path": "data/media_evidence_index/artificial_intelligence/leedl_chapter_06_p114-134_第_6_章_自注意力机制_b51ebc16a0fd.tmp_linked_candidates.jsonl",
+      "annotated_path": "data/media_evidence_index/artificial_intelligence/leedl_chapter_06_p114-134_第_6_章_自注意力机制_b51ebc16a0fd.tmp_annotated_assets.jsonl"
+    },
+    {
+      "doc_dir": "leedl_chapter_07_p135-155_第_7_章_Transformer__776bff1b682a",
+      "chapter_key": "leedl_chapter_07_p135-155_第_7_章_Transformer_776bff1b682a",
+      "raw_count": 35,
+      "filtered_count": 35,
+      "linked_count": 35,
+      "annotated_count": 35,
+      "asset_type_counts": {
+        "figure": 32,
+        "formula": 2,
+        "table": 1
+      },
+      "vision_enabled": false,
+      "filtered_path": "data/media_evidence_index/artificial_intelligence/leedl_chapter_07_p135-155_第_7_章_Transformer_776bff1b682a_filtered_candidates.jsonl",
+      "linked_path": "data/media_evidence_index/artificial_intelligence/leedl_chapter_07_p135-155_第_7_章_Transformer_776bff1b682a_linked_candidates.jsonl",
+      "annotated_path": "data/media_evidence_index/artificial_intelligence/leedl_chapter_07_p135-155_第_7_章_Transformer_776bff1b682a_annotated_assets.jsonl"
+    },
+    {
+      "doc_dir": "leedl_chapter_08_p156-181_第_8_章_生成模型__13870ab4412d",
+      "chapter_key": "leedl_chapter_08_p156-181_第_8_章_生成模型_13870ab4412d",
+      "raw_count": 36,
+      "filtered_count": 36,
+      "linked_count": 36,
+      "annotated_count": 36,
+      "asset_type_counts": {
+        "figure": 36
+      },
+      "vision_enabled": false,
+      "filtered_path": "data/media_evidence_index/artificial_intelligence/leedl_chapter_08_p156-181_第_8_章_生成模型_13870ab4412d_filtered_candidates.jsonl",
+      "linked_path": "data/media_evidence_index/artificial_intelligence/leedl_chapter_08_p156-181_第_8_章_生成模型_13870ab4412d_linked_candidates.jsonl",
+      "annotated_path": "data/media_evidence_index/artificial_intelligence/leedl_chapter_08_p156-181_第_8_章_生成模型_13870ab4412d_annotated_assets.jsonl"
+    },
+    {
+      "doc_dir": "leedl_chapter_09_p182-185_第_9_章_扩散模型__eeb533bee810",
+      "chapter_key": "leedl_chapter_09_p182-185_第_9_章_扩散模型_eeb533bee810",
+      "raw_count": 8,
+      "filtered_count": 8,
+      "linked_count": 8,
+      "annotated_count": 8,
+      "asset_type_counts": {
+        "figure": 8
+      },
+      "vision_enabled": false,
+      "filtered_path": "data/media_evidence_index/artificial_intelligence/leedl_chapter_09_p182-185_第_9_章_扩散模型_eeb533bee810_filtered_candidates.jsonl",
+      "linked_path": "data/media_evidence_index/artificial_intelligence/leedl_chapter_09_p182-185_第_9_章_扩散模型_eeb533bee810_linked_candidates.jsonl",
+      "annotated_path": "data/media_evidence_index/artificial_intelligence/leedl_chapter_09_p182-185_第_9_章_扩散模型_eeb533bee810_annotated_assets.jsonl"
+    },
+    {
+      "doc_dir": "leedl_chapter_10_p186-210_第_10_章_自监督学习__c51dd4bae3b8",
+      "chapter_key": "leedl_chapter_10_p186-210_第_10_章_自监督学习_c51dd4bae3b8",
+      "raw_count": 46,
+      "filtered_count": 46,
+      "linked_count": 46,
+      "annotated_count": 46,
+      "asset_type_counts": {
+        "figure": 41,
+        "formula": 2,
+        "table": 3
+      },
+      "vision_enabled": false,
+      "filtered_path": "data/media_evidence_index/artificial_intelligence/leedl_chapter_10_p186-210_第_10_章_自监督学习_c51dd4bae3b8_filtered_candidates.jsonl",
+      "linked_path": "data/media_evidence_index/artificial_intelligence/leedl_chapter_10_p186-210_第_10_章_自监督学习_c51dd4bae3b8_linked_candidates.jsonl",
+      "annotated_path": "data/media_evidence_index/artificial_intelligence/leedl_chapter_10_p186-210_第_10_章_自监督学习_c51dd4bae3b8_annotated_assets.jsonl"
+    },
+    {
+      "doc_dir": "leedl_chapter_11_p211-220_第_11_章_自编码器__643259fcdf36",
+      "chapter_key": "leedl_chapter_11_p211-220_第_11_章_自编码器_643259fcdf36",
+      "raw_count": 16,
+      "filtered_count": 16,
+      "linked_count": 16,
+      "annotated_count": 16,
+      "asset_type_counts": {
+        "figure": 16
+      },
+      "vision_enabled": false,
+      "filtered_path": "data/media_evidence_index/artificial_intelligence/leedl_chapter_11_p211-220_第_11_章_自编码器_643259fcdf36_filtered_candidates.jsonl",
+      "linked_path": "data/media_evidence_index/artificial_intelligence/leedl_chapter_11_p211-220_第_11_章_自编码器_643259fcdf36_linked_candidates.jsonl",
+      "annotated_path": "data/media_evidence_index/artificial_intelligence/leedl_chapter_11_p211-220_第_11_章_自编码器_643259fcdf36_annotated_assets.jsonl"
+    },
+    {
+      "doc_dir": "leedl_chapter_12_p221-235_第_12_章_对抗攻击__d94740fe5e59.tmp",
+      "chapter_key": "leedl_chapter_12_p221-235_第_12_章_对抗攻击_d94740fe5e59.tmp",
+      "raw_count": 28,
+      "filtered_count": 27,
+      "linked_count": 27,
+      "annotated_count": 27,
+      "asset_type_counts": {
+        "figure": 24,
+        "table": 3
+      },
+      "vision_enabled": false,
+      "filtered_path": "data/media_evidence_index/artificial_intelligence/leedl_chapter_12_p221-235_第_12_章_对抗攻击_d94740fe5e59.tmp_filtered_candidates.jsonl",
+      "linked_path": "data/media_evidence_index/artificial_intelligence/leedl_chapter_12_p221-235_第_12_章_对抗攻击_d94740fe5e59.tmp_linked_candidates.jsonl",
+      "annotated_path": "data/media_evidence_index/artificial_intelligence/leedl_chapter_12_p221-235_第_12_章_对抗攻击_d94740fe5e59.tmp_annotated_assets.jsonl"
+    },
+    {
+      "doc_dir": "leedl_chapter_13_p236-244_第_13_章_迁移学习__63ee64ac11a4",
+      "chapter_key": "leedl_chapter_13_p236-244_第_13_章_迁移学习_63ee64ac11a4",
+      "raw_count": 22,
+      "filtered_count": 20,
+      "linked_count": 20,
+      "annotated_count": 20,
+      "asset_type_counts": {
+        "figure": 16,
+        "formula": 3,
+        "table": 1
+      },
+      "vision_enabled": false,
+      "filtered_path": "data/media_evidence_index/artificial_intelligence/leedl_chapter_13_p236-244_第_13_章_迁移学习_63ee64ac11a4_filtered_candidates.jsonl",
+      "linked_path": "data/media_evidence_index/artificial_intelligence/leedl_chapter_13_p236-244_第_13_章_迁移学习_63ee64ac11a4_linked_candidates.jsonl",
+      "annotated_path": "data/media_evidence_index/artificial_intelligence/leedl_chapter_13_p236-244_第_13_章_迁移学习_63ee64ac11a4_annotated_assets.jsonl"
+    },
+    {
+      "doc_dir": "leedl_chapter_14_p245-264_第_14_章_强化学习__ae87f1ac270b",
+      "chapter_key": "leedl_chapter_14_p245-264_第_14_章_强化学习_ae87f1ac270b",
+      "raw_count": 52,
+      "filtered_count": 48,
+      "linked_count": 48,
+      "annotated_count": 48,
+      "asset_type_counts": {
+        "figure": 30,
+        "formula": 18
+      },
+      "vision_enabled": false,
+      "filtered_path": "data/media_evidence_index/artificial_intelligence/leedl_chapter_14_p245-264_第_14_章_强化学习_ae87f1ac270b_filtered_candidates.jsonl",
+      "linked_path": "data/media_evidence_index/artificial_intelligence/leedl_chapter_14_p245-264_第_14_章_强化学习_ae87f1ac270b_linked_candidates.jsonl",
+      "annotated_path": "data/media_evidence_index/artificial_intelligence/leedl_chapter_14_p245-264_第_14_章_强化学习_ae87f1ac270b_annotated_assets.jsonl"
+    },
+    {
+      "doc_dir": "leedl_chapter_15_p265-274_第_15_章_元学习__ff65baab05f8",
+      "chapter_key": "leedl_chapter_15_p265-274_第_15_章_元学习_ff65baab05f8",
+      "raw_count": 10,
+      "filtered_count": 10,
+      "linked_count": 10,
+      "annotated_count": 10,
+      "asset_type_counts": {
+        "figure": 10
+      },
+      "vision_enabled": false,
+      "filtered_path": "data/media_evidence_index/artificial_intelligence/leedl_chapter_15_p265-274_第_15_章_元学习_ff65baab05f8_filtered_candidates.jsonl",
+      "linked_path": "data/media_evidence_index/artificial_intelligence/leedl_chapter_15_p265-274_第_15_章_元学习_ff65baab05f8_linked_candidates.jsonl",
+      "annotated_path": "data/media_evidence_index/artificial_intelligence/leedl_chapter_15_p265-274_第_15_章_元学习_ff65baab05f8_annotated_assets.jsonl"
+    },
+    {
+      "doc_dir": "leedl_chapter_16_p275-281_第_16_章_终身学习__8852219a1743",
+      "chapter_key": "leedl_chapter_16_p275-281_第_16_章_终身学习_8852219a1743",
+      "raw_count": 15,
+      "filtered_count": 15,
+      "linked_count": 15,
+      "annotated_count": 15,
+      "asset_type_counts": {
+        "figure": 10,
+        "formula": 3,
+        "table": 2
+      },
+      "vision_enabled": false,
+      "filtered_path": "data/media_evidence_index/artificial_intelligence/leedl_chapter_16_p275-281_第_16_章_终身学习_8852219a1743_filtered_candidates.jsonl",
+      "linked_path": "data/media_evidence_index/artificial_intelligence/leedl_chapter_16_p275-281_第_16_章_终身学习_8852219a1743_linked_candidates.jsonl",
+      "annotated_path": "data/media_evidence_index/artificial_intelligence/leedl_chapter_16_p275-281_第_16_章_终身学习_8852219a1743_annotated_assets.jsonl"
+    },
+    {
+      "doc_dir": "leedl_chapter_17_p282-299_第_17_章_网络压缩__5104a7124619",
+      "chapter_key": "leedl_chapter_17_p282-299_第_17_章_网络压缩_5104a7124619",
+      "raw_count": 30,
+      "filtered_count": 30,
+      "linked_count": 30,
+      "annotated_count": 30,
+      "asset_type_counts": {
+        "figure": 19,
+        "formula": 11
+      },
+      "vision_enabled": false,
+      "filtered_path": "data/media_evidence_index/artificial_intelligence/leedl_chapter_17_p282-299_第_17_章_网络压缩_5104a7124619_filtered_candidates.jsonl",
+      "linked_path": "data/media_evidence_index/artificial_intelligence/leedl_chapter_17_p282-299_第_17_章_网络压缩_5104a7124619_linked_candidates.jsonl",
+      "annotated_path": "data/media_evidence_index/artificial_intelligence/leedl_chapter_17_p282-299_第_17_章_网络压缩_5104a7124619_annotated_assets.jsonl"
+    },
+    {
+      "doc_dir": "leedl_chapter_18_p300-312_第_18_章_可解释性人工智能__7ef51a611607",
+      "chapter_key": "leedl_chapter_18_p300-312_第_18_章_可解释性人工智能_7ef51a611607",
+      "raw_count": 19,
+      "filtered_count": 19,
+      "linked_count": 19,
+      "annotated_count": 19,
+      "asset_type_counts": {
+        "figure": 18,
+        "formula": 1
+      },
+      "vision_enabled": false,
+      "filtered_path": "data/media_evidence_index/artificial_intelligence/leedl_chapter_18_p300-312_第_18_章_可解释性人工智能_7ef51a611607_filtered_candidates.jsonl",
+      "linked_path": "data/media_evidence_index/artificial_intelligence/leedl_chapter_18_p300-312_第_18_章_可解释性人工智能_7ef51a611607_linked_candidates.jsonl",
+      "annotated_path": "data/media_evidence_index/artificial_intelligence/leedl_chapter_18_p300-312_第_18_章_可解释性人工智能_7ef51a611607_annotated_assets.jsonl"
+    },
+    {
+      "doc_dir": "leedl_chapter_19_p313-322_第_19_章_ChatGPT__c9a0fb351408",
+      "chapter_key": "leedl_chapter_19_p313-322_第_19_章_ChatGPT_c9a0fb351408",
+      "raw_count": 6,
+      "filtered_count": 6,
+      "linked_count": 6,
+      "annotated_count": 6,
+      "asset_type_counts": {
+        "figure": 6
+      },
+      "vision_enabled": false,
+      "filtered_path": "data/media_evidence_index/artificial_intelligence/leedl_chapter_19_p313-322_第_19_章_ChatGPT_c9a0fb351408_filtered_candidates.jsonl",
+      "linked_path": "data/media_evidence_index/artificial_intelligence/leedl_chapter_19_p313-322_第_19_章_ChatGPT_c9a0fb351408_linked_candidates.jsonl",
+      "annotated_path": "data/media_evidence_index/artificial_intelligence/leedl_chapter_19_p313-322_第_19_章_ChatGPT_c9a0fb351408_annotated_assets.jsonl"
+    },
+    {
+      "doc_dir": "nn_dl_chapter_01_p017-036_第_1_章_绪论__175cad84276d",
+      "chapter_key": "nn_dl_chapter_01_p017-036_第_1_章_绪论_175cad84276d",
+      "raw_count": 7,
+      "filtered_count": 7,
+      "linked_count": 7,
+      "annotated_count": 7,
+      "asset_type_counts": {
+        "figure": 6,
+        "table": 1
+      },
+      "vision_enabled": false,
+      "filtered_path": "data/media_evidence_index/artificial_intelligence/nn_dl_chapter_01_p017-036_第_1_章_绪论_175cad84276d_filtered_candidates.jsonl",
+      "linked_path": "data/media_evidence_index/artificial_intelligence/nn_dl_chapter_01_p017-036_第_1_章_绪论_175cad84276d_linked_candidates.jsonl",
+      "annotated_path": "data/media_evidence_index/artificial_intelligence/nn_dl_chapter_01_p017-036_第_1_章_绪论_175cad84276d_annotated_assets.jsonl"
+    },
+    {
+      "doc_dir": "nn_dl_chapter_02_p037-067_第_2_章_机器学习概述__70e23af8eb7d",
+      "chapter_key": "nn_dl_chapter_02_p037-067_第_2_章_机器学习概述_70e23af8eb7d",
+      "raw_count": 102,
+      "filtered_count": 95,
+      "linked_count": 95,
+      "annotated_count": 95,
+      "asset_type_counts": {
+        "figure": 9,
+        "formula": 82,
+        "table": 4
+      },
+      "vision_enabled": false,
+      "filtered_path": "data/media_evidence_index/artificial_intelligence/nn_dl_chapter_02_p037-067_第_2_章_机器学习概述_70e23af8eb7d_filtered_candidates.jsonl",
+      "linked_path": "data/media_evidence_index/artificial_intelligence/nn_dl_chapter_02_p037-067_第_2_章_机器学习概述_70e23af8eb7d_linked_candidates.jsonl",
+      "annotated_path": "data/media_evidence_index/artificial_intelligence/nn_dl_chapter_02_p037-067_第_2_章_机器学习概述_70e23af8eb7d_annotated_assets.jsonl"
+    },
+    {
+      "doc_dir": "nn_dl_chapter_03_p068-092_第_3_章_线性模型__3837d699cf1a",
+      "chapter_key": "nn_dl_chapter_03_p068-092_第_3_章_线性模型_3837d699cf1a",
+      "raw_count": 125,
+      "filtered_count": 104,
+      "linked_count": 104,
+      "annotated_count": 104,
+      "asset_type_counts": {
+        "figure": 10,
+        "formula": 93,
+        "table": 1
+      },
+      "vision_enabled": false,
+      "filtered_path": "data/media_evidence_index/artificial_intelligence/nn_dl_chapter_03_p068-092_第_3_章_线性模型_3837d699cf1a_filtered_candidates.jsonl",
+      "linked_path": "data/media_evidence_index/artificial_intelligence/nn_dl_chapter_03_p068-092_第_3_章_线性模型_3837d699cf1a_linked_candidates.jsonl",
+      "annotated_path": "data/media_evidence_index/artificial_intelligence/nn_dl_chapter_03_p068-092_第_3_章_线性模型_3837d699cf1a_annotated_assets.jsonl"
+    },
+    {
+      "doc_dir": "nn_dl_chapter_04_p093-119_第_4_章_前馈神经网络__f53b430f17a9",
+      "chapter_key": "nn_dl_chapter_04_p093-119_第_4_章_前馈神经网络_f53b430f17a9",
+      "raw_count": 106,
+      "filtered_count": 100,
+      "linked_count": 100,
+      "annotated_count": 100,
+      "asset_type_counts": {
+        "figure": 14,
+        "formula": 83,
+        "table": 3
+      },
+      "vision_enabled": false,
+      "filtered_path": "data/media_evidence_index/artificial_intelligence/nn_dl_chapter_04_p093-119_第_4_章_前馈神经网络_f53b430f17a9_filtered_candidates.jsonl",
+      "linked_path": "data/media_evidence_index/artificial_intelligence/nn_dl_chapter_04_p093-119_第_4_章_前馈神经网络_f53b430f17a9_linked_candidates.jsonl",
+      "annotated_path": "data/media_evidence_index/artificial_intelligence/nn_dl_chapter_04_p093-119_第_4_章_前馈神经网络_f53b430f17a9_annotated_assets.jsonl"
+    },
+    {
+      "doc_dir": "nn_dl_chapter_05_p120-143_第_5_章_卷积神经网络__b4c740d56693",
+      "chapter_key": "nn_dl_chapter_05_p120-143_第_5_章_卷积神经网络_b4c740d56693",
+      "raw_count": 69,
+      "filtered_count": 65,
+      "linked_count": 65,
+      "annotated_count": 65,
+      "asset_type_counts": {
+        "figure": 26,
+        "formula": 38,
+        "table": 1
+      },
+      "vision_enabled": false,
+      "filtered_path": "data/media_evidence_index/artificial_intelligence/nn_dl_chapter_05_p120-143_第_5_章_卷积神经网络_b4c740d56693_filtered_candidates.jsonl",
+      "linked_path": "data/media_evidence_index/artificial_intelligence/nn_dl_chapter_05_p120-143_第_5_章_卷积神经网络_b4c740d56693_linked_candidates.jsonl",
+      "annotated_path": "data/media_evidence_index/artificial_intelligence/nn_dl_chapter_05_p120-143_第_5_章_卷积神经网络_b4c740d56693_annotated_assets.jsonl"
+    },
+    {
+      "doc_dir": "nn_dl_chapter_06_p144-167_第_6_章_循环神经网络__5e2c92a06ae9",
+      "chapter_key": "nn_dl_chapter_06_p144-167_第_6_章_循环神经网络_5e2c92a06ae9",
+      "raw_count": 93,
+      "filtered_count": 89,
+      "linked_count": 89,
+      "annotated_count": 89,
+      "asset_type_counts": {
+        "figure": 13,
+        "formula": 76
+      },
+      "vision_enabled": false,
+      "filtered_path": "data/media_evidence_index/artificial_intelligence/nn_dl_chapter_06_p144-167_第_6_章_循环神经网络_5e2c92a06ae9_filtered_candidates.jsonl",
+      "linked_path": "data/media_evidence_index/artificial_intelligence/nn_dl_chapter_06_p144-167_第_6_章_循环神经网络_5e2c92a06ae9_linked_candidates.jsonl",
+      "annotated_path": "data/media_evidence_index/artificial_intelligence/nn_dl_chapter_06_p144-167_第_6_章_循环神经网络_5e2c92a06ae9_annotated_assets.jsonl"
+    },
+    {
+      "doc_dir": "nn_dl_chapter_07_p168-206_第_7_章_网络优化与正则化__dd6663d64733",
+      "chapter_key": "nn_dl_chapter_07_p168-206_第_7_章_网络优化与正则化_dd6663d64733",
+      "raw_count": 104,
+      "filtered_count": 95,
+      "linked_count": 95,
+      "annotated_count": 95,
+      "asset_type_counts": {
+        "figure": 22,
+        "formula": 71,
+        "table": 2
+      },
+      "vision_enabled": false,
+      "filtered_path": "data/media_evidence_index/artificial_intelligence/nn_dl_chapter_07_p168-206_第_7_章_网络优化与正则化_dd6663d64733_filtered_candidates.jsonl",
+      "linked_path": "data/media_evidence_index/artificial_intelligence/nn_dl_chapter_07_p168-206_第_7_章_网络优化与正则化_dd6663d64733_linked_candidates.jsonl",
+      "annotated_path": "data/media_evidence_index/artificial_intelligence/nn_dl_chapter_07_p168-206_第_7_章_网络优化与正则化_dd6663d64733_annotated_assets.jsonl"
+    },
+    {
+      "doc_dir": "nn_dl_chapter_08_p207-227_第_8_章_注意力机制与外部记忆__7c818f6bf234.tmp",
+      "chapter_key": "nn_dl_chapter_08_p207-227_第_8_章_注意力机制与外部记忆_7c818f6bf234.tmp",
+      "raw_count": 47,
+      "filtered_count": 47,
+      "linked_count": 47,
+      "annotated_count": 47,
+      "asset_type_counts": {
+        "figure": 14,
+        "formula": 32,
+        "table": 1
+      },
+      "vision_enabled": false,
+      "filtered_path": "data/media_evidence_index/artificial_intelligence/nn_dl_chapter_08_p207-227_第_8_章_注意力机制与外部记忆_7c818f6bf234.tmp_filtered_candidates.jsonl",
+      "linked_path": "data/media_evidence_index/artificial_intelligence/nn_dl_chapter_08_p207-227_第_8_章_注意力机制与外部记忆_7c818f6bf234.tmp_linked_candidates.jsonl",
+      "annotated_path": "data/media_evidence_index/artificial_intelligence/nn_dl_chapter_08_p207-227_第_8_章_注意力机制与外部记忆_7c818f6bf234.tmp_annotated_assets.jsonl"
+    },
+    {
+      "doc_dir": "nn_dl_chapter_09_p228-242_第_9_章_无监督学习__340846bf965b",
+      "chapter_key": "nn_dl_chapter_09_p228-242_第_9_章_无监督学习_340846bf965b",
+      "raw_count": 51,
+      "filtered_count": 46,
+      "linked_count": 46,
+      "annotated_count": 46,
+      "asset_type_counts": {
+        "figure": 5,
+        "formula": 41
+      },
+      "vision_enabled": false,
+      "filtered_path": "data/media_evidence_index/artificial_intelligence/nn_dl_chapter_09_p228-242_第_9_章_无监督学习_340846bf965b_filtered_candidates.jsonl",
+      "linked_path": "data/media_evidence_index/artificial_intelligence/nn_dl_chapter_09_p228-242_第_9_章_无监督学习_340846bf965b_linked_candidates.jsonl",
+      "annotated_path": "data/media_evidence_index/artificial_intelligence/nn_dl_chapter_09_p228-242_第_9_章_无监督学习_340846bf965b_annotated_assets.jsonl"
+    },
+    {
+      "doc_dir": "nn_dl_chapter_10_p243-267_第_10_章_模型独立的学习方式__e6d184fe2fba",
+      "chapter_key": "nn_dl_chapter_10_p243-267_第_10_章_模型独立的学习方式_e6d184fe2fba",
+      "raw_count": 62,
+      "filtered_count": 57,
+      "linked_count": 57,
+      "annotated_count": 57,
+      "asset_type_counts": {
+        "figure": 6,
+        "formula": 50,
+        "table": 1
+      },
+      "vision_enabled": false,
+      "filtered_path": "data/media_evidence_index/artificial_intelligence/nn_dl_chapter_10_p243-267_第_10_章_模型独立的学习方式_e6d184fe2fba_filtered_candidates.jsonl",
+      "linked_path": "data/media_evidence_index/artificial_intelligence/nn_dl_chapter_10_p243-267_第_10_章_模型独立的学习方式_e6d184fe2fba_linked_candidates.jsonl",
+      "annotated_path": "data/media_evidence_index/artificial_intelligence/nn_dl_chapter_10_p243-267_第_10_章_模型独立的学习方式_e6d184fe2fba_annotated_assets.jsonl"
+    },
+    {
+      "doc_dir": "nn_dl_chapter_11_p268-302_第_11_章_概率图模型__7c61589fde41",
+      "chapter_key": "nn_dl_chapter_11_p268-302_第_11_章_概率图模型_7c61589fde41",
+      "raw_count": 144,
+      "filtered_count": 128,
+      "linked_count": 128,
+      "annotated_count": 128,
+      "asset_type_counts": {
+        "figure": 25,
+        "formula": 103
+      },
+      "vision_enabled": false,
+      "filtered_path": "data/media_evidence_index/artificial_intelligence/nn_dl_chapter_11_p268-302_第_11_章_概率图模型_7c61589fde41_filtered_candidates.jsonl",
+      "linked_path": "data/media_evidence_index/artificial_intelligence/nn_dl_chapter_11_p268-302_第_11_章_概率图模型_7c61589fde41_linked_candidates.jsonl",
+      "annotated_path": "data/media_evidence_index/artificial_intelligence/nn_dl_chapter_11_p268-302_第_11_章_概率图模型_7c61589fde41_annotated_assets.jsonl"
+    },
+    {
+      "doc_dir": "nn_dl_chapter_12_p303-322_第_12_章_深度信念网络__89a51dc59d12",
+      "chapter_key": "nn_dl_chapter_12_p303-322_第_12_章_深度信念网络_89a51dc59d12",
+      "raw_count": 66,
+      "filtered_count": 57,
+      "linked_count": 57,
+      "annotated_count": 57,
+      "asset_type_counts": {
+        "figure": 8,
+        "formula": 49
+      },
+      "vision_enabled": false,
+      "filtered_path": "data/media_evidence_index/artificial_intelligence/nn_dl_chapter_12_p303-322_第_12_章_深度信念网络_89a51dc59d12_filtered_candidates.jsonl",
+      "linked_path": "data/media_evidence_index/artificial_intelligence/nn_dl_chapter_12_p303-322_第_12_章_深度信念网络_89a51dc59d12_linked_candidates.jsonl",
+      "annotated_path": "data/media_evidence_index/artificial_intelligence/nn_dl_chapter_12_p303-322_第_12_章_深度信念网络_89a51dc59d12_annotated_assets.jsonl"
+    },
+    {
+      "doc_dir": "nn_dl_chapter_13_p323-343_第_13_章_深度生成模型__07235defdde0",
+      "chapter_key": "nn_dl_chapter_13_p323-343_第_13_章_深度生成模型_07235defdde0",
+      "raw_count": 64,
+      "filtered_count": 57,
+      "linked_count": 57,
+      "annotated_count": 57,
+      "asset_type_counts": {
+        "figure": 12,
+        "formula": 45
+      },
+      "vision_enabled": false,
+      "filtered_path": "data/media_evidence_index/artificial_intelligence/nn_dl_chapter_13_p323-343_第_13_章_深度生成模型_07235defdde0_filtered_candidates.jsonl",
+      "linked_path": "data/media_evidence_index/artificial_intelligence/nn_dl_chapter_13_p323-343_第_13_章_深度生成模型_07235defdde0_linked_candidates.jsonl",
+      "annotated_path": "data/media_evidence_index/artificial_intelligence/nn_dl_chapter_13_p323-343_第_13_章_深度生成模型_07235defdde0_annotated_assets.jsonl"
+    },
+    {
+      "doc_dir": "nn_dl_chapter_14_p344-369_第_14_章_深度强化学习__0fea9be22705",
+      "chapter_key": "nn_dl_chapter_14_p344-369_第_14_章_深度强化学习_0fea9be22705",
+      "raw_count": 74,
+      "filtered_count": 64,
+      "linked_count": 64,
+      "annotated_count": 64,
+      "asset_type_counts": {
+        "figure": 4,
+        "formula": 59,
+        "table": 1
+      },
+      "vision_enabled": false,
+      "filtered_path": "data/media_evidence_index/artificial_intelligence/nn_dl_chapter_14_p344-369_第_14_章_深度强化学习_0fea9be22705_filtered_candidates.jsonl",
+      "linked_path": "data/media_evidence_index/artificial_intelligence/nn_dl_chapter_14_p344-369_第_14_章_深度强化学习_0fea9be22705_linked_candidates.jsonl",
+      "annotated_path": "data/media_evidence_index/artificial_intelligence/nn_dl_chapter_14_p344-369_第_14_章_深度强化学习_0fea9be22705_annotated_assets.jsonl"
+    },
+    {
+      "doc_dir": "nn_dl_chapter_15_p370-395_第_15_章_序列生成模型__22cd1527b884",
+      "chapter_key": "nn_dl_chapter_15_p370-395_第_15_章_序列生成模型_22cd1527b884",
+      "raw_count": 117,
+      "filtered_count": 112,
+      "linked_count": 112,
+      "annotated_count": 112,
+      "asset_type_counts": {
+        "figure": 10,
+        "formula": 102
+      },
+      "vision_enabled": false,
+      "filtered_path": "data/media_evidence_index/artificial_intelligence/nn_dl_chapter_15_p370-395_第_15_章_序列生成模型_22cd1527b884_filtered_candidates.jsonl",
+      "linked_path": "data/media_evidence_index/artificial_intelligence/nn_dl_chapter_15_p370-395_第_15_章_序列生成模型_22cd1527b884_linked_candidates.jsonl",
+      "annotated_path": "data/media_evidence_index/artificial_intelligence/nn_dl_chapter_15_p370-395_第_15_章_序列生成模型_22cd1527b884_annotated_assets.jsonl"
+    }
+  ]
 }

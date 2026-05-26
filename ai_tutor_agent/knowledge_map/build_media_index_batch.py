@@ -130,7 +130,7 @@ def collect_docs(
 
     for doc_dir in sorted(path for path in mineru_cache_root.iterdir() if path.is_dir()):
         name = doc_dir.name
-        if not name.startswith("chapter_"):
+        if not is_mineru_document_dir(doc_dir):
             continue
         if skip_chapter03 and name.startswith("chapter_03_"):
             continue
@@ -142,9 +142,19 @@ def collect_docs(
     return docs
 
 
+def is_mineru_document_dir(doc_dir: Path) -> bool:
+    return (doc_dir / "full.md").exists() and (
+        (doc_dir / "manifest.json").exists() or (doc_dir / "metadata.json").exists()
+    )
+
+
 def build_chapter_key(doc_dir_name: str) -> str:
     match = re.match(r"^(chapter_\d+)", doc_dir_name)
-    return match.group(1) if match else doc_dir_name
+    if match:
+        return match.group(1)
+    sanitized = re.sub(r"[^\w\u4e00-\u9fff.-]+", "_", doc_dir_name, flags=re.UNICODE)
+    sanitized = re.sub(r"_+", "_", sanitized).strip("._")
+    return sanitized or "chapter"
 
 
 def cleanup_stale_outputs(output_dir: Path, expected_output_names: set[str]) -> None:

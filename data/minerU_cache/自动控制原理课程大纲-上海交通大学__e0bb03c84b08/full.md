@@ -1,0 +1,31 @@
+# 《自动控制原理》课程教学大纲
+
+<table><tr><td colspan="7">课程基本信息（Course Information）</td></tr><tr><td>课程代码
+（Course Code）</td><td>NA338</td><td>*学时
+(Credit Hours)</td><td>32</td><td>*学分
+(Credits)</td><td colspan="2">2</td></tr><tr><td rowspan="2">*课程名称
+（Course Name）</td><td colspan="6">自动控制原理</td></tr><tr><td colspan="6">Principle of Automatic Control</td></tr><tr><td>课程性质
+（Course Type）</td><td colspan="6">选修课；Selective Course</td></tr><tr><td>授课对象
+（Audience）</td><td colspan="6">船舶与海洋工程专业本科生；Undergraduates in Naval Architecture and Ocean Engineering</td></tr><tr><td>授课语言
+(Language of Instruction)</td><td colspan="6">中文；Chinese</td></tr><tr><td>*开课院系
+（School）</td><td colspan="6">船舶海洋与建筑工程学院；School of Naval Architecture, Ocean &amp; Civil Engineering</td></tr><tr><td>先修课程
+（Prerequisite）</td><td colspan="6">复变函数与积分变换；Functions of a Complex Variable and Integral Transforms</td></tr><tr><td>授课教师
+（Instructor）</td><td>刘旌扬；Jingyang Liu</td><td colspan="2">课程网址
+(Course Webpage)</td><td colspan="3">无/NA</td></tr><tr><td>*课程简介
+（Description）</td><td colspan="6">自动控制是现代工业生产及技术中重要而不可缺少的组成部分，随着船舶与海洋工程技术的发展，自动控制起着越来越重要的作用。《自动控制原理》是工程学科中一门重要的课程，本课程概要性地向学生介绍自动控制的基本理论及其工程分析和设计方法，包括控制系统建模方法、经典控制理论中的时域和频域分析方法、离散和计算机控制系统的基本概念，以及典型的控制方法及其在船舶与海洋工程中的应用。使学生清晰地建立起线性反馈控制系统的基本原理和基本概念，初步掌握经典控制理论的方法，分析、设计自动控制系统。本课程面向船舶与海洋工程专业本科生，学时较少，对根轨迹、Nyquist图等工程方法的讲解进行了简化，注重自动控制系统基本概念介绍，增加了船舶工程中自动控制系统的介绍。</td></tr><tr><td>*课程简介
+（Description）</td><td colspan="6">In modern industry, automatic control is a fundamental technique. As the development of ocean engineering, the role of automatic control is getting more and more important. “The Principle of Automatic Control” is a fundamental course in engineering education. It introduces the basic theory of automatic control and related engineering analysis and design methods. The content of this course includes control system modeling, frequency domain analysis, time domain analysis, the concept of discrete systems, computer control systems. Some typical control methods in the naval and ocean engineering is also introduced.
+The course is designed for students of naval and ocean engineering, thus the overall</td></tr><tr><td></td><td colspan="6">study time is limited, some of the engineering skills such as root locus and Nyquist diagram analysis are simplified. Saved class hour is devoted to the application of control system in naval and ocean engineering.</td></tr><tr><td colspan="7">课程教学大纲（course syllabus）</td></tr><tr><td>*学习目标(Learning Outcomes)</td><td colspan="6">1. 建立自动控制系统的一般性概念，了解反馈控制系统的基本组成，自动控制系统的分类，控制系统的基本要求以及自动控制理论的内容、发展及现状。
+    2. 了解控制系统的几类主要模型：系统微分方程、传递函数、方块图、信号流图以及这些模型的计算方法。了解物理系统，如电学系统、机械系统及其他混合系统的物理规律和数学模型的关系，初步掌握建立物理系统数学模型的基本原理和方法。
+    3. 可根据对控制系统的基本要求，初步掌握控制系统的稳定性分析、稳态响应分析、动态特性分析的内容和基本方法。
+    4. 了解根轨迹的定义和幅值、相角条件；了解控制系统频率特性的定义以及极坐标图、对数频率坐标图、对数幅相图的基本概念，掌握频域的稳定性分析方法—Nyquist 稳定性判据，频率响应的系统稳态和动态性能的分析。
+    5. 了解离散时间模型和计算机控制系统的基本概念，理解香农采样定理，初步掌握Z变换和离散控制系统的设计及分析方法。
+    6. 初步掌握低阶单输入单输出控制系统设计和校正的一般方法，了解控制系统CAD 方法。
+    7. 初步掌握 PID 控制器的设计和参数整定方法。了解船舶自动舵、减摇控制和动力定位系统的基本概念。</td></tr><tr><td rowspan="8">*教学内容、进度安排及要求(Class Schedule &amp; Requirements)</td><td>作业及要求</td><td>教学内容</td><td>学时</td><td>教学方式</td><td>基本要求</td><td>考查方式</td></tr><tr><td>习题</td><td>绪论</td><td>4</td><td>讲授/讨论</td><td>了解概念</td><td>作业与讨论</td></tr><tr><td>习题</td><td>控制系统的数学模型</td><td>6</td><td>讲授/讨论</td><td>了解原理、掌握方法</td><td>作业与讨论</td></tr><tr><td>习题</td><td>控制系统的时域分析</td><td>6</td><td>讲授/讨论</td><td>了解原理，掌握方法</td><td>作业与讨论</td></tr><tr><td>习题</td><td>根轨迹和频率响应法</td><td>6</td><td>讲授/讨论</td><td>了解原理，掌握方法</td><td>作业与讨论</td></tr><tr><td>习题</td><td>离散控制系统</td><td>2</td><td>讲授/讨论</td><td>了解原理</td><td>作业与讨论</td></tr><tr><td>习题</td><td>典型控制系统设计及仿真</td><td>6</td><td>讲授/讨论</td><td>了解原理，掌握方法</td><td>作业与讨论</td></tr><tr><td>习题</td><td>船舶与海洋工程中的自动控制系统</td><td>4</td><td>讲授/讨论</td><td>了解原理</td><td>作业与讨论</td></tr><tr><td></td><td></td><td>......</td><td></td><td></td><td></td><td></td></tr><tr><td>*考核方式(Grading)</td><td colspan="6">期末考试 70%+平时作业与考勤 30%
+Final Exam 70%+Regular Performance 30%</td></tr><tr><td>*教材或参考资料(Textbooks &amp; Other Materials)</td><td colspan="6">《自动控制理论与设计》 徐薇莉等编 上海交通大学出版社
+《自动控制原理》 吴麟编著 清华大学出版社
+《Modern Control Engineering》, Katsuhiko Ogata, Printence Hall, 2009</td></tr><tr><td>其它(More)</td><td colspan="6"></td></tr><tr><td>备注(Notes)</td><td colspan="6"></td></tr></table>
+
+备注说明：
+
+1．带*内容为必填项。  
+2．课程简介字数为 300-500 字；课程大纲以表述清楚教学安排为宜，字数不限。

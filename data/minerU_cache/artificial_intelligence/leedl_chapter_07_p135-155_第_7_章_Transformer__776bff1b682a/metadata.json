@@ -1,0 +1,17 @@
+{
+  "version": 1,
+  "source_path": "E:\\ai_code\\ai-tutor-agent\\data\\course_materials\\artificial_intelligence\\splits\\leedl_chapter_07_p135-155_第_7_章_Transformer.pdf",
+  "source_filename": "leedl_chapter_07_p135-155_第_7_章_Transformer.pdf",
+  "source_size_bytes": 16603671,
+  "source_mtime": 1779694337,
+  "cache_key": "776bff1b682a",
+  "batch_id": "43f0c057-01dc-4013-9440-3d4208e336aa",
+  "full_zip_url": "https://cdn-mineru.openxlab.org.cn/pdf/2026-05-25/bf5d6b48-91da-43dd-93d2-f196187b0bad.zip",
+  "saved_at": 1779695117,
+  "proxy_mode": "inherit",
+  "proxy_desc": "继承环境变量 HTTP_PROXY / HTTPS_PROXY",
+  "full_md_path": "full.md",
+  "relative_md_path_in_extract": "full.md",
+  "result_zip_path": "result.zip",
+  "extract_dir": "extracted"
+}

@@ -1,0 +1,17 @@
+{
+  "version": 1,
+  "source_path": "E:\\ai_code\\ai-tutor-agent\\data\\course_materials\\artificial_intelligence\\splits\\leedl_chapter_14_p245-264_第_14_章_强化学习.pdf",
+  "source_filename": "leedl_chapter_14_p245-264_第_14_章_强化学习.pdf",
+  "source_size_bytes": 9619399,
+  "source_mtime": 1779694337,
+  "cache_key": "ae87f1ac270b",
+  "batch_id": "ec296426-3ec4-4d11-b76e-89caeaa38ec5",
+  "full_zip_url": "https://cdn-mineru.openxlab.org.cn/pdf/2026-05-25/bb6846bc-1507-44df-af34-8450a63c30aa.zip",
+  "saved_at": 1779695731,
+  "proxy_mode": "inherit",
+  "proxy_desc": "继承环境变量 HTTP_PROXY / HTTPS_PROXY",
+  "full_md_path": "full.md",
+  "relative_md_path_in_extract": "full.md",
+  "result_zip_path": "result.zip",
+  "extract_dir": "extracted"
+}

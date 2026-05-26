@@ -1,0 +1,17 @@
+{
+  "version": 1,
+  "source_path": "E:\\ai_code\\ai-tutor-agent\\data\\course_materials\\artificial_intelligence\\splits\\leedl_chapter_05_p090-113_第_5_章_循环神经网络.pdf",
+  "source_filename": "leedl_chapter_05_p090-113_第_5_章_循环神经网络.pdf",
+  "source_size_bytes": 4879715,
+  "source_mtime": 1779694337,
+  "cache_key": "4d6c76fa0b2b",
+  "batch_id": "04663e9c-8be4-4a80-8e2d-96a6d2bdbac4",
+  "full_zip_url": "https://cdn-mineru.openxlab.org.cn/pdf/2026-05-25/372e44ff-a685-4920-b78f-94695e39a47d.zip",
+  "saved_at": 1779694788,
+  "proxy_mode": "inherit",
+  "proxy_desc": "继承环境变量 HTTP_PROXY / HTTPS_PROXY",
+  "full_md_path": "full.md",
+  "relative_md_path_in_extract": "full.md",
+  "result_zip_path": "result.zip",
+  "extract_dir": "extracted"
+}

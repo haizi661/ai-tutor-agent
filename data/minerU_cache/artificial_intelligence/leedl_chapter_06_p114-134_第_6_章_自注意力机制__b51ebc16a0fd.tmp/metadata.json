@@ -1,0 +1,17 @@
+{
+  "version": 1,
+  "source_path": "E:\\ai_code\\ai-tutor-agent\\data\\course_materials\\artificial_intelligence\\splits\\leedl_chapter_06_p114-134_第_6_章_自注意力机制.pdf",
+  "source_filename": "leedl_chapter_06_p114-134_第_6_章_自注意力机制.pdf",
+  "source_size_bytes": 3870693,
+  "source_mtime": 1779694337,
+  "cache_key": "b51ebc16a0fd",
+  "batch_id": "c634532c-2a9c-4268-bfee-52a248f03249",
+  "full_zip_url": "https://cdn-mineru.openxlab.org.cn/pdf/2026-05-25/a7a0130e-a2f8-4b15-9b3c-ee569e2ed28d.zip",
+  "saved_at": 1779694913,
+  "proxy_mode": "inherit",
+  "proxy_desc": "继承环境变量 HTTP_PROXY / HTTPS_PROXY",
+  "full_md_path": "full.md",
+  "relative_md_path_in_extract": "full.md",
+  "result_zip_path": "result.zip",
+  "extract_dir": "extracted"
+}

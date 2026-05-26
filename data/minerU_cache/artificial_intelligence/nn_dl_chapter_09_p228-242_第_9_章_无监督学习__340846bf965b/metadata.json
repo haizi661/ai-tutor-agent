@@ -1,0 +1,17 @@
+{
+  "version": 1,
+  "source_path": "E:\\ai_code\\ai-tutor-agent\\data\\course_materials\\artificial_intelligence\\splits\\nn_dl_chapter_09_p228-242_第_9_章_无监督学习.pdf",
+  "source_filename": "nn_dl_chapter_09_p228-242_第_9_章_无监督学习.pdf",
+  "source_size_bytes": 907270,
+  "source_mtime": 1779694338,
+  "cache_key": "340846bf965b",
+  "batch_id": "dfc75a3f-daca-48a0-8a84-7c8761c7a65c",
+  "full_zip_url": "https://cdn-mineru.openxlab.org.cn/pdf/2026-05-25/114a3d4e-f292-4c7d-89d9-cd2db601bdbb.zip",
+  "saved_at": 1779696796,
+  "proxy_mode": "inherit",
+  "proxy_desc": "继承环境变量 HTTP_PROXY / HTTPS_PROXY",
+  "full_md_path": "full.md",
+  "relative_md_path_in_extract": "full.md",
+  "result_zip_path": "result.zip",
+  "extract_dir": "extracted"
+}

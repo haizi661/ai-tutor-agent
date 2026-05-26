@@ -9,6 +9,10 @@ from typing import Any, Dict, List, Set, Tuple
 
 import requests
 
+from ai_tutor_agent.course_assets import get_course_assets
+from ai_tutor_agent.knowledge_map.builders.graph_media_enricher import GraphMediaEnricher
+from ai_tutor_agent.knowledge_map.debug_graph_rag import build_learning_answer_html
+
 from .config import (
     AI_NODES_CSV,
     AI_EDGES_CSV,
@@ -346,7 +350,18 @@ class AILearningPathService:
         self.prereq_in: Dict[str, List[str]] = defaultdict(list)
         self.prereq_out: Dict[str, List[str]] = defaultdict(list)
         self.related: Dict[str, List[str]] = defaultdict(list)
+        self.media_enricher = self._create_media_enricher()
         self.reload()
+
+    def _create_media_enricher(self):
+        try:
+            assets = get_course_assets("artificial_intelligence")
+            return GraphMediaEnricher(
+                mineru_cache_root=assets.mineru_cache_root,
+                annotated_assets_path=assets.media_evidence_index_dir,
+            )
+        except Exception:
+            return None
 
     def reload(self) -> None:
         self.nodes = _read_csv(AI_NODES_CSV)
@@ -578,6 +593,108 @@ class AILearningPathService:
         if "参考资料" in text:
             return text
         return text + refs
+
+    def _formatted_node_map(self) -> Dict[str, Dict[str, Any]]:
+        return {
+            node_id: self._format_node(node_id)
+            for node_id in self.node_by_id
+        }
+
+    def _collect_node_media_items(
+        self,
+        node: Dict[str, Any],
+        *,
+        question: str = "",
+    ) -> List[Dict[str, Any]]:
+        if not self.media_enricher:
+            return []
+
+        node_id = str(node.get("node_id", "") or "").strip()
+        if not node_id:
+            return []
+
+        traversed = [{
+            "node_id": node_id,
+            "name": node.get("name", ""),
+            "node_role": "primary",
+            "hop": 0,
+            "score": 1.0,
+        }]
+        try:
+            media_items = self.media_enricher.collect_for_nodes(
+                traversed_nodes=traversed,
+                node_map=self._formatted_node_map(),
+                question=question or str(node.get("name", "")),
+            )
+            source_doc = str(
+                (node.get("extra") or {}).get("retrieval_source_pdf", "") or ""
+            ).strip()
+            same_doc_items = [
+                item for item in media_items
+                if source_doc and str(item.get("source_doc_id", "") or "") == source_doc
+            ]
+            return same_doc_items or media_items
+        except Exception:
+            return []
+
+    def _with_primary_media_markers(
+        self,
+        content: str,
+        media_items: List[Dict[str, Any]],
+    ) -> str:
+        text = (content or "").strip()
+        if not text or "[[MEDIA:" in text:
+            return text
+
+        figures = [
+            item for item in media_items
+            if item.get("asset_type") == "figure" and item.get("is_primary")
+        ] or [
+            item for item in media_items
+            if item.get("asset_type") == "figure"
+        ]
+        refs = [
+            str(item.get("reference", "") or "").strip()
+            for item in figures[:2]
+            if str(item.get("reference", "") or "").strip()
+        ]
+        if not refs:
+            return text
+
+        markers = "\n".join(f"[[MEDIA:{ref}]]" for ref in refs)
+        cue_re = re.compile(
+            r"(\u56fe|\u56fe\u8868|\u793a\u610f|\u53d1\u5c55\u53f2|\u793a\u4f8b)"
+        )
+        lines = text.splitlines()
+        for index, line in enumerate(lines):
+            stripped = line.strip()
+            if stripped and not stripped.startswith("#") and cue_re.search(stripped):
+                lines.insert(index + 1, markers)
+                return "\n".join(lines)
+
+        return f"{text}\n\n{markers}"
+
+    def _render_learning_message(
+        self,
+        *,
+        content: str,
+        node: Dict[str, Any],
+        question: str = "",
+    ) -> str:
+        text = (content or "").strip()
+        media_items = self._collect_node_media_items(node, question=question)
+        if media_items:
+            answer = self._with_primary_media_markers(text, media_items)
+            html = build_learning_answer_html({
+                "question": question or node.get("name", ""),
+                "answer": answer,
+                "media_items": media_items,
+                "evidence_items": [],
+            }).strip()
+            if html:
+                return html
+
+        return self._with_reference_section(text, node)
 
     def _polish_learning_output(
         self,
@@ -1326,7 +1443,11 @@ class AILearningPathService:
             draft=content,
             output_type="节点讲解",
         )
-        content = self._with_reference_section(content, node)
+        content = self._render_learning_message(
+            content=content,
+            node=node,
+            question=str(node.get("name", "")),
+        )
 
         return {
             "status": "success",
@@ -1405,7 +1526,11 @@ options 给 3 到 4 个下一步按钮，例如：
                 output_type="追问回答",
                 question=question,
             )
-            answer = self._with_reference_section(answer, node)
+            answer = self._render_learning_message(
+                content=answer,
+                node=node,
+                question=question,
+            )
             return {
                 "status": "success",
                 "type": "lesson_qa",
@@ -1428,7 +1553,11 @@ options 给 3 到 4 个下一步按钮，例如：
             output_type="追问回答",
             question=question,
         )
-        fallback_answer = self._with_reference_section(fallback_answer, node)
+        fallback_answer = self._render_learning_message(
+            content=fallback_answer,
+            node=node,
+            question=question,
+        )
 
         return {
             "status": "success",

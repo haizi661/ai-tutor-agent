@@ -1,0 +1,17 @@
+{
+  "version": 1,
+  "source_path": "E:\\ai_code\\ai-tutor-agent\\data\\course_materials\\artificial_intelligence\\splits\\leedl_chapter_16_p275-281_第_16_章_终身学习.pdf",
+  "source_filename": "leedl_chapter_16_p275-281_第_16_章_终身学习.pdf",
+  "source_size_bytes": 2521531,
+  "source_mtime": 1779694337,
+  "cache_key": "8852219a1743",
+  "batch_id": "97329519-308e-4e5a-acc8-70d46f30cc27",
+  "full_zip_url": "https://cdn-mineru.openxlab.org.cn/pdf/2026-05-25/94c7bd90-1db5-402e-be12-89144e0d6095.zip",
+  "saved_at": 1779695793,
+  "proxy_mode": "inherit",
+  "proxy_desc": "继承环境变量 HTTP_PROXY / HTTPS_PROXY",
+  "full_md_path": "full.md",
+  "relative_md_path_in_extract": "full.md",
+  "result_zip_path": "result.zip",
+  "extract_dir": "extracted"
+}

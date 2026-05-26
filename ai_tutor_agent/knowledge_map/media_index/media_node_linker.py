@@ -25,6 +25,7 @@ class MediaNodeLinker:
     ) -> None:
         self.config = config or MediaIndexConfig()
         self.nodes_csv_path = resolve_project_path(nodes_csv_path)
+        self.enable_delimited_list_fields = "artificial_intelligence" in self.nodes_csv_path.as_posix()
         self.nodes = self.load_nodes()
 
     def load_nodes(self) -> list[dict[str, Any]]:
@@ -131,7 +132,47 @@ class MediaNodeLinker:
         elif importance == "重要":
             score += 0.2
 
+        if doc_score > 0 and title_match_score == 0.0 and not self._has_strong_node_signal(candidate_text, node):
+            return 0.0
+
         return round(score, 6)
+
+    def _has_strong_node_signal(self, candidate_text: str, node: dict[str, Any]) -> bool:
+        normalized_candidate = self._normalize_text(candidate_text)
+        compact_candidate = re.sub(r"\s+", "", normalized_candidate)
+        if not compact_candidate:
+            return False
+
+        extra = node.get("extra", {}) or {}
+        signals: list[Any] = [
+            node.get("name"),
+            extra.get("matched_block_title"),
+            extra.get("retrieval_matched_block_title"),
+            node.get("core_concepts", []),
+            node.get("formulas", []),
+            node.get("figures_refs", []),
+        ]
+
+        def iter_values(value: Any):
+            if isinstance(value, list):
+                for item in value:
+                    yield from iter_values(item)
+            else:
+                yield str(value or "").strip()
+
+        for raw in signals:
+            for value in iter_values(raw):
+                if not value or value == "无":
+                    continue
+                variants = {value, self._strip_leading_section_number(value)}
+                for variant in variants:
+                    normalized = self._normalize_text(variant)
+                    compact = re.sub(r"\s+", "", normalized)
+                    if len(compact) < 3 and not re.search(r"[A-Za-z]{2,}", compact):
+                        continue
+                    if compact and (compact in compact_candidate or compact_candidate in compact):
+                        return True
+        return False
 
     def _build_candidate_main_text(self, candidate: dict[str, Any]) -> str:
         pieces = [
@@ -255,9 +296,20 @@ class MediaNodeLinker:
         text = str(value).strip()
         if not text:
             return default
+        if self.enable_delimited_list_fields:
+            try:
+                return json.loads(text)
+            except Exception:
+                pass
         try:
             return ast.literal_eval(text)
         except Exception:
+            if isinstance(default, list) and self.enable_delimited_list_fields:
+                return [
+                    part.strip()
+                    for part in re.split(r"\s*(?:;|\|\|)\s*", text)
+                    if part.strip() and part.strip() != "无"
+                ]
             return default
 
     def _normalize_doc_key(self, value: Any) -> str:

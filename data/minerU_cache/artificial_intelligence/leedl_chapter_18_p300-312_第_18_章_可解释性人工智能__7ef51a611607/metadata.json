@@ -1,0 +1,17 @@
+{
+  "version": 1,
+  "source_path": "E:\\ai_code\\ai-tutor-agent\\data\\course_materials\\artificial_intelligence\\splits\\leedl_chapter_18_p300-312_第_18_章_可解释性人工智能.pdf",
+  "source_filename": "leedl_chapter_18_p300-312_第_18_章_可解释性人工智能.pdf",
+  "source_size_bytes": 12348213,
+  "source_mtime": 1779694337,
+  "cache_key": "7ef51a611607",
+  "batch_id": "e3aaa537-f7f3-4b69-8445-2ab372faad2d",
+  "full_zip_url": "https://cdn-mineru.openxlab.org.cn/pdf/2026-05-25/4bc6ead8-4db4-434f-ad22-a1469edd9545.zip",
+  "saved_at": 1779695981,
+  "proxy_mode": "inherit",
+  "proxy_desc": "继承环境变量 HTTP_PROXY / HTTPS_PROXY",
+  "full_md_path": "full.md",
+  "relative_md_path_in_extract": "full.md",
+  "result_zip_path": "result.zip",
+  "extract_dir": "extracted"
+}

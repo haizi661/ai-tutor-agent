@@ -1,0 +1,17 @@
+{
+  "version": 1,
+  "source_path": "E:\\ai_code\\ai-tutor-agent\\data\\course_materials\\artificial_intelligence\\splits\\nn_dl_chapter_07_p168-206_第_7_章_网络优化与正则化.pdf",
+  "source_filename": "nn_dl_chapter_07_p168-206_第_7_章_网络优化与正则化.pdf",
+  "source_size_bytes": 1922187,
+  "source_mtime": 1779694338,
+  "cache_key": "dd6663d64733",
+  "batch_id": "6a264f38-06a3-4cff-9e2a-d13f058525c3",
+  "full_zip_url": "https://cdn-mineru.openxlab.org.cn/pdf/2026-05-25/524c58a6-4c64-476c-a62e-9e1f0cc3cae2.zip",
+  "saved_at": 1779696597,
+  "proxy_mode": "inherit",
+  "proxy_desc": "继承环境变量 HTTP_PROXY / HTTPS_PROXY",
+  "full_md_path": "full.md",
+  "relative_md_path_in_extract": "full.md",
+  "result_zip_path": "result.zip",
+  "extract_dir": "extracted"
+}

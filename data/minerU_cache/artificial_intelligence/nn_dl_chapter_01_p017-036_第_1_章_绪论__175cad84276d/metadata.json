@@ -1,0 +1,17 @@
+{
+  "version": 1,
+  "source_path": "E:\\ai_code\\ai-tutor-agent\\data\\course_materials\\artificial_intelligence\\splits\\nn_dl_chapter_01_p017-036_第_1_章_绪论.pdf",
+  "source_filename": "nn_dl_chapter_01_p017-036_第_1_章_绪论.pdf",
+  "source_size_bytes": 1033800,
+  "source_mtime": 1779694337,
+  "cache_key": "175cad84276d",
+  "batch_id": "f84c52e2-e0ec-4764-a4d9-794c8e3252f6",
+  "full_zip_url": "https://cdn-mineru.openxlab.org.cn/pdf/2026-05-25/63811e65-b4bd-4502-9ce1-f3da7bcedbb2.zip",
+  "saved_at": 1779696060,
+  "proxy_mode": "inherit",
+  "proxy_desc": "继承环境变量 HTTP_PROXY / HTTPS_PROXY",
+  "full_md_path": "full.md",
+  "relative_md_path_in_extract": "full.md",
+  "result_zip_path": "result.zip",
+  "extract_dir": "extracted"
+}

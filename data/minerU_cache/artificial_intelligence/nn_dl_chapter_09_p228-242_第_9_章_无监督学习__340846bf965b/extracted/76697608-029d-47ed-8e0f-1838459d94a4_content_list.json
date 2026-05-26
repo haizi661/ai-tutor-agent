@@ -1,0 +1,3058 @@
+[
+    {
+        "type": "text",
+        "text": "第9章 无监督学习",
+        "text_level": 1,
+        "bbox": [
+            226,
+            188,
+            602,
+            224
+        ],
+        "page_idx": 0
+    },
+    {
+        "type": "text",
+        "text": "大脑有大约1014 个突触，我们只能活大约109 秒．所以我们有比数据更多的参数．这启发了我们必须进行大量无监督学习的想法，因为感知输入（包括本体感受）是我们可以获得每秒$1 0 ^ { 5 }$ 维约束的唯一途径",
+        "bbox": [
+            134,
+            314,
+            697,
+            405
+        ],
+        "page_idx": 0
+    },
+    {
+        "type": "text",
+        "text": "—杰弗里·辛顿（Geoffrey Hinton）",
+        "bbox": [
+            445,
+            414,
+            695,
+            431
+        ],
+        "page_idx": 0
+    },
+    {
+        "type": "text",
+        "text": "2018年图灵奖获得者",
+        "bbox": [
+            548,
+            433,
+            693,
+            448
+        ],
+        "page_idx": 0
+    },
+    {
+        "type": "text",
+        "text": "这 里 数 字 是 指 数 量级．更早的正式描述见[Hinton et al., 1999]",
+        "bbox": [
+            779,
+            339,
+            949,
+            394
+        ],
+        "page_idx": 0
+    },
+    {
+        "type": "text",
+        "text": "无监督学习（Unsupervised Learning，UL）是指从无标签的数据中学习出一些有用的模式．无监督学习算法一般直接从原始数据中学习，不借助于任何人工给出标签或者反馈等指导信息．如果监督学习是建立输入-输出之间的映射关系，那么无监督学习就是发现隐藏的数据中的有价值信息，包括有效的特征、类别、结构以及概率分布等",
+        "bbox": [
+            65,
+            476,
+            764,
+            592
+        ],
+        "page_idx": 0
+    },
+    {
+        "type": "text",
+        "text": "典型的无监督学习问题可以分为以下几类：",
+        "bbox": [
+            107,
+            600,
+            487,
+            620
+        ],
+        "page_idx": 0
+    },
+    {
+        "type": "text",
+        "text": "（1） 无监督特征学习（Unsupervised Feature Learning）是从无标签的训练数据中挖掘有效的特征或表示．无监督特征学习一般用来进行降维、数据可视化或监督学习前期的数据预处理",
+        "bbox": [
+            65,
+            626,
+            764,
+            693
+        ],
+        "page_idx": 0
+    },
+    {
+        "type": "text",
+        "text": "（2） 概率密度估计（Probabilistic Density Estimation）简称密度估计，是根据一组训练样本来估计样本空间的概率密度．密度估计可以分为参数密度估计和非参数密度估计．参数密度估计是假设数据服从某个已知概率密度函数形式的分布（比如高斯分布），然后根据训练样本去估计概率密度函数的参数．非参数密度估计是不假设数据服从某个已知分布，只利用训练样本对密度进行估计，可以进行任意形状密度的估计．非参数密度估计的方法有直方图、核密度估计等．",
+        "bbox": [
+            65,
+            701,
+            766,
+            863
+        ],
+        "page_idx": 0
+    },
+    {
+        "type": "text",
+        "text": "（3） 聚类（Clustering）是将一组样本根据一定的准则划分到不同的组（也称为簇（Cluster））．一个比较通用的准则是组内样本的相似性要高于组间样本的相似性．常见的聚类算法包括K-Means算法、谱聚类等",
+        "bbox": [
+            63,
+            869,
+            773,
+            938
+        ],
+        "page_idx": 0
+    },
+    {
+        "type": "text",
+        "text": "特征学习也包含很多的监督学习算法，比如线性判别分析等",
+        "bbox": [
+            779,
+            626,
+            949,
+            682
+        ],
+        "page_idx": 0
+    },
+    {
+        "type": "text",
+        "text": "和监督学习一样，无监督学习方法也包含三个基本要素：模型、学习准则和优化算法．无监督学习的准则非常多，比如最大似然估计、最小重构错误等．在无监督特征学习中，经常使用的准则为最小化重构错误，同时也经常对特征进行一些约束，比如独立性、非负性或稀释性等．而在密度估计中，经常采用最大似然估计来进行学习",
+        "bbox": [
+            63,
+            74,
+            762,
+            188
+        ],
+        "page_idx": 1
+    },
+    {
+        "type": "text",
+        "text": "本章介绍两种无监督学习问题：无监督特征学习和概率密度估计",
+        "bbox": [
+            105,
+            196,
+            672,
+            216
+        ],
+        "page_idx": 1
+    },
+    {
+        "type": "text",
+        "text": "9.1 无监督特征学习",
+        "text_level": 1,
+        "bbox": [
+            273,
+            256,
+            552,
+            281
+        ],
+        "page_idx": 1
+    },
+    {
+        "type": "text",
+        "text": "无监督特征学习是指从无标注的数据中自动学习有效的数据表示，从而能够帮助后续的机器学习模型更快速地达到更好的性能．无监督特征学习主要方法有主成分分析、稀疏编码、自编码器等",
+        "bbox": [
+            65,
+            304,
+            762,
+            371
+        ],
+        "page_idx": 1
+    },
+    {
+        "type": "text",
+        "text": "9.1.1 主成分分析",
+        "text_level": 1,
+        "bbox": [
+            65,
+            400,
+            268,
+            422
+        ],
+        "page_idx": 1
+    },
+    {
+        "type": "text",
+        "text": "主成分分析（Principal Component Analysis，PCA）是一种最常用的数据降维方法，使得在转换后的空间中数据的方差最大．如图9.1所示的两维数据，如果将这些数据投影到一维空间中，选择数据方差最大的方向进行投影，才能最大化数据的差异性，保留更多的原始数据信息",
+        "bbox": [
+            63,
+            439,
+            762,
+            530
+        ],
+        "page_idx": 1
+    },
+    {
+        "type": "chart",
+        "img_path": "images/10b973b69105ae5dc1a8eb168ed5e32596c8a854d2acb4f5214ee8d8988c30f8.jpg",
+        "content": "| x    | y    |\n| ---- | ---- |\n| 0.0  | 0.0  |\n| 0.1  | 0.1  |\n| 0.2  | 0.2  |\n| 0.3  | 0.3  |\n| 0.4  | 0.4  |\n| 0.5  | 0.5  |\n| 0.6  | 0.6  |\n| 0.7  | 0.7  |\n| 0.8  | 0.8  |\n| 0.9  | 0.9  |\n| 1.0  | 1.0  |",
+        "chart_caption": [
+            "图9.1 主成分分析"
+        ],
+        "chart_footnote": [],
+        "sub_type": "scatter",
+        "bbox": [
+            239,
+            540,
+            592,
+            758
+        ],
+        "page_idx": 1
+    },
+    {
+        "type": "text",
+        "text": "假设有一组??维的样本 $\\pmb { x } ^ { ( n ) } \\in \\mathbb { R } ^ { D } , 1 \\leq n \\leq N$ ，我们希望将其投影到一维空间中，投影向量为 ${ \\pmb w } \\in \\mathbb { R } ^ { D }$ ．不失一般性，我们限制??的模为1，即 $\\pmb { w } ^ { \\top } \\pmb { w } = 1$ ．每个样本点 $\\pmb { x } ^ { ( n ) }$ 投影之后的表示为",
+        "bbox": [
+            63,
+            803,
+            762,
+            869
+        ],
+        "page_idx": 1
+    },
+    {
+        "type": "equation",
+        "text": "$$\nz ^ {(n)} = \\boldsymbol {w} ^ {\\top} \\boldsymbol {x} ^ {(n)}. \\tag {9.1}\n$$",
+        "text_format": "latex",
+        "bbox": [
+            346,
+            890,
+            762,
+            911
+        ],
+        "page_idx": 1
+    },
+    {
+        "type": "header",
+        "text": "9.1 无监督特征学习",
+        "bbox": [
+            65,
+            27,
+            241,
+            43
+        ],
+        "page_idx": 1
+    },
+    {
+        "type": "header",
+        "text": "2021 年 5 月 18 日",
+        "bbox": [
+            426,
+            26,
+            588,
+            41
+        ],
+        "page_idx": 1
+    },
+    {
+        "type": "page_number",
+        "text": "214 ",
+        "bbox": [
+            911,
+            27,
+            947,
+            41
+        ],
+        "page_idx": 1
+    },
+    {
+        "type": "footer",
+        "text": "https://nndl.github.io/ ",
+        "bbox": [
+            65,
+            942,
+            233,
+            959
+        ],
+        "page_idx": 1
+    },
+    {
+        "type": "text",
+        "text": "用矩阵 $\\pmb { X } = [ \\pmb { x } ^ { ( 1 ) } , \\pmb { x } ^ { ( 2 ) } , \\cdots , \\pmb { x } ^ { ( N ) } ]$ 表示输入样本， $\\begin{array} { r } { \\bar { \\mathbf { x } } = \\frac { 1 } { N } \\sum _ { n = 1 } ^ { N } \\mathbf { x } ^ { ( n ) } } \\end{array}$ ?? 为原始样本的中心点，所有样本投影后的方差为",
+        "bbox": [
+            65,
+            72,
+            764,
+            117
+        ],
+        "page_idx": 2
+    },
+    {
+        "type": "equation",
+        "text": "$$\n\\sigma (\\boldsymbol {X}; \\boldsymbol {w}) = \\frac {1}{N} \\sum_ {n = 1} ^ {N} (\\boldsymbol {w} ^ {\\top} \\boldsymbol {x} ^ {(n)} - \\boldsymbol {w} ^ {\\top} \\bar {\\boldsymbol {x}}) ^ {2} \\tag {9.2}\n$$",
+        "text_format": "latex",
+        "bbox": [
+            224,
+            131,
+            764,
+            179
+        ],
+        "page_idx": 2
+    },
+    {
+        "type": "equation",
+        "text": "$$\n= \\frac {1}{N} (\\boldsymbol {w} ^ {\\top} \\boldsymbol {X} - \\boldsymbol {w} ^ {\\top} \\bar {\\boldsymbol {X}}) (\\boldsymbol {w} ^ {\\top} \\boldsymbol {X} - \\boldsymbol {w} ^ {\\top} \\bar {\\boldsymbol {X}}) ^ {\\top} \\tag {9.3}\n$$",
+        "text_format": "latex",
+        "bbox": [
+            302,
+            184,
+            762,
+            219
+        ],
+        "page_idx": 2
+    },
+    {
+        "type": "equation",
+        "text": "$$\n= \\boldsymbol {w} ^ {\\top} \\boldsymbol {\\Sigma} \\boldsymbol {w}, \\tag {9.4}\n$$",
+        "text_format": "latex",
+        "bbox": [
+            302,
+            224,
+            762,
+            244
+        ],
+        "page_idx": 2
+    },
+    {
+        "type": "text",
+        "text": "其中 $\\bar { \\mathbf X } = \\bar { \\mathbf { x } } \\mathbf 1 _ { D } ^ { \\top }$ 是向量 ??̄ 和 ?? 维全 1 向量 ${ \\bf 1 } _ { D }$ 的外积，即有 ?? 列 ??̄组成的矩阵，$\\begin{array} { r } { \\pmb { \\Sigma } = \\frac { 1 } { N } ( \\pmb { X } - \\pmb { \\bar { X } } ) ( \\pmb { X } - \\pmb { \\bar { X } } ) ^ { \\top } } \\end{array}$ 是原始样本的协方差矩阵",
+        "bbox": [
+            63,
+            264,
+            766,
+            314
+        ],
+        "page_idx": 2
+    },
+    {
+        "type": "text",
+        "text": "最大化投影方差 $\\sigma ( { \\pmb X } ; { \\pmb w } )$ 并满足 $\\pmb { w } ^ { \\top } \\pmb { w } = 1$ ，利用拉格朗日方法转换为无约束优化问题，",
+        "bbox": [
+            65,
+            315,
+            762,
+            357
+        ],
+        "page_idx": 2
+    },
+    {
+        "type": "equation",
+        "text": "$$\n\\max _ {\\boldsymbol {w}} \\boldsymbol {w} ^ {\\top} \\boldsymbol {\\Sigma} \\boldsymbol {w} + \\lambda (1 - \\boldsymbol {w} ^ {\\top} \\boldsymbol {w}), \\tag {9.5}\n$$",
+        "text_format": "latex",
+        "bbox": [
+            294,
+            380,
+            762,
+            405
+        ],
+        "page_idx": 2
+    },
+    {
+        "type": "text",
+        "text": "其中??为拉格朗日乘子．对上式求导并令导数等于0，可得",
+        "bbox": [
+            65,
+            421,
+            567,
+            439
+        ],
+        "page_idx": 2
+    },
+    {
+        "type": "equation",
+        "text": "$$\n\\boldsymbol {\\Sigma} \\boldsymbol {w} = \\lambda \\boldsymbol {w}. \\tag {9.6}\n$$",
+        "text_format": "latex",
+        "bbox": [
+            365,
+            462,
+            762,
+            479
+        ],
+        "page_idx": 2
+    },
+    {
+        "type": "text",
+        "text": "从上式可知，??是协方差矩阵??的特征向量，??为特征值．同时",
+        "bbox": [
+            65,
+            500,
+            598,
+            518
+        ],
+        "page_idx": 2
+    },
+    {
+        "type": "equation",
+        "text": "$$\n\\sigma (\\boldsymbol {X}; \\boldsymbol {w}) = \\boldsymbol {w} ^ {\\top} \\boldsymbol {\\Sigma} \\boldsymbol {w} = \\boldsymbol {w} ^ {\\top} \\lambda \\boldsymbol {w} = \\lambda . \\tag {9.7}\n$$",
+        "text_format": "latex",
+        "bbox": [
+            273,
+            541,
+            762,
+            558
+        ],
+        "page_idx": 2
+    },
+    {
+        "type": "text",
+        "text": "??也是投影后样本的方差．因此，主成分分析可以转换成一个矩阵特征值分解问题，投影向量??为矩阵??的最大特征值对应的特征向量",
+        "bbox": [
+            63,
+            578,
+            762,
+            622
+        ],
+        "page_idx": 2
+    },
+    {
+        "type": "text",
+        "text": "如果要通过投影矩阵 ${ \\pmb W } \\in \\ b { R } ^ { D \\times D ^ { \\prime } }$ 将样本投到 $D ^ { \\prime }$ 维空间，投影矩阵满足$W ^ { \\top } W = I$ 为单位阵，只需要将??的特征值从大到小排列，保留前 $D ^ { \\prime }$ 个特征向量，其对应的特征向量即是最优的投影矩阵",
+        "bbox": [
+            65,
+            630,
+            764,
+            696
+        ],
+        "page_idx": 2
+    },
+    {
+        "type": "equation",
+        "text": "$$\n\\boldsymbol {\\Sigma} \\boldsymbol {W} = \\boldsymbol {W} \\operatorname{diag} (\\lambda), \\tag {9.8}\n$$",
+        "text_format": "latex",
+        "bbox": [
+            329,
+            719,
+            762,
+            738
+        ],
+        "page_idx": 2
+    },
+    {
+        "type": "text",
+        "text": "其中 $\\lambda = [ \\lambda _ { 1 } , \\cdots , \\lambda _ { D ^ { \\prime } } ]$ 为?? 的前 $D ^ { \\prime }$ 个最大的特征值",
+        "bbox": [
+            65,
+            756,
+            516,
+            778
+        ],
+        "page_idx": 2
+    },
+    {
+        "type": "text",
+        "text": "主成分分析是一种无监督学习方法，可以作为监督学习的数据预处理方法，用来去除噪声并减少特征之间的相关性，但是它并不能保证投影后数据的类别可分性更好．提高两类可分性的方法一般为监督学习方法，比如线性判别分析（Linear Discriminant Analysis，LDA）",
+        "bbox": [
+            63,
+            784,
+            762,
+            876
+        ],
+        "page_idx": 2
+    },
+    {
+        "type": "text",
+        "text": "参见习题9-3",
+        "bbox": [
+            781,
+            831,
+            876,
+            846
+        ],
+        "page_idx": 2
+    },
+    {
+        "type": "header",
+        "text": "9.1 无监督特征学习",
+        "bbox": [
+            65,
+            27,
+            239,
+            41
+        ],
+        "page_idx": 2
+    },
+    {
+        "type": "header",
+        "text": "2021 年 5 月 18 日",
+        "bbox": [
+            426,
+            26,
+            586,
+            41
+        ],
+        "page_idx": 2
+    },
+    {
+        "type": "page_number",
+        "text": "215 ",
+        "bbox": [
+            911,
+            27,
+            945,
+            41
+        ],
+        "page_idx": 2
+    },
+    {
+        "type": "footer",
+        "text": "https://nndl.github.io/ ",
+        "bbox": [
+            65,
+            942,
+            233,
+            959
+        ],
+        "page_idx": 2
+    },
+    {
+        "type": "text",
+        "text": "9.1.2 稀疏编码",
+        "text_level": 1,
+        "bbox": [
+            65,
+            75,
+            247,
+            95
+        ],
+        "page_idx": 3
+    },
+    {
+        "type": "text",
+        "text": "稀疏编码（Sparse Coding）也是一种受哺乳动物视觉系统中简单细胞感受野而启发的模型．在哺乳动物的初级视觉皮层（Primary Visual Cortex）中，每个神经元仅对处于其感受野中特定的刺激信号（比如特定方向的边缘、条纹等特征）做出响应．局部感受野可以被描述为具有空间局部性、方向性和带通性[Olshausen et al.,1996]．也就是说，外界信息经过编码后仅有一小部分神经元激活，即外界刺激在视觉神经系统的表示具有很高的稀疏性．编码的稀疏性在一定程度上符合生物学的低功耗特性",
+        "bbox": [
+            63,
+            116,
+            762,
+            278
+        ],
+        "page_idx": 3
+    },
+    {
+        "type": "text",
+        "text": "在数学上，（线性）编码是指给定一组基向量 $\\pmb { A } = [ \\pmb { a } _ { 1 } , \\cdots , \\pmb { a } _ { M } ]$ ，将输入样本$\\boldsymbol { x } \\in \\mathbb { R } ^ { D }$ 表示为这些基向量的线性组合",
+        "bbox": [
+            63,
+            287,
+            762,
+            331
+        ],
+        "page_idx": 3
+    },
+    {
+        "type": "equation",
+        "text": "$$\n\\boldsymbol {x} = \\sum_ {m = 1} ^ {M} z _ {m} \\boldsymbol {a} _ {m} \\tag {9.9}\n$$",
+        "text_format": "latex",
+        "bbox": [
+            344,
+            343,
+            762,
+            391
+        ],
+        "page_idx": 3
+    },
+    {
+        "type": "equation",
+        "text": "$$\n= A z, \\tag {9.10}\n$$",
+        "text_format": "latex",
+        "bbox": [
+            367,
+            400,
+            762,
+            419
+        ],
+        "page_idx": 3
+    },
+    {
+        "type": "text",
+        "text": "其中基向量的系数 $z = [ z _ { 1 } , \\cdots , z _ { M } ]$ 称为输入样本??的编码（Encoding），基向量??也称为字典（Dictionary）",
+        "bbox": [
+            65,
+            439,
+            762,
+            482
+        ],
+        "page_idx": 3
+    },
+    {
+        "type": "text",
+        "text": "编码是对??维空间中的样本??找到其在??维空间中的表示（或投影），其目标通常是编码的各个维度都是统计独立的，并且可以重构出输入样本．编码的关键是找到一组“完备”的基向量??，比如主成分分析等．但是主成分分析得到的编码通常是稠密向量，没有稀疏性",
+        "bbox": [
+            63,
+            490,
+            762,
+            580
+        ],
+        "page_idx": 3
+    },
+    {
+        "type": "text",
+        "text": "数学小知识|完备性",
+        "text_level": 1,
+        "bbox": [
+            102,
+            592,
+            285,
+            611
+        ],
+        "page_idx": 3
+    },
+    {
+        "type": "text",
+        "text": "如果??个基向量刚好可以支撑??维的欧氏空间，则这??个基向量是完备的．如果??个基向量可以支撑??维的欧氏空间，并且 $M > D$ ，则这??个基向量是过完备的（overcomplete）、冗余的",
+        "bbox": [
+            92,
+            623,
+            722,
+            691
+        ],
+        "page_idx": 3
+    },
+    {
+        "type": "text",
+        "text": "“过完备”基向量是指基向量个数远远大于其支撑空间维度．因此这些基向量一般不具备独立、正交等性质",
+        "bbox": [
+            92,
+            696,
+            722,
+            739
+        ],
+        "page_idx": 3
+    },
+    {
+        "type": "text",
+        "text": "为了得到稀疏的编码，我们需要找到一组“过完备”的基向量（即 $M > D )$ 来进行编码．在过完备基向量之间往往会存在一些冗余性，因此对于一个输入样本，会存在很多有效的编码．如果加上稀疏性限制，就可以减少解空间的大小，得到“唯一”的稀疏编码",
+        "bbox": [
+            63,
+            761,
+            762,
+            851
+        ],
+        "page_idx": 3
+    },
+    {
+        "type": "text",
+        "text": "给定一组??个输入向量 $\\pmb { x } ^ { ( 1 ) } , \\cdots , \\pmb { x } ^ { ( N ) }$ ，其稀疏编码的目标函数定义为",
+        "bbox": [
+            105,
+            859,
+            707,
+            879
+        ],
+        "page_idx": 3
+    },
+    {
+        "type": "equation",
+        "text": "$$\n\\mathcal {L} (\\boldsymbol {A}, \\boldsymbol {Z}) = \\sum_ {n = 1} ^ {N} \\left(\\left\\| \\boldsymbol {x} ^ {(n)} - A \\boldsymbol {z} ^ {(n)} \\right\\| ^ {2} + \\eta \\rho (\\boldsymbol {z} ^ {(n)})\\right), \\tag {9.11}\n$$",
+        "text_format": "latex",
+        "bbox": [
+            216,
+            891,
+            762,
+            939
+        ],
+        "page_idx": 3
+    },
+    {
+        "type": "text",
+        "text": "带 通 性是 指 不 同 尺度 下 空 间 结 构 的 敏感 性．比 如，带 通 滤波器（Bandpass Filter）是指容许某个频率范围的信号通过，同时屏蔽其他频段的设备",
+        "bbox": [
+            779,
+            188,
+            949,
+            318
+        ],
+        "page_idx": 3
+    },
+    {
+        "type": "header",
+        "text": "9.1 无监督特征学习",
+        "bbox": [
+            65,
+            27,
+            239,
+            43
+        ],
+        "page_idx": 3
+    },
+    {
+        "type": "header",
+        "text": "2021 年 5 月 18 日",
+        "bbox": [
+            426,
+            26,
+            586,
+            41
+        ],
+        "page_idx": 3
+    },
+    {
+        "type": "page_number",
+        "text": "216 ",
+        "bbox": [
+            911,
+            27,
+            947,
+            41
+        ],
+        "page_idx": 3
+    },
+    {
+        "type": "footer",
+        "text": "https://nndl.github.io/ ",
+        "bbox": [
+            65,
+            942,
+            233,
+            959
+        ],
+        "page_idx": 3
+    },
+    {
+        "type": "text",
+        "text": "其中 $Z = [ z ^ { ( 1 ) } , \\cdots , z ^ { ( N ) } ] , \\rho ( \\cdot )$ 是一个稀疏性衡量函数，??是一个超参数，用来控制稀疏性的强度",
+        "bbox": [
+            63,
+            72,
+            762,
+            116
+        ],
+        "page_idx": 4
+    },
+    {
+        "type": "text",
+        "text": "对于一个向量 $z \\in \\mathbb { R } ^ { M }$ ，其稀疏性定义为非零元素的比例．如果一个向量只有很少的几个非零元素，就说这个向量是稀疏的．稀疏性衡量函数 $\\rho ( z )$ 是给向量??一个标量分数．??越稀疏， $\\rho ( z )$ 越小",
+        "bbox": [
+            63,
+            123,
+            762,
+            191
+        ],
+        "page_idx": 4
+    },
+    {
+        "type": "text",
+        "text": "稀疏性衡量函数有多种选择，最直接的衡量向量??稀疏性的函数是 $\\ell _ { 0 }$ 范数",
+        "bbox": [
+            105,
+            199,
+            750,
+            219
+        ],
+        "page_idx": 4
+    },
+    {
+        "type": "equation",
+        "text": "$$\n\\rho (\\mathbf {z}) = \\sum_ {m = 1} ^ {M} \\mathbf {I} (| z _ {m} | > 0). \\tag {9.12}\n$$",
+        "text_format": "latex",
+        "bbox": [
+            306,
+            233,
+            762,
+            281
+        ],
+        "page_idx": 4
+    },
+    {
+        "type": "text",
+        "text": "但 $\\ell _ { 0 }$ 范数不满足连续可导，因此很难进行优化．在实际中，稀疏性衡量函数通常使用 $\\ell _ { 1 }$ 范数",
+        "bbox": [
+            65,
+            295,
+            762,
+            340
+        ],
+        "page_idx": 4
+    },
+    {
+        "type": "equation",
+        "text": "$$\n\\rho (z) = \\sum_ {m = 1} ^ {M} | z _ {m} |, \\tag {9.13}\n$$",
+        "text_format": "latex",
+        "bbox": [
+            338,
+            354,
+            762,
+            402
+        ],
+        "page_idx": 4
+    },
+    {
+        "type": "text",
+        "text": "或对数函数",
+        "bbox": [
+            65,
+            417,
+            174,
+            434
+        ],
+        "page_idx": 4
+    },
+    {
+        "type": "equation",
+        "text": "$$\n\\rho (\\mathbf {z}) = \\sum_ {m = 1} ^ {M} \\log (1 + z _ {m} ^ {2}), \\tag {9.14}\n$$",
+        "text_format": "latex",
+        "bbox": [
+            304,
+            450,
+            762,
+            498
+        ],
+        "page_idx": 4
+    },
+    {
+        "type": "text",
+        "text": "或指数函数",
+        "bbox": [
+            65,
+            517,
+            172,
+            535
+        ],
+        "page_idx": 4
+    },
+    {
+        "type": "text",
+        "text": "由于通常比较难以得到严格的稀疏向量，因此如果一个向量只有少数几个远大于零的元素，其他元素都接近于0，我们也称这个向量为稀疏向量",
+        "bbox": [
+            781,
+            128,
+            947,
+            258
+        ],
+        "page_idx": 4
+    },
+    {
+        "type": "text",
+        "text": "参见习题9-6",
+        "bbox": [
+            781,
+            515,
+            876,
+            530
+        ],
+        "page_idx": 4
+    },
+    {
+        "type": "equation",
+        "text": "$$\n\\rho (\\mathbf {z}) = \\sum_ {m = 1} ^ {M} - \\exp (- z _ {m} ^ {2}). \\tag {9.15}\n$$",
+        "text_format": "latex",
+        "bbox": [
+            304,
+            555,
+            762,
+            603
+        ],
+        "page_idx": 4
+    },
+    {
+        "type": "text",
+        "text": "9.1.2.1 训练方法",
+        "text_level": 1,
+        "bbox": [
+            65,
+            625,
+            233,
+            643
+        ],
+        "page_idx": 4
+    },
+    {
+        "type": "text",
+        "text": "给定一组 ?? 个输入向量 $\\{ \\pmb { x } ^ { ( n ) } \\} _ { n = 1 } ^ { N }$ ，需要同时学习基向量 ?? 以及每个输入样本对应的稀疏编码 $\\{ z ^ { ( n ) } \\} _ { n = 1 } ^ { N }$ ",
+        "bbox": [
+            65,
+            651,
+            762,
+            696
+        ],
+        "page_idx": 4
+    },
+    {
+        "type": "text",
+        "text": "稀疏编码的训练过程一般用交替优化的方法进行",
+        "bbox": [
+            105,
+            702,
+            539,
+            721
+        ],
+        "page_idx": 4
+    },
+    {
+        "type": "text",
+        "text": "1)固定基向量??，对每个输入 $\\pmb { x } ^ { ( n ) }$ ，计算其对应的最优编码",
+        "bbox": [
+            107,
+            730,
+            615,
+            749
+        ],
+        "page_idx": 4
+    },
+    {
+        "type": "equation",
+        "text": "$$\n\\min _ {\\boldsymbol {z} ^ {(n)}} \\left\\| \\boldsymbol {x} ^ {(n)} - \\boldsymbol {A} \\boldsymbol {z} ^ {(n)} \\right\\| ^ {2} + \\eta \\rho (\\boldsymbol {z} ^ {(n)}), \\forall n \\in [ 1, N ]. \\tag {9.16}\n$$",
+        "text_format": "latex",
+        "bbox": [
+            214,
+            763,
+            762,
+            801
+        ],
+        "page_idx": 4
+    },
+    {
+        "type": "text",
+        "text": "2) 固定上一步得到的编码 $\\{ z ^ { ( n ) } \\} _ { n = 1 } ^ { N }$ ，计算其最优的基向量",
+        "bbox": [
+            105,
+            820,
+            609,
+            840
+        ],
+        "page_idx": 4
+    },
+    {
+        "type": "equation",
+        "text": "$$\n\\min _ {\\boldsymbol {A}} \\sum_ {n = 1} ^ {N} \\left(\\left\\| \\boldsymbol {x} ^ {(n)} - \\boldsymbol {A} \\boldsymbol {z} ^ {(n)} \\right\\| ^ {2}\\right) + \\lambda \\frac {1}{2} \\| \\boldsymbol {A} \\| ^ {2}, \\tag {9.17}\n$$",
+        "text_format": "latex",
+        "bbox": [
+            245,
+            856,
+            762,
+            902
+        ],
+        "page_idx": 4
+    },
+    {
+        "type": "text",
+        "text": "其中第二项为正则化项，??为正则化项系数",
+        "bbox": [
+            65,
+            917,
+            443,
+            936
+        ],
+        "page_idx": 4
+    },
+    {
+        "type": "header",
+        "text": "9.1 无监督特征学习",
+        "bbox": [
+            65,
+            27,
+            239,
+            41
+        ],
+        "page_idx": 4
+    },
+    {
+        "type": "header",
+        "text": "2021 年 5 月 18 日",
+        "bbox": [
+            426,
+            26,
+            586,
+            41
+        ],
+        "page_idx": 4
+    },
+    {
+        "type": "page_number",
+        "text": "",
+        "bbox": [
+            911,
+            27,
+            947,
+            41
+        ],
+        "page_idx": 4
+    },
+    {
+        "type": "footer",
+        "text": "https://nndl.github.io/ ",
+        "bbox": [
+            65,
+            942,
+            233,
+            959
+        ],
+        "page_idx": 4
+    },
+    {
+        "type": "text",
+        "text": "9.1.2.2 稀疏编码的优点",
+        "text_level": 1,
+        "bbox": [
+            65,
+            75,
+            294,
+            94
+        ],
+        "page_idx": 5
+    },
+    {
+        "type": "text",
+        "text": "稀疏编码的每一维都可以被看作一种特征．和基于稠密向量的分布式表示相比，稀疏编码具有更小的计算量和更好的可解释性等优点",
+        "bbox": [
+            65,
+            102,
+            764,
+            145
+        ],
+        "page_idx": 5
+    },
+    {
+        "type": "list",
+        "sub_type": "text",
+        "list_items": [
+            "（1） 计算量稀疏性带来的最大好处就是可以极大地降低计算量",
+            "（2） 可解释性 因为稀疏编码只有少数的非零元素，相当于将一个输入样本表示为少数几个相关的特征．这样我们可以更好地描述其特征，并易于理解",
+            "（3） 特征选择 稀疏性带来的另外一个好处是可以实现特征的自动选择，只选择和输入样本最相关的少数特征，从而更高效地表示输入样本，降低噪声并减轻过拟合"
+        ],
+        "bbox": [
+            109,
+            153,
+            762,
+            298
+        ],
+        "page_idx": 5
+    },
+    {
+        "type": "text",
+        "text": "9.1.3 自编码器",
+        "text_level": 1,
+        "bbox": [
+            65,
+            326,
+            245,
+            346
+        ],
+        "page_idx": 5
+    },
+    {
+        "type": "text",
+        "text": "自编码器（Auto-Encoder，AE）是通过无监督的方式来学习一组数据的有效编码（或表示）",
+        "bbox": [
+            65,
+            366,
+            762,
+            408
+        ],
+        "page_idx": 5
+    },
+    {
+        "type": "text",
+        "text": "假设有一组??维的样本 $\\pmb { x } ^ { ( n ) } \\in \\mathbb { R } ^ { D } , 1 \\leq n \\leq N$ ，自编码器将这组数据映射到特征空间得到每个样本的编码 $\\pmb { z } ^ { ( n ) } \\in \\mathbb { R } ^ { M } , 1 \\leq n \\leq N$ ，并且希望这组编码可以重构出原来的样本",
+        "bbox": [
+            63,
+            417,
+            762,
+            482
+        ],
+        "page_idx": 5
+    },
+    {
+        "type": "text",
+        "text": "自编码器的结构可分为两部分：",
+        "bbox": [
+            109,
+            492,
+            382,
+            510
+        ],
+        "page_idx": 5
+    },
+    {
+        "type": "text",
+        "text": "（1） 编码器（Encoder）?? ∶ ℝ?? → ℝ??",
+        "bbox": [
+            109,
+            518,
+            466,
+            538
+        ],
+        "page_idx": 5
+    },
+    {
+        "type": "text",
+        "text": "（2） 解码器（Decoder）?? ∶ ℝ?? → ℝ??",
+        "bbox": [
+            109,
+            544,
+            464,
+            565
+        ],
+        "page_idx": 5
+    },
+    {
+        "type": "text",
+        "text": "自编码器的学习目标是最小化重构错误（Reconstruction Error）：",
+        "bbox": [
+            109,
+            572,
+            684,
+            591
+        ],
+        "page_idx": 5
+    },
+    {
+        "type": "equation",
+        "text": "$$\n\\begin{array}{l} \\mathcal {L} = \\sum_ {n = 1} ^ {N} \\| \\boldsymbol {x} ^ {(n)} - g (f (\\boldsymbol {x} ^ {(n)})) \\| ^ {2} (9.18) \\\\ = \\sum_ {n = 1} ^ {N} \\| \\boldsymbol {x} ^ {(n)} - f \\circ g (\\boldsymbol {x} ^ {(n)}) \\| ^ {2}. (9.19) \\\\ \\end{array}\n$$",
+        "text_format": "latex",
+        "bbox": [
+            279,
+            605,
+            762,
+            708
+        ],
+        "page_idx": 5
+    },
+    {
+        "type": "text",
+        "text": "如果特征空间的维度??小于原始空间的维度??，自编码器相当于是一种降维或特征抽取方法．如果?? ≥ ??，一定可以找到一组或多组解使得?? ∘ ??为单位函数（Identity Function），并使得重构错误为0．然而，这样的解并没有太多的意义．但是，如果再加上一些附加的约束，就可以得到一些有意义的解，比如编码的稀疏性、取值范围，??和??的具体形式等．如果我们让编码只能取??个不同的值$( K < N )$ ，那么自编码器就可以转换为一个??类的聚类（Clustering）问题",
+        "bbox": [
+            63,
+            724,
+            762,
+            865
+        ],
+        "page_idx": 5
+    },
+    {
+        "type": "text",
+        "text": "最简单的自编码器是如图9.2所示的两层神经网络．输入层到隐藏层用来编码，隐藏层到输出层用来解码，层与层之间互相全连接",
+        "bbox": [
+            65,
+            871,
+            762,
+            914
+        ],
+        "page_idx": 5
+    },
+    {
+        "type": "text",
+        "text": "单位函数??(??) = ??",
+        "bbox": [
+            781,
+            773,
+            922,
+            789
+        ],
+        "page_idx": 5
+    },
+    {
+        "type": "header",
+        "text": "9.1 无监督特征学习",
+        "bbox": [
+            65,
+            27,
+            239,
+            41
+        ],
+        "page_idx": 5
+    },
+    {
+        "type": "header",
+        "text": "2021 年 5 月 18 日",
+        "bbox": [
+            426,
+            26,
+            586,
+            41
+        ],
+        "page_idx": 5
+    },
+    {
+        "type": "page_number",
+        "text": "218 ",
+        "bbox": [
+            911,
+            27,
+            945,
+            41
+        ],
+        "page_idx": 5
+    },
+    {
+        "type": "footer",
+        "text": "https://nndl.github.io/ ",
+        "bbox": [
+            65,
+            942,
+            231,
+            958
+        ],
+        "page_idx": 5
+    },
+    {
+        "type": "image",
+        "img_path": "images/920bd1fe3552071ce5f2eb94997764b204d1ce51e16175b744414cd72634d0c8.jpg",
+        "image_caption": [
+            "图9.2 两层网络结构的自编码器"
+        ],
+        "image_footnote": [],
+        "content": "```mermaid\ngraph TD\n    x1[\"x₁\"] --> z1[\"z₁\"]\n    x2[\"x₂\"] --> z1\n    x3[\"x₃\"] --> z2[\"z₂\"]\n    x4[\"x₄\"] --> z2\n    z1 --> x1'[x₁']\n    z1 --> x2'[x₂']\n    z1 --> x3'[x₃']\n    z1 --> x4'[x₄']\n    z2 --> x1'\n    z2 --> x2'\n    z2 --> x3'\n    z2 --> x4'\n    x1 --> z1\n    x2 --> z2\n    x3 --> z2\n    x4 --> z2\n    x1' --> z1\n    x2' --> z2\n    x3' --> z2\n    x4' --> z2\n```",
+        "sub_type": "flowchart",
+        "bbox": [
+            300,
+            72,
+            533,
+            238
+        ],
+        "page_idx": 6
+    },
+    {
+        "type": "text",
+        "text": "对于样本??，自编码器的中间隐藏层的活性值为??的编码，即",
+        "bbox": [
+            107,
+            280,
+            632,
+            298
+        ],
+        "page_idx": 6
+    },
+    {
+        "type": "equation",
+        "text": "$$\n\\boldsymbol {z} = f (\\boldsymbol {W} ^ {(1)} \\boldsymbol {x} + \\boldsymbol {b} ^ {(1)}), \\tag {9.20}\n$$",
+        "text_format": "latex",
+        "bbox": [
+            317,
+            312,
+            762,
+            334
+        ],
+        "page_idx": 6
+    },
+    {
+        "type": "text",
+        "text": "自编码器的输出为重构的数据",
+        "bbox": [
+            67,
+            349,
+            334,
+            366
+        ],
+        "page_idx": 6
+    },
+    {
+        "type": "equation",
+        "text": "$$\n\\boldsymbol {x} ^ {\\prime} = f (\\boldsymbol {W} ^ {(2)} \\boldsymbol {z} + \\boldsymbol {b} ^ {(2)}), \\tag {9.21}\n$$",
+        "text_format": "latex",
+        "bbox": [
+            315,
+            382,
+            762,
+            404
+        ],
+        "page_idx": 6
+    },
+    {
+        "type": "text",
+        "text": "其中 ${ \\pmb W } ^ { ( 1 ) } , { \\pmb W } ^ { ( 2 ) } , { \\pmb b } ^ { ( 1 ) } , { \\pmb b } ^ { ( 2 ) }$ 为网络参数，??(⋅)为激活函数．如果令 $\\pmb { W } ^ { ( 2 ) }$ 等于 $\\mathbf { \\delta } \\mathbf { W } ^ { ( 1 ) }$ 的转置，即 $\\boldsymbol { W } ^ { ( 2 ) } = \\boldsymbol { W } ^ { ( 1 ) } ^ { \\top }$ ，称为捆绑权重（Tied Weight）．捆绑权重自编码器的参数更少，因此更容易学习．此外，捆绑权重还在一定程度上起到正则化的作用",
+        "bbox": [
+            65,
+            417,
+            762,
+            484
+        ],
+        "page_idx": 6
+    },
+    {
+        "type": "text",
+        "text": "给定一组样本 $\\pmb { x } ^ { ( n ) } \\in [ 0 , 1 ] ^ { D } , 1 \\leq n \\leq N$ ，其重构错误为",
+        "bbox": [
+            105,
+            492,
+            588,
+            513
+        ],
+        "page_idx": 6
+    },
+    {
+        "type": "equation",
+        "text": "$$\n\\mathcal {L} = \\sum_ {n = 1} ^ {N} \\| \\boldsymbol {x} ^ {(n)} - \\boldsymbol {x} ^ {\\prime (n)}) \\| ^ {2} + \\lambda \\| \\boldsymbol {W} \\| _ {F} ^ {2}. \\tag {9.22}\n$$",
+        "text_format": "latex",
+        "bbox": [
+            256,
+            521,
+            762,
+            569
+        ],
+        "page_idx": 6
+    },
+    {
+        "type": "text",
+        "text": "其中??为正则化项系数．通过最小化重构错误，可以有效地学习网络的参数",
+        "bbox": [
+            65,
+            580,
+            718,
+            599
+        ],
+        "page_idx": 6
+    },
+    {
+        "type": "text",
+        "text": "我们使用自编码器是为了得到有效的数据表示，因此在训练结束后，我们一般会去掉解码器，只保留编码器．编码器的输出可以直接作为后续机器学习模型的输入",
+        "bbox": [
+            63,
+            606,
+            762,
+            673
+        ],
+        "page_idx": 6
+    },
+    {
+        "type": "text",
+        "text": "9.1.4 稀疏自编码器",
+        "text_level": 1,
+        "bbox": [
+            65,
+            699,
+            292,
+            721
+        ],
+        "page_idx": 6
+    },
+    {
+        "type": "text",
+        "text": "自编码器除了可以学习低维编码之外，也能够学习高维的稀疏编码．假设中间隐藏层??的维度??大于输入样本??的维度??，并让??尽量稀疏，这就是稀疏自编码器（Sparse Auto-Encoder）．和稀疏编码一样，稀疏自编码器的优点是有很高的可解释性，并同时进行了隐式的特征选择",
+        "bbox": [
+            65,
+            739,
+            762,
+            829
+        ],
+        "page_idx": 6
+    },
+    {
+        "type": "text",
+        "text": "通过给自编码器中隐藏层单元??加上稀疏性限制，自编码器可以学习到数据中一些有用的结构．给定?? 个训练样本 $\\{ \\boldsymbol { x } ^ { ( n ) } \\} _ { n = 1 } ^ { N }$ ，稀疏自编码器的目标函数为",
+        "bbox": [
+            65,
+            837,
+            762,
+            883
+        ],
+        "page_idx": 6
+    },
+    {
+        "type": "equation",
+        "text": "$$\n\\mathcal {L} = \\sum_ {n = 1} ^ {N} \\| \\boldsymbol {x} ^ {(n)} - \\boldsymbol {x} ^ {\\prime (n)}) \\| ^ {2} + \\eta \\rho (\\boldsymbol {Z}) + \\lambda \\| \\boldsymbol {W} \\| ^ {2}, \\tag {9.23}\n$$",
+        "text_format": "latex",
+        "bbox": [
+            220,
+            891,
+            762,
+            939
+        ],
+        "page_idx": 6
+    },
+    {
+        "type": "header",
+        "text": "9.1 无监督特征学习",
+        "bbox": [
+            67,
+            27,
+            239,
+            41
+        ],
+        "page_idx": 6
+    },
+    {
+        "type": "header",
+        "text": "2021 年 5 月 18 日",
+        "bbox": [
+            426,
+            26,
+            586,
+            41
+        ],
+        "page_idx": 6
+    },
+    {
+        "type": "page_number",
+        "text": "219 ",
+        "bbox": [
+            911,
+            27,
+            945,
+            41
+        ],
+        "page_idx": 6
+    },
+    {
+        "type": "footer",
+        "text": "https://nndl.github.io/ ",
+        "bbox": [
+            65,
+            942,
+            231,
+            959
+        ],
+        "page_idx": 6
+    },
+    {
+        "type": "text",
+        "text": "其中 $\\pmb { Z } = [ \\pmb { z } ^ { ( 1 ) } , \\cdots , \\pmb { z } ^ { ( N ) } ]$ 表示所有训练样本的编码， $\\rho ( \\boldsymbol { Z } )$ 为稀疏性度量函数， $\\mathbf { \\Delta } _ { W }$ 表示自编码器中的参数",
+        "bbox": [
+            63,
+            72,
+            762,
+            116
+        ],
+        "page_idx": 7
+    },
+    {
+        "type": "text",
+        "text": "稀疏性度量函数 $\\rho ( \\boldsymbol { Z } )$ 可以使用公式(9.13)～公式(9.15)中的稀疏性定义，分别计算每个编码 $\\pmb { z } ^ { ( n ) }$ 的稀疏度，再进行求和．此外， $\\rho ( \\boldsymbol { Z } )$ 还可以定义为一组训练样本中每一个神经元激活的概率",
+        "bbox": [
+            63,
+            125,
+            762,
+            191
+        ],
+        "page_idx": 7
+    },
+    {
+        "type": "text",
+        "text": "给定??个训练样本，隐藏层第??个神经元平均活性值为",
+        "bbox": [
+            105,
+            199,
+            584,
+            219
+        ],
+        "page_idx": 7
+    },
+    {
+        "type": "equation",
+        "text": "$$\n\\hat {\\rho} _ {j} = \\frac {1}{N} \\sum_ {n = 1} ^ {N} z _ {j} ^ {(n)}, \\tag {9.24}\n$$",
+        "text_format": "latex",
+        "bbox": [
+            338,
+            233,
+            762,
+            281
+        ],
+        "page_idx": 7
+    },
+    {
+        "type": "text",
+        "text": "其中 $\\hat { \\rho } _ { j }$ 可以近似地看作第 $j$ 个神经元激活的概率．我们希望 $\\hat { \\rho } _ { j }$ 接近于一个事先给定的值 $\\rho ^ { * }$ ，比如0.05，可以通过KL距离来衡量 $\\hat { \\rho } _ { j }$ 和 $\\rho ^ { * }$ 的差异，即",
+        "bbox": [
+            63,
+            297,
+            762,
+            342
+        ],
+        "page_idx": 7
+    },
+    {
+        "type": "equation",
+        "text": "$$\n\\mathrm{KL} (\\rho^ {*} | | \\hat {\\rho} _ {j}) = \\rho^ {*} \\log \\frac {\\rho^ {*}}{\\hat {\\rho} _ {j}} + (1 - \\rho^ {*}) \\log \\frac {1 - \\rho^ {*}}{1 - \\hat {\\rho} _ {j}}. \\tag {9.25}\n$$",
+        "text_format": "latex",
+        "bbox": [
+            216,
+            357,
+            762,
+            397
+        ],
+        "page_idx": 7
+    },
+    {
+        "type": "text",
+        "text": "如果 $\\hat { \\rho } _ { j } = \\rho ^ { * }$ ，则 $\\mathrm { K L } ( \\rho ^ { * } | | \\hat { \\rho } _ { j } ) = 0$ ",
+        "bbox": [
+            65,
+            410,
+            342,
+            431
+        ],
+        "page_idx": 7
+    },
+    {
+        "type": "text",
+        "text": "稀疏性度量函数定义为",
+        "bbox": [
+            105,
+            436,
+            313,
+            455
+        ],
+        "page_idx": 7
+    },
+    {
+        "type": "equation",
+        "text": "$$\n\\rho (\\mathbf {Z}) = \\sum_ {j = 1} ^ {p} \\mathrm{KL} (\\rho^ {*} | | \\hat {\\rho} _ {j}). \\tag {9.26}\n$$",
+        "text_format": "latex",
+        "bbox": [
+            313,
+            470,
+            762,
+            517
+        ],
+        "page_idx": 7
+    },
+    {
+        "type": "text",
+        "text": "9.1.5 堆叠自编码器",
+        "text_level": 1,
+        "bbox": [
+            65,
+            544,
+            292,
+            565
+        ],
+        "page_idx": 7
+    },
+    {
+        "type": "text",
+        "text": "对于很多数据来说，仅使用两层神经网络的自编码器还不足以获取一种好的数据表示．为了获取更好的数据表示，我们可以使用更深层的神经网络．深层神经网络作为自编码器提取的数据表示一般会更加抽象，能够更好地捕捉到数据的语义信息．在实践中经常使用逐层堆叠的方式来训练一个深层的自编码器，称为堆叠自编码器（Stacked Auto-Encoder，SAE）．堆叠自编码器一般可以采用逐层训练（Layer-Wise Training）来学习网络参数 [Bengio et al., 2007]",
+        "bbox": [
+            63,
+            583,
+            762,
+            724
+        ],
+        "page_idx": 7
+    },
+    {
+        "type": "text",
+        "text": "9.1.6 降噪自编码器",
+        "text_level": 1,
+        "bbox": [
+            65,
+            750,
+            292,
+            770
+        ],
+        "page_idx": 7
+    },
+    {
+        "type": "text",
+        "text": "我们使用自编码器是为了得到有效的数据表示，而有效的数据表示除了具有最小重构错误或稀疏性等性质之外，还可以要求其具备其他性质，比如对数据部分损坏（Partial Destruction）的鲁棒性．高维数据（比如图像）一般都具有一定的信息冗余，比如我们可以根据一张部分破损的图像联想出其完整内容．因此，我们希望自编码器也能够从部分损坏的数据中得到有效的数据表示，并能够恢复出完整的原始信息",
+        "bbox": [
+            63,
+            789,
+            762,
+            928
+        ],
+        "page_idx": 7
+    },
+    {
+        "type": "header",
+        "text": "9.1 无监督特征学习",
+        "bbox": [
+            65,
+            27,
+            239,
+            41
+        ],
+        "page_idx": 7
+    },
+    {
+        "type": "header",
+        "text": "2021 年 5 月 18 日",
+        "bbox": [
+            426,
+            26,
+            586,
+            41
+        ],
+        "page_idx": 7
+    },
+    {
+        "type": "page_number",
+        "text": "220 ",
+        "bbox": [
+            911,
+            27,
+            945,
+            41
+        ],
+        "page_idx": 7
+    },
+    {
+        "type": "footer",
+        "text": "https://nndl.github.io/ ",
+        "bbox": [
+            65,
+            942,
+            231,
+            959
+        ],
+        "page_idx": 7
+    },
+    {
+        "type": "text",
+        "text": "降噪自编码器（Denoising Auto-Encoder）就是一种通过引入噪声来增加编码鲁棒性的自编码器[Vincent et al., 2008]．对于一个向量??，我们首先根据一个比例 $\\mu$ 随机将 $_ x$ 的一些维度的值设置为0，得到一个被损坏的向量??̃．然后将被损坏的向量??̃输入给自编码器得到编码??，并重构出无损的原始输入??",
+        "bbox": [
+            63,
+            74,
+            762,
+            165
+        ],
+        "page_idx": 8
+    },
+    {
+        "type": "text",
+        "text": "降噪自编码器的思想十分简单，通过引入噪声来学习更鲁棒性的数据编码，并提高模型的泛化能力．图9.3给出了自编码器和降噪自编码器的对比，其中 $f _ { \\theta }$ 为编码器， $g _ { \\theta ^ { \\prime } }$ 为解码器， $\\mathcal { L } (  { \\mathbf { { x } } } ,  { \\mathbf { { x } } } ^ { \\prime } )$ 为重构错误",
+        "bbox": [
+            63,
+            173,
+            762,
+            239
+        ],
+        "page_idx": 8
+    },
+    {
+        "type": "text",
+        "text": "损坏比例??一般不超过0.5．也可以使用其他的方法来损坏数据，比如引入高斯噪声",
+        "bbox": [
+            779,
+            122,
+            947,
+            193
+        ],
+        "page_idx": 8
+    },
+    {
+        "type": "image",
+        "img_path": "images/07812ec8ac64c887ae3abac7c0db824075fc1188928c685ea81b309b651825bb.jpg",
+        "image_caption": [
+            "图9.3 自编码器和降噪自编码器"
+        ],
+        "image_footnote": [],
+        "content": "",
+        "bbox": [
+            138,
+            263,
+            699,
+            456
+        ],
+        "page_idx": 8
+    },
+    {
+        "type": "text",
+        "text": "9.2 概率密度估计 ",
+        "text_level": 1,
+        "bbox": [
+            289,
+            509,
+            537,
+            532
+        ],
+        "page_idx": 8
+    },
+    {
+        "type": "text",
+        "text": "概率密度估计（Probabilistic Density Estimation），简称密度估计（Den-sity Estimation），是基于一些观测样本来估计一个随机变量的概率密度函数密度估计在数据建模、机器学习中使用广泛",
+        "bbox": [
+            63,
+            558,
+            762,
+            623
+        ],
+        "page_idx": 8
+    },
+    {
+        "type": "text",
+        "text": "密度估计方法可以分为两类：参数密度估计和非参数密度估计",
+        "bbox": [
+            105,
+            631,
+            651,
+            651
+        ],
+        "page_idx": 8
+    },
+    {
+        "type": "text",
+        "text": "9.2.1 参数密度估计",
+        "text_level": 1,
+        "bbox": [
+            65,
+            679,
+            289,
+            699
+        ],
+        "page_idx": 8
+    },
+    {
+        "type": "text",
+        "text": "参数密度估计（Parametric Density Estimation）是根据先验知识假设随机变量服从某种分布，然后通过训练样本来估计分布的参数",
+        "bbox": [
+            65,
+            719,
+            762,
+            761
+        ],
+        "page_idx": 8
+    },
+    {
+        "type": "text",
+        "text": "令 $\\mathcal { D } = \\{ \\pmb { x } ^ { ( n ) } \\} _ { n = 1 } ^ { N }$ 为从某个未知分布中独立抽取的??个训练样本，假设这些样本服从一个概率分布函数 $p ( \\pmb { x } ; \\theta )$ ，其对数似然函数为",
+        "bbox": [
+            63,
+            770,
+            762,
+            812
+        ],
+        "page_idx": 8
+    },
+    {
+        "type": "equation",
+        "text": "$$\n\\log p (\\mathcal {D}; \\theta) = \\sum_ {n = 1} ^ {N} \\log p (\\boldsymbol {x} ^ {(n)}; \\theta). \\tag {9.27}\n$$",
+        "text_format": "latex",
+        "bbox": [
+            271,
+            829,
+            762,
+            877
+        ],
+        "page_idx": 8
+    },
+    {
+        "type": "text",
+        "text": "使用最大似然估计（Maximum Likelihood Estimation，MLE）来寻找参数",
+        "bbox": [
+            107,
+            896,
+            762,
+            913
+        ],
+        "page_idx": 8
+    },
+    {
+        "type": "header",
+        "text": "9.2 概率密度估计 ",
+        "bbox": [
+            65,
+            27,
+            222,
+            41
+        ],
+        "page_idx": 8
+    },
+    {
+        "type": "header",
+        "text": "2021 年 5 月 18 日",
+        "bbox": [
+            426,
+            26,
+            586,
+            41
+        ],
+        "page_idx": 8
+    },
+    {
+        "type": "page_number",
+        "text": "221 ",
+        "bbox": [
+            911,
+            27,
+            945,
+            41
+        ],
+        "page_idx": 8
+    },
+    {
+        "type": "footer",
+        "text": "https://nndl.github.io/ ",
+        "bbox": [
+            65,
+            942,
+            228,
+            958
+        ],
+        "page_idx": 8
+    },
+    {
+        "type": "text",
+        "text": "??使得 $\\log p ( \\mathcal { D } ; \\theta )$ 最大．这样参数估计问题就转化为最优化问题：",
+        "bbox": [
+            63,
+            74,
+            628,
+            92
+        ],
+        "page_idx": 9
+    },
+    {
+        "type": "equation",
+        "text": "$$\n\\theta^ {M L} = \\arg \\max _ {\\theta} \\sum_ {n = 1} ^ {N} \\log p (\\boldsymbol {x} ^ {(n)}; \\theta). \\tag {9.28}\n$$",
+        "text_format": "latex",
+        "bbox": [
+            266,
+            106,
+            764,
+            154
+        ],
+        "page_idx": 9
+    },
+    {
+        "type": "text",
+        "text": "9.2.1.1 正态分布",
+        "text_level": 1,
+        "bbox": [
+            65,
+            174,
+            231,
+            191
+        ],
+        "page_idx": 9
+    },
+    {
+        "type": "text",
+        "text": "假设样本 $\\boldsymbol { x } \\in \\mathbb { R } ^ { D }$ 服从正态分布",
+        "bbox": [
+            107,
+            199,
+            388,
+            219
+        ],
+        "page_idx": 9
+    },
+    {
+        "type": "equation",
+        "text": "$$\n\\mathcal {N} (\\boldsymbol {x} | \\boldsymbol {\\mu}, \\boldsymbol {\\Sigma}) = \\frac {1}{(2 \\pi) ^ {D / 2} | \\boldsymbol {\\Sigma} | ^ {1 / 2}} \\exp \\Big (- \\frac {1}{2} (\\boldsymbol {x} - \\boldsymbol {\\mu}) ^ {\\intercal} \\boldsymbol {\\Sigma} ^ {- 1} (\\boldsymbol {x} - \\boldsymbol {\\mu}) \\Big), \\tag {9.29}\n$$",
+        "text_format": "latex",
+        "bbox": [
+            130,
+            230,
+            762,
+            267
+        ],
+        "page_idx": 9
+    },
+    {
+        "type": "text",
+        "text": "其中 $\\mu$ 和??分别为正态分布的均值和方差",
+        "bbox": [
+            65,
+            278,
+            436,
+            298
+        ],
+        "page_idx": 9
+    },
+    {
+        "type": "text",
+        "text": "数据集 $\\mathcal { D } = \\{ \\pmb { x } ^ { ( n ) } \\} _ { n = 1 } ^ { N }$ 的对数似然函数为",
+        "bbox": [
+            107,
+            304,
+            466,
+            326
+        ],
+        "page_idx": 9
+    },
+    {
+        "type": "equation",
+        "text": "$$\n\\log p (\\mathcal {D} | \\boldsymbol {\\mu}, \\boldsymbol {\\Sigma}) = - \\frac {N}{2} \\log \\left((2 \\pi) ^ {D} | \\boldsymbol {\\Sigma} |\\right) - \\frac {1}{2} \\sum_ {n = 1} ^ {N} (\\boldsymbol {x} ^ {(n)} - \\boldsymbol {\\mu}) ^ {\\intercal} \\boldsymbol {\\Sigma} ^ {- 1} (\\boldsymbol {x} ^ {(n)} - \\boldsymbol {\\mu}). \\tag {9.30}\n$$",
+        "text_format": "latex",
+        "bbox": [
+            86,
+            339,
+            762,
+            386
+        ],
+        "page_idx": 9
+    },
+    {
+        "type": "text",
+        "text": "分别求上式关于 $\\mu , \\Sigma$ 的偏导数，并令其等于0．可得，",
+        "bbox": [
+            107,
+            402,
+            558,
+            421
+        ],
+        "page_idx": 9
+    },
+    {
+        "type": "equation",
+        "text": "$$\n\\boldsymbol {\\mu} ^ {M L} = \\frac {1}{N} \\sum_ {n = 1} ^ {N} \\boldsymbol {x} ^ {(n)}, \\tag {9.31}\n$$",
+        "text_format": "latex",
+        "bbox": [
+            228,
+            434,
+            762,
+            482
+        ],
+        "page_idx": 9
+    },
+    {
+        "type": "equation",
+        "text": "$$\n\\boldsymbol {\\Sigma} ^ {M L} = \\frac {1}{N} \\sum_ {n = 1} ^ {N} (\\boldsymbol {x} ^ {(n)} - \\boldsymbol {\\mu} ^ {M L}) (\\boldsymbol {x} ^ {(n)} - \\boldsymbol {\\mu} ^ {M L}) ^ {\\intercal}. \\tag {9.32}\n$$",
+        "text_format": "latex",
+        "bbox": [
+            228,
+            487,
+            762,
+            535
+        ],
+        "page_idx": 9
+    },
+    {
+        "type": "text",
+        "text": "9.2.1.2 多项分布",
+        "text_level": 1,
+        "bbox": [
+            65,
+            555,
+            233,
+            572
+        ],
+        "page_idx": 9
+    },
+    {
+        "type": "text",
+        "text": "假设样本服从??个状态的多项分布，令one-hot向量 ${ \\pmb x } \\in \\{ 0 , 1 \\} ^ { K }$ 来表示第??个状态，即 $x _ { k } = 1$ ，其余 $x _ { i , i \\neq k } = 0$ ．样本??的概率密度函数为",
+        "bbox": [
+            65,
+            582,
+            762,
+            626
+        ],
+        "page_idx": 9
+    },
+    {
+        "type": "equation",
+        "text": "$$\np (\\boldsymbol {x} | \\boldsymbol {\\mu}) = \\prod_ {k = 1} ^ {K} \\mu_ {k} ^ {x _ {k}}, \\tag {9.33}\n$$",
+        "text_format": "latex",
+        "bbox": [
+            331,
+            640,
+            762,
+            688
+        ],
+        "page_idx": 9
+    },
+    {
+        "type": "text",
+        "text": "其中 $\\mu _ { k }$ 为第??个状态的概率，并满足 $\\begin{array} { r } { \\sum _ { k = 1 } ^ { K } \\mu _ { k } = 1 } \\end{array}$ ",
+        "bbox": [
+            65,
+            702,
+            508,
+            727
+        ],
+        "page_idx": 9
+    },
+    {
+        "type": "text",
+        "text": "数据集 $\\mathcal { D } = \\{ \\pmb { x } ^ { ( n ) } \\} _ { n = 1 } ^ { N }$ 的对数似然函数为",
+        "bbox": [
+            105,
+            732,
+            466,
+            752
+        ],
+        "page_idx": 9
+    },
+    {
+        "type": "equation",
+        "text": "$$\n\\log p (\\mathcal {D} | \\boldsymbol {\\mu}) = \\sum_ {n = 1} ^ {N} \\sum_ {k = 1} ^ {K} x _ {k} ^ {(n)} \\log (\\mu_ {k}). \\tag {9.34}\n$$",
+        "text_format": "latex",
+        "bbox": [
+            262,
+            767,
+            762,
+            815
+        ],
+        "page_idx": 9
+    },
+    {
+        "type": "text",
+        "text": "多项分布的参数估计为约束优化问题．引入拉格朗日乘子??，将原问题转换为无约束优化问题",
+        "bbox": [
+            65,
+            832,
+            762,
+            874
+        ],
+        "page_idx": 9
+    },
+    {
+        "type": "equation",
+        "text": "$$\n\\max _ {\\mu , \\lambda} \\quad \\sum_ {n = 1} ^ {N} \\sum_ {k = 1} ^ {K} x _ {k} ^ {(n)} \\log (\\mu_ {k}) + \\lambda \\Big (\\sum_ {k = 1} ^ {K} \\mu_ {k} - 1 \\Big). \\tag {9.35}\n$$",
+        "text_format": "latex",
+        "bbox": [
+            218,
+            891,
+            762,
+            939
+        ],
+        "page_idx": 9
+    },
+    {
+        "type": "text",
+        "text": "多 项 分 布 参 见第D.2.2.1节",
+        "bbox": [
+            781,
+            582,
+            901,
+            616
+        ],
+        "page_idx": 9
+    },
+    {
+        "type": "text",
+        "text": "这里没有多项式系数",
+        "bbox": [
+            781,
+            732,
+            934,
+            746
+        ],
+        "page_idx": 9
+    },
+    {
+        "type": "text",
+        "text": "拉格朗日乘子参考参见第C.3节",
+        "bbox": [
+            781,
+            832,
+            947,
+            866
+        ],
+        "page_idx": 9
+    },
+    {
+        "type": "header",
+        "text": "9.2 概率密度估计 ",
+        "bbox": [
+            65,
+            27,
+            222,
+            41
+        ],
+        "page_idx": 9
+    },
+    {
+        "type": "header",
+        "text": "2021 年 5 月 18 日",
+        "bbox": [
+            426,
+            26,
+            586,
+            41
+        ],
+        "page_idx": 9
+    },
+    {
+        "type": "page_number",
+        "text": "222 ",
+        "bbox": [
+            911,
+            27,
+            947,
+            41
+        ],
+        "page_idx": 9
+    },
+    {
+        "type": "footer",
+        "text": "https://nndl.github.io/ ",
+        "bbox": [
+            65,
+            942,
+            231,
+            958
+        ],
+        "page_idx": 9
+    },
+    {
+        "type": "text",
+        "text": "分别求上式关于 $\\mu _ { k }$ , ??的偏导数，并令其等于0．可得，",
+        "bbox": [
+            65,
+            74,
+            523,
+            92
+        ],
+        "page_idx": 10
+    },
+    {
+        "type": "equation",
+        "text": "$$\n\\mu_ {k} ^ {M L} = \\frac {m _ {k}}{N}, \\quad 1 \\leq k \\leq K \\tag {9.36}\n$$",
+        "text_format": "latex",
+        "bbox": [
+            289,
+            105,
+            762,
+            137
+        ],
+        "page_idx": 10
+    },
+    {
+        "type": "text",
+        "text": "其中 ???? = ∑????=1 $\\begin{array} { r } { m _ { k } = \\sum _ { n = 1 } ^ { N } x _ { k } ^ { ( n ) } } \\end{array}$ ??(??)?? 为数据集中取值为第??个状态的样本数量",
+        "bbox": [
+            65,
+            147,
+            626,
+            174
+        ],
+        "page_idx": 10
+    },
+    {
+        "type": "text",
+        "text": "在实际应用中，参数密度估计一般存在以下问题：",
+        "bbox": [
+            107,
+            178,
+            537,
+            196
+        ],
+        "page_idx": 10
+    },
+    {
+        "type": "list",
+        "sub_type": "text",
+        "list_items": [
+            "（1） 模型选择问题：即如何选择数据分布的密度函数．实际数据的分布往往是非常复杂的，而不是简单的正态分布或多项分布",
+            "（2） 不可观测变量问题：即我们用来训练的样本只包含部分的可观测变量，还有一些非常关键的变量是无法观测的，这导致我们很难准确估计数据的真实分布",
+            "（3） 维度灾难问题：即高维数据的参数估计十分困难．随着维度的增加，估计参数所需要的样本数量指数增加．在样本不足时会出现过拟合"
+        ],
+        "bbox": [
+            65,
+            205,
+            762,
+            371
+        ],
+        "page_idx": 10
+    },
+    {
+        "type": "text",
+        "text": "9.2.2 非参数密度估计",
+        "text_level": 1,
+        "bbox": [
+            65,
+            397,
+            315,
+            419
+        ],
+        "page_idx": 10
+    },
+    {
+        "type": "text",
+        "text": "非参数密度估计（Nonparametric Density Estimation）是不假设数据服从某种分布，通过将样本空间划分为不同的区域并估计每个区域的概率来近似数据的概率密度函数",
+        "bbox": [
+            65,
+            438,
+            762,
+            504
+        ],
+        "page_idx": 10
+    },
+    {
+        "type": "text",
+        "text": "对于高维空间中的一个随机向量??，假设其服从一个未知分布 $p ( { \\pmb x } )$ ，则??落入空间中的小区域ℛ的概率为",
+        "bbox": [
+            65,
+            513,
+            762,
+            555
+        ],
+        "page_idx": 10
+    },
+    {
+        "type": "equation",
+        "text": "$$\nP = \\int_ {\\mathcal {R}} p (\\boldsymbol {x}) d \\boldsymbol {x}. \\tag {9.37}\n$$",
+        "text_format": "latex",
+        "bbox": [
+            340,
+            563,
+            762,
+            606
+        ],
+        "page_idx": 10
+    },
+    {
+        "type": "text",
+        "text": "给定?? 个训练样本 $\\mathcal { D } = \\{ \\pmb { x } ^ { ( n ) } \\} _ { n = 1 } ^ { N }$ ，落入区域ℛ的样本数量?? 服从二项分布：",
+        "bbox": [
+            105,
+            620,
+            762,
+            640
+        ],
+        "page_idx": 10
+    },
+    {
+        "type": "equation",
+        "text": "$$\nP _ {K} = \\binom {N} {K} P ^ {K} (1 - P) ^ {1 - K}, \\tag {9.38}\n$$",
+        "text_format": "latex",
+        "bbox": [
+            302,
+            651,
+            762,
+            696
+        ],
+        "page_idx": 10
+    },
+    {
+        "type": "text",
+        "text": "其中??/??的期望为 $\\mathbb { E } [ K / N ] = P$ ，方差为 $\\mathrm { v a r } ( K / N ) = P ( 1 - P ) / N$ ．当??非常大时，我们可以近似认为",
+        "bbox": [
+            65,
+            705,
+            762,
+            747
+        ],
+        "page_idx": 10
+    },
+    {
+        "type": "equation",
+        "text": "$$\nP \\approx \\frac {K}{N}. \\tag {9.39}\n$$",
+        "text_format": "latex",
+        "bbox": [
+            376,
+            758,
+            762,
+            792
+        ],
+        "page_idx": 10
+    },
+    {
+        "type": "text",
+        "text": "假设区域ℛ足够小，其内部的概率密度是相同的，则有",
+        "bbox": [
+            107,
+            806,
+            579,
+            823
+        ],
+        "page_idx": 10
+    },
+    {
+        "type": "equation",
+        "text": "$$\nP \\approx p (\\boldsymbol {x}) V, \\tag {9.40}\n$$",
+        "text_format": "latex",
+        "bbox": [
+            359,
+            843,
+            762,
+            862
+        ],
+        "page_idx": 10
+    },
+    {
+        "type": "text",
+        "text": "其中?? 为区域ℛ的体积．结合上述两个公式，得到",
+        "bbox": [
+            65,
+            879,
+            500,
+            897
+        ],
+        "page_idx": 10
+    },
+    {
+        "type": "equation",
+        "text": "$$\np (\\boldsymbol {x}) \\approx \\frac {K}{N V}. \\tag {9.41}\n$$",
+        "text_format": "latex",
+        "bbox": [
+            357,
+            908,
+            762,
+            942
+        ],
+        "page_idx": 10
+    },
+    {
+        "type": "text",
+        "text": "包含不可观测变量的密度估计问题一般需要使用EM算法，参见第11.2.2.1节．",
+        "bbox": [
+            781,
+            256,
+            947,
+            329
+        ],
+        "page_idx": 10
+    },
+    {
+        "type": "header",
+        "text": "9.2 概率密度估计 ",
+        "bbox": [
+            65,
+            27,
+            222,
+            41
+        ],
+        "page_idx": 10
+    },
+    {
+        "type": "header",
+        "text": "2021 年 5 月 18 日",
+        "bbox": [
+            426,
+            26,
+            586,
+            41
+        ],
+        "page_idx": 10
+    },
+    {
+        "type": "page_number",
+        "text": "223 ",
+        "bbox": [
+            911,
+            27,
+            947,
+            41
+        ],
+        "page_idx": 10
+    },
+    {
+        "type": "footer",
+        "text": "https://nndl.github.io/ ",
+        "bbox": [
+            65,
+            942,
+            233,
+            959
+        ],
+        "page_idx": 10
+    },
+    {
+        "type": "text",
+        "text": "根据公式(9.41)，要准确地估计 $p ( { \\pmb x } )$ ，需要尽量使得样本数量??足够大，区域体积?? 尽可能地小．但在具体应用中，样本数量一般是有限的，过小的区域会导致落入该区域的样本比较少，这样估计的概率密度就不太准确．因此，实践中非参数密度估计通常使用两种方式：1）固定区域大小??，统计落入不同区域的数量，这种方式包括直方图方法和核方法两种；2）改变区域大小以使得落入每个区域的样本数量为??，这种方式称为K近邻方法",
+        "bbox": [
+            63,
+            74,
+            762,
+            212
+        ],
+        "page_idx": 11
+    },
+    {
+        "type": "text",
+        "text": "9.2.2.1 直方图方法",
+        "text_level": 1,
+        "bbox": [
+            65,
+            229,
+            252,
+            247
+        ],
+        "page_idx": 11
+    },
+    {
+        "type": "text",
+        "text": "直方图方法（Histogram Method）是一种非常直观的估计连续变量密度函数的方法，可以表示为一种柱状图",
+        "bbox": [
+            65,
+            255,
+            762,
+            298
+        ],
+        "page_idx": 11
+    },
+    {
+        "type": "text",
+        "text": "以一维随机变量为例，首先将其取值范围分成??个连续的、不重叠的区间（bin），每个区间的宽度为 $\\Delta _ { m }$ ．给定?? 个训练样本 $\\mathcal { D } = \\{ x ^ { ( n ) } \\} _ { n = 1 } ^ { N }$ ，我们统计这些样本落入每个区间的数量 $K _ { m }$ ，然后将它们归一化为密度函数",
+        "bbox": [
+            63,
+            306,
+            762,
+            373
+        ],
+        "page_idx": 11
+    },
+    {
+        "type": "equation",
+        "text": "$$\np _ {m} = \\frac {K _ {m}}{N \\Delta_ {m}}, \\quad 1 \\leq m \\leq M \\tag {9.42}\n$$",
+        "text_format": "latex",
+        "bbox": [
+            283,
+            385,
+            762,
+            424
+        ],
+        "page_idx": 11
+    },
+    {
+        "type": "text",
+        "text": "其中区间宽度 $\\Delta _ { m }$ 通常设为相同的值Δ．直方图方法的关键问题是如何选取一个合适的区间宽度Δ．如果Δ太小，那么落入每个区间的样本数量会比较少，其估计的区间密度也具有很大的随机性．如果Δ太大，其估计的密度函数变得十分平滑，很难反映出真实的数据分布．图9.4给出了直方图密度估计的例子，其中蓝线表示真实的密度函数，红色的柱状图为直方图方法估计的密度",
+        "bbox": [
+            63,
+            436,
+            762,
+            551
+        ],
+        "page_idx": 11
+    },
+    {
+        "type": "chart",
+        "img_path": "images/2b96da3e64ea847ef1240f883195adffe6c1def0d02b4c2fd497c415a95ddb38.jpg",
+        "content": "| Bin Range | Frequency |\n| --------- | --------- |\n| 0 - 10    | 5         |\n| 10 - 20   | 15        |\n| 20 - 30   | 30        |\n| 30 - 40   | 45        |\n| 40 - 50   | 60        |\n| 50 - 60   | 75        |\n| 60 - 70   | 85        |\n| 70 - 80   | 90        |\n| 80 - 90   | 80        |\n| 90 - 100  | 65        |\n| 100 - 110 | 45        |\n| 110 - 120 | 25        |\n| 120 - 130 | 15        |\n| 130 - 140 | 5         |",
+        "chart_caption": [
+            "(a) 10 个区间（bin）"
+        ],
+        "chart_footnote": [],
+        "sub_type": "histogram",
+        "bbox": [
+            96,
+            580,
+            415,
+            696
+        ],
+        "page_idx": 11
+    },
+    {
+        "type": "chart",
+        "img_path": "images/214484caa20b2881c1322e3cb96087b40a6135ede6e41c82b16804b054f68596.jpg",
+        "content": "| Bin Range | Frequency |\n| --------- | --------- |\n| 0.0 - 0.1 | 1         |\n| 0.1 - 0.2 | 3         |\n| 0.2 - 0.3 | 5         |\n| 0.3 - 0.4 | 8         |\n| 0.4 - 0.5 | 12        |\n| 0.5 - 0.6 | 18        |\n| 0.6 - 0.7 | 25        |\n| 0.7 - 0.8 | 35        |\n| 0.8 - 0.9 | 45        |\n| 0.9 - 1.0 | 55        |\n| 1.0 - 1.1 | 65        |\n| 1.1 - 1.2 | 75        |\n| 1.2 - 1.3 | 85        |\n| 1.3 - 1.4 | 95        |\n| 1.4 - 1.5 | 105       |\n| 1.5 - 1.6 | 115       |\n| 1.6 - 1.7 | 125       |\n| 1.7 - 1.8 | 135       |\n| 1.8 - 1.9 | 145       |\n| 1.9 - 2.0 | 155       |\n| 2.0 - 2.1 | 165       |\n| 2.1 - 2.2 | 175       |\n| 2.2 - 2.3 | 185       |\n| 2.3 - 2.4 | 195       |\n| 2.4 - 2.5 | 205       |\n| 2.5 - 2.6 | 215       |\n| 2.6 - 2.7 | 225       |\n| 2.7 - 2.8 | 235       |\n| 2.8 - 2.9 | 245       |\n| 2.9 - 3.0 | 255       |\n| 3.0 - 3.1 | 265       |\n| 3.1 - 3.2 | 275       |\n| 3.2 - 3.3 | 285       |\n| 3.3 - 3.4 | 295       |\n| 3.4 - 3.5 | 305       |\n| 3.5 - 3.6 | 315       |\n| 3.6 - 3.7 | 325       |\n| 3.7 - 3.8 | 335       |\n| 3.8 - 3.9 | 345       |\n| 3.9 - 4.0 | 355       |\n| 4.0 - 4.1 | 365       |\n| 4.1 - 4.2 | 375       |\n| 4.2 - 4.3 | 385       |\n| 4.3 - 4.4 | 395       |\n| 4.4 - 4.5 | 405       |\n| 4.5 - 4.6 | 415       |\n| 4.6 - 4.7 | 425       |\n| 4.7 - 4.8 | 435       |\n| 4.8 - 4.9 | 445       |\n| 4.9 - 5.0 | 455       |\n| Note: The actual frequencies may vary due to the random nature of the data generation.)",
+        "chart_caption": [
+            "(b) 30 个区间（bin）",
+            "图9.4 直方图密度估计"
+        ],
+        "chart_footnote": [],
+        "sub_type": "histogram",
+        "bbox": [
+            418,
+            582,
+            735,
+            696
+        ],
+        "page_idx": 11
+    },
+    {
+        "type": "text",
+        "text": "直方图通常用来处理低维变量，可以非常快速地对数据的分布进行可视化，但其缺点是很难扩展到高维变量．假设一个??维的随机向量，如果每一维都划分为??个区间，那么整个空间的区间数量为 $M ^ { D }$ 个．直方图方法需要的样本数量会随着维度??的增加而指数增长，从而导致维度灾难（Curse of Dimensionality）问题．",
+        "bbox": [
+            65,
+            775,
+            766,
+            890
+        ],
+        "page_idx": 11
+    },
+    {
+        "type": "text",
+        "text": "Histogram 源 自 希 腊语histos（竖 立） 和gramma（描绘），由英国统计学家卡尔·皮尔逊于1895年提出",
+        "bbox": [
+            779,
+            255,
+            947,
+            348
+        ],
+        "page_idx": 11
+    },
+    {
+        "type": "header",
+        "text": "9.2 概率密度估计 ",
+        "bbox": [
+            65,
+            27,
+            222,
+            41
+        ],
+        "page_idx": 11
+    },
+    {
+        "type": "header",
+        "text": "2021 年 5 月 18 日",
+        "bbox": [
+            426,
+            26,
+            586,
+            41
+        ],
+        "page_idx": 11
+    },
+    {
+        "type": "page_number",
+        "text": "224 ",
+        "bbox": [
+            911,
+            27,
+            947,
+            41
+        ],
+        "page_idx": 11
+    },
+    {
+        "type": "footer",
+        "text": "https://nndl.github.io/ ",
+        "bbox": [
+            67,
+            942,
+            231,
+            959
+        ],
+        "page_idx": 11
+    },
+    {
+        "type": "text",
+        "text": "9.2.2.2 核方法",
+        "text_level": 1,
+        "bbox": [
+            65,
+            75,
+            214,
+            92
+        ],
+        "page_idx": 12
+    },
+    {
+        "type": "text",
+        "text": "核密度估计（Kernel Density Estimation），也叫 Parzen 窗方法，是一种直方图方法的改进",
+        "bbox": [
+            65,
+            103,
+            764,
+            143
+        ],
+        "page_idx": 12
+    },
+    {
+        "type": "text",
+        "text": "假设ℛ为??维空间中的一个以点??为中心的“超立方体”，并定义核函数（Kernel Function）为",
+        "bbox": [
+            63,
+            153,
+            762,
+            196
+        ],
+        "page_idx": 12
+    },
+    {
+        "type": "equation",
+        "text": "$$\n\\phi \\left(\\frac {\\mathbf {z} - \\mathbf {x}}{H}\\right) = \\left\\{ \\begin{array}{l l} 1 & \\text {   if   } | z _ {i} - x _ {i} | <   \\frac {H}{2}, 1 \\leq i \\leq D \\\\ 0 & \\text {   else   } \\end{array} \\right. \\tag {9.43}\n$$",
+        "text_format": "latex",
+        "bbox": [
+            199,
+            210,
+            762,
+            273
+        ],
+        "page_idx": 12
+    },
+    {
+        "type": "text",
+        "text": "来表示一个样本 $z$ 是否落入该超立方体中，其中??为超立方体的边长，也称为核函数的宽度",
+        "bbox": [
+            65,
+            287,
+            762,
+            329
+        ],
+        "page_idx": 12
+    },
+    {
+        "type": "text",
+        "text": "给定?? 个训练样本 $\\mathcal { D } = \\{ \\pmb { x } ^ { ( n ) } \\} _ { n = 1 } ^ { N }$ ，落入区域ℛ 的样本数量?? 为",
+        "bbox": [
+            105,
+            337,
+            661,
+            360
+        ],
+        "page_idx": 12
+    },
+    {
+        "type": "equation",
+        "text": "$$\nK = \\sum_ {n = 1} ^ {N} \\phi \\left(\\frac {\\boldsymbol {x} ^ {(n)} - \\boldsymbol {x}}{H}\\right), \\tag {9.44}\n$$",
+        "text_format": "latex",
+        "bbox": [
+            315,
+            374,
+            762,
+            421
+        ],
+        "page_idx": 12
+    },
+    {
+        "type": "text",
+        "text": "则点??的密度估计为",
+        "bbox": [
+            65,
+            436,
+            252,
+            455
+        ],
+        "page_idx": 12
+    },
+    {
+        "type": "equation",
+        "text": "$$\np (\\boldsymbol {x}) = \\frac {K}{N H ^ {D}} = \\frac {1}{N H ^ {D}} \\sum_ {n = 1} ^ {N} \\phi \\left(\\frac {\\boldsymbol {x} ^ {(n)} - \\boldsymbol {x}}{H}\\right), \\tag {9.45}\n$$",
+        "text_format": "latex",
+        "bbox": [
+            237,
+            469,
+            762,
+            517
+        ],
+        "page_idx": 12
+    },
+    {
+        "type": "text",
+        "text": "其中 $H ^ { D }$ 表示超立方体ℛ的体积",
+        "bbox": [
+            65,
+            532,
+            357,
+            551
+        ],
+        "page_idx": 12
+    },
+    {
+        "type": "text",
+        "text": "除了超立方体的核函数之外，我们还可以选择更加平滑的核函数，比如高斯核函数：",
+        "bbox": [
+            65,
+            558,
+            762,
+            602
+        ],
+        "page_idx": 12
+    },
+    {
+        "type": "equation",
+        "text": "$$\n\\phi \\Big (\\frac {\\mathbf {z} - \\mathbf {x}}{H} \\Big) = \\frac {1}{(2 \\pi) ^ {1 / 2} H} \\exp \\Big (- \\frac {\\| \\mathbf {z} - \\mathbf {x} \\| ^ {2}}{2 H ^ {2}} \\Big), \\tag {9.46}\n$$",
+        "text_format": "latex",
+        "bbox": [
+            231,
+            614,
+            762,
+            654
+        ],
+        "page_idx": 12
+    },
+    {
+        "type": "text",
+        "text": "其中 $h ^ { 2 }$ 是高斯核函数的方差．这样，点??的密度估计为",
+        "bbox": [
+            65,
+            667,
+            542,
+            685
+        ],
+        "page_idx": 12
+    },
+    {
+        "type": "equation",
+        "text": "$$\np (\\boldsymbol {x}) = \\frac {1}{N} \\sum_ {n = 1} ^ {N} \\frac {1}{(2 \\pi) ^ {1 / 2} H} \\exp \\Big (- \\frac {\\| \\boldsymbol {z} - \\boldsymbol {x} \\| ^ {2}}{2 H ^ {2}} \\Big). \\tag {9.47}\n$$",
+        "text_format": "latex",
+        "bbox": [
+            224,
+            701,
+            762,
+            749
+        ],
+        "page_idx": 12
+    },
+    {
+        "type": "text",
+        "text": "9.2.2.3 K 近邻方法",
+        "text_level": 1,
+        "bbox": [
+            65,
+            770,
+            252,
+            789
+        ],
+        "page_idx": 12
+    },
+    {
+        "type": "text",
+        "text": "核密度估计方法中的核宽度是固定的，因此同一个宽度可能对高密度的区域过大，而对低密度的区域过小．一种更灵活的方式是设置一种可变宽度的区域，并使得落入每个区域中样本数量为固定的??．要估计点??的密度，首先找到一个以??为中心的球体，使得落入球体的样本数量为??，然后根据公式(9.41)，就可以计算出点??的密度．因为落入球体的样本也是离??最近的??个样本，所以这种方法称为K 近邻方法（K-Nearest Neighbor Method）",
+        "bbox": [
+            65,
+            798,
+            762,
+            938
+        ],
+        "page_idx": 12
+    },
+    {
+        "type": "text",
+        "text": "K近邻方法并不是一个严格的密度函数估计方法，参见习题9-5",
+        "bbox": [
+            779,
+            871,
+            947,
+            925
+        ],
+        "page_idx": 12
+    },
+    {
+        "type": "header",
+        "text": "9.2 概率密度估计 ",
+        "bbox": [
+            65,
+            27,
+            222,
+            41
+        ],
+        "page_idx": 12
+    },
+    {
+        "type": "header",
+        "text": "2021 年 5 月 18 日",
+        "bbox": [
+            426,
+            26,
+            586,
+            41
+        ],
+        "page_idx": 12
+    },
+    {
+        "type": "page_number",
+        "text": "",
+        "bbox": [
+            911,
+            27,
+            947,
+            41
+        ],
+        "page_idx": 12
+    },
+    {
+        "type": "footer",
+        "text": "https://nndl.github.io/ ",
+        "bbox": [
+            65,
+            942,
+            233,
+            959
+        ],
+        "page_idx": 12
+    },
+    {
+        "type": "text",
+        "text": "在K近邻方法中，??的选择也十分关键．如果??太小，无法有效地估计密度函数；而??太大也会使得局部的密度不准确，并且增加计算开销",
+        "bbox": [
+            65,
+            74,
+            764,
+            117
+        ],
+        "page_idx": 13
+    },
+    {
+        "type": "text",
+        "text": "K近邻方法也经常用于分类问题，称为K近邻分类器（K-Nearest NeighborClassifier）．当 $K = 1$ 时，也称为最近邻分类器（Nearest Neighbor Classifier）最近邻分类器的一个性质是，当 $N \\to \\infty$ 时，其分类错误率不超过最优分类器错误率的两倍 [Cover et al., 1967]",
+        "bbox": [
+            65,
+            125,
+            762,
+            216
+        ],
+        "page_idx": 13
+    },
+    {
+        "type": "text",
+        "text": "参见习题9-7",
+        "bbox": [
+            781,
+            196,
+            876,
+            210
+        ],
+        "page_idx": 13
+    },
+    {
+        "type": "text",
+        "text": "9.3 总结和深入阅读 ",
+        "text_level": 1,
+        "bbox": [
+            273,
+            256,
+            552,
+            281
+        ],
+        "page_idx": 13
+    },
+    {
+        "type": "text",
+        "text": "无监督学习是一种十分重要的机器学习方法．广义上讲，监督学习也可以看作一类特殊的无监督学习，即估计条件概率 $p ( y | \\pmb { x } )$ ．条件概率 $p ( y | \\pmb { x } )$ 可以通过贝叶斯公式转为估计概率 $p ( y )$ 和 $p ( { \\boldsymbol { x } } | { \\boldsymbol { y } } )$ ，并通过无监督密度估计来求解",
+        "bbox": [
+            65,
+            304,
+            762,
+            373
+        ],
+        "page_idx": 13
+    },
+    {
+        "type": "text",
+        "text": "无监督学习问题主要可以分为聚类、特征学习、密度估计等几种类型．关于聚类方面的内容，可以参考《机器学习》[周志华,2016]中的第9章",
+        "bbox": [
+            65,
+            380,
+            762,
+            422
+        ],
+        "page_idx": 13
+    },
+    {
+        "type": "text",
+        "text": "无监督特征学习是一种十分重要的表示学习方法．当一个监督学习任务的数据比较少时，可以通过大规模的无标注数据，学习到一种有效的数据表示，并有效提高监督学习的性能．关于无监督特征学习的内容，可以参考《机器学习》[周志华, 2016] 中的第 10 章和《Pattern Classification》[Duda et al., 2001] 中的第10章",
+        "bbox": [
+            63,
+            431,
+            762,
+            546
+        ],
+        "page_idx": 13
+    },
+    {
+        "type": "text",
+        "text": "概率密度估计方法可以分为两类：参数方法和非参数方法．参数方法是假设数据分布服从某种参数化的模型．我们在本书的后面章节会陆续介绍更多的参数密度估计模型．在第11章中，我们通过概率图模型介绍更一般的参数密度估计方法，包括含隐变量的参数估计方法．当估计出一个数据分布的参数化模型后，我们可以根据这个模型来生成数据，因此这些模型也称为生成模型．第12章介绍两种比较复杂的生成模型：玻尔兹曼机和深度信念网络．第13章介绍两种深度生成模型：变分自编码器和对抗生成网络．第15章介绍几种序列数据的生成模型",
+        "bbox": [
+            63,
+            555,
+            762,
+            716
+        ],
+        "page_idx": 13
+    },
+    {
+        "type": "text",
+        "text": "关于非参数密度估计方法的一般性介绍可以参考文献[Duda et al.,2001]和[Bishop, 2007]，理论性介绍可以参考 [Devroye et al., 1985]",
+        "bbox": [
+            65,
+            726,
+            762,
+            770
+        ],
+        "page_idx": 13
+    },
+    {
+        "type": "text",
+        "text": "目前，无监督学习并没有像监督学习那样取得广泛的成功，其主要原因在于无监督学习缺少有效的客观评价方法，导致很难衡量一个无监督学习方法的好坏．无监督学习的好坏通常需要代入到下游任务中进行验证",
+        "bbox": [
+            65,
+            777,
+            762,
+            843
+        ],
+        "page_idx": 13
+    },
+    {
+        "type": "header",
+        "text": "9.3 总结和深入阅读",
+        "bbox": [
+            67,
+            27,
+            241,
+            43
+        ],
+        "page_idx": 13
+    },
+    {
+        "type": "header",
+        "text": "2021 年 5 月 18 日",
+        "bbox": [
+            426,
+            26,
+            586,
+            41
+        ],
+        "page_idx": 13
+    },
+    {
+        "type": "page_number",
+        "text": "",
+        "bbox": [
+            911,
+            27,
+            947,
+            41
+        ],
+        "page_idx": 13
+    },
+    {
+        "type": "footer",
+        "text": "https://nndl.github.io/ ",
+        "bbox": [
+            67,
+            942,
+            231,
+            959
+        ],
+        "page_idx": 13
+    },
+    {
+        "type": "text",
+        "text": "习题",
+        "text_level": 1,
+        "bbox": [
+            384,
+            78,
+            447,
+            102
+        ],
+        "page_idx": 14
+    },
+    {
+        "type": "text",
+        "text": "习题9-1 分析主成分分析为什么具有数据降噪能力？",
+        "bbox": [
+            67,
+            131,
+            527,
+            151
+        ],
+        "page_idx": 14
+    },
+    {
+        "type": "text",
+        "text": "习题9-2 证明对于??个样本（样本维数 $D > N \\}$ ）组成的数据集，主成分分析的有效投影子空间不超过?? − 1维",
+        "bbox": [
+            65,
+            157,
+            762,
+            199
+        ],
+        "page_idx": 14
+    },
+    {
+        "type": "text",
+        "text": "习题9-3 对于一个二分类问题，试举例分析什么样的数据分布会使得主成分分析得到的特征反而会使得分类性能下降",
+        "bbox": [
+            65,
+            207,
+            762,
+            250
+        ],
+        "page_idx": 14
+    },
+    {
+        "type": "text",
+        "text": "习题9-4 若数据矩阵 $X ^ { \\prime } = X - { \\bar { X } }$ ，则对 $\\pmb { X } ^ { \\prime }$ 奇异值分解 $\\pmb { X } ^ { \\prime } = \\pmb { U } \\pmb { \\Sigma } \\pmb { V }$ ，则??为主成分分析的投影矩阵",
+        "bbox": [
+            65,
+            256,
+            762,
+            298
+        ],
+        "page_idx": 14
+    },
+    {
+        "type": "text",
+        "text": "习题9-5 举例说明，K近邻方法估计的密度函数不是严格的概率密度函数，其在整个空间上的积分不等于1",
+        "bbox": [
+            65,
+            306,
+            762,
+            349
+        ],
+        "page_idx": 14
+    },
+    {
+        "type": "text",
+        "text": "习题9-6 分析公式(9.14)和(9.15)来衡量稀疏性的效果",
+        "bbox": [
+            67,
+            356,
+            542,
+            374
+        ],
+        "page_idx": 14
+    },
+    {
+        "type": "text",
+        "text": "习题9-7 对于一个??类的分类问题，使用K近邻方法估计每个类 $c \\left( 1 \\leq c \\leq C \\right)$ 的密度函数 $p ( { \\boldsymbol { x } } | { \\boldsymbol { c } } )$ ，并使用贝叶斯公式计算每个类的后验概率 $p ( c | \\pmb { x } )$ ",
+        "bbox": [
+            65,
+            383,
+            762,
+            427
+        ],
+        "page_idx": 14
+    },
+    {
+        "type": "text",
+        "text": "参考文献",
+        "text_level": 1,
+        "bbox": [
+            355,
+            459,
+            476,
+            484
+        ],
+        "page_idx": 14
+    },
+    {
+        "type": "list",
+        "sub_type": "ref_text",
+        "list_items": [
+            "周志华, 2016. 机器学习[M]. 北京: 清华大学出版社.",
+            "Bengio Y, Lamblin P, Popovici D, et al., 2007. Greedy layer-wise training of deep networks[C]// Advances in neural information processing systems. 153-160. ",
+            "Bishop C M, 2007. Pattern recognition and machine learning[M]. 5th edition. Springer. ",
+            "Cover T, Hart P, 1967. Nearest neighbor pattern classification[J]. IEEE transactions on information theory, 13(1):21-27. ",
+            "Devroye L, Gyorfi L, 1985. Nonparametric density estimation: The $L _ { 1 }$ view[M]. Wiley. ",
+            "Duda R O, Hart P E, Stork D G, 2001. Pattern classification[M]. 2nd edition. Wiley. ",
+            "Hinton G E, Sejnowski T J, Poggio T A, 1999. Unsupervised learning: foundations of neural computation[M]. MIT press. ",
+            "Olshausen B A, et al., 1996. Emergence of simple-cell receptive field properties by learning a sparse code for natural images[J]. Nature, 381(6583):607-609. ",
+            "Vincent P, Larochelle H, Bengio Y, et al., 2008. Extracting and composing robust features with denoising autoencoders[C]//Proceedings of the International Conference on Machine Learning. 1096-1103. "
+        ],
+        "bbox": [
+            63,
+            507,
+            762,
+            787
+        ],
+        "page_idx": 14
+    },
+    {
+        "type": "header",
+        "text": "参考文献",
+        "bbox": [
+            67,
+            27,
+            147,
+            41
+        ],
+        "page_idx": 14
+    },
+    {
+        "type": "header",
+        "text": "2021 年 5 月 18 日",
+        "bbox": [
+            426,
+            26,
+            588,
+            41
+        ],
+        "page_idx": 14
+    },
+    {
+        "type": "page_number",
+        "text": "",
+        "bbox": [
+            911,
+            27,
+            947,
+            41
+        ],
+        "page_idx": 14
+    },
+    {
+        "type": "footer",
+        "text": "https://nndl.github.io/ ",
+        "bbox": [
+            67,
+            942,
+            231,
+            959
+        ],
+        "page_idx": 14
+    }
+]

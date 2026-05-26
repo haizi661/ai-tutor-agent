@@ -825,7 +825,16 @@ def _render_answer_html(
         clean_line, refs = _extract_media_refs(stripped, media_cards_by_ref)
         line_block = ""
         if clean_line:
-            if _is_formula_line(clean_line):
+            heading_match = re.match(r"^(#{1,6})\s+(.+)$", clean_line)
+            bullet_match = re.match(r"^[-*]\s+(.+)$", clean_line)
+            if heading_match:
+                level = min(len(heading_match.group(1)) + 1, 6)
+                rendered_line = _render_answer_line(heading_match.group(2), media_labels_by_ref, refs)
+                line_block = f"<h{level}>{rendered_line}</h{level}>"
+            elif bullet_match:
+                rendered_line = _render_answer_line(bullet_match.group(1), media_labels_by_ref, refs)
+                line_block = f"<ul><li>{rendered_line}</li></ul>"
+            elif _is_formula_line(clean_line):
                 latex = _normalize_latex_text(clean_line)
                 formula_ref = _find_media_ref_for_formula(latex, formula_refs_by_latex, used_refs)
                 if formula_ref:
@@ -1247,6 +1256,16 @@ def _render_answer_line(line: str, media_labels_by_ref: dict[str, str], refs: li
     return _render_text_with_inline_math(cleaned)
 
 
+def _render_plain_markdown_text(text: str) -> str:
+    if not text:
+        return ""
+    escaped = html.escape(text)
+    escaped = re.sub(r"`([^`]+)`", r"<code>\1</code>", escaped)
+    escaped = re.sub(r"\*\*(.+?)\*\*", r"<strong>\1</strong>", escaped)
+    escaped = re.sub(r"(?<!\*)\*(?!\*)(.+?)(?<!\*)\*(?!\*)", r"<em>\1</em>", escaped)
+    return escaped
+
+
 def _render_text_with_inline_math(text: str) -> str:
     if not text:
         return ""
@@ -1258,7 +1277,7 @@ def _render_text_with_inline_math(text: str) -> str:
     for match in pattern.finditer(text):
         start, end = match.span(1)
         if start > last_end:
-            parts.append(html.escape(text[last_end:start]))
+            parts.append(_render_plain_markdown_text(text[last_end:start]))
         latex = (
             match.group(2)
             or match.group(3)
@@ -1270,7 +1289,7 @@ def _render_text_with_inline_math(text: str) -> str:
         parts.append(rendered if rendered else html.escape(match.group(1)))
         last_end = end
     if last_end < len(text):
-        parts.append(html.escape(text[last_end:]))
+        parts.append(_render_plain_markdown_text(text[last_end:]))
     return "".join(parts)
 
 

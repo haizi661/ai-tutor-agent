@@ -1,0 +1,4426 @@
+[
+    [
+        {
+            "type": "header",
+            "bbox": [
+                0.141,
+                0.058,
+                0.191,
+                0.069
+            ],
+            "angle": 0,
+            "content": null
+        },
+        {
+            "type": "header",
+            "bbox": [
+                0.304,
+                0.056,
+                0.693,
+                0.071
+            ],
+            "angle": 0,
+            "content": null
+        },
+        {
+            "type": "header",
+            "bbox": [
+                0.806,
+                0.059,
+                0.858,
+                0.069
+            ],
+            "angle": 0,
+            "content": null
+        },
+        {
+            "type": "title",
+            "bbox": [
+                0.383,
+                0.099,
+                0.611,
+                0.12
+            ],
+            "angle": 0,
+            "content": null
+        },
+        {
+            "type": "text",
+            "bbox": [
+                0.137,
+                0.134,
+                0.862,
+                0.21
+            ],
+            "angle": 0,
+            "content": null,
+            "merge_prev": false
+        },
+        {
+            "type": "title",
+            "bbox": [
+                0.139,
+                0.232,
+                0.287,
+                0.249
+            ],
+            "angle": 0,
+            "content": null
+        },
+        {
+            "type": "text",
+            "bbox": [
+                0.137,
+                0.26,
+                0.859,
+                0.296
+            ],
+            "angle": 0,
+            "content": null,
+            "merge_prev": false
+        },
+        {
+            "type": "text",
+            "bbox": [
+                0.137,
+                0.299,
+                0.86,
+                0.47
+            ],
+            "angle": 0,
+            "content": null,
+            "merge_prev": false
+        },
+        {
+            "type": "chart",
+            "bbox": [
+                0.26,
+                0.481,
+                0.753,
+                0.606
+            ],
+            "angle": 0,
+            "content": "| 数据类型   | 百分比     |\n| ---------- | ---------- |\n| 训练数据   | 40%        |\n| 测试数据   | 94.28%     |",
+            "sub_type": "bar"
+        },
+        {
+            "type": "image_caption",
+            "bbox": [
+                0.362,
+                0.629,
+                0.637,
+                0.645
+            ],
+            "angle": 0,
+            "content": null
+        },
+        {
+            "type": "text",
+            "bbox": [
+                0.137,
+                0.667,
+                0.86,
+                0.779
+            ],
+            "angle": 0,
+            "content": null,
+            "merge_prev": false
+        },
+        {
+            "type": "text",
+            "bbox": [
+                0.137,
+                0.784,
+                0.859,
+                0.838
+            ],
+            "angle": 0,
+            "content": null,
+            "merge_prev": false
+        },
+        {
+            "type": "text",
+            "bbox": [
+                0.137,
+                0.842,
+                0.859,
+                0.897
+            ],
+            "angle": 0,
+            "content": null,
+            "merge_prev": false
+        },
+        {
+            "type": "page_number",
+            "bbox": [
+                0.484,
+                0.924,
+                0.514,
+                0.936
+            ],
+            "angle": 0,
+            "content": null
+        },
+        {
+            "type": "ocr_text",
+            "bbox": [
+                0.14,
+                0.057,
+                0.194,
+                0.071
+            ],
+            "text": "",
+            "score": 1.0
+        },
+        {
+            "type": "ocr_text",
+            "bbox": [
+                0.806,
+                0.057,
+                0.86,
+                0.073
+            ],
+            "text": "",
+            "score": 1.0
+        },
+        {
+            "type": "ocr_text",
+            "bbox": [
+                0.483,
+                0.923,
+                0.517,
+                0.94
+            ],
+            "text": "",
+            "score": 1.0
+        },
+        {
+            "type": "ocr_text",
+            "bbox": [
+                0.304,
+                0.055,
+                0.695,
+                0.072
+            ],
+            "text": "",
+            "score": 1.0
+        },
+        {
+            "type": "ocr_text",
+            "bbox": [
+                0.385,
+                0.098,
+                0.614,
+                0.121
+            ],
+            "text": "",
+            "score": 1.0
+        },
+        {
+            "type": "ocr_text",
+            "bbox": [
+                0.178,
+                0.136,
+                0.858,
+                0.15
+            ],
+            "text": "",
+            "score": 1.0
+        },
+        {
+            "type": "ocr_text",
+            "bbox": [
+                0.142,
+                0.155,
+                0.859,
+                0.171
+            ],
+            "text": "",
+            "score": 1.0
+        },
+        {
+            "type": "ocr_text",
+            "bbox": [
+                0.142,
+                0.175,
+                0.86,
+                0.189
+            ],
+            "text": "",
+            "score": 1.0
+        },
+        {
+            "type": "ocr_text",
+            "bbox": [
+                0.142,
+                0.194,
+                0.842,
+                0.209
+            ],
+            "text": "",
+            "score": 1.0
+        },
+        {
+            "type": "ocr_text",
+            "bbox": [
+                0.139,
+                0.232,
+                0.287,
+                0.25
+            ],
+            "text": "",
+            "score": 1.0
+        },
+        {
+            "type": "ocr_text",
+            "bbox": [
+                0.178,
+                0.262,
+                0.858,
+                0.276
+            ],
+            "text": "",
+            "score": 1.0
+        },
+        {
+            "type": "ocr_text",
+            "bbox": [
+                0.142,
+                0.281,
+                0.733,
+                0.295
+            ],
+            "text": "",
+            "score": 1.0
+        },
+        {
+            "type": "ocr_text",
+            "bbox": [
+                0.177,
+                0.299,
+                0.86,
+                0.315
+            ],
+            "text": "",
+            "score": 1.0
+        },
+        {
+            "type": "ocr_text",
+            "bbox": [
+                0.141,
+                0.319,
+                0.858,
+                0.335
+            ],
+            "text": "",
+            "score": 1.0
+        },
+        {
+            "type": "ocr_text",
+            "bbox": [
+                0.143,
+                0.339,
+                0.858,
+                0.353
+            ],
+            "text": "",
+            "score": 1.0
+        },
+        {
+            "type": "ocr_text",
+            "bbox": [
+                0.143,
+                0.359,
+                0.858,
+                0.373
+            ],
+            "text": "",
+            "score": 1.0
+        },
+        {
+            "type": "ocr_text",
+            "bbox": [
+                0.142,
+                0.379,
+                0.859,
+                0.392
+            ],
+            "text": "",
+            "score": 1.0
+        },
+        {
+            "type": "ocr_text",
+            "bbox": [
+                0.14,
+                0.397,
+                0.859,
+                0.413
+            ],
+            "text": "",
+            "score": 1.0
+        },
+        {
+            "type": "ocr_text",
+            "bbox": [
+                0.141,
+                0.416,
+                0.859,
+                0.432
+            ],
+            "text": "",
+            "score": 1.0
+        },
+        {
+            "type": "ocr_text",
+            "bbox": [
+                0.143,
+                0.437,
+                0.858,
+                0.451
+            ],
+            "text": "",
+            "score": 1.0
+        },
+        {
+            "type": "ocr_text",
+            "bbox": [
+                0.14,
+                0.455,
+                0.328,
+                0.47
+            ],
+            "text": "",
+            "score": 1.0
+        },
+        {
+            "type": "ocr_text",
+            "bbox": [
+                0.366,
+                0.63,
+                0.635,
+                0.645
+            ],
+            "text": "",
+            "score": 1.0
+        },
+        {
+            "type": "ocr_text",
+            "bbox": [
+                0.178,
+                0.669,
+                0.856,
+                0.681
+            ],
+            "text": "",
+            "score": 1.0
+        },
+        {
+            "type": "ocr_text",
+            "bbox": [
+                0.142,
+                0.687,
+                0.857,
+                0.701
+            ],
+            "text": "",
+            "score": 1.0
+        },
+        {
+            "type": "ocr_text",
+            "bbox": [
+                0.141,
+                0.707,
+                0.857,
+                0.72
+            ],
+            "text": "",
+            "score": 1.0
+        },
+        {
+            "type": "ocr_text",
+            "bbox": [
+                0.142,
+                0.726,
+                0.857,
+                0.74
+            ],
+            "text": "",
+            "score": 1.0
+        },
+        {
+            "type": "ocr_text",
+            "bbox": [
+                0.142,
+                0.745,
+                0.86,
+                0.76
+            ],
+            "text": "",
+            "score": 1.0
+        },
+        {
+            "type": "ocr_text",
+            "bbox": [
+                0.141,
+                0.764,
+                0.367,
+                0.779
+            ],
+            "text": "",
+            "score": 1.0
+        },
+        {
+            "type": "ocr_text",
+            "bbox": [
+                0.177,
+                0.785,
+                0.858,
+                0.799
+            ],
+            "text": "",
+            "score": 1.0
+        },
+        {
+            "type": "ocr_text",
+            "bbox": [
+                0.143,
+                0.804,
+                0.858,
+                0.818
+            ],
+            "text": "",
+            "score": 1.0
+        },
+        {
+            "type": "ocr_text",
+            "bbox": [
+                0.142,
+                0.824,
+                0.348,
+                0.838
+            ],
+            "text": "",
+            "score": 1.0
+        },
+        {
+            "type": "ocr_text",
+            "bbox": [
+                0.176,
+                0.842,
+                0.858,
+                0.857
+            ],
+            "text": "",
+            "score": 1.0
+        },
+        {
+            "type": "ocr_text",
+            "bbox": [
+                0.144,
+                0.862,
+                0.858,
+                0.876
+            ],
+            "text": "",
+            "score": 1.0
+        },
+        {
+            "type": "ocr_text",
+            "bbox": [
+                0.144,
+                0.882,
+                0.857,
+                0.896
+            ],
+            "text": "",
+            "score": 1.0
+        }
+    ],
+    [
+        {
+            "type": "header",
+            "bbox": [
+                0.141,
+                0.059,
+                0.191,
+                0.069
+            ],
+            "angle": 0,
+            "content": null
+        },
+        {
+            "type": "header",
+            "bbox": [
+                0.305,
+                0.056,
+                0.694,
+                0.071
+            ],
+            "angle": 0,
+            "content": null
+        },
+        {
+            "type": "header",
+            "bbox": [
+                0.807,
+                0.059,
+                0.858,
+                0.069
+            ],
+            "angle": 0,
+            "content": null
+        },
+        {
+            "type": "image_caption",
+            "bbox": [
+                0.296,
+                0.109,
+                0.406,
+                0.13
+            ],
+            "angle": 0,
+            "content": null
+        },
+        {
+            "type": "image",
+            "bbox": [
+                0.266,
+                0.137,
+                0.471,
+                0.186
+            ],
+            "angle": 0,
+            "content": "401",
+            "sub_type": "text_image"
+        },
+        {
+            "type": "image_caption",
+            "bbox": [
+                0.326,
+                0.204,
+                0.411,
+                0.226
+            ],
+            "angle": 0,
+            "content": null
+        },
+        {
+            "type": "image_caption",
+            "bbox": [
+                0.585,
+                0.109,
+                0.696,
+                0.13
+            ],
+            "angle": 0,
+            "content": null
+        },
+        {
+            "type": "image",
+            "bbox": [
+                0.544,
+                0.137,
+                0.752,
+                0.186
+            ],
+            "angle": 0,
+            "content": "8 1 6",
+            "sub_type": "text_image"
+        },
+        {
+            "type": "image_caption",
+            "bbox": [
+                0.598,
+                0.204,
+                0.708,
+                0.226
+            ],
+            "angle": 0,
+            "content": null
+        },
+        {
+            "type": "image_caption",
+            "bbox": [
+                0.389,
+                0.259,
+                0.61,
+                0.275
+            ],
+            "angle": 0,
+            "content": null
+        },
+        {
+            "type": "text",
+            "bbox": [
+                0.137,
+                0.3,
+                0.856,
+                0.336
+            ],
+            "angle": 0,
+            "content": null,
+            "merge_prev": false
+        },
+        {
+            "type": "title",
+            "bbox": [
+                0.14,
+                0.358,
+                0.306,
+                0.375
+            ],
+            "angle": 0,
+            "content": null
+        },
+        {
+            "type": "text",
+            "bbox": [
+                0.137,
+                0.387,
+                0.859,
+                0.442
+            ],
+            "angle": 0,
+            "content": null,
+            "merge_prev": false
+        },
+        {
+            "type": "text",
+            "bbox": [
+                0.137,
+                0.445,
+                0.86,
+                0.597
+            ],
+            "angle": 0,
+            "content": null,
+            "merge_prev": false
+        },
+        {
+            "type": "text",
+            "bbox": [
+                0.163,
+                0.618,
+                0.833,
+                0.674
+            ],
+            "angle": 0,
+            "content": null,
+            "merge_prev": false
+        },
+        {
+            "type": "text",
+            "bbox": [
+                0.137,
+                0.694,
+                0.859,
+                0.789
+            ],
+            "angle": 0,
+            "content": null,
+            "merge_prev": false
+        },
+        {
+            "type": "text",
+            "bbox": [
+                0.137,
+                0.792,
+                0.859,
+                0.886
+            ],
+            "angle": 0,
+            "content": null,
+            "merge_prev": false
+        },
+        {
+            "type": "page_number",
+            "bbox": [
+                0.484,
+                0.924,
+                0.514,
+                0.936
+            ],
+            "angle": 0,
+            "content": null
+        },
+        {
+            "type": "ocr_text",
+            "bbox": [
+                0.14,
+                0.057,
+                0.194,
+                0.073
+            ],
+            "text": "",
+            "score": 1.0
+        },
+        {
+            "type": "ocr_text",
+            "bbox": [
+                0.805,
+                0.057,
+                0.859,
+                0.073
+            ],
+            "text": "",
+            "score": 1.0
+        },
+        {
+            "type": "ocr_text",
+            "bbox": [
+                0.482,
+                0.923,
+                0.517,
+                0.94
+            ],
+            "text": "",
+            "score": 1.0
+        },
+        {
+            "type": "ocr_text",
+            "bbox": [
+                0.305,
+                0.055,
+                0.695,
+                0.072
+            ],
+            "text": "",
+            "score": 1.0
+        },
+        {
+            "type": "ocr_text",
+            "bbox": [
+                0.393,
+                0.26,
+                0.608,
+                0.274
+            ],
+            "text": "",
+            "score": 1.0
+        },
+        {
+            "type": "ocr_text",
+            "bbox": [
+                0.178,
+                0.794,
+                0.858,
+                0.807
+            ],
+            "text": "",
+            "score": 1.0
+        },
+        {
+            "type": "ocr_text",
+            "bbox": [
+                0.142,
+                0.813,
+                0.858,
+                0.826
+            ],
+            "text": "",
+            "score": 1.0
+        },
+        {
+            "type": "ocr_text",
+            "bbox": [
+                0.142,
+                0.833,
+                0.859,
+                0.846
+            ],
+            "text": "",
+            "score": 1.0
+        },
+        {
+            "type": "ocr_text",
+            "bbox": [
+                0.141,
+                0.851,
+                0.859,
+                0.866
+            ],
+            "text": "",
+            "score": 1.0
+        },
+        {
+            "type": "ocr_text",
+            "bbox": [
+                0.142,
+                0.872,
+                0.858,
+                0.885
+            ],
+            "text": "",
+            "score": 1.0
+        },
+        {
+            "type": "ocr_text",
+            "bbox": [
+                0.139,
+                0.358,
+                0.307,
+                0.377
+            ],
+            "text": "",
+            "score": 1.0
+        },
+        {
+            "type": "ocr_text",
+            "bbox": [
+                0.142,
+                0.302,
+                0.856,
+                0.314
+            ],
+            "text": "",
+            "score": 1.0
+        },
+        {
+            "type": "ocr_text",
+            "bbox": [
+                0.143,
+                0.321,
+                0.84,
+                0.335
+            ],
+            "text": "",
+            "score": 1.0
+        },
+        {
+            "type": "ocr_text",
+            "bbox": [
+                0.178,
+                0.447,
+                0.858,
+                0.46
+            ],
+            "text": "",
+            "score": 1.0
+        },
+        {
+            "type": "ocr_text",
+            "bbox": [
+                0.142,
+                0.466,
+                0.858,
+                0.48
+            ],
+            "text": "",
+            "score": 1.0
+        },
+        {
+            "type": "ocr_text",
+            "bbox": [
+                0.141,
+                0.485,
+                0.858,
+                0.5
+            ],
+            "text": "",
+            "score": 1.0
+        },
+        {
+            "type": "ocr_text",
+            "bbox": [
+                0.142,
+                0.504,
+                0.857,
+                0.519
+            ],
+            "text": "",
+            "score": 1.0
+        },
+        {
+            "type": "ocr_text",
+            "bbox": [
+                0.142,
+                0.525,
+                0.856,
+                0.538
+            ],
+            "text": "",
+            "score": 1.0
+        },
+        {
+            "type": "ocr_text",
+            "bbox": [
+                0.142,
+                0.544,
+                0.857,
+                0.558
+            ],
+            "text": "",
+            "score": 1.0
+        },
+        {
+            "type": "ocr_text",
+            "bbox": [
+                0.141,
+                0.563,
+                0.858,
+                0.578
+            ],
+            "text": "",
+            "score": 1.0
+        },
+        {
+            "type": "ocr_text",
+            "bbox": [
+                0.14,
+                0.581,
+                0.207,
+                0.598
+            ],
+            "text": "",
+            "score": 1.0
+        },
+        {
+            "type": "ocr_text",
+            "bbox": [
+                0.178,
+                0.696,
+                0.857,
+                0.709
+            ],
+            "text": "",
+            "score": 1.0
+        },
+        {
+            "type": "ocr_text",
+            "bbox": [
+                0.142,
+                0.715,
+                0.858,
+                0.729
+            ],
+            "text": "",
+            "score": 1.0
+        },
+        {
+            "type": "ocr_text",
+            "bbox": [
+                0.142,
+                0.735,
+                0.857,
+                0.749
+            ],
+            "text": "",
+            "score": 1.0
+        },
+        {
+            "type": "ocr_text",
+            "bbox": [
+                0.142,
+                0.755,
+                0.86,
+                0.768
+            ],
+            "text": "",
+            "score": 1.0
+        },
+        {
+            "type": "ocr_text",
+            "bbox": [
+                0.143,
+                0.775,
+                0.84,
+                0.787
+            ],
+            "text": "",
+            "score": 1.0
+        },
+        {
+            "type": "ocr_text",
+            "bbox": [
+                0.178,
+                0.389,
+                0.857,
+                0.401
+            ],
+            "text": "",
+            "score": 1.0
+        },
+        {
+            "type": "ocr_text",
+            "bbox": [
+                0.142,
+                0.407,
+                0.857,
+                0.422
+            ],
+            "text": "",
+            "score": 1.0
+        },
+        {
+            "type": "ocr_text",
+            "bbox": [
+                0.143,
+                0.428,
+                0.577,
+                0.44
+            ],
+            "text": "",
+            "score": 1.0
+        },
+        {
+            "type": "ocr_text",
+            "bbox": [
+                0.293,
+                0.107,
+                0.409,
+                0.132
+            ],
+            "text": "",
+            "score": 1.0
+        },
+        {
+            "type": "ocr_text",
+            "bbox": [
+                0.583,
+                0.109,
+                0.699,
+                0.133
+            ],
+            "text": "",
+            "score": 1.0
+        },
+        {
+            "type": "ocr_text",
+            "bbox": [
+                0.594,
+                0.202,
+                0.713,
+                0.229
+            ],
+            "text": "",
+            "score": 1.0
+        },
+        {
+            "type": "ocr_text",
+            "bbox": [
+                0.322,
+                0.201,
+                0.416,
+                0.23
+            ],
+            "text": "",
+            "score": 1.0
+        },
+        {
+            "type": "ocr_text",
+            "bbox": [
+                0.167,
+                0.618,
+                0.833,
+                0.634
+            ],
+            "text": "",
+            "score": 1.0
+        },
+        {
+            "type": "ocr_text",
+            "bbox": [
+                0.167,
+                0.637,
+                0.831,
+                0.653
+            ],
+            "text": "",
+            "score": 1.0
+        },
+        {
+            "type": "ocr_text",
+            "bbox": [
+                0.164,
+                0.656,
+                0.201,
+                0.675
+            ],
+            "text": "",
+            "score": 1.0
+        }
+    ],
+    [
+        {
+            "type": "header",
+            "bbox": [
+                0.141,
+                0.058,
+                0.191,
+                0.069
+            ],
+            "angle": 0,
+            "content": null
+        },
+        {
+            "type": "header",
+            "bbox": [
+                0.305,
+                0.056,
+                0.694,
+                0.071
+            ],
+            "angle": 0,
+            "content": null
+        },
+        {
+            "type": "header",
+            "bbox": [
+                0.806,
+                0.059,
+                0.858,
+                0.069
+            ],
+            "angle": 0,
+            "content": null
+        },
+        {
+            "type": "text",
+            "bbox": [
+                0.137,
+                0.101,
+                0.86,
+                0.136
+            ],
+            "angle": 0,
+            "content": null,
+            "merge_prev": false
+        },
+        {
+            "type": "image",
+            "bbox": [
+                0.258,
+                0.146,
+                0.725,
+                0.358
+            ],
+            "angle": 0,
+            "content": "```mermaid\ngraph TD\n    A[\"源领域\"] --> B[\"特征提取器（网络）\"]\n    C[\"目标领域\"] --> D[\"特征提取器（网络）\"]\n    B --> E[\"特征\"]\n    D --> F[\"特征\"]\n    style A fill:#f9f,stroke:#333\n    style C fill:#f9f,stroke:#333\n    style B fill:#ccf,stroke:#333\n    style D fill:#ccf,stroke:#333\n    style E fill:#dfd,stroke:#333\n    style F fill:#dfd,stroke:#333\n    subgraph 源领域\n        G[\"401\"]\n    end\n    subgraph 目标领域\n        H[\"8 1 6\"]\n    end\n    G -.-> I[\"不同\"]\n    H -.-> I\n    I -.-> J[\"相同分布\"]\n    J -.-> K[\"特征\"]\n```",
+            "sub_type": "flowchart"
+        },
+        {
+            "type": "image_caption",
+            "bbox": [
+                0.344,
+                0.368,
+                0.655,
+                0.385
+            ],
+            "angle": 0,
+            "content": null
+        },
+        {
+            "type": "text",
+            "bbox": [
+                0.137,
+                0.404,
+                0.862,
+                0.499
+            ],
+            "angle": 0,
+            "content": null,
+            "merge_prev": false
+        },
+        {
+            "type": "text",
+            "bbox": [
+                0.163,
+                0.519,
+                0.676,
+                0.535
+            ],
+            "angle": 0,
+            "content": null,
+            "merge_prev": false
+        },
+        {
+            "type": "text",
+            "bbox": [
+                0.163,
+                0.538,
+                0.835,
+                0.573
+            ],
+            "angle": 0,
+            "content": null,
+            "merge_prev": false
+        },
+        {
+            "type": "text",
+            "bbox": [
+                0.137,
+                0.595,
+                0.86,
+                0.709
+            ],
+            "angle": 0,
+            "content": null,
+            "merge_prev": false
+        },
+        {
+            "type": "text",
+            "bbox": [
+                0.137,
+                0.712,
+                0.861,
+                0.883
+            ],
+            "angle": 0,
+            "content": null,
+            "merge_prev": false
+        },
+        {
+            "type": "text",
+            "bbox": [
+                0.173,
+                0.887,
+                0.859,
+                0.904
+            ],
+            "angle": 0,
+            "content": null,
+            "merge_prev": false
+        },
+        {
+            "type": "page_number",
+            "bbox": [
+                0.484,
+                0.924,
+                0.514,
+                0.936
+            ],
+            "angle": 0,
+            "content": null
+        },
+        {
+            "type": "inline_formula",
+            "bbox": [
+                0.377,
+                0.888,
+                0.399,
+                0.903
+            ],
+            "latex": "\\theta _ { p }",
+            "score": 0.8603
+        },
+        {
+            "type": "inline_formula",
+            "bbox": [
+                0.579,
+                0.888,
+                0.601,
+                0.902
+            ],
+            "latex": "\\theta _ { d }",
+            "score": 0.8627
+        },
+        {
+            "type": "inline_formula",
+            "bbox": [
+                0.782,
+                0.888,
+                0.806,
+                0.903
+            ],
+            "latex": "\\theta _ { f }",
+            "score": 0.8587
+        },
+        {
+            "type": "ocr_text",
+            "bbox": [
+                0.14,
+                0.057,
+                0.194,
+                0.071
+            ],
+            "text": "",
+            "score": 1.0
+        },
+        {
+            "type": "ocr_text",
+            "bbox": [
+                0.806,
+                0.057,
+                0.86,
+                0.073
+            ],
+            "text": "",
+            "score": 1.0
+        },
+        {
+            "type": "ocr_text",
+            "bbox": [
+                0.483,
+                0.923,
+                0.517,
+                0.94
+            ],
+            "text": "",
+            "score": 1.0
+        },
+        {
+            "type": "ocr_text",
+            "bbox": [
+                0.305,
+                0.055,
+                0.695,
+                0.072
+            ],
+            "text": "",
+            "score": 1.0
+        },
+        {
+            "type": "ocr_text",
+            "bbox": [
+                0.143,
+                0.102,
+                0.858,
+                0.116
+            ],
+            "text": "",
+            "score": 1.0
+        },
+        {
+            "type": "ocr_text",
+            "bbox": [
+                0.141,
+                0.121,
+                0.515,
+                0.135
+            ],
+            "text": "",
+            "score": 1.0
+        },
+        {
+            "type": "ocr_text",
+            "bbox": [
+                0.178,
+                0.714,
+                0.857,
+                0.726
+            ],
+            "text": "",
+            "score": 1.0
+        },
+        {
+            "type": "ocr_text",
+            "bbox": [
+                0.143,
+                0.733,
+                0.857,
+                0.746
+            ],
+            "text": "",
+            "score": 1.0
+        },
+        {
+            "type": "ocr_text",
+            "bbox": [
+                0.142,
+                0.752,
+                0.858,
+                0.766
+            ],
+            "text": "",
+            "score": 1.0
+        },
+        {
+            "type": "ocr_text",
+            "bbox": [
+                0.142,
+                0.772,
+                0.858,
+                0.786
+            ],
+            "text": "",
+            "score": 1.0
+        },
+        {
+            "type": "ocr_text",
+            "bbox": [
+                0.142,
+                0.791,
+                0.859,
+                0.805
+            ],
+            "text": "",
+            "score": 1.0
+        },
+        {
+            "type": "ocr_text",
+            "bbox": [
+                0.141,
+                0.81,
+                0.858,
+                0.825
+            ],
+            "text": "",
+            "score": 1.0
+        },
+        {
+            "type": "ocr_text",
+            "bbox": [
+                0.143,
+                0.83,
+                0.858,
+                0.844
+            ],
+            "text": "",
+            "score": 1.0
+        },
+        {
+            "type": "ocr_text",
+            "bbox": [
+                0.143,
+                0.85,
+                0.857,
+                0.863
+            ],
+            "text": "",
+            "score": 1.0
+        },
+        {
+            "type": "ocr_text",
+            "bbox": [
+                0.141,
+                0.869,
+                0.33,
+                0.882
+            ],
+            "text": "",
+            "score": 1.0
+        },
+        {
+            "type": "ocr_text",
+            "bbox": [
+                0.175,
+                0.404,
+                0.859,
+                0.42
+            ],
+            "text": "",
+            "score": 1.0
+        },
+        {
+            "type": "ocr_text",
+            "bbox": [
+                0.141,
+                0.423,
+                0.86,
+                0.439
+            ],
+            "text": "",
+            "score": 1.0
+        },
+        {
+            "type": "ocr_text",
+            "bbox": [
+                0.142,
+                0.444,
+                0.859,
+                0.459
+            ],
+            "text": "",
+            "score": 1.0
+        },
+        {
+            "type": "ocr_text",
+            "bbox": [
+                0.142,
+                0.464,
+                0.858,
+                0.478
+            ],
+            "text": "",
+            "score": 1.0
+        },
+        {
+            "type": "ocr_text",
+            "bbox": [
+                0.143,
+                0.484,
+                0.508,
+                0.497
+            ],
+            "text": "",
+            "score": 1.0
+        },
+        {
+            "type": "ocr_text",
+            "bbox": [
+                0.177,
+                0.596,
+                0.858,
+                0.611
+            ],
+            "text": "",
+            "score": 1.0
+        },
+        {
+            "type": "ocr_text",
+            "bbox": [
+                0.14,
+                0.615,
+                0.86,
+                0.631
+            ],
+            "text": "",
+            "score": 1.0
+        },
+        {
+            "type": "ocr_text",
+            "bbox": [
+                0.142,
+                0.635,
+                0.857,
+                0.649
+            ],
+            "text": "",
+            "score": 1.0
+        },
+        {
+            "type": "ocr_text",
+            "bbox": [
+                0.144,
+                0.655,
+                0.857,
+                0.669
+            ],
+            "text": "",
+            "score": 1.0
+        },
+        {
+            "type": "ocr_text",
+            "bbox": [
+                0.141,
+                0.673,
+                0.858,
+                0.688
+            ],
+            "text": "",
+            "score": 1.0
+        },
+        {
+            "type": "ocr_text",
+            "bbox": [
+                0.141,
+                0.693,
+                0.752,
+                0.708
+            ],
+            "text": "",
+            "score": 1.0
+        },
+        {
+            "type": "ocr_text",
+            "bbox": [
+                0.348,
+                0.369,
+                0.652,
+                0.383
+            ],
+            "text": "",
+            "score": 1.0
+        },
+        {
+            "type": "ocr_text",
+            "bbox": [
+                0.161,
+                0.518,
+                0.678,
+                0.536
+            ],
+            "text": "",
+            "score": 1.0
+        },
+        {
+            "type": "ocr_text",
+            "bbox": [
+                0.164,
+                0.538,
+                0.834,
+                0.554
+            ],
+            "text": "",
+            "score": 1.0
+        },
+        {
+            "type": "ocr_text",
+            "bbox": [
+                0.166,
+                0.558,
+                0.285,
+                0.573
+            ],
+            "text": "",
+            "score": 1.0
+        },
+        {
+            "type": "ocr_text",
+            "bbox": [
+                0.177,
+                0.888,
+                0.377,
+                0.903
+            ],
+            "text": "",
+            "score": 1.0
+        },
+        {
+            "type": "ocr_text",
+            "bbox": [
+                0.4,
+                0.888,
+                0.579,
+                0.903
+            ],
+            "text": "",
+            "score": 1.0
+        },
+        {
+            "type": "ocr_text",
+            "bbox": [
+                0.602,
+                0.888,
+                0.781,
+                0.903
+            ],
+            "text": "",
+            "score": 1.0
+        },
+        {
+            "type": "ocr_text",
+            "bbox": [
+                0.807,
+                0.888,
+                0.858,
+                0.903
+            ],
+            "text": "",
+            "score": 1.0
+        }
+    ],
+    [
+        {
+            "type": "header",
+            "bbox": [
+                0.141,
+                0.058,
+                0.191,
+                0.069
+            ],
+            "angle": 0,
+            "content": null
+        },
+        {
+            "type": "header",
+            "bbox": [
+                0.305,
+                0.056,
+                0.694,
+                0.071
+            ],
+            "angle": 0,
+            "content": null
+        },
+        {
+            "type": "header",
+            "bbox": [
+                0.807,
+                0.059,
+                0.858,
+                0.069
+            ],
+            "angle": 0,
+            "content": null
+        },
+        {
+            "type": "image",
+            "bbox": [
+                0.264,
+                0.104,
+                0.744,
+                0.297
+            ],
+            "angle": 0,
+            "content": "```mermaid\ngraph LR\n    A[\"图像\"] --> B[\"特征提取器\"]\n    B --> C[\"标签预测器\"]\n    C --> D[\"类的分布\"]\n    D --> E[\"4\"]\n    \n    subgraph 源领域（数据有标签）\n        F[\"401\"]\n        G[\"蓝色点\"]\n    end\n    \n    subgraph 目标领域（数据无标签）\n        H[\"16\"]\n        I[\"红色点\"]\n    end\n```",
+            "sub_type": "flowchart"
+        },
+        {
+            "type": "image_caption",
+            "bbox": [
+                0.248,
+                0.307,
+                0.747,
+                0.324
+            ],
+            "angle": 0,
+            "content": null
+        },
+        {
+            "type": "text",
+            "bbox": [
+                0.137,
+                0.349,
+                0.86,
+                0.404
+            ],
+            "angle": 0,
+            "content": null,
+            "merge_prev": false
+        },
+        {
+            "type": "equation",
+            "bbox": [
+                0.451,
+                0.419,
+                0.858,
+                0.442
+            ],
+            "angle": 0,
+            "content": "\\[\n\\boldsymbol {\\theta} _ {p} ^ {*} = \\min _ {\\boldsymbol {\\theta} _ {p}} L \\tag {13.1}\n\\]"
+        },
+        {
+            "type": "text",
+            "bbox": [
+                0.173,
+                0.453,
+                0.591,
+                0.469
+            ],
+            "angle": 0,
+            "content": null,
+            "merge_prev": false
+        },
+        {
+            "type": "equation",
+            "bbox": [
+                0.446,
+                0.484,
+                0.858,
+                0.507
+            ],
+            "angle": 0,
+            "content": "\\[\n\\boldsymbol {\\theta} _ {d} ^ {*} = \\min _ {\\boldsymbol {\\theta} _ {d}} L _ {d} \\tag {13.2}\n\\]"
+        },
+        {
+            "type": "text",
+            "bbox": [
+                0.137,
+                0.517,
+                0.86,
+                0.592
+            ],
+            "angle": 0,
+            "content": null,
+            "merge_prev": false
+        },
+        {
+            "type": "equation",
+            "bbox": [
+                0.429,
+                0.607,
+                0.858,
+                0.631
+            ],
+            "angle": 0,
+            "content": "\\[\n\\boldsymbol {\\theta} _ {f} ^ {*} = \\min _ {\\boldsymbol {\\theta} _ {f}} L - L _ {d} \\tag {13.3}\n\\]"
+        },
+        {
+            "type": "text",
+            "bbox": [
+                0.137,
+                0.641,
+                0.86,
+                0.774
+            ],
+            "angle": 0,
+            "content": null,
+            "merge_prev": false
+        },
+        {
+            "type": "text",
+            "bbox": [
+                0.137,
+                0.777,
+                0.86,
+                0.852
+            ],
+            "angle": 0,
+            "content": null,
+            "merge_prev": false
+        },
+        {
+            "type": "text",
+            "bbox": [
+                0.138,
+                0.855,
+                0.859,
+                0.891
+            ],
+            "angle": 0,
+            "content": null,
+            "merge_prev": false
+        },
+        {
+            "type": "page_number",
+            "bbox": [
+                0.484,
+                0.924,
+                0.514,
+                0.936
+            ],
+            "angle": 0,
+            "content": null
+        },
+        {
+            "type": "inline_formula",
+            "bbox": [
+                0.216,
+                0.389,
+                0.238,
+                0.404
+            ],
+            "latex": "\\theta _ { p }",
+            "score": 0.8772
+        },
+        {
+            "type": "inline_formula",
+            "bbox": [
+                0.629,
+                0.351,
+                0.652,
+                0.364
+            ],
+            "latex": "L _ { \\circ }",
+            "score": 0.8372
+        },
+        {
+            "type": "inline_formula",
+            "bbox": [
+                0.765,
+                0.37,
+                0.791,
+                0.384
+            ],
+            "latex": "L _ { d } { \\mathrm { . } }",
+            "score": 0.8684
+        },
+        {
+            "type": "inline_formula",
+            "bbox": [
+                0.305,
+                0.455,
+                0.327,
+                0.468
+            ],
+            "latex": "\\theta _ { d }",
+            "score": 0.8662
+        },
+        {
+            "type": "inline_formula",
+            "bbox": [
+                0.453,
+                0.456,
+                0.476,
+                0.469
+            ],
+            "latex": "L _ { d }",
+            "score": 0.863
+        },
+        {
+            "type": "inline_formula",
+            "bbox": [
+                0.216,
+                0.578,
+                0.239,
+                0.592
+            ],
+            "latex": "\\theta _ { f }",
+            "score": 0.8814
+        },
+        {
+            "type": "inline_formula",
+            "bbox": [
+                0.265,
+                0.578,
+                0.323,
+                0.591
+            ],
+            "latex": "L - L _ { d }",
+            "score": 0.9056
+        },
+        {
+            "type": "inline_formula",
+            "bbox": [
+                0.527,
+                0.558,
+                0.55,
+                0.572
+            ],
+            "latex": "L _ { d }",
+            "score": 0.8759
+        },
+        {
+            "type": "inline_formula",
+            "bbox": [
+                0.766,
+                0.558,
+                0.822,
+                0.572
+            ],
+            "latex": "L - L _ { d }",
+            "score": 0.9036
+        },
+        {
+            "type": "inline_formula",
+            "bbox": [
+                0.141,
+                0.682,
+                0.177,
+                0.696
+            ],
+            "latex": "- L _ { d }",
+            "score": 0.8834
+        },
+        {
+            "type": "inline_formula",
+            "bbox": [
+                0.303,
+                0.741,
+                0.327,
+                0.754
+            ],
+            "latex": "L _ { d }",
+            "score": 0.8903
+        },
+        {
+            "type": "inline_formula",
+            "bbox": [
+                0.742,
+                0.721,
+                0.765,
+                0.735
+            ],
+            "latex": "L _ { d }",
+            "score": 0.8856
+        },
+        {
+            "type": "ocr_text",
+            "bbox": [
+                0.14,
+                0.057,
+                0.194,
+                0.071
+            ],
+            "text": "",
+            "score": 1.0
+        },
+        {
+            "type": "ocr_text",
+            "bbox": [
+                0.805,
+                0.057,
+                0.859,
+                0.073
+            ],
+            "text": "",
+            "score": 1.0
+        },
+        {
+            "type": "ocr_text",
+            "bbox": [
+                0.483,
+                0.923,
+                0.517,
+                0.94
+            ],
+            "text": "",
+            "score": 1.0
+        },
+        {
+            "type": "ocr_text",
+            "bbox": [
+                0.305,
+                0.055,
+                0.695,
+                0.072
+            ],
+            "text": "",
+            "score": 1.0
+        },
+        {
+            "type": "ocr_text",
+            "bbox": [
+                0.178,
+                0.519,
+                0.86,
+                0.533
+            ],
+            "text": "",
+            "score": 1.0
+        },
+        {
+            "type": "ocr_text",
+            "bbox": [
+                0.141,
+                0.538,
+                0.859,
+                0.554
+            ],
+            "text": "",
+            "score": 1.0
+        },
+        {
+            "type": "ocr_text",
+            "bbox": [
+                0.141,
+                0.557,
+                0.526,
+                0.572
+            ],
+            "text": "",
+            "score": 1.0
+        },
+        {
+            "type": "ocr_text",
+            "bbox": [
+                0.551,
+                0.557,
+                0.765,
+                0.572
+            ],
+            "text": "",
+            "score": 1.0
+        },
+        {
+            "type": "ocr_text",
+            "bbox": [
+                0.823,
+                0.557,
+                0.859,
+                0.572
+            ],
+            "text": "",
+            "score": 1.0
+        },
+        {
+            "type": "ocr_text",
+            "bbox": [
+                0.142,
+                0.577,
+                0.216,
+                0.592
+            ],
+            "text": "",
+            "score": 1.0
+        },
+        {
+            "type": "ocr_text",
+            "bbox": [
+                0.24,
+                0.577,
+                0.265,
+                0.592
+            ],
+            "text": "",
+            "score": 1.0
+        },
+        {
+            "type": "ocr_text",
+            "bbox": [
+                0.323,
+                0.577,
+                0.47,
+                0.592
+            ],
+            "text": "",
+            "score": 1.0
+        },
+        {
+            "type": "ocr_text",
+            "bbox": [
+                0.178,
+                0.779,
+                0.857,
+                0.793
+            ],
+            "text": "",
+            "score": 1.0
+        },
+        {
+            "type": "ocr_text",
+            "bbox": [
+                0.142,
+                0.799,
+                0.857,
+                0.812
+            ],
+            "text": "",
+            "score": 1.0
+        },
+        {
+            "type": "ocr_text",
+            "bbox": [
+                0.14,
+                0.817,
+                0.859,
+                0.832
+            ],
+            "text": "",
+            "score": 1.0
+        },
+        {
+            "type": "ocr_text",
+            "bbox": [
+                0.142,
+                0.837,
+                0.312,
+                0.852
+            ],
+            "text": "",
+            "score": 1.0
+        },
+        {
+            "type": "ocr_text",
+            "bbox": [
+                0.178,
+                0.855,
+                0.857,
+                0.87
+            ],
+            "text": "",
+            "score": 1.0
+        },
+        {
+            "type": "ocr_text",
+            "bbox": [
+                0.148,
+                0.876,
+                0.47,
+                0.891
+            ],
+            "text": "",
+            "score": 1.0
+        },
+        {
+            "type": "ocr_text",
+            "bbox": [
+                0.142,
+                0.35,
+                0.628,
+                0.365
+            ],
+            "text": "",
+            "score": 1.0
+        },
+        {
+            "type": "ocr_text",
+            "bbox": [
+                0.652,
+                0.35,
+                0.858,
+                0.365
+            ],
+            "text": "",
+            "score": 1.0
+        },
+        {
+            "type": "ocr_text",
+            "bbox": [
+                0.143,
+                0.37,
+                0.764,
+                0.384
+            ],
+            "text": "",
+            "score": 1.0
+        },
+        {
+            "type": "ocr_text",
+            "bbox": [
+                0.791,
+                0.37,
+                0.858,
+                0.384
+            ],
+            "text": "",
+            "score": 1.0
+        },
+        {
+            "type": "ocr_text",
+            "bbox": [
+                0.143,
+                0.389,
+                0.215,
+                0.404
+            ],
+            "text": "",
+            "score": 1.0
+        },
+        {
+            "type": "ocr_text",
+            "bbox": [
+                0.239,
+                0.389,
+                0.457,
+                0.404
+            ],
+            "text": "",
+            "score": 1.0
+        },
+        {
+            "type": "ocr_text",
+            "bbox": [
+                0.252,
+                0.308,
+                0.748,
+                0.323
+            ],
+            "text": "",
+            "score": 1.0
+        },
+        {
+            "type": "ocr_text",
+            "bbox": [
+                0.176,
+                0.454,
+                0.304,
+                0.469
+            ],
+            "text": "",
+            "score": 1.0
+        },
+        {
+            "type": "ocr_text",
+            "bbox": [
+                0.328,
+                0.454,
+                0.452,
+                0.469
+            ],
+            "text": "",
+            "score": 1.0
+        },
+        {
+            "type": "ocr_text",
+            "bbox": [
+                0.477,
+                0.454,
+                0.588,
+                0.469
+            ],
+            "text": "",
+            "score": 1.0
+        },
+        {
+            "type": "ocr_text",
+            "bbox": [
+                0.143,
+                0.643,
+                0.857,
+                0.657
+            ],
+            "text": "",
+            "score": 1.0
+        },
+        {
+            "type": "ocr_text",
+            "bbox": [
+                0.143,
+                0.663,
+                0.857,
+                0.676
+            ],
+            "text": "",
+            "score": 1.0
+        },
+        {
+            "type": "ocr_text",
+            "bbox": [
+                0.177,
+                0.681,
+                0.859,
+                0.696
+            ],
+            "text": "",
+            "score": 1.0
+        },
+        {
+            "type": "ocr_text",
+            "bbox": [
+                0.143,
+                0.702,
+                0.856,
+                0.715
+            ],
+            "text": "",
+            "score": 1.0
+        },
+        {
+            "type": "ocr_text",
+            "bbox": [
+                0.14,
+                0.72,
+                0.742,
+                0.735
+            ],
+            "text": "",
+            "score": 1.0
+        },
+        {
+            "type": "ocr_text",
+            "bbox": [
+                0.766,
+                0.72,
+                0.858,
+                0.735
+            ],
+            "text": "",
+            "score": 1.0
+        },
+        {
+            "type": "ocr_text",
+            "bbox": [
+                0.143,
+                0.74,
+                0.302,
+                0.754
+            ],
+            "text": "",
+            "score": 1.0
+        },
+        {
+            "type": "ocr_text",
+            "bbox": [
+                0.328,
+                0.74,
+                0.857,
+                0.754
+            ],
+            "text": "",
+            "score": 1.0
+        },
+        {
+            "type": "ocr_text",
+            "bbox": [
+                0.143,
+                0.76,
+                0.346,
+                0.773
+            ],
+            "text": "",
+            "score": 1.0
+        }
+    ],
+    [
+        {
+            "type": "header",
+            "bbox": [
+                0.141,
+                0.059,
+                0.191,
+                0.069
+            ],
+            "angle": 0,
+            "content": null
+        },
+        {
+            "type": "header",
+            "bbox": [
+                0.305,
+                0.056,
+                0.694,
+                0.071
+            ],
+            "angle": 0,
+            "content": null
+        },
+        {
+            "type": "header",
+            "bbox": [
+                0.807,
+                0.059,
+                0.858,
+                0.069
+            ],
+            "angle": 0,
+            "content": null
+        },
+        {
+            "type": "image",
+            "bbox": [
+                0.246,
+                0.099,
+                0.744,
+                0.284
+            ],
+            "angle": 0,
+            "content": "```mermaid\ngraph LR\n    A[\"图像\"] --> B[\"特征提取器 θf\"]\n    B --> C[\"标签预测器 θp\"]\n    C --> D[\"“4” L\"]\n    E[\"生成器\"] --> B\n    F[\"判别器\"] --> G[\"领域分类器 θd\"]\n    G --> H[\"Ld 源领域? 目标领域?\"]\n    I[\"θf* = min θf L - Ld\"] --> B\n    J[\"θp* = min θp L\"] --> C\n    K[\"θd* = min θd L\"] --> G\n```",
+            "sub_type": "flowchart"
+        },
+        {
+            "type": "image_caption",
+            "bbox": [
+                0.406,
+                0.301,
+                0.591,
+                0.317
+            ],
+            "angle": 0,
+            "content": null
+        },
+        {
+            "type": "image",
+            "bbox": [
+                0.25,
+                0.332,
+                0.753,
+                0.415
+            ],
+            "angle": 0,
+            "content": "源领域\n目标领域\nMNIST\n401\n516\nMNIST-M\n合成数字\n988\n1825\nSVHN\n7310\n942\nMNIST\n70\n70\nGTSRB",
+            "sub_type": "text_image"
+        },
+        {
+            "type": "image_caption",
+            "bbox": [
+                0.318,
+                0.429,
+                0.678,
+                0.444
+            ],
+            "angle": 0,
+            "content": null
+        },
+        {
+            "type": "text",
+            "bbox": [
+                0.137,
+                0.47,
+                0.86,
+                0.603
+            ],
+            "angle": 0,
+            "content": null,
+            "merge_prev": false
+        },
+        {
+            "type": "text",
+            "bbox": [
+                0.137,
+                0.606,
+                0.86,
+                0.7
+            ],
+            "angle": 0,
+            "content": null,
+            "merge_prev": false
+        },
+        {
+            "type": "text",
+            "bbox": [
+                0.137,
+                0.704,
+                0.859,
+                0.739
+            ],
+            "angle": 0,
+            "content": null,
+            "merge_prev": false
+        },
+        {
+            "type": "table_caption",
+            "bbox": [
+                0.273,
+                0.763,
+                0.724,
+                0.779
+            ],
+            "angle": 0,
+            "content": null
+        },
+        {
+            "type": "table",
+            "bbox": [
+                0.21,
+                0.79,
+                0.789,
+                0.894
+            ],
+            "angle": 0,
+            "content": "<table><tr><td>方法</td><td>源领域目标领域</td><td>MNISTMNIST-M</td><td>合成数字SVHN</td><td>SVHNMNIST</td><td>合成标志GTSRB</td></tr><tr><td colspan=\"2\">只使用源领域数据训练</td><td>57.49%</td><td>86.65%</td><td>59.19%</td><td>74.00%</td></tr><tr><td colspan=\"2\">使用领域对抗训练</td><td>81.49%</td><td>90.48%</td><td>71.07%</td><td>88.66%</td></tr><tr><td colspan=\"2\">只使用目标领域数据训练</td><td>98.91%</td><td>92.44%</td><td>99.51%</td><td>99.87%</td></tr></table>"
+        },
+        {
+            "type": "page_number",
+            "bbox": [
+                0.484,
+                0.924,
+                0.514,
+                0.936
+            ],
+            "angle": 0,
+            "content": null
+        },
+        {
+            "type": "ocr_text",
+            "bbox": [
+                0.14,
+                0.057,
+                0.194,
+                0.073
+            ],
+            "text": "",
+            "score": 1.0
+        },
+        {
+            "type": "ocr_text",
+            "bbox": [
+                0.805,
+                0.057,
+                0.859,
+                0.073
+            ],
+            "text": "",
+            "score": 1.0
+        },
+        {
+            "type": "ocr_text",
+            "bbox": [
+                0.482,
+                0.923,
+                0.517,
+                0.94
+            ],
+            "text": "",
+            "score": 1.0
+        },
+        {
+            "type": "ocr_text",
+            "bbox": [
+                0.305,
+                0.055,
+                0.695,
+                0.072
+            ],
+            "text": "",
+            "score": 1.0
+        },
+        {
+            "type": "ocr_text",
+            "bbox": [
+                0.176,
+                0.606,
+                0.859,
+                0.621
+            ],
+            "text": "",
+            "score": 1.0
+        },
+        {
+            "type": "ocr_text",
+            "bbox": [
+                0.14,
+                0.626,
+                0.859,
+                0.642
+            ],
+            "text": "",
+            "score": 1.0
+        },
+        {
+            "type": "ocr_text",
+            "bbox": [
+                0.143,
+                0.647,
+                0.858,
+                0.66
+            ],
+            "text": "",
+            "score": 1.0
+        },
+        {
+            "type": "ocr_text",
+            "bbox": [
+                0.14,
+                0.663,
+                0.86,
+                0.681
+            ],
+            "text": "",
+            "score": 1.0
+        },
+        {
+            "type": "ocr_text",
+            "bbox": [
+                0.142,
+                0.684,
+                0.365,
+                0.7
+            ],
+            "text": "",
+            "score": 1.0
+        },
+        {
+            "type": "ocr_text",
+            "bbox": [
+                0.178,
+                0.705,
+                0.857,
+                0.719
+            ],
+            "text": "",
+            "score": 1.0
+        },
+        {
+            "type": "ocr_text",
+            "bbox": [
+                0.142,
+                0.724,
+                0.858,
+                0.738
+            ],
+            "text": "",
+            "score": 1.0
+        },
+        {
+            "type": "ocr_text",
+            "bbox": [
+                0.176,
+                0.471,
+                0.862,
+                0.485
+            ],
+            "text": "",
+            "score": 1.0
+        },
+        {
+            "type": "ocr_text",
+            "bbox": [
+                0.143,
+                0.491,
+                0.858,
+                0.504
+            ],
+            "text": "",
+            "score": 1.0
+        },
+        {
+            "type": "ocr_text",
+            "bbox": [
+                0.142,
+                0.51,
+                0.859,
+                0.523
+            ],
+            "text": "",
+            "score": 1.0
+        },
+        {
+            "type": "ocr_text",
+            "bbox": [
+                0.142,
+                0.529,
+                0.86,
+                0.544
+            ],
+            "text": "",
+            "score": 1.0
+        },
+        {
+            "type": "ocr_text",
+            "bbox": [
+                0.142,
+                0.548,
+                0.86,
+                0.563
+            ],
+            "text": "",
+            "score": 1.0
+        },
+        {
+            "type": "ocr_text",
+            "bbox": [
+                0.142,
+                0.568,
+                0.859,
+                0.583
+            ],
+            "text": "",
+            "score": 1.0
+        },
+        {
+            "type": "ocr_text",
+            "bbox": [
+                0.143,
+                0.589,
+                0.646,
+                0.602
+            ],
+            "text": "",
+            "score": 1.0
+        },
+        {
+            "type": "ocr_text",
+            "bbox": [
+                0.409,
+                0.301,
+                0.591,
+                0.318
+            ],
+            "text": "",
+            "score": 1.0
+        },
+        {
+            "type": "ocr_text",
+            "bbox": [
+                0.322,
+                0.43,
+                0.678,
+                0.444
+            ],
+            "text": "",
+            "score": 1.0
+        },
+        {
+            "type": "ocr_text",
+            "bbox": [
+                0.277,
+                0.763,
+                0.723,
+                0.778
+            ],
+            "text": "",
+            "score": 1.0
+        }
+    ],
+    [
+        {
+            "type": "header",
+            "bbox": [
+                0.141,
+                0.058,
+                0.191,
+                0.069
+            ],
+            "angle": 0,
+            "content": null
+        },
+        {
+            "type": "header",
+            "bbox": [
+                0.305,
+                0.056,
+                0.694,
+                0.071
+            ],
+            "angle": 0,
+            "content": null
+        },
+        {
+            "type": "header",
+            "bbox": [
+                0.807,
+                0.059,
+                0.858,
+                0.069
+            ],
+            "angle": 0,
+            "content": null
+        },
+        {
+            "type": "image",
+            "bbox": [
+                0.419,
+                0.105,
+                0.739,
+                0.144
+            ],
+            "angle": 0,
+            "content": "● 类 1（源领域） ■ 目标领域数据\n▲ 类 2（源领域） （类别未知）",
+            "sub_type": "text_image"
+        },
+        {
+            "type": "image_caption",
+            "bbox": [
+                0.422,
+                0.158,
+                0.715,
+                0.175
+            ],
+            "angle": 0,
+            "content": null
+        },
+        {
+            "type": "chart",
+            "bbox": [
+                0.247,
+                0.192,
+                0.462,
+                0.339
+            ],
+            "angle": 0,
+            "content": "| x | y | group |\n| --- | --- | --- |\n| 0.1 | 0.9 | A |\n| 0.2 | 0.85 | B |\n| 0.3 | 0.75 | A |\n| 0.4 | 0.65 | B |\n| 0.5 | 0.55 | A |\n| 0.6 | 0.45 | B |\n| 0.7 | 0.35 | A |\n| 0.8 | 0.25 | B |\n| 0.9 | 0.15 | A |\n| 1.0 | 0.05 | B |",
+            "sub_type": "scatter"
+        },
+        {
+            "type": "image_caption",
+            "bbox": [
+                0.347,
+                0.345,
+                0.382,
+                0.363
+            ],
+            "angle": 0,
+            "content": null
+        },
+        {
+            "type": "chart",
+            "bbox": [
+                0.484,
+                0.191,
+                0.727,
+                0.346
+            ],
+            "angle": 0,
+            "content": "| x | y | group |\n| --- | --- | --- |\n| 0.1 | 0.8 | A |\n| 0.2 | 0.75 | B |\n| 0.3 | 0.65 | A |\n| 0.4 | 0.55 | B |\n| 0.5 | 0.45 | A |\n| 0.6 | 0.35 | B |\n| 0.7 | 0.25 | A |\n| 0.8 | 0.15 | B |\n| 0.9 | 0.05 | A |\n| 1.0 | 0.95 | B |",
+            "sub_type": "scatter"
+        },
+        {
+            "type": "image_caption",
+            "bbox": [
+                0.593,
+                0.348,
+                0.628,
+                0.365
+            ],
+            "angle": 0,
+            "content": null
+        },
+        {
+            "type": "image_caption",
+            "bbox": [
+                0.424,
+                0.389,
+                0.573,
+                0.405
+            ],
+            "angle": 0,
+            "content": null
+        },
+        {
+            "type": "image",
+            "bbox": [
+                0.277,
+                0.424,
+                0.75,
+                0.56
+            ],
+            "angle": 0,
+            "content": "```mermaid\ngraph LR\n    A[\"无标签\"] --> B[\"特征提取器\"]\n    B --> C[\"标签预测器\"]\n    C --> D[\"熵小图标\"]\n    E[\"无标签\"] --> F[\"特征提取器\"]\n    F --> G[\"标签预测器\"]\n    G --> H[\"熵大图标\"]\n    style A fill:#fff,stroke:#333\n    style E fill:#fff,stroke:#333\n    style D fill:#999,stroke:#333\n    style H fill:#fff,stroke:#333\n```",
+            "sub_type": "flowchart"
+        },
+        {
+            "type": "image_caption",
+            "bbox": [
+                0.397,
+                0.574,
+                0.599,
+                0.59
+            ],
+            "angle": 0,
+            "content": null
+        },
+        {
+            "type": "text",
+            "bbox": [
+                0.137,
+                0.615,
+                0.86,
+                0.689
+            ],
+            "angle": 0,
+            "content": null,
+            "merge_prev": false
+        },
+        {
+            "type": "text",
+            "bbox": [
+                0.137,
+                0.693,
+                0.861,
+                0.768
+            ],
+            "angle": 0,
+            "content": null,
+            "merge_prev": false
+        },
+        {
+            "type": "page_number",
+            "bbox": [
+                0.484,
+                0.924,
+                0.514,
+                0.936
+            ],
+            "angle": 0,
+            "content": null
+        },
+        {
+            "type": "ocr_text",
+            "bbox": [
+                0.14,
+                0.057,
+                0.194,
+                0.071
+            ],
+            "text": "",
+            "score": 1.0
+        },
+        {
+            "type": "ocr_text",
+            "bbox": [
+                0.805,
+                0.057,
+                0.859,
+                0.073
+            ],
+            "text": "",
+            "score": 1.0
+        },
+        {
+            "type": "ocr_text",
+            "bbox": [
+                0.482,
+                0.923,
+                0.517,
+                0.94
+            ],
+            "text": "",
+            "score": 1.0
+        },
+        {
+            "type": "ocr_text",
+            "bbox": [
+                0.305,
+                0.055,
+                0.695,
+                0.072
+            ],
+            "text": "",
+            "score": 1.0
+        },
+        {
+            "type": "ocr_text",
+            "bbox": [
+                0.142,
+                0.617,
+                0.857,
+                0.63
+            ],
+            "text": "",
+            "score": 1.0
+        },
+        {
+            "type": "ocr_text",
+            "bbox": [
+                0.143,
+                0.636,
+                0.856,
+                0.649
+            ],
+            "text": "",
+            "score": 1.0
+        },
+        {
+            "type": "ocr_text",
+            "bbox": [
+                0.143,
+                0.656,
+                0.857,
+                0.669
+            ],
+            "text": "",
+            "score": 1.0
+        },
+        {
+            "type": "ocr_text",
+            "bbox": [
+                0.142,
+                0.675,
+                0.47,
+                0.688
+            ],
+            "text": "",
+            "score": 1.0
+        },
+        {
+            "type": "ocr_text",
+            "bbox": [
+                0.178,
+                0.694,
+                0.857,
+                0.707
+            ],
+            "text": "",
+            "score": 1.0
+        },
+        {
+            "type": "ocr_text",
+            "bbox": [
+                0.142,
+                0.714,
+                0.857,
+                0.727
+            ],
+            "text": "",
+            "score": 1.0
+        },
+        {
+            "type": "ocr_text",
+            "bbox": [
+                0.142,
+                0.734,
+                0.858,
+                0.747
+            ],
+            "text": "",
+            "score": 1.0
+        },
+        {
+            "type": "ocr_text",
+            "bbox": [
+                0.14,
+                0.751,
+                0.556,
+                0.767
+            ],
+            "text": "",
+            "score": 1.0
+        },
+        {
+            "type": "ocr_text",
+            "bbox": [
+                0.427,
+                0.389,
+                0.573,
+                0.406
+            ],
+            "text": "",
+            "score": 1.0
+        },
+        {
+            "type": "ocr_text",
+            "bbox": [
+                0.43,
+                0.159,
+                0.715,
+                0.174
+            ],
+            "text": "",
+            "score": 1.0
+        },
+        {
+            "type": "ocr_text",
+            "bbox": [
+                0.401,
+                0.574,
+                0.6,
+                0.589
+            ],
+            "text": "",
+            "score": 1.0
+        },
+        {
+            "type": "ocr_text",
+            "bbox": [
+                0.343,
+                0.342,
+                0.387,
+                0.367
+            ],
+            "text": "",
+            "score": 1.0
+        },
+        {
+            "type": "ocr_text",
+            "bbox": [
+                0.588,
+                0.344,
+                0.634,
+                0.371
+            ],
+            "text": "",
+            "score": 1.0
+        }
+    ],
+    [
+        {
+            "type": "header",
+            "bbox": [
+                0.141,
+                0.058,
+                0.191,
+                0.069
+            ],
+            "angle": 0,
+            "content": null
+        },
+        {
+            "type": "header",
+            "bbox": [
+                0.305,
+                0.056,
+                0.694,
+                0.071
+            ],
+            "angle": 0,
+            "content": null
+        },
+        {
+            "type": "header",
+            "bbox": [
+                0.807,
+                0.059,
+                0.858,
+                0.069
+            ],
+            "angle": 0,
+            "content": null
+        },
+        {
+            "type": "image",
+            "bbox": [
+                0.318,
+                0.098,
+                0.468,
+                0.181
+            ],
+            "angle": 0,
+            "content": "老虎\n狗\n狮子",
+            "sub_type": "text_image"
+        },
+        {
+            "type": "image_caption",
+            "bbox": [
+                0.383,
+                0.184,
+                0.406,
+                0.196
+            ],
+            "angle": 0,
+            "content": null
+        },
+        {
+            "type": "image",
+            "bbox": [
+                0.484,
+                0.099,
+                0.634,
+                0.182
+            ],
+            "angle": 0,
+            "content": "老虎\n狗\n狮子",
+            "sub_type": "text_image"
+        },
+        {
+            "type": "image_caption",
+            "bbox": [
+                0.553,
+                0.184,
+                0.576,
+                0.197
+            ],
+            "angle": 0,
+            "content": null
+        },
+        {
+            "type": "image",
+            "bbox": [
+                0.369,
+                0.197,
+                0.573,
+                0.279
+            ],
+            "angle": 0,
+            "content": "熊\n老虎\n狗\n狮子\n鸟",
+            "sub_type": "text_image"
+        },
+        {
+            "type": "image_caption",
+            "bbox": [
+                0.463,
+                0.28,
+                0.486,
+                0.292
+            ],
+            "angle": 0,
+            "content": null
+        },
+        {
+            "type": "image",
+            "bbox": [
+                0.466,
+                0.298,
+                0.497,
+                0.314
+            ],
+            "angle": 0,
+            "content": null
+        },
+        {
+            "type": "image_caption",
+            "bbox": [
+                0.5,
+                0.302,
+                0.56,
+                0.311
+            ],
+            "angle": 0,
+            "content": null
+        },
+        {
+            "type": "image",
+            "bbox": [
+                0.572,
+                0.298,
+                0.603,
+                0.315
+            ],
+            "angle": 0,
+            "content": null
+        },
+        {
+            "type": "image_caption",
+            "bbox": [
+                0.606,
+                0.302,
+                0.674,
+                0.312
+            ],
+            "angle": 0,
+            "content": null
+        },
+        {
+            "type": "image_caption",
+            "bbox": [
+                0.31,
+                0.328,
+                0.688,
+                0.343
+            ],
+            "angle": 0,
+            "content": null
+        },
+        {
+            "type": "text",
+            "bbox": [
+                0.163,
+                0.378,
+                0.834,
+                0.434
+            ],
+            "angle": 0,
+            "content": null,
+            "merge_prev": false
+        },
+        {
+            "type": "text",
+            "bbox": [
+                0.163,
+                0.437,
+                0.835,
+                0.552
+            ],
+            "angle": 0,
+            "content": null,
+            "merge_prev": false
+        },
+        {
+            "type": "text",
+            "bbox": [
+                0.137,
+                0.572,
+                0.86,
+                0.645
+            ],
+            "angle": 0,
+            "content": null,
+            "merge_prev": false
+        },
+        {
+            "type": "title",
+            "bbox": [
+                0.14,
+                0.669,
+                0.287,
+                0.686
+            ],
+            "angle": 0,
+            "content": null
+        },
+        {
+            "type": "text",
+            "bbox": [
+                0.137,
+                0.697,
+                0.86,
+                0.869
+            ],
+            "angle": 0,
+            "content": null,
+            "merge_prev": false
+        },
+        {
+            "type": "page_number",
+            "bbox": [
+                0.484,
+                0.924,
+                0.513,
+                0.936
+            ],
+            "angle": 0,
+            "content": null
+        },
+        {
+            "type": "ocr_text",
+            "bbox": [
+                0.14,
+                0.057,
+                0.194,
+                0.071
+            ],
+            "text": "",
+            "score": 1.0
+        },
+        {
+            "type": "ocr_text",
+            "bbox": [
+                0.805,
+                0.057,
+                0.859,
+                0.073
+            ],
+            "text": "",
+            "score": 1.0
+        },
+        {
+            "type": "ocr_text",
+            "bbox": [
+                0.38,
+                0.181,
+                0.41,
+                0.199
+            ],
+            "text": "",
+            "score": 1.0
+        },
+        {
+            "type": "ocr_text",
+            "bbox": [
+                0.461,
+                0.278,
+                0.489,
+                0.296
+            ],
+            "text": "",
+            "score": 1.0
+        },
+        {
+            "type": "ocr_text",
+            "bbox": [
+                0.482,
+                0.923,
+                0.516,
+                0.941
+            ],
+            "text": "",
+            "score": 1.0
+        },
+        {
+            "type": "ocr_text",
+            "bbox": [
+                0.305,
+                0.055,
+                0.695,
+                0.072
+            ],
+            "text": "",
+            "score": 1.0
+        },
+        {
+            "type": "ocr_text",
+            "bbox": [
+                0.313,
+                0.329,
+                0.687,
+                0.343
+            ],
+            "text": "",
+            "score": 1.0
+        },
+        {
+            "type": "ocr_text",
+            "bbox": [
+                0.178,
+                0.573,
+                0.858,
+                0.587
+            ],
+            "text": "",
+            "score": 1.0
+        },
+        {
+            "type": "ocr_text",
+            "bbox": [
+                0.14,
+                0.591,
+                0.86,
+                0.607
+            ],
+            "text": "",
+            "score": 1.0
+        },
+        {
+            "type": "ocr_text",
+            "bbox": [
+                0.142,
+                0.613,
+                0.858,
+                0.626
+            ],
+            "text": "",
+            "score": 1.0
+        },
+        {
+            "type": "ocr_text",
+            "bbox": [
+                0.139,
+                0.631,
+                0.319,
+                0.644
+            ],
+            "text": "",
+            "score": 1.0
+        },
+        {
+            "type": "ocr_text",
+            "bbox": [
+                0.138,
+                0.668,
+                0.287,
+                0.687
+            ],
+            "text": "",
+            "score": 1.0
+        },
+        {
+            "type": "ocr_text",
+            "bbox": [
+                0.177,
+                0.699,
+                0.858,
+                0.712
+            ],
+            "text": "",
+            "score": 1.0
+        },
+        {
+            "type": "ocr_text",
+            "bbox": [
+                0.142,
+                0.718,
+                0.858,
+                0.732
+            ],
+            "text": "",
+            "score": 1.0
+        },
+        {
+            "type": "ocr_text",
+            "bbox": [
+                0.143,
+                0.737,
+                0.857,
+                0.751
+            ],
+            "text": "",
+            "score": 1.0
+        },
+        {
+            "type": "ocr_text",
+            "bbox": [
+                0.142,
+                0.757,
+                0.857,
+                0.771
+            ],
+            "text": "",
+            "score": 1.0
+        },
+        {
+            "type": "ocr_text",
+            "bbox": [
+                0.143,
+                0.776,
+                0.857,
+                0.79
+            ],
+            "text": "",
+            "score": 1.0
+        },
+        {
+            "type": "ocr_text",
+            "bbox": [
+                0.141,
+                0.795,
+                0.858,
+                0.811
+            ],
+            "text": "",
+            "score": 1.0
+        },
+        {
+            "type": "ocr_text",
+            "bbox": [
+                0.142,
+                0.815,
+                0.856,
+                0.829
+            ],
+            "text": "",
+            "score": 1.0
+        },
+        {
+            "type": "ocr_text",
+            "bbox": [
+                0.141,
+                0.833,
+                0.86,
+                0.85
+            ],
+            "text": "",
+            "score": 1.0
+        },
+        {
+            "type": "ocr_text",
+            "bbox": [
+                0.139,
+                0.853,
+                0.484,
+                0.868
+            ],
+            "text": "",
+            "score": 1.0
+        },
+        {
+            "type": "ocr_text",
+            "bbox": [
+                0.166,
+                0.378,
+                0.834,
+                0.395
+            ],
+            "text": "",
+            "score": 1.0
+        },
+        {
+            "type": "ocr_text",
+            "bbox": [
+                0.167,
+                0.398,
+                0.833,
+                0.414
+            ],
+            "text": "",
+            "score": 1.0
+        },
+        {
+            "type": "ocr_text",
+            "bbox": [
+                0.165,
+                0.418,
+                0.664,
+                0.434
+            ],
+            "text": "",
+            "score": 1.0
+        },
+        {
+            "type": "ocr_text",
+            "bbox": [
+                0.549,
+                0.183,
+                0.58,
+                0.201
+            ],
+            "text": "",
+            "score": 1.0
+        },
+        {
+            "type": "ocr_text",
+            "bbox": [
+                0.5,
+                0.303,
+                0.56,
+                0.311
+            ],
+            "text": "",
+            "score": 1.0
+        },
+        {
+            "type": "ocr_text",
+            "bbox": [
+                0.606,
+                0.303,
+                0.674,
+                0.311
+            ],
+            "text": "",
+            "score": 1.0
+        },
+        {
+            "type": "ocr_text",
+            "bbox": [
+                0.167,
+                0.438,
+                0.828,
+                0.452
+            ],
+            "text": "",
+            "score": 1.0
+        },
+        {
+            "type": "ocr_text",
+            "bbox": [
+                0.167,
+                0.456,
+                0.831,
+                0.472
+            ],
+            "text": "",
+            "score": 1.0
+        },
+        {
+            "type": "ocr_text",
+            "bbox": [
+                0.169,
+                0.477,
+                0.831,
+                0.491
+            ],
+            "text": "",
+            "score": 1.0
+        },
+        {
+            "type": "ocr_text",
+            "bbox": [
+                0.167,
+                0.496,
+                0.831,
+                0.511
+            ],
+            "text": "",
+            "score": 1.0
+        },
+        {
+            "type": "ocr_text",
+            "bbox": [
+                0.169,
+                0.516,
+                0.831,
+                0.53
+            ],
+            "text": "",
+            "score": 1.0
+        },
+        {
+            "type": "ocr_text",
+            "bbox": [
+                0.169,
+                0.535,
+                0.796,
+                0.549
+            ],
+            "text": "",
+            "score": 1.0
+        }
+    ],
+    [
+        {
+            "type": "header",
+            "bbox": [
+                0.141,
+                0.058,
+                0.191,
+                0.069
+            ],
+            "angle": 0,
+            "content": null
+        },
+        {
+            "type": "header",
+            "bbox": [
+                0.305,
+                0.056,
+                0.694,
+                0.071
+            ],
+            "angle": 0,
+            "content": null
+        },
+        {
+            "type": "header",
+            "bbox": [
+                0.807,
+                0.059,
+                0.858,
+                0.069
+            ],
+            "angle": 0,
+            "content": null
+        },
+        {
+            "type": "image",
+            "bbox": [
+                0.246,
+                0.098,
+                0.717,
+                0.165
+            ],
+            "angle": 0,
+            "content": "```mermaid\ngraph LR\n    A[\"真实猫\"] --> B[\"真实狗\"]\n    B --> C[\"素描猫\"]\n    C --> D[\"素描狗\"]\n    D --> E[\"水彩猫\"]\n    E --> F[\"水彩狗\"]\n    F --> G[\"卡通猫\"]\n    G --> H[\"卡通狗\"]\n    style A fill:#4A90E2,stroke:#333\n    style B fill:#4A90E2,stroke:#333\n    style C fill:#4A90E2,stroke:#333\n    style D fill:#4A90E2,stroke:#333\n    style E fill:#4A90E2,stroke:#333\n    style F fill:#4A90E2,stroke:#333\n    style G fill:#4A90E2,stroke:#333\n    style H fill:#4A90E2,stroke:#333\n```",
+            "sub_type": "flowchart"
+        },
+        {
+            "type": "image_caption",
+            "bbox": [
+                0.474,
+                0.178,
+                0.501,
+                0.192
+            ],
+            "angle": 0,
+            "content": null
+        },
+        {
+            "type": "image",
+            "bbox": [
+                0.277,
+                0.216,
+                0.753,
+                0.28
+            ],
+            "angle": 0,
+            "content": "```mermaid\ngraph LR\n    A[\"真实猫\"] --> B[\"真实狗\"]\n    C[\"素描猫\"] --> D[\"素描狗\"]\n    E[\"水彩猫\"] --> F[\"水彩狗\"]\n    G[\"卡通猫\"] --> H[\"卡通狗\"]\n    style A fill:#fff,stroke:#000\n    style B fill:#fff,stroke:#000\n    style C fill:#fff,stroke:#000\n    style D fill:#fff,stroke:#000\n    style E fill:#fff,stroke:#000\n    style F fill:#fff,stroke:#000\n    style G fill:#fff,stroke:#000\n    style H fill:#fff,stroke:#000\n    subgraph 训练\n        A\n        B\n    end\n    subgraph 测试\n        C\n        D\n        E\n        F\n        G\n        H\n    end\n```",
+            "sub_type": "flowchart"
+        },
+        {
+            "type": "image_caption",
+            "bbox": [
+                0.474,
+                0.286,
+                0.501,
+                0.3
+            ],
+            "angle": 0,
+            "content": null
+        },
+        {
+            "type": "image_caption",
+            "bbox": [
+                0.402,
+                0.32,
+                0.596,
+                0.336
+            ],
+            "angle": 0,
+            "content": null
+        },
+        {
+            "type": "title",
+            "bbox": [
+                0.446,
+                0.36,
+                0.553,
+                0.381
+            ],
+            "angle": 0,
+            "content": null
+        },
+        {
+            "type": "list",
+            "bbox": [
+                0.136,
+                0.391,
+                0.865,
+                0.88
+            ],
+            "angle": 0,
+            "content": null
+        },
+        {
+            "type": "ref_text",
+            "bbox": [
+                0.141,
+                0.395,
+                0.859,
+                0.432
+            ],
+            "angle": 0,
+            "content": null
+        },
+        {
+            "type": "ref_text",
+            "bbox": [
+                0.141,
+                0.443,
+                0.857,
+                0.481
+            ],
+            "angle": 0,
+            "content": null
+        },
+        {
+            "type": "ref_text",
+            "bbox": [
+                0.142,
+                0.491,
+                0.859,
+                0.529
+            ],
+            "angle": 0,
+            "content": null
+        },
+        {
+            "type": "ref_text",
+            "bbox": [
+                0.141,
+                0.539,
+                0.859,
+                0.577
+            ],
+            "angle": 0,
+            "content": null
+        },
+        {
+            "type": "ref_text",
+            "bbox": [
+                0.142,
+                0.589,
+                0.859,
+                0.626
+            ],
+            "angle": 0,
+            "content": null
+        },
+        {
+            "type": "ref_text",
+            "bbox": [
+                0.141,
+                0.637,
+                0.859,
+                0.693
+            ],
+            "angle": 0,
+            "content": null
+        },
+        {
+            "type": "ref_text",
+            "bbox": [
+                0.142,
+                0.704,
+                0.859,
+                0.742
+            ],
+            "angle": 0,
+            "content": null
+        },
+        {
+            "type": "ref_text",
+            "bbox": [
+                0.142,
+                0.753,
+                0.859,
+                0.809
+            ],
+            "angle": 0,
+            "content": null
+        },
+        {
+            "type": "ref_text",
+            "bbox": [
+                0.142,
+                0.821,
+                0.859,
+                0.876
+            ],
+            "angle": 0,
+            "content": null
+        },
+        {
+            "type": "page_number",
+            "bbox": [
+                0.484,
+                0.924,
+                0.514,
+                0.936
+            ],
+            "angle": 0,
+            "content": null
+        },
+        {
+            "type": "ocr_text",
+            "bbox": [
+                0.14,
+                0.057,
+                0.194,
+                0.071
+            ],
+            "text": "",
+            "score": 1.0
+        },
+        {
+            "type": "ocr_text",
+            "bbox": [
+                0.805,
+                0.057,
+                0.859,
+                0.073
+            ],
+            "text": "",
+            "score": 1.0
+        },
+        {
+            "type": "ocr_text",
+            "bbox": [
+                0.482,
+                0.923,
+                0.517,
+                0.94
+            ],
+            "text": "",
+            "score": 1.0
+        },
+        {
+            "type": "ocr_text",
+            "bbox": [
+                0.305,
+                0.055,
+                0.695,
+                0.072
+            ],
+            "text": "",
+            "score": 1.0
+        },
+        {
+            "type": "ocr_text",
+            "bbox": [
+                0.138,
+                0.394,
+                0.86,
+                0.414
+            ],
+            "text": "",
+            "score": 1.0
+        },
+        {
+            "type": "ocr_text",
+            "bbox": [
+                0.176,
+                0.415,
+                0.689,
+                0.433
+            ],
+            "text": "",
+            "score": 1.0
+        },
+        {
+            "type": "ocr_text",
+            "bbox": [
+                0.138,
+                0.443,
+                0.862,
+                0.461
+            ],
+            "text": "",
+            "score": 1.0
+        },
+        {
+            "type": "ocr_text",
+            "bbox": [
+                0.175,
+                0.463,
+                0.775,
+                0.481
+            ],
+            "text": "",
+            "score": 1.0
+        },
+        {
+            "type": "ocr_text",
+            "bbox": [
+                0.137,
+                0.491,
+                0.861,
+                0.512
+            ],
+            "text": "",
+            "score": 1.0
+        },
+        {
+            "type": "ocr_text",
+            "bbox": [
+                0.175,
+                0.513,
+                0.786,
+                0.528
+            ],
+            "text": "",
+            "score": 1.0
+        },
+        {
+            "type": "ocr_text",
+            "bbox": [
+                0.138,
+                0.539,
+                0.86,
+                0.56
+            ],
+            "text": "",
+            "score": 1.0
+        },
+        {
+            "type": "ocr_text",
+            "bbox": [
+                0.174,
+                0.56,
+                0.732,
+                0.577
+            ],
+            "text": "",
+            "score": 1.0
+        },
+        {
+            "type": "ocr_text",
+            "bbox": [
+                0.139,
+                0.589,
+                0.86,
+                0.608
+            ],
+            "text": "",
+            "score": 1.0
+        },
+        {
+            "type": "ocr_text",
+            "bbox": [
+                0.175,
+                0.608,
+                0.513,
+                0.625
+            ],
+            "text": "",
+            "score": 1.0
+        },
+        {
+            "type": "ocr_text",
+            "bbox": [
+                0.138,
+                0.704,
+                0.862,
+                0.724
+            ],
+            "text": "",
+            "score": 1.0
+        },
+        {
+            "type": "ocr_text",
+            "bbox": [
+                0.175,
+                0.724,
+                0.837,
+                0.742
+            ],
+            "text": "",
+            "score": 1.0
+        },
+        {
+            "type": "ocr_text",
+            "bbox": [
+                0.138,
+                0.637,
+                0.86,
+                0.656
+            ],
+            "text": "",
+            "score": 1.0
+        },
+        {
+            "type": "ocr_text",
+            "bbox": [
+                0.175,
+                0.658,
+                0.86,
+                0.674
+            ],
+            "text": "",
+            "score": 1.0
+        },
+        {
+            "type": "ocr_text",
+            "bbox": [
+                0.175,
+                0.678,
+                0.506,
+                0.693
+            ],
+            "text": "",
+            "score": 1.0
+        },
+        {
+            "type": "ocr_text",
+            "bbox": [
+                0.138,
+                0.753,
+                0.861,
+                0.773
+            ],
+            "text": "",
+            "score": 1.0
+        },
+        {
+            "type": "ocr_text",
+            "bbox": [
+                0.177,
+                0.775,
+                0.859,
+                0.789
+            ],
+            "text": "",
+            "score": 1.0
+        },
+        {
+            "type": "ocr_text",
+            "bbox": [
+                0.175,
+                0.794,
+                0.262,
+                0.808
+            ],
+            "text": "",
+            "score": 1.0
+        },
+        {
+            "type": "ocr_text",
+            "bbox": [
+                0.139,
+                0.822,
+                0.861,
+                0.839
+            ],
+            "text": "",
+            "score": 1.0
+        },
+        {
+            "type": "ocr_text",
+            "bbox": [
+                0.175,
+                0.841,
+                0.86,
+                0.859
+            ],
+            "text": "",
+            "score": 1.0
+        },
+        {
+            "type": "ocr_text",
+            "bbox": [
+                0.175,
+                0.861,
+                0.31,
+                0.876
+            ],
+            "text": "",
+            "score": 1.0
+        },
+        {
+            "type": "ocr_text",
+            "bbox": [
+                0.445,
+                0.358,
+                0.554,
+                0.382
+            ],
+            "text": "",
+            "score": 1.0
+        },
+        {
+            "type": "ocr_text",
+            "bbox": [
+                0.405,
+                0.321,
+                0.596,
+                0.337
+            ],
+            "text": "",
+            "score": 1.0
+        },
+        {
+            "type": "ocr_text",
+            "bbox": [
+                0.47,
+                0.176,
+                0.504,
+                0.195
+            ],
+            "text": "",
+            "score": 1.0
+        },
+        {
+            "type": "ocr_text",
+            "bbox": [
+                0.47,
+                0.283,
+                0.505,
+                0.304
+            ],
+            "text": "",
+            "score": 1.0
+        }
+    ],
+    [
+        {
+            "type": "header",
+            "bbox": [
+                0.141,
+                0.058,
+                0.191,
+                0.07
+            ],
+            "angle": 0,
+            "content": null
+        },
+        {
+            "type": "header",
+            "bbox": [
+                0.305,
+                0.056,
+                0.694,
+                0.071
+            ],
+            "angle": 0,
+            "content": null
+        },
+        {
+            "type": "header",
+            "bbox": [
+                0.807,
+                0.058,
+                0.858,
+                0.07
+            ],
+            "angle": 0,
+            "content": null
+        },
+        {
+            "type": "ref_text",
+            "bbox": [
+                0.14,
+                0.1,
+                0.861,
+                0.155
+            ],
+            "angle": 0,
+            "content": null
+        },
+        {
+            "type": "page_number",
+            "bbox": [
+                0.484,
+                0.924,
+                0.515,
+                0.936
+            ],
+            "angle": 0,
+            "content": null
+        },
+        {
+            "type": "ocr_text",
+            "bbox": [
+                0.14,
+                0.056,
+                0.194,
+                0.073
+            ],
+            "text": "",
+            "score": 1.0
+        },
+        {
+            "type": "ocr_text",
+            "bbox": [
+                0.805,
+                0.057,
+                0.859,
+                0.073
+            ],
+            "text": "",
+            "score": 1.0
+        },
+        {
+            "type": "ocr_text",
+            "bbox": [
+                0.482,
+                0.923,
+                0.518,
+                0.94
+            ],
+            "text": "",
+            "score": 1.0
+        },
+        {
+            "type": "ocr_text",
+            "bbox": [
+                0.305,
+                0.055,
+                0.695,
+                0.072
+            ],
+            "text": "",
+            "score": 1.0
+        },
+        {
+            "type": "ocr_text",
+            "bbox": [
+                0.139,
+                0.101,
+                0.859,
+                0.119
+            ],
+            "text": "",
+            "score": 1.0
+        },
+        {
+            "type": "ocr_text",
+            "bbox": [
+                0.175,
+                0.12,
+                0.86,
+                0.138
+            ],
+            "text": "",
+            "score": 1.0
+        },
+        {
+            "type": "ocr_text",
+            "bbox": [
+                0.175,
+                0.14,
+                0.372,
+                0.156
+            ],
+            "text": "",
+            "score": 1.0
+        }
+    ]
+]

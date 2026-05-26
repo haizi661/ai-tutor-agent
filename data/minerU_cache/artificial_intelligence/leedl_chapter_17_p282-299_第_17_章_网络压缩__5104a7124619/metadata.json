@@ -1,0 +1,17 @@
+{
+  "version": 1,
+  "source_path": "E:\\ai_code\\ai-tutor-agent\\data\\course_materials\\artificial_intelligence\\splits\\leedl_chapter_17_p282-299_第_17_章_网络压缩.pdf",
+  "source_filename": "leedl_chapter_17_p282-299_第_17_章_网络压缩.pdf",
+  "source_size_bytes": 2103112,
+  "source_mtime": 1779694337,
+  "cache_key": "5104a7124619",
+  "batch_id": "83c27bcf-b67e-4813-ac70-a2dea780bc2d",
+  "full_zip_url": "https://cdn-mineru.openxlab.org.cn/pdf/2026-05-25/875a5369-97b7-4ee0-86db-6180d59e2c04.zip",
+  "saved_at": 1779695869,
+  "proxy_mode": "inherit",
+  "proxy_desc": "继承环境变量 HTTP_PROXY / HTTPS_PROXY",
+  "full_md_path": "full.md",
+  "relative_md_path_in_extract": "full.md",
+  "result_zip_path": "result.zip",
+  "extract_dir": "extracted"
+}

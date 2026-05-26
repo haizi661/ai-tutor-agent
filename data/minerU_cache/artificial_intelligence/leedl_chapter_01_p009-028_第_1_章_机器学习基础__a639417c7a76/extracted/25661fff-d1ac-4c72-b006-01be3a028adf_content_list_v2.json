@@ -1,0 +1,5652 @@
+[
+    [
+        {
+            "type": "title",
+            "content": {
+                "title_content": [
+                    {
+                        "type": "text",
+                        "content": "第 1 章 机器学习基础"
+                    }
+                ],
+                "level": 1
+            },
+            "bbox": [
+                364,
+                98,
+                631,
+                118
+            ]
+        },
+        {
+            "type": "paragraph",
+            "content": {
+                "paragraph_content": [
+                    {
+                        "type": "text",
+                        "content": "首先简单介绍一下机器学习（Machine Learning，ML）和深度学习（Deep Learning，DL）的基本概念。机器学习，顾名思义，机器具备有学习的能力。具体来讲，机器学习就是让机器具备找一个函数的能力。机器具备找函数的能力以后，它可以做很多事。比如语音识别，机器听一段声音，产生这段声音对应的文字。我们需要的是一个函数，该函数的输入是声音信号，输出是这段声音信号的内容。这个函数显然非常复杂，人类难以把它写出来，因此想通过机器的力量把这个函数自动找出来。还有好多的任务需要找一个很复杂的函数，以图像识别为例，图像识别函数的输入是一张图片，输出是这个图片里面的内容。AlphaGo 也可以看作是一个函数，机器下围棋需要的就是一个函数，该函数的输入是棋盘上黑子跟白子的位置，输出是机器下一步应该落子的位置。"
+                    }
+                ]
+            },
+            "bbox": [
+                136,
+                134,
+                860,
+                305
+            ]
+        },
+        {
+            "type": "paragraph",
+            "content": {
+                "paragraph_content": [
+                    {
+                        "type": "text",
+                        "content": "随着要找的函数不同，机器学习有不同的类别。假设要找的函数的输出是一个数值，一个标量（scalar），这种机器学习的任务称为回归。举个回归的例子，假设机器要预测未来某一个时间的 PM2.5 的数值。机器要找一个函数 f，其输入是可能是种种跟预测 PM2.5 有关的指数，包括今天的 PM2.5 的数值、平均温度、平均的臭氧浓度等等，输出是明天中午的 PM2.5的数值，找这个函数的任务称为回归（regression）。"
+                    }
+                ]
+            },
+            "bbox": [
+                136,
+                309,
+                860,
+                403
+            ]
+        },
+        {
+            "type": "paragraph",
+            "content": {
+                "paragraph_content": [
+                    {
+                        "type": "text",
+                        "content": "除了回归以外，另一个常见的任务是分类（classification，）。分类任务要让机器做选择题。人类先准备好一些选项，这些选项称为类别（class），现在要找的函数的输出就是从设定好的选项里面选择一个当作输出，该任务称为分类。举个例子，每个人都有邮箱账户，邮箱账户里面有一个函数，该函数可以检测一封邮件是否为垃圾邮件。分类不一定只有两个选项，也可以有多个选项。"
+                    }
+                ]
+            },
+            "bbox": [
+                136,
+                406,
+                860,
+                500
+            ]
+        },
+        {
+            "type": "paragraph",
+            "content": {
+                "paragraph_content": [
+                    {
+                        "type": "text",
+                        "content": "AlphaGo 也是一个分类的问题，如果让机器下围棋，做一个 AlphaGo，给出的选项与棋盘的位置有关。棋盘上有 19×19 个位置，机器下围棋其实是一个有 19×19 个选项的选择题。机器找一个函数，该函数的输入是棋盘上黑子跟白子的位置，输出就是从 19×19 个选项里面，选出一个正确的选项，从 19 × 19 个可以落子的位置里面，选出下一步应该要落子的位置。"
+                    }
+                ]
+            },
+            "bbox": [
+                136,
+                504,
+                860,
+                577
+            ]
+        },
+        {
+            "type": "paragraph",
+            "content": {
+                "paragraph_content": [
+                    {
+                        "type": "text",
+                        "content": "在机器学习领域里面，除了回归跟分类以外，还有结构化学习（structured learning）。机器不只是要做选择题或输出一个数字，而是产生一个有结构的物体，比如让机器画一张图，写一篇文章。这种叫机器产生有结构的东西的问题称为结构化学习。"
+                    }
+                ]
+            },
+            "bbox": [
+                136,
+                582,
+                860,
+                636
+            ]
+        },
+        {
+            "type": "title",
+            "content": {
+                "title_content": [
+                    {
+                        "type": "text",
+                        "content": "1.1 案例学习 "
+                    }
+                ],
+                "level": 1
+            },
+            "bbox": [
+                137,
+                659,
+                273,
+                676
+            ]
+        },
+        {
+            "type": "paragraph",
+            "content": {
+                "paragraph_content": [
+                    {
+                        "type": "text",
+                        "content": "以视频的点击次数预测为例介绍下机器学习的运作过程。假设有人想要通过视频平台赚钱，他会在意频道有没有流量，这样他才会知道他的获利。假设后台可以看到很多相关的信息，比如：每天点赞的人数、订阅人数、观看次数。根据一个频道过往所有的信息可以预测明天的观看次数。找一个函数，该函数的输入是后台的信息，输出是隔天这个频道会有的总观看的次数."
+                    }
+                ]
+            },
+            "bbox": [
+                136,
+                687,
+                858,
+                780
+            ]
+        },
+        {
+            "type": "paragraph",
+            "content": {
+                "paragraph_content": [
+                    {
+                        "type": "text",
+                        "content": "机器学习找函数的过程，分成 3 个步骤。第一个步骤是写出一个带有未知参数的函数 f，其能预测未来观看次数。比如将函数写成"
+                    }
+                ]
+            },
+            "bbox": [
+                136,
+                785,
+                860,
+                820
+            ]
+        },
+        {
+            "type": "equation_interline",
+            "content": {
+                "math_content": "y = b + w x _ {1} \\tag {1.1}",
+                "math_type": "latex",
+                "image_source": {
+                    "path": "images/f16ff9e9ef73bab12421462587cf4008328c661f3d1c63f0ccb60018bd6dc628.jpg"
+                }
+            },
+            "bbox": [
+                448,
+                835,
+                855,
+                851
+            ]
+        },
+        {
+            "type": "paragraph",
+            "content": {
+                "paragraph_content": [
+                    {
+                        "type": "text",
+                        "content": "其中，y 是准备要预测的东西，要预测的是今天（2 月 26 日）这个频道总共观看的人，y 就假设是今天总共的观看次数。 "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "x _ { 1 }"
+                    },
+                    {
+                        "type": "text",
+                        "content": "是这个频道，前一天（2 月 25 日）总共的观看次数，y 跟 "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "x _ { 1 }"
+                    },
+                    {
+                        "type": "text",
+                        "content": "都是数值，b 跟 w 是未知的参数，它是准备要通过数据去找出来的，w 跟 b 是未知的，只是隐约地猜测。猜测往往来自于对这个问题本质上的了解，即领域知识（domain knowledge）。机器学习就需要一些领域知识。这是一个猜测，也许今天的观看次数，总是会跟昨天的观看次数有点关联，所以把昨天的观看次数，乘上一个数值，但是总是不会一模一样，所以再加上一个 b 做修正，当作是对于 2 月 26 日，观看次数的预测，这是一个猜测，它不一定是对的，等一下回头会再来修正这个猜测。总之， "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "y = b + w * x _ { 1 }"
+                    },
+                    {
+                        "type": "text",
+                        "content": "，而 b 跟 w 是未知的。带有未知的参数（parameter）的函数称为模型（model）。模型在机器学习里面，就是一个带有未知的参数的函数，特征（feature） "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "x _ { 1 }"
+                    },
+                    {
+                        "type": "text",
+                        "content": "是这个函数里面已知的，它是来自于后台的信息，2 月 25 日点击的总次数是已知的，而 w 跟 b 是未知的参数。w 称为权重（weight），b 称为偏置（bias）。这个是第一个步骤。"
+                    }
+                ]
+            },
+            "bbox": [
+                136,
+                866,
+                860,
+                902
+            ]
+        },
+        {
+            "type": "page_header",
+            "content": {
+                "page_header_content": [
+                    {
+                        "type": "text",
+                        "content": "→_→ "
+                    }
+                ]
+            },
+            "bbox": [
+                139,
+                57,
+                189,
+                68
+            ]
+        },
+        {
+            "type": "page_header",
+            "content": {
+                "page_header_content": [
+                    {
+                        "type": "text",
+                        "content": "https://github.com/datawhalechina/leedl-tutorial "
+                    }
+                ]
+            },
+            "bbox": [
+                302,
+                55,
+                692,
+                70
+            ]
+        },
+        {
+            "type": "page_header",
+            "content": {
+                "page_header_content": [
+                    {
+                        "type": "text",
+                        "content": "←_← "
+                    }
+                ]
+            },
+            "bbox": [
+                805,
+                58,
+                857,
+                68
+            ]
+        },
+        {
+            "type": "page_number",
+            "content": {
+                "page_number_content": [
+                    {
+                        "type": "text",
+                        "content": "8 "
+                    }
+                ]
+            },
+            "bbox": [
+                492,
+                923,
+                504,
+                935
+            ]
+        }
+    ],
+    [
+        {
+            "type": "paragraph",
+            "content": {
+                "paragraph_content": []
+            },
+            "bbox": [
+                136,
+                99,
+                860,
+                291
+            ]
+        },
+        {
+            "type": "paragraph",
+            "content": {
+                "paragraph_content": [
+                    {
+                        "type": "text",
+                        "content": "第 2 个步骤是定义损失（loss），损失也是一个函数。这个函数的输入是模型里面的参数，模型是 "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "y = b + w * x _ { 1 }"
+                    },
+                    {
+                        "type": "text",
+                        "content": "，而 b 跟 w 是未知的，损失是函数 "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "L ( b , w )"
+                    },
+                    {
+                        "type": "text",
+                        "content": "，其输入是模型参数 b 跟"
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "w _ { \\mathsf { c } }"
+                    },
+                    {
+                        "type": "text",
+                        "content": "。损失函数输出的值代表，现在如果把这一组未知的参数，设定某一个数值的时候，这笔数值好还是不好。举一个具体的例子，假设未知的参数的设定是 "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "b = 5 0 0 , \\ w = 1"
+                    },
+                    {
+                        "type": "text",
+                        "content": "，预测未来的观看次数的函数就变成 "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "y = 5 0 0 + x _ { 1 }"
+                    },
+                    {
+                        "type": "text",
+                        "content": "。要从训练数据来进行计算损失，在这个问题里面，训练数据是这一个频道过去的观看次数。举个例子，从 2017 年 1 月 1 日到 2020 年 12 月 31 日的观看次数（此处的数字是随意生成的）如图 1.1 所示，接下来就可以计算损失。"
+                    }
+                ]
+            },
+            "bbox": [
+                136,
+                294,
+                860,
+                428
+            ]
+        },
+        {
+            "type": "chart",
+            "content": {
+                "image_source": {
+                    "path": "images/f80bef15ab3db199419705fc1c35c8da049e4e0116ee6aee3b40f905a7d6e273.jpg"
+                },
+                "content": "| Date | Value |\n|---|---|\n| 2017/01/01 | 4800 |\n| 01/02 | 4900 |\n| 01/03 | 7500 |\n| …… |  |\n| 2020/12/30 | 3400 |\n| 12/31 | 9800 |",
+                "chart_caption": [
+                    {
+                        "type": "text",
+                        "content": "图 1.1 2017 年 1 月 1 日到 2020 年 12 月 31 日的观看次数"
+                    }
+                ],
+                "chart_footnote": []
+            },
+            "sub_type": "line",
+            "bbox": [
+                245,
+                448,
+                749,
+                497
+            ]
+        },
+        {
+            "type": "paragraph",
+            "content": {
+                "paragraph_content": [
+                    {
+                        "type": "text",
+                        "content": "把 2017 年 1 月 1 日的观看次数，代入这一个函数里面"
+                    }
+                ]
+            },
+            "bbox": [
+                178,
+                552,
+                608,
+                568
+            ]
+        },
+        {
+            "type": "equation_interline",
+            "content": {
+                "math_content": "\\hat {y} = 5 0 0 + 1 x _ {1} \\tag {1.2}",
+                "math_type": "latex",
+                "image_source": {
+                    "path": "images/958345e1b440804c85a556b1788c22337b6648474190ec5ca4eccdf71b3cb6db.jpg"
+                }
+            },
+            "bbox": [
+                440,
+                581,
+                855,
+                596
+            ]
+        },
+        {
+            "type": "paragraph",
+            "content": {
+                "paragraph_content": [
+                    {
+                        "type": "text",
+                        "content": "可以判断 "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "b = 5 0 0 , \\ w = 1"
+                    },
+                    {
+                        "type": "text",
+                        "content": "的时候，这个函数有多棒。 "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "x _ { 1 }"
+                    },
+                    {
+                        "type": "text",
+                        "content": "代入 4800，预测隔天实际上的观看次数结果为 "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "\\hat { y } = 5 3 0 0"
+                    },
+                    {
+                        "type": "text",
+                        "content": "，真正的结果是 4900，真实的值称为标签（label），它高估了这个频道可能的点击次数，可以计算一下估测的值 yˆ 跟真实值 y 的差距 "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "e _ { \\circ }"
+                    },
+                    {
+                        "type": "text",
+                        "content": "计算差距其实不只一种方式，比如取绝对值："
+                    }
+                ]
+            },
+            "bbox": [
+                136,
+                611,
+                858,
+                684
+            ]
+        },
+        {
+            "type": "equation_interline",
+            "content": {
+                "math_content": "e _ {1} = | y - \\hat {y} | = 4 0 0 \\tag {1.3}",
+                "math_type": "latex",
+                "image_source": {
+                    "path": "images/11434189092371168ac9c3c1b62500beceefe1648c1dfaefeea8b236a565af4a.jpg"
+                }
+            },
+            "bbox": [
+                423,
+                689,
+                855,
+                705
+            ]
+        },
+        {
+            "type": "paragraph",
+            "content": {
+                "paragraph_content": [
+                    {
+                        "type": "text",
+                        "content": "我们不是只能用 1 月 1 日，来预测 1 月 2 日的值，可以用 1 月 2 日的值，来预测 1 月 3日的值。根据 1 月 2 日的观看次数，预测的 1 月 3 日的观看次数的，值是 5400。接下来计算5400 跟跟标签（7500）之间的差距，低估了这个频道。在 1 月 3 日的时候的观看次数，才可以算出："
+                    }
+                ]
+            },
+            "bbox": [
+                136,
+                714,
+                858,
+                788
+            ]
+        },
+        {
+            "type": "equation_interline",
+            "content": {
+                "math_content": "e _ {2} = | y - \\hat {y} | = 2 1 0 0 \\tag {1.4}",
+                "math_type": "latex",
+                "image_source": {
+                    "path": "images/86ee72cd0b8e39cb601f0b581520e7c3a3eefa326626b41a2fe87f75b0a435e7.jpg"
+                }
+            },
+            "bbox": [
+                420,
+                793,
+                855,
+                808
+            ]
+        },
+        {
+            "type": "paragraph",
+            "content": {
+                "paragraph_content": [
+                    {
+                        "type": "text",
+                        "content": "我们可以算过这 3 年来，每一天的预测的误差，这 3 年来每一天的误差，通通都可以算出来，每一天的误差都可以得到 "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "e _ { \\circ }"
+                    },
+                    {
+                        "type": "text",
+                        "content": "接下来把每一天的误差，通通加起来取得平均，得到损失L"
+                    }
+                ]
+            },
+            "bbox": [
+                136,
+                818,
+                858,
+                870
+            ]
+        },
+        {
+            "type": "equation_interline",
+            "content": {
+                "math_content": "L = \\frac {1}{N} \\sum_ {n} e _ {n} \\tag {1.5}",
+                "math_type": "latex",
+                "image_source": {
+                    "path": "images/a02d57833aa5c4950eb416390795db3ddbffa07a0d4a925a229dfb81dbddc985.jpg"
+                }
+            },
+            "bbox": [
+                442,
+                869,
+                855,
+                904
+            ]
+        },
+        {
+            "type": "page_header",
+            "content": {
+                "page_header_content": [
+                    {
+                        "type": "text",
+                        "content": "→_→ "
+                    }
+                ]
+            },
+            "bbox": [
+                139,
+                57,
+                189,
+                68
+            ]
+        },
+        {
+            "type": "page_header",
+            "content": {
+                "page_header_content": [
+                    {
+                        "type": "text",
+                        "content": "https://github.com/datawhalechina/leedl-tutorial "
+                    }
+                ]
+            },
+            "bbox": [
+                302,
+                55,
+                692,
+                70
+            ]
+        },
+        {
+            "type": "page_header",
+            "content": {
+                "page_header_content": [
+                    {
+                        "type": "text",
+                        "content": "←_← "
+                    }
+                ]
+            },
+            "bbox": [
+                805,
+                58,
+                857,
+                68
+            ]
+        },
+        {
+            "type": "page_number",
+            "content": {
+                "page_number_content": [
+                    {
+                        "type": "text",
+                        "content": "9 "
+                    }
+                ]
+            },
+            "bbox": [
+                492,
+                923,
+                504,
+                935
+            ]
+        }
+    ],
+    [
+        {
+            "type": "paragraph",
+            "content": {
+                "paragraph_content": [
+                    {
+                        "type": "text",
+                        "content": "其中，N 代表训验数据的个数，即 3 年来的训练数据，就 365 乘以 3，计算出一个 L，，L 是每一笔训练数据的误差 e 相加以后的结果。L 越大，代表现在这一组参数越不好，L 越小，代表现在这一组参数越好。"
+                    }
+                ]
+            },
+            "bbox": [
+                136,
+                99,
+                860,
+                154
+            ]
+        },
+        {
+            "type": "paragraph",
+            "content": {
+                "paragraph_content": [
+                    {
+                        "type": "text",
+                        "content": "估测的值跟实际的值之间的差距，其实有不同的计算方法，计算 y 与 yˆ 之间绝对值的差距，如式 (1.6) 所示，称为平均绝对误差（Mean Absolute Error，MAE）。"
+                    }
+                ]
+            },
+            "bbox": [
+                136,
+                158,
+                860,
+                193
+            ]
+        },
+        {
+            "type": "equation_interline",
+            "content": {
+                "math_content": "e = | \\hat {y} - y | \\tag {1.6}",
+                "math_type": "latex",
+                "image_source": {
+                    "path": "images/1474337308387a81f15457c6828aae25956c968733548f352a2880c62c00635b.jpg"
+                }
+            },
+            "bbox": [
+                453,
+                209,
+                857,
+                225
+            ]
+        },
+        {
+            "type": "paragraph",
+            "content": {
+                "paragraph_content": [
+                    {
+                        "type": "text",
+                        "content": "如果算 y 与 yˆ 之间平方的差距，如式 (1.7) 所示，则称为均方误差（Mean SquaredError，MSE）。"
+                    }
+                ]
+            },
+            "bbox": [
+                136,
+                240,
+                858,
+                275
+            ]
+        },
+        {
+            "type": "equation_interline",
+            "content": {
+                "math_content": "e = (\\hat {y} - y) ^ {2} \\tag {1.7}",
+                "math_type": "latex",
+                "image_source": {
+                    "path": "images/1614d22c009582db8baf0c86c1aeaa56b3171f9e360fe4a98d1960abdc3155ac.jpg"
+                }
+            },
+            "bbox": [
+                447,
+                278,
+                857,
+                296
+            ]
+        },
+        {
+            "type": "paragraph",
+            "content": {
+                "paragraph_content": [
+                    {
+                        "type": "text",
+                        "content": "有一些任务中 y 和 yˆ 都是概率分布，这个时候可能会选择交叉熵（cross entropy），这个是机器学习的第 2 步。刚才举的那些数字不是真正的例子，以下的数字是真实的例子，是这个频道真实的后台的数据，所计算出来的结果。可以调整不同的 w 和不同的 b，求取各种w 和各种 b，组合起来以后，我们可以为不同的 w 跟 b 的组合，都去计算它的损失，就可以画出图 1.2 所示的等高线图。在这个等高线图上面，越偏红色系，代表计算出来的损失越大，就代表这一组 w 跟 b 越差。如果越偏蓝色系，就代表损失越小，就代表这一组 w 跟 b 越好，拿这一组 w 跟 b，放到函数里面，预测会越精准。假设 "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "w = - 0 . 2 5 , b = - 5 0 0"
+                    },
+                    {
+                        "type": "text",
+                        "content": "，这代表这个频道每天看的人越来越少，而且损失这么大，跟真实的情况不太合。如果 "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "w = 0 . 7 5 , b = 5 0 0"
+                    },
+                    {
+                        "type": "text",
+                        "content": "，估测会比较精准。如果 w 代一个很接近 1 的值，b 带一个小小的值，比如说 100 多，这个时候估测是最精准的，这跟大家的预期可能是比较接近的，就是拿前一天的点击的总次数，去预测隔天的点击的总次数，可能前一天跟隔天的点击的总次数是差不多的，因此 w 设 1，b 设一个小一点的数值，也许估测就会蛮精准的。如图 1.2 所示的等高线图，就是试了不同的参数，计算它的损失，画出来的等高线图称为误差表面（error surface）。这是机器学习的第 2 步。"
+                    }
+                ]
+            },
+            "bbox": [
+                136,
+                305,
+                860,
+                556
+            ]
+        },
+        {
+            "type": "chart",
+            "content": {
+                "image_source": {
+                    "path": "images/74beda43b113af771da192da2e1084df6f252317a3e1dc89a265010200c5cfc6.jpg"
+                },
+                "content": "| w     | b      | L     |\n|-------|--------|-------|\n| -0.75 | -1000  | -1000 |\n| -0.25 | -500   | -500  |\n| 0.75  | 500    | 500   |",
+                "chart_caption": [
+                    {
+                        "type": "text",
+                        "content": "图 1.2 误差表面"
+                    }
+                ],
+                "chart_footnote": []
+            },
+            "sub_type": "heatmap",
+            "bbox": [
+                255,
+                570,
+                737,
+                752
+            ]
+        },
+        {
+            "type": "paragraph",
+            "content": {
+                "paragraph_content": [
+                    {
+                        "type": "text",
+                        "content": "接下来进入机器学习的第 3 步：解一个最优化的问题。找一个 w 跟 b，把未知的参数找一个数值出来，看代哪一个数值进去可以让损失 L 的值最小，就是要找的 w 跟 b，这个可以让损失最小的 w 跟 b 称为 "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "w ^ { * }"
+                    },
+                    {
+                        "type": "text",
+                        "content": "跟 b∗ 代表它们是最好的一组 w 跟 b，可以让损失的值最小。梯度下降（gradient descent）是经常会使用优化的方法。为了要简化起见，先假设只有一个未知的参数 w，b 是已知的。w 代不同的数值的时候，就会得到不同的损失，这一条曲线就是误差表面，只是刚才在前一个例子里面，误差表面是 2 维的，这边只有一个参数，所以这个误差表面是 1 维的。怎么样找一个 w 让损失的值最小呢? 如图 1.3 所示，首先要随机选取一个初始的点 "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "w ^ { 0 }"
+                    },
+                    {
+                        "type": "text",
+                        "content": "。接下来计算 "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "\\frac { \\partial L } { \\partial w } \\big | _ { w = w ^ { 0 } }"
+                    },
+                    {
+                        "type": "text",
+                        "content": "，在 w 等于 "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "w ^ { 0 }"
+                    },
+                    {
+                        "type": "text",
+                        "content": "的时候，参数 w 对损失的微分。计算在这一个点，在 "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "w ^ { 0 }"
+                    },
+                    {
+                        "type": "text",
+                        "content": "这个位置的误差表面的切线斜率，也就是这一条蓝色的虚线，它的斜率，如果这一条虚线的斜率是负的，代表说左边比较高，右边比较低。在这个位置附近，左边比较高，右边比较低。如果左边比较高右边比较低的话，就把 w 的值变大，就可以让损失变小。如果算出来的斜率是正的，就代表左边比较低右边比较高。左边比较低右边比较高，如果左边比较低右边比较高的话，就代表把 w 变小了，w 往左边移，可以让损失的值变小。这个时候就应该把 w 的值变小。我们可以想像说有一个人站在这个地方，他左右环视一下，算微分就是左右环视，它会知道左边比较高还是右边比较高，看哪边比较低，它就往比较低的地方跨出一步。这一步的步伐的大小取决于两件事情："
+                    }
+                ]
+            },
+            "bbox": [
+                136,
+                808,
+                860,
+                904
+            ]
+        },
+        {
+            "type": "page_header",
+            "content": {
+                "page_header_content": [
+                    {
+                        "type": "text",
+                        "content": "→_→ "
+                    }
+                ]
+            },
+            "bbox": [
+                139,
+                57,
+                189,
+                68
+            ]
+        },
+        {
+            "type": "page_header",
+            "content": {
+                "page_header_content": [
+                    {
+                        "type": "text",
+                        "content": "https://github.com/datawhalechina/leedl-tutorial "
+                    }
+                ]
+            },
+            "bbox": [
+                302,
+                55,
+                692,
+                70
+            ]
+        },
+        {
+            "type": "page_header",
+            "content": {
+                "page_header_content": [
+                    {
+                        "type": "text",
+                        "content": "←_← "
+                    }
+                ]
+            },
+            "bbox": [
+                805,
+                58,
+                857,
+                68
+            ]
+        },
+        {
+            "type": "page_number",
+            "content": {
+                "page_number_content": [
+                    {
+                        "type": "text",
+                        "content": "10 "
+                    }
+                ]
+            },
+            "bbox": [
+                489,
+                923,
+                509,
+                935
+            ]
+        }
+    ],
+    [
+        {
+            "type": "paragraph",
+            "content": {
+                "paragraph_content": []
+            },
+            "bbox": [
+                136,
+                99,
+                860,
+                311
+            ]
+        },
+        {
+            "type": "list",
+            "content": {
+                "list_type": "text_list",
+                "list_items": [
+                    {
+                        "item_type": "text",
+                        "item_content": [
+                            {
+                                "type": "text",
+                                "content": "• 第一件事情是这个地方的斜率，斜率大步伐就跨大一点，斜率小步伐就跨小一点。"
+                            }
+                        ]
+                    },
+                    {
+                        "item_type": "text",
+                        "item_content": [
+                            {
+                                "type": "text",
+                                "content": "• 另外，学习率（learning rate）η 也会影响步伐大小。学习率是自己设定的，如果 η 设大一点，每次参数更新就会量大，学习可能就比较快。如果 η 设小一点，参数更新就很慢，每次只会改变一点点参数的数值。这种在做机器学习，需要自己设定，不是机器自己找出来的，称为超参数（hyperparameter）。"
+                            }
+                        ]
+                    }
+                ]
+            },
+            "bbox": [
+                159,
+                313,
+                858,
+                407
+            ]
+        },
+        {
+            "type": "title",
+            "content": {
+                "title_content": [
+                    {
+                        "type": "text",
+                        "content": "Q: 为什么损失可以是负的?"
+                    }
+                ],
+                "level": 1
+            },
+            "bbox": [
+                164,
+                428,
+                379,
+                444
+            ]
+        },
+        {
+            "type": "paragraph",
+            "content": {
+                "paragraph_content": [
+                    {
+                        "type": "text",
+                        "content": "A: 损失函数是自己定义的，在刚才定义里面，损失就是估测的值跟正确的值的绝对值。如果根据刚才损失的定义，它不可能是负的。但是损失函数是自己决定的，比如设置个损失函数为绝对值再减 100，其可能就有负的。这个曲线并不是一个真实的损失，并不是一个真实任务的误差表面。因此这个损失的曲线可以是任何形状。"
+                    }
+                ]
+            },
+            "bbox": [
+                161,
+                448,
+                833,
+                521
+            ]
+        },
+        {
+            "type": "paragraph",
+            "content": {
+                "paragraph_content": [
+                    {
+                        "type": "text",
+                        "content": "把 "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "w ^ { 0 }"
+                    },
+                    {
+                        "type": "text",
+                        "content": "往右移一步，新的位置为 "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "w ^ { 1 }"
+                    },
+                    {
+                        "type": "text",
+                        "content": "，这一步的步伐是 η 乘上微分的结果，即："
+                    }
+                ]
+            },
+            "bbox": [
+                171,
+                543,
+                776,
+                558
+            ]
+        },
+        {
+            "type": "equation_interline",
+            "content": {
+                "math_content": "w ^ {1} \\leftarrow w ^ {0} - \\eta \\left. \\frac {\\partial L}{\\partial w} \\right| _ {w = w ^ {0}} \\tag {1.8}",
+                "math_type": "latex",
+                "image_source": {
+                    "path": "images/de073d67920f69b46fd46f4c419c599c6ae8e1c8374a12ed6502eb0acd4b6c5d.jpg"
+                }
+            },
+            "bbox": [
+                406,
+                565,
+                857,
+                601
+            ]
+        },
+        {
+            "type": "image",
+            "content": {
+                "image_source": {
+                    "path": "images/9e1874289cb3be420dbb88f6737c30303ce72ee31259f2b5c1617375e1fafecc.jpg"
+                },
+                "content": "损失\nL\nη ∂L/∂w |_{w=w_0}\nw_0\nw_1\nw",
+                "image_caption": [
+                    {
+                        "type": "text",
+                        "content": "图 1.3 优化过程"
+                    }
+                ],
+                "image_footnote": []
+            },
+            "sub_type": "text_image",
+            "bbox": [
+                248,
+                619,
+                757,
+                803
+            ]
+        },
+        {
+            "type": "paragraph",
+            "content": {
+                "paragraph_content": [
+                    {
+                        "type": "text",
+                        "content": "接下来反复进行刚才的操作，计算一下 "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "w ^ { 1 }"
+                    },
+                    {
+                        "type": "text",
+                        "content": "微分的结果，再决定现在要把 "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "w ^ { 1 }"
+                    },
+                    {
+                        "type": "text",
+                        "content": "移动多少，再移动到 "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "w ^ { 2 }"
+                    },
+                    {
+                        "type": "text",
+                        "content": "，再继续反复做同样的操作，不断地移动 w 的位置，最后会停下来。往往有两种情况会停下来。"
+                    }
+                ]
+            },
+            "bbox": [
+                136,
+                847,
+                860,
+                902
+            ]
+        },
+        {
+            "type": "page_header",
+            "content": {
+                "page_header_content": [
+                    {
+                        "type": "text",
+                        "content": "→_→ "
+                    }
+                ]
+            },
+            "bbox": [
+                139,
+                57,
+                189,
+                68
+            ]
+        },
+        {
+            "type": "page_header",
+            "content": {
+                "page_header_content": [
+                    {
+                        "type": "text",
+                        "content": "https://github.com/datawhalechina/leedl-tutorial "
+                    }
+                ]
+            },
+            "bbox": [
+                302,
+                55,
+                692,
+                70
+            ]
+        },
+        {
+            "type": "page_header",
+            "content": {
+                "page_header_content": [
+                    {
+                        "type": "text",
+                        "content": "←_← "
+                    }
+                ]
+            },
+            "bbox": [
+                805,
+                58,
+                857,
+                68
+            ]
+        },
+        {
+            "type": "page_number",
+            "content": {
+                "page_number_content": [
+                    {
+                        "type": "text",
+                        "content": "11 "
+                    }
+                ]
+            },
+            "bbox": [
+                489,
+                923,
+                507,
+                935
+            ]
+        }
+    ],
+    [
+        {
+            "type": "list",
+            "content": {
+                "list_type": "text_list",
+                "list_items": [
+                    {
+                        "item_type": "text",
+                        "item_content": [
+                            {
+                                "type": "text",
+                                "content": "• 第一种情况是一开始会设定说，在调整参数的时候，在计算微分的时候，最多计算几次。上限可能会设为 100 万次，参数更新 100 万次后，就不再更新了，更新次数也是一个超参数。"
+                            }
+                        ]
+                    },
+                    {
+                        "item_type": "text",
+                        "item_content": [
+                            {
+                                "type": "text",
+                                "content": "• 还有另外一种理想上的，停下来的可能是，当不断调整参数，调整到一个地方，它的微分的值就是这一项，算出来正好是 0 的时候，如果这一项正好算出来是 0，0 乘上学习率 η 还是 0，所以参数就不会再移动位置。假设是这个理想的情况，把 "
+                            },
+                            {
+                                "type": "equation_inline",
+                                "content": "w ^ { 0 }"
+                            },
+                            {
+                                "type": "text",
+                                "content": "更新到 "
+                            },
+                            {
+                                "type": "equation_inline",
+                                "content": "w ^ { 1 }"
+                            },
+                            {
+                                "type": "text",
+                                "content": "，再更新到 "
+                            },
+                            {
+                                "type": "equation_inline",
+                                "content": "w ^ { 2 }"
+                            },
+                            {
+                                "type": "text",
+                                "content": "，最后更新到 "
+                            },
+                            {
+                                "type": "equation_inline",
+                                "content": "w ^ { T }"
+                            },
+                            {
+                                "type": "text",
+                                "content": "有点卡， "
+                            },
+                            {
+                                "type": "equation_inline",
+                                "content": "w ^ { T }"
+                            },
+                            {
+                                "type": "text",
+                                "content": "卡住了，也就是算出来这个微分的值是 0 了，参数的位置就不会再更新。"
+                            }
+                        ]
+                    }
+                ]
+            },
+            "bbox": [
+                159,
+                99,
+                858,
+                252
+            ]
+        },
+        {
+            "type": "paragraph",
+            "content": {
+                "paragraph_content": [
+                    {
+                        "type": "text",
+                        "content": "梯度下降有一个很大的问题，没有找到真正最好的解，没有找到可以让损失最小的 w。在图 1.4 所示的例子里面，把 w 设定在最右侧红点附近这个地方可以让损失最小。但如果在梯度下降中， "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "w ^ { 0 }"
+                    },
+                    {
+                        "type": "text",
+                        "content": "是随机初始的位置，也很有可能走到 "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "w ^ { T }"
+                    },
+                    {
+                        "type": "text",
+                        "content": "这里，训练就停住了，无法再移动 w 的位置。右侧红点这个位置是真的可以让损失最小的地方，称为全局最小值（global minima），而 "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "w ^ { T }"
+                    },
+                    {
+                        "type": "text",
+                        "content": "这个地方称为局部最小值（local minima），其左右两边都比这个地方的损失还要高一点，但是它不是整个误差表面上面的最低点。"
+                    }
+                ]
+            },
+            "bbox": [
+                136,
+                255,
+                858,
+                369
+            ]
+        },
+        {
+            "type": "chart",
+            "content": {
+                "image_source": {
+                    "path": "images/d0ff782f1372531093b7c4ad69445cff69c007db4bbf766ba74e095c125c922c.jpg"
+                },
+                "content": "| Point | Value |\n|-------|-------|\n| w0    | L     |\n| w1    | L     |\n| w2    | L     |\n| wT    | L     |\n| w     | L     |",
+                "chart_caption": [
+                    {
+                        "type": "text",
+                        "content": "图 1.4 局部最小值"
+                    }
+                ],
+                "chart_footnote": []
+            },
+            "sub_type": "line",
+            "bbox": [
+                253,
+                382,
+                757,
+                563
+            ]
+        },
+        {
+            "type": "paragraph",
+            "content": {
+                "paragraph_content": [
+                    {
+                        "type": "text",
+                        "content": "所以常常可能会听到有人讲到梯度下降不是个好方法，这个方法会有局部最小值的问题，无法真的找到全局最小值。事实上局部最小值是一个假问题，在做梯度下降的时候，真正面对的难题不是局部最小值。有两个参数的情况下使用梯度下降，其实跟刚才一个参数没有什么不同。如果一个参数没有问题的话，可以很快的推广到两个参数。"
+                    }
+                ]
+            },
+            "bbox": [
+                136,
+                614,
+                858,
+                687
+            ]
+        },
+        {
+            "type": "paragraph",
+            "content": {
+                "paragraph_content": [
+                    {
+                        "type": "text",
+                        "content": "假设有两个参数，随机初始值为 "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "w ^ { 0 } , b ^ { 0 }"
+                    },
+                    {
+                        "type": "text",
+                        "content": "。要计算 w, b 跟损失的微分，计算在 "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "w = w ^ { 0 }"
+                    },
+                    {
+                        "type": "text",
+                        "content": "的位置， "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "b = b ^ { 0 }"
+                    },
+                    {
+                        "type": "text",
+                        "content": "的位置，要计算 w 对 L 的微分，计算 b 对 L 的微分"
+                    }
+                ]
+            },
+            "bbox": [
+                136,
+                690,
+                858,
+                726
+            ]
+        },
+        {
+            "type": "equation_interline",
+            "content": {
+                "math_content": "\\left. \\frac {\\partial L}{\\partial b} \\right| _ {w = w ^ {0}, b = b ^ {0}} \\tag {1.9}",
+                "math_type": "latex",
+                "image_source": {
+                    "path": "images/d5f7001f94f23e5d221e63e9407242d6fc7784278728cd1a628d9f93388b0557.jpg"
+                }
+            },
+            "bbox": [
+                445,
+                736,
+                855,
+                778
+            ]
+        },
+        {
+            "type": "equation_interline",
+            "content": {
+                "math_content": "\\left. \\frac {\\partial L}{\\partial w} \\right| _ {w = w ^ {0}, b = b ^ {0}}",
+                "math_type": "latex",
+                "image_source": {
+                    "path": "images/5f5450a2eed67b09978d03ec2c32c57cfcab8a6304643c570ca697dbb29b4737.jpg"
+                }
+            },
+            "bbox": [
+                448,
+                772,
+                554,
+                808
+            ]
+        },
+        {
+            "type": "paragraph",
+            "content": {
+                "paragraph_content": [
+                    {
+                        "type": "text",
+                        "content": "计算完后更新 w 跟 b，把 "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "w ^ { 0 }"
+                    },
+                    {
+                        "type": "text",
+                        "content": "减掉学习率乘上微分的结果得到 "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "w ^ { 1 }"
+                    },
+                    {
+                        "type": "text",
+                        "content": "，把 "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "b ^ { 0 }"
+                    },
+                    {
+                        "type": "text",
+                        "content": "减掉学习率乘 "
+                    }
+                ]
+            },
+            "bbox": [
+                171,
+                818,
+                858,
+                834
+            ]
+        },
+        {
+            "type": "page_header",
+            "content": {
+                "page_header_content": [
+                    {
+                        "type": "text",
+                        "content": "→_→ "
+                    }
+                ]
+            },
+            "bbox": [
+                139,
+                57,
+                189,
+                68
+            ]
+        },
+        {
+            "type": "page_header",
+            "content": {
+                "page_header_content": [
+                    {
+                        "type": "text",
+                        "content": "https://github.com/datawhalechina/leedl-tutorial "
+                    }
+                ]
+            },
+            "bbox": [
+                302,
+                55,
+                692,
+                70
+            ]
+        },
+        {
+            "type": "page_header",
+            "content": {
+                "page_header_content": [
+                    {
+                        "type": "text",
+                        "content": "←_← "
+                    }
+                ]
+            },
+            "bbox": [
+                805,
+                58,
+                857,
+                68
+            ]
+        },
+        {
+            "type": "page_number",
+            "content": {
+                "page_number_content": [
+                    {
+                        "type": "text",
+                        "content": "12 "
+                    }
+                ]
+            },
+            "bbox": [
+                489,
+                923,
+                509,
+                935
+            ]
+        }
+    ],
+    [
+        {
+            "type": "paragraph",
+            "content": {
+                "paragraph_content": [
+                    {
+                        "type": "text",
+                        "content": "上微分的结果得到 "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "b ^ { 1 }"
+                    },
+                    {
+                        "type": "text",
+                        "content": "。 "
+                    }
+                ]
+            },
+            "bbox": [
+                137,
+                99,
+                312,
+                115
+            ]
+        },
+        {
+            "type": "equation_interline",
+            "content": {
+                "math_content": "w ^ {1} \\leftarrow w ^ {0} - \\eta \\left. \\frac {\\partial L}{\\partial w} \\right| _ {w = w ^ {0}, b = b ^ {0}} \\tag {1.10}",
+                "math_type": "latex",
+                "image_source": {
+                    "path": "images/c6d378f6dfc2c8275bc859a6e1de81a3b12b74cac6cd3c8a4de51ea2388143af.jpg"
+                }
+            },
+            "bbox": [
+                389,
+                112,
+                855,
+                155
+            ]
+        },
+        {
+            "type": "equation_interline",
+            "content": {
+                "math_content": "b ^ {1} \\leftarrow b ^ {0} - \\eta \\left. \\frac {\\partial L}{\\partial b} \\right| _ {w = w ^ {0}, b = b ^ {0}}",
+                "math_type": "latex",
+                "image_source": {
+                    "path": "images/10dd452549e2c1af1042aa2f261f791a0079b58399ac45097ae804192618fa72.jpg"
+                }
+            },
+            "bbox": [
+                403,
+                149,
+                603,
+                184
+            ]
+        },
+        {
+            "type": "paragraph",
+            "content": {
+                "paragraph_content": [
+                    {
+                        "type": "text",
+                        "content": "在深度学习框架里面，比如 PyTorch 里面，算微分都是程序自动帮计算的。就是反复同样的步骤，就不断的更新 w 跟 b，期待最后，可以找到一个最好的 w， "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "w ^ { * }"
+                    },
+                    {
+                        "type": "text",
+                        "content": "跟最好的 b∗. 如图 1.5 所示，随便选一个初始的值，先计算一下 w 对 L 的微分，跟计算一下 b 对 L 的微分，接下来更新 w 跟 b，更新的方向就是 "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "{ { \\partial } L } / { { \\partial } w }"
+                    },
+                    {
+                        "type": "text",
+                        "content": "，乘以 η 再乘以一个负号， "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "\\partial L / \\partial b"
+                    },
+                    {
+                        "type": "text",
+                        "content": "，算出这个微分的值，就可以决定更新的方向，可以决定 w 要怎么更新。把 w 跟 b 更新的方向结合起来，就是一个向量，就是红色的箭头，再计算一次微分，再决定要走什么样的方向，把这个微分的值乘上学习率，再乘上负号，我们就知道红色的箭头要指向那里，就知道如何移动 w 跟 b 的位置，一直移动，期待最后可以找出一组不错的 "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "w , b _ { \\mathfrak { c } }"
+                    },
+                    {
+                        "type": "text",
+                        "content": "。实际上真的用梯度下降，进行一番计算以后，这个是真正的数据，算出来的最好的 "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "w ^ { * } = 0 . 9 7 , b ^ { * } = 1 0 0"
+                    },
+                    {
+                        "type": "text",
+                        "content": "，跟猜测蛮接近的。因为"
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "x _ { 1 }"
+                    },
+                    {
+                        "type": "text",
+                        "content": "的值可能跟 y 很接近，所以这个 w 就设一个接近 1 的值，b 就设一个比较偏小的值。损失 "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "L ( w ^ { * } , b ^ { * } )"
+                    },
+                    {
+                        "type": "text",
+                        "content": "算一下是 480，也就是在 2017 到 2020 年的数据上，如果使用这一个函数，b 代100，w 代 0.97，平均的误差是 480，其预测的观看次数误差，大概是 500 人左右。"
+                    }
+                ]
+            },
+            "bbox": [
+                136,
+                190,
+                860,
+                420
+            ]
+        },
+        {
+            "type": "chart",
+            "content": {
+                "image_source": {
+                    "path": "images/77e84f5588bc364ef04358c388af9c56e85c0df50957d189908014a93243edd8.jpg"
+                },
+                "content": "| b     | -0.75 | -0.25 | 0.00 | 0.25 | 0.50 | 0.75 | 1.00 |\n|-------|-------|-------|------|------|------|------|------|\n| -1000 |       |       |      |      |      |      |      |\n| -750  |       |       |      |      |      |      |      |\n| -500  |       |       |      |      |      |      |      |\n| -250  |       |       |      |      |      |      |      |\n| 0     |       |       |      |      |      |      |      |\n| 250   |       |       |      |      |      |      |      |\n| 500   |       |       |      |      |      |      |      |\n| 750   |       |       |      |      |      |      |      |\n| 1000  |       |       |      |      |      |      |      |\nThe chart displays a contour plot with two distinct regions labeled '计算 ∂L/∂w, ∂L/∂b' and '计算 ∂L/∂w, ∂L/∂b', where the contour lines are colored from red to blue. The points are marked with orange circles and connected by a red line, indicating a trajectory or transition in the data series. The label '计算 ∂L/∂w, ∂L/∂b' appears near the top-left corner of the contour region.",
+                "chart_caption": [
+                    {
+                        "type": "text",
+                        "content": "图 1.5 梯度下降优化的过程"
+                    }
+                ],
+                "chart_footnote": []
+            },
+            "sub_type": "heatmap",
+            "bbox": [
+                273,
+                449,
+                742,
+                649
+            ]
+        },
+        {
+            "type": "title",
+            "content": {
+                "title_content": [
+                    {
+                        "type": "text",
+                        "content": "1.2 线性模型"
+                    }
+                ],
+                "level": 1
+            },
+            "bbox": [
+                137,
+                721,
+                273,
+                738
+            ]
+        },
+        {
+            "type": "paragraph",
+            "content": {
+                "paragraph_content": [
+                    {
+                        "type": "text",
+                        "content": "w 跟 b 的值刚才已经找出来的，这组 w 跟 b 可以让损失小到 480。在已经知道答案的数据上去计算损失，2017 到 2020 年每天的观看次数是已知的。所以假装不知道隔天的观看次数，拿这一个函数来进行预测，发现误差是 480。接下来使用这个函数预测未来的观看次数。预测从 2021 年开始每一天都拿这个函数去预测次日的观看人次：用 2020 年的 12 月 31 日的观看人次预测 2021 年 1 月 1 日的观看人次，用 2021 年 1 月 1 日的观看人次预测 1 月 2 日的观看人次，用 1 月 2 日的观看人次去预测 1 月 3 日的观看人次⋯⋯每天都做这件事，一直做到 2 月 14 日，得到平均的值，在 2021 年没有看过的数据上，误差值用 "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "L ^ { \\prime }"
+                    },
+                    {
+                        "type": "text",
+                        "content": "来表示，它是0.58，所以在有看过的数据上，在训练数据上，误差值是比较小的，在没有看过的数据上，在"
+                    }
+                ]
+            },
+            "bbox": [
+                136,
+                750,
+                860,
+                903
+            ]
+        },
+        {
+            "type": "page_header",
+            "content": {
+                "page_header_content": [
+                    {
+                        "type": "text",
+                        "content": "→_→ "
+                    }
+                ]
+            },
+            "bbox": [
+                139,
+                57,
+                189,
+                68
+            ]
+        },
+        {
+            "type": "page_header",
+            "content": {
+                "page_header_content": [
+                    {
+                        "type": "text",
+                        "content": "https://github.com/datawhalechina/leedl-tutorial "
+                    }
+                ]
+            },
+            "bbox": [
+                304,
+                55,
+                692,
+                70
+            ]
+        },
+        {
+            "type": "page_header",
+            "content": {
+                "page_header_content": [
+                    {
+                        "type": "text",
+                        "content": "←_← "
+                    }
+                ]
+            },
+            "bbox": [
+                805,
+                58,
+                857,
+                68
+            ]
+        },
+        {
+            "type": "page_number",
+            "content": {
+                "page_number_content": [
+                    {
+                        "type": "text",
+                        "content": "13 "
+                    }
+                ]
+            },
+            "bbox": [
+                489,
+                923,
+                509,
+                935
+            ]
+        }
+    ],
+    [
+        {
+            "type": "paragraph",
+            "content": {
+                "paragraph_content": [
+                    {
+                        "type": "text",
+                        "content": "2021 年的数据上，看起来误差值是比较大的，每一天的平均误差有 580 人左右，600 人左右。如图 1.6 所示，横轴是代表的是时间，所以 0 这个点代表的是 2021 年 1 月 1 日，最右边点代表的是 2021 年 2 月 14 日，纵轴就是观看的人次，这边是用千人当作单位。红色线是真实的观看人次，蓝色线是机器用这一个函数预测出来的观看人次。蓝色的线几乎就是红色的线往右平移一天而已，这很合理，因为 "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "x _ { 1 }"
+                    },
+                    {
+                        "type": "text",
+                        "content": "也就是前一天的观看人次，跟隔天观看人次的，要怎么拿前一天的观看人次，去预测隔天的观看人次呢，前一天观看人次乘以 0.97，加上 100 加上100，就是隔天的观看人次。机器几乎就是拿前一天的观看人次来预测隔天的观看人次。这个真实的数据有一个很神奇的现象，它是有周期性的，它每隔 7 天就会有两天特别低（周五和周六），两天观看的人特别少，每隔 7 天，就是一个循环。目前的模型不太行，它只能够看前一天。 每隔 7 天它一个循环，如果一个模型参考前 7 天的数据，把 7 天前的数据，直接复制到拿来当作预测的结果，也许预测的会更准也说不定，所以我们就要修改一下模型。通常一个模型的修改，往往来自于对这个问题的理解，即领域知识。"
+                    }
+                ]
+            },
+            "bbox": [
+                136,
+                99,
+                860,
+                331
+            ]
+        },
+        {
+            "type": "chart",
+            "content": {
+                "image_source": {
+                    "path": "images/12ef4d951506924e24a775ff42d27105f6b7bec918b34434f42dcf70e7eaa559.jpg"
+                },
+                "content": "| Date       | 看实观看次数 (千次) | 估计观看次数 (千次) |\n| ---------- | ------------------- | ------------------- |\n| 2021/01/01 | 3.5                 | 2.7                 |\n| 2021/02/14 | 3.3                 | 3.1                 |",
+                "chart_caption": [
+                    {
+                        "type": "text",
+                        "content": "图 1.6 预估曲线图"
+                    }
+                ],
+                "chart_footnote": []
+            },
+            "sub_type": "line",
+            "bbox": [
+                260,
+                343,
+                739,
+                596
+            ]
+        },
+        {
+            "type": "paragraph",
+            "content": {
+                "paragraph_content": [
+                    {
+                        "type": "text",
+                        "content": "一开始，对问题完全不理解的时候，胡乱写一个"
+                    }
+                ]
+            },
+            "bbox": [
+                173,
+                651,
+                549,
+                665
+            ]
+        },
+        {
+            "type": "equation_interline",
+            "content": {
+                "math_content": "y = b + w x _ {1} \\tag {1.11}",
+                "math_type": "latex",
+                "image_source": {
+                    "path": "images/23034cb3e30c33b80064bdc1ee418ba3f5d4941014d9982dfa8fa7df08dfc4ec.jpg"
+                }
+            },
+            "bbox": [
+                448,
+                677,
+                857,
+                694
+            ]
+        },
+        {
+            "type": "paragraph",
+            "content": {
+                "paragraph_content": [
+                    {
+                        "type": "text",
+                        "content": "并没有做得特别好。接下来我们观察了真实的数据以后，得到一个结论是，每隔 7 天有一个循环。所以要把前 7 天的观看人次都列入考虑，写了一个新的模型"
+                    }
+                ]
+            },
+            "bbox": [
+                137,
+                702,
+                858,
+                738
+            ]
+        },
+        {
+            "type": "equation_interline",
+            "content": {
+                "math_content": "y = b + \\sum_ {j = 1} ^ {7} w _ {j} x _ {j} \\tag {1.12}",
+                "math_type": "latex",
+                "image_source": {
+                    "path": "images/d1f8ac2057075b6be9632b3f988bf872aa429637e80691308fbe87566d17657b.jpg"
+                }
+            },
+            "bbox": [
+                430,
+                741,
+                855,
+                783
+            ]
+        },
+        {
+            "type": "paragraph",
+            "content": {
+                "paragraph_content": [
+                    {
+                        "type": "text",
+                        "content": "其中 "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "x _ { j }"
+                    },
+                    {
+                        "type": "text",
+                        "content": "代表第 j 天的观看测试，也就是 7 天前的数据，通通乘上不同的权重 "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "w _ { j }"
+                    },
+                    {
+                        "type": "text",
+                        "content": "，加起来，再加上偏置得到预测的结果。使用该模型预测，其在训练数据上的损失是 380，而只考虑 1 天的模型在训练数据上的损失是 480。因为其考虑了 7 天，所以在训练数据上会得到比较低的损失。考虑了比较多的信息，在训练数据上应该要得到更好的、更低的损失。在没有看到的数据上的损失有比较好是 490。只考虑 1 天的误差是 580，考虑 7 天的误差是 490。用梯度下降，算出 w 跟 b 的最优值如 表 1.1 所示。"
+                    }
+                ]
+            },
+            "bbox": [
+                136,
+                788,
+                860,
+                902
+            ]
+        },
+        {
+            "type": "page_header",
+            "content": {
+                "page_header_content": [
+                    {
+                        "type": "text",
+                        "content": "→_→ "
+                    }
+                ]
+            },
+            "bbox": [
+                139,
+                57,
+                189,
+                68
+            ]
+        },
+        {
+            "type": "page_header",
+            "content": {
+                "page_header_content": [
+                    {
+                        "type": "text",
+                        "content": "https://github.com/datawhalechina/leedl-tutorial "
+                    }
+                ]
+            },
+            "bbox": [
+                304,
+                55,
+                692,
+                70
+            ]
+        },
+        {
+            "type": "page_header",
+            "content": {
+                "page_header_content": [
+                    {
+                        "type": "text",
+                        "content": "←_← "
+                    }
+                ]
+            },
+            "bbox": [
+                805,
+                58,
+                857,
+                68
+            ]
+        },
+        {
+            "type": "page_number",
+            "content": {
+                "page_number_content": []
+            },
+            "bbox": [
+                489,
+                923,
+                509,
+                935
+            ]
+        }
+    ],
+    [
+        {
+            "type": "table",
+            "content": {
+                "image_source": {
+                    "path": "images/1f24009a12c5a90f4b4fa64480e2878783161d76e0e4414d192daca4bdff0793.jpg"
+                },
+                "table_caption": [
+                    {
+                        "type": "text",
+                        "content": "表 1.1 w 和 b 的最优值"
+                    }
+                ],
+                "table_footnote": [],
+                "html": "<table><tr><td>b</td><td>$ w_{1}^{*} $</td><td>$ w_{2}^{*} $</td><td>$ w_{3}^{*} $</td><td>$ w_{4}^{*} $</td><td>$ w_{5}^{*} $</td><td>$ w_{6}^{*} $</td><td>$ w_{7}^{*} $</td></tr><tr><td>50</td><td>0.79</td><td>-0.31</td><td>0.12</td><td>-0.01</td><td>-0.10</td><td>0.30</td><td>0.18</td></tr></table>",
+                "table_type": "simple_table",
+                "table_nest_level": 1
+            },
+            "bbox": [
+                289,
+                129,
+                709,
+                180
+            ]
+        },
+        {
+            "type": "paragraph",
+            "content": {
+                "paragraph_content": [
+                    {
+                        "type": "text",
+                        "content": "机器的逻辑是前一天跟要预测的隔天的数值的关系很大，所以 "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "w _ { 1 } ^ { * }"
+                    },
+                    {
+                        "type": "text",
+                        "content": "是 0.79，不过它知道，如果是前两天前四天前五天，它的值会跟未来要预测的，隔天的值是成反比的，所以 "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "w _ { 2 } , w _ { 4 } , w _ { 5 }"
+                    },
+                    {
+                        "type": "text",
+                        "content": "最佳的值（让训练数据上的损失为 380 的值）是负的。但是 "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "w _ { 1 } , w _ { 3 } , w _ { 6 } , w _ { 7 }"
+                    },
+                    {
+                        "type": "text",
+                        "content": "是正的，考虑前 7天的值，其实可以考虑更多天，本来是考虑前 7 天，可以考虑 28 天，即"
+                    }
+                ]
+            },
+            "bbox": [
+                136,
+                200,
+                860,
+                277
+            ]
+        },
+        {
+            "type": "equation_interline",
+            "content": {
+                "math_content": "y = b + \\sum_ {j = 1} ^ {2 8} w _ {j} x _ {j}. \\tag {1.13}",
+                "math_type": "latex",
+                "image_source": {
+                    "path": "images/c2ff96910139be09c30525f904f6ed5c25fef1e0ca9a06d3fcb8a0008d0ceec0.jpg"
+                }
+            },
+            "bbox": [
+                428,
+                285,
+                855,
+                326
+            ]
+        },
+        {
+            "type": "paragraph",
+            "content": {
+                "paragraph_content": [
+                    {
+                        "type": "text",
+                        "content": "28 天是一个月，考虑前一个月每一天的观看人次，去预测隔天的观看人次，训练数据上是 330。在 2021 年的数据上，损失是 460，看起来又更好一点。如果考虑 56 天，即"
+                    }
+                ]
+            },
+            "bbox": [
+                136,
+                336,
+                858,
+                373
+            ]
+        },
+        {
+            "type": "equation_interline",
+            "content": {
+                "math_content": "y = b + \\sum_ {j = 1} ^ {5 6} w _ {j} x _ {j} \\tag {1.14}",
+                "math_type": "latex",
+                "image_source": {
+                    "path": "images/13141853c6a4b630d9e3a27f49d5ad9c7aff393faa41d4dbe44dae49268a4486.jpg"
+                }
+            },
+            "bbox": [
+                430,
+                381,
+                855,
+                422
+            ]
+        },
+        {
+            "type": "paragraph",
+            "content": {
+                "paragraph_content": [
+                    {
+                        "type": "text",
+                        "content": "在训练数据上损失是 320，在没看过的数据上损失还是 460。考虑更多天没有办法再更降低损失了。看来考虑天数这件事，也许已经到了一个极限。这些模型都是把输入的特征 x 乘上一个权重，再加上一个偏置就得到预测的结果，这样的模型称为线性模型（linear model）。接下来会看如何把线性模型做得更好。"
+                    }
+                ]
+            },
+            "bbox": [
+                136,
+                432,
+                858,
+                506
+            ]
+        },
+        {
+            "type": "title",
+            "content": {
+                "title_content": [
+                    {
+                        "type": "text",
+                        "content": "1.2.1 分段线性曲线"
+                    }
+                ],
+                "level": 1
+            },
+            "bbox": [
+                137,
+                527,
+                309,
+                544
+            ]
+        },
+        {
+            "type": "paragraph",
+            "content": {
+                "paragraph_content": [
+                    {
+                        "type": "text",
+                        "content": "线性模型也许过于简单， "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "x _ { 1 }"
+                    },
+                    {
+                        "type": "text",
+                        "content": "跟 y 可能中间有比较复杂的关系，如图 1.7 所示。对于线性模型， "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "x _ { 1 }"
+                    },
+                    {
+                        "type": "text",
+                        "content": "跟 y 的关系就是一条直线，随着 "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "x _ { 1 }"
+                    },
+                    {
+                        "type": "text",
+                        "content": "越来越高，y 就应该越来越大。设定不同的 w可以改变这条线的斜率，设定不同的 b 可以改变这一条蓝色的直线跟 y 轴的交叉点。但是无论如何改 "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "w"
+                    },
+                    {
+                        "type": "text",
+                        "content": "跟 b，它永远都是一条直线，永远都是 "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "x _ { 1 }"
+                    },
+                    {
+                        "type": "text",
+                        "content": "越大，y 就越大，前一天观看的次数越多，隔天的观看次数就越多。但现实中也许在 "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "x _ { 1 }"
+                    },
+                    {
+                        "type": "text",
+                        "content": "小于某一个数值的时候，前一天的观看次数跟隔天的观看次数是成正比；也许当 "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "x _ { 1 }"
+                    },
+                    {
+                        "type": "text",
+                        "content": "大于一个数值的时候， "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "x _ { 1 }"
+                    },
+                    {
+                        "type": "text",
+                        "content": "太大，前天观看的次数太高，隔天观看次数就会变少；也许 "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "x _ { 1 }"
+                    },
+                    {
+                        "type": "text",
+                        "content": "跟 y 中间，有一个比较复杂的、像红色线一样的关系。但不管如何设置 w 跟 b，永远制造不出红色线，永远无法用线性模型制造红色线。显然线性模型有很大的限制，这一种来自于模型的限制称为模型的偏差，无法模拟真实的情况。"
+                    }
+                ]
+            },
+            "bbox": [
+                136,
+                555,
+                858,
+                727
+            ]
+        },
+        {
+            "type": "paragraph",
+            "content": {
+                "paragraph_content": [
+                    {
+                        "type": "text",
+                        "content": "所以需要写一个更复杂的、更有灵活性的、有未知参数的函数。红色的曲线可以看作是一个常数再加上一群 Hard Sigmoid 函数。Hard Sigmoid 函数的特性是当输入的值，当 x 轴的值小于某一个阈值（某个定值）的时候，大于另外一个定值阈值的时候，中间有一个斜坡。所以它是先水平的，再斜坡，再水平的。所以红色的线可以看作是一个常数项加一大堆的蓝色函数（Hard Sigmoid）。常数项设成红色的线跟 x 轴的交点一样大。常数项怎么加上蓝色函数后，变成红色的这一条线? 蓝线 1 函数斜坡的起点，设在红色函数的起始的地方，第 2 个斜坡的终点设在第一个转角处，让第 1 个蓝色函数的斜坡和红色函数的斜坡的斜率是一样的，这个时候把 0+1 就可以得到红色曲线左侧的线段。接下来，再加第 2 个蓝色的函数，所以第2 个蓝色函数的斜坡就在红色函数的第一个转折点到第 2 个转折点之间，让第 2 个蓝色函数的斜率跟红色函数的斜率一样，这个时候把 0+1+2，就可以得到红色函数左侧和中间的线段。接下来第 3 个部分，第 2 个转折点之后的部分，就加第 3 个蓝色的函数，第 3 个蓝色的函数坡度的起始点设的跟红色函数转折点一样，蓝色函数的斜率设的跟红色函数斜率一样，接下来把 0+1+2+3 全部加起来，就得到完整红色的线。"
+                    }
+                ]
+            },
+            "bbox": [
+                136,
+                730,
+                860,
+                903
+            ]
+        },
+        {
+            "type": "page_header",
+            "content": {
+                "page_header_content": [
+                    {
+                        "type": "text",
+                        "content": "→_→ "
+                    }
+                ]
+            },
+            "bbox": [
+                139,
+                57,
+                189,
+                68
+            ]
+        },
+        {
+            "type": "page_header",
+            "content": {
+                "page_header_content": [
+                    {
+                        "type": "text",
+                        "content": "https://github.com/datawhalechina/leedl-tutorial "
+                    }
+                ]
+            },
+            "bbox": [
+                304,
+                55,
+                692,
+                70
+            ]
+        },
+        {
+            "type": "page_header",
+            "content": {
+                "page_header_content": [
+                    {
+                        "type": "text",
+                        "content": "←_← "
+                    }
+                ]
+            },
+            "bbox": [
+                805,
+                58,
+                857,
+                68
+            ]
+        },
+        {
+            "type": "page_number",
+            "content": {
+                "page_number_content": []
+            },
+            "bbox": [
+                489,
+                923,
+                509,
+                935
+            ]
+        }
+    ],
+    [
+        {
+            "type": "image",
+            "content": {
+                "image_source": {
+                    "path": "images/ca42d75c2e506375ab645b197389a1b6b13cd690e593bc1707ccbbaaac61b855.jpg"
+                },
+                "content": "y\nx₁\n不同的 b\n不同的 w",
+                "image_caption": [
+                    {
+                        "type": "text",
+                        "content": "图 1.7 线性模型的局限性"
+                    }
+                ],
+                "image_footnote": []
+            },
+            "sub_type": "text_image",
+            "bbox": [
+                247,
+                96,
+                747,
+                278
+            ]
+        },
+        {
+            "type": "paragraph",
+            "content": {
+                "paragraph_content": []
+            },
+            "bbox": [
+                136,
+                332,
+                860,
+                406
+            ]
+        },
+        {
+            "type": "paragraph",
+            "content": {
+                "paragraph_content": [
+                    {
+                        "type": "text",
+                        "content": "所以红色线，即分段线性曲线（piecewise linear curve）可以看作是一个常数，再加上一堆蓝色的函数。分段线性曲线可以用常数项加一大堆的蓝色函数组合出来，只是用的蓝色函数不一定一样。要有很多不同的蓝色函数，加上一个常数以后就可以组出这些分段线性曲线。如果分段线性曲线越复杂，转折的点越多，所需的蓝色函数就越多。"
+                    }
+                ]
+            },
+            "bbox": [
+                136,
+                410,
+                860,
+                483
+            ]
+        },
+        {
+            "type": "chart",
+            "content": {
+                "image_source": {
+                    "path": "images/4383a72b57d818ce37b459076edf6211471cf9c0f54ca68e91ee6fc52810e456.jpg"
+                },
+                "content": "| x1 | y (Red Line) | y (Blue Line) |\n|----|--------------|---------------|\n| 0  | 0            | 0             |\n| Peak | ~1.5         | ~1.0          |\n| End| ~0.8         | ~0.5          |",
+                "chart_caption": [
+                    {
+                        "type": "text",
+                        "content": "图 1.8 构建红色曲线"
+                    }
+                ],
+                "chart_footnote": []
+            },
+            "sub_type": "line",
+            "bbox": [
+                245,
+                495,
+                757,
+                762
+            ]
+        },
+        {
+            "type": "paragraph",
+            "content": {
+                "paragraph_content": [
+                    {
+                        "type": "text",
+                        "content": "也许要考虑的 x 跟 y 的关系不是分段线性曲线，而是如图 1.9 所示的曲线。可以在这样的曲线上面，先取一些点，再把这些点点起来，变成一个分段线性曲线。而这个分段线性曲线跟原来的曲线，它会非常接近，如果点取的够多或点取的位置适当，分段线性曲线就可以逼近这一个连续的曲线，就可以逼近有角度的、有弧度的这一条曲线。 所以可以用分段线性曲线去逼近任何的连续的曲线，而每个分段线性曲线都可以用一大堆蓝色的函数组合起来。也就是说，只要有足够的蓝色函数把它加起来，就可以变成任何连续的曲线。"
+                    }
+                ]
+            },
+            "bbox": [
+                136,
+                807,
+                860,
+                902
+            ]
+        },
+        {
+            "type": "page_header",
+            "content": {
+                "page_header_content": [
+                    {
+                        "type": "text",
+                        "content": "→_→ "
+                    }
+                ]
+            },
+            "bbox": [
+                139,
+                57,
+                189,
+                68
+            ]
+        },
+        {
+            "type": "page_header",
+            "content": {
+                "page_header_content": [
+                    {
+                        "type": "text",
+                        "content": "https://github.com/datawhalechina/leedl-tutorial "
+                    }
+                ]
+            },
+            "bbox": [
+                304,
+                55,
+                692,
+                70
+            ]
+        },
+        {
+            "type": "page_header",
+            "content": {
+                "page_header_content": [
+                    {
+                        "type": "text",
+                        "content": "←_← "
+                    }
+                ]
+            },
+            "bbox": [
+                805,
+                58,
+                857,
+                68
+            ]
+        },
+        {
+            "type": "page_number",
+            "content": {
+                "page_number_content": []
+            },
+            "bbox": [
+                489,
+                923,
+                509,
+                935
+            ]
+        }
+    ],
+    [
+        {
+            "type": "paragraph",
+            "content": {
+                "paragraph_content": []
+            },
+            "bbox": [
+                136,
+                99,
+                697,
+                115
+            ]
+        },
+        {
+            "type": "chart",
+            "content": {
+                "image_source": {
+                    "path": "images/d3ea68f3e52f6c7cf8d1b51cb2ad2ee65a47c4ae166b10f95819e29cdc07edda.jpg"
+                },
+                "content": "| x₁ | y (solid line) | y (dotted line) |\n|----|----------------|-----------------|\n| 0  | 0              | 0               |\n| 0.5| ~0.8           | ~0.7            |\n| 1  | ~0.6           | ~0.5            |\n| 1.5| ~0.3           | ~0.2            |\n| 2  | ~0.4           | ~0.3            |",
+                "chart_caption": [
+                    {
+                        "type": "text",
+                        "content": "图 1.9 分段曲线可以逼近任何连续曲线"
+                    }
+                ],
+                "chart_footnote": []
+            },
+            "sub_type": "line",
+            "bbox": [
+                245,
+                130,
+                747,
+                321
+            ]
+        },
+        {
+            "type": "paragraph",
+            "content": {
+                "paragraph_content": [
+                    {
+                        "type": "text",
+                        "content": "假设 x 跟 y 的关系非常复杂也没关系，就想办法写一个带有未知数的函数。直接写 HardSigmoid 不是很容易，但是可以用一条曲线来理解它，用 Sigmoid 函数来逼近 Hard Sigmoid，如图 1.10 所示。Sigmoid 函数的表达式为"
+                    }
+                ]
+            },
+            "bbox": [
+                136,
+                370,
+                858,
+                425
+            ]
+        },
+        {
+            "type": "equation_interline",
+            "content": {
+                "math_content": "y = c \\frac {1}{1 + e ^ {- (b + w x _ {1})}}",
+                "math_type": "latex",
+                "image_source": {
+                    "path": "images/8c33f5ab94bbe8e2fef47edc04dcf4b792edbe97dfd8cfc14a9b0707e65b8197.jpg"
+                }
+            },
+            "bbox": [
+                421,
+                432,
+                571,
+                463
+            ]
+        },
+        {
+            "type": "paragraph",
+            "content": {
+                "paragraph_content": [
+                    {
+                        "type": "text",
+                        "content": "其横轴输入是 "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "x _ { 1 }"
+                    },
+                    {
+                        "type": "text",
+                        "content": "，输出是 y，c 为常数。"
+                    }
+                ]
+            },
+            "bbox": [
+                137,
+                470,
+                453,
+                486
+            ]
+        },
+        {
+            "type": "image",
+            "content": {
+                "image_source": {
+                    "path": "images/c96ce8827a2572e490760c0e1be98c1059e05635628263ab6ee42f1276862f5a.jpg"
+                },
+                "content": "Hard Sigmoid\nSigmoid 函数",
+                "image_caption": [
+                    {
+                        "type": "text",
+                        "content": "图 1.10 使用 Sigmoid 逼近 Hard Sigmoid"
+                    }
+                ],
+                "image_footnote": []
+            },
+            "sub_type": "text_image",
+            "bbox": [
+                315,
+                495,
+                678,
+                680
+            ]
+        },
+        {
+            "type": "paragraph",
+            "content": {
+                "paragraph_content": [
+                    {
+                        "type": "text",
+                        "content": "如果 "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "x _ { 1 }"
+                    },
+                    {
+                        "type": "text",
+                        "content": "的值，趋近于无穷大的时候， "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "e ^ { - ( b + w x _ { 1 } ) }"
+                    },
+                    {
+                        "type": "text",
+                        "content": "这一项就会消失，当 "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "x _ { 1 }"
+                    },
+                    {
+                        "type": "text",
+                        "content": "非常大的时候，这一条就会收敛在高度为 c 的地方。如果 "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "x _ { 1 }"
+                    },
+                    {
+                        "type": "text",
+                        "content": "负的非常大的时候，分母的地方就会非常大，y的值就会趋近于 0。"
+                    }
+                ]
+            },
+            "bbox": [
+                136,
+                728,
+                858,
+                783
+            ]
+        },
+        {
+            "type": "paragraph",
+            "content": {
+                "paragraph_content": [
+                    {
+                        "type": "text",
+                        "content": "所以可以用这样子的一个函数逼近这一个蓝色的函数，即 Sigmoid 函数，Sigmoid 函数就是 S 型的函数。因为它长得是有点像是 S 型，所以叫它 Sigmoid 函数。"
+                    }
+                ]
+            },
+            "bbox": [
+                136,
+                787,
+                858,
+                822
+            ]
+        },
+        {
+            "type": "paragraph",
+            "content": {
+                "paragraph_content": [
+                    {
+                        "type": "text",
+                        "content": "为了简洁，去掉了指数的部分，蓝色函数的表达式为"
+                    }
+                ]
+            },
+            "bbox": [
+                171,
+                826,
+                586,
+                841
+            ]
+        },
+        {
+            "type": "equation_interline",
+            "content": {
+                "math_content": "y = c \\sigma (b + w x _ {1}) \\tag {1.15}",
+                "math_type": "latex",
+                "image_source": {
+                    "path": "images/2443a10f220831dc50fca21fc8f18bf3436d647f79fdcb759f1ea11ff1e354fe.jpg"
+                }
+            },
+            "bbox": [
+                431,
+                856,
+                857,
+                872
+            ]
+        },
+        {
+            "type": "paragraph",
+            "content": {
+                "paragraph_content": [
+                    {
+                        "type": "text",
+                        "content": "所以可以用 Sigmoid 函数逼近 Hard Sigmoid 函数。"
+                    }
+                ]
+            },
+            "bbox": [
+                171,
+                885,
+                571,
+                902
+            ]
+        },
+        {
+            "type": "page_header",
+            "content": {
+                "page_header_content": [
+                    {
+                        "type": "text",
+                        "content": "→_→ "
+                    }
+                ]
+            },
+            "bbox": [
+                139,
+                57,
+                189,
+                68
+            ]
+        },
+        {
+            "type": "page_header",
+            "content": {
+                "page_header_content": [
+                    {
+                        "type": "text",
+                        "content": "https://github.com/datawhalechina/leedl-tutorial "
+                    }
+                ]
+            },
+            "bbox": [
+                302,
+                55,
+                692,
+                70
+            ]
+        },
+        {
+            "type": "page_header",
+            "content": {
+                "page_header_content": [
+                    {
+                        "type": "text",
+                        "content": "←_← "
+                    }
+                ]
+            },
+            "bbox": [
+                805,
+                58,
+                857,
+                68
+            ]
+        },
+        {
+            "type": "page_number",
+            "content": {
+                "page_number_content": []
+            },
+            "bbox": [
+                489,
+                923,
+                509,
+                935
+            ]
+        }
+    ],
+    [
+        {
+            "type": "equation_interline",
+            "content": {
+                "math_content": "y = c \\frac {1}{1 + e ^ {- (b + w x _ {1})}} \\tag {1.16}",
+                "math_type": "latex",
+                "image_source": {
+                    "path": "images/5b4e63502965c035ddb2ff9daac1ebb03c3b6841dfd0f04792c333e933773e33.jpg"
+                }
+            },
+            "bbox": [
+                421,
+                112,
+                855,
+                141
+            ]
+        },
+        {
+            "type": "paragraph",
+            "content": {
+                "paragraph_content": [
+                    {
+                        "type": "text",
+                        "content": "调整这里的b、w 和c可以制造各种不同形状的Sigmoid函数，用各种不同形状的Sigmoid函数去逼近 Hard Sigmoid 函数。如图 1.11 所示，如果改 w，就会改变斜率，就会改变斜坡的坡度。如果改了 b，就可以把这一个 Sigmoid 函数左右移动；如果改 c，就可以改变它的高度。所以只要有不同的 w 不同的 b 不同的 c，就可以制造出不同的 Sigmoid 函数，把不同的Sigmoid 函数叠起来以后就可以去逼近各种不同的分段线性函数；分段线性函数可以拿来近似各种不同的连续的函数。"
+                    }
+                ]
+            },
+            "bbox": [
+                136,
+                145,
+                860,
+                258
+            ]
+        },
+        {
+            "type": "chart",
+            "content": {
+                "image_source": {
+                    "path": "images/5310ebb01d665f6d08837e0f14f2e345bc2171c5edf683be2573e8ed19d41b97.jpg"
+                },
+                "content": "| Parameter | Value Range |\n|-----------|-------------|\n| 不同的 w (改变斜率) | -2 to 2 |\n| 不同的 b (偏移) | -2 to 2 |\n| 不同的 c (改变高度) | -2 to 2 |",
+                "chart_caption": [
+                    {
+                        "type": "text",
+                        "content": "图 1.11 调整参数，制造不同的 Sigmoid 函数"
+                    }
+                ],
+                "chart_footnote": []
+            },
+            "sub_type": "line",
+            "bbox": [
+                245,
+                267,
+                754,
+                596
+            ]
+        },
+        {
+            "type": "paragraph",
+            "content": {
+                "paragraph_content": [
+                    {
+                        "type": "text",
+                        "content": "如图 1.12 所示，红色这条线就是 0 加 1+2+3，而 1、2、3 都是蓝色的函数，其都可写成 "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "\\left( b + w x _ { 1 } \\right)"
+                    },
+                    {
+                        "type": "text",
+                        "content": "，去做 Sigmoid 再乘上 "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "c _ { i } 1"
+                    },
+                    {
+                        "type": "text",
+                        "content": "，只是 1、2、3 的 w、b、c 不同。"
+                    }
+                ]
+            },
+            "bbox": [
+                136,
+                644,
+                858,
+                680
+            ]
+        },
+        {
+            "type": "equation_interline",
+            "content": {
+                "math_content": "y = b + \\sum_ {i} c _ {i} \\sigma (b _ {i} + w _ {i} x _ {1}) \\tag {1.17}",
+                "math_type": "latex",
+                "image_source": {
+                    "path": "images/6980151f7aa079405a2497f512e605fdb9d361631339ea6fa4922fedffe2ab6b.jpg"
+                }
+            },
+            "bbox": [
+                394,
+                690,
+                857,
+                722
+            ]
+        },
+        {
+            "type": "paragraph",
+            "content": {
+                "paragraph_content": [
+                    {
+                        "type": "text",
+                        "content": "所以这边每一个式子都代表了一个不同蓝色的函数，求和就是把不同的蓝色的函数相加，再加一个常数 "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "b _ { \\circ }"
+                    },
+                    {
+                        "type": "text",
+                        "content": "假设里面的 b 跟 w 跟 c，它是未知的，它是未知的参数，就可以设定不同的b 跟 w 跟 c，就可以制造不同的蓝色的函数，制造不同的蓝色的函数叠起来以后，就可以制造出不同的红色的曲线，就可以制造出不同的分段线性曲线，逼近各式各样不同的连续函数。"
+                    }
+                ]
+            },
+            "bbox": [
+                136,
+                730,
+                858,
+                804
+            ]
+        },
+        {
+            "type": "paragraph",
+            "content": {
+                "paragraph_content": [
+                    {
+                        "type": "text",
+                        "content": "此外，我们可以不只用一个特征 x ，可以用多个特征代入不同的 "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "c , b , w"
+                    },
+                    {
+                        "type": "text",
+                        "content": "，组合出各种不同的函数，从而得到更有灵活性（flexibility）的函数，如图 1.13 所示。用 j 来代表特征的编号。如果要考虑前 28 天，j 就是 1 到 28。"
+                    }
+                ]
+            },
+            "bbox": [
+                136,
+                808,
+                858,
+                863
+            ]
+        },
+        {
+            "type": "paragraph",
+            "content": {
+                "paragraph_content": [
+                    {
+                        "type": "text",
+                        "content": "直观来讲，先考虑一下 j 就是 1、2、3 的情况，就是只考虑 3 个特征。举个例子，只考虑前一天、前两天跟前 3 天的情况，所以 j 等于 1,2,3，所以输入就是 "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "x _ { 1 }"
+                    },
+                    {
+                        "type": "text",
+                        "content": "代表前一天的观看次数， "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "x _ { 2 }"
+                    },
+                    {
+                        "type": "text",
+                        "content": "两天前观看次数， "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "x _ { 3 }"
+                    },
+                    {
+                        "type": "text",
+                        "content": "3 天前的观看次数，每一个 i 就代表了一个蓝色的函数。每一个蓝色的函数都用一个 Sigmoid 函数来比近似它，1,2,3 代表有个 Sigmoid 函数。"
+                    }
+                ]
+            },
+            "bbox": [
+                136,
+                866,
+                858,
+                902
+            ]
+        },
+        {
+            "type": "page_header",
+            "content": {
+                "page_header_content": [
+                    {
+                        "type": "text",
+                        "content": "→_→ "
+                    }
+                ]
+            },
+            "bbox": [
+                139,
+                57,
+                189,
+                68
+            ]
+        },
+        {
+            "type": "page_header",
+            "content": {
+                "page_header_content": [
+                    {
+                        "type": "text",
+                        "content": "https://github.com/datawhalechina/leedl-tutorial "
+                    }
+                ]
+            },
+            "bbox": [
+                304,
+                55,
+                692,
+                70
+            ]
+        },
+        {
+            "type": "page_header",
+            "content": {
+                "page_header_content": [
+                    {
+                        "type": "text",
+                        "content": "←_← "
+                    }
+                ]
+            },
+            "bbox": [
+                806,
+                58,
+                857,
+                68
+            ]
+        },
+        {
+            "type": "page_number",
+            "content": {
+                "page_number_content": []
+            },
+            "bbox": [
+                489,
+                923,
+                509,
+                935
+            ]
+        }
+    ],
+    [
+        {
+            "type": "chart",
+            "content": {
+                "image_source": {
+                    "path": "images/6b389bfb731cd849405b238acd74413370750fb139c2ffcf6e2034bbf4892e31.jpg"
+                },
+                "content": "| x1 | c1 sigmoid(b1 + w1x1) | c2 sigmoid(b2 + w2x1) | c3 sigmoid(b3 + w3x1) |\n|----|------------------------|------------------------|------------------------|\n| 0  | 0                      | 0                      | 0                      |\n| 1  | 1                      | 0                      | 0                      |\n| 2  | 0                      | 0                      | 0                      |\n| 3  | 1                      | 0                      | 0                      |",
+                "chart_caption": [
+                    {
+                        "type": "text",
+                        "content": "图 1.12 使用 Hard Sigmoid 来合成红色"
+                    }
+                ],
+                "chart_footnote": []
+            },
+            "sub_type": "line",
+            "bbox": [
+                245,
+                101,
+                754,
+                326
+            ]
+        },
+        {
+            "type": "paragraph",
+            "content": {
+                "paragraph_content": []
+            },
+            "bbox": [
+                136,
+                376,
+                858,
+                412
+            ]
+        },
+        {
+            "type": "equation_interline",
+            "content": {
+                "math_content": "b _ {1} + w _ {1 1} x _ {1} + w _ {1 2} x _ {2} + w _ {1 3} x _ {3} \\tag {1.18}",
+                "math_type": "latex",
+                "image_source": {
+                    "path": "images/251182f227e029ca576771ca79c72ffc444f46b0428109b52f82f6dd7d445a85.jpg"
+                }
+            },
+            "bbox": [
+                386,
+                435,
+                855,
+                451
+            ]
+        },
+        {
+            "type": "paragraph",
+            "content": {
+                "paragraph_content": [
+                    {
+                        "type": "equation_inline",
+                        "content": "w _ { i j }"
+                    },
+                    {
+                        "type": "text",
+                        "content": "代表在第 i 个 Sigmoid 里面，乘给第 j 个特征的权重，w 的第一个下标代表是现在在考虑的是第一个 Sigmoid 函数。为了简化起见，括号里面的式子为"
+                    }
+                ]
+            },
+            "bbox": [
+                136,
+                458,
+                858,
+                495
+            ]
+        },
+        {
+            "type": "equation_interline",
+            "content": {
+                "math_content": "r _ {1} = b _ {1} + w _ {1 1} x _ {1} + w _ {1 2} x _ {2} + w _ {1 3} x _ {3}",
+                "math_type": "latex",
+                "image_source": {
+                    "path": "images/c06c423a4885b094599ff23ea3619dcb998cf53fdf44d3a96dbfb1f964696790.jpg"
+                }
+            },
+            "bbox": [
+                366,
+                506,
+                628,
+                521
+            ]
+        },
+        {
+            "type": "equation_interline",
+            "content": {
+                "math_content": "r _ {2} = b _ {2} + w _ {2 1} x _ {1} + w _ {2 2} x _ {2} + w _ {2 3} x _ {3} \\tag {1.19}",
+                "math_type": "latex",
+                "image_source": {
+                    "path": "images/431ae3cb4448dec69a8cb0ddc085a71b34fd4ab19581d900e6bf6ce732d8be3f.jpg"
+                }
+            },
+            "bbox": [
+                366,
+                527,
+                855,
+                545
+            ]
+        },
+        {
+            "type": "equation_interline",
+            "content": {
+                "math_content": "r _ {3} = b _ {3} + w _ {3 1} x _ {1} + w _ {3 2} x _ {2} + w _ {3 3} x _ {3}",
+                "math_type": "latex",
+                "image_source": {
+                    "path": "images/71a32db785cd748aa6cc45fcf83ff24962bee75c45e1d70d6cf78e020b728ca2.jpg"
+                }
+            },
+            "bbox": [
+                368,
+                552,
+                628,
+                568
+            ]
+        },
+        {
+            "type": "paragraph",
+            "content": {
+                "paragraph_content": [
+                    {
+                        "type": "text",
+                        "content": "我们可以用矩阵跟向量相乘的方法，写一个比较简洁的写法。"
+                    }
+                ]
+            },
+            "bbox": [
+                171,
+                577,
+                645,
+                593
+            ]
+        },
+        {
+            "type": "equation_interline",
+            "content": {
+                "math_content": "\\left[ \\begin{array}{l} r _ {1} \\\\ r _ {2} \\\\ r _ {3} \\end{array} \\right] = \\left[ \\begin{array}{l} b _ {1} \\\\ b _ {2} \\\\ b _ {3} \\end{array} \\right] + \\left[ \\begin{array}{l l l} w _ {1 1} & w _ {1 2} & w _ {1 3} \\\\ w _ {2 1} & w _ {2 2} & w _ {2 3} \\\\ w _ {3 1} & w _ {3 2} & w _ {3 3} \\end{array} \\right] \\left[ \\begin{array}{l} x _ {1} \\\\ x _ {2} \\\\ x _ {3} \\end{array} \\right] \\tag {1.20}",
+                "math_type": "latex",
+                "image_source": {
+                    "path": "images/591a186c0c0f6ef34f75ec96a7073819638b49844fa8de13f6d41dc8fdf18b07.jpg"
+                }
+            },
+            "bbox": [
+                312,
+                598,
+                855,
+                663
+            ]
+        },
+        {
+            "type": "paragraph",
+            "content": {
+                "paragraph_content": [
+                    {
+                        "type": "text",
+                        "content": "将其改成线性代数比较常用的表示方式为"
+                    }
+                ]
+            },
+            "bbox": [
+                171,
+                669,
+                497,
+                684
+            ]
+        },
+        {
+            "type": "equation_interline",
+            "content": {
+                "math_content": "\\boldsymbol {r} = \\boldsymbol {b} + \\boldsymbol {W} \\boldsymbol {x} \\tag {1.21}",
+                "math_type": "latex",
+                "image_source": {
+                    "path": "images/6576bf76fe7c67a5db400aabda4a161ea8349858015ccd0c00e58409bd4844f4.jpg"
+                }
+            },
+            "bbox": [
+                445,
+                697,
+                855,
+                714
+            ]
+        },
+        {
+            "type": "paragraph",
+            "content": {
+                "paragraph_content": [
+                    {
+                        "type": "text",
+                        "content": "蓝框里面的括号里面做的如式 (1.21) 所示，r 对应的是 "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "r _ { 1 } , r _ { 2 } , r _ { 3 \\circ } \\ r _ { 1 } , r _ { 2 } , r _ { 3 }"
+                    },
+                    {
+                        "type": "text",
+                        "content": "分别通过 Sig-moid 函数得到 "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "a _ { 1 } , a _ { 2 } , a _ { 3 }"
+                    },
+                    {
+                        "type": "text",
+                        "content": "，即"
+                    }
+                ]
+            },
+            "bbox": [
+                136,
+                726,
+                858,
+                762
+            ]
+        },
+        {
+            "type": "equation_interline",
+            "content": {
+                "math_content": "\\boldsymbol {a} = \\sigma (\\boldsymbol {r}) \\tag {1.22}",
+                "math_type": "latex",
+                "image_source": {
+                    "path": "images/bdfc0cef8a2976b441982f6e947c0ba1c472c8e7a2b78b5e944de493dbfb6a40.jpg"
+                }
+            },
+            "bbox": [
+                460,
+                765,
+                855,
+                781
+            ]
+        },
+        {
+            "type": "paragraph",
+            "content": {
+                "paragraph_content": [
+                    {
+                        "type": "text",
+                        "content": "因此蓝色虚线框里面做的事情，是从 "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "x _ { 1 } , x _ { 2 } , x _ { 3 }"
+                    },
+                    {
+                        "type": "text",
+                        "content": "得到了 "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "a _ { 1 } , a _ { 2 } , a _ { 3 }"
+                    },
+                    {
+                        "type": "text",
+                        "content": "，如图 1.14 所示。"
+                    }
+                ]
+            },
+            "bbox": [
+                171,
+                790,
+                805,
+                806
+            ]
+        },
+        {
+            "type": "paragraph",
+            "content": {
+                "paragraph_content": [
+                    {
+                        "type": "text",
+                        "content": "上面这个比较有灵活性的函数，如果用线性代数来表示，即"
+                    }
+                ]
+            },
+            "bbox": [
+                173,
+                810,
+                640,
+                826
+            ]
+        },
+        {
+            "type": "equation_interline",
+            "content": {
+                "math_content": "y = b + \\boldsymbol {c} ^ {\\mathrm{T}} \\boldsymbol {a} \\tag {1.23}",
+                "math_type": "latex",
+                "image_source": {
+                    "path": "images/ec4aad7bd0a3e8d01de93ee7d172cf4bf44b6554d5cbf54c6d300a1e53698edd.jpg"
+                }
+            },
+            "bbox": [
+                447,
+                837,
+                855,
+                854
+            ]
+        },
+        {
+            "type": "paragraph",
+            "content": {
+                "paragraph_content": [
+                    {
+                        "type": "text",
+                        "content": "接下来，如图1.15所示，x是特征，绿色的b是一个向量，灰色的b是一个数值。 "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "W , \\boldsymbol { b } , c ^ { \\mathrm { T } }"
+                    },
+                    {
+                        "type": "text",
+                        "content": ", b是未知参数。把这些东西通通拉直，“拼”成一个很长的向量，我们把 W 的每一行或者是每一列拿出来。无论是拿行或拿列都可以，把 W 的每一列或每一行“拼”成一个长的向量，把 "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "\\displaystyle b , c ^ { \\mathrm { T } }"
+                    },
+                    {
+                        "type": "text",
+                        "content": ", b” 拼” 上来，这个长的向量直接用 θ 来表示。所有的未知的参数，一律统称 θ。"
+                    }
+                ]
+            },
+            "bbox": [
+                137,
+                866,
+                858,
+                902
+            ]
+        },
+        {
+            "type": "page_header",
+            "content": {
+                "page_header_content": [
+                    {
+                        "type": "text",
+                        "content": "→_→ "
+                    }
+                ]
+            },
+            "bbox": [
+                139,
+                57,
+                189,
+                68
+            ]
+        },
+        {
+            "type": "page_header",
+            "content": {
+                "page_header_content": [
+                    {
+                        "type": "text",
+                        "content": "https://github.com/datawhalechina/leedl-tutorial "
+                    }
+                ]
+            },
+            "bbox": [
+                304,
+                55,
+                692,
+                70
+            ]
+        },
+        {
+            "type": "page_header",
+            "content": {
+                "page_header_content": [
+                    {
+                        "type": "text",
+                        "content": "←_← "
+                    }
+                ]
+            },
+            "bbox": [
+                806,
+                58,
+                857,
+                68
+            ]
+        },
+        {
+            "type": "page_number",
+            "content": {
+                "page_number_content": [
+                    {
+                        "type": "text",
+                        "content": "19 "
+                    }
+                ]
+            },
+            "bbox": [
+                489,
+                923,
+                509,
+                935
+            ]
+        }
+    ],
+    [
+        {
+            "type": "image",
+            "content": {
+                "image_source": {
+                    "path": "images/1a253e84382d0da425cfed0bf4d2e3f4da627a19c0250110691f811231c9396b.jpg"
+                },
+                "content": "y = b + wx₁\n↓\ny = b + ∑ᵢ cᵢ sigmoid(bᵢ + wᵢx₁)\n↓\ny = b + ∑ⱼ wⱼxⱼ\n↓\ny = b + ∑ᵢ cᵢ sigmoid(bᵢ + ∑ⱼ wᵢⱼxⱼ)",
+                "image_caption": [
+                    {
+                        "type": "text",
+                        "content": "图 1.13 构建更有灵活性的函数"
+                    }
+                ],
+                "image_footnote": []
+            },
+            "sub_type": "text_image",
+            "bbox": [
+                243,
+                137,
+                690,
+                363
+            ]
+        },
+        {
+            "type": "paragraph",
+            "content": {
+                "paragraph_content": []
+            },
+            "bbox": [
+                136,
+                418,
+                858,
+                454
+            ]
+        },
+        {
+            "type": "paragraph",
+            "content": {
+                "paragraph_content": [
+                    {
+                        "type": "text",
+                        "content": "Q: 优化是找一个可以让损失最小的参数，是否可以穷举所有可能的未知参数的值？"
+                    }
+                ]
+            },
+            "bbox": [
+                161,
+                474,
+                803,
+                491
+            ]
+        },
+        {
+            "type": "paragraph",
+            "content": {
+                "paragraph_content": [
+                    {
+                        "type": "text",
+                        "content": "A：只有 w 跟 b 两个参数的前提之下，可以穷举所有可能的 w 跟 b 的值，所以在参数很少的情况下。甚至可能不用梯度下降，不需要优化的技巧。但是参数非常多的时候，就不能使用穷举的方法，需要梯度下降来找出可以让损失最低的参数。"
+                    }
+                ]
+            },
+            "bbox": [
+                161,
+                494,
+                835,
+                550
+            ]
+        },
+        {
+            "type": "paragraph",
+            "content": {
+                "paragraph_content": [
+                    {
+                        "type": "text",
+                        "content": "Q：刚才的例子里面有 3 个 Sigmoid，为什么是 3 个，能不能 4 个或更多？"
+                    }
+                ]
+            },
+            "bbox": [
+                161,
+                577,
+                746,
+                594
+            ]
+        },
+        {
+            "type": "paragraph",
+            "content": {
+                "paragraph_content": [
+                    {
+                        "type": "text",
+                        "content": "A：Sigmoid 的数量是由自己决定的，而且 Sigmoid 的数量越多，可以产生出来的分段线性函数就越复杂。Sigmoid 越多可以产生有越多段线的分段线性函数，可以逼近越复杂的函数。Sigmoid 的数量也是一个超参数。"
+                    }
+                ]
+            },
+            "bbox": [
+                161,
+                598,
+                831,
+                653
+            ]
+        },
+        {
+            "type": "paragraph",
+            "content": {
+                "paragraph_content": [
+                    {
+                        "type": "text",
+                        "content": "接下来要定义损失。之前是 "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "L ( w , b )"
+                    },
+                    {
+                        "type": "text",
+                        "content": "，因为 w 跟 b 是未知的。现在未知的参数很多了，再把它一个一个列出来太累了，所以直接用 θ 来统设所有的参数，所以损失函数就变成 L(θ)。损失函数能够判断 θ 的好坏，其计算方法跟刚才只有两个参数的时候是一样的。"
+                    }
+                ]
+            },
+            "bbox": [
+                136,
+                674,
+                858,
+                730
+            ]
+        },
+        {
+            "type": "paragraph",
+            "content": {
+                "paragraph_content": [
+                    {
+                        "type": "text",
+                        "content": "先给定 θ 的值，即某一组 "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "W , b , c ^ { \\mathrm { T } } ,"
+                    },
+                    {
+                        "type": "text",
+                        "content": ", b 的值，再把一种特征 x 代进去，得到估测出来的 y，再计算一下跟真实的标签之间的误差 "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "e _ { \\circ }"
+                    },
+                    {
+                        "type": "text",
+                        "content": "把所有的误差通通加起来，就得到损失。"
+                    }
+                ]
+            },
+            "bbox": [
+                136,
+                733,
+                858,
+                768
+            ]
+        },
+        {
+            "type": "paragraph",
+            "content": {
+                "paragraph_content": [
+                    {
+                        "type": "text",
+                        "content": "接下来下一步就是优化"
+                    }
+                ]
+            },
+            "bbox": [
+                178,
+                772,
+                361,
+                788
+            ]
+        },
+        {
+            "type": "equation_interline",
+            "content": {
+                "math_content": "\\boldsymbol {\\theta} = \\left[ \\begin{array}{c} \\theta_ {1} \\\\ \\theta_ {2} \\\\ \\theta_ {3} \\\\ \\vdots \\end{array} \\right] \\tag {1.24}",
+                "math_type": "latex",
+                "image_source": {
+                    "path": "images/ced4a0bf9ff36d5496060990956a2c5ad87dc68659f92b514eef02c82bcb0bd3.jpg"
+                }
+            },
+            "bbox": [
+                448,
+                784,
+                855,
+                870
+            ]
+        },
+        {
+            "type": "paragraph",
+            "content": {
+                "paragraph_content": [
+                    {
+                        "type": "text",
+                        "content": "要找到 θ 让损失越小越好，可以让损失最小的一组 θ 称为 "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "\\pmb { \\theta } ^ { * }"
+                    },
+                    {
+                        "type": "text",
+                        "content": "。一开始要随机选一个初始"
+                    }
+                ]
+            },
+            "bbox": [
+                171,
+                875,
+                858,
+                892
+            ]
+        },
+        {
+            "type": "page_header",
+            "content": {
+                "page_header_content": [
+                    {
+                        "type": "text",
+                        "content": "→_→ "
+                    }
+                ]
+            },
+            "bbox": [
+                139,
+                57,
+                189,
+                68
+            ]
+        },
+        {
+            "type": "page_header",
+            "content": {
+                "page_header_content": [
+                    {
+                        "type": "text",
+                        "content": "https://github.com/datawhalechina/leedl-tutorial "
+                    }
+                ]
+            },
+            "bbox": [
+                304,
+                55,
+                692,
+                70
+            ]
+        },
+        {
+            "type": "page_header",
+            "content": {
+                "page_header_content": [
+                    {
+                        "type": "text",
+                        "content": "←_← "
+                    }
+                ]
+            },
+            "bbox": [
+                806,
+                58,
+                857,
+                68
+            ]
+        },
+        {
+            "type": "page_number",
+            "content": {
+                "page_number_content": [
+                    {
+                        "type": "text",
+                        "content": "20 "
+                    }
+                ]
+            },
+            "bbox": [
+                487,
+                923,
+                509,
+                935
+            ]
+        }
+    ],
+    [
+        {
+            "type": "equation_interline",
+            "content": {
+                "math_content": "y = \\boxed {b + \\sum_ {i} c _ {i} \\text {sigmoid} \\left(b _ {i} + \\sum_ {j} w _ {i j} x _ {j}\\right)} \\quad \\begin{array}{l} i: 1, 2, 3 \\\\ j: 1, 2, 3 \\end{array}",
+                "math_type": "latex",
+                "image_source": {
+                    "path": "images/dbf3f6d49f1a46cb9ad6a26b54c872636bd081c6f01ec70967e35f45f1710a99.jpg"
+                }
+            },
+            "bbox": [
+                252,
+                161,
+                732,
+                223
+            ]
+        },
+        {
+            "type": "image",
+            "content": {
+                "image_source": {
+                    "path": "images/a13e0bc3301d225ba59e445681658a3747af185bc7e047e83dc896043515fbef.jpg"
+                },
+                "content": "```mermaid\ngraph TD\n    y -->|b| A[\"+\"]\n    A -->|c1| B[\"a1\"]\n    A -->|c2| C[\"a2\"]\n    A -->|c3| D[\"a3\"]\n    B --> E[\"∫\"]\n    C --> F[\"∫\"]\n    D --> G[\"∫\"]\n    E --> H[\"r1\"]\n    F --> I[\"r2\"]\n    G --> J[\"r3\"]\n    H --> K[\"+\"]\n    I --> L[\"+\"]\n    J --> M[\"+\"]\n    K --> N[\"x1\"]\n    L --> O[\"x2\"]\n    M --> P[\"x3\"]\n    style k fill:#f9f,stroke:#333\n    style l fill:#f9f,stroke:#333\n    style m fill:#f9f,stroke:#333\n```",
+                "image_caption": [
+                    {
+                        "type": "text",
+                        "content": "图 1.14 比较有灵活性函数的计算过程"
+                    }
+                ],
+                "image_footnote": []
+            },
+            "sub_type": "flowchart",
+            "bbox": [
+                263,
+                225,
+                754,
+                432
+            ]
+        },
+        {
+            "type": "paragraph",
+            "content": {
+                "paragraph_content": [
+                    {
+                        "type": "text",
+                        "content": "的数值 "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "\\theta _ { 0 } ."
+                    },
+                    {
+                        "type": "text",
+                        "content": "。接下来计算每一个未知的参数对 L 的微分，得到向量 "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "\\textbf {  { g } }"
+                    },
+                    {
+                        "type": "text",
+                        "content": "，即可以让损失变低的函数"
+                    }
+                ]
+            },
+            "bbox": [
+                136,
+                488,
+                858,
+                523
+            ]
+        },
+        {
+            "type": "equation_interline",
+            "content": {
+                "math_content": "\\boldsymbol {g} = \\nabla L \\left(\\boldsymbol {\\theta} _ {0}\\right) \\tag {1.25}",
+                "math_type": "latex",
+                "image_source": {
+                    "path": "images/8ced825ad7e29dd9e824d3f2c0d31bf5814502da654b5774bb452ab82ab2c714.jpg"
+                }
+            },
+            "bbox": [
+                445,
+                527,
+                855,
+                543
+            ]
+        },
+        {
+            "type": "equation_interline",
+            "content": {
+                "math_content": "\\boldsymbol {g} = \\left[ \\begin{array}{c c} \\frac {\\partial L}{\\partial \\theta_ {1}} & \\\\ \\frac {\\partial L}{\\partial \\theta_ {2}} & \\boldsymbol {\\theta} = \\boldsymbol {\\theta} _ {0} \\\\ & \\boldsymbol {\\theta} = \\boldsymbol {\\theta} _ {0} \\\\ & \\vdots \\end{array} \\right] \\tag {1.26}",
+                "math_type": "latex",
+                "image_source": {
+                    "path": "images/3ad6878f3a63f56017480c967f2418e20a1b5516a211a871aab0ce53b0f9a980.jpg"
+                }
+            },
+            "bbox": [
+                423,
+                549,
+                855,
+                621
+            ]
+        },
+        {
+            "type": "paragraph",
+            "content": {
+                "paragraph_content": [
+                    {
+                        "type": "text",
+                        "content": "假设有 1000 个参数，这个向量的长度就是 1000，这个向量也称为梯度， "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "\\nabla L"
+                    },
+                    {
+                        "type": "text",
+                        "content": "代表梯度。"
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "L ( \\pmb { \\theta } _ { 0 } )"
+                    },
+                    {
+                        "type": "text",
+                        "content": "是指计算梯度的位置，是在 "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "\\pmb \\theta"
+                    },
+                    {
+                        "type": "text",
+                        "content": "等于 "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "\\theta _ { 0 }"
+                    },
+                    {
+                        "type": "text",
+                        "content": "的地方。计算出 "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "\\textbf {  { g } }"
+                    },
+                    {
+                        "type": "text",
+                        "content": "后，接下来跟新参数， "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "\\pmb { \\theta } ^ { 0 }"
+                    },
+                    {
+                        "type": "text",
+                        "content": "代表它是一个起始的值，它是一个随机选的起始的值，代表 "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "\\theta _ { 1 }"
+                    },
+                    {
+                        "type": "text",
+                        "content": "更新过一次的结果， "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "\\theta _ { 2 } ^ { 0 }"
+                    },
+                    {
+                        "type": "text",
+                        "content": "减掉微分乘以，减掉 η 乘上微分的值，得到 "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "\\theta _ { 2 } ^ { 1 }"
+                    },
+                    {
+                        "type": "text",
+                        "content": "，以此类推，就可以把 1000 个参数都更新了。"
+                    }
+                ]
+            },
+            "bbox": [
+                136,
+                629,
+                858,
+                703
+            ]
+        },
+        {
+            "type": "equation_interline",
+            "content": {
+                "math_content": "\\left[ \\begin{array}{c} \\theta_ {1} ^ {1} \\\\ \\theta_ {1} ^ {2} \\\\ \\vdots \\end{array} \\right] \\leftarrow \\left[ \\begin{array}{c} \\theta_ {0} ^ {1} \\\\ \\theta_ {0} ^ {2} \\\\ \\vdots \\end{array} \\right] - \\left[ \\begin{array}{c} \\eta \\frac {\\partial L}{\\partial \\theta_ {1}} \\bigg | _ {\\boldsymbol {\\theta} = \\boldsymbol {\\theta} _ {0}} \\\\ \\eta \\frac {\\partial L}{\\partial \\theta_ {2}} \\bigg | _ {\\boldsymbol {\\theta} = \\boldsymbol {\\theta} _ {0}} \\\\ \\vdots \\end{array} \\right] \\tag {1.27}",
+                "math_type": "latex",
+                "image_source": {
+                    "path": "images/a4d636b958be70f9297f7ed46e39405f33fe807dfe7e9d19080ead27a4f622d2.jpg"
+                }
+            },
+            "bbox": [
+                359,
+                714,
+                855,
+                785
+            ]
+        },
+        {
+            "type": "equation_interline",
+            "content": {
+                "math_content": "\\boldsymbol {\\theta} _ {1} \\leftarrow \\boldsymbol {\\theta} _ {0} - \\eta \\boldsymbol {g} \\tag {1.28}",
+                "math_type": "latex",
+                "image_source": {
+                    "path": "images/a1b3f8ad299381359fe8c398d04a1f52ac11798c22985589d349439ca4fb6aba.jpg"
+                }
+            },
+            "bbox": [
+                442,
+                808,
+                855,
+                824
+            ]
+        },
+        {
+            "type": "paragraph",
+            "content": {
+                "paragraph_content": [
+                    {
+                        "type": "text",
+                        "content": "假设参数有 1000 个， "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "\\pmb { \\theta } _ { 0 }"
+                    },
+                    {
+                        "type": "text",
+                        "content": "就是 1000 个数值，1000 维的向量， "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "\\textbf {  { g } }"
+                    },
+                    {
+                        "type": "text",
+                        "content": "是 1000 维的向量， "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "\\pmb { \\theta } _ { 1 }"
+                    },
+                    {
+                        "type": "text",
+                        "content": "也是 1000 维的向量。 整个操作就是这样，由 "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "\\pmb { \\theta } _ { 0 }"
+                    },
+                    {
+                        "type": "text",
+                        "content": "算梯度，根据梯度去把 "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "\\pmb { \\theta } _ { 0 }"
+                    },
+                    {
+                        "type": "text",
+                        "content": "更新成 "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "\\pmb { \\theta } _ { 1 }"
+                    },
+                    {
+                        "type": "text",
+                        "content": "，再算一次梯度，再根据梯度把 "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "\\pmb { \\theta } _ { 1 }"
+                    },
+                    {
+                        "type": "text",
+                        "content": "再更新成 "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "\\pmb { \\theta } _ { 2 }"
+                    },
+                    {
+                        "type": "text",
+                        "content": "，再算一次梯度把 "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "\\pmb { \\theta } _ { 2 }"
+                    },
+                    {
+                        "type": "text",
+                        "content": "更新成 "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "\\pmb { \\theta } _ { 3 }"
+                    },
+                    {
+                        "type": "text",
+                        "content": "，以此类推，直到不想做。或者计算出梯度为 0 向量，导致无法再更新参数为止，不过在实现上几乎不太可能梯度为 0，通常会停下来就是我们不想做了。"
+                    }
+                ]
+            },
+            "bbox": [
+                136,
+                834,
+                858,
+                889
+            ]
+        },
+        {
+            "type": "page_header",
+            "content": {
+                "page_header_content": [
+                    {
+                        "type": "text",
+                        "content": "→_→ "
+                    }
+                ]
+            },
+            "bbox": [
+                139,
+                57,
+                189,
+                68
+            ]
+        },
+        {
+            "type": "page_header",
+            "content": {
+                "page_header_content": [
+                    {
+                        "type": "text",
+                        "content": "https://github.com/datawhalechina/leedl-tutorial "
+                    }
+                ]
+            },
+            "bbox": [
+                304,
+                55,
+                692,
+                70
+            ]
+        },
+        {
+            "type": "page_header",
+            "content": {
+                "page_header_content": [
+                    {
+                        "type": "text",
+                        "content": "←_← "
+                    }
+                ]
+            },
+            "bbox": [
+                806,
+                58,
+                857,
+                68
+            ]
+        },
+        {
+            "type": "page_number",
+            "content": {
+                "page_number_content": [
+                    {
+                        "type": "text",
+                        "content": "21 "
+                    }
+                ]
+            },
+            "bbox": [
+                487,
+                923,
+                507,
+                935
+            ]
+        }
+    ],
+    [
+        {
+            "type": "image",
+            "content": {
+                "image_source": {
+                    "path": "images/ed3cd8c4319ce4efd7fa8244e113e16ce509ba497f53ab14908a894dce2175f3.jpg"
+                },
+                "content": "含有未知参数的函数\ny = b + c^T σ( b + W x )\nx 特征\n...\n未知参数\nW b\nc^T b\nw 的行\nθ = [θ₁\nθ₂\nθ₃\n⋮]",
+                "image_caption": [
+                    {
+                        "type": "text",
+                        "content": "图 1.15 未知参数“拼”成一个向量"
+                    }
+                ],
+                "image_footnote": []
+            },
+            "sub_type": "text_image",
+            "bbox": [
+                258,
+                105,
+                712,
+                354
+            ]
+        },
+        {
+            "type": "paragraph",
+            "content": {
+                "paragraph_content": []
+            },
+            "bbox": [
+                136,
+                406,
+                858,
+                441
+            ]
+        },
+        {
+            "type": "list",
+            "content": {
+                "list_type": "text_list",
+                "list_items": [
+                    {
+                        "item_type": "text",
+                        "item_content": [
+                            {
+                                "type": "text",
+                                "content": "·（随机）选取初始值 "
+                            },
+                            {
+                                "type": "equation_inline",
+                                "content": "\\pmb { \\theta } _ { 0 }"
+                            }
+                        ]
+                    },
+                    {
+                        "item_type": "text",
+                        "item_content": [
+                            {
+                                "type": "text",
+                                "content": "·计算梯度 "
+                            },
+                            {
+                                "type": "equation_inline",
+                                "content": "\\pmb { g } = \\nabla L ( \\pmb { \\theta } _ { 0 } )"
+                            }
+                        ]
+                    },
+                    {
+                        "item_type": "text",
+                        "item_content": [
+                            {
+                                "type": "text",
+                                "content": "更新 "
+                            },
+                            {
+                                "type": "equation_inline",
+                                "content": "\\pmb { \\theta } _ { 1 }  \\pmb { \\theta } _ { 0 } - \\eta \\pmb { g }"
+                            }
+                        ]
+                    },
+                    {
+                        "item_type": "text",
+                        "item_content": [
+                            {
+                                "type": "text",
+                                "content": "·计算梯度 "
+                            },
+                            {
+                                "type": "equation_inline",
+                                "content": "\\pmb { g } = \\nabla L ( \\pmb { \\theta } _ { 1 } )"
+                            }
+                        ]
+                    },
+                    {
+                        "item_type": "text",
+                        "item_content": [
+                            {
+                                "type": "text",
+                                "content": "更新 "
+                            },
+                            {
+                                "type": "equation_inline",
+                                "content": "\\pmb { \\theta } _ { 2 }  \\pmb { \\theta } _ { 1 } - \\eta \\pmb { g }"
+                            }
+                        ]
+                    },
+                    {
+                        "item_type": "text",
+                        "item_content": [
+                            {
+                                "type": "text",
+                                "content": "·计算梯度 "
+                            },
+                            {
+                                "type": "equation_inline",
+                                "content": "\\pmb { g } = \\nabla L ( \\pmb { \\theta } _ { 2 } )"
+                            }
+                        ]
+                    },
+                    {
+                        "item_type": "text",
+                        "item_content": [
+                            {
+                                "type": "text",
+                                "content": "更新 "
+                            },
+                            {
+                                "type": "equation_inline",
+                                "content": "\\pmb { \\theta } _ { 3 }  \\pmb { \\theta } _ { 2 } - \\eta \\pmb { g }"
+                            }
+                        ]
+                    }
+                ]
+            },
+            "bbox": [
+                396,
+                456,
+                608,
+                589
+            ]
+        },
+        {
+            "type": "paragraph",
+            "content": {
+                "paragraph_content": [
+                    {
+                        "type": "text",
+                        "content": "图 1.16 使用梯度下降更新参数"
+                    }
+                ]
+            },
+            "bbox": [
+                369,
+                608,
+                623,
+                623
+            ]
+        },
+        {
+            "type": "paragraph",
+            "content": {
+                "paragraph_content": [
+                    {
+                        "type": "text",
+                        "content": "但实现上有个细节的问题，实际使用梯度下降的时候，如图 1.17 所示，会把 N 笔数据随机分成一个一个的批量（batch），一组一组的。每个批量里面有 B 笔数据，所以本来有 N笔数据，现在 B 笔数据一组，一组叫做批量。本来是把所有的数据拿出来算一个损失，现在只拿一个批量里面的数据出来算一个损失，记为 "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "L _ { 1 }"
+                    },
+                    {
+                        "type": "text",
+                        "content": "跟 L 以示区别。假设 B 够大，也许 L 跟"
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "L _ { 1 }"
+                    },
+                    {
+                        "type": "text",
+                        "content": "会很接近。所以实现上每次会先选一个批量，用该批量来算 "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "L _ { 1 }"
+                    },
+                    {
+                        "type": "text",
+                        "content": "，根据 "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "L _ { 1 }"
+                    },
+                    {
+                        "type": "text",
+                        "content": "来算梯度，再用梯度来更新参数，接下来再选下一个批量算出 "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "L _ { 2 }"
+                    },
+                    {
+                        "type": "text",
+                        "content": "，根据 "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "L _ { 2 }"
+                    },
+                    {
+                        "type": "text",
+                        "content": "算出梯度，再更新参数，再取下一个批量算出 "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "L _ { 3 }"
+                    },
+                    {
+                        "type": "text",
+                        "content": "，根据 "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "L _ { 3 }"
+                    },
+                    {
+                        "type": "text",
+                        "content": "算出梯度，再用 "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "L _ { 3 }"
+                    },
+                    {
+                        "type": "text",
+                        "content": "算出来的梯度来更新参数。"
+                    }
+                ]
+            },
+            "bbox": [
+                136,
+                645,
+                858,
+                777
+            ]
+        },
+        {
+            "type": "paragraph",
+            "content": {
+                "paragraph_content": [
+                    {
+                        "type": "text",
+                        "content": "所以并不是拿 L 来算梯度，实际上是拿一个批量算出来的 "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "L _ { 1 } , L _ { 2 } , L _ { 3 }"
+                    },
+                    {
+                        "type": "text",
+                        "content": "来计算梯度。把所有的批量都看过一次，称为一个回合（epoch），每一次更新参数叫做一次更新。更新跟回合是不同的东西。每次更新一次参数叫做一次更新，把所有的批量都看过一遍，叫做一个回合。"
+                    }
+                ]
+            },
+            "bbox": [
+                136,
+                781,
+                858,
+                835
+            ]
+        },
+        {
+            "type": "paragraph",
+            "content": {
+                "paragraph_content": [
+                    {
+                        "type": "text",
+                        "content": "更新跟回合的差别，举个例子，假设有 10000 笔数据，即 N 等于 10000，批量的大小是设 10，也就 B 等于 10。10000 个样本（example）形成了 1000 个批量，所以在一个回合里面更新了参数 1000 次，所以一个回合并不是更新参数一次，在这个例子里面一个回合，已经"
+                    }
+                ]
+            },
+            "bbox": [
+                136,
+                839,
+                858,
+                894
+            ]
+        },
+        {
+            "type": "page_header",
+            "content": {
+                "page_header_content": [
+                    {
+                        "type": "text",
+                        "content": "→_→ "
+                    }
+                ]
+            },
+            "bbox": [
+                139,
+                57,
+                189,
+                68
+            ]
+        },
+        {
+            "type": "page_header",
+            "content": {
+                "page_header_content": [
+                    {
+                        "type": "text",
+                        "content": "https://github.com/datawhalechina/leedl-tutorial "
+                    }
+                ]
+            },
+            "bbox": [
+                304,
+                55,
+                692,
+                70
+            ]
+        },
+        {
+            "type": "page_header",
+            "content": {
+                "page_header_content": [
+                    {
+                        "type": "text",
+                        "content": "←_← "
+                    }
+                ]
+            },
+            "bbox": [
+                806,
+                58,
+                857,
+                68
+            ]
+        },
+        {
+            "type": "page_number",
+            "content": {
+                "page_number_content": [
+                    {
+                        "type": "text",
+                        "content": "22 "
+                    }
+                ]
+            },
+            "bbox": [
+                487,
+                923,
+                509,
+                935
+            ]
+        }
+    ],
+    [
+        {
+            "type": "image",
+            "content": {
+                "image_source": {
+                    "path": "images/a8d3ab9c8cc2856a6ff75d3c1acc1344817c6ed9333b421162450f2ca0557b72.jpg"
+                },
+                "content": "```mermaid\ngraph TD\n    A[\"• (随机) 选取初始值 θ₀\"] --> B[\"• 计算梯度 g₀ = ∇L₁(θ₀)\"]\n    B --> C[\"更新 θ₁ ← θ₀ - ηg₀\"]\n    C --> D[\"• 计算梯度 g₁ = ∇L₂(θ₁)\"]\n    D --> E[\"更新 θ₂ ← θ₁ - ηg₁\"]\n    E --> F[\"• 计算梯度 g₂ = ∇L₃(θ₂)\"]\n    F --> G[\"更新 θ₃ ← θ₂ - ηg₂\"]\n    B --> H[\"B\"]\n    H --> I[\"批量\"]\n    I --> J[\"L\"]\n    I --> K[\"N\"]\n    H --> L[\"L₁\"]\n    H --> M[\"L₂\"]\n    H --> N[\"L₃\"]\n    I --> O[\"批量\"]\n    I --> P[\"批量\"]\n    I --> Q[\"批量\"]\n```",
+                "image_caption": [
+                    {
+                        "type": "text",
+                        "content": "图 1.17 分批量进行梯度下降"
+                    }
+                ],
+                "image_footnote": []
+            },
+            "sub_type": "flowchart",
+            "bbox": [
+                255,
+                97,
+                721,
+                294
+            ]
+        },
+        {
+            "type": "paragraph",
+            "content": {
+                "paragraph_content": [
+                    {
+                        "type": "text",
+                        "content": "更新了参数 1000 次了。"
+                    }
+                ]
+            },
+            "bbox": [
+                137,
+                354,
+                322,
+                369
+            ]
+        },
+        {
+            "type": "paragraph",
+            "content": {
+                "paragraph_content": [
+                    {
+                        "type": "text",
+                        "content": "第 2 个例子，假设有 1000 个数据，批量大小（batch size）设 100，批量大小和 Sigmoid的个数都是超参数。1000 个样本，批量大小设 100，1 个回合总共更新 10 次参数。所以做了一个回合的训练其实不知道它更新了几次参数，有可能 1000 次，也有可能 10 次，取决于它的批量大小有多大。"
+                    }
+                ]
+            },
+            "bbox": [
+                136,
+                373,
+                858,
+                447
+            ]
+        },
+        {
+            "type": "title",
+            "content": {
+                "title_content": [
+                    {
+                        "type": "text",
+                        "content": "1.2.2 模型变形"
+                    }
+                ],
+                "level": 1
+            },
+            "bbox": [
+                137,
+                468,
+                273,
+                483
+            ]
+        },
+        {
+            "type": "paragraph",
+            "content": {
+                "paragraph_content": [
+                    {
+                        "type": "text",
+                        "content": "其实还可以对模型做更多的变形，不一定要把 Hard Sigmoid 换成 Soft Sigmoid。HardSigmoid 可以看作是两个修正线性单元（Rectified Linear Unit，ReLU）的加总，ReLU 的图像有一个水平的线，走到某个地方有一个转折的点，变成一个斜坡，其对应的公式为"
+                    }
+                ]
+            },
+            "bbox": [
+                136,
+                495,
+                858,
+                551
+            ]
+        },
+        {
+            "type": "equation_interline",
+            "content": {
+                "math_content": "c * \\max (0, b + w x _ {1}) \\tag {1.29}",
+                "math_type": "latex",
+                "image_source": {
+                    "path": "images/24f59cf2b6ecd49fa6ef18dbae0c1add1cd2e40950fd73add9fbec66947f733b.jpg"
+                }
+            },
+            "bbox": [
+                420,
+                567,
+                857,
+                583
+            ]
+        },
+        {
+            "type": "paragraph",
+            "content": {
+                "paragraph_content": [
+                    {
+                        "type": "equation_inline",
+                        "content": "\\operatorname* { m a x } ( 0 , b + w x _ { 1 } )"
+                    },
+                    {
+                        "type": "text",
+                        "content": "是指看 0 跟 "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "b + w x _ { 1 }"
+                    },
+                    {
+                        "type": "text",
+                        "content": "谁比较大，比较大的会被当做输出；如果 "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "b + w x _ { 1 } < 0"
+                    },
+                    {
+                        "type": "text",
+                        "content": "，输出是 0；如果 "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "b + w x _ { 1 } > 0"
+                    },
+                    {
+                        "type": "text",
+                        "content": "，输出是 "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "b + w x _ { 1 }"
+                    },
+                    {
+                        "type": "text",
+                        "content": "。通过 "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "w , b , c"
+                    },
+                    {
+                        "type": "text",
+                        "content": "可以挪动其位置和斜率。把两个 ReLU 叠起来就可以变成 Hard 的 Sigmoid，想要用 ReLU，就把 Sigmoid 的地方，换成"
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "\\operatorname* { m a x } ( 0 , b _ { i } + w _ { i j } x _ { j } )"
+                    },
+                    {
+                        "type": "text",
+                        "content": "。"
+                    }
+                ]
+            },
+            "bbox": [
+                136,
+                596,
+                858,
+                673
+            ]
+        },
+        {
+            "type": "paragraph",
+            "content": {
+                "paragraph_content": [
+                    {
+                        "type": "text",
+                        "content": "如图 1.19 所示，2 个 ReLU 才能够合成一个 Hard Sigmoid。要合成 i 个 Hard Sigmoid，需要 i 个 Sigmoid，如果 ReLU 要做到一样的事情，则需要 2i 个 ReLU，因为 2 个 ReLU 合起来才是一个 Hard Sigmoid。因此表示一个 Hard 的 Sigmoid 不是只有一种做法。在机器学习里面，Sigmoid 或 ReLU 称为激活函数（activation function）。"
+                    }
+                ]
+            },
+            "bbox": [
+                136,
+                675,
+                858,
+                749
+            ]
+        },
+        {
+            "type": "paragraph",
+            "content": {
+                "paragraph_content": [
+                    {
+                        "type": "text",
+                        "content": "当然还有其他常见的激活函数，但 Sigmoid 跟 ReLU 是最常见的激活函数，接下来的实验都选择用了 ReLU，显然 ReLU 比较好，实验结果如图 1.20 所示。如果是线性模型，考虑56 天，训练数据上面的损失是 320，没看过的数据 2021 年数据是 460。连续使用 10 个 ReLU作为模型，跟用线性模型的结果是差不多的，"
+                    }
+                ]
+            },
+            "bbox": [
+                136,
+                753,
+                858,
+                827
+            ]
+        },
+        {
+            "type": "paragraph",
+            "content": {
+                "paragraph_content": [
+                    {
+                        "type": "text",
+                        "content": "但连续使用 100 个 ReLU 作为模型，结果就有显著差别了，100 个 "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "\\mathrm { R e L U }"
+                    },
+                    {
+                        "type": "text",
+                        "content": "在训练数据上的损失就可以从 320 降到 280，有 100 个 ReLU 就可以制造比较复杂的曲线，本来线性就是一直线，但 100 个 ReLU 就可以产生 100 个折线的函数，在测试数据上也好了一些. 接下来"
+                    }
+                ]
+            },
+            "bbox": [
+                136,
+                831,
+                858,
+                885
+            ]
+        },
+        {
+            "type": "page_header",
+            "content": {
+                "page_header_content": [
+                    {
+                        "type": "text",
+                        "content": "→_→ "
+                    }
+                ]
+            },
+            "bbox": [
+                139,
+                57,
+                189,
+                68
+            ]
+        },
+        {
+            "type": "page_header",
+            "content": {
+                "page_header_content": [
+                    {
+                        "type": "text",
+                        "content": "https://github.com/datawhalechina/leedl-tutorial "
+                    }
+                ]
+            },
+            "bbox": [
+                304,
+                55,
+                692,
+                70
+            ]
+        },
+        {
+            "type": "page_header",
+            "content": {
+                "page_header_content": [
+                    {
+                        "type": "text",
+                        "content": "←_← "
+                    }
+                ]
+            },
+            "bbox": [
+                806,
+                58,
+                857,
+                68
+            ]
+        },
+        {
+            "type": "page_number",
+            "content": {
+                "page_number_content": [
+                    {
+                        "type": "text",
+                        "content": "23 "
+                    }
+                ]
+            },
+            "bbox": [
+                487,
+                923,
+                509,
+                935
+            ]
+        }
+    ],
+    [
+        {
+            "type": "image",
+            "content": {
+                "image_source": {
+                    "path": "images/6e437c5428d374368fda91ce21df8c81b7732704e4043906aa15a3bf0a204031.jpg"
+                },
+                "content": "Hard Sigmoid\nRectified Linear\nUnit (ReLU)\nc max(0, b + wx₁)\nc' max(0, b' + w'x₁)",
+                "image_caption": [
+                    {
+                        "type": "text",
+                        "content": "图 1.18 ReLU 函数"
+                    }
+                ],
+                "image_footnote": []
+            },
+            "sub_type": "text_image",
+            "bbox": [
+                255,
+                95,
+                749,
+                342
+            ]
+        },
+        {
+            "type": "equation_interline",
+            "content": {
+                "math_content": "\\begin{array}{l} y = b + \\sum_ {i} c _ {i} \\underbrace {\\sigma} _ {\\searrow} \\left(b _ {i} + \\sum_ {j} w _ {i j} x _ {j}\\right) \\\\ y = b + \\sum_ {\\boxed {2 i}} c _ {i} \\stackrel {\\nearrow} {\\underset {} {\\max} {\\longrightarrow}} \\bigg (0, b _ {i} + \\sum_ {j} w _ {i j} x _ {j} \\bigg) \\\\ \\end{array}",
+                "math_type": "latex",
+                "image_source": {
+                    "path": "images/4d4a9cba300b8bb4d32cdb0ee60ab03cba6f19aa496d37f7131f973ac025f35d.jpg"
+                }
+            },
+            "bbox": [
+                257,
+                384,
+                742,
+                579
+            ]
+        },
+        {
+            "type": "paragraph",
+            "content": {
+                "paragraph_content": []
+            },
+            "bbox": [
+                473,
+                464,
+                596,
+                489
+            ]
+        },
+        {
+            "type": "paragraph",
+            "content": {
+                "paragraph_content": [
+                    {
+                        "type": "text",
+                        "content": "图 1.19 激活函数"
+                    }
+                ]
+            },
+            "bbox": [
+                423,
+                598,
+                571,
+                614
+            ]
+        },
+        {
+            "type": "paragraph",
+            "content": {
+                "paragraph_content": [
+                    {
+                        "type": "text",
+                        "content": "使用 1000 个 ReLU 作为模型，在训练数据上损失更低了一些，但是在没看过的数据上，损失没有变化。"
+                    }
+                ]
+            },
+            "bbox": [
+                136,
+                640,
+                855,
+                675
+            ]
+        },
+        {
+            "type": "paragraph",
+            "content": {
+                "paragraph_content": [
+                    {
+                        "type": "text",
+                        "content": "接下来可以继续改模型，如图 1.21 所示，从 x 变成 a，就是把 x 乘上 w 加 b，再通过Sigmoid 函数。不一定要通过 Sigmoid 函数，通过 ReLU 也可以得到 a，同样的事情再反复地多做几次。 所以可以把 x 做这一连串的运算产生 a，接下来把 a 做这一连串的运算产生 "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "a _ { \\mathrm { ~ \\odot ~ } } ^ { \\prime }"
+                    },
+                    {
+                        "type": "text",
+                        "content": "反复地多做的次数又是另外一个超参数。注意，w, b 和 "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "w ^ { \\prime } , b ^ { \\prime }"
+                    },
+                    {
+                        "type": "text",
+                        "content": "不是同一个参数，是增加了更多的未知的参数。"
+                    }
+                ]
+            },
+            "bbox": [
+                136,
+                678,
+                857,
+                772
+            ]
+        },
+        {
+            "type": "paragraph",
+            "content": {
+                "paragraph_content": [
+                    {
+                        "type": "text",
+                        "content": "每次都加 100 个 ReLU，输入特征，就是 56 天前的数据。如图 1.22 所示，如果做两次，损失降低很多，280 降到 180。如果做 3 次，损失从 180 降到 140，通过 3 次 ReLU，从 280降到 140，在训练数据上，在没看过的数据上，从 430 降到了 380。"
+                    }
+                ]
+            },
+            "bbox": [
+                136,
+                776,
+                858,
+                831
+            ]
+        },
+        {
+            "type": "paragraph",
+            "content": {
+                "paragraph_content": [
+                    {
+                        "type": "text",
+                        "content": "通过 3 次 ReLU 的实验结果如图 1.23 所示。横轴就是时间，纵轴是观看次数。红色的线是真实的数据，蓝色的线是预测出来的数据在这种低点的地方啊，看红色的数据是每隔一段时间，就会有两天的低点，在低点的地方，机器的预测还算是蛮准确的，机器高估了真实的观看人次，尤其是在红圈标注的这一天，这一天有一个很明显的低谷，但是机器没有预测到这一天有明显的低谷，它是晚一天才预测出低谷。这天最低点就是除夕。但机器只知道看前 56 天的值，来预测下一天会发生什么事，所以它不知道那一天是除夕。"
+                    }
+                ]
+            },
+            "bbox": [
+                136,
+                835,
+                858,
+                889
+            ]
+        },
+        {
+            "type": "page_header",
+            "content": {
+                "page_header_content": [
+                    {
+                        "type": "text",
+                        "content": "→_→ "
+                    }
+                ]
+            },
+            "bbox": [
+                139,
+                57,
+                189,
+                68
+            ]
+        },
+        {
+            "type": "page_header",
+            "content": {
+                "page_header_content": [
+                    {
+                        "type": "text",
+                        "content": "https://github.com/datawhalechina/leedl-tutorial "
+                    }
+                ]
+            },
+            "bbox": [
+                304,
+                55,
+                692,
+                70
+            ]
+        },
+        {
+            "type": "page_header",
+            "content": {
+                "page_header_content": [
+                    {
+                        "type": "text",
+                        "content": "←_← "
+                    }
+                ]
+            },
+            "bbox": [
+                806,
+                58,
+                857,
+                68
+            ]
+        },
+        {
+            "type": "page_number",
+            "content": {
+                "page_number_content": [
+                    {
+                        "type": "text",
+                        "content": "24 "
+                    }
+                ]
+            },
+            "bbox": [
+                487,
+                923,
+                507,
+                935
+            ]
+        }
+    ],
+    [
+        {
+            "type": "table",
+            "content": {
+                "image_source": {
+                    "path": "images/4f8ff6037dfa793e128b75adc32071be7756b0cc45e6865e0b584bd4d818f802.jpg"
+                },
+                "table_caption": [],
+                "table_footnote": [],
+                "html": "<table><tr><td></td><td>线性</td><td>10 ReLU</td><td>100 ReLU</td><td>1000 ReLU</td></tr><tr><td>2017 – 2020</td><td>320</td><td>320</td><td>280</td><td>270</td></tr><tr><td>2021</td><td>460</td><td>450</td><td>430</td><td>430</td></tr></table>",
+                "table_type": "simple_table",
+                "table_nest_level": 1
+            },
+            "bbox": [
+                247,
+                101,
+                749,
+                161
+            ]
+        },
+        {
+            "type": "image",
+            "content": {
+                "image_source": {
+                    "path": "images/23a95fa27595bba35ddeb64fb696c9fb11e330908c3692609b559f21fa17d683.jpg"
+                },
+                "content": "```mermaid\ngraph TD\n    subgraph Input Layer\n        A1[\"橙色圆圈\"] --> B1[\"+\"]\n        A2[\"橙色圆圈\"] --> B2[\"+\"]\n        A3[\"橙色圆圈\"] --> B3[\"+\"]\n    end\n    subgraph Hidden Layer\n        C1[\"灰色圆圈\"] --> D1[\"+\"]\n        C2[\"灰色圆圈\"] --> D2[\"+\"]\n        C3[\"灰色圆圈\"] --> D3[\"+\"]\n    end\n    subgraph Output Layer\n        E1[\"x₁\"] --> F1[\"+\"]\n        E2[\"x₂\"] --> F2[\"+\"]\n        E3[\"x₃\"] --> F3[\"+\"]\n    end\n    B1 --> C1\n    B2 --> C2\n    B3 --> C3\n    style B1 fill:#f9f,stroke:#333\n    style B2 fill:#f9f,stroke:#333\n    style B3 fill:#f9f,stroke:#333\n    style C1 fill:#ccf,stroke:#333\n    style C2 fill:#ccf,stroke:#333\n    style C3 fill:#ccf,stroke:#333\n    note right of B1: '或'\n    note right of C1: 'σ(b') + W' (with a) and x (with b + W)\n```",
+                "image_caption": [
+                    {
+                        "type": "text",
+                        "content": "图 1.20 激活函数实验结果"
+                    },
+                    {
+                        "type": "text",
+                        "content": "图 1.21 改进模型"
+                    }
+                ],
+                "image_footnote": []
+            },
+            "sub_type": "flowchart",
+            "bbox": [
+                247,
+                206,
+                751,
+                458
+            ]
+        },
+        {
+            "type": "paragraph",
+            "content": {
+                "paragraph_content": []
+            },
+            "bbox": [
+                136,
+                508,
+                858,
+                564
+            ]
+        },
+        {
+            "type": "paragraph",
+            "content": {
+                "paragraph_content": [
+                    {
+                        "type": "text",
+                        "content": "如图 1.24 所示，Sigmoid 或 ReLU 称为神经元（neuron），很多的神经元称为神经网络（neural network）。人脑中就是有很多神经元，很多神经元串起来就是一个神经网络，跟人脑是一样的。人工智能就是在模拟人脑。神经网络不是新的技术，80、90 年代就已经用过了，后来为了要重振神经网络的雄风，所以需要新的名字。每一排称为一层，称为隐藏层（hiddenlayer），很多的隐藏层就“深”，这套技术称为深度学习。"
+                    }
+                ]
+            },
+            "bbox": [
+                136,
+                567,
+                860,
+                661
+            ]
+        },
+        {
+            "type": "paragraph",
+            "content": {
+                "paragraph_content": [
+                    {
+                        "type": "text",
+                        "content": "所以人们把神经网络越叠越多越叠越深，2012 年的 AlexNet 有 8 层它的错误率是 16.4%，两年之后 VGG 有 19 层，错误率在图像识别上进步到 7.3 %。这都是在图像识别上一个基准的数据库（ImageNet）上面的结果，后来 GoogleNet 有 22 层，错误率降到 6.7%。而残差网络（Residual Network，ResNet）有 152 层，错误率降到 3.57%。"
+                    }
+                ]
+            },
+            "bbox": [
+                136,
+                665,
+                858,
+                739
+            ]
+        },
+        {
+            "type": "paragraph",
+            "content": {
+                "paragraph_content": [
+                    {
+                        "type": "text",
+                        "content": "刚才只做到 3 层，应该要做得更深，现在网络都是叠几百层的，深度学习就要做更深。但4 层在训练数据上，损失是 100，在没有看过 2021 年的数据上，损失是 440。在训练数据上，"
+                    }
+                ]
+            },
+            "bbox": [
+                136,
+                743,
+                858,
+                778
+            ]
+        },
+        {
+            "type": "table",
+            "content": {
+                "image_source": {
+                    "path": "images/124cd62b2ef94644d56b0e669e08e59495ae6bc53f25f09758de6f1327c3dde4.jpg"
+                },
+                "table_caption": [
+                    {
+                        "type": "text",
+                        "content": "图 1.22 使用 ReLU 的实验结果"
+                    }
+                ],
+                "table_footnote": [],
+                "html": "<table><tr><td></td><td>1层</td><td>2层</td><td>3层</td><td>4层</td></tr><tr><td>2017-2020</td><td>280</td><td>180</td><td>140</td><td>100</td></tr><tr><td>2021</td><td>430</td><td>390</td><td>380</td><td>440</td></tr></table>",
+                "table_type": "simple_table",
+                "table_nest_level": 1
+            },
+            "bbox": [
+                247,
+                801,
+                749,
+                860
+            ]
+        },
+        {
+            "type": "page_header",
+            "content": {
+                "page_header_content": [
+                    {
+                        "type": "text",
+                        "content": "→_→ "
+                    }
+                ]
+            },
+            "bbox": [
+                139,
+                58,
+                189,
+                68
+            ]
+        },
+        {
+            "type": "page_header",
+            "content": {
+                "page_header_content": [
+                    {
+                        "type": "text",
+                        "content": "https://github.com/datawhalechina/leedl-tutorial "
+                    }
+                ]
+            },
+            "bbox": [
+                304,
+                55,
+                692,
+                70
+            ]
+        },
+        {
+            "type": "page_header",
+            "content": {
+                "page_header_content": [
+                    {
+                        "type": "text",
+                        "content": "←_← "
+                    }
+                ]
+            },
+            "bbox": [
+                806,
+                58,
+                857,
+                68
+            ]
+        },
+        {
+            "type": "page_number",
+            "content": {
+                "page_number_content": [
+                    {
+                        "type": "text",
+                        "content": "25 "
+                    }
+                ]
+            },
+            "bbox": [
+                487,
+                923,
+                509,
+                935
+            ]
+        }
+    ],
+    [
+        {
+            "type": "chart",
+            "content": {
+                "image_source": {
+                    "path": "images/a34ec284cb65ceee91f9cd13fbfa4f8a0a808eb599439d997d745471f316f994.jpg"
+                },
+                "content": "| Date       | 看实观看次数 (千次) | 估计观看次数 (千次) |\n| ---------- | ------------------- | ------------------- |\n| 2021/01/01 | 3.5                 | 2.7                 |\n| 2021/01/14 | 6.8                 | 6.2                 |\n| 2021/02/14 | 2.5                 | 3.0                 |",
+                "chart_caption": [
+                    {
+                        "type": "text",
+                        "content": "图 1.23 使用 3 次 ReLU 的实验结果"
+                    }
+                ],
+                "chart_footnote": []
+            },
+            "sub_type": "line",
+            "bbox": [
+                262,
+                104,
+                739,
+                354
+            ]
+        },
+        {
+            "type": "paragraph",
+            "content": {
+                "paragraph_content": [
+                    {
+                        "type": "text",
+                        "content": "3 层比 4 层差，但是在没看过的数据上，4 层比较差，3 层比较好，如图 1.25 所示。在训练数据和测试数据上的结果是不一致的，这种情况称为过拟合（overfitting）。"
+                    }
+                ]
+            },
+            "bbox": [
+                136,
+                414,
+                858,
+                450
+            ]
+        },
+        {
+            "type": "paragraph",
+            "content": {
+                "paragraph_content": [
+                    {
+                        "type": "text",
+                        "content": "但是做到目前为止，还没有真的发挥这个模型的力量，2021 年的数据到 2 月 14 日之前的数据是已知的。要预测未知的数据，选 3 层的网络还是 4 层的网络呢？假设今天是 2 月 26日，今天的观看次数是未知的，如果用已经训练出来的神经网络预测今天的观看次数。要选 3层的，虽然 4 层在训练数据上的结果比较好，但在没有看过的数据的结果更重要。应该选一个在训练的时候，没有看过的数据上表现会好的模型，所以应该选 3 层的网络。深度学习的训练会用到反向传播（BackPropagation，BP），其实它就是比较有效率、算梯度的方法。"
+                    }
+                ]
+            },
+            "bbox": [
+                136,
+                453,
+                858,
+                567
+            ]
+        },
+        {
+            "type": "title",
+            "content": {
+                "title_content": [
+                    {
+                        "type": "text",
+                        "content": "1.2.3 机器学习框架"
+                    }
+                ],
+                "level": 1
+            },
+            "bbox": [
+                137,
+                587,
+                309,
+                602
+            ]
+        },
+        {
+            "type": "paragraph",
+            "content": {
+                "paragraph_content": [
+                    {
+                        "type": "text",
+                        "content": "我们会有一堆训练的数据以及测试数据如式 (1.30) 所示，测试集就是只有 x 没有 "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "y _ { \\textsf { C } }"
+                    },
+                    {
+                        "type": "text",
+                        "content": "。"
+                    }
+                ]
+            },
+            "bbox": [
+                171,
+                615,
+                826,
+                631
+            ]
+        },
+        {
+            "type": "equation_interline",
+            "content": {
+                "math_content": "\\text {训练数据：} \\left\\{\\left(x ^ {1}, y ^ {1}\\right), \\left(x ^ {2}, y ^ {2}\\right), \\dots , \\left(x ^ {N}, y ^ {N}\\right) \\right\\} \\tag {1.30}",
+                "math_type": "latex",
+                "image_source": {
+                    "path": "images/ba7b9c31c71b98610763ce255ac7e2bb3bd13954167812a191d49919d6b7da3e.jpg"
+                }
+            },
+            "bbox": [
+                319,
+                642,
+                855,
+                670
+            ]
+        },
+        {
+            "type": "equation_interline",
+            "content": {
+                "math_content": "\\mathrm{测试数据} \\colon \\left\\{x ^ {N + 1}, x ^ {N + 2}, \\ldots , x ^ {N + M} \\right\\}",
+                "math_type": "latex",
+                "image_source": {
+                    "path": "images/84c27e6305000addf8379f4928ae8f4dc6111e833dc563b663368fa761550861.jpg"
+                }
+            },
+            "bbox": [
+                322,
+                665,
+                608,
+                684
+            ]
+        },
+        {
+            "type": "paragraph",
+            "content": {
+                "paragraph_content": [
+                    {
+                        "type": "text",
+                        "content": "训练集就要拿来训练模型，训练的过程是 3 个步骤。"
+                    }
+                ]
+            },
+            "bbox": [
+                173,
+                696,
+                576,
+                711
+            ]
+        },
+        {
+            "type": "list",
+            "content": {
+                "list_type": "text_list",
+                "list_items": [
+                    {
+                        "item_type": "text",
+                        "item_content": [
+                            {
+                                "type": "text",
+                                "content": "1. 先写出一个有未知数 θ 的函数，θ 代表一个模型里面所有的未知参数。 "
+                            },
+                            {
+                                "type": "equation_inline",
+                                "content": "f _ { \\theta } ( x )"
+                            },
+                            {
+                                "type": "text",
+                                "content": "的意思就是函数叫 "
+                            },
+                            {
+                                "type": "equation_inline",
+                                "content": "f _ { \\theta } ( x )"
+                            },
+                            {
+                                "type": "text",
+                                "content": "，输入的特征为 x，；"
+                            }
+                        ]
+                    },
+                    {
+                        "item_type": "text",
+                        "item_content": [
+                            {
+                                "type": "text",
+                                "content": "2. 定义损失，损失是一个函数，其输入就是一组参数，去判断这一组参数的好坏；"
+                            }
+                        ]
+                    },
+                    {
+                        "item_type": "text",
+                        "item_content": [
+                            {
+                                "type": "text",
+                                "content": "3. 解一个优化的问题，找一个 θ，该 θ 可以让损失的值越小越好。让损失的值最小的 θ 为"
+                            },
+                            {
+                                "type": "equation_inline",
+                                "content": "\\pmb { \\theta } ^ { * }"
+                            },
+                            {
+                                "type": "text",
+                                "content": "，即"
+                            }
+                        ]
+                    }
+                ]
+            },
+            "bbox": [
+                156,
+                715,
+                858,
+                808
+            ]
+        },
+        {
+            "type": "equation_interline",
+            "content": {
+                "math_content": "\\boldsymbol {\\theta} ^ {*} = \\underset {\\boldsymbol {\\theta}} {\\arg \\min} L \\tag {1.31}",
+                "math_type": "latex",
+                "image_source": {
+                    "path": "images/7fed05f6ba50071301b57c243992999c6ac76869fdc3fab27ad0b692d3eda365.jpg"
+                }
+            },
+            "bbox": [
+                457,
+                813,
+                855,
+                837
+            ]
+        },
+        {
+            "type": "paragraph",
+            "content": {
+                "paragraph_content": [
+                    {
+                        "type": "text",
+                        "content": "有了 "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "\\pmb { \\theta } ^ { * }"
+                    },
+                    {
+                        "type": "text",
+                        "content": "以后，就把它拿来用在测试集上，也就是把 "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "\\pmb { \\theta } ^ { * }"
+                    },
+                    {
+                        "type": "text",
+                        "content": "带入这些未知的参数，本来 "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "f _ { \\theta } ( x )"
+                    },
+                    {
+                        "type": "text",
+                        "content": "里面有一些未知的参数，现在 "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "\\pmb \\theta"
+                    },
+                    {
+                        "type": "text",
+                        "content": "用 "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "\\pmb { \\theta } ^ { * }"
+                    },
+                    {
+                        "type": "text",
+                        "content": "来取代，输入是测试集，输出的结果存起来，上传到Kaggle 就结束了。"
+                    }
+                ]
+            },
+            "bbox": [
+                136,
+                841,
+                858,
+                897
+            ]
+        },
+        {
+            "type": "page_header",
+            "content": {
+                "page_header_content": [
+                    {
+                        "type": "text",
+                        "content": "→_→ "
+                    }
+                ]
+            },
+            "bbox": [
+                139,
+                57,
+                189,
+                68
+            ]
+        },
+        {
+            "type": "page_header",
+            "content": {
+                "page_header_content": [
+                    {
+                        "type": "text",
+                        "content": "https://github.com/datawhalechina/leedl-tutorial "
+                    }
+                ]
+            },
+            "bbox": [
+                304,
+                55,
+                692,
+                70
+            ]
+        },
+        {
+            "type": "page_header",
+            "content": {
+                "page_header_content": [
+                    {
+                        "type": "text",
+                        "content": "←_← "
+                    }
+                ]
+            },
+            "bbox": [
+                806,
+                58,
+                857,
+                68
+            ]
+        },
+        {
+            "type": "page_number",
+            "content": {
+                "page_number_content": [
+                    {
+                        "type": "text",
+                        "content": "26 "
+                    }
+                ]
+            },
+            "bbox": [
+                487,
+                923,
+                507,
+                935
+            ]
+        }
+    ],
+    [
+        {
+            "type": "image",
+            "content": {
+                "image_source": {
+                    "path": "images/247d03856cecbb1a21ba45e1c4d09a9e8e6144bf526e7d62058a0ef4aabf16f3.jpg"
+                },
+                "content": "```mermaid\ngraph TD\n    subgraph 隐藏层\n        A1[\"橙色圆圈\"] -->|+| B1[\"灰色方块\"]\n        A2[\"橙色圆圈\"] -->|+| B1\n        A3[\"橙色圆圈\"] -->|+| B1\n        A1 -->|1| B1\n        A2 -->|1| B1\n        A3 -->|1| B1\n    end\n    subgraph 神经网络\n        C1[\"橙色圆圈\"] -->|+| D1[\"灰色方块\"]\n        C2[\"橙色圆圈\"] -->|+| D1\n        C3[\"橙色圆圈\"] -->|+| D1\n        C1 -->|1| D1\n        C2 -->|1| D1\n        C3 -->|1| D1\n    end\n    subgraph 神经元\n        E1[\"蓝色圆圈\"] -->|+| F1[\"灰色方块\"]\n        E2[\"蓝色圆圈\"] -->|+| F1\n        E3[\"蓝色圆圈\"] -->|+| F1\n        E1 -->|1| F1\n        E2 -->|1| F1\n        E3 -->|1| F1\n    end\n    style 神经网络 fill:#f9f,stroke:#333\n    style 神经元 fill:#bbf,stroke:#333\n    note right of B1: a₁, a₂, a₃; note left of E1: x₁, x₂, x₃; note right of F1: ...; note bottom of B1: ...; note top of B1: ...; note bottom of F1: ...; note bottom of B1: ...; note top of B1: ...; note bottom of F1: ...; note bottom of B1: ...; note bottom of B1: ...; note bottom of B1: ...; note bottom of B1: ...; note bottom of B1: ...; note bottom of B1: ...; note bottom of B1: ...; note bottom of B1: ...; note bottom of B1: ...; note bottom of B1: ...; note bottom of B1: ...; note bottom of B1: ...; note bottom of B1: ...;\n```",
+                "image_caption": [
+                    {
+                        "type": "text",
+                        "content": "图 1.24 深度学习的结构"
+                    }
+                ],
+                "image_footnote": []
+            },
+            "sub_type": "flowchart",
+            "bbox": [
+                253,
+                197,
+                754,
+                470
+            ]
+        },
+        {
+            "type": "table",
+            "content": {
+                "image_source": {
+                    "path": "images/d3d0101ca069e1716e7867eebdbb3765e68439d40386f101d2d5476bd80255aa.jpg"
+                },
+                "table_caption": [
+                    {
+                        "type": "text",
+                        "content": "图 1.25 模型有过拟合问题"
+                    }
+                ],
+                "table_footnote": [],
+                "html": "<table><tr><td></td><td>1层</td><td>2层</td><td>3层</td><td>4层</td></tr><tr><td>2017 – 2020</td><td>280</td><td>180</td><td>140</td><td>100</td></tr><tr><td>2021</td><td>430</td><td>390</td><td>380</td><td>440</td></tr></table>",
+                "table_type": "simple_table",
+                "table_nest_level": 1
+            },
+            "bbox": [
+                247,
+                708,
+                749,
+                766
+            ]
+        },
+        {
+            "type": "page_header",
+            "content": {
+                "page_header_content": [
+                    {
+                        "type": "text",
+                        "content": "→_→ "
+                    }
+                ]
+            },
+            "bbox": [
+                139,
+                57,
+                189,
+                68
+            ]
+        },
+        {
+            "type": "page_header",
+            "content": {
+                "page_header_content": [
+                    {
+                        "type": "text",
+                        "content": "https://github.com/datawhalechina/leedl-tutorial "
+                    }
+                ]
+            },
+            "bbox": [
+                304,
+                55,
+                692,
+                70
+            ]
+        },
+        {
+            "type": "page_header",
+            "content": {
+                "page_header_content": [
+                    {
+                        "type": "text",
+                        "content": "←_← "
+                    }
+                ]
+            },
+            "bbox": [
+                806,
+                58,
+                857,
+                68
+            ]
+        },
+        {
+            "type": "page_number",
+            "content": {
+                "page_number_content": [
+                    {
+                        "type": "text",
+                        "content": "27 "
+                    }
+                ]
+            },
+            "bbox": [
+                487,
+                923,
+                509,
+                935
+            ]
+        }
+    ]
+]

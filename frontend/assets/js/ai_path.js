@@ -41,8 +41,13 @@
     }
 
     function appendAgent(text) {
+        const rawText = String(text || '');
+        const allowLearningHtml = rawText.includes('learning-answer-content');
         if (app.appendMessage) {
-            app.appendMessage('agent', text);
+            app.appendMessage('agent', text, {
+                allowLearningHtml,
+                kind: allowLearningHtml ? 'graph_rag_answer' : undefined,
+            });
         } else {
             appendFallbackMessage('agent', text);
         }

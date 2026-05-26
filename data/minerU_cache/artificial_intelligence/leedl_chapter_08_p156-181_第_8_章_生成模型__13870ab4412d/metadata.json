@@ -1,0 +1,17 @@
+{
+  "version": 1,
+  "source_path": "E:\\ai_code\\ai-tutor-agent\\data\\course_materials\\artificial_intelligence\\splits\\leedl_chapter_08_p156-181_第_8_章_生成模型.pdf",
+  "source_filename": "leedl_chapter_08_p156-181_第_8_章_生成模型.pdf",
+  "source_size_bytes": 18251706,
+  "source_mtime": 1779694337,
+  "cache_key": "13870ab4412d",
+  "batch_id": "400b5e4e-6779-4d61-8ab9-64a83f28f812",
+  "full_zip_url": "https://cdn-mineru.openxlab.org.cn/pdf/2026-05-25/6c63874b-d18c-4272-ac4c-29f0475aa4fc.zip",
+  "saved_at": 1779695253,
+  "proxy_mode": "inherit",
+  "proxy_desc": "继承环境变量 HTTP_PROXY / HTTPS_PROXY",
+  "full_md_path": "full.md",
+  "relative_md_path_in_extract": "full.md",
+  "result_zip_path": "result.zip",
+  "extract_dir": "extracted"
+}

@@ -1,0 +1,17 @@
+{
+  "version": 1,
+  "source_path": "E:\\ai_code\\ai-tutor-agent\\data\\course_materials\\artificial_intelligence\\splits\\nn_dl_chapter_15_p370-395_第_15_章_序列生成模型.pdf",
+  "source_filename": "nn_dl_chapter_15_p370-395_第_15_章_序列生成模型.pdf",
+  "source_size_bytes": 1233683,
+  "source_mtime": 1779694338,
+  "cache_key": "22cd1527b884",
+  "batch_id": "fdfd3648-8a13-466e-b75e-22ad7e10e443",
+  "full_zip_url": "https://cdn-mineru.openxlab.org.cn/pdf/2026-05-25/f3723481-4bc5-4b28-b7b8-d3c20aaf2bb1.zip",
+  "saved_at": 1779697328,
+  "proxy_mode": "inherit",
+  "proxy_desc": "继承环境变量 HTTP_PROXY / HTTPS_PROXY",
+  "full_md_path": "full.md",
+  "relative_md_path_in_extract": "full.md",
+  "result_zip_path": "result.zip",
+  "extract_dir": "extracted"
+}

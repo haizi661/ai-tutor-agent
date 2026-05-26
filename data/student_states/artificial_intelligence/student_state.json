@@ -1,0 +1,3408 @@
+{
+  "student_id": "ai_default_student",
+  "current_node_id": "",
+  "learning_goal_node_id": "",
+  "learning_path": [],
+  "mastery_scores": {
+    "AI001": 0.85,
+    "AI002": 0.85,
+    "AI003": 0.85,
+    "AI004": 0.85,
+    "AI006": 0.85,
+    "AI162": 0.85,
+    "AI200": 0.85,
+    "AI155": 0.85,
+    "AI207": 0.85,
+    "AI048": 0.85,
+    "AI138": 0.85,
+    "AI022": 0.85,
+    "AI007": 0.85,
+    "AI192": 0.85,
+    "AI073": 0.85,
+    "AI068": 0.85
+  },
+  "visited_nodes": [],
+  "wrong_nodes": [],
+  "recommended_queue": [],
+  "notes": {},
+  "node_learning_records": {},
+  "homework": [],
+  "homework_assignments": [],
+  "homework_history": [],
+  "question_attempts": [],
+  "daily_records": [],
+  "last_learning_time": "",
+  "current_node": "AI060",
+  "current_goal": "强化学习概述、神经网络",
+  "current_path": [
+    "AI001",
+    "AI073",
+    "AI068",
+    "AI002",
+    "AI003",
+    "AI004",
+    "AI006",
+    "AI007",
+    "AI048",
+    "AI022",
+    "AI060",
+    "AI005",
+    "AI030",
+    "AI036",
+    "AI019",
+    "AI025",
+    "AI043",
+    "AI028",
+    "AI026",
+    "AI058",
+    "AI010",
+    "AI039",
+    "AI021",
+    "AI061",
+    "AI085",
+    "AI042",
+    "AI041",
+    "AI045",
+    "AI056",
+    "AI059",
+    "AI044",
+    "AI020",
+    "AI072",
+    "AI037",
+    "AI024",
+    "AI040",
+    "AI055",
+    "AI031",
+    "AI023",
+    "AI027",
+    "AI057",
+    "AI046",
+    "AI047",
+    "AI062",
+    "AI029",
+    "AI008",
+    "AI038",
+    "AI156",
+    "AI082"
+  ],
+  "learned_nodes": {
+    "AI001": {
+      "mastery": 0.85,
+      "status": "completed",
+      "finish_time": "2026-05-20T22:03:28"
+    },
+    "AI002": {
+      "mastery": 0.85,
+      "status": "completed",
+      "finish_time": "2026-05-20T22:03:31"
+    },
+    "AI003": {
+      "mastery": 0.85,
+      "status": "completed",
+      "finish_time": "2026-05-20T22:47:19"
+    },
+    "AI004": {
+      "mastery": 0.85,
+      "status": "completed",
+      "finish_time": "2026-05-20T22:48:01"
+    },
+    "AI006": {
+      "mastery": 0.85,
+      "status": "completed",
+      "finish_time": "2026-05-24T12:42:47"
+    },
+    "AI162": {
+      "mastery": 0.85,
+      "status": "completed",
+      "finish_time": "2026-05-24T12:42:55"
+    },
+    "AI200": {
+      "mastery": 0.85,
+      "status": "completed",
+      "finish_time": "2026-05-24T14:04:41"
+    },
+    "AI155": {
+      "mastery": 0.85,
+      "status": "completed",
+      "finish_time": "2026-05-24T14:35:34"
+    },
+    "AI207": {
+      "mastery": 0.85,
+      "status": "completed",
+      "finish_time": "2026-05-24T14:35:49"
+    },
+    "AI048": {
+      "mastery": 0.85,
+      "status": "completed",
+      "finish_time": "2026-05-24T14:45:16"
+    },
+    "AI138": {
+      "mastery": 0.85,
+      "status": "completed",
+      "finish_time": "2026-05-24T14:45:28"
+    },
+    "AI022": {
+      "mastery": 0.85,
+      "status": "completed",
+      "finish_time": "2026-05-24T14:51:20"
+    },
+    "AI007": {
+      "mastery": 0.85,
+      "status": "completed",
+      "finish_time": "2026-05-24T14:51:35"
+    },
+    "AI192": {
+      "mastery": 0.85,
+      "status": "completed",
+      "finish_time": "2026-05-25T21:04:51"
+    },
+    "AI073": {
+      "mastery": 0.85,
+      "status": "completed",
+      "finish_time": "2026-05-26T11:17:37"
+    },
+    "AI068": {
+      "mastery": 0.85,
+      "status": "completed",
+      "finish_time": "2026-05-26T11:18:07"
+    }
+  },
+  "weak_nodes": {},
+  "intent_history": [
+    {
+      "thread_id": "session_qzyh888",
+      "stage": "intent",
+      "updated_at": "2026-05-20T20:50:04",
+      "latest_intent": ""
+    },
+    {
+      "thread_id": "session_qzyh888",
+      "stage": "clarify_target",
+      "updated_at": "2026-05-20T20:50:15",
+      "latest_intent": "我想学习目标检测"
+    },
+    {
+      "thread_id": "session_qzyh888",
+      "stage": "clarify_style",
+      "updated_at": "2026-05-20T20:50:45",
+      "latest_intent": "我想学的是在自动驾驶方向的目标检测有关的"
+    },
+    {
+      "thread_id": "session_qzyh888",
+      "stage": "confirm",
+      "updated_at": "2026-05-20T20:50:51",
+      "latest_intent": "偏自动驾驶/机器人应用"
+    },
+    {
+      "thread_id": "session_qzyh888",
+      "stage": "clarify_target",
+      "updated_at": "2026-05-20T20:50:53",
+      "latest_intent": "我再补充一下目标"
+    },
+    {
+      "thread_id": "session_qzyh888",
+      "stage": "clarify_style",
+      "updated_at": "2026-05-20T20:50:58",
+      "latest_intent": "自动驾驶目标检测"
+    },
+    {
+      "thread_id": "session_qzyh888",
+      "stage": "confirm",
+      "updated_at": "2026-05-20T20:51:00",
+      "latest_intent": "偏自动驾驶/机器人应用"
+    },
+    {
+      "thread_id": "session_qzyh888",
+      "stage": "planned",
+      "updated_at": "2026-05-20T20:51:02",
+      "latest_intent": "偏自动驾驶/机器人应用"
+    },
+    {
+      "thread_id": "session_no3f6bi",
+      "stage": "intent",
+      "updated_at": "2026-05-20T20:51:11",
+      "latest_intent": ""
+    },
+    {
+      "thread_id": "session_no3f6bi",
+      "stage": "clarify_target",
+      "updated_at": "2026-05-20T20:51:24",
+      "latest_intent": "我想学习离线强化学习"
+    },
+    {
+      "thread_id": "session_no3f6bi",
+      "stage": "clarify_style",
+      "updated_at": "2026-05-20T20:51:33",
+      "latest_intent": "强化学习"
+    },
+    {
+      "thread_id": "session_vh953t2",
+      "stage": "intent_refining",
+      "updated_at": "2026-05-20T21:00:27",
+      "latest_intent": ""
+    },
+    {
+      "thread_id": "session_vh953t2",
+      "stage": "intent_refining",
+      "updated_at": "2026-05-20T21:00:34",
+      "latest_intent": "我想学习离线强化学习"
+    },
+    {
+      "thread_id": "session_vh953t2",
+      "stage": "intent_refining",
+      "updated_at": "2026-05-20T21:00:43",
+      "latest_intent": "我想学习强化学习"
+    },
+    {
+      "thread_id": "session_vh953t2",
+      "stage": "intent_refining",
+      "updated_at": "2026-05-20T21:00:52",
+      "latest_intent": "强化学习"
+    },
+    {
+      "thread_id": "session_vh953t2",
+      "stage": "intent_refining",
+      "updated_at": "2026-05-20T21:01:19",
+      "latest_intent": "离线强化学习"
+    },
+    {
+      "thread_id": "session_vh953t2",
+      "stage": "intent_refining",
+      "updated_at": "2026-05-20T21:01:34",
+      "latest_intent": "强化学习在机械臂控制中的应用"
+    },
+    {
+      "thread_id": "session_vh953t2",
+      "stage": "intent_refining",
+      "updated_at": "2026-05-20T21:01:46",
+      "latest_intent": "是的，我确定要学习这个方向"
+    },
+    {
+      "thread_id": "session_vh953t2",
+      "stage": "planned",
+      "updated_at": "2026-05-20T21:01:48",
+      "latest_intent": "我就确定是现在的方向了"
+    },
+    {
+      "thread_id": "session_lqom7i2",
+      "stage": "intent_refining",
+      "updated_at": "2026-05-20T21:25:30",
+      "latest_intent": ""
+    },
+    {
+      "thread_id": "session_lqom7i2",
+      "stage": "intent_refining",
+      "updated_at": "2026-05-20T21:25:48",
+      "latest_intent": "我想要学的是视觉相关的"
+    },
+    {
+      "thread_id": "session_lqom7i2",
+      "stage": "intent_refining",
+      "updated_at": "2026-05-20T21:25:58",
+      "latest_intent": "自动驾驶视觉感知"
+    },
+    {
+      "thread_id": "session_lqom7i2",
+      "stage": "intent_refining",
+      "updated_at": "2026-05-20T21:26:14",
+      "latest_intent": "目标跟踪"
+    },
+    {
+      "thread_id": "session_lqom7i2",
+      "stage": "intent_refining",
+      "updated_at": "2026-05-20T21:26:31",
+      "latest_intent": "自动驾驶"
+    },
+    {
+      "thread_id": "session_lqom7i2",
+      "stage": "intent_refining",
+      "updated_at": "2026-05-20T21:26:44",
+      "latest_intent": "人机交互"
+    },
+    {
+      "thread_id": "session_lqom7i2",
+      "stage": "intent_refining",
+      "updated_at": "2026-05-20T21:26:57",
+      "latest_intent": "自动驾驶"
+    },
+    {
+      "thread_id": "session_lqom7i2",
+      "stage": "intent_refining",
+      "updated_at": "2026-05-20T21:27:08",
+      "latest_intent": "自动驾驶视觉感知"
+    },
+    {
+      "thread_id": "session_lqom7i2",
+      "stage": "planned",
+      "updated_at": "2026-05-20T21:27:11",
+      "latest_intent": "我就确定是现在的方向了"
+    },
+    {
+      "thread_id": "session_8sb2l4a",
+      "stage": "intent_refining",
+      "updated_at": "2026-05-20T21:38:02",
+      "latest_intent": ""
+    },
+    {
+      "thread_id": "session_8sb2l4a",
+      "stage": "intent_refining",
+      "updated_at": "2026-05-20T21:38:11",
+      "latest_intent": "自动驾驶目标检测"
+    },
+    {
+      "thread_id": "session_8sb2l4a",
+      "stage": "intent_refining",
+      "updated_at": "2026-05-20T21:38:17",
+      "latest_intent": "自动驾驶目标检测"
+    },
+    {
+      "thread_id": "session_8sb2l4a",
+      "stage": "intent_refining",
+      "updated_at": "2026-05-20T21:38:24",
+      "latest_intent": "强化学习在自动驾驶中的应用"
+    },
+    {
+      "thread_id": "session_8sb2l4a",
+      "stage": "planned",
+      "updated_at": "2026-05-20T21:38:24",
+      "latest_intent": "我就确定是现在的方向了"
+    },
+    {
+      "thread_id": "session_n5kee17",
+      "stage": "intent_refining",
+      "updated_at": "2026-05-20T22:03:06",
+      "latest_intent": ""
+    },
+    {
+      "thread_id": "session_n5kee17",
+      "stage": "intent_refining",
+      "updated_at": "2026-05-20T22:03:13",
+      "latest_intent": "自动驾驶目标检测"
+    },
+    {
+      "thread_id": "session_n5kee17",
+      "stage": "intent_refining",
+      "updated_at": "2026-05-20T22:03:22",
+      "latest_intent": "强化学习在自动驾驶中的应用"
+    },
+    {
+      "thread_id": "session_n5kee17",
+      "stage": "planned",
+      "updated_at": "2026-05-20T22:03:23",
+      "latest_intent": "我就确定是现在的方向了"
+    },
+    {
+      "thread_id": "session_nforho7",
+      "stage": "intent_refining",
+      "updated_at": "2026-05-20T22:46:56",
+      "latest_intent": ""
+    },
+    {
+      "thread_id": "session_nforho7",
+      "stage": "intent_refining",
+      "updated_at": "2026-05-20T22:47:03",
+      "latest_intent": "自动驾驶目标检测"
+    },
+    {
+      "thread_id": "session_nforho7",
+      "stage": "intent_refining",
+      "updated_at": "2026-05-20T22:47:11",
+      "latest_intent": "强化学习在自动驾驶中的应用"
+    },
+    {
+      "thread_id": "session_nforho7",
+      "stage": "planned",
+      "updated_at": "2026-05-20T22:47:13",
+      "latest_intent": "我就确定是现在的方向了"
+    },
+    {
+      "thread_id": "session_nforho7",
+      "stage": "learning",
+      "updated_at": "2026-05-20T22:47:18",
+      "latest_intent": "我就确定是现在的方向了"
+    },
+    {
+      "thread_id": "session_nforho7",
+      "stage": "learning",
+      "updated_at": "2026-05-20T22:47:19",
+      "latest_intent": "我就确定是现在的方向了"
+    },
+    {
+      "thread_id": "session_nforho7",
+      "stage": "learning",
+      "updated_at": "2026-05-20T22:48:01",
+      "latest_intent": "我就确定是现在的方向了"
+    },
+    {
+      "thread_id": "session_6az8rc3",
+      "stage": "intent_refining",
+      "updated_at": "2026-05-24T12:10:03",
+      "latest_intent": ""
+    },
+    {
+      "thread_id": "session_6az8rc3",
+      "stage": "intent_refining",
+      "updated_at": "2026-05-24T12:11:14",
+      "latest_intent": "机器人强化学习"
+    },
+    {
+      "thread_id": "session_6az8rc3",
+      "stage": "intent_refining",
+      "updated_at": "2026-05-24T12:11:20",
+      "latest_intent": "机器人强化学习"
+    },
+    {
+      "thread_id": "session_6az8rc3",
+      "stage": "intent_refining",
+      "updated_at": "2026-05-24T12:11:27",
+      "latest_intent": "机器人强化学习"
+    },
+    {
+      "thread_id": "session_6az8rc3",
+      "stage": "planned",
+      "updated_at": "2026-05-24T12:12:57",
+      "latest_intent": "我就确定是现在的方向了"
+    },
+    {
+      "thread_id": "session_kl3rioo",
+      "stage": "intent_refining",
+      "updated_at": "2026-05-24T12:32:56",
+      "latest_intent": ""
+    },
+    {
+      "thread_id": "session_kl3rioo",
+      "stage": "intent_refining",
+      "updated_at": "2026-05-24T12:33:03",
+      "latest_intent": "自动驾驶目标检测"
+    },
+    {
+      "thread_id": "session_kl3rioo",
+      "stage": "intent_refining",
+      "updated_at": "2026-05-24T12:33:13",
+      "latest_intent": "强化学习在自动驾驶中的应用"
+    },
+    {
+      "thread_id": "session_kl3rioo",
+      "stage": "planned",
+      "updated_at": "2026-05-24T12:33:40",
+      "latest_intent": "我就确定是现在的方向了"
+    },
+    {
+      "thread_id": "session_kl3rioo",
+      "stage": "learning",
+      "updated_at": "2026-05-24T12:33:45",
+      "latest_intent": "我就确定是现在的方向了"
+    },
+    {
+      "thread_id": "session_kl3rioo",
+      "stage": "learning",
+      "updated_at": "2026-05-24T12:33:53",
+      "latest_intent": "我就确定是现在的方向了"
+    },
+    {
+      "thread_id": "session_kl3rioo",
+      "stage": "learning",
+      "updated_at": "2026-05-24T12:42:47",
+      "latest_intent": "我就确定是现在的方向了"
+    },
+    {
+      "thread_id": "session_kl3rioo",
+      "stage": "learning",
+      "updated_at": "2026-05-24T12:42:55",
+      "latest_intent": "我就确定是现在的方向了"
+    },
+    {
+      "thread_id": "session_kl3rioo",
+      "stage": "learning",
+      "updated_at": "2026-05-24T14:04:41",
+      "latest_intent": "我就确定是现在的方向了"
+    },
+    {
+      "thread_id": "session_l8py2j5",
+      "stage": "intent_refining",
+      "updated_at": "2026-05-24T14:22:00",
+      "latest_intent": ""
+    },
+    {
+      "thread_id": "session_l8py2j5",
+      "stage": "intent_refining",
+      "updated_at": "2026-05-24T14:22:12",
+      "latest_intent": "机器学习基础"
+    },
+    {
+      "thread_id": "session_l8py2j5",
+      "stage": "intent_refining",
+      "updated_at": "2026-05-24T14:22:23",
+      "latest_intent": "AI伦理"
+    },
+    {
+      "thread_id": "session_l8py2j5",
+      "stage": "planned",
+      "updated_at": "2026-05-24T14:22:27",
+      "latest_intent": "我就确定是现在的方向了"
+    },
+    {
+      "thread_id": "session_l8py2j5",
+      "stage": "learning",
+      "updated_at": "2026-05-24T14:22:32",
+      "latest_intent": "我就确定是现在的方向了"
+    },
+    {
+      "thread_id": "session_l8py2j5",
+      "stage": "intent_refining",
+      "updated_at": "2026-05-24T14:26:23",
+      "latest_intent": "世界模型"
+    },
+    {
+      "thread_id": "session_l8py2j5",
+      "stage": "intent_refining",
+      "updated_at": "2026-05-24T14:26:39",
+      "latest_intent": "通用人工智能"
+    },
+    {
+      "thread_id": "session_l8py2j5",
+      "stage": "planned",
+      "updated_at": "2026-05-24T14:26:43",
+      "latest_intent": "我就确定是现在的方向了"
+    },
+    {
+      "thread_id": "session_z2vlat9",
+      "stage": "intent_refining",
+      "updated_at": "2026-05-24T14:27:13",
+      "latest_intent": ""
+    },
+    {
+      "thread_id": "session_fs5kopw",
+      "stage": "intent_refining",
+      "updated_at": "2026-05-24T14:27:40",
+      "latest_intent": ""
+    },
+    {
+      "thread_id": "session_gy8cfto",
+      "stage": "intent_refining",
+      "updated_at": "2026-05-24T14:32:43",
+      "latest_intent": ""
+    },
+    {
+      "thread_id": "session_gy8cfto",
+      "stage": "intent_refining",
+      "updated_at": "2026-05-24T14:32:56",
+      "latest_intent": "世界模型"
+    },
+    {
+      "thread_id": "session_gy8cfto",
+      "stage": "intent_refining",
+      "updated_at": "2026-05-24T14:33:15",
+      "latest_intent": "强化学习中的世界模型"
+    },
+    {
+      "thread_id": "session_gy8cfto",
+      "stage": "intent_refining",
+      "updated_at": "2026-05-24T14:33:40",
+      "latest_intent": "智能体"
+    },
+    {
+      "thread_id": "session_gy8cfto",
+      "stage": "planned",
+      "updated_at": "2026-05-24T14:34:19",
+      "latest_intent": "我就确定是现在的方向了"
+    },
+    {
+      "thread_id": "session_gy8cfto",
+      "stage": "learning",
+      "updated_at": "2026-05-24T14:35:22",
+      "latest_intent": "我就确定是现在的方向了"
+    },
+    {
+      "thread_id": "session_gy8cfto",
+      "stage": "learning",
+      "updated_at": "2026-05-24T14:35:34",
+      "latest_intent": "我就确定是现在的方向了"
+    },
+    {
+      "thread_id": "session_gy8cfto",
+      "stage": "learning",
+      "updated_at": "2026-05-24T14:35:49",
+      "latest_intent": "我就确定是现在的方向了"
+    },
+    {
+      "thread_id": "session_gy8cfto",
+      "stage": "intent_refining",
+      "updated_at": "2026-05-24T14:36:46",
+      "latest_intent": "自动驾驶"
+    },
+    {
+      "thread_id": "session_gy8cfto",
+      "stage": "planned",
+      "updated_at": "2026-05-24T14:36:58",
+      "latest_intent": "我就确定是现在的方向了"
+    },
+    {
+      "thread_id": "session_bykie84",
+      "stage": "intent_refining",
+      "updated_at": "2026-05-24T14:44:43",
+      "latest_intent": ""
+    },
+    {
+      "thread_id": "session_bykie84",
+      "stage": "intent_refining",
+      "updated_at": "2026-05-24T14:44:52",
+      "latest_intent": "大语言模型与RAG"
+    },
+    {
+      "thread_id": "session_bykie84",
+      "stage": "planned",
+      "updated_at": "2026-05-24T14:44:58",
+      "latest_intent": "我就确定是现在的方向了"
+    },
+    {
+      "thread_id": "session_bykie84",
+      "stage": "learning",
+      "updated_at": "2026-05-24T14:45:06",
+      "latest_intent": "我就确定是现在的方向了"
+    },
+    {
+      "thread_id": "session_bykie84",
+      "stage": "learning",
+      "updated_at": "2026-05-24T14:45:16",
+      "latest_intent": "我就确定是现在的方向了"
+    },
+    {
+      "thread_id": "session_bykie84",
+      "stage": "learning",
+      "updated_at": "2026-05-24T14:45:28",
+      "latest_intent": "我就确定是现在的方向了"
+    },
+    {
+      "thread_id": "session_bykie84",
+      "stage": "intent_refining",
+      "updated_at": "2026-05-24T14:46:48",
+      "latest_intent": "重新调整路径"
+    },
+    {
+      "thread_id": "session_bykie84",
+      "stage": "intent_refining",
+      "updated_at": "2026-05-24T14:47:10",
+      "latest_intent": "自动驾驶目标检测"
+    },
+    {
+      "thread_id": "session_bykie84",
+      "stage": "planned",
+      "updated_at": "2026-05-24T14:48:08",
+      "latest_intent": "我就确定是现在的方向了"
+    },
+    {
+      "thread_id": "session_bykie84",
+      "stage": "learning",
+      "updated_at": "2026-05-24T14:51:20",
+      "latest_intent": "我就确定是现在的方向了"
+    },
+    {
+      "thread_id": "session_bykie84",
+      "stage": "learning",
+      "updated_at": "2026-05-24T14:51:35",
+      "latest_intent": "我就确定是现在的方向了"
+    },
+    {
+      "thread_id": "session_gtzugsi",
+      "stage": "intent_refining",
+      "updated_at": "2026-05-25T13:41:50",
+      "latest_intent": ""
+    },
+    {
+      "thread_id": "session_gtzugsi",
+      "stage": "intent_refining",
+      "updated_at": "2026-05-25T13:41:59",
+      "latest_intent": "机器人强化学习"
+    },
+    {
+      "thread_id": "session_gtzugsi",
+      "stage": "intent_refining",
+      "updated_at": "2026-05-25T13:42:09",
+      "latest_intent": "强化学习在自动驾驶中的应用"
+    },
+    {
+      "thread_id": "session_gtzugsi",
+      "stage": "planned",
+      "updated_at": "2026-05-25T13:42:11",
+      "latest_intent": "我就确定是现在的方向了"
+    },
+    {
+      "thread_id": "session_gtzugsi",
+      "stage": "intent_refining",
+      "updated_at": "2026-05-25T13:42:43",
+      "latest_intent": "大模型RAG"
+    },
+    {
+      "thread_id": "session_gtzugsi",
+      "stage": "intent_refining",
+      "updated_at": "2026-05-25T13:42:55",
+      "latest_intent": "大语言模型"
+    },
+    {
+      "thread_id": "session_gtzugsi",
+      "stage": "planned",
+      "updated_at": "2026-05-25T13:42:57",
+      "latest_intent": "我就确定是现在的方向了"
+    },
+    {
+      "thread_id": "session_j685248",
+      "stage": "intent_refining",
+      "updated_at": "2026-05-25T14:03:31",
+      "latest_intent": ""
+    },
+    {
+      "thread_id": "session_j685248",
+      "stage": "intent_refining",
+      "updated_at": "2026-05-25T14:03:44",
+      "latest_intent": "自动驾驶目标检测"
+    },
+    {
+      "thread_id": "session_320dc2w",
+      "stage": "intent_refining",
+      "updated_at": "2026-05-25T14:21:39",
+      "latest_intent": ""
+    },
+    {
+      "thread_id": "session_320dc2w",
+      "stage": "intent_refining",
+      "updated_at": "2026-05-25T14:21:54",
+      "latest_intent": "自动驾驶目标检测"
+    },
+    {
+      "thread_id": "session_320dc2w",
+      "stage": "planned",
+      "updated_at": "2026-05-25T14:21:56",
+      "latest_intent": "我就确定是现在的方向了"
+    },
+    {
+      "thread_id": "session_7o6wbi9",
+      "stage": "intent_refining",
+      "updated_at": "2026-05-25T21:03:45",
+      "latest_intent": ""
+    },
+    {
+      "thread_id": "session_7o6wbi9",
+      "stage": "intent_refining",
+      "updated_at": "2026-05-25T21:03:54",
+      "latest_intent": "机器人强化学习"
+    },
+    {
+      "thread_id": "session_7o6wbi9",
+      "stage": "intent_refining",
+      "updated_at": "2026-05-25T21:04:05",
+      "latest_intent": "强化学习在推荐系统中的应用"
+    },
+    {
+      "thread_id": "session_7o6wbi9",
+      "stage": "planned",
+      "updated_at": "2026-05-25T21:04:08",
+      "latest_intent": "我就确定是现在的方向了"
+    },
+    {
+      "thread_id": "session_7o6wbi9",
+      "stage": "learning",
+      "updated_at": "2026-05-25T21:04:13",
+      "latest_intent": "我就确定是现在的方向了"
+    },
+    {
+      "thread_id": "session_7o6wbi9",
+      "stage": "learning",
+      "updated_at": "2026-05-25T21:04:51",
+      "latest_intent": "我就确定是现在的方向了"
+    },
+    {
+      "thread_id": "session_rpr2dxd",
+      "stage": "intent_refining",
+      "updated_at": "2026-05-26T10:45:42",
+      "latest_intent": ""
+    },
+    {
+      "thread_id": "session_rpr2dxd",
+      "stage": "intent_refining",
+      "updated_at": "2026-05-26T10:45:50",
+      "latest_intent": "自动驾驶目标检测"
+    },
+    {
+      "thread_id": "session_rpr2dxd",
+      "stage": "planned",
+      "updated_at": "2026-05-26T10:45:52",
+      "latest_intent": "我就确定是现在的方向了"
+    },
+    {
+      "thread_id": "session_rpr2dxd",
+      "stage": "learning",
+      "updated_at": "2026-05-26T10:45:56",
+      "latest_intent": "我就确定是现在的方向了"
+    },
+    {
+      "thread_id": "session_nh1ky6p",
+      "stage": "intent_refining",
+      "updated_at": "2026-05-26T11:16:46",
+      "latest_intent": ""
+    },
+    {
+      "thread_id": "session_nh1ky6p",
+      "stage": "intent_refining",
+      "updated_at": "2026-05-26T11:16:59",
+      "latest_intent": "机器学习基础"
+    },
+    {
+      "thread_id": "session_nh1ky6p",
+      "stage": "intent_refining",
+      "updated_at": "2026-05-26T11:17:08",
+      "latest_intent": "机器学习在时序预测中的应用"
+    },
+    {
+      "thread_id": "session_nh1ky6p",
+      "stage": "planned",
+      "updated_at": "2026-05-26T11:17:09",
+      "latest_intent": "我就确定是现在的方向了"
+    },
+    {
+      "thread_id": "session_nh1ky6p",
+      "stage": "learning",
+      "updated_at": "2026-05-26T11:17:13",
+      "latest_intent": "我就确定是现在的方向了"
+    },
+    {
+      "thread_id": "session_nh1ky6p",
+      "stage": "learning",
+      "updated_at": "2026-05-26T11:17:37",
+      "latest_intent": "我就确定是现在的方向了"
+    },
+    {
+      "thread_id": "session_nh1ky6p",
+      "stage": "learning",
+      "updated_at": "2026-05-26T11:18:07",
+      "latest_intent": "我就确定是现在的方向了"
+    },
+    {
+      "thread_id": "session_xt0ere8",
+      "stage": "intent_refining",
+      "updated_at": "2026-05-26T13:29:58",
+      "latest_intent": ""
+    },
+    {
+      "thread_id": "session_xt0ere8",
+      "stage": "intent_refining",
+      "updated_at": "2026-05-26T13:30:10",
+      "latest_intent": "机器学习基础"
+    },
+    {
+      "thread_id": "session_xt0ere8",
+      "stage": "planned",
+      "updated_at": "2026-05-26T13:30:12",
+      "latest_intent": "我就确定是现在的方向了"
+    },
+    {
+      "thread_id": "session_xt0ere8",
+      "stage": "learning",
+      "updated_at": "2026-05-26T13:30:17",
+      "latest_intent": "我就确定是现在的方向了"
+    },
+    {
+      "thread_id": "session_xt0ere8",
+      "stage": "intent_refining",
+      "updated_at": "2026-05-26T13:30:43",
+      "latest_intent": "重新调整路径"
+    },
+    {
+      "thread_id": "session_xt0ere8",
+      "stage": "intent_refining",
+      "updated_at": "2026-05-26T13:30:59",
+      "latest_intent": "目标检测"
+    },
+    {
+      "thread_id": "session_xt0ere8",
+      "stage": "planned",
+      "updated_at": "2026-05-26T13:31:01",
+      "latest_intent": "我就确定是现在的方向了"
+    },
+    {
+      "thread_id": "session_u648kco",
+      "stage": "intent_refining",
+      "updated_at": "2026-05-26T13:48:22",
+      "latest_intent": ""
+    },
+    {
+      "thread_id": "session_u648kco",
+      "stage": "intent_refining",
+      "updated_at": "2026-05-26T13:48:34",
+      "latest_intent": "机器学习基础"
+    },
+    {
+      "thread_id": "session_u648kco",
+      "stage": "intent_refining",
+      "updated_at": "2026-05-26T13:48:49",
+      "latest_intent": "系统学习机器学习理论"
+    },
+    {
+      "thread_id": "session_u648kco",
+      "stage": "intent_refining",
+      "updated_at": "2026-05-26T13:48:58",
+      "latest_intent": "智能体系统"
+    },
+    {
+      "thread_id": "session_u648kco",
+      "stage": "planned",
+      "updated_at": "2026-05-26T13:49:00",
+      "latest_intent": "我就确定是现在的方向了"
+    },
+    {
+      "thread_id": "session_u648kco",
+      "stage": "learning",
+      "updated_at": "2026-05-26T13:49:03",
+      "latest_intent": "我就确定是现在的方向了"
+    },
+    {
+      "thread_id": "session_ld9v12o",
+      "stage": "intent_refining",
+      "updated_at": "2026-05-26T13:57:12",
+      "latest_intent": ""
+    },
+    {
+      "thread_id": "session_ld9v12o",
+      "stage": "intent_refining",
+      "updated_at": "2026-05-26T13:57:20",
+      "latest_intent": "机器学习基础"
+    },
+    {
+      "thread_id": "session_ld9v12o",
+      "stage": "intent_refining",
+      "updated_at": "2026-05-26T13:57:30",
+      "latest_intent": "数字孪生"
+    },
+    {
+      "thread_id": "session_ld9v12o",
+      "stage": "planned",
+      "updated_at": "2026-05-26T13:57:31",
+      "latest_intent": "我就确定是现在的方向了"
+    },
+    {
+      "thread_id": "session_ld9v12o",
+      "stage": "learning",
+      "updated_at": "2026-05-26T13:57:35",
+      "latest_intent": "我就确定是现在的方向了"
+    }
+  ],
+  "dialogue_sessions": {
+    "session_qzyh888": {
+      "stage": "planned",
+      "intent_history": [
+        "我想学习目标检测",
+        "我想学的是在自动驾驶方向的目标检测有关的",
+        "偏自动驾驶/机器人应用",
+        "我再补充一下目标",
+        "自动驾驶目标检测",
+        "偏自动驾驶/机器人应用"
+      ],
+      "candidate_nodes": [
+        "AI123"
+      ],
+      "selected_nodes": [
+        "AI123"
+      ],
+      "preference": {
+        "learning_style": "偏自动驾驶/机器人应用"
+      },
+      "created_at": "2026-05-20T20:50:04",
+      "latest_plan": {
+        "total": 53,
+        "skipped": 0,
+        "target_ids": [
+          "AI123"
+        ],
+        "target_names": [
+          "目标检测"
+        ]
+      }
+    },
+    "session_no3f6bi": {
+      "stage": "clarify_style",
+      "intent_history": [
+        "我想学习离线强化学习",
+        "强化学习"
+      ],
+      "candidate_nodes": [],
+      "selected_nodes": [
+        "AI009"
+      ],
+      "preference": {},
+      "created_at": "2026-05-20T20:51:11"
+    },
+    "session_vh953t2": {
+      "stage": "planned",
+      "intent_history": [
+        "我想学习离线强化学习",
+        "我想学习强化学习",
+        "强化学习",
+        "离线强化学习",
+        "强化学习在机械臂控制中的应用",
+        "是的，我确定要学习这个方向",
+        "我就确定是现在的方向了"
+      ],
+      "candidate_nodes": [
+        "AI202",
+        "AI201",
+        "AI200",
+        "AI199",
+        "AI198",
+        "AI197",
+        "AI196",
+        "AI195",
+        "AI156",
+        "AI009",
+        "AI228",
+        "AI227"
+      ],
+      "selected_nodes": [
+        "AI202"
+      ],
+      "understood_goal": "强化学习在机械臂控制中的应用",
+      "preference": {},
+      "created_at": "2026-05-20T21:00:27",
+      "last_reason": "学生历史输入明确表达了学习离线强化学习、强化学习，并最终确认了强化学习在机械臂控制中的应用，且最新输入确认了方向，因此直接确定目标节点。",
+      "latest_plan": {
+        "total": 54,
+        "skipped": 0,
+        "target_ids": [
+          "AI202"
+        ],
+        "target_names": [
+          "强化学习在机械臂控制中的应用"
+        ]
+      }
+    },
+    "session_lqom7i2": {
+      "stage": "planned",
+      "intent_history": [
+        "我想要学的是视觉相关的",
+        "自动驾驶视觉感知",
+        "目标跟踪",
+        "自动驾驶",
+        "人机交互",
+        "自动驾驶",
+        "自动驾驶视觉感知",
+        "我就确定是现在的方向了"
+      ],
+      "candidate_nodes": [
+        "AI140",
+        "AI146",
+        "AI228",
+        "AI203",
+        "AI150",
+        "AI147",
+        "AI145",
+        "AI143",
+        "AI141",
+        "AI132",
+        "AI128",
+        "AI127"
+      ],
+      "selected_nodes": [
+        "AI145",
+        "AI203",
+        "AI146"
+      ],
+      "understood_goal": "自动驾驶视觉感知",
+      "preference": {},
+      "created_at": "2026-05-20T21:25:30",
+      "last_reason": "学生多次提到自动驾驶视觉感知，但该领域包含多个子任务，需要进一步明确具体方向。",
+      "latest_plan": {
+        "total": 53,
+        "skipped": 0,
+        "target_ids": [
+          "AI145",
+          "AI203",
+          "AI146"
+        ],
+        "target_names": [
+          "自动驾驶视觉感知",
+          "自动驾驶",
+          "多目标跟踪"
+        ]
+      }
+    },
+    "session_8sb2l4a": {
+      "stage": "planned",
+      "intent_history": [
+        "自动驾驶目标检测",
+        "自动驾驶目标检测",
+        "强化学习在自动驾驶中的应用",
+        "我就确定是现在的方向了"
+      ],
+      "candidate_nodes": [
+        "AI116",
+        "AI088",
+        "AI036",
+        "AI199",
+        "AI203",
+        "AI123",
+        "AI124",
+        "AI125",
+        "AI126",
+        "AI127",
+        "AI128",
+        "AI129"
+      ],
+      "selected_nodes": [
+        "AI199"
+      ],
+      "understood_goal": "强化学习在自动驾驶中的应用",
+      "preference": {},
+      "created_at": "2026-05-20T21:38:02",
+      "last_reason": "学生明确表达了想学习强化学习在自动驾驶中的应用，知识图谱中有对应节点AI199，因此无需追问。",
+      "latest_plan": {
+        "total": 54,
+        "skipped": 0,
+        "target_ids": [
+          "AI199"
+        ],
+        "target_names": [
+          "强化学习在自动驾驶中的应用"
+        ]
+      }
+    },
+    "session_n5kee17": {
+      "stage": "planned",
+      "intent_history": [
+        "自动驾驶目标检测",
+        "强化学习在自动驾驶中的应用",
+        "我就确定是现在的方向了"
+      ],
+      "candidate_nodes": [
+        "AI203",
+        "AI199",
+        "AI145",
+        "AI228",
+        "AI227",
+        "AI226",
+        "AI225",
+        "AI224",
+        "AI223",
+        "AI222",
+        "AI221",
+        "AI220"
+      ],
+      "selected_nodes": [
+        "AI199"
+      ],
+      "understood_goal": "学生希望学习强化学习在自动驾驶中的应用",
+      "preference": {},
+      "created_at": "2026-05-20T22:03:06",
+      "last_reason": "学生两次输入均明确指向强化学习在自动驾驶中的应用，且候选节点中AI199完全匹配该知识点，无需进一步追问。",
+      "latest_plan": {
+        "total": 54,
+        "skipped": 0,
+        "target_ids": [
+          "AI199"
+        ],
+        "target_names": [
+          "强化学习在自动驾驶中的应用"
+        ]
+      }
+    },
+    "session_nforho7": {
+      "stage": "learning",
+      "intent_history": [
+        "自动驾驶目标检测",
+        "强化学习在自动驾驶中的应用",
+        "我就确定是现在的方向了"
+      ],
+      "candidate_nodes": [
+        "AI116",
+        "AI088",
+        "AI036",
+        "AI199",
+        "AI203",
+        "AI123",
+        "AI145",
+        "AI146",
+        "AI204",
+        "AI205",
+        "AI206"
+      ],
+      "selected_nodes": [
+        "AI199"
+      ],
+      "understood_goal": "强化学习在自动驾驶中的应用",
+      "preference": {},
+      "created_at": "2026-05-20T22:46:56",
+      "last_reason": "学生明确提到了强化学习在自动驾驶中的应用，但该领域较宽泛，需要进一步明确具体子方向，因此给出最匹配的候选节点并追问。",
+      "latest_plan": {
+        "total": 52,
+        "skipped": 2,
+        "target_ids": [
+          "AI199"
+        ],
+        "target_names": [
+          "强化学习在自动驾驶中的应用"
+        ]
+      }
+    },
+    "session_6az8rc3": {
+      "stage": "planned",
+      "intent_history": [
+        "机器人强化学习",
+        "机器人强化学习",
+        "机器人强化学习",
+        "我就确定是现在的方向了"
+      ],
+      "candidate_nodes": [
+        "AI009",
+        "AI156",
+        "AI157",
+        "AI158",
+        "AI159",
+        "AI160",
+        "AI161",
+        "AI162",
+        "AI163",
+        "AI164",
+        "AI165",
+        "AI166"
+      ],
+      "selected_nodes": [
+        "AI009"
+      ],
+      "understood_goal": "机器人强化学习",
+      "preference": {},
+      "created_at": "2026-05-24T12:10:03",
+      "last_reason": "学生多次重复'机器人强化学习'，但该表述较宽泛，需要进一步明确具体子方向或学习方式，因此继续追问。",
+      "latest_plan": {
+        "total": 47,
+        "skipped": 4,
+        "target_ids": [
+          "AI009"
+        ],
+        "target_names": [
+          "强化学习"
+        ]
+      }
+    },
+    "session_kl3rioo": {
+      "stage": "learning",
+      "intent_history": [
+        "自动驾驶目标检测",
+        "强化学习在自动驾驶中的应用",
+        "我就确定是现在的方向了"
+      ],
+      "candidate_nodes": [
+        "AI116",
+        "AI088",
+        "AI036",
+        "AI199",
+        "AI203",
+        "AI123",
+        "AI124",
+        "AI125",
+        "AI126",
+        "AI127",
+        "AI128",
+        "AI129"
+      ],
+      "selected_nodes": [
+        "AI199"
+      ],
+      "understood_goal": "强化学习在自动驾驶中的应用",
+      "preference": {},
+      "created_at": "2026-05-24T12:32:56",
+      "last_reason": "学生明确表示想学习强化学习在自动驾驶中的应用，且该节点在候选列表中，无需进一步追问。",
+      "latest_plan": {
+        "total": 50,
+        "skipped": 4,
+        "target_ids": [
+          "AI199"
+        ],
+        "target_names": [
+          "强化学习在自动驾驶中的应用"
+        ]
+      }
+    },
+    "session_l8py2j5": {
+      "stage": "planned",
+      "intent_history": [
+        "世界模型",
+        "通用人工智能",
+        "我就确定是现在的方向了"
+      ],
+      "candidate_nodes": [
+        "AI006",
+        "AI119",
+        "AI018",
+        "AI013",
+        "AI005",
+        "AI004",
+        "AI003",
+        "AI001",
+        "AI002",
+        "AI007",
+        "AI008",
+        "AI009"
+      ],
+      "selected_nodes": [
+        "AI006",
+        "AI018",
+        "AI013",
+        "AI009"
+      ],
+      "understood_goal": "通用人工智能",
+      "preference": {},
+      "created_at": "2026-05-24T14:26:17",
+      "last_reason": "学生明确表示想学习通用人工智能，但AGI是一个宏大方向，需要进一步明确是理论认知还是具体技术路径，因此推荐相关候选节点供选择。",
+      "latest_plan": {
+        "total": 49,
+        "skipped": 5,
+        "target_ids": [
+          "AI006",
+          "AI018",
+          "AI013",
+          "AI009"
+        ],
+        "target_names": [
+          "通用人工智能",
+          "元学习",
+          "自监督学习",
+          "强化学习"
+        ]
+      }
+    },
+    "session_z2vlat9": {
+      "stage": "intent_refining",
+      "intent_history": [],
+      "candidate_nodes": [],
+      "selected_nodes": [],
+      "understood_goal": "",
+      "preference": {},
+      "created_at": "2026-05-24T14:27:13"
+    },
+    "session_fs5kopw": {
+      "stage": "intent_refining",
+      "intent_history": [],
+      "candidate_nodes": [],
+      "selected_nodes": [],
+      "understood_goal": "",
+      "preference": {},
+      "created_at": "2026-05-24T14:27:40"
+    },
+    "session_gy8cfto": {
+      "stage": "planned",
+      "intent_history": [
+        "自动驾驶",
+        "我就确定是现在的方向了"
+      ],
+      "candidate_nodes": [
+        "AI203",
+        "AI199",
+        "AI145",
+        "AI228",
+        "AI227",
+        "AI226",
+        "AI225",
+        "AI224",
+        "AI223",
+        "AI222",
+        "AI221",
+        "AI220"
+      ],
+      "selected_nodes": [
+        "AI203"
+      ],
+      "understood_goal": "自动驾驶",
+      "preference": {},
+      "created_at": "2026-05-24T14:36:40",
+      "last_reason": "学生输入仍较宽泛，需要进一步明确具体子方向，目前最匹配的候选节点是自动驾驶整体概念。",
+      "latest_plan": {
+        "total": 49,
+        "skipped": 2,
+        "target_ids": [
+          "AI203"
+        ],
+        "target_names": [
+          "自动驾驶"
+        ]
+      }
+    },
+    "session_bykie84": {
+      "stage": "learning",
+      "intent_history": [
+        "自动驾驶目标检测",
+        "我就确定是现在的方向了"
+      ],
+      "candidate_nodes": [
+        "AI203",
+        "AI199",
+        "AI145",
+        "AI228",
+        "AI227",
+        "AI226",
+        "AI225",
+        "AI224",
+        "AI223",
+        "AI222",
+        "AI221",
+        "AI220"
+      ],
+      "selected_nodes": [
+        "AI145",
+        "AI199",
+        "AI203"
+      ],
+      "understood_goal": "自动驾驶目标检测",
+      "preference": {},
+      "created_at": "2026-05-24T14:47:03",
+      "replan_keep_progress": false,
+      "last_reason": "学生明确提到自动驾驶和目标检测，但未指定具体子方向，候选节点中AI145（自动驾驶视觉感知）最直接相关，AI199（强化学习应用）和AI203（自动驾驶概述）也相关，需要进一步确认侧重点。",
+      "latest_plan": {
+        "total": 65,
+        "skipped": 0,
+        "target_ids": [
+          "AI145",
+          "AI199",
+          "AI203"
+        ],
+        "target_names": [
+          "自动驾驶视觉感知",
+          "强化学习在自动驾驶中的应用",
+          "自动驾驶"
+        ]
+      }
+    },
+    "session_gtzugsi": {
+      "stage": "planned",
+      "intent_history": [
+        "大模型RAG",
+        "大语言模型",
+        "我就确定是现在的方向了"
+      ],
+      "candidate_nodes": [
+        "AI113",
+        "AI138",
+        "AI120",
+        "AI115",
+        "AI112",
+        "AI111",
+        "AI110",
+        "AI105",
+        "AI101",
+        "AI100",
+        "AI096",
+        "AI095"
+      ],
+      "selected_nodes": [
+        "AI113",
+        "AI115"
+      ],
+      "understood_goal": "大语言模型及其RAG应用",
+      "preference": {},
+      "created_at": "2026-05-25T13:42:37",
+      "replan_keep_progress": false,
+      "last_reason": "学生输入了'大语言模型'和'大模型RAG'，但未明确是学习基础还是应用，需要进一步澄清。",
+      "latest_plan": {
+        "total": 58,
+        "skipped": 0,
+        "target_ids": [
+          "AI113",
+          "AI115"
+        ],
+        "target_names": [
+          "大语言模型",
+          "RAG"
+        ]
+      }
+    },
+    "session_j685248": {
+      "stage": "intent_refining",
+      "intent_history": [
+        "自动驾驶目标检测"
+      ],
+      "candidate_nodes": [
+        "AI203",
+        "AI199",
+        "AI145",
+        "AI228",
+        "AI227",
+        "AI226",
+        "AI225",
+        "AI224",
+        "AI223",
+        "AI222",
+        "AI221",
+        "AI220"
+      ],
+      "selected_nodes": [
+        "AI145",
+        "AI199",
+        "AI203"
+      ],
+      "understood_goal": "自动驾驶目标检测",
+      "preference": {},
+      "created_at": "2026-05-25T14:03:31",
+      "last_reason": "学生输入明确为自动驾驶目标检测，但候选节点中有多个相关方向（视觉感知、强化学习应用、整体自动驾驶），需要进一步确认具体子方向。"
+    },
+    "session_320dc2w": {
+      "stage": "planned",
+      "intent_history": [
+        "自动驾驶目标检测",
+        "我就确定是现在的方向了"
+      ],
+      "candidate_nodes": [
+        "AI203",
+        "AI199",
+        "AI145",
+        "AI228",
+        "AI227",
+        "AI226",
+        "AI225",
+        "AI224",
+        "AI223",
+        "AI222",
+        "AI221",
+        "AI220"
+      ],
+      "selected_nodes": [
+        "AI145",
+        "AI199",
+        "AI203"
+      ],
+      "understood_goal": "自动驾驶目标检测",
+      "preference": {},
+      "created_at": "2026-05-25T14:21:39",
+      "last_reason": "学生输入‘自动驾驶目标检测’指向明确，但候选节点中既有视觉感知（AI145）又有强化学习应用（AI199）和整体自动驾驶（AI203），需要进一步确认具体子方向和学习侧重点。",
+      "latest_plan": {
+        "total": 56,
+        "skipped": 4,
+        "target_ids": [
+          "AI145",
+          "AI199",
+          "AI203"
+        ],
+        "target_names": [
+          "自动驾驶视觉感知",
+          "强化学习在自动驾驶中的应用",
+          "自动驾驶"
+        ]
+      },
+      "replan_keep_progress": false
+    },
+    "session_7o6wbi9": {
+      "stage": "learning",
+      "intent_history": [
+        "机器人强化学习",
+        "强化学习在推荐系统中的应用",
+        "我就确定是现在的方向了"
+      ],
+      "candidate_nodes": [
+        "AI201",
+        "AI227",
+        "AI210",
+        "AI206",
+        "AI200",
+        "AI199",
+        "AI195",
+        "AI194",
+        "AI193",
+        "AI192",
+        "AI191",
+        "AI190"
+      ],
+      "selected_nodes": [
+        "AI201"
+      ],
+      "understood_goal": "强化学习在推荐系统中的应用",
+      "preference": {},
+      "created_at": "2026-05-25T21:03:45",
+      "last_reason": "学生明确提到‘强化学习在推荐系统中的应用’，与候选节点AI201完全匹配，但需要进一步确认学习深度和具体需求，因此设为最可能的候选节点并追问。",
+      "latest_plan": {
+        "total": 54,
+        "skipped": 7,
+        "target_ids": [
+          "AI201"
+        ],
+        "target_names": [
+          "强化学习在推荐系统中的应用"
+        ]
+      },
+      "replan_keep_progress": false
+    },
+    "session_rpr2dxd": {
+      "stage": "learning",
+      "intent_history": [
+        "自动驾驶目标检测",
+        "我就确定是现在的方向了"
+      ],
+      "candidate_nodes": [
+        "AI088",
+        "AI028"
+      ],
+      "selected_nodes": [
+        "AI088",
+        "AI028"
+      ],
+      "understood_goal": "自动驾驶目标检测",
+      "preference": {},
+      "created_at": "2026-05-26T10:45:42",
+      "last_reason": "学生目标明确为自动驾驶目标检测，但候选节点中无直接对应节点，需追问其更关注基础原理还是评估方法，以便进一步定位学习路径。",
+      "latest_plan": {
+        "total": 53,
+        "skipped": 8,
+        "target_ids": [
+          "AI088",
+          "AI028"
+        ],
+        "target_names": [
+          "卷积层",
+          "测试集"
+        ]
+      },
+      "replan_keep_progress": false
+    },
+    "session_nh1ky6p": {
+      "stage": "learning",
+      "intent_history": [
+        "机器学习基础",
+        "机器学习在时序预测中的应用",
+        "我就确定是现在的方向了"
+      ],
+      "candidate_nodes": [
+        "AI156",
+        "AI082",
+        "AI080",
+        "AI073",
+        "AI061",
+        "AI060",
+        "AI028",
+        "AI026",
+        "AI023",
+        "AI022",
+        "AI020",
+        "AI015"
+      ],
+      "selected_nodes": [
+        "AI060",
+        "AI061",
+        "AI020",
+        "AI023"
+      ],
+      "understood_goal": "机器学习在时序预测中的应用",
+      "preference": {},
+      "created_at": "2026-05-26T11:16:46",
+      "last_reason": "学生明确提到时序预测，但未指定具体模型或技术。候选节点中线性回归、多项式回归是时序预测的基础模型，特征工程和数据预处理是时序数据的关键步骤，因此推荐这些节点供学生选择，以进一步明确学习重点。",
+      "latest_plan": {
+        "total": 48,
+        "skipped": 8,
+        "target_ids": [
+          "AI060",
+          "AI061",
+          "AI020",
+          "AI023"
+        ],
+        "target_names": [
+          "线性回归",
+          "多项式回归",
+          "特征工程",
+          "数据预处理"
+        ]
+      },
+      "replan_keep_progress": false
+    },
+    "session_xt0ere8": {
+      "stage": "planned",
+      "intent_history": [
+        "目标检测",
+        "我就确定是现在的方向了"
+      ],
+      "candidate_nodes": [
+        "AI123",
+        "AI125",
+        "AI124",
+        "AI220",
+        "AI204",
+        "AI203",
+        "AI155",
+        "AI151",
+        "AI150",
+        "AI146",
+        "AI145",
+        "AI144"
+      ],
+      "selected_nodes": [
+        "AI124",
+        "AI125",
+        "AI203",
+        "AI155"
+      ],
+      "understood_goal": "目标检测",
+      "preference": {},
+      "created_at": "2026-05-26T13:30:52",
+      "replan_keep_progress": false,
+      "last_reason": "学生仅输入'目标检测'，属于宽泛方向，需要进一步明确具体子方向或应用场景。候选节点中单阶段和双阶段检测是核心子方向，自动驾驶和机器人视觉是典型应用，因此推荐这些选项供学生选择。",
+      "latest_plan": {
+        "total": 65,
+        "skipped": 0,
+        "target_ids": [
+          "AI124",
+          "AI125",
+          "AI203",
+          "AI155"
+        ],
+        "target_names": [
+          "单阶段目标检测",
+          "双阶段目标检测",
+          "自动驾驶",
+          "机器人视觉"
+        ]
+      }
+    },
+    "session_u648kco": {
+      "stage": "learning",
+      "intent_history": [
+        "机器学习基础",
+        "系统学习机器学习理论",
+        "智能体系统",
+        "我就确定是现在的方向了"
+      ],
+      "candidate_nodes": [
+        "AI156",
+        "AI082",
+        "AI080",
+        "AI073",
+        "AI061",
+        "AI060",
+        "AI028",
+        "AI026",
+        "AI023",
+        "AI022",
+        "AI020",
+        "AI015"
+      ],
+      "selected_nodes": [
+        "AI156"
+      ],
+      "understood_goal": "学生希望系统学习智能体系统，这通常与强化学习密切相关。",
+      "preference": {},
+      "created_at": "2026-05-26T13:48:22",
+      "last_reason": "学生明确提到智能体系统，强化学习是核心基础，但方向仍较宽泛，需进一步确认学习侧重点。",
+      "latest_plan": {
+        "total": 46,
+        "skipped": 9,
+        "target_ids": [
+          "AI156"
+        ],
+        "target_names": [
+          "强化学习概述"
+        ]
+      },
+      "replan_keep_progress": false
+    },
+    "session_ld9v12o": {
+      "stage": "learning",
+      "intent_history": [
+        "机器学习基础",
+        "数字孪生",
+        "我就确定是现在的方向了"
+      ],
+      "candidate_nodes": [
+        "AI156",
+        "AI082",
+        "AI080",
+        "AI073",
+        "AI061",
+        "AI060",
+        "AI028",
+        "AI026",
+        "AI023",
+        "AI022",
+        "AI020",
+        "AI015"
+      ],
+      "selected_nodes": [
+        "AI156",
+        "AI082"
+      ],
+      "understood_goal": "数字孪生",
+      "preference": {},
+      "created_at": "2026-05-26T13:57:12",
+      "last_reason": "学生仅提到'数字孪生'，范围较宽泛，需要进一步明确其具体兴趣点（如基础概念、机器学习应用或仿真技术），因此追问以缩小范围。",
+      "latest_plan": {
+        "total": 49,
+        "skipped": 10,
+        "target_ids": [
+          "AI156",
+          "AI082"
+        ],
+        "target_names": [
+          "强化学习概述",
+          "神经网络"
+        ]
+      },
+      "replan_keep_progress": false
+    }
+  },
+  "path_versions": [
+    {
+      "created_at": "2026-05-20T20:51:02",
+      "target_nodes": [
+        "AI123"
+      ],
+      "path": [
+        "AI042",
+        "AI001",
+        "AI043",
+        "AI004",
+        "AI044",
+        "AI011",
+        "AI086",
+        "AI034",
+        "AI025",
+        "AI087",
+        "AI033",
+        "AI122",
+        "AI047",
+        "AI046",
+        "AI056",
+        "AI054",
+        "AI023",
+        "AI057",
+        "AI035",
+        "AI089",
+        "AI010",
+        "AI084",
+        "AI007",
+        "AI090",
+        "AI121",
+        "AI060",
+        "AI032",
+        "AI049",
+        "AI088",
+        "AI008",
+        "AI062",
+        "AI059",
+        "AI072",
+        "AI055",
+        "AI020",
+        "AI083",
+        "AI037",
+        "AI082",
+        "AI058",
+        "AI048",
+        "AI031",
+        "AI029",
+        "AI052",
+        "AI045",
+        "AI061",
+        "AI051",
+        "AI085",
+        "AI030",
+        "AI009",
+        "AI053",
+        "AI026",
+        "AI050",
+        "AI123"
+      ],
+      "skipped": []
+    },
+    {
+      "created_at": "2026-05-20T21:01:48",
+      "target_nodes": [
+        "AI202"
+      ],
+      "path": [
+        "AI001",
+        "AI002",
+        "AI003",
+        "AI004",
+        "AI006",
+        "AI173",
+        "AI162",
+        "AI189",
+        "AI174",
+        "AI167",
+        "AI007",
+        "AI196",
+        "AI023",
+        "AI186",
+        "AI074",
+        "AI161",
+        "AI171",
+        "AI209",
+        "AI010",
+        "AI158",
+        "AI206",
+        "AI197",
+        "AI192",
+        "AI157",
+        "AI193",
+        "AI188",
+        "AI076",
+        "AI227",
+        "AI217",
+        "AI226",
+        "AI187",
+        "AI175",
+        "AI199",
+        "AI165",
+        "AI183",
+        "AI190",
+        "AI020",
+        "AI198",
+        "AI191",
+        "AI156",
+        "AI200",
+        "AI011",
+        "AI185",
+        "AI024",
+        "AI184",
+        "AI182",
+        "AI181",
+        "AI195",
+        "AI159",
+        "AI172",
+        "AI160",
+        "AI216",
+        "AI194",
+        "AI202"
+      ],
+      "skipped": []
+    },
+    {
+      "created_at": "2026-05-20T21:27:11",
+      "target_nodes": [
+        "AI145",
+        "AI203",
+        "AI146"
+      ],
+      "path": [
+        "AI020",
+        "AI001",
+        "AI022",
+        "AI007",
+        "AI010",
+        "AI060",
+        "AI062",
+        "AI152",
+        "AI088",
+        "AI155",
+        "AI058",
+        "AI141",
+        "AI125",
+        "AI126",
+        "AI222",
+        "AI132",
+        "AI133",
+        "AI087",
+        "AI131",
+        "AI082",
+        "AI086",
+        "AI150",
+        "AI127",
+        "AI089",
+        "AI216",
+        "AI147",
+        "AI140",
+        "AI122",
+        "AI121",
+        "AI090",
+        "AI102",
+        "AI154",
+        "AI083",
+        "AI124",
+        "AI084",
+        "AI130",
+        "AI149",
+        "AI128",
+        "AI035",
+        "AI129",
+        "AI143",
+        "AI085",
+        "AI151",
+        "AI224",
+        "AI148",
+        "AI123",
+        "AI055",
+        "AI008",
+        "AI217",
+        "AI091",
+        "AI145",
+        "AI203",
+        "AI146"
+      ],
+      "skipped": []
+    },
+    {
+      "created_at": "2026-05-20T21:38:24",
+      "target_nodes": [
+        "AI199"
+      ],
+      "path": [
+        "AI001",
+        "AI002",
+        "AI003",
+        "AI004",
+        "AI006",
+        "AI156",
+        "AI174",
+        "AI181",
+        "AI171",
+        "AI010",
+        "AI194",
+        "AI162",
+        "AI197",
+        "AI165",
+        "AI209",
+        "AI187",
+        "AI193",
+        "AI173",
+        "AI182",
+        "AI023",
+        "AI192",
+        "AI024",
+        "AI167",
+        "AI183",
+        "AI074",
+        "AI188",
+        "AI175",
+        "AI159",
+        "AI007",
+        "AI190",
+        "AI195",
+        "AI161",
+        "AI206",
+        "AI216",
+        "AI020",
+        "AI217",
+        "AI202",
+        "AI160",
+        "AI076",
+        "AI157",
+        "AI198",
+        "AI196",
+        "AI184",
+        "AI189",
+        "AI227",
+        "AI011",
+        "AI226",
+        "AI172",
+        "AI185",
+        "AI191",
+        "AI186",
+        "AI158",
+        "AI200",
+        "AI199"
+      ],
+      "skipped": []
+    },
+    {
+      "created_at": "2026-05-20T22:03:23",
+      "target_nodes": [
+        "AI199"
+      ],
+      "path": [
+        "AI001",
+        "AI002",
+        "AI003",
+        "AI004",
+        "AI006",
+        "AI183",
+        "AI188",
+        "AI024",
+        "AI202",
+        "AI076",
+        "AI165",
+        "AI159",
+        "AI174",
+        "AI173",
+        "AI198",
+        "AI185",
+        "AI217",
+        "AI194",
+        "AI020",
+        "AI010",
+        "AI074",
+        "AI175",
+        "AI172",
+        "AI206",
+        "AI182",
+        "AI187",
+        "AI226",
+        "AI181",
+        "AI196",
+        "AI167",
+        "AI171",
+        "AI189",
+        "AI158",
+        "AI191",
+        "AI192",
+        "AI023",
+        "AI007",
+        "AI200",
+        "AI186",
+        "AI197",
+        "AI162",
+        "AI195",
+        "AI157",
+        "AI011",
+        "AI184",
+        "AI160",
+        "AI227",
+        "AI193",
+        "AI161",
+        "AI190",
+        "AI209",
+        "AI156",
+        "AI216",
+        "AI199"
+      ],
+      "skipped": []
+    },
+    {
+      "created_at": "2026-05-20T22:47:13",
+      "target_nodes": [
+        "AI199"
+      ],
+      "path": [
+        "AI003",
+        "AI004",
+        "AI006",
+        "AI020",
+        "AI202",
+        "AI024",
+        "AI195",
+        "AI172",
+        "AI188",
+        "AI161",
+        "AI171",
+        "AI074",
+        "AI193",
+        "AI157",
+        "AI197",
+        "AI165",
+        "AI174",
+        "AI011",
+        "AI162",
+        "AI010",
+        "AI186",
+        "AI194",
+        "AI189",
+        "AI227",
+        "AI023",
+        "AI007",
+        "AI076",
+        "AI209",
+        "AI175",
+        "AI226",
+        "AI200",
+        "AI191",
+        "AI187",
+        "AI156",
+        "AI190",
+        "AI196",
+        "AI160",
+        "AI183",
+        "AI185",
+        "AI181",
+        "AI182",
+        "AI216",
+        "AI159",
+        "AI198",
+        "AI158",
+        "AI206",
+        "AI184",
+        "AI173",
+        "AI167",
+        "AI192",
+        "AI217",
+        "AI199"
+      ],
+      "skipped": [
+        "AI001",
+        "AI002"
+      ]
+    },
+    {
+      "created_at": "2026-05-24T12:12:57",
+      "target_nodes": [
+        "AI009"
+      ],
+      "path": [
+        "AI073",
+        "AI042",
+        "AI043",
+        "AI044",
+        "AI059",
+        "AI082",
+        "AI061",
+        "AI058",
+        "AI077",
+        "AI055",
+        "AI008",
+        "AI016",
+        "AI011",
+        "AI075",
+        "AI156",
+        "AI174",
+        "AI224",
+        "AI083",
+        "AI086",
+        "AI060",
+        "AI047",
+        "AI217",
+        "AI085",
+        "AI045",
+        "AI049",
+        "AI007",
+        "AI023",
+        "AI062",
+        "AI167",
+        "AI201",
+        "AI010",
+        "AI223",
+        "AI024",
+        "AI216",
+        "AI048",
+        "AI076",
+        "AI072",
+        "AI091",
+        "AI020",
+        "AI102",
+        "AI074",
+        "AI225",
+        "AI084",
+        "AI046",
+        "AI222",
+        "AI057",
+        "AI009"
+      ],
+      "skipped": [
+        "AI001",
+        "AI002",
+        "AI003",
+        "AI004"
+      ]
+    },
+    {
+      "created_at": "2026-05-24T12:33:40",
+      "target_nodes": [
+        "AI199"
+      ],
+      "path": [
+        "AI006",
+        "AI162",
+        "AI200",
+        "AI007",
+        "AI172",
+        "AI158",
+        "AI074",
+        "AI202",
+        "AI182",
+        "AI209",
+        "AI157",
+        "AI020",
+        "AI187",
+        "AI197",
+        "AI161",
+        "AI226",
+        "AI185",
+        "AI196",
+        "AI159",
+        "AI165",
+        "AI193",
+        "AI186",
+        "AI156",
+        "AI173",
+        "AI076",
+        "AI184",
+        "AI217",
+        "AI181",
+        "AI188",
+        "AI198",
+        "AI175",
+        "AI191",
+        "AI183",
+        "AI024",
+        "AI010",
+        "AI227",
+        "AI206",
+        "AI174",
+        "AI192",
+        "AI216",
+        "AI023",
+        "AI189",
+        "AI171",
+        "AI194",
+        "AI160",
+        "AI190",
+        "AI011",
+        "AI167",
+        "AI195",
+        "AI199"
+      ],
+      "skipped": [
+        "AI001",
+        "AI002",
+        "AI003",
+        "AI004"
+      ]
+    },
+    {
+      "created_at": "2026-05-24T14:22:27",
+      "target_nodes": [
+        "AI224"
+      ],
+      "path": [
+        "AI025",
+        "AI158",
+        "AI048",
+        "AI156",
+        "AI167",
+        "AI223",
+        "AI174",
+        "AI035",
+        "AI225",
+        "AI201",
+        "AI171",
+        "AI084",
+        "AI023",
+        "AI089",
+        "AI051",
+        "AI056",
+        "AI072",
+        "AI191",
+        "AI060",
+        "AI088",
+        "AI172",
+        "AI010",
+        "AI061",
+        "AI024",
+        "AI055",
+        "AI058",
+        "AI008",
+        "AI011",
+        "AI047",
+        "AI085",
+        "AI173",
+        "AI222",
+        "AI057",
+        "AI033",
+        "AI090",
+        "AI020",
+        "AI082",
+        "AI045",
+        "AI157",
+        "AI087",
+        "AI062",
+        "AI083",
+        "AI034",
+        "AI165",
+        "AI175",
+        "AI086",
+        "AI059",
+        "AI192",
+        "AI007",
+        "AI224"
+      ],
+      "skipped": [
+        "AI001",
+        "AI002",
+        "AI003",
+        "AI004"
+      ]
+    },
+    {
+      "created_at": "2026-05-24T14:26:43",
+      "target_nodes": [
+        "AI006",
+        "AI018",
+        "AI013",
+        "AI009"
+      ],
+      "path": [
+        "AI042",
+        "AI043",
+        "AI044",
+        "AI005",
+        "AI048",
+        "AI156",
+        "AI167",
+        "AI017",
+        "AI223",
+        "AI174",
+        "AI225",
+        "AI076",
+        "AI074",
+        "AI201",
+        "AI023",
+        "AI084",
+        "AI072",
+        "AI060",
+        "AI016",
+        "AI010",
+        "AI216",
+        "AI061",
+        "AI024",
+        "AI055",
+        "AI075",
+        "AI058",
+        "AI008",
+        "AI102",
+        "AI049",
+        "AI217",
+        "AI011",
+        "AI077",
+        "AI012",
+        "AI085",
+        "AI047",
+        "AI222",
+        "AI046",
+        "AI082",
+        "AI020",
+        "AI045",
+        "AI224",
+        "AI062",
+        "AI083",
+        "AI091",
+        "AI086",
+        "AI007",
+        "AI018",
+        "AI013",
+        "AI009"
+      ],
+      "skipped": [
+        "AI001",
+        "AI002",
+        "AI003",
+        "AI004",
+        "AI006"
+      ]
+    },
+    {
+      "created_at": "2026-05-24T14:34:19",
+      "target_nodes": [
+        "AI157",
+        "AI228",
+        "AI227"
+      ],
+      "path": [
+        "AI155",
+        "AI207",
+        "AI142",
+        "AI005",
+        "AI105",
+        "AI020",
+        "AI016",
+        "AI187",
+        "AI194",
+        "AI198",
+        "AI174",
+        "AI217",
+        "AI188",
+        "AI159",
+        "AI218",
+        "AI023",
+        "AI193",
+        "AI199",
+        "AI216",
+        "AI219",
+        "AI008",
+        "AI011",
+        "AI208",
+        "AI195",
+        "AI202",
+        "AI190",
+        "AI189",
+        "AI201",
+        "AI167",
+        "AI225",
+        "AI185",
+        "AI082",
+        "AI156",
+        "AI206",
+        "AI158",
+        "AI009",
+        "AI209",
+        "AI007",
+        "AI186",
+        "AI197",
+        "AI226",
+        "AI010",
+        "AI196",
+        "AI157",
+        "AI228",
+        "AI227"
+      ],
+      "skipped": [
+        "AI001",
+        "AI002",
+        "AI003",
+        "AI004",
+        "AI006",
+        "AI162",
+        "AI200"
+      ]
+    },
+    {
+      "created_at": "2026-05-24T14:36:58",
+      "target_nodes": [
+        "AI203"
+      ],
+      "path": [
+        "AI056",
+        "AI020",
+        "AI102",
+        "AI089",
+        "AI131",
+        "AI059",
+        "AI217",
+        "AI019",
+        "AI023",
+        "AI055",
+        "AI057",
+        "AI216",
+        "AI035",
+        "AI008",
+        "AI033",
+        "AI011",
+        "AI051",
+        "AI085",
+        "AI074",
+        "AI083",
+        "AI088",
+        "AI121",
+        "AI091",
+        "AI084",
+        "AI025",
+        "AI224",
+        "AI122",
+        "AI047",
+        "AI225",
+        "AI082",
+        "AI087",
+        "AI060",
+        "AI045",
+        "AI061",
+        "AI024",
+        "AI007",
+        "AI123",
+        "AI058",
+        "AI072",
+        "AI076",
+        "AI223",
+        "AI090",
+        "AI086",
+        "AI048",
+        "AI222",
+        "AI034",
+        "AI062",
+        "AI010",
+        "AI203"
+      ],
+      "skipped": [
+        "AI001",
+        "AI004"
+      ]
+    },
+    {
+      "created_at": "2026-05-24T14:44:58",
+      "target_nodes": [
+        "AI113",
+        "AI115"
+      ],
+      "path": [
+        "AI048",
+        "AI138",
+        "AI022",
+        "AI005",
+        "AI007",
+        "AI010",
+        "AI011",
+        "AI082",
+        "AI012",
+        "AI156",
+        "AI008",
+        "AI083",
+        "AI013",
+        "AI167",
+        "AI174",
+        "AI019",
+        "AI105",
+        "AI084",
+        "AI208",
+        "AI201",
+        "AI087",
+        "AI102",
+        "AI142",
+        "AI103",
+        "AI091",
+        "AI209",
+        "AI104",
+        "AI106",
+        "AI144",
+        "AI107",
+        "AI108",
+        "AI111",
+        "AI098",
+        "AI092",
+        "AI110",
+        "AI093",
+        "AI101",
+        "AI099",
+        "AI114",
+        "AI095",
+        "AI100",
+        "AI112",
+        "AI094",
+        "AI096",
+        "AI097",
+        "AI109",
+        "AI113",
+        "AI115"
+      ],
+      "skipped": [
+        "AI001",
+        "AI002",
+        "AI003",
+        "AI004"
+      ]
+    },
+    {
+      "created_at": "2026-05-24T14:48:08",
+      "target_nodes": [
+        "AI145",
+        "AI199",
+        "AI203"
+      ],
+      "path": [
+        "AI001",
+        "AI002",
+        "AI003",
+        "AI004",
+        "AI006",
+        "AI162",
+        "AI200",
+        "AI155",
+        "AI207",
+        "AI048",
+        "AI138",
+        "AI022",
+        "AI007",
+        "AI010",
+        "AI011",
+        "AI060",
+        "AI156",
+        "AI062",
+        "AI157",
+        "AI143",
+        "AI083",
+        "AI055",
+        "AI088",
+        "AI193",
+        "AI224",
+        "AI140",
+        "AI087",
+        "AI132",
+        "AI133",
+        "AI222",
+        "AI089",
+        "AI126",
+        "AI159",
+        "AI217",
+        "AI194",
+        "AI196",
+        "AI125",
+        "AI195",
+        "AI124",
+        "AI158",
+        "AI216",
+        "AI035",
+        "AI085",
+        "AI127",
+        "AI198",
+        "AI058",
+        "AI122",
+        "AI086",
+        "AI141",
+        "AI090",
+        "AI121",
+        "AI167",
+        "AI084",
+        "AI190",
+        "AI130",
+        "AI131",
+        "AI128",
+        "AI008",
+        "AI123",
+        "AI082",
+        "AI091",
+        "AI129",
+        "AI145",
+        "AI199",
+        "AI203"
+      ],
+      "skipped": []
+    },
+    {
+      "created_at": "2026-05-25T13:42:11",
+      "target_nodes": [
+        "AI199"
+      ],
+      "path": [
+        "AI001",
+        "AI002",
+        "AI003",
+        "AI004",
+        "AI006",
+        "AI007",
+        "AI200",
+        "AI162",
+        "AI173",
+        "AI188",
+        "AI193",
+        "AI165",
+        "AI192",
+        "AI217",
+        "AI187",
+        "AI185",
+        "AI197",
+        "AI175",
+        "AI020",
+        "AI160",
+        "AI167",
+        "AI159",
+        "AI171",
+        "AI184",
+        "AI189",
+        "AI172",
+        "AI226",
+        "AI158",
+        "AI206",
+        "AI181",
+        "AI074",
+        "AI157",
+        "AI161",
+        "AI182",
+        "AI156",
+        "AI183",
+        "AI202",
+        "AI194",
+        "AI010",
+        "AI209",
+        "AI191",
+        "AI024",
+        "AI216",
+        "AI011",
+        "AI195",
+        "AI196",
+        "AI227",
+        "AI076",
+        "AI174",
+        "AI023",
+        "AI186",
+        "AI190",
+        "AI198",
+        "AI199"
+      ],
+      "skipped": [
+        "AI001",
+        "AI002",
+        "AI003",
+        "AI004",
+        "AI006",
+        "AI007",
+        "AI200",
+        "AI162"
+      ]
+    },
+    {
+      "created_at": "2026-05-25T13:42:57",
+      "target_nodes": [
+        "AI113",
+        "AI115"
+      ],
+      "path": [
+        "AI001",
+        "AI002",
+        "AI003",
+        "AI004",
+        "AI006",
+        "AI162",
+        "AI200",
+        "AI155",
+        "AI207",
+        "AI048",
+        "AI138",
+        "AI022",
+        "AI007",
+        "AI173",
+        "AI005",
+        "AI010",
+        "AI011",
+        "AI082",
+        "AI012",
+        "AI156",
+        "AI008",
+        "AI083",
+        "AI013",
+        "AI167",
+        "AI174",
+        "AI019",
+        "AI105",
+        "AI084",
+        "AI208",
+        "AI201",
+        "AI087",
+        "AI102",
+        "AI142",
+        "AI103",
+        "AI091",
+        "AI209",
+        "AI104",
+        "AI106",
+        "AI144",
+        "AI107",
+        "AI108",
+        "AI094",
+        "AI092",
+        "AI101",
+        "AI112",
+        "AI097",
+        "AI093",
+        "AI109",
+        "AI111",
+        "AI110",
+        "AI095",
+        "AI099",
+        "AI098",
+        "AI100",
+        "AI096",
+        "AI114",
+        "AI113",
+        "AI115"
+      ],
+      "skipped": []
+    },
+    {
+      "created_at": "2026-05-25T14:21:56",
+      "target_nodes": [
+        "AI145",
+        "AI199",
+        "AI203"
+      ],
+      "path": [
+        "AI022",
+        "AI007",
+        "AI200",
+        "AI162",
+        "AI010",
+        "AI011",
+        "AI060",
+        "AI156",
+        "AI062",
+        "AI157",
+        "AI058",
+        "AI167",
+        "AI122",
+        "AI159",
+        "AI126",
+        "AI090",
+        "AI132",
+        "AI222",
+        "AI124",
+        "AI141",
+        "AI008",
+        "AI086",
+        "AI127",
+        "AI121",
+        "AI198",
+        "AI123",
+        "AI125",
+        "AI128",
+        "AI224",
+        "AI130",
+        "AI055",
+        "AI087",
+        "AI158",
+        "AI131",
+        "AI140",
+        "AI082",
+        "AI143",
+        "AI190",
+        "AI196",
+        "AI217",
+        "AI089",
+        "AI129",
+        "AI035",
+        "AI216",
+        "AI194",
+        "AI088",
+        "AI195",
+        "AI084",
+        "AI085",
+        "AI133",
+        "AI091",
+        "AI083",
+        "AI193",
+        "AI145",
+        "AI199",
+        "AI203"
+      ],
+      "skipped": [
+        "AI022",
+        "AI007",
+        "AI200",
+        "AI162"
+      ]
+    },
+    {
+      "created_at": "2026-05-25T21:04:08",
+      "target_nodes": [
+        "AI201"
+      ],
+      "path": [
+        "AI006",
+        "AI007",
+        "AI003",
+        "AI001",
+        "AI162",
+        "AI004",
+        "AI002",
+        "AI192",
+        "AI161",
+        "AI164",
+        "AI064",
+        "AI189",
+        "AI066",
+        "AI158",
+        "AI023",
+        "AI188",
+        "AI173",
+        "AI010",
+        "AI166",
+        "AI171",
+        "AI157",
+        "AI165",
+        "AI206",
+        "AI186",
+        "AI204",
+        "AI011",
+        "AI184",
+        "AI190",
+        "AI156",
+        "AI169",
+        "AI024",
+        "AI172",
+        "AI167",
+        "AI027",
+        "AI065",
+        "AI168",
+        "AI026",
+        "AI160",
+        "AI063",
+        "AI025",
+        "AI174",
+        "AI020",
+        "AI159",
+        "AI170",
+        "AI163",
+        "AI191",
+        "AI005",
+        "AI182",
+        "AI175",
+        "AI185",
+        "AI187",
+        "AI205",
+        "AI183",
+        "AI201"
+      ],
+      "skipped": [
+        "AI006",
+        "AI007",
+        "AI003",
+        "AI001",
+        "AI162",
+        "AI004",
+        "AI002"
+      ]
+    },
+    {
+      "created_at": "2026-05-26T10:45:52",
+      "target_nodes": [
+        "AI088",
+        "AI028"
+      ],
+      "path": [
+        "AI001",
+        "AI002",
+        "AI003",
+        "AI004",
+        "AI006",
+        "AI007",
+        "AI022",
+        "AI048",
+        "AI060",
+        "AI042",
+        "AI044",
+        "AI005",
+        "AI049",
+        "AI034",
+        "AI059",
+        "AI008",
+        "AI021",
+        "AI030",
+        "AI029",
+        "AI026",
+        "AI053",
+        "AI090",
+        "AI085",
+        "AI058",
+        "AI084",
+        "AI045",
+        "AI032",
+        "AI056",
+        "AI082",
+        "AI019",
+        "AI083",
+        "AI050",
+        "AI055",
+        "AI052",
+        "AI089",
+        "AI062",
+        "AI027",
+        "AI087",
+        "AI033",
+        "AI031",
+        "AI035",
+        "AI057",
+        "AI024",
+        "AI086",
+        "AI023",
+        "AI047",
+        "AI046",
+        "AI025",
+        "AI010",
+        "AI020",
+        "AI054",
+        "AI088",
+        "AI028"
+      ],
+      "skipped": [
+        "AI001",
+        "AI002",
+        "AI003",
+        "AI004",
+        "AI006",
+        "AI007",
+        "AI022",
+        "AI048"
+      ]
+    },
+    {
+      "created_at": "2026-05-26T11:17:09",
+      "target_nodes": [
+        "AI060",
+        "AI061",
+        "AI020",
+        "AI023"
+      ],
+      "path": [
+        "AI001",
+        "AI002",
+        "AI003",
+        "AI004",
+        "AI006",
+        "AI007",
+        "AI022",
+        "AI048",
+        "AI073",
+        "AI068",
+        "AI005",
+        "AI041",
+        "AI036",
+        "AI037",
+        "AI028",
+        "AI019",
+        "AI046",
+        "AI085",
+        "AI026",
+        "AI059",
+        "AI024",
+        "AI030",
+        "AI082",
+        "AI029",
+        "AI044",
+        "AI062",
+        "AI072",
+        "AI047",
+        "AI043",
+        "AI008",
+        "AI031",
+        "AI027",
+        "AI021",
+        "AI042",
+        "AI056",
+        "AI055",
+        "AI025",
+        "AI045",
+        "AI038",
+        "AI058",
+        "AI040",
+        "AI010",
+        "AI039",
+        "AI057",
+        "AI060",
+        "AI061",
+        "AI020",
+        "AI023"
+      ],
+      "skipped": [
+        "AI001",
+        "AI002",
+        "AI003",
+        "AI004",
+        "AI006",
+        "AI007",
+        "AI022",
+        "AI048"
+      ]
+    },
+    {
+      "created_at": "2026-05-26T13:30:12",
+      "target_nodes": [
+        "AI007"
+      ],
+      "path": [
+        "AI001",
+        "AI002",
+        "AI003",
+        "AI004",
+        "AI006",
+        "AI007",
+        "AI005"
+      ],
+      "skipped": [
+        "AI001",
+        "AI002",
+        "AI003",
+        "AI004",
+        "AI006",
+        "AI007"
+      ]
+    },
+    {
+      "created_at": "2026-05-26T13:31:01",
+      "target_nodes": [
+        "AI124",
+        "AI125",
+        "AI203",
+        "AI155"
+      ],
+      "path": [
+        "AI001",
+        "AI002",
+        "AI003",
+        "AI004",
+        "AI006",
+        "AI162",
+        "AI200",
+        "AI155",
+        "AI207",
+        "AI048",
+        "AI138",
+        "AI022",
+        "AI007",
+        "AI192",
+        "AI073",
+        "AI068",
+        "AI005",
+        "AI225",
+        "AI052",
+        "AI060",
+        "AI010",
+        "AI016",
+        "AI055",
+        "AI157",
+        "AI090",
+        "AI056",
+        "AI085",
+        "AI134",
+        "AI123",
+        "AI034",
+        "AI035",
+        "AI019",
+        "AI156",
+        "AI158",
+        "AI139",
+        "AI129",
+        "AI058",
+        "AI082",
+        "AI135",
+        "AI024",
+        "AI057",
+        "AI033",
+        "AI089",
+        "AI025",
+        "AI136",
+        "AI008",
+        "AI088",
+        "AI086",
+        "AI021",
+        "AI083",
+        "AI217",
+        "AI087",
+        "AI084",
+        "AI020",
+        "AI196",
+        "AI216",
+        "AI009",
+        "AI122",
+        "AI121",
+        "AI032",
+        "AI199",
+        "AI023",
+        "AI124",
+        "AI125",
+        "AI203"
+      ],
+      "skipped": []
+    },
+    {
+      "created_at": "2026-05-26T13:48:59",
+      "target_nodes": [
+        "AI156"
+      ],
+      "path": [
+        "AI001",
+        "AI073",
+        "AI002",
+        "AI003",
+        "AI004",
+        "AI006",
+        "AI007",
+        "AI048",
+        "AI022",
+        "AI060",
+        "AI005",
+        "AI072",
+        "AI039",
+        "AI055",
+        "AI058",
+        "AI040",
+        "AI021",
+        "AI026",
+        "AI028",
+        "AI045",
+        "AI047",
+        "AI023",
+        "AI029",
+        "AI008",
+        "AI041",
+        "AI031",
+        "AI061",
+        "AI038",
+        "AI062",
+        "AI057",
+        "AI085",
+        "AI044",
+        "AI046",
+        "AI025",
+        "AI019",
+        "AI027",
+        "AI059",
+        "AI036",
+        "AI043",
+        "AI020",
+        "AI042",
+        "AI082",
+        "AI024",
+        "AI010",
+        "AI056",
+        "AI156"
+      ],
+      "skipped": [
+        "AI001",
+        "AI073",
+        "AI002",
+        "AI003",
+        "AI004",
+        "AI006",
+        "AI007",
+        "AI048",
+        "AI022"
+      ]
+    },
+    {
+      "created_at": "2026-05-26T13:57:31",
+      "target_nodes": [
+        "AI156",
+        "AI082"
+      ],
+      "path": [
+        "AI001",
+        "AI073",
+        "AI068",
+        "AI002",
+        "AI003",
+        "AI004",
+        "AI006",
+        "AI007",
+        "AI048",
+        "AI022",
+        "AI060",
+        "AI005",
+        "AI030",
+        "AI036",
+        "AI019",
+        "AI025",
+        "AI043",
+        "AI028",
+        "AI026",
+        "AI058",
+        "AI010",
+        "AI039",
+        "AI021",
+        "AI061",
+        "AI085",
+        "AI042",
+        "AI041",
+        "AI045",
+        "AI056",
+        "AI059",
+        "AI044",
+        "AI020",
+        "AI072",
+        "AI037",
+        "AI024",
+        "AI040",
+        "AI055",
+        "AI031",
+        "AI023",
+        "AI027",
+        "AI057",
+        "AI046",
+        "AI047",
+        "AI062",
+        "AI029",
+        "AI008",
+        "AI038",
+        "AI156",
+        "AI082"
+      ],
+      "skipped": [
+        "AI001",
+        "AI073",
+        "AI068",
+        "AI002",
+        "AI003",
+        "AI004",
+        "AI006",
+        "AI007",
+        "AI048",
+        "AI022"
+      ]
+    }
+  ],
+  "confirmed_target_nodes": [
+    "AI156",
+    "AI082"
+  ]
+}

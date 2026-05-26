@@ -1,0 +1,303 @@
+{
+  "pdf_name": "chapter_01_p009-032_自动控制的一般概念.pdf",
+  "pdf_md5": "8a4182391b25b78c2b66746ef463f142",
+  "cache_dir": "data/mineru_cache\\chapter_01_p009-032_自动控制的一般概念__8a418239",
+  "full_md_path": "data/mineru_cache\\chapter_01_p009-032_自动控制的一般概念__8a418239\\full.md",
+  "images_dir": "data/mineru_cache\\chapter_01_p009-032_自动控制的一般概念__8a418239\\images",
+  "json_dir": "data/mineru_cache\\chapter_01_p009-032_自动控制的一般概念__8a418239\\json",
+  "images": {
+    "0ef8e377e560b552000ab7f806de58697c572773377e7b3a56327a1487d05a93.jpg": {
+      "original_name": "0ef8e377e560b552000ab7f806de58697c572773377e7b3a56327a1487d05a93.jpg",
+      "original_rel_path": "0ef8e377e560b552000ab7f806de58697c572773377e7b3a56327a1487d05a93.jpg",
+      "friendly_name": "figure_01.jpg",
+      "abs_path": "data/mineru_cache\\chapter_01_p009-032_自动控制的一般概念__8a418239\\images\\figure_01.jpg",
+      "index": 1
+    },
+    "26c532782587343db089a3a4699fc1da2ce2c0eba80491cf2b8d0a7be0d8aa58.jpg": {
+      "original_name": "26c532782587343db089a3a4699fc1da2ce2c0eba80491cf2b8d0a7be0d8aa58.jpg",
+      "original_rel_path": "26c532782587343db089a3a4699fc1da2ce2c0eba80491cf2b8d0a7be0d8aa58.jpg",
+      "friendly_name": "figure_02.jpg",
+      "abs_path": "data/mineru_cache\\chapter_01_p009-032_自动控制的一般概念__8a418239\\images\\figure_02.jpg",
+      "index": 2
+    },
+    "2f95243d8326a86a6859bf61e9d432055b46405d8e8527217bae394aabae06db.jpg": {
+      "original_name": "2f95243d8326a86a6859bf61e9d432055b46405d8e8527217bae394aabae06db.jpg",
+      "original_rel_path": "2f95243d8326a86a6859bf61e9d432055b46405d8e8527217bae394aabae06db.jpg",
+      "friendly_name": "figure_03.jpg",
+      "abs_path": "data/mineru_cache\\chapter_01_p009-032_自动控制的一般概念__8a418239\\images\\figure_03.jpg",
+      "index": 3
+    },
+    "38dbdc1d54ea4ff402cb5e39d644b78af94f16047250be515c1b540c18f249b7.jpg": {
+      "original_name": "38dbdc1d54ea4ff402cb5e39d644b78af94f16047250be515c1b540c18f249b7.jpg",
+      "original_rel_path": "38dbdc1d54ea4ff402cb5e39d644b78af94f16047250be515c1b540c18f249b7.jpg",
+      "friendly_name": "figure_04.jpg",
+      "abs_path": "data/mineru_cache\\chapter_01_p009-032_自动控制的一般概念__8a418239\\images\\figure_04.jpg",
+      "index": 4
+    },
+    "39205e1e318220eeaa99b413540afd0336990a52c89664c685185271a98a212b.jpg": {
+      "original_name": "39205e1e318220eeaa99b413540afd0336990a52c89664c685185271a98a212b.jpg",
+      "original_rel_path": "39205e1e318220eeaa99b413540afd0336990a52c89664c685185271a98a212b.jpg",
+      "friendly_name": "figure_05.jpg",
+      "abs_path": "data/mineru_cache\\chapter_01_p009-032_自动控制的一般概念__8a418239\\images\\figure_05.jpg",
+      "index": 5
+    },
+    "44c5f2e419b619843a8c69b766d7728b583e3824613356f8df98dbbeeb99c84a.jpg": {
+      "original_name": "44c5f2e419b619843a8c69b766d7728b583e3824613356f8df98dbbeeb99c84a.jpg",
+      "original_rel_path": "44c5f2e419b619843a8c69b766d7728b583e3824613356f8df98dbbeeb99c84a.jpg",
+      "friendly_name": "figure_06.jpg",
+      "abs_path": "data/mineru_cache\\chapter_01_p009-032_自动控制的一般概念__8a418239\\images\\figure_06.jpg",
+      "index": 6
+    },
+    "4c3e6c6f30695c007e7022475aabe057cb6d38474b8c158bc022ff008afc7202.jpg": {
+      "original_name": "4c3e6c6f30695c007e7022475aabe057cb6d38474b8c158bc022ff008afc7202.jpg",
+      "original_rel_path": "4c3e6c6f30695c007e7022475aabe057cb6d38474b8c158bc022ff008afc7202.jpg",
+      "friendly_name": "figure_07.jpg",
+      "abs_path": "data/mineru_cache\\chapter_01_p009-032_自动控制的一般概念__8a418239\\images\\figure_07.jpg",
+      "index": 7
+    },
+    "4f4790143d2cb5562823316d42ef23b1e484e9d659efb7fcf5cadce4c6c4fb99.jpg": {
+      "original_name": "4f4790143d2cb5562823316d42ef23b1e484e9d659efb7fcf5cadce4c6c4fb99.jpg",
+      "original_rel_path": "4f4790143d2cb5562823316d42ef23b1e484e9d659efb7fcf5cadce4c6c4fb99.jpg",
+      "friendly_name": "figure_08.jpg",
+      "abs_path": "data/mineru_cache\\chapter_01_p009-032_自动控制的一般概念__8a418239\\images\\figure_08.jpg",
+      "index": 8
+    },
+    "5142bf2b0ef29d1b8e813fbd718417ee2d1ee4d802442d5231baa2623769da4f.jpg": {
+      "original_name": "5142bf2b0ef29d1b8e813fbd718417ee2d1ee4d802442d5231baa2623769da4f.jpg",
+      "original_rel_path": "5142bf2b0ef29d1b8e813fbd718417ee2d1ee4d802442d5231baa2623769da4f.jpg",
+      "friendly_name": "figure_09.jpg",
+      "abs_path": "data/mineru_cache\\chapter_01_p009-032_自动控制的一般概念__8a418239\\images\\figure_09.jpg",
+      "index": 9
+    },
+    "55f711f859a29650951c522798708826198203bf87de3a4165c09d210574c1ba.jpg": {
+      "original_name": "55f711f859a29650951c522798708826198203bf87de3a4165c09d210574c1ba.jpg",
+      "original_rel_path": "55f711f859a29650951c522798708826198203bf87de3a4165c09d210574c1ba.jpg",
+      "friendly_name": "figure_10.jpg",
+      "abs_path": "data/mineru_cache\\chapter_01_p009-032_自动控制的一般概念__8a418239\\images\\figure_10.jpg",
+      "index": 10
+    },
+    "5fd495e69b416235a9b0b3522d1efe00fd5f687833f6a05f5eef7eed82d7d1e5.jpg": {
+      "original_name": "5fd495e69b416235a9b0b3522d1efe00fd5f687833f6a05f5eef7eed82d7d1e5.jpg",
+      "original_rel_path": "5fd495e69b416235a9b0b3522d1efe00fd5f687833f6a05f5eef7eed82d7d1e5.jpg",
+      "friendly_name": "figure_11.jpg",
+      "abs_path": "data/mineru_cache\\chapter_01_p009-032_自动控制的一般概念__8a418239\\images\\figure_11.jpg",
+      "index": 11
+    },
+    "68716d1784944d3f5119c67a7418b002315f107875774eb0583cd4168ba059f7.jpg": {
+      "original_name": "68716d1784944d3f5119c67a7418b002315f107875774eb0583cd4168ba059f7.jpg",
+      "original_rel_path": "68716d1784944d3f5119c67a7418b002315f107875774eb0583cd4168ba059f7.jpg",
+      "friendly_name": "figure_12.jpg",
+      "abs_path": "data/mineru_cache\\chapter_01_p009-032_自动控制的一般概念__8a418239\\images\\figure_12.jpg",
+      "index": 12
+    },
+    "7ccc71ac85f762655177dc290347d7ebf689be5a70fa2accd30e1610f01acc1d.jpg": {
+      "original_name": "7ccc71ac85f762655177dc290347d7ebf689be5a70fa2accd30e1610f01acc1d.jpg",
+      "original_rel_path": "7ccc71ac85f762655177dc290347d7ebf689be5a70fa2accd30e1610f01acc1d.jpg",
+      "friendly_name": "figure_13.jpg",
+      "abs_path": "data/mineru_cache\\chapter_01_p009-032_自动控制的一般概念__8a418239\\images\\figure_13.jpg",
+      "index": 13
+    },
+    "7d530186d37a1b19e7da7dc2c24e6b4b572d1a520f13444128db2cabe75bf279.jpg": {
+      "original_name": "7d530186d37a1b19e7da7dc2c24e6b4b572d1a520f13444128db2cabe75bf279.jpg",
+      "original_rel_path": "7d530186d37a1b19e7da7dc2c24e6b4b572d1a520f13444128db2cabe75bf279.jpg",
+      "friendly_name": "figure_14.jpg",
+      "abs_path": "data/mineru_cache\\chapter_01_p009-032_自动控制的一般概念__8a418239\\images\\figure_14.jpg",
+      "index": 14
+    },
+    "823ba889de2fe9337f936aaef8800db65fec3d3c7a1b3cba94262621fa91cc9b.jpg": {
+      "original_name": "823ba889de2fe9337f936aaef8800db65fec3d3c7a1b3cba94262621fa91cc9b.jpg",
+      "original_rel_path": "823ba889de2fe9337f936aaef8800db65fec3d3c7a1b3cba94262621fa91cc9b.jpg",
+      "friendly_name": "figure_15.jpg",
+      "abs_path": "data/mineru_cache\\chapter_01_p009-032_自动控制的一般概念__8a418239\\images\\figure_15.jpg",
+      "index": 15
+    },
+    "891324ce737b16dafd5d38e0c16c930c21e21c0d72313c1dbe770c054113bfac.jpg": {
+      "original_name": "891324ce737b16dafd5d38e0c16c930c21e21c0d72313c1dbe770c054113bfac.jpg",
+      "original_rel_path": "891324ce737b16dafd5d38e0c16c930c21e21c0d72313c1dbe770c054113bfac.jpg",
+      "friendly_name": "figure_16.jpg",
+      "abs_path": "data/mineru_cache\\chapter_01_p009-032_自动控制的一般概念__8a418239\\images\\figure_16.jpg",
+      "index": 16
+    },
+    "92009d41d2b30a31d8a8c163162720e97e405d2bdf04e0a11035297071868bf0.jpg": {
+      "original_name": "92009d41d2b30a31d8a8c163162720e97e405d2bdf04e0a11035297071868bf0.jpg",
+      "original_rel_path": "92009d41d2b30a31d8a8c163162720e97e405d2bdf04e0a11035297071868bf0.jpg",
+      "friendly_name": "figure_17.jpg",
+      "abs_path": "data/mineru_cache\\chapter_01_p009-032_自动控制的一般概念__8a418239\\images\\figure_17.jpg",
+      "index": 17
+    },
+    "96f8e7868921ab7afb32368e74672fff8dc4508dc173e4b7aa8696d899a9879a.jpg": {
+      "original_name": "96f8e7868921ab7afb32368e74672fff8dc4508dc173e4b7aa8696d899a9879a.jpg",
+      "original_rel_path": "96f8e7868921ab7afb32368e74672fff8dc4508dc173e4b7aa8696d899a9879a.jpg",
+      "friendly_name": "figure_18.jpg",
+      "abs_path": "data/mineru_cache\\chapter_01_p009-032_自动控制的一般概念__8a418239\\images\\figure_18.jpg",
+      "index": 18
+    },
+    "98ed19031764412d8d5f0706625a4ff43e56f9e8138523f5149bd327521d89c3.jpg": {
+      "original_name": "98ed19031764412d8d5f0706625a4ff43e56f9e8138523f5149bd327521d89c3.jpg",
+      "original_rel_path": "98ed19031764412d8d5f0706625a4ff43e56f9e8138523f5149bd327521d89c3.jpg",
+      "friendly_name": "figure_19.jpg",
+      "abs_path": "data/mineru_cache\\chapter_01_p009-032_自动控制的一般概念__8a418239\\images\\figure_19.jpg",
+      "index": 19
+    },
+    "a02b6f9da3042459508d6c24f20f4440d8ba4e47e59fa8d9879260ac53469041.jpg": {
+      "original_name": "a02b6f9da3042459508d6c24f20f4440d8ba4e47e59fa8d9879260ac53469041.jpg",
+      "original_rel_path": "a02b6f9da3042459508d6c24f20f4440d8ba4e47e59fa8d9879260ac53469041.jpg",
+      "friendly_name": "figure_20.jpg",
+      "abs_path": "data/mineru_cache\\chapter_01_p009-032_自动控制的一般概念__8a418239\\images\\figure_20.jpg",
+      "index": 20
+    },
+    "a331695fddec963b7dec45db6e09d41ec3e4d9a81af5130f7bcf1c9b972a1f8e.jpg": {
+      "original_name": "a331695fddec963b7dec45db6e09d41ec3e4d9a81af5130f7bcf1c9b972a1f8e.jpg",
+      "original_rel_path": "a331695fddec963b7dec45db6e09d41ec3e4d9a81af5130f7bcf1c9b972a1f8e.jpg",
+      "friendly_name": "figure_21.jpg",
+      "abs_path": "data/mineru_cache\\chapter_01_p009-032_自动控制的一般概念__8a418239\\images\\figure_21.jpg",
+      "index": 21
+    },
+    "a46c225651b93d10b5f6eea83c9ed0d48457512a4565a154fd3caecba2e26dd5.jpg": {
+      "original_name": "a46c225651b93d10b5f6eea83c9ed0d48457512a4565a154fd3caecba2e26dd5.jpg",
+      "original_rel_path": "a46c225651b93d10b5f6eea83c9ed0d48457512a4565a154fd3caecba2e26dd5.jpg",
+      "friendly_name": "figure_22.jpg",
+      "abs_path": "data/mineru_cache\\chapter_01_p009-032_自动控制的一般概念__8a418239\\images\\figure_22.jpg",
+      "index": 22
+    },
+    "b0abd11a62a5c70f55bf6d90aeb273bfab942e856302f07ca7bfd892e704687a.jpg": {
+      "original_name": "b0abd11a62a5c70f55bf6d90aeb273bfab942e856302f07ca7bfd892e704687a.jpg",
+      "original_rel_path": "b0abd11a62a5c70f55bf6d90aeb273bfab942e856302f07ca7bfd892e704687a.jpg",
+      "friendly_name": "figure_23.jpg",
+      "abs_path": "data/mineru_cache\\chapter_01_p009-032_自动控制的一般概念__8a418239\\images\\figure_23.jpg",
+      "index": 23
+    },
+    "b0b8a0ef1c9c1313ea7ede3dc0c83e9e31ae60369a5c0cfdc29572673c8feaac.jpg": {
+      "original_name": "b0b8a0ef1c9c1313ea7ede3dc0c83e9e31ae60369a5c0cfdc29572673c8feaac.jpg",
+      "original_rel_path": "b0b8a0ef1c9c1313ea7ede3dc0c83e9e31ae60369a5c0cfdc29572673c8feaac.jpg",
+      "friendly_name": "figure_24.jpg",
+      "abs_path": "data/mineru_cache\\chapter_01_p009-032_自动控制的一般概念__8a418239\\images\\figure_24.jpg",
+      "index": 24
+    },
+    "c1cc14ac51ed76ccc45da373bbded455cf1033daa9e38a4e0372a6fd4a45ce18.jpg": {
+      "original_name": "c1cc14ac51ed76ccc45da373bbded455cf1033daa9e38a4e0372a6fd4a45ce18.jpg",
+      "original_rel_path": "c1cc14ac51ed76ccc45da373bbded455cf1033daa9e38a4e0372a6fd4a45ce18.jpg",
+      "friendly_name": "figure_25.jpg",
+      "abs_path": "data/mineru_cache\\chapter_01_p009-032_自动控制的一般概念__8a418239\\images\\figure_25.jpg",
+      "index": 25
+    },
+    "c27ba173b0fd085b681d583e4ca56ce5569d066303112e64e97352b7d389911c.jpg": {
+      "original_name": "c27ba173b0fd085b681d583e4ca56ce5569d066303112e64e97352b7d389911c.jpg",
+      "original_rel_path": "c27ba173b0fd085b681d583e4ca56ce5569d066303112e64e97352b7d389911c.jpg",
+      "friendly_name": "figure_26.jpg",
+      "abs_path": "data/mineru_cache\\chapter_01_p009-032_自动控制的一般概念__8a418239\\images\\figure_26.jpg",
+      "index": 26
+    },
+    "c3a95cdf442ebb7a08927b11c3d2f2f947ffa5aecfb2ec9c948a5c85c2b65ee3.jpg": {
+      "original_name": "c3a95cdf442ebb7a08927b11c3d2f2f947ffa5aecfb2ec9c948a5c85c2b65ee3.jpg",
+      "original_rel_path": "c3a95cdf442ebb7a08927b11c3d2f2f947ffa5aecfb2ec9c948a5c85c2b65ee3.jpg",
+      "friendly_name": "figure_27.jpg",
+      "abs_path": "data/mineru_cache\\chapter_01_p009-032_自动控制的一般概念__8a418239\\images\\figure_27.jpg",
+      "index": 27
+    },
+    "c58eaccbd2a9fc97451179605eeb4c03fcc1d729594e51de289858d034e4b6d4.jpg": {
+      "original_name": "c58eaccbd2a9fc97451179605eeb4c03fcc1d729594e51de289858d034e4b6d4.jpg",
+      "original_rel_path": "c58eaccbd2a9fc97451179605eeb4c03fcc1d729594e51de289858d034e4b6d4.jpg",
+      "friendly_name": "figure_28.jpg",
+      "abs_path": "data/mineru_cache\\chapter_01_p009-032_自动控制的一般概念__8a418239\\images\\figure_28.jpg",
+      "index": 28
+    },
+    "c673be00491d1bcc1d5a9ef1c1d962cc1041e16cd4059ac2988ee53618e89a03.jpg": {
+      "original_name": "c673be00491d1bcc1d5a9ef1c1d962cc1041e16cd4059ac2988ee53618e89a03.jpg",
+      "original_rel_path": "c673be00491d1bcc1d5a9ef1c1d962cc1041e16cd4059ac2988ee53618e89a03.jpg",
+      "friendly_name": "figure_29.jpg",
+      "abs_path": "data/mineru_cache\\chapter_01_p009-032_自动控制的一般概念__8a418239\\images\\figure_29.jpg",
+      "index": 29
+    },
+    "cc2cc88048de412e330990b64fde9ed61a3cff6bc8c5fa532b8f852ad935afcf.jpg": {
+      "original_name": "cc2cc88048de412e330990b64fde9ed61a3cff6bc8c5fa532b8f852ad935afcf.jpg",
+      "original_rel_path": "cc2cc88048de412e330990b64fde9ed61a3cff6bc8c5fa532b8f852ad935afcf.jpg",
+      "friendly_name": "figure_30.jpg",
+      "abs_path": "data/mineru_cache\\chapter_01_p009-032_自动控制的一般概念__8a418239\\images\\figure_30.jpg",
+      "index": 30
+    },
+    "cc46eebc08b61261ad44474fed193460b73ceeca8d65a3ffbeb12ad11d55c76a.jpg": {
+      "original_name": "cc46eebc08b61261ad44474fed193460b73ceeca8d65a3ffbeb12ad11d55c76a.jpg",
+      "original_rel_path": "cc46eebc08b61261ad44474fed193460b73ceeca8d65a3ffbeb12ad11d55c76a.jpg",
+      "friendly_name": "figure_31.jpg",
+      "abs_path": "data/mineru_cache\\chapter_01_p009-032_自动控制的一般概念__8a418239\\images\\figure_31.jpg",
+      "index": 31
+    },
+    "cdb88f6063b61b37a09da85d0c3cdd9b68c3c716e25a0bcf1b23601d809d050e.jpg": {
+      "original_name": "cdb88f6063b61b37a09da85d0c3cdd9b68c3c716e25a0bcf1b23601d809d050e.jpg",
+      "original_rel_path": "cdb88f6063b61b37a09da85d0c3cdd9b68c3c716e25a0bcf1b23601d809d050e.jpg",
+      "friendly_name": "figure_32.jpg",
+      "abs_path": "data/mineru_cache\\chapter_01_p009-032_自动控制的一般概念__8a418239\\images\\figure_32.jpg",
+      "index": 32
+    },
+    "d1d539c3663189b37029d4d5ba43eb06facaa7d20301d9931efc4109e88aa437.jpg": {
+      "original_name": "d1d539c3663189b37029d4d5ba43eb06facaa7d20301d9931efc4109e88aa437.jpg",
+      "original_rel_path": "d1d539c3663189b37029d4d5ba43eb06facaa7d20301d9931efc4109e88aa437.jpg",
+      "friendly_name": "figure_33.jpg",
+      "abs_path": "data/mineru_cache\\chapter_01_p009-032_自动控制的一般概念__8a418239\\images\\figure_33.jpg",
+      "index": 33
+    },
+    "d21160de91753fec4cefe9566bf99349cf653e979a1b71d71bb3c002c715a986.jpg": {
+      "original_name": "d21160de91753fec4cefe9566bf99349cf653e979a1b71d71bb3c002c715a986.jpg",
+      "original_rel_path": "d21160de91753fec4cefe9566bf99349cf653e979a1b71d71bb3c002c715a986.jpg",
+      "friendly_name": "figure_34.jpg",
+      "abs_path": "data/mineru_cache\\chapter_01_p009-032_自动控制的一般概念__8a418239\\images\\figure_34.jpg",
+      "index": 34
+    },
+    "d8dcce4d6b978686c74b59fe85409d6e11feaf053199cad4c06b99d69b9a8083.jpg": {
+      "original_name": "d8dcce4d6b978686c74b59fe85409d6e11feaf053199cad4c06b99d69b9a8083.jpg",
+      "original_rel_path": "d8dcce4d6b978686c74b59fe85409d6e11feaf053199cad4c06b99d69b9a8083.jpg",
+      "friendly_name": "figure_35.jpg",
+      "abs_path": "data/mineru_cache\\chapter_01_p009-032_自动控制的一般概念__8a418239\\images\\figure_35.jpg",
+      "index": 35
+    },
+    "db1b58113ec5f7b8ac99f584a37d0ff5815fbd6af797dd5a0406a1f89b9d1252.jpg": {
+      "original_name": "db1b58113ec5f7b8ac99f584a37d0ff5815fbd6af797dd5a0406a1f89b9d1252.jpg",
+      "original_rel_path": "db1b58113ec5f7b8ac99f584a37d0ff5815fbd6af797dd5a0406a1f89b9d1252.jpg",
+      "friendly_name": "figure_36.jpg",
+      "abs_path": "data/mineru_cache\\chapter_01_p009-032_自动控制的一般概念__8a418239\\images\\figure_36.jpg",
+      "index": 36
+    },
+    "ebc26dbddb09f80c2a874a7b179915b9666f322d151b92483f368c70b963ee61.jpg": {
+      "original_name": "ebc26dbddb09f80c2a874a7b179915b9666f322d151b92483f368c70b963ee61.jpg",
+      "original_rel_path": "ebc26dbddb09f80c2a874a7b179915b9666f322d151b92483f368c70b963ee61.jpg",
+      "friendly_name": "figure_37.jpg",
+      "abs_path": "data/mineru_cache\\chapter_01_p009-032_自动控制的一般概念__8a418239\\images\\figure_37.jpg",
+      "index": 37
+    },
+    "edddd1b4b678718969761abd3a25b60f859cf4609c28009600eecd912b01d55e.jpg": {
+      "original_name": "edddd1b4b678718969761abd3a25b60f859cf4609c28009600eecd912b01d55e.jpg",
+      "original_rel_path": "edddd1b4b678718969761abd3a25b60f859cf4609c28009600eecd912b01d55e.jpg",
+      "friendly_name": "figure_38.jpg",
+      "abs_path": "data/mineru_cache\\chapter_01_p009-032_自动控制的一般概念__8a418239\\images\\figure_38.jpg",
+      "index": 38
+    },
+    "eed26155280b377f04471edacd32cdbc2084480fa9f36af12ca21bfc859ef845.jpg": {
+      "original_name": "eed26155280b377f04471edacd32cdbc2084480fa9f36af12ca21bfc859ef845.jpg",
+      "original_rel_path": "eed26155280b377f04471edacd32cdbc2084480fa9f36af12ca21bfc859ef845.jpg",
+      "friendly_name": "figure_39.jpg",
+      "abs_path": "data/mineru_cache\\chapter_01_p009-032_自动控制的一般概念__8a418239\\images\\figure_39.jpg",
+      "index": 39
+    },
+    "f238002547615f71dabb5a82be799e8c5bb85a43ce33f2f73189d441aaf13298.jpg": {
+      "original_name": "f238002547615f71dabb5a82be799e8c5bb85a43ce33f2f73189d441aaf13298.jpg",
+      "original_rel_path": "f238002547615f71dabb5a82be799e8c5bb85a43ce33f2f73189d441aaf13298.jpg",
+      "friendly_name": "figure_40.jpg",
+      "abs_path": "data/mineru_cache\\chapter_01_p009-032_自动控制的一般概念__8a418239\\images\\figure_40.jpg",
+      "index": 40
+    },
+    "f511c7ae0abb313fe695669c4364e076c7d12da9e88216961c77d972510b95b6.jpg": {
+      "original_name": "f511c7ae0abb313fe695669c4364e076c7d12da9e88216961c77d972510b95b6.jpg",
+      "original_rel_path": "f511c7ae0abb313fe695669c4364e076c7d12da9e88216961c77d972510b95b6.jpg",
+      "friendly_name": "figure_41.jpg",
+      "abs_path": "data/mineru_cache\\chapter_01_p009-032_自动控制的一般概念__8a418239\\images\\figure_41.jpg",
+      "index": 41
+    }
+  },
+  "json_files": {
+    "4987af22-b119-4fa1-9fe5-42be12dcd29e_content_list.json": "data/mineru_cache\\chapter_01_p009-032_自动控制的一般概念__8a418239\\json\\4987af22-b119-4fa1-9fe5-42be12dcd29e_content_list.json",
+    "4987af22-b119-4fa1-9fe5-42be12dcd29e_model.json": "data/mineru_cache\\chapter_01_p009-032_自动控制的一般概念__8a418239\\json\\4987af22-b119-4fa1-9fe5-42be12dcd29e_model.json",
+    "content_list_v2.json": "data/mineru_cache\\chapter_01_p009-032_自动控制的一般概念__8a418239\\json\\content_list_v2.json",
+    "layout.json": "data/mineru_cache\\chapter_01_p009-032_自动控制的一般概念__8a418239\\json\\layout.json"
+  }
+}

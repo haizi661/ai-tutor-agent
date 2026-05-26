@@ -1,0 +1,17 @@
+{
+  "version": 1,
+  "source_path": "E:\\ai_code\\ai-tutor-agent\\data\\course_materials\\artificial_intelligence\\splits\\nn_dl_chapter_05_p120-143_第_5_章_卷积神经网络.pdf",
+  "source_filename": "nn_dl_chapter_05_p120-143_第_5_章_卷积神经网络.pdf",
+  "source_size_bytes": 1503260,
+  "source_mtime": 1779694337,
+  "cache_key": "b4c740d56693",
+  "batch_id": "8c48cc63-1f0c-4098-8f13-943199a11211",
+  "full_zip_url": "https://cdn-mineru.openxlab.org.cn/pdf/2026-05-25/f7fb6ad9-3211-4e01-80d8-19fa466faa36.zip",
+  "saved_at": 1779696444,
+  "proxy_mode": "inherit",
+  "proxy_desc": "继承环境变量 HTTP_PROXY / HTTPS_PROXY",
+  "full_md_path": "full.md",
+  "relative_md_path_in_extract": "full.md",
+  "result_zip_path": "result.zip",
+  "extract_dir": "extracted"
+}

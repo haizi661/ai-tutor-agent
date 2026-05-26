@@ -1,0 +1,3068 @@
+{
+  "pdf_name": "chapter_03_p082-159_线性系统的时域分析法.pdf",
+  "pdf_md5": "082fadd02989160464051a3f5d195fac",
+  "cache_dir": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0",
+  "full_md_path": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\full.md",
+  "images_dir": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\images",
+  "json_dir": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\json",
+  "images": {
+    "01911b189ac8f3d7eed397aaed1ad5ce4eafe69fe1c8fffdd8a32a682f4fa592.jpg": {
+      "original_name": "01911b189ac8f3d7eed397aaed1ad5ce4eafe69fe1c8fffdd8a32a682f4fa592.jpg",
+      "original_rel_path": "01911b189ac8f3d7eed397aaed1ad5ce4eafe69fe1c8fffdd8a32a682f4fa592.jpg",
+      "friendly_name": "figure_01.jpg",
+      "abs_path": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\images\\figure_01.jpg",
+      "index": 1
+    },
+    "0253aeec0bca9591e04d4f0b8880ce6c15b1f5b9cd5e29ecc04407558c84a469.jpg": {
+      "original_name": "0253aeec0bca9591e04d4f0b8880ce6c15b1f5b9cd5e29ecc04407558c84a469.jpg",
+      "original_rel_path": "0253aeec0bca9591e04d4f0b8880ce6c15b1f5b9cd5e29ecc04407558c84a469.jpg",
+      "friendly_name": "figure_02.jpg",
+      "abs_path": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\images\\figure_02.jpg",
+      "index": 2
+    },
+    "03cecaa5d171c80e108355c0efa1dcc34a3dca5b38519fbf0a48afef0805f390.jpg": {
+      "original_name": "03cecaa5d171c80e108355c0efa1dcc34a3dca5b38519fbf0a48afef0805f390.jpg",
+      "original_rel_path": "03cecaa5d171c80e108355c0efa1dcc34a3dca5b38519fbf0a48afef0805f390.jpg",
+      "friendly_name": "figure_03.jpg",
+      "abs_path": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\images\\figure_03.jpg",
+      "index": 3
+    },
+    "03e08ccbc8256a37e8c8610507da1f0f85dda755ce582945ff64d6e0af9c1fc0.jpg": {
+      "original_name": "03e08ccbc8256a37e8c8610507da1f0f85dda755ce582945ff64d6e0af9c1fc0.jpg",
+      "original_rel_path": "03e08ccbc8256a37e8c8610507da1f0f85dda755ce582945ff64d6e0af9c1fc0.jpg",
+      "friendly_name": "figure_04.jpg",
+      "abs_path": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\images\\figure_04.jpg",
+      "index": 4
+    },
+    "040bb74f1b4088eecd439f3719289415cfbe30a80d3be00cad2487cdaeb8be15.jpg": {
+      "original_name": "040bb74f1b4088eecd439f3719289415cfbe30a80d3be00cad2487cdaeb8be15.jpg",
+      "original_rel_path": "040bb74f1b4088eecd439f3719289415cfbe30a80d3be00cad2487cdaeb8be15.jpg",
+      "friendly_name": "figure_05.jpg",
+      "abs_path": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\images\\figure_05.jpg",
+      "index": 5
+    },
+    "0527e8a01be1ff21b9908f74a2903f8559b7ba45592e44ad41646882a3b1e4e3.jpg": {
+      "original_name": "0527e8a01be1ff21b9908f74a2903f8559b7ba45592e44ad41646882a3b1e4e3.jpg",
+      "original_rel_path": "0527e8a01be1ff21b9908f74a2903f8559b7ba45592e44ad41646882a3b1e4e3.jpg",
+      "friendly_name": "figure_06.jpg",
+      "abs_path": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\images\\figure_06.jpg",
+      "index": 6
+    },
+    "053ed16540ae87e52585e6c8eb1709efcee8f7af720e5956ec197c875f30cecf.jpg": {
+      "original_name": "053ed16540ae87e52585e6c8eb1709efcee8f7af720e5956ec197c875f30cecf.jpg",
+      "original_rel_path": "053ed16540ae87e52585e6c8eb1709efcee8f7af720e5956ec197c875f30cecf.jpg",
+      "friendly_name": "figure_07.jpg",
+      "abs_path": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\images\\figure_07.jpg",
+      "index": 7
+    },
+    "058baef5e54366dc214cff98ee1eb07715064edc96fe7a4c87bab0f4f03a3658.jpg": {
+      "original_name": "058baef5e54366dc214cff98ee1eb07715064edc96fe7a4c87bab0f4f03a3658.jpg",
+      "original_rel_path": "058baef5e54366dc214cff98ee1eb07715064edc96fe7a4c87bab0f4f03a3658.jpg",
+      "friendly_name": "figure_08.jpg",
+      "abs_path": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\images\\figure_08.jpg",
+      "index": 8
+    },
+    "05fa43c8385e4ae4ded60419dc9b8d70b89f8f5d8e4a664782de133e1f64d00a.jpg": {
+      "original_name": "05fa43c8385e4ae4ded60419dc9b8d70b89f8f5d8e4a664782de133e1f64d00a.jpg",
+      "original_rel_path": "05fa43c8385e4ae4ded60419dc9b8d70b89f8f5d8e4a664782de133e1f64d00a.jpg",
+      "friendly_name": "figure_09.jpg",
+      "abs_path": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\images\\figure_09.jpg",
+      "index": 9
+    },
+    "060a19ee67a9c76366f516ec75b50915659f241bb927e42335981fbba694fd6f.jpg": {
+      "original_name": "060a19ee67a9c76366f516ec75b50915659f241bb927e42335981fbba694fd6f.jpg",
+      "original_rel_path": "060a19ee67a9c76366f516ec75b50915659f241bb927e42335981fbba694fd6f.jpg",
+      "friendly_name": "figure_10.jpg",
+      "abs_path": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\images\\figure_10.jpg",
+      "index": 10
+    },
+    "06e07e7cbbbcae97c0704ea0f107460cbe9c1cadfc077df12e73eab95936f90e.jpg": {
+      "original_name": "06e07e7cbbbcae97c0704ea0f107460cbe9c1cadfc077df12e73eab95936f90e.jpg",
+      "original_rel_path": "06e07e7cbbbcae97c0704ea0f107460cbe9c1cadfc077df12e73eab95936f90e.jpg",
+      "friendly_name": "figure_11.jpg",
+      "abs_path": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\images\\figure_11.jpg",
+      "index": 11
+    },
+    "0742bb4e387f956c1e3030db4f90108522f9cc48ffb84adf458a26078e34d736.jpg": {
+      "original_name": "0742bb4e387f956c1e3030db4f90108522f9cc48ffb84adf458a26078e34d736.jpg",
+      "original_rel_path": "0742bb4e387f956c1e3030db4f90108522f9cc48ffb84adf458a26078e34d736.jpg",
+      "friendly_name": "figure_12.jpg",
+      "abs_path": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\images\\figure_12.jpg",
+      "index": 12
+    },
+    "07b92b9deca7476c540620157fe062e2c7b6f2818694799f3910a49ecaa45ba3.jpg": {
+      "original_name": "07b92b9deca7476c540620157fe062e2c7b6f2818694799f3910a49ecaa45ba3.jpg",
+      "original_rel_path": "07b92b9deca7476c540620157fe062e2c7b6f2818694799f3910a49ecaa45ba3.jpg",
+      "friendly_name": "figure_13.jpg",
+      "abs_path": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\images\\figure_13.jpg",
+      "index": 13
+    },
+    "0823afab04b8813b09f1676361978baf35bc8b5d86d11a23ba721e72d9f2d85f.jpg": {
+      "original_name": "0823afab04b8813b09f1676361978baf35bc8b5d86d11a23ba721e72d9f2d85f.jpg",
+      "original_rel_path": "0823afab04b8813b09f1676361978baf35bc8b5d86d11a23ba721e72d9f2d85f.jpg",
+      "friendly_name": "figure_14.jpg",
+      "abs_path": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\images\\figure_14.jpg",
+      "index": 14
+    },
+    "08a5e773a5c1c6a6023e3ea67485f9c39a8674aa132382e34c6c98918b30887e.jpg": {
+      "original_name": "08a5e773a5c1c6a6023e3ea67485f9c39a8674aa132382e34c6c98918b30887e.jpg",
+      "original_rel_path": "08a5e773a5c1c6a6023e3ea67485f9c39a8674aa132382e34c6c98918b30887e.jpg",
+      "friendly_name": "figure_15.jpg",
+      "abs_path": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\images\\figure_15.jpg",
+      "index": 15
+    },
+    "08bb6142df9b2ad3f356d9726e5ed5f98ecdb0d0e300528ac058827737875e16.jpg": {
+      "original_name": "08bb6142df9b2ad3f356d9726e5ed5f98ecdb0d0e300528ac058827737875e16.jpg",
+      "original_rel_path": "08bb6142df9b2ad3f356d9726e5ed5f98ecdb0d0e300528ac058827737875e16.jpg",
+      "friendly_name": "figure_16.jpg",
+      "abs_path": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\images\\figure_16.jpg",
+      "index": 16
+    },
+    "09db744da7316ff5fbbf30ca684d581ba14d9dfae39d601ba6ec5d8674886224.jpg": {
+      "original_name": "09db744da7316ff5fbbf30ca684d581ba14d9dfae39d601ba6ec5d8674886224.jpg",
+      "original_rel_path": "09db744da7316ff5fbbf30ca684d581ba14d9dfae39d601ba6ec5d8674886224.jpg",
+      "friendly_name": "figure_17.jpg",
+      "abs_path": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\images\\figure_17.jpg",
+      "index": 17
+    },
+    "0a2dfe0bbf01cd9f5c590ab42bce0912648881869225240b570229471f06c853.jpg": {
+      "original_name": "0a2dfe0bbf01cd9f5c590ab42bce0912648881869225240b570229471f06c853.jpg",
+      "original_rel_path": "0a2dfe0bbf01cd9f5c590ab42bce0912648881869225240b570229471f06c853.jpg",
+      "friendly_name": "figure_18.jpg",
+      "abs_path": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\images\\figure_18.jpg",
+      "index": 18
+    },
+    "0b7a1b3d08c10a484520933881d0fbc7b1b157e9f547ce5b4d15fc903e7e56c6.jpg": {
+      "original_name": "0b7a1b3d08c10a484520933881d0fbc7b1b157e9f547ce5b4d15fc903e7e56c6.jpg",
+      "original_rel_path": "0b7a1b3d08c10a484520933881d0fbc7b1b157e9f547ce5b4d15fc903e7e56c6.jpg",
+      "friendly_name": "figure_19.jpg",
+      "abs_path": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\images\\figure_19.jpg",
+      "index": 19
+    },
+    "0ba0630c68e9314a03ba19ec53691dad2f6d98a8cc9feffed880b752b472c751.jpg": {
+      "original_name": "0ba0630c68e9314a03ba19ec53691dad2f6d98a8cc9feffed880b752b472c751.jpg",
+      "original_rel_path": "0ba0630c68e9314a03ba19ec53691dad2f6d98a8cc9feffed880b752b472c751.jpg",
+      "friendly_name": "figure_20.jpg",
+      "abs_path": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\images\\figure_20.jpg",
+      "index": 20
+    },
+    "0bc5ac55c7faf92cd739f9d2318c103b7db513628c3dec73ae6a775625026d1d.jpg": {
+      "original_name": "0bc5ac55c7faf92cd739f9d2318c103b7db513628c3dec73ae6a775625026d1d.jpg",
+      "original_rel_path": "0bc5ac55c7faf92cd739f9d2318c103b7db513628c3dec73ae6a775625026d1d.jpg",
+      "friendly_name": "figure_21.jpg",
+      "abs_path": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\images\\figure_21.jpg",
+      "index": 21
+    },
+    "0c62bb211aaa40a21908bcbd06aa2c9128f202a06070ee192f3d489fc3149252.jpg": {
+      "original_name": "0c62bb211aaa40a21908bcbd06aa2c9128f202a06070ee192f3d489fc3149252.jpg",
+      "original_rel_path": "0c62bb211aaa40a21908bcbd06aa2c9128f202a06070ee192f3d489fc3149252.jpg",
+      "friendly_name": "figure_22.jpg",
+      "abs_path": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\images\\figure_22.jpg",
+      "index": 22
+    },
+    "0f0f07d7db8b0a152d2516907ab82295acc1a261edd98dcf8caa769b0ba59d60.jpg": {
+      "original_name": "0f0f07d7db8b0a152d2516907ab82295acc1a261edd98dcf8caa769b0ba59d60.jpg",
+      "original_rel_path": "0f0f07d7db8b0a152d2516907ab82295acc1a261edd98dcf8caa769b0ba59d60.jpg",
+      "friendly_name": "figure_23.jpg",
+      "abs_path": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\images\\figure_23.jpg",
+      "index": 23
+    },
+    "10187db09e51083a586c29649b982ae67564437170222bac4af7ead4367f94b3.jpg": {
+      "original_name": "10187db09e51083a586c29649b982ae67564437170222bac4af7ead4367f94b3.jpg",
+      "original_rel_path": "10187db09e51083a586c29649b982ae67564437170222bac4af7ead4367f94b3.jpg",
+      "friendly_name": "figure_24.jpg",
+      "abs_path": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\images\\figure_24.jpg",
+      "index": 24
+    },
+    "12fe6ee79bf1a9a8274cb12990f2c5c0256619d08c370551bd9d088f3f3ae5ce.jpg": {
+      "original_name": "12fe6ee79bf1a9a8274cb12990f2c5c0256619d08c370551bd9d088f3f3ae5ce.jpg",
+      "original_rel_path": "12fe6ee79bf1a9a8274cb12990f2c5c0256619d08c370551bd9d088f3f3ae5ce.jpg",
+      "friendly_name": "figure_25.jpg",
+      "abs_path": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\images\\figure_25.jpg",
+      "index": 25
+    },
+    "1318216896a25541cc332b923dff24214f39ea7abf3fd2cbcb03fec7bf4795ff.jpg": {
+      "original_name": "1318216896a25541cc332b923dff24214f39ea7abf3fd2cbcb03fec7bf4795ff.jpg",
+      "original_rel_path": "1318216896a25541cc332b923dff24214f39ea7abf3fd2cbcb03fec7bf4795ff.jpg",
+      "friendly_name": "figure_26.jpg",
+      "abs_path": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\images\\figure_26.jpg",
+      "index": 26
+    },
+    "131bbfe07add2df441c35ace47112f1a100af4a4ffaf45b6129387e896653c5c.jpg": {
+      "original_name": "131bbfe07add2df441c35ace47112f1a100af4a4ffaf45b6129387e896653c5c.jpg",
+      "original_rel_path": "131bbfe07add2df441c35ace47112f1a100af4a4ffaf45b6129387e896653c5c.jpg",
+      "friendly_name": "figure_27.jpg",
+      "abs_path": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\images\\figure_27.jpg",
+      "index": 27
+    },
+    "1320f44baec2abc261f9083ba35e4c4f292abb30c3abba7bb56cb147056a22e0.jpg": {
+      "original_name": "1320f44baec2abc261f9083ba35e4c4f292abb30c3abba7bb56cb147056a22e0.jpg",
+      "original_rel_path": "1320f44baec2abc261f9083ba35e4c4f292abb30c3abba7bb56cb147056a22e0.jpg",
+      "friendly_name": "figure_28.jpg",
+      "abs_path": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\images\\figure_28.jpg",
+      "index": 28
+    },
+    "13393cde584430bc71081b2be6e2323919f5de86dedbe91e9276c08d4e25cbc7.jpg": {
+      "original_name": "13393cde584430bc71081b2be6e2323919f5de86dedbe91e9276c08d4e25cbc7.jpg",
+      "original_rel_path": "13393cde584430bc71081b2be6e2323919f5de86dedbe91e9276c08d4e25cbc7.jpg",
+      "friendly_name": "figure_29.jpg",
+      "abs_path": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\images\\figure_29.jpg",
+      "index": 29
+    },
+    "13c69d6a9b4482bd6e8181ff5cea53353d8be33b7d39ef9bec0c95effc23330a.jpg": {
+      "original_name": "13c69d6a9b4482bd6e8181ff5cea53353d8be33b7d39ef9bec0c95effc23330a.jpg",
+      "original_rel_path": "13c69d6a9b4482bd6e8181ff5cea53353d8be33b7d39ef9bec0c95effc23330a.jpg",
+      "friendly_name": "figure_30.jpg",
+      "abs_path": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\images\\figure_30.jpg",
+      "index": 30
+    },
+    "13e62f0d32aa3c6d8038450eef89696724577541437cca29270450fef3e10569.jpg": {
+      "original_name": "13e62f0d32aa3c6d8038450eef89696724577541437cca29270450fef3e10569.jpg",
+      "original_rel_path": "13e62f0d32aa3c6d8038450eef89696724577541437cca29270450fef3e10569.jpg",
+      "friendly_name": "figure_31.jpg",
+      "abs_path": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\images\\figure_31.jpg",
+      "index": 31
+    },
+    "141a5252165d9e7f58aa30556b7a265a10c4cf38875546860a1eae6399892419.jpg": {
+      "original_name": "141a5252165d9e7f58aa30556b7a265a10c4cf38875546860a1eae6399892419.jpg",
+      "original_rel_path": "141a5252165d9e7f58aa30556b7a265a10c4cf38875546860a1eae6399892419.jpg",
+      "friendly_name": "figure_32.jpg",
+      "abs_path": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\images\\figure_32.jpg",
+      "index": 32
+    },
+    "1486d00f57d232661dfc95b5707a489220775ce3bc404c1c92bb72e7a5a0111b.jpg": {
+      "original_name": "1486d00f57d232661dfc95b5707a489220775ce3bc404c1c92bb72e7a5a0111b.jpg",
+      "original_rel_path": "1486d00f57d232661dfc95b5707a489220775ce3bc404c1c92bb72e7a5a0111b.jpg",
+      "friendly_name": "figure_33.jpg",
+      "abs_path": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\images\\figure_33.jpg",
+      "index": 33
+    },
+    "14c6da739d30a0983b9c09c643a009359cac83268803251ce034e2b152067aeb.jpg": {
+      "original_name": "14c6da739d30a0983b9c09c643a009359cac83268803251ce034e2b152067aeb.jpg",
+      "original_rel_path": "14c6da739d30a0983b9c09c643a009359cac83268803251ce034e2b152067aeb.jpg",
+      "friendly_name": "figure_34.jpg",
+      "abs_path": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\images\\figure_34.jpg",
+      "index": 34
+    },
+    "16f759976190bd36b34aaeefcf8df5a6125f02e85fd7b792514d4c5fdc3af71d.jpg": {
+      "original_name": "16f759976190bd36b34aaeefcf8df5a6125f02e85fd7b792514d4c5fdc3af71d.jpg",
+      "original_rel_path": "16f759976190bd36b34aaeefcf8df5a6125f02e85fd7b792514d4c5fdc3af71d.jpg",
+      "friendly_name": "figure_35.jpg",
+      "abs_path": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\images\\figure_35.jpg",
+      "index": 35
+    },
+    "18da2603e84391767ede75d773f6d245aec6c08a6afa479cd138e2ebd1161a5f.jpg": {
+      "original_name": "18da2603e84391767ede75d773f6d245aec6c08a6afa479cd138e2ebd1161a5f.jpg",
+      "original_rel_path": "18da2603e84391767ede75d773f6d245aec6c08a6afa479cd138e2ebd1161a5f.jpg",
+      "friendly_name": "figure_36.jpg",
+      "abs_path": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\images\\figure_36.jpg",
+      "index": 36
+    },
+    "19142bea07fcdc302265f65f6419c1ba78fd5d31b7c4ffc3942d73c6dbc7a2cb.jpg": {
+      "original_name": "19142bea07fcdc302265f65f6419c1ba78fd5d31b7c4ffc3942d73c6dbc7a2cb.jpg",
+      "original_rel_path": "19142bea07fcdc302265f65f6419c1ba78fd5d31b7c4ffc3942d73c6dbc7a2cb.jpg",
+      "friendly_name": "figure_37.jpg",
+      "abs_path": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\images\\figure_37.jpg",
+      "index": 37
+    },
+    "1a4547d277522c8aa2fff61aa7d238611c48de546bf254ba5a600fecd4b334e9.jpg": {
+      "original_name": "1a4547d277522c8aa2fff61aa7d238611c48de546bf254ba5a600fecd4b334e9.jpg",
+      "original_rel_path": "1a4547d277522c8aa2fff61aa7d238611c48de546bf254ba5a600fecd4b334e9.jpg",
+      "friendly_name": "figure_38.jpg",
+      "abs_path": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\images\\figure_38.jpg",
+      "index": 38
+    },
+    "1bcffb709390be22ecdb14de7fb48c853ddd1c54ec45def6e8f15f77a433f6bd.jpg": {
+      "original_name": "1bcffb709390be22ecdb14de7fb48c853ddd1c54ec45def6e8f15f77a433f6bd.jpg",
+      "original_rel_path": "1bcffb709390be22ecdb14de7fb48c853ddd1c54ec45def6e8f15f77a433f6bd.jpg",
+      "friendly_name": "figure_39.jpg",
+      "abs_path": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\images\\figure_39.jpg",
+      "index": 39
+    },
+    "1c21d8519f040615255f77431684e6c0745953d4001f2b77ce86317eecfb9181.jpg": {
+      "original_name": "1c21d8519f040615255f77431684e6c0745953d4001f2b77ce86317eecfb9181.jpg",
+      "original_rel_path": "1c21d8519f040615255f77431684e6c0745953d4001f2b77ce86317eecfb9181.jpg",
+      "friendly_name": "figure_40.jpg",
+      "abs_path": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\images\\figure_40.jpg",
+      "index": 40
+    },
+    "1c255713f8909094ec24adb02c22c92cbd764055faa1135bd403425fd9013ad6.jpg": {
+      "original_name": "1c255713f8909094ec24adb02c22c92cbd764055faa1135bd403425fd9013ad6.jpg",
+      "original_rel_path": "1c255713f8909094ec24adb02c22c92cbd764055faa1135bd403425fd9013ad6.jpg",
+      "friendly_name": "figure_41.jpg",
+      "abs_path": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\images\\figure_41.jpg",
+      "index": 41
+    },
+    "1cf7f1c3e6ad4391fdbdd97996464e346acf329206bbd21cd8ef9fbfbc741362.jpg": {
+      "original_name": "1cf7f1c3e6ad4391fdbdd97996464e346acf329206bbd21cd8ef9fbfbc741362.jpg",
+      "original_rel_path": "1cf7f1c3e6ad4391fdbdd97996464e346acf329206bbd21cd8ef9fbfbc741362.jpg",
+      "friendly_name": "figure_42.jpg",
+      "abs_path": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\images\\figure_42.jpg",
+      "index": 42
+    },
+    "1d0e1344863bd567ea923c9e34cb2e33b024c6cd558612177db635ad1ab6683d.jpg": {
+      "original_name": "1d0e1344863bd567ea923c9e34cb2e33b024c6cd558612177db635ad1ab6683d.jpg",
+      "original_rel_path": "1d0e1344863bd567ea923c9e34cb2e33b024c6cd558612177db635ad1ab6683d.jpg",
+      "friendly_name": "figure_43.jpg",
+      "abs_path": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\images\\figure_43.jpg",
+      "index": 43
+    },
+    "1f8c5ba12f9b774099a24ccbb5908af7254270a5ba3dc1db68835828ea2e6d1f.jpg": {
+      "original_name": "1f8c5ba12f9b774099a24ccbb5908af7254270a5ba3dc1db68835828ea2e6d1f.jpg",
+      "original_rel_path": "1f8c5ba12f9b774099a24ccbb5908af7254270a5ba3dc1db68835828ea2e6d1f.jpg",
+      "friendly_name": "figure_44.jpg",
+      "abs_path": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\images\\figure_44.jpg",
+      "index": 44
+    },
+    "1fbfe24153f3ecb1b633e311ab5d46b9d66d192ce12193f7322f43ae8a4db3e5.jpg": {
+      "original_name": "1fbfe24153f3ecb1b633e311ab5d46b9d66d192ce12193f7322f43ae8a4db3e5.jpg",
+      "original_rel_path": "1fbfe24153f3ecb1b633e311ab5d46b9d66d192ce12193f7322f43ae8a4db3e5.jpg",
+      "friendly_name": "figure_45.jpg",
+      "abs_path": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\images\\figure_45.jpg",
+      "index": 45
+    },
+    "1ff27c13602bc1aebd190ebf852f9243575005722eec22d4c6999cb94767a9cd.jpg": {
+      "original_name": "1ff27c13602bc1aebd190ebf852f9243575005722eec22d4c6999cb94767a9cd.jpg",
+      "original_rel_path": "1ff27c13602bc1aebd190ebf852f9243575005722eec22d4c6999cb94767a9cd.jpg",
+      "friendly_name": "figure_46.jpg",
+      "abs_path": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\images\\figure_46.jpg",
+      "index": 46
+    },
+    "205260bf1cb1341226057b2301c4cb65cac3f101866d0abcfe3b387ca4aa663e.jpg": {
+      "original_name": "205260bf1cb1341226057b2301c4cb65cac3f101866d0abcfe3b387ca4aa663e.jpg",
+      "original_rel_path": "205260bf1cb1341226057b2301c4cb65cac3f101866d0abcfe3b387ca4aa663e.jpg",
+      "friendly_name": "figure_47.jpg",
+      "abs_path": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\images\\figure_47.jpg",
+      "index": 47
+    },
+    "20976ba36520ba17e7281b273919f0e30d1d9f7767dc6dc8bdd69f31590b3ca6.jpg": {
+      "original_name": "20976ba36520ba17e7281b273919f0e30d1d9f7767dc6dc8bdd69f31590b3ca6.jpg",
+      "original_rel_path": "20976ba36520ba17e7281b273919f0e30d1d9f7767dc6dc8bdd69f31590b3ca6.jpg",
+      "friendly_name": "figure_48.jpg",
+      "abs_path": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\images\\figure_48.jpg",
+      "index": 48
+    },
+    "2116f73b1a103fed8f1fb3ead180d2705c609b1b8da542d5f637fc6dcb302236.jpg": {
+      "original_name": "2116f73b1a103fed8f1fb3ead180d2705c609b1b8da542d5f637fc6dcb302236.jpg",
+      "original_rel_path": "2116f73b1a103fed8f1fb3ead180d2705c609b1b8da542d5f637fc6dcb302236.jpg",
+      "friendly_name": "figure_49.jpg",
+      "abs_path": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\images\\figure_49.jpg",
+      "index": 49
+    },
+    "212bde44a68c5d16c0f2a6c74baa74ed596f9678bea60db8de1d9c741bb6fc07.jpg": {
+      "original_name": "212bde44a68c5d16c0f2a6c74baa74ed596f9678bea60db8de1d9c741bb6fc07.jpg",
+      "original_rel_path": "212bde44a68c5d16c0f2a6c74baa74ed596f9678bea60db8de1d9c741bb6fc07.jpg",
+      "friendly_name": "figure_50.jpg",
+      "abs_path": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\images\\figure_50.jpg",
+      "index": 50
+    },
+    "219aa2f4ade91cb37cc5bedf14f0e82686fe5425d28ef6c6b9309a3a01263f95.jpg": {
+      "original_name": "219aa2f4ade91cb37cc5bedf14f0e82686fe5425d28ef6c6b9309a3a01263f95.jpg",
+      "original_rel_path": "219aa2f4ade91cb37cc5bedf14f0e82686fe5425d28ef6c6b9309a3a01263f95.jpg",
+      "friendly_name": "figure_51.jpg",
+      "abs_path": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\images\\figure_51.jpg",
+      "index": 51
+    },
+    "219f236388a881fc24b991ee5d560b91e2de666ddd01f02fc1de18884a820e7e.jpg": {
+      "original_name": "219f236388a881fc24b991ee5d560b91e2de666ddd01f02fc1de18884a820e7e.jpg",
+      "original_rel_path": "219f236388a881fc24b991ee5d560b91e2de666ddd01f02fc1de18884a820e7e.jpg",
+      "friendly_name": "figure_52.jpg",
+      "abs_path": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\images\\figure_52.jpg",
+      "index": 52
+    },
+    "223b5cda3d82a94f9da093668d0175a11e9e7dd1f41f9d0d0c974f8acfced760.jpg": {
+      "original_name": "223b5cda3d82a94f9da093668d0175a11e9e7dd1f41f9d0d0c974f8acfced760.jpg",
+      "original_rel_path": "223b5cda3d82a94f9da093668d0175a11e9e7dd1f41f9d0d0c974f8acfced760.jpg",
+      "friendly_name": "figure_53.jpg",
+      "abs_path": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\images\\figure_53.jpg",
+      "index": 53
+    },
+    "22da8fc8e4bc34c168bca6f6d8d41c2d15bb0cd07705f93361d5cb49df7f8836.jpg": {
+      "original_name": "22da8fc8e4bc34c168bca6f6d8d41c2d15bb0cd07705f93361d5cb49df7f8836.jpg",
+      "original_rel_path": "22da8fc8e4bc34c168bca6f6d8d41c2d15bb0cd07705f93361d5cb49df7f8836.jpg",
+      "friendly_name": "figure_54.jpg",
+      "abs_path": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\images\\figure_54.jpg",
+      "index": 54
+    },
+    "2391bf3df9faf4f73850b6bce31b17689ff697aff3d6569385ae46d80dac74d4.jpg": {
+      "original_name": "2391bf3df9faf4f73850b6bce31b17689ff697aff3d6569385ae46d80dac74d4.jpg",
+      "original_rel_path": "2391bf3df9faf4f73850b6bce31b17689ff697aff3d6569385ae46d80dac74d4.jpg",
+      "friendly_name": "figure_55.jpg",
+      "abs_path": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\images\\figure_55.jpg",
+      "index": 55
+    },
+    "251150c944844974d99a137cadef37f4b4565486ffd3caf367d8ebe0e21ed3f4.jpg": {
+      "original_name": "251150c944844974d99a137cadef37f4b4565486ffd3caf367d8ebe0e21ed3f4.jpg",
+      "original_rel_path": "251150c944844974d99a137cadef37f4b4565486ffd3caf367d8ebe0e21ed3f4.jpg",
+      "friendly_name": "figure_56.jpg",
+      "abs_path": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\images\\figure_56.jpg",
+      "index": 56
+    },
+    "25569d8d5aee3e40eb3c20703471ad47bb342d44aba3f89c1148f2042131244b.jpg": {
+      "original_name": "25569d8d5aee3e40eb3c20703471ad47bb342d44aba3f89c1148f2042131244b.jpg",
+      "original_rel_path": "25569d8d5aee3e40eb3c20703471ad47bb342d44aba3f89c1148f2042131244b.jpg",
+      "friendly_name": "figure_57.jpg",
+      "abs_path": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\images\\figure_57.jpg",
+      "index": 57
+    },
+    "2587a3df113b874526d42767f8ffc4cd96e0ebb90a3ba919c162ae44bcf1bb3c.jpg": {
+      "original_name": "2587a3df113b874526d42767f8ffc4cd96e0ebb90a3ba919c162ae44bcf1bb3c.jpg",
+      "original_rel_path": "2587a3df113b874526d42767f8ffc4cd96e0ebb90a3ba919c162ae44bcf1bb3c.jpg",
+      "friendly_name": "figure_58.jpg",
+      "abs_path": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\images\\figure_58.jpg",
+      "index": 58
+    },
+    "262f765c4398f3a39c070b1d909c7ec7e600b3c5f40a80afba55f41f9e26ab05.jpg": {
+      "original_name": "262f765c4398f3a39c070b1d909c7ec7e600b3c5f40a80afba55f41f9e26ab05.jpg",
+      "original_rel_path": "262f765c4398f3a39c070b1d909c7ec7e600b3c5f40a80afba55f41f9e26ab05.jpg",
+      "friendly_name": "figure_59.jpg",
+      "abs_path": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\images\\figure_59.jpg",
+      "index": 59
+    },
+    "27802b8700e7d848b78b77736223605ff93a7b9db2f52e1213d11b1acf43f117.jpg": {
+      "original_name": "27802b8700e7d848b78b77736223605ff93a7b9db2f52e1213d11b1acf43f117.jpg",
+      "original_rel_path": "27802b8700e7d848b78b77736223605ff93a7b9db2f52e1213d11b1acf43f117.jpg",
+      "friendly_name": "figure_60.jpg",
+      "abs_path": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\images\\figure_60.jpg",
+      "index": 60
+    },
+    "2799bbadb229b4ef6c1021a64fcf16f7014b62e853dfa28b49b7c7cd6151b19f.jpg": {
+      "original_name": "2799bbadb229b4ef6c1021a64fcf16f7014b62e853dfa28b49b7c7cd6151b19f.jpg",
+      "original_rel_path": "2799bbadb229b4ef6c1021a64fcf16f7014b62e853dfa28b49b7c7cd6151b19f.jpg",
+      "friendly_name": "figure_61.jpg",
+      "abs_path": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\images\\figure_61.jpg",
+      "index": 61
+    },
+    "28b425f6ef3712a5dae4c863138ea86d77fd44948acfcfa5e47e7fe53dfe1ca6.jpg": {
+      "original_name": "28b425f6ef3712a5dae4c863138ea86d77fd44948acfcfa5e47e7fe53dfe1ca6.jpg",
+      "original_rel_path": "28b425f6ef3712a5dae4c863138ea86d77fd44948acfcfa5e47e7fe53dfe1ca6.jpg",
+      "friendly_name": "figure_62.jpg",
+      "abs_path": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\images\\figure_62.jpg",
+      "index": 62
+    },
+    "297af55f7ffac1b6c48ee3ee42316572f541aa02ab1027c3138dfbf3c37dcb9c.jpg": {
+      "original_name": "297af55f7ffac1b6c48ee3ee42316572f541aa02ab1027c3138dfbf3c37dcb9c.jpg",
+      "original_rel_path": "297af55f7ffac1b6c48ee3ee42316572f541aa02ab1027c3138dfbf3c37dcb9c.jpg",
+      "friendly_name": "figure_63.jpg",
+      "abs_path": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\images\\figure_63.jpg",
+      "index": 63
+    },
+    "29c66461da994bf4c804a5b28fb375902e1e7b098dba57ed45cf352b0259fa52.jpg": {
+      "original_name": "29c66461da994bf4c804a5b28fb375902e1e7b098dba57ed45cf352b0259fa52.jpg",
+      "original_rel_path": "29c66461da994bf4c804a5b28fb375902e1e7b098dba57ed45cf352b0259fa52.jpg",
+      "friendly_name": "figure_64.jpg",
+      "abs_path": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\images\\figure_64.jpg",
+      "index": 64
+    },
+    "2a19ed85fb88046ea8360177265e4fb1c2aeeade72b038b2fff66d2e625c4b7e.jpg": {
+      "original_name": "2a19ed85fb88046ea8360177265e4fb1c2aeeade72b038b2fff66d2e625c4b7e.jpg",
+      "original_rel_path": "2a19ed85fb88046ea8360177265e4fb1c2aeeade72b038b2fff66d2e625c4b7e.jpg",
+      "friendly_name": "figure_65.jpg",
+      "abs_path": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\images\\figure_65.jpg",
+      "index": 65
+    },
+    "2ac173ffaba5b1f91f1576427e22ed5252ff308da285302569c264aae1d70bb7.jpg": {
+      "original_name": "2ac173ffaba5b1f91f1576427e22ed5252ff308da285302569c264aae1d70bb7.jpg",
+      "original_rel_path": "2ac173ffaba5b1f91f1576427e22ed5252ff308da285302569c264aae1d70bb7.jpg",
+      "friendly_name": "figure_66.jpg",
+      "abs_path": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\images\\figure_66.jpg",
+      "index": 66
+    },
+    "2b100911dc2fb637e5881c73ca3ca1f4da910d0139a1dbe363cf546bd67ff4a5.jpg": {
+      "original_name": "2b100911dc2fb637e5881c73ca3ca1f4da910d0139a1dbe363cf546bd67ff4a5.jpg",
+      "original_rel_path": "2b100911dc2fb637e5881c73ca3ca1f4da910d0139a1dbe363cf546bd67ff4a5.jpg",
+      "friendly_name": "figure_67.jpg",
+      "abs_path": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\images\\figure_67.jpg",
+      "index": 67
+    },
+    "2b5613b9a632bc2f534566499256cfe5e6a733fc3ceeac1c88c3ccd6b167a802.jpg": {
+      "original_name": "2b5613b9a632bc2f534566499256cfe5e6a733fc3ceeac1c88c3ccd6b167a802.jpg",
+      "original_rel_path": "2b5613b9a632bc2f534566499256cfe5e6a733fc3ceeac1c88c3ccd6b167a802.jpg",
+      "friendly_name": "figure_68.jpg",
+      "abs_path": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\images\\figure_68.jpg",
+      "index": 68
+    },
+    "2e09a1b6a59e6d98e2712e612e4f817322dce1b0ca5217a15dbbf9de3261367e.jpg": {
+      "original_name": "2e09a1b6a59e6d98e2712e612e4f817322dce1b0ca5217a15dbbf9de3261367e.jpg",
+      "original_rel_path": "2e09a1b6a59e6d98e2712e612e4f817322dce1b0ca5217a15dbbf9de3261367e.jpg",
+      "friendly_name": "figure_69.jpg",
+      "abs_path": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\images\\figure_69.jpg",
+      "index": 69
+    },
+    "2f3502eeb702f15d5de556122010f476b33fe0d2a234fb5a776a93d97228ba92.jpg": {
+      "original_name": "2f3502eeb702f15d5de556122010f476b33fe0d2a234fb5a776a93d97228ba92.jpg",
+      "original_rel_path": "2f3502eeb702f15d5de556122010f476b33fe0d2a234fb5a776a93d97228ba92.jpg",
+      "friendly_name": "figure_70.jpg",
+      "abs_path": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\images\\figure_70.jpg",
+      "index": 70
+    },
+    "2fa58022af7947ff550dc92ab1616d7910d6f46ff37d22257079331cdd292904.jpg": {
+      "original_name": "2fa58022af7947ff550dc92ab1616d7910d6f46ff37d22257079331cdd292904.jpg",
+      "original_rel_path": "2fa58022af7947ff550dc92ab1616d7910d6f46ff37d22257079331cdd292904.jpg",
+      "friendly_name": "figure_71.jpg",
+      "abs_path": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\images\\figure_71.jpg",
+      "index": 71
+    },
+    "3004966c431aafba5e89ed27b7a9da94ce69c47a4d3215d3f04260dd29e9a45f.jpg": {
+      "original_name": "3004966c431aafba5e89ed27b7a9da94ce69c47a4d3215d3f04260dd29e9a45f.jpg",
+      "original_rel_path": "3004966c431aafba5e89ed27b7a9da94ce69c47a4d3215d3f04260dd29e9a45f.jpg",
+      "friendly_name": "figure_72.jpg",
+      "abs_path": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\images\\figure_72.jpg",
+      "index": 72
+    },
+    "3074e16a2166b2b4e4e919417420c2ea5a2f1bcffc4a4bc3db20888e4d965fd9.jpg": {
+      "original_name": "3074e16a2166b2b4e4e919417420c2ea5a2f1bcffc4a4bc3db20888e4d965fd9.jpg",
+      "original_rel_path": "3074e16a2166b2b4e4e919417420c2ea5a2f1bcffc4a4bc3db20888e4d965fd9.jpg",
+      "friendly_name": "figure_73.jpg",
+      "abs_path": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\images\\figure_73.jpg",
+      "index": 73
+    },
+    "307d5ccbfbe2c18efb9932e43074fa9fb15e7d157f1d28d19b55002b42697e7b.jpg": {
+      "original_name": "307d5ccbfbe2c18efb9932e43074fa9fb15e7d157f1d28d19b55002b42697e7b.jpg",
+      "original_rel_path": "307d5ccbfbe2c18efb9932e43074fa9fb15e7d157f1d28d19b55002b42697e7b.jpg",
+      "friendly_name": "figure_74.jpg",
+      "abs_path": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\images\\figure_74.jpg",
+      "index": 74
+    },
+    "31fb142d848469509a8d66e49cd19243e0685dd3f9c0c784c6156a87632df9c9.jpg": {
+      "original_name": "31fb142d848469509a8d66e49cd19243e0685dd3f9c0c784c6156a87632df9c9.jpg",
+      "original_rel_path": "31fb142d848469509a8d66e49cd19243e0685dd3f9c0c784c6156a87632df9c9.jpg",
+      "friendly_name": "figure_75.jpg",
+      "abs_path": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\images\\figure_75.jpg",
+      "index": 75
+    },
+    "32b0de1f564a4c8fdd54c264b26b24a3e0a307ec5ca9dc28d4f41842743a513e.jpg": {
+      "original_name": "32b0de1f564a4c8fdd54c264b26b24a3e0a307ec5ca9dc28d4f41842743a513e.jpg",
+      "original_rel_path": "32b0de1f564a4c8fdd54c264b26b24a3e0a307ec5ca9dc28d4f41842743a513e.jpg",
+      "friendly_name": "figure_76.jpg",
+      "abs_path": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\images\\figure_76.jpg",
+      "index": 76
+    },
+    "32d1f7e2ade6f76ba92a2432a7e6d67ca50ac4b7c63129cf7f263cea8af1a614.jpg": {
+      "original_name": "32d1f7e2ade6f76ba92a2432a7e6d67ca50ac4b7c63129cf7f263cea8af1a614.jpg",
+      "original_rel_path": "32d1f7e2ade6f76ba92a2432a7e6d67ca50ac4b7c63129cf7f263cea8af1a614.jpg",
+      "friendly_name": "figure_77.jpg",
+      "abs_path": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\images\\figure_77.jpg",
+      "index": 77
+    },
+    "3314d912c74f7d7273a5db32df5da28dd5b045b5063512f030df3386d3ffeb54.jpg": {
+      "original_name": "3314d912c74f7d7273a5db32df5da28dd5b045b5063512f030df3386d3ffeb54.jpg",
+      "original_rel_path": "3314d912c74f7d7273a5db32df5da28dd5b045b5063512f030df3386d3ffeb54.jpg",
+      "friendly_name": "figure_78.jpg",
+      "abs_path": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\images\\figure_78.jpg",
+      "index": 78
+    },
+    "3394b6d4a91db428f24bfabf20121e0f50716283ea14ee4cc81590bf3376e443.jpg": {
+      "original_name": "3394b6d4a91db428f24bfabf20121e0f50716283ea14ee4cc81590bf3376e443.jpg",
+      "original_rel_path": "3394b6d4a91db428f24bfabf20121e0f50716283ea14ee4cc81590bf3376e443.jpg",
+      "friendly_name": "figure_79.jpg",
+      "abs_path": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\images\\figure_79.jpg",
+      "index": 79
+    },
+    "368aa84e828fe0de8a9e785960bd7fe535a212abc0c5ef7d682ded749aae28e5.jpg": {
+      "original_name": "368aa84e828fe0de8a9e785960bd7fe535a212abc0c5ef7d682ded749aae28e5.jpg",
+      "original_rel_path": "368aa84e828fe0de8a9e785960bd7fe535a212abc0c5ef7d682ded749aae28e5.jpg",
+      "friendly_name": "figure_80.jpg",
+      "abs_path": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\images\\figure_80.jpg",
+      "index": 80
+    },
+    "377a5aabad94d8fda234e7f7b8b963314419bda1e5dd4719f029a3795a3a6247.jpg": {
+      "original_name": "377a5aabad94d8fda234e7f7b8b963314419bda1e5dd4719f029a3795a3a6247.jpg",
+      "original_rel_path": "377a5aabad94d8fda234e7f7b8b963314419bda1e5dd4719f029a3795a3a6247.jpg",
+      "friendly_name": "figure_81.jpg",
+      "abs_path": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\images\\figure_81.jpg",
+      "index": 81
+    },
+    "37f845968bd0a75a0332920c365a6be3d9c56ffa69e2e227b8202f270600450d.jpg": {
+      "original_name": "37f845968bd0a75a0332920c365a6be3d9c56ffa69e2e227b8202f270600450d.jpg",
+      "original_rel_path": "37f845968bd0a75a0332920c365a6be3d9c56ffa69e2e227b8202f270600450d.jpg",
+      "friendly_name": "figure_82.jpg",
+      "abs_path": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\images\\figure_82.jpg",
+      "index": 82
+    },
+    "3810a547beffcbddf51993143f3251fcf6e42ea99e499491292bc2605ba5f379.jpg": {
+      "original_name": "3810a547beffcbddf51993143f3251fcf6e42ea99e499491292bc2605ba5f379.jpg",
+      "original_rel_path": "3810a547beffcbddf51993143f3251fcf6e42ea99e499491292bc2605ba5f379.jpg",
+      "friendly_name": "figure_83.jpg",
+      "abs_path": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\images\\figure_83.jpg",
+      "index": 83
+    },
+    "3926d77415b566517e5c6fedbadc11888309017de00094cec75d89630a508514.jpg": {
+      "original_name": "3926d77415b566517e5c6fedbadc11888309017de00094cec75d89630a508514.jpg",
+      "original_rel_path": "3926d77415b566517e5c6fedbadc11888309017de00094cec75d89630a508514.jpg",
+      "friendly_name": "figure_84.jpg",
+      "abs_path": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\images\\figure_84.jpg",
+      "index": 84
+    },
+    "39fac8d36a3a2e72352ef81735f5c494157191ac6da9e58b9b420eeb81e49de3.jpg": {
+      "original_name": "39fac8d36a3a2e72352ef81735f5c494157191ac6da9e58b9b420eeb81e49de3.jpg",
+      "original_rel_path": "39fac8d36a3a2e72352ef81735f5c494157191ac6da9e58b9b420eeb81e49de3.jpg",
+      "friendly_name": "figure_85.jpg",
+      "abs_path": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\images\\figure_85.jpg",
+      "index": 85
+    },
+    "3a710f4dc8d97fade3b67d6dbadc1283390203e117b0ad42eb1149f0e4a4c0a3.jpg": {
+      "original_name": "3a710f4dc8d97fade3b67d6dbadc1283390203e117b0ad42eb1149f0e4a4c0a3.jpg",
+      "original_rel_path": "3a710f4dc8d97fade3b67d6dbadc1283390203e117b0ad42eb1149f0e4a4c0a3.jpg",
+      "friendly_name": "figure_86.jpg",
+      "abs_path": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\images\\figure_86.jpg",
+      "index": 86
+    },
+    "3aa118c046856bbebafac80f1f49fbe769b9fac5dc0c9ea75463542c965ce182.jpg": {
+      "original_name": "3aa118c046856bbebafac80f1f49fbe769b9fac5dc0c9ea75463542c965ce182.jpg",
+      "original_rel_path": "3aa118c046856bbebafac80f1f49fbe769b9fac5dc0c9ea75463542c965ce182.jpg",
+      "friendly_name": "figure_87.jpg",
+      "abs_path": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\images\\figure_87.jpg",
+      "index": 87
+    },
+    "3ba69d74bd164327fa099e2a74915c315984a3b2fd2ed3b869c1a1b76744364e.jpg": {
+      "original_name": "3ba69d74bd164327fa099e2a74915c315984a3b2fd2ed3b869c1a1b76744364e.jpg",
+      "original_rel_path": "3ba69d74bd164327fa099e2a74915c315984a3b2fd2ed3b869c1a1b76744364e.jpg",
+      "friendly_name": "figure_88.jpg",
+      "abs_path": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\images\\figure_88.jpg",
+      "index": 88
+    },
+    "3bdb1902d79766f863515be6beac95c5fd5df50197cfacf410e1ab4c1ff8a9ce.jpg": {
+      "original_name": "3bdb1902d79766f863515be6beac95c5fd5df50197cfacf410e1ab4c1ff8a9ce.jpg",
+      "original_rel_path": "3bdb1902d79766f863515be6beac95c5fd5df50197cfacf410e1ab4c1ff8a9ce.jpg",
+      "friendly_name": "figure_89.jpg",
+      "abs_path": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\images\\figure_89.jpg",
+      "index": 89
+    },
+    "3c4b24ca278379e8c7bda285e41084e8c576ffc0d412e329a43ac66905bd576d.jpg": {
+      "original_name": "3c4b24ca278379e8c7bda285e41084e8c576ffc0d412e329a43ac66905bd576d.jpg",
+      "original_rel_path": "3c4b24ca278379e8c7bda285e41084e8c576ffc0d412e329a43ac66905bd576d.jpg",
+      "friendly_name": "figure_90.jpg",
+      "abs_path": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\images\\figure_90.jpg",
+      "index": 90
+    },
+    "3d0d25c4183af143a66113268ce0621e567e76a57ca59b1d8271bfbb3a28bb09.jpg": {
+      "original_name": "3d0d25c4183af143a66113268ce0621e567e76a57ca59b1d8271bfbb3a28bb09.jpg",
+      "original_rel_path": "3d0d25c4183af143a66113268ce0621e567e76a57ca59b1d8271bfbb3a28bb09.jpg",
+      "friendly_name": "figure_91.jpg",
+      "abs_path": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\images\\figure_91.jpg",
+      "index": 91
+    },
+    "3d992670e92f9a834cc1dc6d3841f4aca8187ca7490ee0299d2e68daea788f59.jpg": {
+      "original_name": "3d992670e92f9a834cc1dc6d3841f4aca8187ca7490ee0299d2e68daea788f59.jpg",
+      "original_rel_path": "3d992670e92f9a834cc1dc6d3841f4aca8187ca7490ee0299d2e68daea788f59.jpg",
+      "friendly_name": "figure_92.jpg",
+      "abs_path": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\images\\figure_92.jpg",
+      "index": 92
+    },
+    "3dabf29f076b8af1badcef363e18d3b9f8349b73ddd3873a98447aeca36af35d.jpg": {
+      "original_name": "3dabf29f076b8af1badcef363e18d3b9f8349b73ddd3873a98447aeca36af35d.jpg",
+      "original_rel_path": "3dabf29f076b8af1badcef363e18d3b9f8349b73ddd3873a98447aeca36af35d.jpg",
+      "friendly_name": "figure_93.jpg",
+      "abs_path": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\images\\figure_93.jpg",
+      "index": 93
+    },
+    "3e5bf224dec13c310cdf6e3db7f1a241b487e36347dc406c2fee9c3ea7567627.jpg": {
+      "original_name": "3e5bf224dec13c310cdf6e3db7f1a241b487e36347dc406c2fee9c3ea7567627.jpg",
+      "original_rel_path": "3e5bf224dec13c310cdf6e3db7f1a241b487e36347dc406c2fee9c3ea7567627.jpg",
+      "friendly_name": "figure_94.jpg",
+      "abs_path": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\images\\figure_94.jpg",
+      "index": 94
+    },
+    "3f1ac4ee8b4aa2d47baa0fae561bd1a6e9b90bcd7e4ac998445511f2c863770d.jpg": {
+      "original_name": "3f1ac4ee8b4aa2d47baa0fae561bd1a6e9b90bcd7e4ac998445511f2c863770d.jpg",
+      "original_rel_path": "3f1ac4ee8b4aa2d47baa0fae561bd1a6e9b90bcd7e4ac998445511f2c863770d.jpg",
+      "friendly_name": "figure_95.jpg",
+      "abs_path": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\images\\figure_95.jpg",
+      "index": 95
+    },
+    "4057e38629ef4a31453aaef5ed11cc46bbf00b2165337dc5ac63d37c93c9d391.jpg": {
+      "original_name": "4057e38629ef4a31453aaef5ed11cc46bbf00b2165337dc5ac63d37c93c9d391.jpg",
+      "original_rel_path": "4057e38629ef4a31453aaef5ed11cc46bbf00b2165337dc5ac63d37c93c9d391.jpg",
+      "friendly_name": "figure_96.jpg",
+      "abs_path": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\images\\figure_96.jpg",
+      "index": 96
+    },
+    "4156aae7eec8b1dd49686c9d30f4eb811d506210d4f2bdf8dd4150c30ee4f9e0.jpg": {
+      "original_name": "4156aae7eec8b1dd49686c9d30f4eb811d506210d4f2bdf8dd4150c30ee4f9e0.jpg",
+      "original_rel_path": "4156aae7eec8b1dd49686c9d30f4eb811d506210d4f2bdf8dd4150c30ee4f9e0.jpg",
+      "friendly_name": "figure_97.jpg",
+      "abs_path": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\images\\figure_97.jpg",
+      "index": 97
+    },
+    "41644b563d143d196d858c308cd8c172eef50a1e6e9ff8b1eae8f73b299f0f21.jpg": {
+      "original_name": "41644b563d143d196d858c308cd8c172eef50a1e6e9ff8b1eae8f73b299f0f21.jpg",
+      "original_rel_path": "41644b563d143d196d858c308cd8c172eef50a1e6e9ff8b1eae8f73b299f0f21.jpg",
+      "friendly_name": "figure_98.jpg",
+      "abs_path": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\images\\figure_98.jpg",
+      "index": 98
+    },
+    "42242f1b4744fd5bcd960a34259654777ee85e58064f8c273c5a74a55f095e6f.jpg": {
+      "original_name": "42242f1b4744fd5bcd960a34259654777ee85e58064f8c273c5a74a55f095e6f.jpg",
+      "original_rel_path": "42242f1b4744fd5bcd960a34259654777ee85e58064f8c273c5a74a55f095e6f.jpg",
+      "friendly_name": "figure_99.jpg",
+      "abs_path": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\images\\figure_99.jpg",
+      "index": 99
+    },
+    "432b5af2672d1d09ebc0df875b3ce0c19ef2160b4ad767d98878a0c2b00e0730.jpg": {
+      "original_name": "432b5af2672d1d09ebc0df875b3ce0c19ef2160b4ad767d98878a0c2b00e0730.jpg",
+      "original_rel_path": "432b5af2672d1d09ebc0df875b3ce0c19ef2160b4ad767d98878a0c2b00e0730.jpg",
+      "friendly_name": "figure_100.jpg",
+      "abs_path": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\images\\figure_100.jpg",
+      "index": 100
+    },
+    "43ab43f865236a255b7a50a03839e0234efce244a38da6aa5a6ded3af5afbad6.jpg": {
+      "original_name": "43ab43f865236a255b7a50a03839e0234efce244a38da6aa5a6ded3af5afbad6.jpg",
+      "original_rel_path": "43ab43f865236a255b7a50a03839e0234efce244a38da6aa5a6ded3af5afbad6.jpg",
+      "friendly_name": "figure_101.jpg",
+      "abs_path": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\images\\figure_101.jpg",
+      "index": 101
+    },
+    "43e589d592a0be1495212a853dd021a52cafc733cc3a0631dcdb7f77313bd004.jpg": {
+      "original_name": "43e589d592a0be1495212a853dd021a52cafc733cc3a0631dcdb7f77313bd004.jpg",
+      "original_rel_path": "43e589d592a0be1495212a853dd021a52cafc733cc3a0631dcdb7f77313bd004.jpg",
+      "friendly_name": "figure_102.jpg",
+      "abs_path": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\images\\figure_102.jpg",
+      "index": 102
+    },
+    "43f9a63d5730c61646b3e7d45c8a3c779b9965eb0c76d6eb4d101a0df8e19c48.jpg": {
+      "original_name": "43f9a63d5730c61646b3e7d45c8a3c779b9965eb0c76d6eb4d101a0df8e19c48.jpg",
+      "original_rel_path": "43f9a63d5730c61646b3e7d45c8a3c779b9965eb0c76d6eb4d101a0df8e19c48.jpg",
+      "friendly_name": "figure_103.jpg",
+      "abs_path": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\images\\figure_103.jpg",
+      "index": 103
+    },
+    "43fcba36f1c66f38c8a4745cc5a4d2d4d9e8b862a947dadc24de0950ec9f3ab9.jpg": {
+      "original_name": "43fcba36f1c66f38c8a4745cc5a4d2d4d9e8b862a947dadc24de0950ec9f3ab9.jpg",
+      "original_rel_path": "43fcba36f1c66f38c8a4745cc5a4d2d4d9e8b862a947dadc24de0950ec9f3ab9.jpg",
+      "friendly_name": "figure_104.jpg",
+      "abs_path": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\images\\figure_104.jpg",
+      "index": 104
+    },
+    "449c623c10502cd649c402c07266720127ac11fbceeec398393fd9fef105e8b7.jpg": {
+      "original_name": "449c623c10502cd649c402c07266720127ac11fbceeec398393fd9fef105e8b7.jpg",
+      "original_rel_path": "449c623c10502cd649c402c07266720127ac11fbceeec398393fd9fef105e8b7.jpg",
+      "friendly_name": "figure_105.jpg",
+      "abs_path": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\images\\figure_105.jpg",
+      "index": 105
+    },
+    "44ba1f97d7511087bf0636e7be088838d5f3849213f968223dc1a3da6b1bef00.jpg": {
+      "original_name": "44ba1f97d7511087bf0636e7be088838d5f3849213f968223dc1a3da6b1bef00.jpg",
+      "original_rel_path": "44ba1f97d7511087bf0636e7be088838d5f3849213f968223dc1a3da6b1bef00.jpg",
+      "friendly_name": "figure_106.jpg",
+      "abs_path": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\images\\figure_106.jpg",
+      "index": 106
+    },
+    "454fdcb1f9f9da57ae603af78aa9c50918dac5171edc16185875f94efcfae0cb.jpg": {
+      "original_name": "454fdcb1f9f9da57ae603af78aa9c50918dac5171edc16185875f94efcfae0cb.jpg",
+      "original_rel_path": "454fdcb1f9f9da57ae603af78aa9c50918dac5171edc16185875f94efcfae0cb.jpg",
+      "friendly_name": "figure_107.jpg",
+      "abs_path": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\images\\figure_107.jpg",
+      "index": 107
+    },
+    "4621b47f2e4ec2f9be5964c254d258ebf6f8b39315ca8846c4f5d48f352ff3a2.jpg": {
+      "original_name": "4621b47f2e4ec2f9be5964c254d258ebf6f8b39315ca8846c4f5d48f352ff3a2.jpg",
+      "original_rel_path": "4621b47f2e4ec2f9be5964c254d258ebf6f8b39315ca8846c4f5d48f352ff3a2.jpg",
+      "friendly_name": "figure_108.jpg",
+      "abs_path": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\images\\figure_108.jpg",
+      "index": 108
+    },
+    "469a51e6d9eb911c42e89d41e239aade1b0288971d8383f92072df1b188acfd7.jpg": {
+      "original_name": "469a51e6d9eb911c42e89d41e239aade1b0288971d8383f92072df1b188acfd7.jpg",
+      "original_rel_path": "469a51e6d9eb911c42e89d41e239aade1b0288971d8383f92072df1b188acfd7.jpg",
+      "friendly_name": "figure_109.jpg",
+      "abs_path": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\images\\figure_109.jpg",
+      "index": 109
+    },
+    "4700831bca626d4aaebde63f35b8202cdca0ebe975f6064d7c4047a45ca803e0.jpg": {
+      "original_name": "4700831bca626d4aaebde63f35b8202cdca0ebe975f6064d7c4047a45ca803e0.jpg",
+      "original_rel_path": "4700831bca626d4aaebde63f35b8202cdca0ebe975f6064d7c4047a45ca803e0.jpg",
+      "friendly_name": "figure_110.jpg",
+      "abs_path": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\images\\figure_110.jpg",
+      "index": 110
+    },
+    "4821f4554c05d48890246bb43b7a643284b482c4ec4caf116ad750a909d30d9d.jpg": {
+      "original_name": "4821f4554c05d48890246bb43b7a643284b482c4ec4caf116ad750a909d30d9d.jpg",
+      "original_rel_path": "4821f4554c05d48890246bb43b7a643284b482c4ec4caf116ad750a909d30d9d.jpg",
+      "friendly_name": "figure_111.jpg",
+      "abs_path": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\images\\figure_111.jpg",
+      "index": 111
+    },
+    "483ab048455e6cdccd261611ebe26c4de70c58640535561415c7012b8db9e216.jpg": {
+      "original_name": "483ab048455e6cdccd261611ebe26c4de70c58640535561415c7012b8db9e216.jpg",
+      "original_rel_path": "483ab048455e6cdccd261611ebe26c4de70c58640535561415c7012b8db9e216.jpg",
+      "friendly_name": "figure_112.jpg",
+      "abs_path": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\images\\figure_112.jpg",
+      "index": 112
+    },
+    "4893a116f71d3c82d6e978aab0e1a6783c437e5b16e520e296edf13309a936b1.jpg": {
+      "original_name": "4893a116f71d3c82d6e978aab0e1a6783c437e5b16e520e296edf13309a936b1.jpg",
+      "original_rel_path": "4893a116f71d3c82d6e978aab0e1a6783c437e5b16e520e296edf13309a936b1.jpg",
+      "friendly_name": "figure_113.jpg",
+      "abs_path": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\images\\figure_113.jpg",
+      "index": 113
+    },
+    "4900aea917d4ff8ba54d200e8bdbe712db93c8b6158410b4f49fe4f24bc02685.jpg": {
+      "original_name": "4900aea917d4ff8ba54d200e8bdbe712db93c8b6158410b4f49fe4f24bc02685.jpg",
+      "original_rel_path": "4900aea917d4ff8ba54d200e8bdbe712db93c8b6158410b4f49fe4f24bc02685.jpg",
+      "friendly_name": "figure_114.jpg",
+      "abs_path": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\images\\figure_114.jpg",
+      "index": 114
+    },
+    "4a2e58ae7704920e118d8a3f4b38092da46d4754ac03bec5dbf6f46724fb7e35.jpg": {
+      "original_name": "4a2e58ae7704920e118d8a3f4b38092da46d4754ac03bec5dbf6f46724fb7e35.jpg",
+      "original_rel_path": "4a2e58ae7704920e118d8a3f4b38092da46d4754ac03bec5dbf6f46724fb7e35.jpg",
+      "friendly_name": "figure_115.jpg",
+      "abs_path": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\images\\figure_115.jpg",
+      "index": 115
+    },
+    "4b3ab81146ee196a3e0438a4dd3cc109b5af652d8a4aca6e428ba08278f3070e.jpg": {
+      "original_name": "4b3ab81146ee196a3e0438a4dd3cc109b5af652d8a4aca6e428ba08278f3070e.jpg",
+      "original_rel_path": "4b3ab81146ee196a3e0438a4dd3cc109b5af652d8a4aca6e428ba08278f3070e.jpg",
+      "friendly_name": "figure_116.jpg",
+      "abs_path": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\images\\figure_116.jpg",
+      "index": 116
+    },
+    "4bc3bafc7d5a6851be6c6f5812ee7ec05766e666b59941b24c362e23e038bdc3.jpg": {
+      "original_name": "4bc3bafc7d5a6851be6c6f5812ee7ec05766e666b59941b24c362e23e038bdc3.jpg",
+      "original_rel_path": "4bc3bafc7d5a6851be6c6f5812ee7ec05766e666b59941b24c362e23e038bdc3.jpg",
+      "friendly_name": "figure_117.jpg",
+      "abs_path": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\images\\figure_117.jpg",
+      "index": 117
+    },
+    "4bca9ed681e40f115f9d63f41f2788090efa9e50f83ce0b62b7b86754cf6e494.jpg": {
+      "original_name": "4bca9ed681e40f115f9d63f41f2788090efa9e50f83ce0b62b7b86754cf6e494.jpg",
+      "original_rel_path": "4bca9ed681e40f115f9d63f41f2788090efa9e50f83ce0b62b7b86754cf6e494.jpg",
+      "friendly_name": "figure_118.jpg",
+      "abs_path": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\images\\figure_118.jpg",
+      "index": 118
+    },
+    "4c79eb0eeb2e66857f875bf8cf7592da82804d638e5760223b1cb8df599b702a.jpg": {
+      "original_name": "4c79eb0eeb2e66857f875bf8cf7592da82804d638e5760223b1cb8df599b702a.jpg",
+      "original_rel_path": "4c79eb0eeb2e66857f875bf8cf7592da82804d638e5760223b1cb8df599b702a.jpg",
+      "friendly_name": "figure_119.jpg",
+      "abs_path": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\images\\figure_119.jpg",
+      "index": 119
+    },
+    "4ca605f595280efb1d92c0217413c5f3698637c0699b1b29441f5e3720e40d1f.jpg": {
+      "original_name": "4ca605f595280efb1d92c0217413c5f3698637c0699b1b29441f5e3720e40d1f.jpg",
+      "original_rel_path": "4ca605f595280efb1d92c0217413c5f3698637c0699b1b29441f5e3720e40d1f.jpg",
+      "friendly_name": "figure_120.jpg",
+      "abs_path": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\images\\figure_120.jpg",
+      "index": 120
+    },
+    "4cb5a1f942d10d6354a82cafdd7f2b3da9fe0cd64191f450eaee3e7134c5d99c.jpg": {
+      "original_name": "4cb5a1f942d10d6354a82cafdd7f2b3da9fe0cd64191f450eaee3e7134c5d99c.jpg",
+      "original_rel_path": "4cb5a1f942d10d6354a82cafdd7f2b3da9fe0cd64191f450eaee3e7134c5d99c.jpg",
+      "friendly_name": "figure_121.jpg",
+      "abs_path": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\images\\figure_121.jpg",
+      "index": 121
+    },
+    "4cce4ab4acf30536f1bcf5bc6b2377dc0e58539367148c5120d43b12e1007cca.jpg": {
+      "original_name": "4cce4ab4acf30536f1bcf5bc6b2377dc0e58539367148c5120d43b12e1007cca.jpg",
+      "original_rel_path": "4cce4ab4acf30536f1bcf5bc6b2377dc0e58539367148c5120d43b12e1007cca.jpg",
+      "friendly_name": "figure_122.jpg",
+      "abs_path": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\images\\figure_122.jpg",
+      "index": 122
+    },
+    "4dcdbc4fc0d20d5cf496c008cfb431bb5c67c64ed990a78b07f85a7204168475.jpg": {
+      "original_name": "4dcdbc4fc0d20d5cf496c008cfb431bb5c67c64ed990a78b07f85a7204168475.jpg",
+      "original_rel_path": "4dcdbc4fc0d20d5cf496c008cfb431bb5c67c64ed990a78b07f85a7204168475.jpg",
+      "friendly_name": "figure_123.jpg",
+      "abs_path": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\images\\figure_123.jpg",
+      "index": 123
+    },
+    "4eca038ca0d09de5fc39f56e9b5fd1043e178c4d60092b785407281664795510.jpg": {
+      "original_name": "4eca038ca0d09de5fc39f56e9b5fd1043e178c4d60092b785407281664795510.jpg",
+      "original_rel_path": "4eca038ca0d09de5fc39f56e9b5fd1043e178c4d60092b785407281664795510.jpg",
+      "friendly_name": "figure_124.jpg",
+      "abs_path": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\images\\figure_124.jpg",
+      "index": 124
+    },
+    "4f761da3a167efe6eab0f4e5685220d6a582a6bb78933eea327ea77de171930f.jpg": {
+      "original_name": "4f761da3a167efe6eab0f4e5685220d6a582a6bb78933eea327ea77de171930f.jpg",
+      "original_rel_path": "4f761da3a167efe6eab0f4e5685220d6a582a6bb78933eea327ea77de171930f.jpg",
+      "friendly_name": "figure_125.jpg",
+      "abs_path": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\images\\figure_125.jpg",
+      "index": 125
+    },
+    "4fbb57f471444a3819935f28839fdee6f784182be630044483c7703f51874f4d.jpg": {
+      "original_name": "4fbb57f471444a3819935f28839fdee6f784182be630044483c7703f51874f4d.jpg",
+      "original_rel_path": "4fbb57f471444a3819935f28839fdee6f784182be630044483c7703f51874f4d.jpg",
+      "friendly_name": "figure_126.jpg",
+      "abs_path": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\images\\figure_126.jpg",
+      "index": 126
+    },
+    "50403aaf53e0a3a6be2a24d2c5d45c78b237c31630d2bd836ba85b1b4732bf49.jpg": {
+      "original_name": "50403aaf53e0a3a6be2a24d2c5d45c78b237c31630d2bd836ba85b1b4732bf49.jpg",
+      "original_rel_path": "50403aaf53e0a3a6be2a24d2c5d45c78b237c31630d2bd836ba85b1b4732bf49.jpg",
+      "friendly_name": "figure_127.jpg",
+      "abs_path": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\images\\figure_127.jpg",
+      "index": 127
+    },
+    "508a8d04766878c677bbad911a78729979804e978f7f102820fd384294c1c069.jpg": {
+      "original_name": "508a8d04766878c677bbad911a78729979804e978f7f102820fd384294c1c069.jpg",
+      "original_rel_path": "508a8d04766878c677bbad911a78729979804e978f7f102820fd384294c1c069.jpg",
+      "friendly_name": "figure_128.jpg",
+      "abs_path": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\images\\figure_128.jpg",
+      "index": 128
+    },
+    "50ed12d00112d3328a0205d2f4bf71ac329851ef4cc6ae781c279542ffb65cd3.jpg": {
+      "original_name": "50ed12d00112d3328a0205d2f4bf71ac329851ef4cc6ae781c279542ffb65cd3.jpg",
+      "original_rel_path": "50ed12d00112d3328a0205d2f4bf71ac329851ef4cc6ae781c279542ffb65cd3.jpg",
+      "friendly_name": "figure_129.jpg",
+      "abs_path": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\images\\figure_129.jpg",
+      "index": 129
+    },
+    "5173f836a403271cdcb52c3f48733cc44850028dea726cb92bb754b8789912ef.jpg": {
+      "original_name": "5173f836a403271cdcb52c3f48733cc44850028dea726cb92bb754b8789912ef.jpg",
+      "original_rel_path": "5173f836a403271cdcb52c3f48733cc44850028dea726cb92bb754b8789912ef.jpg",
+      "friendly_name": "figure_130.jpg",
+      "abs_path": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\images\\figure_130.jpg",
+      "index": 130
+    },
+    "51785f3aa22ca1f6cd96017c5a7f263172c3e03cb54b6617d5a711312ddf8886.jpg": {
+      "original_name": "51785f3aa22ca1f6cd96017c5a7f263172c3e03cb54b6617d5a711312ddf8886.jpg",
+      "original_rel_path": "51785f3aa22ca1f6cd96017c5a7f263172c3e03cb54b6617d5a711312ddf8886.jpg",
+      "friendly_name": "figure_131.jpg",
+      "abs_path": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\images\\figure_131.jpg",
+      "index": 131
+    },
+    "51832ee91a7cbfb756e1f3060c50ffd1183a219b0f4d40bbddf55575b6f96adb.jpg": {
+      "original_name": "51832ee91a7cbfb756e1f3060c50ffd1183a219b0f4d40bbddf55575b6f96adb.jpg",
+      "original_rel_path": "51832ee91a7cbfb756e1f3060c50ffd1183a219b0f4d40bbddf55575b6f96adb.jpg",
+      "friendly_name": "figure_132.jpg",
+      "abs_path": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\images\\figure_132.jpg",
+      "index": 132
+    },
+    "51d9bda1d8644a57468071ca93fff6cb4e12ad5ba26a5da9f977d41325cc2b42.jpg": {
+      "original_name": "51d9bda1d8644a57468071ca93fff6cb4e12ad5ba26a5da9f977d41325cc2b42.jpg",
+      "original_rel_path": "51d9bda1d8644a57468071ca93fff6cb4e12ad5ba26a5da9f977d41325cc2b42.jpg",
+      "friendly_name": "figure_133.jpg",
+      "abs_path": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\images\\figure_133.jpg",
+      "index": 133
+    },
+    "521d45d375cba7579b14e76dfb131ec4d8de729ca16addaa541287e9e1cfd778.jpg": {
+      "original_name": "521d45d375cba7579b14e76dfb131ec4d8de729ca16addaa541287e9e1cfd778.jpg",
+      "original_rel_path": "521d45d375cba7579b14e76dfb131ec4d8de729ca16addaa541287e9e1cfd778.jpg",
+      "friendly_name": "figure_134.jpg",
+      "abs_path": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\images\\figure_134.jpg",
+      "index": 134
+    },
+    "549d73b6ce0e6484dd9c5051723638b0420b5f517fd22be9f5bcc3886a7facbd.jpg": {
+      "original_name": "549d73b6ce0e6484dd9c5051723638b0420b5f517fd22be9f5bcc3886a7facbd.jpg",
+      "original_rel_path": "549d73b6ce0e6484dd9c5051723638b0420b5f517fd22be9f5bcc3886a7facbd.jpg",
+      "friendly_name": "figure_135.jpg",
+      "abs_path": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\images\\figure_135.jpg",
+      "index": 135
+    },
+    "5526f30d56bcc91efb4a4900191b7d93d51269395f2dc415e51e35e3ffdb962c.jpg": {
+      "original_name": "5526f30d56bcc91efb4a4900191b7d93d51269395f2dc415e51e35e3ffdb962c.jpg",
+      "original_rel_path": "5526f30d56bcc91efb4a4900191b7d93d51269395f2dc415e51e35e3ffdb962c.jpg",
+      "friendly_name": "figure_136.jpg",
+      "abs_path": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\images\\figure_136.jpg",
+      "index": 136
+    },
+    "560125a16438f762bb246b4c394d315b0b6e907917e843bee0ffe5401167a8a9.jpg": {
+      "original_name": "560125a16438f762bb246b4c394d315b0b6e907917e843bee0ffe5401167a8a9.jpg",
+      "original_rel_path": "560125a16438f762bb246b4c394d315b0b6e907917e843bee0ffe5401167a8a9.jpg",
+      "friendly_name": "figure_137.jpg",
+      "abs_path": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\images\\figure_137.jpg",
+      "index": 137
+    },
+    "56abdefe7d2de1a820bce0e1b85efdfa4cffb5374c6fba41a132d98ce3aec14c.jpg": {
+      "original_name": "56abdefe7d2de1a820bce0e1b85efdfa4cffb5374c6fba41a132d98ce3aec14c.jpg",
+      "original_rel_path": "56abdefe7d2de1a820bce0e1b85efdfa4cffb5374c6fba41a132d98ce3aec14c.jpg",
+      "friendly_name": "figure_138.jpg",
+      "abs_path": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\images\\figure_138.jpg",
+      "index": 138
+    },
+    "571e30dbb6214b3af2a7a6722a46f0366a3464c8b7d708ea7c58c5bde3878e06.jpg": {
+      "original_name": "571e30dbb6214b3af2a7a6722a46f0366a3464c8b7d708ea7c58c5bde3878e06.jpg",
+      "original_rel_path": "571e30dbb6214b3af2a7a6722a46f0366a3464c8b7d708ea7c58c5bde3878e06.jpg",
+      "friendly_name": "figure_139.jpg",
+      "abs_path": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\images\\figure_139.jpg",
+      "index": 139
+    },
+    "5751ebba7995afec9b661e8302593e2a38be821f5a3fc33b3e91c6f8cbe67a28.jpg": {
+      "original_name": "5751ebba7995afec9b661e8302593e2a38be821f5a3fc33b3e91c6f8cbe67a28.jpg",
+      "original_rel_path": "5751ebba7995afec9b661e8302593e2a38be821f5a3fc33b3e91c6f8cbe67a28.jpg",
+      "friendly_name": "figure_140.jpg",
+      "abs_path": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\images\\figure_140.jpg",
+      "index": 140
+    },
+    "577bd3d11c9aa05917549bfc6b797cfcd9d6ea81043b81256e90d8f63e876ceb.jpg": {
+      "original_name": "577bd3d11c9aa05917549bfc6b797cfcd9d6ea81043b81256e90d8f63e876ceb.jpg",
+      "original_rel_path": "577bd3d11c9aa05917549bfc6b797cfcd9d6ea81043b81256e90d8f63e876ceb.jpg",
+      "friendly_name": "figure_141.jpg",
+      "abs_path": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\images\\figure_141.jpg",
+      "index": 141
+    },
+    "580f8daf8fcd79de0951b9f551a577a5e6060da9331d174062796cabe1cbbec8.jpg": {
+      "original_name": "580f8daf8fcd79de0951b9f551a577a5e6060da9331d174062796cabe1cbbec8.jpg",
+      "original_rel_path": "580f8daf8fcd79de0951b9f551a577a5e6060da9331d174062796cabe1cbbec8.jpg",
+      "friendly_name": "figure_142.jpg",
+      "abs_path": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\images\\figure_142.jpg",
+      "index": 142
+    },
+    "592f879d9f96efa16109b8c817961c2d479fb3355f24327eff496edce91d0586.jpg": {
+      "original_name": "592f879d9f96efa16109b8c817961c2d479fb3355f24327eff496edce91d0586.jpg",
+      "original_rel_path": "592f879d9f96efa16109b8c817961c2d479fb3355f24327eff496edce91d0586.jpg",
+      "friendly_name": "figure_143.jpg",
+      "abs_path": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\images\\figure_143.jpg",
+      "index": 143
+    },
+    "5a746e6b584f03123c805ba0fab444da768199e2e57080600cfb723e816640a8.jpg": {
+      "original_name": "5a746e6b584f03123c805ba0fab444da768199e2e57080600cfb723e816640a8.jpg",
+      "original_rel_path": "5a746e6b584f03123c805ba0fab444da768199e2e57080600cfb723e816640a8.jpg",
+      "friendly_name": "figure_144.jpg",
+      "abs_path": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\images\\figure_144.jpg",
+      "index": 144
+    },
+    "5b01a98dc12d3c4496f86f5b7909cd0cc0a8aeac2e57db542af7cdf416a4e59d.jpg": {
+      "original_name": "5b01a98dc12d3c4496f86f5b7909cd0cc0a8aeac2e57db542af7cdf416a4e59d.jpg",
+      "original_rel_path": "5b01a98dc12d3c4496f86f5b7909cd0cc0a8aeac2e57db542af7cdf416a4e59d.jpg",
+      "friendly_name": "figure_145.jpg",
+      "abs_path": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\images\\figure_145.jpg",
+      "index": 145
+    },
+    "5bbecc5b4817c0dd56e75e4cca2e0ad56411c2bf53ec75fac4dad2887c8b15b3.jpg": {
+      "original_name": "5bbecc5b4817c0dd56e75e4cca2e0ad56411c2bf53ec75fac4dad2887c8b15b3.jpg",
+      "original_rel_path": "5bbecc5b4817c0dd56e75e4cca2e0ad56411c2bf53ec75fac4dad2887c8b15b3.jpg",
+      "friendly_name": "figure_146.jpg",
+      "abs_path": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\images\\figure_146.jpg",
+      "index": 146
+    },
+    "5bf0f98b73e195003cc0c20a0001d933590b1a4b78f9405b86708f9ed218c374.jpg": {
+      "original_name": "5bf0f98b73e195003cc0c20a0001d933590b1a4b78f9405b86708f9ed218c374.jpg",
+      "original_rel_path": "5bf0f98b73e195003cc0c20a0001d933590b1a4b78f9405b86708f9ed218c374.jpg",
+      "friendly_name": "figure_147.jpg",
+      "abs_path": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\images\\figure_147.jpg",
+      "index": 147
+    },
+    "5c1328e7e3c7f15884bc176e15516dcec51b05a81fd6b20cf835b948190afd13.jpg": {
+      "original_name": "5c1328e7e3c7f15884bc176e15516dcec51b05a81fd6b20cf835b948190afd13.jpg",
+      "original_rel_path": "5c1328e7e3c7f15884bc176e15516dcec51b05a81fd6b20cf835b948190afd13.jpg",
+      "friendly_name": "figure_148.jpg",
+      "abs_path": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\images\\figure_148.jpg",
+      "index": 148
+    },
+    "5c7d8ec91a77f2739bb407c90dd7116bb2c41ae87aa9212bea27a856359f8af0.jpg": {
+      "original_name": "5c7d8ec91a77f2739bb407c90dd7116bb2c41ae87aa9212bea27a856359f8af0.jpg",
+      "original_rel_path": "5c7d8ec91a77f2739bb407c90dd7116bb2c41ae87aa9212bea27a856359f8af0.jpg",
+      "friendly_name": "figure_149.jpg",
+      "abs_path": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\images\\figure_149.jpg",
+      "index": 149
+    },
+    "5d257d650cb3e801030ebe154bb416c2a65192ebabf79112599da67f734f6b47.jpg": {
+      "original_name": "5d257d650cb3e801030ebe154bb416c2a65192ebabf79112599da67f734f6b47.jpg",
+      "original_rel_path": "5d257d650cb3e801030ebe154bb416c2a65192ebabf79112599da67f734f6b47.jpg",
+      "friendly_name": "figure_150.jpg",
+      "abs_path": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\images\\figure_150.jpg",
+      "index": 150
+    },
+    "5f1ab0ff74b982434ea5b36e0caaec5c1b0dcd183e1b96613a57431edf2b1365.jpg": {
+      "original_name": "5f1ab0ff74b982434ea5b36e0caaec5c1b0dcd183e1b96613a57431edf2b1365.jpg",
+      "original_rel_path": "5f1ab0ff74b982434ea5b36e0caaec5c1b0dcd183e1b96613a57431edf2b1365.jpg",
+      "friendly_name": "figure_151.jpg",
+      "abs_path": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\images\\figure_151.jpg",
+      "index": 151
+    },
+    "5fd448f2e00b431e061aabec4705dfa193b975663b4c06640533ccd4bfb454f8.jpg": {
+      "original_name": "5fd448f2e00b431e061aabec4705dfa193b975663b4c06640533ccd4bfb454f8.jpg",
+      "original_rel_path": "5fd448f2e00b431e061aabec4705dfa193b975663b4c06640533ccd4bfb454f8.jpg",
+      "friendly_name": "figure_152.jpg",
+      "abs_path": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\images\\figure_152.jpg",
+      "index": 152
+    },
+    "6163fd606147b0866f36bba72afacdb67d6d1639438d01c7b6f8dbae5cdf10a5.jpg": {
+      "original_name": "6163fd606147b0866f36bba72afacdb67d6d1639438d01c7b6f8dbae5cdf10a5.jpg",
+      "original_rel_path": "6163fd606147b0866f36bba72afacdb67d6d1639438d01c7b6f8dbae5cdf10a5.jpg",
+      "friendly_name": "figure_153.jpg",
+      "abs_path": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\images\\figure_153.jpg",
+      "index": 153
+    },
+    "61a4c0fc7aaf6c0e50372f897e011e6010a87b65d6972f69528d8d51509a71ea.jpg": {
+      "original_name": "61a4c0fc7aaf6c0e50372f897e011e6010a87b65d6972f69528d8d51509a71ea.jpg",
+      "original_rel_path": "61a4c0fc7aaf6c0e50372f897e011e6010a87b65d6972f69528d8d51509a71ea.jpg",
+      "friendly_name": "figure_154.jpg",
+      "abs_path": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\images\\figure_154.jpg",
+      "index": 154
+    },
+    "62a5da990462ad956baa0ab025d9bc0451408e39828a078d9744e6b6a08dc84d.jpg": {
+      "original_name": "62a5da990462ad956baa0ab025d9bc0451408e39828a078d9744e6b6a08dc84d.jpg",
+      "original_rel_path": "62a5da990462ad956baa0ab025d9bc0451408e39828a078d9744e6b6a08dc84d.jpg",
+      "friendly_name": "figure_155.jpg",
+      "abs_path": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\images\\figure_155.jpg",
+      "index": 155
+    },
+    "641112ddc930e16e8c8398be4f1e2640bc1f5cb06aa4b08ae8c760ac956a1913.jpg": {
+      "original_name": "641112ddc930e16e8c8398be4f1e2640bc1f5cb06aa4b08ae8c760ac956a1913.jpg",
+      "original_rel_path": "641112ddc930e16e8c8398be4f1e2640bc1f5cb06aa4b08ae8c760ac956a1913.jpg",
+      "friendly_name": "figure_156.jpg",
+      "abs_path": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\images\\figure_156.jpg",
+      "index": 156
+    },
+    "64c411ddfd30bc5f34a4d765d06f3d10ca2429fb8738c2dbbb8727ea75a3dd96.jpg": {
+      "original_name": "64c411ddfd30bc5f34a4d765d06f3d10ca2429fb8738c2dbbb8727ea75a3dd96.jpg",
+      "original_rel_path": "64c411ddfd30bc5f34a4d765d06f3d10ca2429fb8738c2dbbb8727ea75a3dd96.jpg",
+      "friendly_name": "figure_157.jpg",
+      "abs_path": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\images\\figure_157.jpg",
+      "index": 157
+    },
+    "64fbc45a46c45c7c1c70ba2b7ea2c6277ac64807743a534881e714529ed1811d.jpg": {
+      "original_name": "64fbc45a46c45c7c1c70ba2b7ea2c6277ac64807743a534881e714529ed1811d.jpg",
+      "original_rel_path": "64fbc45a46c45c7c1c70ba2b7ea2c6277ac64807743a534881e714529ed1811d.jpg",
+      "friendly_name": "figure_158.jpg",
+      "abs_path": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\images\\figure_158.jpg",
+      "index": 158
+    },
+    "653559d6100802110009235e1b8e2d41320b8dac28632befa69168a09f3446fc.jpg": {
+      "original_name": "653559d6100802110009235e1b8e2d41320b8dac28632befa69168a09f3446fc.jpg",
+      "original_rel_path": "653559d6100802110009235e1b8e2d41320b8dac28632befa69168a09f3446fc.jpg",
+      "friendly_name": "figure_159.jpg",
+      "abs_path": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\images\\figure_159.jpg",
+      "index": 159
+    },
+    "65b9a0c2b8bbdb571dc71a1e6f7598c77d04727b04b0476a3811477c81953f39.jpg": {
+      "original_name": "65b9a0c2b8bbdb571dc71a1e6f7598c77d04727b04b0476a3811477c81953f39.jpg",
+      "original_rel_path": "65b9a0c2b8bbdb571dc71a1e6f7598c77d04727b04b0476a3811477c81953f39.jpg",
+      "friendly_name": "figure_160.jpg",
+      "abs_path": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\images\\figure_160.jpg",
+      "index": 160
+    },
+    "6607cbe3c68d650b3d1094b1937f5abf261c0f6a7a0204c89eb26f2325d4cb93.jpg": {
+      "original_name": "6607cbe3c68d650b3d1094b1937f5abf261c0f6a7a0204c89eb26f2325d4cb93.jpg",
+      "original_rel_path": "6607cbe3c68d650b3d1094b1937f5abf261c0f6a7a0204c89eb26f2325d4cb93.jpg",
+      "friendly_name": "figure_161.jpg",
+      "abs_path": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\images\\figure_161.jpg",
+      "index": 161
+    },
+    "66a40b263db20ff7b785433e242b18287cde1bf91605369d969465b193f499bd.jpg": {
+      "original_name": "66a40b263db20ff7b785433e242b18287cde1bf91605369d969465b193f499bd.jpg",
+      "original_rel_path": "66a40b263db20ff7b785433e242b18287cde1bf91605369d969465b193f499bd.jpg",
+      "friendly_name": "figure_162.jpg",
+      "abs_path": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\images\\figure_162.jpg",
+      "index": 162
+    },
+    "66f556451fb4173d31501dec0711ecd088d78dd1ddc0fa85bce700e01fe153ff.jpg": {
+      "original_name": "66f556451fb4173d31501dec0711ecd088d78dd1ddc0fa85bce700e01fe153ff.jpg",
+      "original_rel_path": "66f556451fb4173d31501dec0711ecd088d78dd1ddc0fa85bce700e01fe153ff.jpg",
+      "friendly_name": "figure_163.jpg",
+      "abs_path": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\images\\figure_163.jpg",
+      "index": 163
+    },
+    "683b4aa8a1e225d8e291728cc2102059dd333870157b5348f9b7def3ba204469.jpg": {
+      "original_name": "683b4aa8a1e225d8e291728cc2102059dd333870157b5348f9b7def3ba204469.jpg",
+      "original_rel_path": "683b4aa8a1e225d8e291728cc2102059dd333870157b5348f9b7def3ba204469.jpg",
+      "friendly_name": "figure_164.jpg",
+      "abs_path": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\images\\figure_164.jpg",
+      "index": 164
+    },
+    "690f5be319da1b8535e29523adc2f86e05e7ff6f6c46aa6295c3948b6253aa74.jpg": {
+      "original_name": "690f5be319da1b8535e29523adc2f86e05e7ff6f6c46aa6295c3948b6253aa74.jpg",
+      "original_rel_path": "690f5be319da1b8535e29523adc2f86e05e7ff6f6c46aa6295c3948b6253aa74.jpg",
+      "friendly_name": "figure_165.jpg",
+      "abs_path": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\images\\figure_165.jpg",
+      "index": 165
+    },
+    "6924263eda98513ab6bd76762ee602d76cf88fd49f3dfb09d5fe10949f229cd5.jpg": {
+      "original_name": "6924263eda98513ab6bd76762ee602d76cf88fd49f3dfb09d5fe10949f229cd5.jpg",
+      "original_rel_path": "6924263eda98513ab6bd76762ee602d76cf88fd49f3dfb09d5fe10949f229cd5.jpg",
+      "friendly_name": "figure_166.jpg",
+      "abs_path": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\images\\figure_166.jpg",
+      "index": 166
+    },
+    "69a1cbc1a73fc11680b67e539f9e51c621fee067c4d2f22b418434dccea1570e.jpg": {
+      "original_name": "69a1cbc1a73fc11680b67e539f9e51c621fee067c4d2f22b418434dccea1570e.jpg",
+      "original_rel_path": "69a1cbc1a73fc11680b67e539f9e51c621fee067c4d2f22b418434dccea1570e.jpg",
+      "friendly_name": "figure_167.jpg",
+      "abs_path": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\images\\figure_167.jpg",
+      "index": 167
+    },
+    "69b6ce0cf18ae9ca6e47366489169322893821e0f4ff31afaf0bc43c4c3ebf29.jpg": {
+      "original_name": "69b6ce0cf18ae9ca6e47366489169322893821e0f4ff31afaf0bc43c4c3ebf29.jpg",
+      "original_rel_path": "69b6ce0cf18ae9ca6e47366489169322893821e0f4ff31afaf0bc43c4c3ebf29.jpg",
+      "friendly_name": "figure_168.jpg",
+      "abs_path": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\images\\figure_168.jpg",
+      "index": 168
+    },
+    "69e848c6becc5e297cbb7fea68942dc99cc1450feb255225521a30b5f4466a2d.jpg": {
+      "original_name": "69e848c6becc5e297cbb7fea68942dc99cc1450feb255225521a30b5f4466a2d.jpg",
+      "original_rel_path": "69e848c6becc5e297cbb7fea68942dc99cc1450feb255225521a30b5f4466a2d.jpg",
+      "friendly_name": "figure_169.jpg",
+      "abs_path": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\images\\figure_169.jpg",
+      "index": 169
+    },
+    "6a372e151700c39e88132c05eb4091ebd7bab035c1dfe97e91e6f326cb6ab946.jpg": {
+      "original_name": "6a372e151700c39e88132c05eb4091ebd7bab035c1dfe97e91e6f326cb6ab946.jpg",
+      "original_rel_path": "6a372e151700c39e88132c05eb4091ebd7bab035c1dfe97e91e6f326cb6ab946.jpg",
+      "friendly_name": "figure_170.jpg",
+      "abs_path": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\images\\figure_170.jpg",
+      "index": 170
+    },
+    "6a76e051125ffc66d0131d908eade27ffcf3fcb2cff05eca7bef655e3430ca3d.jpg": {
+      "original_name": "6a76e051125ffc66d0131d908eade27ffcf3fcb2cff05eca7bef655e3430ca3d.jpg",
+      "original_rel_path": "6a76e051125ffc66d0131d908eade27ffcf3fcb2cff05eca7bef655e3430ca3d.jpg",
+      "friendly_name": "figure_171.jpg",
+      "abs_path": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\images\\figure_171.jpg",
+      "index": 171
+    },
+    "6a79af393abece61fd0dff423b4c9a12d2f95b977b2e2855346e9972de877d85.jpg": {
+      "original_name": "6a79af393abece61fd0dff423b4c9a12d2f95b977b2e2855346e9972de877d85.jpg",
+      "original_rel_path": "6a79af393abece61fd0dff423b4c9a12d2f95b977b2e2855346e9972de877d85.jpg",
+      "friendly_name": "figure_172.jpg",
+      "abs_path": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\images\\figure_172.jpg",
+      "index": 172
+    },
+    "6b9c5ffaafcfed2912531a018d5b70d428f832799c4e88f8517b7b619dbc63ec.jpg": {
+      "original_name": "6b9c5ffaafcfed2912531a018d5b70d428f832799c4e88f8517b7b619dbc63ec.jpg",
+      "original_rel_path": "6b9c5ffaafcfed2912531a018d5b70d428f832799c4e88f8517b7b619dbc63ec.jpg",
+      "friendly_name": "figure_173.jpg",
+      "abs_path": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\images\\figure_173.jpg",
+      "index": 173
+    },
+    "6bf9663ebeecc30d5adbd6a58d546466b4004716272e7e11258716e92b4cc05a.jpg": {
+      "original_name": "6bf9663ebeecc30d5adbd6a58d546466b4004716272e7e11258716e92b4cc05a.jpg",
+      "original_rel_path": "6bf9663ebeecc30d5adbd6a58d546466b4004716272e7e11258716e92b4cc05a.jpg",
+      "friendly_name": "figure_174.jpg",
+      "abs_path": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\images\\figure_174.jpg",
+      "index": 174
+    },
+    "6c04c6ef32895cc535a4f5a037aee9a4dff839e5b7c6c3ae8b19b39bde902098.jpg": {
+      "original_name": "6c04c6ef32895cc535a4f5a037aee9a4dff839e5b7c6c3ae8b19b39bde902098.jpg",
+      "original_rel_path": "6c04c6ef32895cc535a4f5a037aee9a4dff839e5b7c6c3ae8b19b39bde902098.jpg",
+      "friendly_name": "figure_175.jpg",
+      "abs_path": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\images\\figure_175.jpg",
+      "index": 175
+    },
+    "6cec139c7ed5f99eb25f196e793d966065bf1b3cdf302059d9494e9594681518.jpg": {
+      "original_name": "6cec139c7ed5f99eb25f196e793d966065bf1b3cdf302059d9494e9594681518.jpg",
+      "original_rel_path": "6cec139c7ed5f99eb25f196e793d966065bf1b3cdf302059d9494e9594681518.jpg",
+      "friendly_name": "figure_176.jpg",
+      "abs_path": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\images\\figure_176.jpg",
+      "index": 176
+    },
+    "6db6a463e31b8bee76510e877d1193158212bb4bea307ad8f0c3ef9d29882206.jpg": {
+      "original_name": "6db6a463e31b8bee76510e877d1193158212bb4bea307ad8f0c3ef9d29882206.jpg",
+      "original_rel_path": "6db6a463e31b8bee76510e877d1193158212bb4bea307ad8f0c3ef9d29882206.jpg",
+      "friendly_name": "figure_177.jpg",
+      "abs_path": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\images\\figure_177.jpg",
+      "index": 177
+    },
+    "6e875ff2f03862279996b09a97f7fb150345957dc80df7b5f7999e611cf80fd6.jpg": {
+      "original_name": "6e875ff2f03862279996b09a97f7fb150345957dc80df7b5f7999e611cf80fd6.jpg",
+      "original_rel_path": "6e875ff2f03862279996b09a97f7fb150345957dc80df7b5f7999e611cf80fd6.jpg",
+      "friendly_name": "figure_178.jpg",
+      "abs_path": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\images\\figure_178.jpg",
+      "index": 178
+    },
+    "6f3d8f2e2160c20ce3c2ae9ba5d9a0b0b87bee3421c4e2a55eac4601efd34935.jpg": {
+      "original_name": "6f3d8f2e2160c20ce3c2ae9ba5d9a0b0b87bee3421c4e2a55eac4601efd34935.jpg",
+      "original_rel_path": "6f3d8f2e2160c20ce3c2ae9ba5d9a0b0b87bee3421c4e2a55eac4601efd34935.jpg",
+      "friendly_name": "figure_179.jpg",
+      "abs_path": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\images\\figure_179.jpg",
+      "index": 179
+    },
+    "6f565f4aac0a7a01a7f3db04bae827a3024c2fd594f263bca0664abfed0ec917.jpg": {
+      "original_name": "6f565f4aac0a7a01a7f3db04bae827a3024c2fd594f263bca0664abfed0ec917.jpg",
+      "original_rel_path": "6f565f4aac0a7a01a7f3db04bae827a3024c2fd594f263bca0664abfed0ec917.jpg",
+      "friendly_name": "figure_180.jpg",
+      "abs_path": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\images\\figure_180.jpg",
+      "index": 180
+    },
+    "6fd73c03a456e671b02c0d3cba091764ef221478b279acdbd92935ce750912c7.jpg": {
+      "original_name": "6fd73c03a456e671b02c0d3cba091764ef221478b279acdbd92935ce750912c7.jpg",
+      "original_rel_path": "6fd73c03a456e671b02c0d3cba091764ef221478b279acdbd92935ce750912c7.jpg",
+      "friendly_name": "figure_181.jpg",
+      "abs_path": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\images\\figure_181.jpg",
+      "index": 181
+    },
+    "7048987b18545ee474ee82c3897c38b76a8e0b787eaaa5b02a5c60067c00d2a4.jpg": {
+      "original_name": "7048987b18545ee474ee82c3897c38b76a8e0b787eaaa5b02a5c60067c00d2a4.jpg",
+      "original_rel_path": "7048987b18545ee474ee82c3897c38b76a8e0b787eaaa5b02a5c60067c00d2a4.jpg",
+      "friendly_name": "figure_182.jpg",
+      "abs_path": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\images\\figure_182.jpg",
+      "index": 182
+    },
+    "705f46ce1b0ab5ae80078903971f56ca6c4cef61162dfcc46442e35fa1763502.jpg": {
+      "original_name": "705f46ce1b0ab5ae80078903971f56ca6c4cef61162dfcc46442e35fa1763502.jpg",
+      "original_rel_path": "705f46ce1b0ab5ae80078903971f56ca6c4cef61162dfcc46442e35fa1763502.jpg",
+      "friendly_name": "figure_183.jpg",
+      "abs_path": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\images\\figure_183.jpg",
+      "index": 183
+    },
+    "707e693fc475e3d6289e50b0a505f61d5254bd4814824fd3d5a2b05884612b73.jpg": {
+      "original_name": "707e693fc475e3d6289e50b0a505f61d5254bd4814824fd3d5a2b05884612b73.jpg",
+      "original_rel_path": "707e693fc475e3d6289e50b0a505f61d5254bd4814824fd3d5a2b05884612b73.jpg",
+      "friendly_name": "figure_184.jpg",
+      "abs_path": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\images\\figure_184.jpg",
+      "index": 184
+    },
+    "70c573e67b3f4a5a3a0b63e3cc3fd2e3c6bf72b3a072863109a793c8874f8cc1.jpg": {
+      "original_name": "70c573e67b3f4a5a3a0b63e3cc3fd2e3c6bf72b3a072863109a793c8874f8cc1.jpg",
+      "original_rel_path": "70c573e67b3f4a5a3a0b63e3cc3fd2e3c6bf72b3a072863109a793c8874f8cc1.jpg",
+      "friendly_name": "figure_185.jpg",
+      "abs_path": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\images\\figure_185.jpg",
+      "index": 185
+    },
+    "70e2fc1f0b5123cab3c62f5d6fc5bccf222bdc7a015cf3ea1cd1db7ca54a2d69.jpg": {
+      "original_name": "70e2fc1f0b5123cab3c62f5d6fc5bccf222bdc7a015cf3ea1cd1db7ca54a2d69.jpg",
+      "original_rel_path": "70e2fc1f0b5123cab3c62f5d6fc5bccf222bdc7a015cf3ea1cd1db7ca54a2d69.jpg",
+      "friendly_name": "figure_186.jpg",
+      "abs_path": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\images\\figure_186.jpg",
+      "index": 186
+    },
+    "7138f1344301cd391d42aeadbde67fe2ccf7c4d1947a675ff8af8e517c006984.jpg": {
+      "original_name": "7138f1344301cd391d42aeadbde67fe2ccf7c4d1947a675ff8af8e517c006984.jpg",
+      "original_rel_path": "7138f1344301cd391d42aeadbde67fe2ccf7c4d1947a675ff8af8e517c006984.jpg",
+      "friendly_name": "figure_187.jpg",
+      "abs_path": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\images\\figure_187.jpg",
+      "index": 187
+    },
+    "71ae602a0c95eee30d691e851cd402eed5414f6cba561a5fa9c69ddaab66b143.jpg": {
+      "original_name": "71ae602a0c95eee30d691e851cd402eed5414f6cba561a5fa9c69ddaab66b143.jpg",
+      "original_rel_path": "71ae602a0c95eee30d691e851cd402eed5414f6cba561a5fa9c69ddaab66b143.jpg",
+      "friendly_name": "figure_188.jpg",
+      "abs_path": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\images\\figure_188.jpg",
+      "index": 188
+    },
+    "72378278395ba44ab9472f500ea8b6407d5a0a0aed5aff06a104d001a8b9e726.jpg": {
+      "original_name": "72378278395ba44ab9472f500ea8b6407d5a0a0aed5aff06a104d001a8b9e726.jpg",
+      "original_rel_path": "72378278395ba44ab9472f500ea8b6407d5a0a0aed5aff06a104d001a8b9e726.jpg",
+      "friendly_name": "figure_189.jpg",
+      "abs_path": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\images\\figure_189.jpg",
+      "index": 189
+    },
+    "7275bbe51e3750d69d95b472ce067b45d80cacecc8d82d86c28149ee1b1342db.jpg": {
+      "original_name": "7275bbe51e3750d69d95b472ce067b45d80cacecc8d82d86c28149ee1b1342db.jpg",
+      "original_rel_path": "7275bbe51e3750d69d95b472ce067b45d80cacecc8d82d86c28149ee1b1342db.jpg",
+      "friendly_name": "figure_190.jpg",
+      "abs_path": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\images\\figure_190.jpg",
+      "index": 190
+    },
+    "72ad499599ddb33ed05b0408b0a4dc9a28dcb2dcc4c0efd87db06d5a6da840ae.jpg": {
+      "original_name": "72ad499599ddb33ed05b0408b0a4dc9a28dcb2dcc4c0efd87db06d5a6da840ae.jpg",
+      "original_rel_path": "72ad499599ddb33ed05b0408b0a4dc9a28dcb2dcc4c0efd87db06d5a6da840ae.jpg",
+      "friendly_name": "figure_191.jpg",
+      "abs_path": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\images\\figure_191.jpg",
+      "index": 191
+    },
+    "7389a02151f4f5400ac5fa695a06293480b7434f6fc83f52bf39e3b72263a7ce.jpg": {
+      "original_name": "7389a02151f4f5400ac5fa695a06293480b7434f6fc83f52bf39e3b72263a7ce.jpg",
+      "original_rel_path": "7389a02151f4f5400ac5fa695a06293480b7434f6fc83f52bf39e3b72263a7ce.jpg",
+      "friendly_name": "figure_192.jpg",
+      "abs_path": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\images\\figure_192.jpg",
+      "index": 192
+    },
+    "73eb7b84262763e14d75cf22333fafbeccbdfe8aa0b55bf1ca8c0998b952b4f4.jpg": {
+      "original_name": "73eb7b84262763e14d75cf22333fafbeccbdfe8aa0b55bf1ca8c0998b952b4f4.jpg",
+      "original_rel_path": "73eb7b84262763e14d75cf22333fafbeccbdfe8aa0b55bf1ca8c0998b952b4f4.jpg",
+      "friendly_name": "figure_193.jpg",
+      "abs_path": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\images\\figure_193.jpg",
+      "index": 193
+    },
+    "7408c17031c2631737732888d16c63ed48b27de9ccb8b84bdbf28041e2f7e849.jpg": {
+      "original_name": "7408c17031c2631737732888d16c63ed48b27de9ccb8b84bdbf28041e2f7e849.jpg",
+      "original_rel_path": "7408c17031c2631737732888d16c63ed48b27de9ccb8b84bdbf28041e2f7e849.jpg",
+      "friendly_name": "figure_194.jpg",
+      "abs_path": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\images\\figure_194.jpg",
+      "index": 194
+    },
+    "74c99f71ffb45c313ab414ffcfc705883ac55ae038d3ca225d50466cce3ca3f5.jpg": {
+      "original_name": "74c99f71ffb45c313ab414ffcfc705883ac55ae038d3ca225d50466cce3ca3f5.jpg",
+      "original_rel_path": "74c99f71ffb45c313ab414ffcfc705883ac55ae038d3ca225d50466cce3ca3f5.jpg",
+      "friendly_name": "figure_195.jpg",
+      "abs_path": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\images\\figure_195.jpg",
+      "index": 195
+    },
+    "77c781c905065a798c5cf680d1a8e9881978b160f9281ba85750c7e1fd160836.jpg": {
+      "original_name": "77c781c905065a798c5cf680d1a8e9881978b160f9281ba85750c7e1fd160836.jpg",
+      "original_rel_path": "77c781c905065a798c5cf680d1a8e9881978b160f9281ba85750c7e1fd160836.jpg",
+      "friendly_name": "figure_196.jpg",
+      "abs_path": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\images\\figure_196.jpg",
+      "index": 196
+    },
+    "794ecaad31d726438afa9460b9ec6d16ae291b53de51b5515c49db53509ee734.jpg": {
+      "original_name": "794ecaad31d726438afa9460b9ec6d16ae291b53de51b5515c49db53509ee734.jpg",
+      "original_rel_path": "794ecaad31d726438afa9460b9ec6d16ae291b53de51b5515c49db53509ee734.jpg",
+      "friendly_name": "figure_197.jpg",
+      "abs_path": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\images\\figure_197.jpg",
+      "index": 197
+    },
+    "7b0d3e6487824e9180d3e8ec6ae7619f36a160bb25547b43008825f5e0dfbceb.jpg": {
+      "original_name": "7b0d3e6487824e9180d3e8ec6ae7619f36a160bb25547b43008825f5e0dfbceb.jpg",
+      "original_rel_path": "7b0d3e6487824e9180d3e8ec6ae7619f36a160bb25547b43008825f5e0dfbceb.jpg",
+      "friendly_name": "figure_198.jpg",
+      "abs_path": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\images\\figure_198.jpg",
+      "index": 198
+    },
+    "7b250d0538fb2457b117ebbba60401200ec47f52cd8421d8c93858afd0df0228.jpg": {
+      "original_name": "7b250d0538fb2457b117ebbba60401200ec47f52cd8421d8c93858afd0df0228.jpg",
+      "original_rel_path": "7b250d0538fb2457b117ebbba60401200ec47f52cd8421d8c93858afd0df0228.jpg",
+      "friendly_name": "figure_199.jpg",
+      "abs_path": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\images\\figure_199.jpg",
+      "index": 199
+    },
+    "7b4dddb818b9b19e8620c48693d8a19d176ad6a9e0c65e69594432e1167cbca2.jpg": {
+      "original_name": "7b4dddb818b9b19e8620c48693d8a19d176ad6a9e0c65e69594432e1167cbca2.jpg",
+      "original_rel_path": "7b4dddb818b9b19e8620c48693d8a19d176ad6a9e0c65e69594432e1167cbca2.jpg",
+      "friendly_name": "figure_200.jpg",
+      "abs_path": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\images\\figure_200.jpg",
+      "index": 200
+    },
+    "7b7e7ea6efd3895fac897aedf7658eea9048aad64281518e6518f31e2b9bf6c0.jpg": {
+      "original_name": "7b7e7ea6efd3895fac897aedf7658eea9048aad64281518e6518f31e2b9bf6c0.jpg",
+      "original_rel_path": "7b7e7ea6efd3895fac897aedf7658eea9048aad64281518e6518f31e2b9bf6c0.jpg",
+      "friendly_name": "figure_201.jpg",
+      "abs_path": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\images\\figure_201.jpg",
+      "index": 201
+    },
+    "7bc3a67f044e8aff3c67215af730d2dd26894fa2995e1a876d284d495164d5a7.jpg": {
+      "original_name": "7bc3a67f044e8aff3c67215af730d2dd26894fa2995e1a876d284d495164d5a7.jpg",
+      "original_rel_path": "7bc3a67f044e8aff3c67215af730d2dd26894fa2995e1a876d284d495164d5a7.jpg",
+      "friendly_name": "figure_202.jpg",
+      "abs_path": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\images\\figure_202.jpg",
+      "index": 202
+    },
+    "7d1ed1ac5beaa010c07c1b74b888b547752c2f4c71f63bed57966c27a93e88fa.jpg": {
+      "original_name": "7d1ed1ac5beaa010c07c1b74b888b547752c2f4c71f63bed57966c27a93e88fa.jpg",
+      "original_rel_path": "7d1ed1ac5beaa010c07c1b74b888b547752c2f4c71f63bed57966c27a93e88fa.jpg",
+      "friendly_name": "figure_203.jpg",
+      "abs_path": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\images\\figure_203.jpg",
+      "index": 203
+    },
+    "7d8c564efceeef1dd80c91f336f5a890b6972031f04fc7183c9bbd6d8b2d2117.jpg": {
+      "original_name": "7d8c564efceeef1dd80c91f336f5a890b6972031f04fc7183c9bbd6d8b2d2117.jpg",
+      "original_rel_path": "7d8c564efceeef1dd80c91f336f5a890b6972031f04fc7183c9bbd6d8b2d2117.jpg",
+      "friendly_name": "figure_204.jpg",
+      "abs_path": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\images\\figure_204.jpg",
+      "index": 204
+    },
+    "7e1fd6f509696738927231a4a40853d9f4705608a8181ad7d017cf6cf6d1ebe4.jpg": {
+      "original_name": "7e1fd6f509696738927231a4a40853d9f4705608a8181ad7d017cf6cf6d1ebe4.jpg",
+      "original_rel_path": "7e1fd6f509696738927231a4a40853d9f4705608a8181ad7d017cf6cf6d1ebe4.jpg",
+      "friendly_name": "figure_205.jpg",
+      "abs_path": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\images\\figure_205.jpg",
+      "index": 205
+    },
+    "7ed174e1f970fa844e85e79d337c83529ef2f269af7645791646eb6aeea0a894.jpg": {
+      "original_name": "7ed174e1f970fa844e85e79d337c83529ef2f269af7645791646eb6aeea0a894.jpg",
+      "original_rel_path": "7ed174e1f970fa844e85e79d337c83529ef2f269af7645791646eb6aeea0a894.jpg",
+      "friendly_name": "figure_206.jpg",
+      "abs_path": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\images\\figure_206.jpg",
+      "index": 206
+    },
+    "7f02dcca39c0fabd55ebdca3a677bb4de7b9be918fd2ce2945559b022615b211.jpg": {
+      "original_name": "7f02dcca39c0fabd55ebdca3a677bb4de7b9be918fd2ce2945559b022615b211.jpg",
+      "original_rel_path": "7f02dcca39c0fabd55ebdca3a677bb4de7b9be918fd2ce2945559b022615b211.jpg",
+      "friendly_name": "figure_207.jpg",
+      "abs_path": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\images\\figure_207.jpg",
+      "index": 207
+    },
+    "806ac23594e596673effe947460e267494061ad5b4d068f6eb6ccdf35acdd5c1.jpg": {
+      "original_name": "806ac23594e596673effe947460e267494061ad5b4d068f6eb6ccdf35acdd5c1.jpg",
+      "original_rel_path": "806ac23594e596673effe947460e267494061ad5b4d068f6eb6ccdf35acdd5c1.jpg",
+      "friendly_name": "figure_208.jpg",
+      "abs_path": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\images\\figure_208.jpg",
+      "index": 208
+    },
+    "8157d87de9edc38c760729a7e390c968d43480bca1b57ace148e856f20d221df.jpg": {
+      "original_name": "8157d87de9edc38c760729a7e390c968d43480bca1b57ace148e856f20d221df.jpg",
+      "original_rel_path": "8157d87de9edc38c760729a7e390c968d43480bca1b57ace148e856f20d221df.jpg",
+      "friendly_name": "figure_209.jpg",
+      "abs_path": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\images\\figure_209.jpg",
+      "index": 209
+    },
+    "816b1d994cbcba015fafc2d5722b59550057a2490f10c512d172e97d03c9d043.jpg": {
+      "original_name": "816b1d994cbcba015fafc2d5722b59550057a2490f10c512d172e97d03c9d043.jpg",
+      "original_rel_path": "816b1d994cbcba015fafc2d5722b59550057a2490f10c512d172e97d03c9d043.jpg",
+      "friendly_name": "figure_210.jpg",
+      "abs_path": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\images\\figure_210.jpg",
+      "index": 210
+    },
+    "82321ea1e64da0049b9f1099bf4844d99cd37e35ab902f9b66e5dc726ed122ed.jpg": {
+      "original_name": "82321ea1e64da0049b9f1099bf4844d99cd37e35ab902f9b66e5dc726ed122ed.jpg",
+      "original_rel_path": "82321ea1e64da0049b9f1099bf4844d99cd37e35ab902f9b66e5dc726ed122ed.jpg",
+      "friendly_name": "figure_211.jpg",
+      "abs_path": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\images\\figure_211.jpg",
+      "index": 211
+    },
+    "82698012ea4a42fae1e899b53aff75bef4c015b9a62fd2c80d3e465cda49a6c6.jpg": {
+      "original_name": "82698012ea4a42fae1e899b53aff75bef4c015b9a62fd2c80d3e465cda49a6c6.jpg",
+      "original_rel_path": "82698012ea4a42fae1e899b53aff75bef4c015b9a62fd2c80d3e465cda49a6c6.jpg",
+      "friendly_name": "figure_212.jpg",
+      "abs_path": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\images\\figure_212.jpg",
+      "index": 212
+    },
+    "83db54497b25f37971e5ab323cdee6a34c124fa2fbeed319c4c1b4e41e634466.jpg": {
+      "original_name": "83db54497b25f37971e5ab323cdee6a34c124fa2fbeed319c4c1b4e41e634466.jpg",
+      "original_rel_path": "83db54497b25f37971e5ab323cdee6a34c124fa2fbeed319c4c1b4e41e634466.jpg",
+      "friendly_name": "figure_213.jpg",
+      "abs_path": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\images\\figure_213.jpg",
+      "index": 213
+    },
+    "847345356ea2155e4b1212d36deb2cf810c93d595f071e02c128b00c19ea4bd9.jpg": {
+      "original_name": "847345356ea2155e4b1212d36deb2cf810c93d595f071e02c128b00c19ea4bd9.jpg",
+      "original_rel_path": "847345356ea2155e4b1212d36deb2cf810c93d595f071e02c128b00c19ea4bd9.jpg",
+      "friendly_name": "figure_214.jpg",
+      "abs_path": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\images\\figure_214.jpg",
+      "index": 214
+    },
+    "855cf47a87b03c9e3bcc9bc582c8116c13347644f0ea830e06b0d44acded5125.jpg": {
+      "original_name": "855cf47a87b03c9e3bcc9bc582c8116c13347644f0ea830e06b0d44acded5125.jpg",
+      "original_rel_path": "855cf47a87b03c9e3bcc9bc582c8116c13347644f0ea830e06b0d44acded5125.jpg",
+      "friendly_name": "figure_215.jpg",
+      "abs_path": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\images\\figure_215.jpg",
+      "index": 215
+    },
+    "856bfe7089b58d7941679172848f62e4db49f25de988acdf59f3fb6b5231d5fd.jpg": {
+      "original_name": "856bfe7089b58d7941679172848f62e4db49f25de988acdf59f3fb6b5231d5fd.jpg",
+      "original_rel_path": "856bfe7089b58d7941679172848f62e4db49f25de988acdf59f3fb6b5231d5fd.jpg",
+      "friendly_name": "figure_216.jpg",
+      "abs_path": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\images\\figure_216.jpg",
+      "index": 216
+    },
+    "863f1428ab3c9773a1016532c8c23ada9c1073e7349dc71c3d9e7f36ca4cc086.jpg": {
+      "original_name": "863f1428ab3c9773a1016532c8c23ada9c1073e7349dc71c3d9e7f36ca4cc086.jpg",
+      "original_rel_path": "863f1428ab3c9773a1016532c8c23ada9c1073e7349dc71c3d9e7f36ca4cc086.jpg",
+      "friendly_name": "figure_217.jpg",
+      "abs_path": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\images\\figure_217.jpg",
+      "index": 217
+    },
+    "8666171896742a1f56821ce362e8f9948349217d80817ad82c9f35ca16b351d6.jpg": {
+      "original_name": "8666171896742a1f56821ce362e8f9948349217d80817ad82c9f35ca16b351d6.jpg",
+      "original_rel_path": "8666171896742a1f56821ce362e8f9948349217d80817ad82c9f35ca16b351d6.jpg",
+      "friendly_name": "figure_218.jpg",
+      "abs_path": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\images\\figure_218.jpg",
+      "index": 218
+    },
+    "866df347c3bdad6409d67c779d671be3e147a04941c60309c53d930346188dab.jpg": {
+      "original_name": "866df347c3bdad6409d67c779d671be3e147a04941c60309c53d930346188dab.jpg",
+      "original_rel_path": "866df347c3bdad6409d67c779d671be3e147a04941c60309c53d930346188dab.jpg",
+      "friendly_name": "figure_219.jpg",
+      "abs_path": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\images\\figure_219.jpg",
+      "index": 219
+    },
+    "86d28acaf5c14cfa6f9a9ec81e7e3ec60ceb6e45f7d28b567bbd28cf93a496f5.jpg": {
+      "original_name": "86d28acaf5c14cfa6f9a9ec81e7e3ec60ceb6e45f7d28b567bbd28cf93a496f5.jpg",
+      "original_rel_path": "86d28acaf5c14cfa6f9a9ec81e7e3ec60ceb6e45f7d28b567bbd28cf93a496f5.jpg",
+      "friendly_name": "figure_220.jpg",
+      "abs_path": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\images\\figure_220.jpg",
+      "index": 220
+    },
+    "877032705cd4b7b1b874529170227ec7662b040b1cb30cc6f19f9c1c5a22fc9b.jpg": {
+      "original_name": "877032705cd4b7b1b874529170227ec7662b040b1cb30cc6f19f9c1c5a22fc9b.jpg",
+      "original_rel_path": "877032705cd4b7b1b874529170227ec7662b040b1cb30cc6f19f9c1c5a22fc9b.jpg",
+      "friendly_name": "figure_221.jpg",
+      "abs_path": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\images\\figure_221.jpg",
+      "index": 221
+    },
+    "877dd781d1731d25fc87f5a4f840e37fa9f910cab58863b4497cf71cd708f165.jpg": {
+      "original_name": "877dd781d1731d25fc87f5a4f840e37fa9f910cab58863b4497cf71cd708f165.jpg",
+      "original_rel_path": "877dd781d1731d25fc87f5a4f840e37fa9f910cab58863b4497cf71cd708f165.jpg",
+      "friendly_name": "figure_222.jpg",
+      "abs_path": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\images\\figure_222.jpg",
+      "index": 222
+    },
+    "8920afd4824e738f9aa19e4439964b6a9f41e32a45f621d6148703187f079e9a.jpg": {
+      "original_name": "8920afd4824e738f9aa19e4439964b6a9f41e32a45f621d6148703187f079e9a.jpg",
+      "original_rel_path": "8920afd4824e738f9aa19e4439964b6a9f41e32a45f621d6148703187f079e9a.jpg",
+      "friendly_name": "figure_223.jpg",
+      "abs_path": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\images\\figure_223.jpg",
+      "index": 223
+    },
+    "89f734d74e8150666b3677f8d9df9a22dfc6e9af8f49dde2ca0a55c4fee364d7.jpg": {
+      "original_name": "89f734d74e8150666b3677f8d9df9a22dfc6e9af8f49dde2ca0a55c4fee364d7.jpg",
+      "original_rel_path": "89f734d74e8150666b3677f8d9df9a22dfc6e9af8f49dde2ca0a55c4fee364d7.jpg",
+      "friendly_name": "figure_224.jpg",
+      "abs_path": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\images\\figure_224.jpg",
+      "index": 224
+    },
+    "8ce5910657d4252a32c396ba3f33361e78fc11d97835d0c3b6c171d2da4d989d.jpg": {
+      "original_name": "8ce5910657d4252a32c396ba3f33361e78fc11d97835d0c3b6c171d2da4d989d.jpg",
+      "original_rel_path": "8ce5910657d4252a32c396ba3f33361e78fc11d97835d0c3b6c171d2da4d989d.jpg",
+      "friendly_name": "figure_225.jpg",
+      "abs_path": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\images\\figure_225.jpg",
+      "index": 225
+    },
+    "8ef0502a59f2bcf8154081b0bee2d146bf212d0bf87f80314a8cb9a1738365e9.jpg": {
+      "original_name": "8ef0502a59f2bcf8154081b0bee2d146bf212d0bf87f80314a8cb9a1738365e9.jpg",
+      "original_rel_path": "8ef0502a59f2bcf8154081b0bee2d146bf212d0bf87f80314a8cb9a1738365e9.jpg",
+      "friendly_name": "figure_226.jpg",
+      "abs_path": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\images\\figure_226.jpg",
+      "index": 226
+    },
+    "8f6ecea389fc1d4e92dcadd06f295d32aebe7fe88d13e6e648b123f26c9d87f3.jpg": {
+      "original_name": "8f6ecea389fc1d4e92dcadd06f295d32aebe7fe88d13e6e648b123f26c9d87f3.jpg",
+      "original_rel_path": "8f6ecea389fc1d4e92dcadd06f295d32aebe7fe88d13e6e648b123f26c9d87f3.jpg",
+      "friendly_name": "figure_227.jpg",
+      "abs_path": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\images\\figure_227.jpg",
+      "index": 227
+    },
+    "8f7ada2bc4192a521754dcccf3812418255637af938e50f9b8475bcac4e043f1.jpg": {
+      "original_name": "8f7ada2bc4192a521754dcccf3812418255637af938e50f9b8475bcac4e043f1.jpg",
+      "original_rel_path": "8f7ada2bc4192a521754dcccf3812418255637af938e50f9b8475bcac4e043f1.jpg",
+      "friendly_name": "figure_228.jpg",
+      "abs_path": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\images\\figure_228.jpg",
+      "index": 228
+    },
+    "8fe98589426f2e9a4779f36a54b3d4bea232dbcf50ba7cc6d36c2725ac762e2d.jpg": {
+      "original_name": "8fe98589426f2e9a4779f36a54b3d4bea232dbcf50ba7cc6d36c2725ac762e2d.jpg",
+      "original_rel_path": "8fe98589426f2e9a4779f36a54b3d4bea232dbcf50ba7cc6d36c2725ac762e2d.jpg",
+      "friendly_name": "figure_229.jpg",
+      "abs_path": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\images\\figure_229.jpg",
+      "index": 229
+    },
+    "900392283eabb5cc4221b2e402a1639882ec877b89e784a544ed04b03f313b44.jpg": {
+      "original_name": "900392283eabb5cc4221b2e402a1639882ec877b89e784a544ed04b03f313b44.jpg",
+      "original_rel_path": "900392283eabb5cc4221b2e402a1639882ec877b89e784a544ed04b03f313b44.jpg",
+      "friendly_name": "figure_230.jpg",
+      "abs_path": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\images\\figure_230.jpg",
+      "index": 230
+    },
+    "910be19233ba3921789ee2a6aebd9e2cd3bed568d79cebd254d99a42f2f1acba.jpg": {
+      "original_name": "910be19233ba3921789ee2a6aebd9e2cd3bed568d79cebd254d99a42f2f1acba.jpg",
+      "original_rel_path": "910be19233ba3921789ee2a6aebd9e2cd3bed568d79cebd254d99a42f2f1acba.jpg",
+      "friendly_name": "figure_231.jpg",
+      "abs_path": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\images\\figure_231.jpg",
+      "index": 231
+    },
+    "9151142f926f607cc1143dd98c90eeb3c9ee793bcd16c146f4b503765ffc0500.jpg": {
+      "original_name": "9151142f926f607cc1143dd98c90eeb3c9ee793bcd16c146f4b503765ffc0500.jpg",
+      "original_rel_path": "9151142f926f607cc1143dd98c90eeb3c9ee793bcd16c146f4b503765ffc0500.jpg",
+      "friendly_name": "figure_232.jpg",
+      "abs_path": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\images\\figure_232.jpg",
+      "index": 232
+    },
+    "915cf8ac6d1fdf4d225e9916052580c42db721efbe343592213fb6ed126420b1.jpg": {
+      "original_name": "915cf8ac6d1fdf4d225e9916052580c42db721efbe343592213fb6ed126420b1.jpg",
+      "original_rel_path": "915cf8ac6d1fdf4d225e9916052580c42db721efbe343592213fb6ed126420b1.jpg",
+      "friendly_name": "figure_233.jpg",
+      "abs_path": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\images\\figure_233.jpg",
+      "index": 233
+    },
+    "919d1a7298156a3c55948491bdf9f4a9b4f70ea405b90603f1a44600a4b97daf.jpg": {
+      "original_name": "919d1a7298156a3c55948491bdf9f4a9b4f70ea405b90603f1a44600a4b97daf.jpg",
+      "original_rel_path": "919d1a7298156a3c55948491bdf9f4a9b4f70ea405b90603f1a44600a4b97daf.jpg",
+      "friendly_name": "figure_234.jpg",
+      "abs_path": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\images\\figure_234.jpg",
+      "index": 234
+    },
+    "91e55983a657a6bceb1223aac3c90ed118310e9d021f91bf13585bda155424ad.jpg": {
+      "original_name": "91e55983a657a6bceb1223aac3c90ed118310e9d021f91bf13585bda155424ad.jpg",
+      "original_rel_path": "91e55983a657a6bceb1223aac3c90ed118310e9d021f91bf13585bda155424ad.jpg",
+      "friendly_name": "figure_235.jpg",
+      "abs_path": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\images\\figure_235.jpg",
+      "index": 235
+    },
+    "921cf4add7d19a2f01e331e04809873979801a8b8f9e3692bc29ecd87172028f.jpg": {
+      "original_name": "921cf4add7d19a2f01e331e04809873979801a8b8f9e3692bc29ecd87172028f.jpg",
+      "original_rel_path": "921cf4add7d19a2f01e331e04809873979801a8b8f9e3692bc29ecd87172028f.jpg",
+      "friendly_name": "figure_236.jpg",
+      "abs_path": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\images\\figure_236.jpg",
+      "index": 236
+    },
+    "9343a5fb9f7f00f10325ed75dad4d8826643c225b98598a884cf9ec399fe7263.jpg": {
+      "original_name": "9343a5fb9f7f00f10325ed75dad4d8826643c225b98598a884cf9ec399fe7263.jpg",
+      "original_rel_path": "9343a5fb9f7f00f10325ed75dad4d8826643c225b98598a884cf9ec399fe7263.jpg",
+      "friendly_name": "figure_237.jpg",
+      "abs_path": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\images\\figure_237.jpg",
+      "index": 237
+    },
+    "93c6631fad69791d94d4fa4ece9593e428c98a2ce994a62852ffdb8a05739eed.jpg": {
+      "original_name": "93c6631fad69791d94d4fa4ece9593e428c98a2ce994a62852ffdb8a05739eed.jpg",
+      "original_rel_path": "93c6631fad69791d94d4fa4ece9593e428c98a2ce994a62852ffdb8a05739eed.jpg",
+      "friendly_name": "figure_238.jpg",
+      "abs_path": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\images\\figure_238.jpg",
+      "index": 238
+    },
+    "94cb6ecba96e02261e41a001d4f75f462fe4059eafb20821f66bf4c2115dde46.jpg": {
+      "original_name": "94cb6ecba96e02261e41a001d4f75f462fe4059eafb20821f66bf4c2115dde46.jpg",
+      "original_rel_path": "94cb6ecba96e02261e41a001d4f75f462fe4059eafb20821f66bf4c2115dde46.jpg",
+      "friendly_name": "figure_239.jpg",
+      "abs_path": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\images\\figure_239.jpg",
+      "index": 239
+    },
+    "94ebc20ac1c5f6c38a83ef74a928f4e8e07b5f7c5ee93e2239334efef12dc4a4.jpg": {
+      "original_name": "94ebc20ac1c5f6c38a83ef74a928f4e8e07b5f7c5ee93e2239334efef12dc4a4.jpg",
+      "original_rel_path": "94ebc20ac1c5f6c38a83ef74a928f4e8e07b5f7c5ee93e2239334efef12dc4a4.jpg",
+      "friendly_name": "figure_240.jpg",
+      "abs_path": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\images\\figure_240.jpg",
+      "index": 240
+    },
+    "95513e214a4167a9a7fdd91869ae1514bb5c87b675fc12e1e943d1472ac0a5cd.jpg": {
+      "original_name": "95513e214a4167a9a7fdd91869ae1514bb5c87b675fc12e1e943d1472ac0a5cd.jpg",
+      "original_rel_path": "95513e214a4167a9a7fdd91869ae1514bb5c87b675fc12e1e943d1472ac0a5cd.jpg",
+      "friendly_name": "figure_241.jpg",
+      "abs_path": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\images\\figure_241.jpg",
+      "index": 241
+    },
+    "9653b9725234edd037be3c9558cb01cc6e059b4e831a706a5d1276c7d6dbc770.jpg": {
+      "original_name": "9653b9725234edd037be3c9558cb01cc6e059b4e831a706a5d1276c7d6dbc770.jpg",
+      "original_rel_path": "9653b9725234edd037be3c9558cb01cc6e059b4e831a706a5d1276c7d6dbc770.jpg",
+      "friendly_name": "figure_242.jpg",
+      "abs_path": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\images\\figure_242.jpg",
+      "index": 242
+    },
+    "9684c60ef3e59ea725ab73f6566a0c1b1e327c666ed6a27a7949295ccc5c9637.jpg": {
+      "original_name": "9684c60ef3e59ea725ab73f6566a0c1b1e327c666ed6a27a7949295ccc5c9637.jpg",
+      "original_rel_path": "9684c60ef3e59ea725ab73f6566a0c1b1e327c666ed6a27a7949295ccc5c9637.jpg",
+      "friendly_name": "figure_243.jpg",
+      "abs_path": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\images\\figure_243.jpg",
+      "index": 243
+    },
+    "9685cd8916cb143f809c50114dae3937a5c0204738245876f657865cfa4da131.jpg": {
+      "original_name": "9685cd8916cb143f809c50114dae3937a5c0204738245876f657865cfa4da131.jpg",
+      "original_rel_path": "9685cd8916cb143f809c50114dae3937a5c0204738245876f657865cfa4da131.jpg",
+      "friendly_name": "figure_244.jpg",
+      "abs_path": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\images\\figure_244.jpg",
+      "index": 244
+    },
+    "96b8eb91255d1e8d4cc1a1b8e1f842848dbb310fcc43a7e550004f86cd68872a.jpg": {
+      "original_name": "96b8eb91255d1e8d4cc1a1b8e1f842848dbb310fcc43a7e550004f86cd68872a.jpg",
+      "original_rel_path": "96b8eb91255d1e8d4cc1a1b8e1f842848dbb310fcc43a7e550004f86cd68872a.jpg",
+      "friendly_name": "figure_245.jpg",
+      "abs_path": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\images\\figure_245.jpg",
+      "index": 245
+    },
+    "978fd1d331ce68401230cab80c2331a43c567c0876068b9cf9685f13bca286db.jpg": {
+      "original_name": "978fd1d331ce68401230cab80c2331a43c567c0876068b9cf9685f13bca286db.jpg",
+      "original_rel_path": "978fd1d331ce68401230cab80c2331a43c567c0876068b9cf9685f13bca286db.jpg",
+      "friendly_name": "figure_246.jpg",
+      "abs_path": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\images\\figure_246.jpg",
+      "index": 246
+    },
+    "980a9d7e63aaa71e227e3154ce6bcafe48c28f1175787aa6d1a5c7907087a239.jpg": {
+      "original_name": "980a9d7e63aaa71e227e3154ce6bcafe48c28f1175787aa6d1a5c7907087a239.jpg",
+      "original_rel_path": "980a9d7e63aaa71e227e3154ce6bcafe48c28f1175787aa6d1a5c7907087a239.jpg",
+      "friendly_name": "figure_247.jpg",
+      "abs_path": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\images\\figure_247.jpg",
+      "index": 247
+    },
+    "98d358aea84acf99fdf13887f590453be4a09f2b31478583131e0b3f112beccf.jpg": {
+      "original_name": "98d358aea84acf99fdf13887f590453be4a09f2b31478583131e0b3f112beccf.jpg",
+      "original_rel_path": "98d358aea84acf99fdf13887f590453be4a09f2b31478583131e0b3f112beccf.jpg",
+      "friendly_name": "figure_248.jpg",
+      "abs_path": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\images\\figure_248.jpg",
+      "index": 248
+    },
+    "994459d8a0a25a1376b906cd651787cec519d6f26e92a9ec6330acb1435e44a4.jpg": {
+      "original_name": "994459d8a0a25a1376b906cd651787cec519d6f26e92a9ec6330acb1435e44a4.jpg",
+      "original_rel_path": "994459d8a0a25a1376b906cd651787cec519d6f26e92a9ec6330acb1435e44a4.jpg",
+      "friendly_name": "figure_249.jpg",
+      "abs_path": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\images\\figure_249.jpg",
+      "index": 249
+    },
+    "9944c84fce8cdfde64199b608ba37e5efcca80d131059336c15028459a315cbe.jpg": {
+      "original_name": "9944c84fce8cdfde64199b608ba37e5efcca80d131059336c15028459a315cbe.jpg",
+      "original_rel_path": "9944c84fce8cdfde64199b608ba37e5efcca80d131059336c15028459a315cbe.jpg",
+      "friendly_name": "figure_250.jpg",
+      "abs_path": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\images\\figure_250.jpg",
+      "index": 250
+    },
+    "99939045d911f953b2b078398575487e938aa77e682ea5fbee00fa81b88350a6.jpg": {
+      "original_name": "99939045d911f953b2b078398575487e938aa77e682ea5fbee00fa81b88350a6.jpg",
+      "original_rel_path": "99939045d911f953b2b078398575487e938aa77e682ea5fbee00fa81b88350a6.jpg",
+      "friendly_name": "figure_251.jpg",
+      "abs_path": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\images\\figure_251.jpg",
+      "index": 251
+    },
+    "9aa72e9c3f490f3cf4008f49659d8cd360b114e0bbc2d4dd4082748203acf9bd.jpg": {
+      "original_name": "9aa72e9c3f490f3cf4008f49659d8cd360b114e0bbc2d4dd4082748203acf9bd.jpg",
+      "original_rel_path": "9aa72e9c3f490f3cf4008f49659d8cd360b114e0bbc2d4dd4082748203acf9bd.jpg",
+      "friendly_name": "figure_252.jpg",
+      "abs_path": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\images\\figure_252.jpg",
+      "index": 252
+    },
+    "9b2516b0bff0e871e6f3618e5f2e766313755028ff162e167e25f45fccb8a43d.jpg": {
+      "original_name": "9b2516b0bff0e871e6f3618e5f2e766313755028ff162e167e25f45fccb8a43d.jpg",
+      "original_rel_path": "9b2516b0bff0e871e6f3618e5f2e766313755028ff162e167e25f45fccb8a43d.jpg",
+      "friendly_name": "figure_253.jpg",
+      "abs_path": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\images\\figure_253.jpg",
+      "index": 253
+    },
+    "9b65ddd11b574bccfa5d6a761a8b20e7026ccabf71236a090007de6ac033d507.jpg": {
+      "original_name": "9b65ddd11b574bccfa5d6a761a8b20e7026ccabf71236a090007de6ac033d507.jpg",
+      "original_rel_path": "9b65ddd11b574bccfa5d6a761a8b20e7026ccabf71236a090007de6ac033d507.jpg",
+      "friendly_name": "figure_254.jpg",
+      "abs_path": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\images\\figure_254.jpg",
+      "index": 254
+    },
+    "9e2f91ad941777117d7146fbf21a225541e103adf571188e30e04744817ae438.jpg": {
+      "original_name": "9e2f91ad941777117d7146fbf21a225541e103adf571188e30e04744817ae438.jpg",
+      "original_rel_path": "9e2f91ad941777117d7146fbf21a225541e103adf571188e30e04744817ae438.jpg",
+      "friendly_name": "figure_255.jpg",
+      "abs_path": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\images\\figure_255.jpg",
+      "index": 255
+    },
+    "9ec8f34f17f503623cb961b0985658427a3dca705abbf38d4aa50b07e0a6a5e6.jpg": {
+      "original_name": "9ec8f34f17f503623cb961b0985658427a3dca705abbf38d4aa50b07e0a6a5e6.jpg",
+      "original_rel_path": "9ec8f34f17f503623cb961b0985658427a3dca705abbf38d4aa50b07e0a6a5e6.jpg",
+      "friendly_name": "figure_256.jpg",
+      "abs_path": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\images\\figure_256.jpg",
+      "index": 256
+    },
+    "9edff0fa4ff149053d29eaf2faab2c60f21da0467eb45fcb75404f7c1fb4be1b.jpg": {
+      "original_name": "9edff0fa4ff149053d29eaf2faab2c60f21da0467eb45fcb75404f7c1fb4be1b.jpg",
+      "original_rel_path": "9edff0fa4ff149053d29eaf2faab2c60f21da0467eb45fcb75404f7c1fb4be1b.jpg",
+      "friendly_name": "figure_257.jpg",
+      "abs_path": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\images\\figure_257.jpg",
+      "index": 257
+    },
+    "9f3ef50ff2447d1feb0022e3e3fb1dce8577d3a2fc233cece39680f2cd9e3c3c.jpg": {
+      "original_name": "9f3ef50ff2447d1feb0022e3e3fb1dce8577d3a2fc233cece39680f2cd9e3c3c.jpg",
+      "original_rel_path": "9f3ef50ff2447d1feb0022e3e3fb1dce8577d3a2fc233cece39680f2cd9e3c3c.jpg",
+      "friendly_name": "figure_258.jpg",
+      "abs_path": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\images\\figure_258.jpg",
+      "index": 258
+    },
+    "9fcc71627cf71bd6a23ffd81ac2ef41d838f7c580a297cec7ea889018f386914.jpg": {
+      "original_name": "9fcc71627cf71bd6a23ffd81ac2ef41d838f7c580a297cec7ea889018f386914.jpg",
+      "original_rel_path": "9fcc71627cf71bd6a23ffd81ac2ef41d838f7c580a297cec7ea889018f386914.jpg",
+      "friendly_name": "figure_259.jpg",
+      "abs_path": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\images\\figure_259.jpg",
+      "index": 259
+    },
+    "9fcfa59efa29af80e9337d6236f3aa3734ba124024c01f987f51e404138ef3d5.jpg": {
+      "original_name": "9fcfa59efa29af80e9337d6236f3aa3734ba124024c01f987f51e404138ef3d5.jpg",
+      "original_rel_path": "9fcfa59efa29af80e9337d6236f3aa3734ba124024c01f987f51e404138ef3d5.jpg",
+      "friendly_name": "figure_260.jpg",
+      "abs_path": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\images\\figure_260.jpg",
+      "index": 260
+    },
+    "a106fbb0c8f9b3c1fbf8ae31b6d39f525fa76831c4ff91db45ae30170fdda2b3.jpg": {
+      "original_name": "a106fbb0c8f9b3c1fbf8ae31b6d39f525fa76831c4ff91db45ae30170fdda2b3.jpg",
+      "original_rel_path": "a106fbb0c8f9b3c1fbf8ae31b6d39f525fa76831c4ff91db45ae30170fdda2b3.jpg",
+      "friendly_name": "figure_261.jpg",
+      "abs_path": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\images\\figure_261.jpg",
+      "index": 261
+    },
+    "a148f103f4b1e60738f898dcad2384fb6d62e74acfd2f4198bde4d2119fb18c0.jpg": {
+      "original_name": "a148f103f4b1e60738f898dcad2384fb6d62e74acfd2f4198bde4d2119fb18c0.jpg",
+      "original_rel_path": "a148f103f4b1e60738f898dcad2384fb6d62e74acfd2f4198bde4d2119fb18c0.jpg",
+      "friendly_name": "figure_262.jpg",
+      "abs_path": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\images\\figure_262.jpg",
+      "index": 262
+    },
+    "a186ccd30ce90626130309742f91f17c243272cced3ebee70415d55989975ab6.jpg": {
+      "original_name": "a186ccd30ce90626130309742f91f17c243272cced3ebee70415d55989975ab6.jpg",
+      "original_rel_path": "a186ccd30ce90626130309742f91f17c243272cced3ebee70415d55989975ab6.jpg",
+      "friendly_name": "figure_263.jpg",
+      "abs_path": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\images\\figure_263.jpg",
+      "index": 263
+    },
+    "a19102e0ae4a0ae99897f671726227ca90d7899e34ad7549c7ac932fdfc882d9.jpg": {
+      "original_name": "a19102e0ae4a0ae99897f671726227ca90d7899e34ad7549c7ac932fdfc882d9.jpg",
+      "original_rel_path": "a19102e0ae4a0ae99897f671726227ca90d7899e34ad7549c7ac932fdfc882d9.jpg",
+      "friendly_name": "figure_264.jpg",
+      "abs_path": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\images\\figure_264.jpg",
+      "index": 264
+    },
+    "a29d338a860b26f8237266372297d6984c0a59548a3603b21acb97e02212701c.jpg": {
+      "original_name": "a29d338a860b26f8237266372297d6984c0a59548a3603b21acb97e02212701c.jpg",
+      "original_rel_path": "a29d338a860b26f8237266372297d6984c0a59548a3603b21acb97e02212701c.jpg",
+      "friendly_name": "figure_265.jpg",
+      "abs_path": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\images\\figure_265.jpg",
+      "index": 265
+    },
+    "a3e7e0942b15b450937d8071041b68a03a623d5971249dc7956d54639f46c88a.jpg": {
+      "original_name": "a3e7e0942b15b450937d8071041b68a03a623d5971249dc7956d54639f46c88a.jpg",
+      "original_rel_path": "a3e7e0942b15b450937d8071041b68a03a623d5971249dc7956d54639f46c88a.jpg",
+      "friendly_name": "figure_266.jpg",
+      "abs_path": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\images\\figure_266.jpg",
+      "index": 266
+    },
+    "a411d127cb7aeaa577acee8ba9db33f0c9ff6d8af0156fd8d2cf9435a52ea28f.jpg": {
+      "original_name": "a411d127cb7aeaa577acee8ba9db33f0c9ff6d8af0156fd8d2cf9435a52ea28f.jpg",
+      "original_rel_path": "a411d127cb7aeaa577acee8ba9db33f0c9ff6d8af0156fd8d2cf9435a52ea28f.jpg",
+      "friendly_name": "figure_267.jpg",
+      "abs_path": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\images\\figure_267.jpg",
+      "index": 267
+    },
+    "a488c9d6e31724ce6e76ad8007759c9cd1de2cbe889c8c395f6000be9bb2ef40.jpg": {
+      "original_name": "a488c9d6e31724ce6e76ad8007759c9cd1de2cbe889c8c395f6000be9bb2ef40.jpg",
+      "original_rel_path": "a488c9d6e31724ce6e76ad8007759c9cd1de2cbe889c8c395f6000be9bb2ef40.jpg",
+      "friendly_name": "figure_268.jpg",
+      "abs_path": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\images\\figure_268.jpg",
+      "index": 268
+    },
+    "a574ac4d25ceb9527e5c5af4a95750a6867456d6f62645bd78a0df733bbc62ce.jpg": {
+      "original_name": "a574ac4d25ceb9527e5c5af4a95750a6867456d6f62645bd78a0df733bbc62ce.jpg",
+      "original_rel_path": "a574ac4d25ceb9527e5c5af4a95750a6867456d6f62645bd78a0df733bbc62ce.jpg",
+      "friendly_name": "figure_269.jpg",
+      "abs_path": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\images\\figure_269.jpg",
+      "index": 269
+    },
+    "a62396b8b60cf8ddc08fcd6db3170023d4da01fc5ca5977d398bf096b46aa1c2.jpg": {
+      "original_name": "a62396b8b60cf8ddc08fcd6db3170023d4da01fc5ca5977d398bf096b46aa1c2.jpg",
+      "original_rel_path": "a62396b8b60cf8ddc08fcd6db3170023d4da01fc5ca5977d398bf096b46aa1c2.jpg",
+      "friendly_name": "figure_270.jpg",
+      "abs_path": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\images\\figure_270.jpg",
+      "index": 270
+    },
+    "a6b5edb1dd8d56cff813f4c1e599234545ae0f02e831dc38dd22cf306f1c9ef4.jpg": {
+      "original_name": "a6b5edb1dd8d56cff813f4c1e599234545ae0f02e831dc38dd22cf306f1c9ef4.jpg",
+      "original_rel_path": "a6b5edb1dd8d56cff813f4c1e599234545ae0f02e831dc38dd22cf306f1c9ef4.jpg",
+      "friendly_name": "figure_271.jpg",
+      "abs_path": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\images\\figure_271.jpg",
+      "index": 271
+    },
+    "a6fb8c386dfec682e6643dc2c890306e2a2cb1847ba6c1a52d103b5ac6feecf3.jpg": {
+      "original_name": "a6fb8c386dfec682e6643dc2c890306e2a2cb1847ba6c1a52d103b5ac6feecf3.jpg",
+      "original_rel_path": "a6fb8c386dfec682e6643dc2c890306e2a2cb1847ba6c1a52d103b5ac6feecf3.jpg",
+      "friendly_name": "figure_272.jpg",
+      "abs_path": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\images\\figure_272.jpg",
+      "index": 272
+    },
+    "a72e8efc1602f6759f9973a3bee116bfeb00ea2af56b913e160f973b09371c5b.jpg": {
+      "original_name": "a72e8efc1602f6759f9973a3bee116bfeb00ea2af56b913e160f973b09371c5b.jpg",
+      "original_rel_path": "a72e8efc1602f6759f9973a3bee116bfeb00ea2af56b913e160f973b09371c5b.jpg",
+      "friendly_name": "figure_273.jpg",
+      "abs_path": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\images\\figure_273.jpg",
+      "index": 273
+    },
+    "a7519c9a4f986601b015b7adb8537dacd9a946873f15ab3fe2ec33a65012928f.jpg": {
+      "original_name": "a7519c9a4f986601b015b7adb8537dacd9a946873f15ab3fe2ec33a65012928f.jpg",
+      "original_rel_path": "a7519c9a4f986601b015b7adb8537dacd9a946873f15ab3fe2ec33a65012928f.jpg",
+      "friendly_name": "figure_274.jpg",
+      "abs_path": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\images\\figure_274.jpg",
+      "index": 274
+    },
+    "a7940e486d43cb728496fceeee8a6d933bac720056974284d0fe56853868e01f.jpg": {
+      "original_name": "a7940e486d43cb728496fceeee8a6d933bac720056974284d0fe56853868e01f.jpg",
+      "original_rel_path": "a7940e486d43cb728496fceeee8a6d933bac720056974284d0fe56853868e01f.jpg",
+      "friendly_name": "figure_275.jpg",
+      "abs_path": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\images\\figure_275.jpg",
+      "index": 275
+    },
+    "a799577e7e5f65a6f1fa2b92d9ee77a33cd7da7e55951cbb60db30db79af1dc2.jpg": {
+      "original_name": "a799577e7e5f65a6f1fa2b92d9ee77a33cd7da7e55951cbb60db30db79af1dc2.jpg",
+      "original_rel_path": "a799577e7e5f65a6f1fa2b92d9ee77a33cd7da7e55951cbb60db30db79af1dc2.jpg",
+      "friendly_name": "figure_276.jpg",
+      "abs_path": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\images\\figure_276.jpg",
+      "index": 276
+    },
+    "a7b1a9ffcdcbf7f5225460d9941745763fd0822aac4dcd1ac7e7ada50a8a5e60.jpg": {
+      "original_name": "a7b1a9ffcdcbf7f5225460d9941745763fd0822aac4dcd1ac7e7ada50a8a5e60.jpg",
+      "original_rel_path": "a7b1a9ffcdcbf7f5225460d9941745763fd0822aac4dcd1ac7e7ada50a8a5e60.jpg",
+      "friendly_name": "figure_277.jpg",
+      "abs_path": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\images\\figure_277.jpg",
+      "index": 277
+    },
+    "a7b7360228b5884099862de1a7176735eccc5e377f800756bc6b98b0da409a03.jpg": {
+      "original_name": "a7b7360228b5884099862de1a7176735eccc5e377f800756bc6b98b0da409a03.jpg",
+      "original_rel_path": "a7b7360228b5884099862de1a7176735eccc5e377f800756bc6b98b0da409a03.jpg",
+      "friendly_name": "figure_278.jpg",
+      "abs_path": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\images\\figure_278.jpg",
+      "index": 278
+    },
+    "a82662ff7c513569f7e4e1c537a4ce025aa42e43d0d5549bf6557237651635c7.jpg": {
+      "original_name": "a82662ff7c513569f7e4e1c537a4ce025aa42e43d0d5549bf6557237651635c7.jpg",
+      "original_rel_path": "a82662ff7c513569f7e4e1c537a4ce025aa42e43d0d5549bf6557237651635c7.jpg",
+      "friendly_name": "figure_279.jpg",
+      "abs_path": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\images\\figure_279.jpg",
+      "index": 279
+    },
+    "a83d497b1fda1f13161976433ed090b06ce8bb52de6943a82f57f88295f876b1.jpg": {
+      "original_name": "a83d497b1fda1f13161976433ed090b06ce8bb52de6943a82f57f88295f876b1.jpg",
+      "original_rel_path": "a83d497b1fda1f13161976433ed090b06ce8bb52de6943a82f57f88295f876b1.jpg",
+      "friendly_name": "figure_280.jpg",
+      "abs_path": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\images\\figure_280.jpg",
+      "index": 280
+    },
+    "a83ff40916d688c7a8c208acf1ba3083f44d23306137ed8d26d629047284cc7c.jpg": {
+      "original_name": "a83ff40916d688c7a8c208acf1ba3083f44d23306137ed8d26d629047284cc7c.jpg",
+      "original_rel_path": "a83ff40916d688c7a8c208acf1ba3083f44d23306137ed8d26d629047284cc7c.jpg",
+      "friendly_name": "figure_281.jpg",
+      "abs_path": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\images\\figure_281.jpg",
+      "index": 281
+    },
+    "a8bf7c10e08b96b5be4c27684a4f541093227ae559a0974602ea79d4d10aa5b2.jpg": {
+      "original_name": "a8bf7c10e08b96b5be4c27684a4f541093227ae559a0974602ea79d4d10aa5b2.jpg",
+      "original_rel_path": "a8bf7c10e08b96b5be4c27684a4f541093227ae559a0974602ea79d4d10aa5b2.jpg",
+      "friendly_name": "figure_282.jpg",
+      "abs_path": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\images\\figure_282.jpg",
+      "index": 282
+    },
+    "ab34cc905327de48045bc8b2852d94399d20c4cee79ceb711fe8ac03c037daf3.jpg": {
+      "original_name": "ab34cc905327de48045bc8b2852d94399d20c4cee79ceb711fe8ac03c037daf3.jpg",
+      "original_rel_path": "ab34cc905327de48045bc8b2852d94399d20c4cee79ceb711fe8ac03c037daf3.jpg",
+      "friendly_name": "figure_283.jpg",
+      "abs_path": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\images\\figure_283.jpg",
+      "index": 283
+    },
+    "ac4d42eb0ad895f6ced6d0299257c76badf5200c80efe27b2e319799f10e9a6d.jpg": {
+      "original_name": "ac4d42eb0ad895f6ced6d0299257c76badf5200c80efe27b2e319799f10e9a6d.jpg",
+      "original_rel_path": "ac4d42eb0ad895f6ced6d0299257c76badf5200c80efe27b2e319799f10e9a6d.jpg",
+      "friendly_name": "figure_284.jpg",
+      "abs_path": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\images\\figure_284.jpg",
+      "index": 284
+    },
+    "aced8f755ec60a1ca14037b579e8667acc8025f2c3b54db01e340632e135c7f0.jpg": {
+      "original_name": "aced8f755ec60a1ca14037b579e8667acc8025f2c3b54db01e340632e135c7f0.jpg",
+      "original_rel_path": "aced8f755ec60a1ca14037b579e8667acc8025f2c3b54db01e340632e135c7f0.jpg",
+      "friendly_name": "figure_285.jpg",
+      "abs_path": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\images\\figure_285.jpg",
+      "index": 285
+    },
+    "b10d268baca14fd3a20011de36d0a36285e1be2f61a46a6d8442af9ad01e4a39.jpg": {
+      "original_name": "b10d268baca14fd3a20011de36d0a36285e1be2f61a46a6d8442af9ad01e4a39.jpg",
+      "original_rel_path": "b10d268baca14fd3a20011de36d0a36285e1be2f61a46a6d8442af9ad01e4a39.jpg",
+      "friendly_name": "figure_286.jpg",
+      "abs_path": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\images\\figure_286.jpg",
+      "index": 286
+    },
+    "b16d82bea43f2865c63106a58b4f3815031c0373c719166c07a25bf72403bec5.jpg": {
+      "original_name": "b16d82bea43f2865c63106a58b4f3815031c0373c719166c07a25bf72403bec5.jpg",
+      "original_rel_path": "b16d82bea43f2865c63106a58b4f3815031c0373c719166c07a25bf72403bec5.jpg",
+      "friendly_name": "figure_287.jpg",
+      "abs_path": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\images\\figure_287.jpg",
+      "index": 287
+    },
+    "b1bedc61a87326f8a34ab0afd927e457f97f861ef6a4c323adf12236c612787e.jpg": {
+      "original_name": "b1bedc61a87326f8a34ab0afd927e457f97f861ef6a4c323adf12236c612787e.jpg",
+      "original_rel_path": "b1bedc61a87326f8a34ab0afd927e457f97f861ef6a4c323adf12236c612787e.jpg",
+      "friendly_name": "figure_288.jpg",
+      "abs_path": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\images\\figure_288.jpg",
+      "index": 288
+    },
+    "b2375675cec64783b99e5ffc117649f9d1324cd1a726bffa41c7073c6f15e222.jpg": {
+      "original_name": "b2375675cec64783b99e5ffc117649f9d1324cd1a726bffa41c7073c6f15e222.jpg",
+      "original_rel_path": "b2375675cec64783b99e5ffc117649f9d1324cd1a726bffa41c7073c6f15e222.jpg",
+      "friendly_name": "figure_289.jpg",
+      "abs_path": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\images\\figure_289.jpg",
+      "index": 289
+    },
+    "b2d91731ff7d8401feb6dcae2e16a85c81581d146d30bd9f5b6d58d98d9bafca.jpg": {
+      "original_name": "b2d91731ff7d8401feb6dcae2e16a85c81581d146d30bd9f5b6d58d98d9bafca.jpg",
+      "original_rel_path": "b2d91731ff7d8401feb6dcae2e16a85c81581d146d30bd9f5b6d58d98d9bafca.jpg",
+      "friendly_name": "figure_290.jpg",
+      "abs_path": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\images\\figure_290.jpg",
+      "index": 290
+    },
+    "b351aa5b41e34acb8a94e8003fe454bfec90ba3d785a8450830728d43a09d943.jpg": {
+      "original_name": "b351aa5b41e34acb8a94e8003fe454bfec90ba3d785a8450830728d43a09d943.jpg",
+      "original_rel_path": "b351aa5b41e34acb8a94e8003fe454bfec90ba3d785a8450830728d43a09d943.jpg",
+      "friendly_name": "figure_291.jpg",
+      "abs_path": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\images\\figure_291.jpg",
+      "index": 291
+    },
+    "b3b3541850bc7d7897005c28c3e6c3aa9e081e722f94c4563063ac9e42cbe68c.jpg": {
+      "original_name": "b3b3541850bc7d7897005c28c3e6c3aa9e081e722f94c4563063ac9e42cbe68c.jpg",
+      "original_rel_path": "b3b3541850bc7d7897005c28c3e6c3aa9e081e722f94c4563063ac9e42cbe68c.jpg",
+      "friendly_name": "figure_292.jpg",
+      "abs_path": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\images\\figure_292.jpg",
+      "index": 292
+    },
+    "b402b0fd65690135028e99b353265f185ffd413a22f6e90ba18770bffff3bc36.jpg": {
+      "original_name": "b402b0fd65690135028e99b353265f185ffd413a22f6e90ba18770bffff3bc36.jpg",
+      "original_rel_path": "b402b0fd65690135028e99b353265f185ffd413a22f6e90ba18770bffff3bc36.jpg",
+      "friendly_name": "figure_293.jpg",
+      "abs_path": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\images\\figure_293.jpg",
+      "index": 293
+    },
+    "b433a7851f47e668b220d44a9a7225ba779c23a84cd725eca12384b3be183863.jpg": {
+      "original_name": "b433a7851f47e668b220d44a9a7225ba779c23a84cd725eca12384b3be183863.jpg",
+      "original_rel_path": "b433a7851f47e668b220d44a9a7225ba779c23a84cd725eca12384b3be183863.jpg",
+      "friendly_name": "figure_294.jpg",
+      "abs_path": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\images\\figure_294.jpg",
+      "index": 294
+    },
+    "b48b65c24eee3910827776244d7be0d66ab4c2bfb827990967a3d779169b3448.jpg": {
+      "original_name": "b48b65c24eee3910827776244d7be0d66ab4c2bfb827990967a3d779169b3448.jpg",
+      "original_rel_path": "b48b65c24eee3910827776244d7be0d66ab4c2bfb827990967a3d779169b3448.jpg",
+      "friendly_name": "figure_295.jpg",
+      "abs_path": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\images\\figure_295.jpg",
+      "index": 295
+    },
+    "b49df66937599ff11700144b204278dee365ba4db799a7f66549c054c6aa27c6.jpg": {
+      "original_name": "b49df66937599ff11700144b204278dee365ba4db799a7f66549c054c6aa27c6.jpg",
+      "original_rel_path": "b49df66937599ff11700144b204278dee365ba4db799a7f66549c054c6aa27c6.jpg",
+      "friendly_name": "figure_296.jpg",
+      "abs_path": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\images\\figure_296.jpg",
+      "index": 296
+    },
+    "b5307bb671fab556d8db88e867389eefce4dc82d01a63fd40c7ed6ca5fdc54eb.jpg": {
+      "original_name": "b5307bb671fab556d8db88e867389eefce4dc82d01a63fd40c7ed6ca5fdc54eb.jpg",
+      "original_rel_path": "b5307bb671fab556d8db88e867389eefce4dc82d01a63fd40c7ed6ca5fdc54eb.jpg",
+      "friendly_name": "figure_297.jpg",
+      "abs_path": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\images\\figure_297.jpg",
+      "index": 297
+    },
+    "b628034d72cf9dc23c3bdc2a38774f5df43b6c26a3cc210e897139693740a1e9.jpg": {
+      "original_name": "b628034d72cf9dc23c3bdc2a38774f5df43b6c26a3cc210e897139693740a1e9.jpg",
+      "original_rel_path": "b628034d72cf9dc23c3bdc2a38774f5df43b6c26a3cc210e897139693740a1e9.jpg",
+      "friendly_name": "figure_298.jpg",
+      "abs_path": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\images\\figure_298.jpg",
+      "index": 298
+    },
+    "b641dd8fc192908b9ea7cd9f1039243b3980a98eef13030da916a8f7baf935bc.jpg": {
+      "original_name": "b641dd8fc192908b9ea7cd9f1039243b3980a98eef13030da916a8f7baf935bc.jpg",
+      "original_rel_path": "b641dd8fc192908b9ea7cd9f1039243b3980a98eef13030da916a8f7baf935bc.jpg",
+      "friendly_name": "figure_299.jpg",
+      "abs_path": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\images\\figure_299.jpg",
+      "index": 299
+    },
+    "b6bb147bae7a5644560b9d8c282d96f5cbb9120ee381fe275242dee2f00e1b99.jpg": {
+      "original_name": "b6bb147bae7a5644560b9d8c282d96f5cbb9120ee381fe275242dee2f00e1b99.jpg",
+      "original_rel_path": "b6bb147bae7a5644560b9d8c282d96f5cbb9120ee381fe275242dee2f00e1b99.jpg",
+      "friendly_name": "figure_300.jpg",
+      "abs_path": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\images\\figure_300.jpg",
+      "index": 300
+    },
+    "b6dc5095a3dcc91957f95ea04eb93ecff9797252a885c84fa9dd2151637ad1df.jpg": {
+      "original_name": "b6dc5095a3dcc91957f95ea04eb93ecff9797252a885c84fa9dd2151637ad1df.jpg",
+      "original_rel_path": "b6dc5095a3dcc91957f95ea04eb93ecff9797252a885c84fa9dd2151637ad1df.jpg",
+      "friendly_name": "figure_301.jpg",
+      "abs_path": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\images\\figure_301.jpg",
+      "index": 301
+    },
+    "b71a906a87dd2653e8ab985479c7e844d46574ca1fedb58d7db91ef5cf6e6dac.jpg": {
+      "original_name": "b71a906a87dd2653e8ab985479c7e844d46574ca1fedb58d7db91ef5cf6e6dac.jpg",
+      "original_rel_path": "b71a906a87dd2653e8ab985479c7e844d46574ca1fedb58d7db91ef5cf6e6dac.jpg",
+      "friendly_name": "figure_302.jpg",
+      "abs_path": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\images\\figure_302.jpg",
+      "index": 302
+    },
+    "b72a3244e39ff1d23ce05faa3b048d323951ded65d590043e85fb68f00295250.jpg": {
+      "original_name": "b72a3244e39ff1d23ce05faa3b048d323951ded65d590043e85fb68f00295250.jpg",
+      "original_rel_path": "b72a3244e39ff1d23ce05faa3b048d323951ded65d590043e85fb68f00295250.jpg",
+      "friendly_name": "figure_303.jpg",
+      "abs_path": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\images\\figure_303.jpg",
+      "index": 303
+    },
+    "b88174a548b6d56f80c2edf541e15eefe7a388aba041af711a333a65e98d4305.jpg": {
+      "original_name": "b88174a548b6d56f80c2edf541e15eefe7a388aba041af711a333a65e98d4305.jpg",
+      "original_rel_path": "b88174a548b6d56f80c2edf541e15eefe7a388aba041af711a333a65e98d4305.jpg",
+      "friendly_name": "figure_304.jpg",
+      "abs_path": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\images\\figure_304.jpg",
+      "index": 304
+    },
+    "b948937d6eccc815d1ae1451a4f004c53bbdca288096f271ce1a55a7a3b1cd95.jpg": {
+      "original_name": "b948937d6eccc815d1ae1451a4f004c53bbdca288096f271ce1a55a7a3b1cd95.jpg",
+      "original_rel_path": "b948937d6eccc815d1ae1451a4f004c53bbdca288096f271ce1a55a7a3b1cd95.jpg",
+      "friendly_name": "figure_305.jpg",
+      "abs_path": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\images\\figure_305.jpg",
+      "index": 305
+    },
+    "baaf7cc0e62c123bb84bbda4b496f2e5a7cb35bd9a70f149efa5b061d039fb17.jpg": {
+      "original_name": "baaf7cc0e62c123bb84bbda4b496f2e5a7cb35bd9a70f149efa5b061d039fb17.jpg",
+      "original_rel_path": "baaf7cc0e62c123bb84bbda4b496f2e5a7cb35bd9a70f149efa5b061d039fb17.jpg",
+      "friendly_name": "figure_306.jpg",
+      "abs_path": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\images\\figure_306.jpg",
+      "index": 306
+    },
+    "bb5efb985c4e6d5a888628180e75c4193e8073e0f38c7d496fa8188609cce0aa.jpg": {
+      "original_name": "bb5efb985c4e6d5a888628180e75c4193e8073e0f38c7d496fa8188609cce0aa.jpg",
+      "original_rel_path": "bb5efb985c4e6d5a888628180e75c4193e8073e0f38c7d496fa8188609cce0aa.jpg",
+      "friendly_name": "figure_307.jpg",
+      "abs_path": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\images\\figure_307.jpg",
+      "index": 307
+    },
+    "bb691f3015dd13ce28eafc807a2b8cfb68305209d3f9af918481c02c7f7a93d3.jpg": {
+      "original_name": "bb691f3015dd13ce28eafc807a2b8cfb68305209d3f9af918481c02c7f7a93d3.jpg",
+      "original_rel_path": "bb691f3015dd13ce28eafc807a2b8cfb68305209d3f9af918481c02c7f7a93d3.jpg",
+      "friendly_name": "figure_308.jpg",
+      "abs_path": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\images\\figure_308.jpg",
+      "index": 308
+    },
+    "bb85c5f1d1cdb6e1cca766e4812645252cc8f17d76a898c74b8c6deb66894197.jpg": {
+      "original_name": "bb85c5f1d1cdb6e1cca766e4812645252cc8f17d76a898c74b8c6deb66894197.jpg",
+      "original_rel_path": "bb85c5f1d1cdb6e1cca766e4812645252cc8f17d76a898c74b8c6deb66894197.jpg",
+      "friendly_name": "figure_309.jpg",
+      "abs_path": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\images\\figure_309.jpg",
+      "index": 309
+    },
+    "bb8ab31baefe79f36c710901d55cc63411f0304b09aa618f4939d6e6a6f2d044.jpg": {
+      "original_name": "bb8ab31baefe79f36c710901d55cc63411f0304b09aa618f4939d6e6a6f2d044.jpg",
+      "original_rel_path": "bb8ab31baefe79f36c710901d55cc63411f0304b09aa618f4939d6e6a6f2d044.jpg",
+      "friendly_name": "figure_310.jpg",
+      "abs_path": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\images\\figure_310.jpg",
+      "index": 310
+    },
+    "bc6094141d433c8466486adc17727ae687d801af99c89b804b2642f938d48a4d.jpg": {
+      "original_name": "bc6094141d433c8466486adc17727ae687d801af99c89b804b2642f938d48a4d.jpg",
+      "original_rel_path": "bc6094141d433c8466486adc17727ae687d801af99c89b804b2642f938d48a4d.jpg",
+      "friendly_name": "figure_311.jpg",
+      "abs_path": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\images\\figure_311.jpg",
+      "index": 311
+    },
+    "bcb2064abc704f91b8c78088b59f044c319810c30916db8246cfc9f1077b36cb.jpg": {
+      "original_name": "bcb2064abc704f91b8c78088b59f044c319810c30916db8246cfc9f1077b36cb.jpg",
+      "original_rel_path": "bcb2064abc704f91b8c78088b59f044c319810c30916db8246cfc9f1077b36cb.jpg",
+      "friendly_name": "figure_312.jpg",
+      "abs_path": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\images\\figure_312.jpg",
+      "index": 312
+    },
+    "bcbabd1e637a8566678a3b60386584a543ac8df339a3f0c838510b38c052292a.jpg": {
+      "original_name": "bcbabd1e637a8566678a3b60386584a543ac8df339a3f0c838510b38c052292a.jpg",
+      "original_rel_path": "bcbabd1e637a8566678a3b60386584a543ac8df339a3f0c838510b38c052292a.jpg",
+      "friendly_name": "figure_313.jpg",
+      "abs_path": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\images\\figure_313.jpg",
+      "index": 313
+    },
+    "bd2e20b861617ba60b42c455010935caa7f6c4c5e0b4217c8c18a03d9344af0d.jpg": {
+      "original_name": "bd2e20b861617ba60b42c455010935caa7f6c4c5e0b4217c8c18a03d9344af0d.jpg",
+      "original_rel_path": "bd2e20b861617ba60b42c455010935caa7f6c4c5e0b4217c8c18a03d9344af0d.jpg",
+      "friendly_name": "figure_314.jpg",
+      "abs_path": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\images\\figure_314.jpg",
+      "index": 314
+    },
+    "bd969be28078b84d1293943cd3f7a3d3c04b0a6a200b597ebccda6f382725596.jpg": {
+      "original_name": "bd969be28078b84d1293943cd3f7a3d3c04b0a6a200b597ebccda6f382725596.jpg",
+      "original_rel_path": "bd969be28078b84d1293943cd3f7a3d3c04b0a6a200b597ebccda6f382725596.jpg",
+      "friendly_name": "figure_315.jpg",
+      "abs_path": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\images\\figure_315.jpg",
+      "index": 315
+    },
+    "bda8f11d000f59ca9b20fd561a9ff1e5d9c3ba7840088ab72ee1c816cc4b23b5.jpg": {
+      "original_name": "bda8f11d000f59ca9b20fd561a9ff1e5d9c3ba7840088ab72ee1c816cc4b23b5.jpg",
+      "original_rel_path": "bda8f11d000f59ca9b20fd561a9ff1e5d9c3ba7840088ab72ee1c816cc4b23b5.jpg",
+      "friendly_name": "figure_316.jpg",
+      "abs_path": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\images\\figure_316.jpg",
+      "index": 316
+    },
+    "be6143cb0891861a79b88898fe3000b7603c5c3983834d925c0a2e4f378f80c3.jpg": {
+      "original_name": "be6143cb0891861a79b88898fe3000b7603c5c3983834d925c0a2e4f378f80c3.jpg",
+      "original_rel_path": "be6143cb0891861a79b88898fe3000b7603c5c3983834d925c0a2e4f378f80c3.jpg",
+      "friendly_name": "figure_317.jpg",
+      "abs_path": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\images\\figure_317.jpg",
+      "index": 317
+    },
+    "bf307ae547af59581342993d67e73b428d8f5488dfe7cc3f537a4c4540bc760a.jpg": {
+      "original_name": "bf307ae547af59581342993d67e73b428d8f5488dfe7cc3f537a4c4540bc760a.jpg",
+      "original_rel_path": "bf307ae547af59581342993d67e73b428d8f5488dfe7cc3f537a4c4540bc760a.jpg",
+      "friendly_name": "figure_318.jpg",
+      "abs_path": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\images\\figure_318.jpg",
+      "index": 318
+    },
+    "bf5cc90de8dcf0c1a4fe97ef9d524dbc363cb406e21bd0a05f9eb8d519fc6a1d.jpg": {
+      "original_name": "bf5cc90de8dcf0c1a4fe97ef9d524dbc363cb406e21bd0a05f9eb8d519fc6a1d.jpg",
+      "original_rel_path": "bf5cc90de8dcf0c1a4fe97ef9d524dbc363cb406e21bd0a05f9eb8d519fc6a1d.jpg",
+      "friendly_name": "figure_319.jpg",
+      "abs_path": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\images\\figure_319.jpg",
+      "index": 319
+    },
+    "bfa38f6d59e4918bdae9fa46eed7614b27dd1d3e978e3af51b6d7e6adaa4e0a6.jpg": {
+      "original_name": "bfa38f6d59e4918bdae9fa46eed7614b27dd1d3e978e3af51b6d7e6adaa4e0a6.jpg",
+      "original_rel_path": "bfa38f6d59e4918bdae9fa46eed7614b27dd1d3e978e3af51b6d7e6adaa4e0a6.jpg",
+      "friendly_name": "figure_320.jpg",
+      "abs_path": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\images\\figure_320.jpg",
+      "index": 320
+    },
+    "bfc32ff127ee96f768eb67cb2129e6c1cc2ac0bdfcc1ed422249513b40ca216f.jpg": {
+      "original_name": "bfc32ff127ee96f768eb67cb2129e6c1cc2ac0bdfcc1ed422249513b40ca216f.jpg",
+      "original_rel_path": "bfc32ff127ee96f768eb67cb2129e6c1cc2ac0bdfcc1ed422249513b40ca216f.jpg",
+      "friendly_name": "figure_321.jpg",
+      "abs_path": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\images\\figure_321.jpg",
+      "index": 321
+    },
+    "bfca91acf3157e8fe61f6ea8d3eaaa42f423573af490b4b58c02cc143950c2ec.jpg": {
+      "original_name": "bfca91acf3157e8fe61f6ea8d3eaaa42f423573af490b4b58c02cc143950c2ec.jpg",
+      "original_rel_path": "bfca91acf3157e8fe61f6ea8d3eaaa42f423573af490b4b58c02cc143950c2ec.jpg",
+      "friendly_name": "figure_322.jpg",
+      "abs_path": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\images\\figure_322.jpg",
+      "index": 322
+    },
+    "c0ef6efb38977e58a5834ab89eaaf6758f9b9195c8cfebb66e6480455e72e306.jpg": {
+      "original_name": "c0ef6efb38977e58a5834ab89eaaf6758f9b9195c8cfebb66e6480455e72e306.jpg",
+      "original_rel_path": "c0ef6efb38977e58a5834ab89eaaf6758f9b9195c8cfebb66e6480455e72e306.jpg",
+      "friendly_name": "figure_323.jpg",
+      "abs_path": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\images\\figure_323.jpg",
+      "index": 323
+    },
+    "c1f154109c68c16f58e8397efae7c7d5320e51a40ec4b2aa39061a5ead72cb49.jpg": {
+      "original_name": "c1f154109c68c16f58e8397efae7c7d5320e51a40ec4b2aa39061a5ead72cb49.jpg",
+      "original_rel_path": "c1f154109c68c16f58e8397efae7c7d5320e51a40ec4b2aa39061a5ead72cb49.jpg",
+      "friendly_name": "figure_324.jpg",
+      "abs_path": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\images\\figure_324.jpg",
+      "index": 324
+    },
+    "c219ad1a1915810b3c451057cb11e4c099c368e528ad7b26b57ad39add4c2dc8.jpg": {
+      "original_name": "c219ad1a1915810b3c451057cb11e4c099c368e528ad7b26b57ad39add4c2dc8.jpg",
+      "original_rel_path": "c219ad1a1915810b3c451057cb11e4c099c368e528ad7b26b57ad39add4c2dc8.jpg",
+      "friendly_name": "figure_325.jpg",
+      "abs_path": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\images\\figure_325.jpg",
+      "index": 325
+    },
+    "c3082ffb1793d1373ea7305ac50dc9a812203e5c492182a22d93ec005b5317c7.jpg": {
+      "original_name": "c3082ffb1793d1373ea7305ac50dc9a812203e5c492182a22d93ec005b5317c7.jpg",
+      "original_rel_path": "c3082ffb1793d1373ea7305ac50dc9a812203e5c492182a22d93ec005b5317c7.jpg",
+      "friendly_name": "figure_326.jpg",
+      "abs_path": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\images\\figure_326.jpg",
+      "index": 326
+    },
+    "c3205fdbae234db60b669238ec0ff03ab172c427946895e400eaa24f49f63e2f.jpg": {
+      "original_name": "c3205fdbae234db60b669238ec0ff03ab172c427946895e400eaa24f49f63e2f.jpg",
+      "original_rel_path": "c3205fdbae234db60b669238ec0ff03ab172c427946895e400eaa24f49f63e2f.jpg",
+      "friendly_name": "figure_327.jpg",
+      "abs_path": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\images\\figure_327.jpg",
+      "index": 327
+    },
+    "c53fdbbabcd337692bc18bd79ef2d86ccf6dbe8c57b163623af957205d573ebc.jpg": {
+      "original_name": "c53fdbbabcd337692bc18bd79ef2d86ccf6dbe8c57b163623af957205d573ebc.jpg",
+      "original_rel_path": "c53fdbbabcd337692bc18bd79ef2d86ccf6dbe8c57b163623af957205d573ebc.jpg",
+      "friendly_name": "figure_328.jpg",
+      "abs_path": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\images\\figure_328.jpg",
+      "index": 328
+    },
+    "c5f9d91d51e3c6c04c9246d489e2b2a65e37e910aed9cf68f161662ffd454c5a.jpg": {
+      "original_name": "c5f9d91d51e3c6c04c9246d489e2b2a65e37e910aed9cf68f161662ffd454c5a.jpg",
+      "original_rel_path": "c5f9d91d51e3c6c04c9246d489e2b2a65e37e910aed9cf68f161662ffd454c5a.jpg",
+      "friendly_name": "figure_329.jpg",
+      "abs_path": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\images\\figure_329.jpg",
+      "index": 329
+    },
+    "c60f0e1ad1d3cac2f9ec3ea175f3302933a84f95a3e42ecb293e9687bf15be4e.jpg": {
+      "original_name": "c60f0e1ad1d3cac2f9ec3ea175f3302933a84f95a3e42ecb293e9687bf15be4e.jpg",
+      "original_rel_path": "c60f0e1ad1d3cac2f9ec3ea175f3302933a84f95a3e42ecb293e9687bf15be4e.jpg",
+      "friendly_name": "figure_330.jpg",
+      "abs_path": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\images\\figure_330.jpg",
+      "index": 330
+    },
+    "c8d3461d9f6fa6c84a5f6352cc69f33c272d6d82272540ae1f86b1b0b3e8230f.jpg": {
+      "original_name": "c8d3461d9f6fa6c84a5f6352cc69f33c272d6d82272540ae1f86b1b0b3e8230f.jpg",
+      "original_rel_path": "c8d3461d9f6fa6c84a5f6352cc69f33c272d6d82272540ae1f86b1b0b3e8230f.jpg",
+      "friendly_name": "figure_331.jpg",
+      "abs_path": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\images\\figure_331.jpg",
+      "index": 331
+    },
+    "c98529ee52034202037bb926042254842e933dfbebdd908dcbf4f596680ee219.jpg": {
+      "original_name": "c98529ee52034202037bb926042254842e933dfbebdd908dcbf4f596680ee219.jpg",
+      "original_rel_path": "c98529ee52034202037bb926042254842e933dfbebdd908dcbf4f596680ee219.jpg",
+      "friendly_name": "figure_332.jpg",
+      "abs_path": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\images\\figure_332.jpg",
+      "index": 332
+    },
+    "ca4467c4f19f4cba1da374f659c21f71b173a952e437d08c45d6b28529208f75.jpg": {
+      "original_name": "ca4467c4f19f4cba1da374f659c21f71b173a952e437d08c45d6b28529208f75.jpg",
+      "original_rel_path": "ca4467c4f19f4cba1da374f659c21f71b173a952e437d08c45d6b28529208f75.jpg",
+      "friendly_name": "figure_333.jpg",
+      "abs_path": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\images\\figure_333.jpg",
+      "index": 333
+    },
+    "ca57fa50ff794c4a3eb62859302325c6d97860bcdd8be94ad0b3ace59178d7d7.jpg": {
+      "original_name": "ca57fa50ff794c4a3eb62859302325c6d97860bcdd8be94ad0b3ace59178d7d7.jpg",
+      "original_rel_path": "ca57fa50ff794c4a3eb62859302325c6d97860bcdd8be94ad0b3ace59178d7d7.jpg",
+      "friendly_name": "figure_334.jpg",
+      "abs_path": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\images\\figure_334.jpg",
+      "index": 334
+    },
+    "cbc743e123ee4e9e7c5c9008424ee88de0b90c46859329b3fbb4caabaf0e42e1.jpg": {
+      "original_name": "cbc743e123ee4e9e7c5c9008424ee88de0b90c46859329b3fbb4caabaf0e42e1.jpg",
+      "original_rel_path": "cbc743e123ee4e9e7c5c9008424ee88de0b90c46859329b3fbb4caabaf0e42e1.jpg",
+      "friendly_name": "figure_335.jpg",
+      "abs_path": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\images\\figure_335.jpg",
+      "index": 335
+    },
+    "cc056a3a3222f03b4106d44918c46bc37abc1660f14738760f5e4709c1bc43ec.jpg": {
+      "original_name": "cc056a3a3222f03b4106d44918c46bc37abc1660f14738760f5e4709c1bc43ec.jpg",
+      "original_rel_path": "cc056a3a3222f03b4106d44918c46bc37abc1660f14738760f5e4709c1bc43ec.jpg",
+      "friendly_name": "figure_336.jpg",
+      "abs_path": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\images\\figure_336.jpg",
+      "index": 336
+    },
+    "cc5a30d20e9d933cac8ede6648d0c50ec51e6f68525cee10321333bafd66c79d.jpg": {
+      "original_name": "cc5a30d20e9d933cac8ede6648d0c50ec51e6f68525cee10321333bafd66c79d.jpg",
+      "original_rel_path": "cc5a30d20e9d933cac8ede6648d0c50ec51e6f68525cee10321333bafd66c79d.jpg",
+      "friendly_name": "figure_337.jpg",
+      "abs_path": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\images\\figure_337.jpg",
+      "index": 337
+    },
+    "cdc59be79fac3d5952d2d8e687273050ed2acd0f4520b58563ffcd8435ce0a22.jpg": {
+      "original_name": "cdc59be79fac3d5952d2d8e687273050ed2acd0f4520b58563ffcd8435ce0a22.jpg",
+      "original_rel_path": "cdc59be79fac3d5952d2d8e687273050ed2acd0f4520b58563ffcd8435ce0a22.jpg",
+      "friendly_name": "figure_338.jpg",
+      "abs_path": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\images\\figure_338.jpg",
+      "index": 338
+    },
+    "ce11f4b469a6452fca013360539390a5ae113c6e243b0c285aacbce364a8933a.jpg": {
+      "original_name": "ce11f4b469a6452fca013360539390a5ae113c6e243b0c285aacbce364a8933a.jpg",
+      "original_rel_path": "ce11f4b469a6452fca013360539390a5ae113c6e243b0c285aacbce364a8933a.jpg",
+      "friendly_name": "figure_339.jpg",
+      "abs_path": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\images\\figure_339.jpg",
+      "index": 339
+    },
+    "ce24a88b0f0ce24adda345e408fa153378db68316b32164b4538d86dcda90fba.jpg": {
+      "original_name": "ce24a88b0f0ce24adda345e408fa153378db68316b32164b4538d86dcda90fba.jpg",
+      "original_rel_path": "ce24a88b0f0ce24adda345e408fa153378db68316b32164b4538d86dcda90fba.jpg",
+      "friendly_name": "figure_340.jpg",
+      "abs_path": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\images\\figure_340.jpg",
+      "index": 340
+    },
+    "cf11e534197d2259181b03a462b8cfe770f0c05b03652737adcd50a287f03c2f.jpg": {
+      "original_name": "cf11e534197d2259181b03a462b8cfe770f0c05b03652737adcd50a287f03c2f.jpg",
+      "original_rel_path": "cf11e534197d2259181b03a462b8cfe770f0c05b03652737adcd50a287f03c2f.jpg",
+      "friendly_name": "figure_341.jpg",
+      "abs_path": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\images\\figure_341.jpg",
+      "index": 341
+    },
+    "cf3e89c78de349cf6423cd088f73c75af39ff7d16a7caae429795c0d8e34a466.jpg": {
+      "original_name": "cf3e89c78de349cf6423cd088f73c75af39ff7d16a7caae429795c0d8e34a466.jpg",
+      "original_rel_path": "cf3e89c78de349cf6423cd088f73c75af39ff7d16a7caae429795c0d8e34a466.jpg",
+      "friendly_name": "figure_342.jpg",
+      "abs_path": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\images\\figure_342.jpg",
+      "index": 342
+    },
+    "cf9c05c54f90e2dc9de43b82a600509fed78a861b6c40810538318ab0fc8d8ed.jpg": {
+      "original_name": "cf9c05c54f90e2dc9de43b82a600509fed78a861b6c40810538318ab0fc8d8ed.jpg",
+      "original_rel_path": "cf9c05c54f90e2dc9de43b82a600509fed78a861b6c40810538318ab0fc8d8ed.jpg",
+      "friendly_name": "figure_343.jpg",
+      "abs_path": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\images\\figure_343.jpg",
+      "index": 343
+    },
+    "d0717ce55af25f908c509ebe315ac24c1d2922239e5cb24e80440aaf15559995.jpg": {
+      "original_name": "d0717ce55af25f908c509ebe315ac24c1d2922239e5cb24e80440aaf15559995.jpg",
+      "original_rel_path": "d0717ce55af25f908c509ebe315ac24c1d2922239e5cb24e80440aaf15559995.jpg",
+      "friendly_name": "figure_344.jpg",
+      "abs_path": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\images\\figure_344.jpg",
+      "index": 344
+    },
+    "d10b1d675e1f6ef8b2dad1805ac2949926791848437367a6c8702724f5968e08.jpg": {
+      "original_name": "d10b1d675e1f6ef8b2dad1805ac2949926791848437367a6c8702724f5968e08.jpg",
+      "original_rel_path": "d10b1d675e1f6ef8b2dad1805ac2949926791848437367a6c8702724f5968e08.jpg",
+      "friendly_name": "figure_345.jpg",
+      "abs_path": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\images\\figure_345.jpg",
+      "index": 345
+    },
+    "d1e3019900cd50af92fe175b1a483e71a4ef9bcb2293470262232eda0c0f9765.jpg": {
+      "original_name": "d1e3019900cd50af92fe175b1a483e71a4ef9bcb2293470262232eda0c0f9765.jpg",
+      "original_rel_path": "d1e3019900cd50af92fe175b1a483e71a4ef9bcb2293470262232eda0c0f9765.jpg",
+      "friendly_name": "figure_346.jpg",
+      "abs_path": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\images\\figure_346.jpg",
+      "index": 346
+    },
+    "d22f1187d467bef50d7d413d9c7d61c26047460a197bb31bda1eb5d6656fce8b.jpg": {
+      "original_name": "d22f1187d467bef50d7d413d9c7d61c26047460a197bb31bda1eb5d6656fce8b.jpg",
+      "original_rel_path": "d22f1187d467bef50d7d413d9c7d61c26047460a197bb31bda1eb5d6656fce8b.jpg",
+      "friendly_name": "figure_347.jpg",
+      "abs_path": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\images\\figure_347.jpg",
+      "index": 347
+    },
+    "d2738290c7831997c8cb55db78e70ebc832d9bbc7d92e54b88f6bfca9a3ceede.jpg": {
+      "original_name": "d2738290c7831997c8cb55db78e70ebc832d9bbc7d92e54b88f6bfca9a3ceede.jpg",
+      "original_rel_path": "d2738290c7831997c8cb55db78e70ebc832d9bbc7d92e54b88f6bfca9a3ceede.jpg",
+      "friendly_name": "figure_348.jpg",
+      "abs_path": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\images\\figure_348.jpg",
+      "index": 348
+    },
+    "d332eb96fef4a4ba0dd45724067ac34b91e53def6fc32b009fadff984e95c6b6.jpg": {
+      "original_name": "d332eb96fef4a4ba0dd45724067ac34b91e53def6fc32b009fadff984e95c6b6.jpg",
+      "original_rel_path": "d332eb96fef4a4ba0dd45724067ac34b91e53def6fc32b009fadff984e95c6b6.jpg",
+      "friendly_name": "figure_349.jpg",
+      "abs_path": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\images\\figure_349.jpg",
+      "index": 349
+    },
+    "d34b6cc3eb50da4f43f37c59cf601db3c2809f9c6f4a11f3102f0ac6eb3689c4.jpg": {
+      "original_name": "d34b6cc3eb50da4f43f37c59cf601db3c2809f9c6f4a11f3102f0ac6eb3689c4.jpg",
+      "original_rel_path": "d34b6cc3eb50da4f43f37c59cf601db3c2809f9c6f4a11f3102f0ac6eb3689c4.jpg",
+      "friendly_name": "figure_350.jpg",
+      "abs_path": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\images\\figure_350.jpg",
+      "index": 350
+    },
+    "d374c741b6bcd96985c4508f6069ef4b54ae3b9cf93d48e821b648e7bec2b38b.jpg": {
+      "original_name": "d374c741b6bcd96985c4508f6069ef4b54ae3b9cf93d48e821b648e7bec2b38b.jpg",
+      "original_rel_path": "d374c741b6bcd96985c4508f6069ef4b54ae3b9cf93d48e821b648e7bec2b38b.jpg",
+      "friendly_name": "figure_351.jpg",
+      "abs_path": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\images\\figure_351.jpg",
+      "index": 351
+    },
+    "d3a3addfef5d74bd087aaae89f037d3003dafdd106ffa82c363d50406242f47c.jpg": {
+      "original_name": "d3a3addfef5d74bd087aaae89f037d3003dafdd106ffa82c363d50406242f47c.jpg",
+      "original_rel_path": "d3a3addfef5d74bd087aaae89f037d3003dafdd106ffa82c363d50406242f47c.jpg",
+      "friendly_name": "figure_352.jpg",
+      "abs_path": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\images\\figure_352.jpg",
+      "index": 352
+    },
+    "d3ec377250cee64257cf22d5f9c04e5807b92bb01efee677ce4d50d88dbc2be4.jpg": {
+      "original_name": "d3ec377250cee64257cf22d5f9c04e5807b92bb01efee677ce4d50d88dbc2be4.jpg",
+      "original_rel_path": "d3ec377250cee64257cf22d5f9c04e5807b92bb01efee677ce4d50d88dbc2be4.jpg",
+      "friendly_name": "figure_353.jpg",
+      "abs_path": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\images\\figure_353.jpg",
+      "index": 353
+    },
+    "d477b3fda02c81336341378848ded44a111cb51563cb03361ddb1c86a5d0a5c7.jpg": {
+      "original_name": "d477b3fda02c81336341378848ded44a111cb51563cb03361ddb1c86a5d0a5c7.jpg",
+      "original_rel_path": "d477b3fda02c81336341378848ded44a111cb51563cb03361ddb1c86a5d0a5c7.jpg",
+      "friendly_name": "figure_354.jpg",
+      "abs_path": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\images\\figure_354.jpg",
+      "index": 354
+    },
+    "d4eb300b07451d6dad7de95dc63f4b41490c9e171c15bc9fb3ef02fbc6f47f48.jpg": {
+      "original_name": "d4eb300b07451d6dad7de95dc63f4b41490c9e171c15bc9fb3ef02fbc6f47f48.jpg",
+      "original_rel_path": "d4eb300b07451d6dad7de95dc63f4b41490c9e171c15bc9fb3ef02fbc6f47f48.jpg",
+      "friendly_name": "figure_355.jpg",
+      "abs_path": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\images\\figure_355.jpg",
+      "index": 355
+    },
+    "d5359b1c66434670d4a38d9932d384cd5f932f14c3a5a78654941ee845788686.jpg": {
+      "original_name": "d5359b1c66434670d4a38d9932d384cd5f932f14c3a5a78654941ee845788686.jpg",
+      "original_rel_path": "d5359b1c66434670d4a38d9932d384cd5f932f14c3a5a78654941ee845788686.jpg",
+      "friendly_name": "figure_356.jpg",
+      "abs_path": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\images\\figure_356.jpg",
+      "index": 356
+    },
+    "d5e72a31875ec3cb929a81d25abb1edf516a29ce27aa5cd50081bc8f69a4d8c8.jpg": {
+      "original_name": "d5e72a31875ec3cb929a81d25abb1edf516a29ce27aa5cd50081bc8f69a4d8c8.jpg",
+      "original_rel_path": "d5e72a31875ec3cb929a81d25abb1edf516a29ce27aa5cd50081bc8f69a4d8c8.jpg",
+      "friendly_name": "figure_357.jpg",
+      "abs_path": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\images\\figure_357.jpg",
+      "index": 357
+    },
+    "d672f28c0ae2a8ea92d79fdc8a3eb7db750b19c59926d9a95a4b1acf42b3f3ee.jpg": {
+      "original_name": "d672f28c0ae2a8ea92d79fdc8a3eb7db750b19c59926d9a95a4b1acf42b3f3ee.jpg",
+      "original_rel_path": "d672f28c0ae2a8ea92d79fdc8a3eb7db750b19c59926d9a95a4b1acf42b3f3ee.jpg",
+      "friendly_name": "figure_358.jpg",
+      "abs_path": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\images\\figure_358.jpg",
+      "index": 358
+    },
+    "d7825a94cf167cf45fabdf74292457c05c00058438149291eb0e71f0da760575.jpg": {
+      "original_name": "d7825a94cf167cf45fabdf74292457c05c00058438149291eb0e71f0da760575.jpg",
+      "original_rel_path": "d7825a94cf167cf45fabdf74292457c05c00058438149291eb0e71f0da760575.jpg",
+      "friendly_name": "figure_359.jpg",
+      "abs_path": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\images\\figure_359.jpg",
+      "index": 359
+    },
+    "d897a330b8ba36bcb16a80e054a39a653c7702da0892dd7627bcc90fc6c353aa.jpg": {
+      "original_name": "d897a330b8ba36bcb16a80e054a39a653c7702da0892dd7627bcc90fc6c353aa.jpg",
+      "original_rel_path": "d897a330b8ba36bcb16a80e054a39a653c7702da0892dd7627bcc90fc6c353aa.jpg",
+      "friendly_name": "figure_360.jpg",
+      "abs_path": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\images\\figure_360.jpg",
+      "index": 360
+    },
+    "d8eedf02363fabf5a34ee7cbc12ef5e26999160e8203e20e013706b1f70bb5ea.jpg": {
+      "original_name": "d8eedf02363fabf5a34ee7cbc12ef5e26999160e8203e20e013706b1f70bb5ea.jpg",
+      "original_rel_path": "d8eedf02363fabf5a34ee7cbc12ef5e26999160e8203e20e013706b1f70bb5ea.jpg",
+      "friendly_name": "figure_361.jpg",
+      "abs_path": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\images\\figure_361.jpg",
+      "index": 361
+    },
+    "d990f00089260322ad4dbc3f5f16bddf025d7365681c6e367d85279a724c33dc.jpg": {
+      "original_name": "d990f00089260322ad4dbc3f5f16bddf025d7365681c6e367d85279a724c33dc.jpg",
+      "original_rel_path": "d990f00089260322ad4dbc3f5f16bddf025d7365681c6e367d85279a724c33dc.jpg",
+      "friendly_name": "figure_362.jpg",
+      "abs_path": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\images\\figure_362.jpg",
+      "index": 362
+    },
+    "d9ade3f4308d4d14da05e3ad7ede25c42843fa57d40a5c6902d38ba610a5c82b.jpg": {
+      "original_name": "d9ade3f4308d4d14da05e3ad7ede25c42843fa57d40a5c6902d38ba610a5c82b.jpg",
+      "original_rel_path": "d9ade3f4308d4d14da05e3ad7ede25c42843fa57d40a5c6902d38ba610a5c82b.jpg",
+      "friendly_name": "figure_363.jpg",
+      "abs_path": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\images\\figure_363.jpg",
+      "index": 363
+    },
+    "d9d2d31422ca7c2cb2897c37afeb2f98b8458e2a5f17d48fa63a4bf4d2ae804d.jpg": {
+      "original_name": "d9d2d31422ca7c2cb2897c37afeb2f98b8458e2a5f17d48fa63a4bf4d2ae804d.jpg",
+      "original_rel_path": "d9d2d31422ca7c2cb2897c37afeb2f98b8458e2a5f17d48fa63a4bf4d2ae804d.jpg",
+      "friendly_name": "figure_364.jpg",
+      "abs_path": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\images\\figure_364.jpg",
+      "index": 364
+    },
+    "daee65898c127705aee63f273033bbd3e484697122c113a26b16d6cdc6251041.jpg": {
+      "original_name": "daee65898c127705aee63f273033bbd3e484697122c113a26b16d6cdc6251041.jpg",
+      "original_rel_path": "daee65898c127705aee63f273033bbd3e484697122c113a26b16d6cdc6251041.jpg",
+      "friendly_name": "figure_365.jpg",
+      "abs_path": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\images\\figure_365.jpg",
+      "index": 365
+    },
+    "db68a1d252a99f7133bc81fec16a95fb0bfa78c011e7f12319245392bb483268.jpg": {
+      "original_name": "db68a1d252a99f7133bc81fec16a95fb0bfa78c011e7f12319245392bb483268.jpg",
+      "original_rel_path": "db68a1d252a99f7133bc81fec16a95fb0bfa78c011e7f12319245392bb483268.jpg",
+      "friendly_name": "figure_366.jpg",
+      "abs_path": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\images\\figure_366.jpg",
+      "index": 366
+    },
+    "dc10df1379be596552c1eff19813bff6c6859b15a84af24eca523371fa26968e.jpg": {
+      "original_name": "dc10df1379be596552c1eff19813bff6c6859b15a84af24eca523371fa26968e.jpg",
+      "original_rel_path": "dc10df1379be596552c1eff19813bff6c6859b15a84af24eca523371fa26968e.jpg",
+      "friendly_name": "figure_367.jpg",
+      "abs_path": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\images\\figure_367.jpg",
+      "index": 367
+    },
+    "dc3475d615bcd0de7d5ebef54d9dadfb9a11f93931781b1594e7e10c652ffe15.jpg": {
+      "original_name": "dc3475d615bcd0de7d5ebef54d9dadfb9a11f93931781b1594e7e10c652ffe15.jpg",
+      "original_rel_path": "dc3475d615bcd0de7d5ebef54d9dadfb9a11f93931781b1594e7e10c652ffe15.jpg",
+      "friendly_name": "figure_368.jpg",
+      "abs_path": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\images\\figure_368.jpg",
+      "index": 368
+    },
+    "dc5bd74f543a45e1a930edbe88e09d3e188af95eae85f454b989e8f9504175a7.jpg": {
+      "original_name": "dc5bd74f543a45e1a930edbe88e09d3e188af95eae85f454b989e8f9504175a7.jpg",
+      "original_rel_path": "dc5bd74f543a45e1a930edbe88e09d3e188af95eae85f454b989e8f9504175a7.jpg",
+      "friendly_name": "figure_369.jpg",
+      "abs_path": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\images\\figure_369.jpg",
+      "index": 369
+    },
+    "dd89f6ef30a2285741e00262952975aa62796cc15b5ff140612a8e49ebb1c410.jpg": {
+      "original_name": "dd89f6ef30a2285741e00262952975aa62796cc15b5ff140612a8e49ebb1c410.jpg",
+      "original_rel_path": "dd89f6ef30a2285741e00262952975aa62796cc15b5ff140612a8e49ebb1c410.jpg",
+      "friendly_name": "figure_370.jpg",
+      "abs_path": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\images\\figure_370.jpg",
+      "index": 370
+    },
+    "dde71fe2b4d5eac11e750cb867087f50435a4882614d18899289d2b41bc8bddd.jpg": {
+      "original_name": "dde71fe2b4d5eac11e750cb867087f50435a4882614d18899289d2b41bc8bddd.jpg",
+      "original_rel_path": "dde71fe2b4d5eac11e750cb867087f50435a4882614d18899289d2b41bc8bddd.jpg",
+      "friendly_name": "figure_371.jpg",
+      "abs_path": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\images\\figure_371.jpg",
+      "index": 371
+    },
+    "de4d2bb2393cb839050a332b530c71cb6522c37b9494b9d83ab4ac0a0cd0296c.jpg": {
+      "original_name": "de4d2bb2393cb839050a332b530c71cb6522c37b9494b9d83ab4ac0a0cd0296c.jpg",
+      "original_rel_path": "de4d2bb2393cb839050a332b530c71cb6522c37b9494b9d83ab4ac0a0cd0296c.jpg",
+      "friendly_name": "figure_372.jpg",
+      "abs_path": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\images\\figure_372.jpg",
+      "index": 372
+    },
+    "def40d723a0256b10c17442a3e588ebd1836e2cce29494defd3eb5ac2accb50d.jpg": {
+      "original_name": "def40d723a0256b10c17442a3e588ebd1836e2cce29494defd3eb5ac2accb50d.jpg",
+      "original_rel_path": "def40d723a0256b10c17442a3e588ebd1836e2cce29494defd3eb5ac2accb50d.jpg",
+      "friendly_name": "figure_373.jpg",
+      "abs_path": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\images\\figure_373.jpg",
+      "index": 373
+    },
+    "dfa9d48ab851fe44ff8a161dbe7804d75127abe0a59dead316732863e2123816.jpg": {
+      "original_name": "dfa9d48ab851fe44ff8a161dbe7804d75127abe0a59dead316732863e2123816.jpg",
+      "original_rel_path": "dfa9d48ab851fe44ff8a161dbe7804d75127abe0a59dead316732863e2123816.jpg",
+      "friendly_name": "figure_374.jpg",
+      "abs_path": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\images\\figure_374.jpg",
+      "index": 374
+    },
+    "dfc727066c3f2fded0922af79acb11d599b56dbfc837057985cd6635e96de9d0.jpg": {
+      "original_name": "dfc727066c3f2fded0922af79acb11d599b56dbfc837057985cd6635e96de9d0.jpg",
+      "original_rel_path": "dfc727066c3f2fded0922af79acb11d599b56dbfc837057985cd6635e96de9d0.jpg",
+      "friendly_name": "figure_375.jpg",
+      "abs_path": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\images\\figure_375.jpg",
+      "index": 375
+    },
+    "e0104983cd2c4ec34f08f59ec04dfbae111775bb8b2f0c60fa2cb3c8115bed2d.jpg": {
+      "original_name": "e0104983cd2c4ec34f08f59ec04dfbae111775bb8b2f0c60fa2cb3c8115bed2d.jpg",
+      "original_rel_path": "e0104983cd2c4ec34f08f59ec04dfbae111775bb8b2f0c60fa2cb3c8115bed2d.jpg",
+      "friendly_name": "figure_376.jpg",
+      "abs_path": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\images\\figure_376.jpg",
+      "index": 376
+    },
+    "e099c6b3e46daf08e57980e15d60ea98dc1865615b59897696856a34845d0149.jpg": {
+      "original_name": "e099c6b3e46daf08e57980e15d60ea98dc1865615b59897696856a34845d0149.jpg",
+      "original_rel_path": "e099c6b3e46daf08e57980e15d60ea98dc1865615b59897696856a34845d0149.jpg",
+      "friendly_name": "figure_377.jpg",
+      "abs_path": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\images\\figure_377.jpg",
+      "index": 377
+    },
+    "e1254d7cc13a73818a15d8c69ea941840cdbda92b58f30098ef29e8a73b81681.jpg": {
+      "original_name": "e1254d7cc13a73818a15d8c69ea941840cdbda92b58f30098ef29e8a73b81681.jpg",
+      "original_rel_path": "e1254d7cc13a73818a15d8c69ea941840cdbda92b58f30098ef29e8a73b81681.jpg",
+      "friendly_name": "figure_378.jpg",
+      "abs_path": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\images\\figure_378.jpg",
+      "index": 378
+    },
+    "e1988d81f155f6e2b237ea021e8bd6005a46b41005cf60d06971abd1aa970732.jpg": {
+      "original_name": "e1988d81f155f6e2b237ea021e8bd6005a46b41005cf60d06971abd1aa970732.jpg",
+      "original_rel_path": "e1988d81f155f6e2b237ea021e8bd6005a46b41005cf60d06971abd1aa970732.jpg",
+      "friendly_name": "figure_379.jpg",
+      "abs_path": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\images\\figure_379.jpg",
+      "index": 379
+    },
+    "e19f188a484c97e98d5e47a3a0e0ee55665b0912e8ab532a6671adfb49102874.jpg": {
+      "original_name": "e19f188a484c97e98d5e47a3a0e0ee55665b0912e8ab532a6671adfb49102874.jpg",
+      "original_rel_path": "e19f188a484c97e98d5e47a3a0e0ee55665b0912e8ab532a6671adfb49102874.jpg",
+      "friendly_name": "figure_380.jpg",
+      "abs_path": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\images\\figure_380.jpg",
+      "index": 380
+    },
+    "e1ca603b1d0ff386704d1ceabf57a1aea87716deffcd512ac3b4d20fedff3ddf.jpg": {
+      "original_name": "e1ca603b1d0ff386704d1ceabf57a1aea87716deffcd512ac3b4d20fedff3ddf.jpg",
+      "original_rel_path": "e1ca603b1d0ff386704d1ceabf57a1aea87716deffcd512ac3b4d20fedff3ddf.jpg",
+      "friendly_name": "figure_381.jpg",
+      "abs_path": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\images\\figure_381.jpg",
+      "index": 381
+    },
+    "e2210a65a1332804da942d6d3a028fc9eabce54cbe2241413bd64c392bd94033.jpg": {
+      "original_name": "e2210a65a1332804da942d6d3a028fc9eabce54cbe2241413bd64c392bd94033.jpg",
+      "original_rel_path": "e2210a65a1332804da942d6d3a028fc9eabce54cbe2241413bd64c392bd94033.jpg",
+      "friendly_name": "figure_382.jpg",
+      "abs_path": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\images\\figure_382.jpg",
+      "index": 382
+    },
+    "e26627de891fbca2ff02a59d8817058a4cd160aa27b31fbddbeec41f39b1f5a7.jpg": {
+      "original_name": "e26627de891fbca2ff02a59d8817058a4cd160aa27b31fbddbeec41f39b1f5a7.jpg",
+      "original_rel_path": "e26627de891fbca2ff02a59d8817058a4cd160aa27b31fbddbeec41f39b1f5a7.jpg",
+      "friendly_name": "figure_383.jpg",
+      "abs_path": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\images\\figure_383.jpg",
+      "index": 383
+    },
+    "e38994546efdc1c2e147e8449171022f4ca677f87397c88bfa3a7cc4b164bcd2.jpg": {
+      "original_name": "e38994546efdc1c2e147e8449171022f4ca677f87397c88bfa3a7cc4b164bcd2.jpg",
+      "original_rel_path": "e38994546efdc1c2e147e8449171022f4ca677f87397c88bfa3a7cc4b164bcd2.jpg",
+      "friendly_name": "figure_384.jpg",
+      "abs_path": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\images\\figure_384.jpg",
+      "index": 384
+    },
+    "e40245e640e798ef5496d12cf6ec0911b0518ade5d8db16b638a27889c5d0588.jpg": {
+      "original_name": "e40245e640e798ef5496d12cf6ec0911b0518ade5d8db16b638a27889c5d0588.jpg",
+      "original_rel_path": "e40245e640e798ef5496d12cf6ec0911b0518ade5d8db16b638a27889c5d0588.jpg",
+      "friendly_name": "figure_385.jpg",
+      "abs_path": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\images\\figure_385.jpg",
+      "index": 385
+    },
+    "e409b540658dc73bf63de0ba36d097eed831d42f76e54f6927387aa65be42e1f.jpg": {
+      "original_name": "e409b540658dc73bf63de0ba36d097eed831d42f76e54f6927387aa65be42e1f.jpg",
+      "original_rel_path": "e409b540658dc73bf63de0ba36d097eed831d42f76e54f6927387aa65be42e1f.jpg",
+      "friendly_name": "figure_386.jpg",
+      "abs_path": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\images\\figure_386.jpg",
+      "index": 386
+    },
+    "e478e5e50c0432e75416a7d446e9cd108191b67ffd7faa4e733ef8952fc27f54.jpg": {
+      "original_name": "e478e5e50c0432e75416a7d446e9cd108191b67ffd7faa4e733ef8952fc27f54.jpg",
+      "original_rel_path": "e478e5e50c0432e75416a7d446e9cd108191b67ffd7faa4e733ef8952fc27f54.jpg",
+      "friendly_name": "figure_387.jpg",
+      "abs_path": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\images\\figure_387.jpg",
+      "index": 387
+    },
+    "e648b5ee88d4798d420906a333a4115845f79c7114b30fe1ccb135aa901a736f.jpg": {
+      "original_name": "e648b5ee88d4798d420906a333a4115845f79c7114b30fe1ccb135aa901a736f.jpg",
+      "original_rel_path": "e648b5ee88d4798d420906a333a4115845f79c7114b30fe1ccb135aa901a736f.jpg",
+      "friendly_name": "figure_388.jpg",
+      "abs_path": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\images\\figure_388.jpg",
+      "index": 388
+    },
+    "e66f63d9ae01f679c2941302e8abe44ebec2924d080502d0058f04aee6daf4df.jpg": {
+      "original_name": "e66f63d9ae01f679c2941302e8abe44ebec2924d080502d0058f04aee6daf4df.jpg",
+      "original_rel_path": "e66f63d9ae01f679c2941302e8abe44ebec2924d080502d0058f04aee6daf4df.jpg",
+      "friendly_name": "figure_389.jpg",
+      "abs_path": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\images\\figure_389.jpg",
+      "index": 389
+    },
+    "e7428e685409c8eddead73bab7a3f60ceb9098f83d7c344807fc691688e9c7af.jpg": {
+      "original_name": "e7428e685409c8eddead73bab7a3f60ceb9098f83d7c344807fc691688e9c7af.jpg",
+      "original_rel_path": "e7428e685409c8eddead73bab7a3f60ceb9098f83d7c344807fc691688e9c7af.jpg",
+      "friendly_name": "figure_390.jpg",
+      "abs_path": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\images\\figure_390.jpg",
+      "index": 390
+    },
+    "e75c113dc890e4dba6e2a9b1492c3f11524bcddcd1e37cb90b6b926f225627ff.jpg": {
+      "original_name": "e75c113dc890e4dba6e2a9b1492c3f11524bcddcd1e37cb90b6b926f225627ff.jpg",
+      "original_rel_path": "e75c113dc890e4dba6e2a9b1492c3f11524bcddcd1e37cb90b6b926f225627ff.jpg",
+      "friendly_name": "figure_391.jpg",
+      "abs_path": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\images\\figure_391.jpg",
+      "index": 391
+    },
+    "e7f22004a193e1b83f4803bf9fc0725a3b44cd8a4cd25d10b9ce42ed5965807a.jpg": {
+      "original_name": "e7f22004a193e1b83f4803bf9fc0725a3b44cd8a4cd25d10b9ce42ed5965807a.jpg",
+      "original_rel_path": "e7f22004a193e1b83f4803bf9fc0725a3b44cd8a4cd25d10b9ce42ed5965807a.jpg",
+      "friendly_name": "figure_392.jpg",
+      "abs_path": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\images\\figure_392.jpg",
+      "index": 392
+    },
+    "e83995bf7835de9baf8901a47be62026a3aff8eeeb3640ec488bbec28ca93ac8.jpg": {
+      "original_name": "e83995bf7835de9baf8901a47be62026a3aff8eeeb3640ec488bbec28ca93ac8.jpg",
+      "original_rel_path": "e83995bf7835de9baf8901a47be62026a3aff8eeeb3640ec488bbec28ca93ac8.jpg",
+      "friendly_name": "figure_393.jpg",
+      "abs_path": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\images\\figure_393.jpg",
+      "index": 393
+    },
+    "e9628e97f75ccfa1124fde69756169107facb598f23dfae91a4288cdf1f1b823.jpg": {
+      "original_name": "e9628e97f75ccfa1124fde69756169107facb598f23dfae91a4288cdf1f1b823.jpg",
+      "original_rel_path": "e9628e97f75ccfa1124fde69756169107facb598f23dfae91a4288cdf1f1b823.jpg",
+      "friendly_name": "figure_394.jpg",
+      "abs_path": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\images\\figure_394.jpg",
+      "index": 394
+    },
+    "e973030ff6326ad4549065d593d571efeb9f53d29d4fda544f1be0b677a3f56d.jpg": {
+      "original_name": "e973030ff6326ad4549065d593d571efeb9f53d29d4fda544f1be0b677a3f56d.jpg",
+      "original_rel_path": "e973030ff6326ad4549065d593d571efeb9f53d29d4fda544f1be0b677a3f56d.jpg",
+      "friendly_name": "figure_395.jpg",
+      "abs_path": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\images\\figure_395.jpg",
+      "index": 395
+    },
+    "e99878523aee24cf395ccbb9b229a935526813a1b04d4bd5a994f6ab9898c1e1.jpg": {
+      "original_name": "e99878523aee24cf395ccbb9b229a935526813a1b04d4bd5a994f6ab9898c1e1.jpg",
+      "original_rel_path": "e99878523aee24cf395ccbb9b229a935526813a1b04d4bd5a994f6ab9898c1e1.jpg",
+      "friendly_name": "figure_396.jpg",
+      "abs_path": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\images\\figure_396.jpg",
+      "index": 396
+    },
+    "ea8845d040c6fad8d6eb701268c9a131afb38ac2c60bad2ab62f1957b37a649b.jpg": {
+      "original_name": "ea8845d040c6fad8d6eb701268c9a131afb38ac2c60bad2ab62f1957b37a649b.jpg",
+      "original_rel_path": "ea8845d040c6fad8d6eb701268c9a131afb38ac2c60bad2ab62f1957b37a649b.jpg",
+      "friendly_name": "figure_397.jpg",
+      "abs_path": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\images\\figure_397.jpg",
+      "index": 397
+    },
+    "ec293cafd473e915c3318ea317ae61b934bc2ca9361c3583384c8c403366a1e4.jpg": {
+      "original_name": "ec293cafd473e915c3318ea317ae61b934bc2ca9361c3583384c8c403366a1e4.jpg",
+      "original_rel_path": "ec293cafd473e915c3318ea317ae61b934bc2ca9361c3583384c8c403366a1e4.jpg",
+      "friendly_name": "figure_398.jpg",
+      "abs_path": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\images\\figure_398.jpg",
+      "index": 398
+    },
+    "ed576d627c0b3ec35ff024411c393a0d1b3006a0294a1ca597e1325853029d48.jpg": {
+      "original_name": "ed576d627c0b3ec35ff024411c393a0d1b3006a0294a1ca597e1325853029d48.jpg",
+      "original_rel_path": "ed576d627c0b3ec35ff024411c393a0d1b3006a0294a1ca597e1325853029d48.jpg",
+      "friendly_name": "figure_399.jpg",
+      "abs_path": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\images\\figure_399.jpg",
+      "index": 399
+    },
+    "edd2e35705d2ae74dcb3714b03a80a10c3dc780cf3536999d0aae41cc844857a.jpg": {
+      "original_name": "edd2e35705d2ae74dcb3714b03a80a10c3dc780cf3536999d0aae41cc844857a.jpg",
+      "original_rel_path": "edd2e35705d2ae74dcb3714b03a80a10c3dc780cf3536999d0aae41cc844857a.jpg",
+      "friendly_name": "figure_400.jpg",
+      "abs_path": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\images\\figure_400.jpg",
+      "index": 400
+    },
+    "ee0c3c7094c830c8cf9c8d3485f148ee85f0138f2bfca324a2a4c22ace0270b9.jpg": {
+      "original_name": "ee0c3c7094c830c8cf9c8d3485f148ee85f0138f2bfca324a2a4c22ace0270b9.jpg",
+      "original_rel_path": "ee0c3c7094c830c8cf9c8d3485f148ee85f0138f2bfca324a2a4c22ace0270b9.jpg",
+      "friendly_name": "figure_401.jpg",
+      "abs_path": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\images\\figure_401.jpg",
+      "index": 401
+    },
+    "ee8310b46e9af5f12b00f9eb6e64ca77400a5e6137343958149555faea2470d4.jpg": {
+      "original_name": "ee8310b46e9af5f12b00f9eb6e64ca77400a5e6137343958149555faea2470d4.jpg",
+      "original_rel_path": "ee8310b46e9af5f12b00f9eb6e64ca77400a5e6137343958149555faea2470d4.jpg",
+      "friendly_name": "figure_402.jpg",
+      "abs_path": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\images\\figure_402.jpg",
+      "index": 402
+    },
+    "ef22196a636c2e5c2275c63751404d80a90ad18f50eee9c7198223112a43bfd1.jpg": {
+      "original_name": "ef22196a636c2e5c2275c63751404d80a90ad18f50eee9c7198223112a43bfd1.jpg",
+      "original_rel_path": "ef22196a636c2e5c2275c63751404d80a90ad18f50eee9c7198223112a43bfd1.jpg",
+      "friendly_name": "figure_403.jpg",
+      "abs_path": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\images\\figure_403.jpg",
+      "index": 403
+    },
+    "f0f239711b17bf3ba00d59e507f963490df71d4bc3969fd318955b320bbc4fef.jpg": {
+      "original_name": "f0f239711b17bf3ba00d59e507f963490df71d4bc3969fd318955b320bbc4fef.jpg",
+      "original_rel_path": "f0f239711b17bf3ba00d59e507f963490df71d4bc3969fd318955b320bbc4fef.jpg",
+      "friendly_name": "figure_404.jpg",
+      "abs_path": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\images\\figure_404.jpg",
+      "index": 404
+    },
+    "f17a28f6607b3bc7abe31a994f97fa6d0e9af0434c1a853d879c494ea91dc94e.jpg": {
+      "original_name": "f17a28f6607b3bc7abe31a994f97fa6d0e9af0434c1a853d879c494ea91dc94e.jpg",
+      "original_rel_path": "f17a28f6607b3bc7abe31a994f97fa6d0e9af0434c1a853d879c494ea91dc94e.jpg",
+      "friendly_name": "figure_405.jpg",
+      "abs_path": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\images\\figure_405.jpg",
+      "index": 405
+    },
+    "f1879dcf215b485b8dc5fb6ab9c86d8d1adae3897f2817a0d777351638340556.jpg": {
+      "original_name": "f1879dcf215b485b8dc5fb6ab9c86d8d1adae3897f2817a0d777351638340556.jpg",
+      "original_rel_path": "f1879dcf215b485b8dc5fb6ab9c86d8d1adae3897f2817a0d777351638340556.jpg",
+      "friendly_name": "figure_406.jpg",
+      "abs_path": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\images\\figure_406.jpg",
+      "index": 406
+    },
+    "f1b49841a63aab2ad0a22b4a14590ce41000322bea632a95a87d01e7c0382577.jpg": {
+      "original_name": "f1b49841a63aab2ad0a22b4a14590ce41000322bea632a95a87d01e7c0382577.jpg",
+      "original_rel_path": "f1b49841a63aab2ad0a22b4a14590ce41000322bea632a95a87d01e7c0382577.jpg",
+      "friendly_name": "figure_407.jpg",
+      "abs_path": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\images\\figure_407.jpg",
+      "index": 407
+    },
+    "f1ccf880d2453ae83409a87bf7ff030bd2f27115d1f223fe61dd450d5a3ffb65.jpg": {
+      "original_name": "f1ccf880d2453ae83409a87bf7ff030bd2f27115d1f223fe61dd450d5a3ffb65.jpg",
+      "original_rel_path": "f1ccf880d2453ae83409a87bf7ff030bd2f27115d1f223fe61dd450d5a3ffb65.jpg",
+      "friendly_name": "figure_408.jpg",
+      "abs_path": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\images\\figure_408.jpg",
+      "index": 408
+    },
+    "f20a5504d62ccae72084951e16c9417332e81388790a8aafa5a34ee768e8a471.jpg": {
+      "original_name": "f20a5504d62ccae72084951e16c9417332e81388790a8aafa5a34ee768e8a471.jpg",
+      "original_rel_path": "f20a5504d62ccae72084951e16c9417332e81388790a8aafa5a34ee768e8a471.jpg",
+      "friendly_name": "figure_409.jpg",
+      "abs_path": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\images\\figure_409.jpg",
+      "index": 409
+    },
+    "f2835383085880317bdbc2fd994f1fc5522c394873bde7571c1f896ae2aa95fa.jpg": {
+      "original_name": "f2835383085880317bdbc2fd994f1fc5522c394873bde7571c1f896ae2aa95fa.jpg",
+      "original_rel_path": "f2835383085880317bdbc2fd994f1fc5522c394873bde7571c1f896ae2aa95fa.jpg",
+      "friendly_name": "figure_410.jpg",
+      "abs_path": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\images\\figure_410.jpg",
+      "index": 410
+    },
+    "f3085190a956f6f05bba26cbd7a61c4fef889afcee52e219c4a6d943609614da.jpg": {
+      "original_name": "f3085190a956f6f05bba26cbd7a61c4fef889afcee52e219c4a6d943609614da.jpg",
+      "original_rel_path": "f3085190a956f6f05bba26cbd7a61c4fef889afcee52e219c4a6d943609614da.jpg",
+      "friendly_name": "figure_411.jpg",
+      "abs_path": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\images\\figure_411.jpg",
+      "index": 411
+    },
+    "f32baf82b40b37e04283276dfa01f611d500fb7888ae52496e27ab448c5630b8.jpg": {
+      "original_name": "f32baf82b40b37e04283276dfa01f611d500fb7888ae52496e27ab448c5630b8.jpg",
+      "original_rel_path": "f32baf82b40b37e04283276dfa01f611d500fb7888ae52496e27ab448c5630b8.jpg",
+      "friendly_name": "figure_412.jpg",
+      "abs_path": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\images\\figure_412.jpg",
+      "index": 412
+    },
+    "f334b75268fccd018268c8c410c5f4438ce0008f5afeb2d35fba35f3dd607030.jpg": {
+      "original_name": "f334b75268fccd018268c8c410c5f4438ce0008f5afeb2d35fba35f3dd607030.jpg",
+      "original_rel_path": "f334b75268fccd018268c8c410c5f4438ce0008f5afeb2d35fba35f3dd607030.jpg",
+      "friendly_name": "figure_413.jpg",
+      "abs_path": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\images\\figure_413.jpg",
+      "index": 413
+    },
+    "f4722f330ca1615d371ad194b22f962d72575e30028008eddf9d3446c6c63dce.jpg": {
+      "original_name": "f4722f330ca1615d371ad194b22f962d72575e30028008eddf9d3446c6c63dce.jpg",
+      "original_rel_path": "f4722f330ca1615d371ad194b22f962d72575e30028008eddf9d3446c6c63dce.jpg",
+      "friendly_name": "figure_414.jpg",
+      "abs_path": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\images\\figure_414.jpg",
+      "index": 414
+    },
+    "f47cd66d9a5f5777d48e1d9f51d09fce87b277532087d59512ee9742b65d951f.jpg": {
+      "original_name": "f47cd66d9a5f5777d48e1d9f51d09fce87b277532087d59512ee9742b65d951f.jpg",
+      "original_rel_path": "f47cd66d9a5f5777d48e1d9f51d09fce87b277532087d59512ee9742b65d951f.jpg",
+      "friendly_name": "figure_415.jpg",
+      "abs_path": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\images\\figure_415.jpg",
+      "index": 415
+    },
+    "f5827cf95e3b6b940b2e9b76d2c2190f93841dc45fd604b4890b8fe55eda6e57.jpg": {
+      "original_name": "f5827cf95e3b6b940b2e9b76d2c2190f93841dc45fd604b4890b8fe55eda6e57.jpg",
+      "original_rel_path": "f5827cf95e3b6b940b2e9b76d2c2190f93841dc45fd604b4890b8fe55eda6e57.jpg",
+      "friendly_name": "figure_416.jpg",
+      "abs_path": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\images\\figure_416.jpg",
+      "index": 416
+    },
+    "f5acfec74877e174d05a8a03648cc732bbc22d9e4671d6d33a93a8a6a3080f1c.jpg": {
+      "original_name": "f5acfec74877e174d05a8a03648cc732bbc22d9e4671d6d33a93a8a6a3080f1c.jpg",
+      "original_rel_path": "f5acfec74877e174d05a8a03648cc732bbc22d9e4671d6d33a93a8a6a3080f1c.jpg",
+      "friendly_name": "figure_417.jpg",
+      "abs_path": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\images\\figure_417.jpg",
+      "index": 417
+    },
+    "f68fd6e31d31603d61eb4247a1b1aabf20fd0e42fd0121fc1d7b2d785f6df1b9.jpg": {
+      "original_name": "f68fd6e31d31603d61eb4247a1b1aabf20fd0e42fd0121fc1d7b2d785f6df1b9.jpg",
+      "original_rel_path": "f68fd6e31d31603d61eb4247a1b1aabf20fd0e42fd0121fc1d7b2d785f6df1b9.jpg",
+      "friendly_name": "figure_418.jpg",
+      "abs_path": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\images\\figure_418.jpg",
+      "index": 418
+    },
+    "f7d56bb5c9e29761172b7aeb780ca7261d82d03bd23f64a2b7ab3cc9ef3ebc03.jpg": {
+      "original_name": "f7d56bb5c9e29761172b7aeb780ca7261d82d03bd23f64a2b7ab3cc9ef3ebc03.jpg",
+      "original_rel_path": "f7d56bb5c9e29761172b7aeb780ca7261d82d03bd23f64a2b7ab3cc9ef3ebc03.jpg",
+      "friendly_name": "figure_419.jpg",
+      "abs_path": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\images\\figure_419.jpg",
+      "index": 419
+    },
+    "f81cea3b93a599881c416eb89c081e551b4146008c044a0f4b8ee9a22c4d7cd6.jpg": {
+      "original_name": "f81cea3b93a599881c416eb89c081e551b4146008c044a0f4b8ee9a22c4d7cd6.jpg",
+      "original_rel_path": "f81cea3b93a599881c416eb89c081e551b4146008c044a0f4b8ee9a22c4d7cd6.jpg",
+      "friendly_name": "figure_420.jpg",
+      "abs_path": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\images\\figure_420.jpg",
+      "index": 420
+    },
+    "f838c99c5df3d3960e8befac3e7b3a84226987a8ca4298688752de74a17695a3.jpg": {
+      "original_name": "f838c99c5df3d3960e8befac3e7b3a84226987a8ca4298688752de74a17695a3.jpg",
+      "original_rel_path": "f838c99c5df3d3960e8befac3e7b3a84226987a8ca4298688752de74a17695a3.jpg",
+      "friendly_name": "figure_421.jpg",
+      "abs_path": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\images\\figure_421.jpg",
+      "index": 421
+    },
+    "f88ae35956cf57d6e4e40925f78c7fb2da02e3f0f0430e9b3c4e6ff3ec53ae53.jpg": {
+      "original_name": "f88ae35956cf57d6e4e40925f78c7fb2da02e3f0f0430e9b3c4e6ff3ec53ae53.jpg",
+      "original_rel_path": "f88ae35956cf57d6e4e40925f78c7fb2da02e3f0f0430e9b3c4e6ff3ec53ae53.jpg",
+      "friendly_name": "figure_422.jpg",
+      "abs_path": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\images\\figure_422.jpg",
+      "index": 422
+    },
+    "f9251d4eb102170c4740aa3c0533a03e399de03b5eda70d5f08575ef552c572e.jpg": {
+      "original_name": "f9251d4eb102170c4740aa3c0533a03e399de03b5eda70d5f08575ef552c572e.jpg",
+      "original_rel_path": "f9251d4eb102170c4740aa3c0533a03e399de03b5eda70d5f08575ef552c572e.jpg",
+      "friendly_name": "figure_423.jpg",
+      "abs_path": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\images\\figure_423.jpg",
+      "index": 423
+    },
+    "f964ccf2e8f01dc49a90a16fd16f59d70aa959c7bc469439f801132dc60dd0cd.jpg": {
+      "original_name": "f964ccf2e8f01dc49a90a16fd16f59d70aa959c7bc469439f801132dc60dd0cd.jpg",
+      "original_rel_path": "f964ccf2e8f01dc49a90a16fd16f59d70aa959c7bc469439f801132dc60dd0cd.jpg",
+      "friendly_name": "figure_424.jpg",
+      "abs_path": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\images\\figure_424.jpg",
+      "index": 424
+    },
+    "f9be5a300c5bdf521729cc97388cc1d36d9c39f25e51a1e418503a82a6de7423.jpg": {
+      "original_name": "f9be5a300c5bdf521729cc97388cc1d36d9c39f25e51a1e418503a82a6de7423.jpg",
+      "original_rel_path": "f9be5a300c5bdf521729cc97388cc1d36d9c39f25e51a1e418503a82a6de7423.jpg",
+      "friendly_name": "figure_425.jpg",
+      "abs_path": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\images\\figure_425.jpg",
+      "index": 425
+    },
+    "fa42cac94d5998129207ed6cacf24c6f16ca54ef9e0aaf05d7987c5cfc62e0d3.jpg": {
+      "original_name": "fa42cac94d5998129207ed6cacf24c6f16ca54ef9e0aaf05d7987c5cfc62e0d3.jpg",
+      "original_rel_path": "fa42cac94d5998129207ed6cacf24c6f16ca54ef9e0aaf05d7987c5cfc62e0d3.jpg",
+      "friendly_name": "figure_426.jpg",
+      "abs_path": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\images\\figure_426.jpg",
+      "index": 426
+    },
+    "fa86ed088096cc6b3c3ed748d35eb05c24ca21c74437e5bce208a188f111283f.jpg": {
+      "original_name": "fa86ed088096cc6b3c3ed748d35eb05c24ca21c74437e5bce208a188f111283f.jpg",
+      "original_rel_path": "fa86ed088096cc6b3c3ed748d35eb05c24ca21c74437e5bce208a188f111283f.jpg",
+      "friendly_name": "figure_427.jpg",
+      "abs_path": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\images\\figure_427.jpg",
+      "index": 427
+    },
+    "fadc14e4f77cbf580216e1bad57fcaa879dc9374c958356cba9d4a864e927a00.jpg": {
+      "original_name": "fadc14e4f77cbf580216e1bad57fcaa879dc9374c958356cba9d4a864e927a00.jpg",
+      "original_rel_path": "fadc14e4f77cbf580216e1bad57fcaa879dc9374c958356cba9d4a864e927a00.jpg",
+      "friendly_name": "figure_428.jpg",
+      "abs_path": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\images\\figure_428.jpg",
+      "index": 428
+    },
+    "fb04e0f0e1f4499545ddbf21eda19ddf0562651e75bc3c50d13e35885eb16a32.jpg": {
+      "original_name": "fb04e0f0e1f4499545ddbf21eda19ddf0562651e75bc3c50d13e35885eb16a32.jpg",
+      "original_rel_path": "fb04e0f0e1f4499545ddbf21eda19ddf0562651e75bc3c50d13e35885eb16a32.jpg",
+      "friendly_name": "figure_429.jpg",
+      "abs_path": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\images\\figure_429.jpg",
+      "index": 429
+    },
+    "fb2916f1e96762ff7d1ef29363fb2c8cde4b019219d9212f041834e07a2fad23.jpg": {
+      "original_name": "fb2916f1e96762ff7d1ef29363fb2c8cde4b019219d9212f041834e07a2fad23.jpg",
+      "original_rel_path": "fb2916f1e96762ff7d1ef29363fb2c8cde4b019219d9212f041834e07a2fad23.jpg",
+      "friendly_name": "figure_430.jpg",
+      "abs_path": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\images\\figure_430.jpg",
+      "index": 430
+    },
+    "fd1e5ccff9b31183c18bbbe1ee02d357315239de7e3071acf647a0eb4511dfcb.jpg": {
+      "original_name": "fd1e5ccff9b31183c18bbbe1ee02d357315239de7e3071acf647a0eb4511dfcb.jpg",
+      "original_rel_path": "fd1e5ccff9b31183c18bbbe1ee02d357315239de7e3071acf647a0eb4511dfcb.jpg",
+      "friendly_name": "figure_431.jpg",
+      "abs_path": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\images\\figure_431.jpg",
+      "index": 431
+    },
+    "fd29c3d5a9e50d07f8d4502161c307c8b35f29c03eb5ac7284c7c1dd0805dd1d.jpg": {
+      "original_name": "fd29c3d5a9e50d07f8d4502161c307c8b35f29c03eb5ac7284c7c1dd0805dd1d.jpg",
+      "original_rel_path": "fd29c3d5a9e50d07f8d4502161c307c8b35f29c03eb5ac7284c7c1dd0805dd1d.jpg",
+      "friendly_name": "figure_432.jpg",
+      "abs_path": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\images\\figure_432.jpg",
+      "index": 432
+    },
+    "fdc74ca9d6ead7a916ef0a1c08bb8720f2cbf2e04fbf661176191d75557a0744.jpg": {
+      "original_name": "fdc74ca9d6ead7a916ef0a1c08bb8720f2cbf2e04fbf661176191d75557a0744.jpg",
+      "original_rel_path": "fdc74ca9d6ead7a916ef0a1c08bb8720f2cbf2e04fbf661176191d75557a0744.jpg",
+      "friendly_name": "figure_433.jpg",
+      "abs_path": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\images\\figure_433.jpg",
+      "index": 433
+    },
+    "fdec4cdb325d529b682e6f5222c99f8fa0571cbdc7cf67c22f4c8c54f8ba6d93.jpg": {
+      "original_name": "fdec4cdb325d529b682e6f5222c99f8fa0571cbdc7cf67c22f4c8c54f8ba6d93.jpg",
+      "original_rel_path": "fdec4cdb325d529b682e6f5222c99f8fa0571cbdc7cf67c22f4c8c54f8ba6d93.jpg",
+      "friendly_name": "figure_434.jpg",
+      "abs_path": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\images\\figure_434.jpg",
+      "index": 434
+    },
+    "ff73221a9c48a0bbfeb88fd8888fc0187c2ad8e7c6e2ca69d4603b1858af2fd1.jpg": {
+      "original_name": "ff73221a9c48a0bbfeb88fd8888fc0187c2ad8e7c6e2ca69d4603b1858af2fd1.jpg",
+      "original_rel_path": "ff73221a9c48a0bbfeb88fd8888fc0187c2ad8e7c6e2ca69d4603b1858af2fd1.jpg",
+      "friendly_name": "figure_435.jpg",
+      "abs_path": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\images\\figure_435.jpg",
+      "index": 435
+    },
+    "ff9c220fecd740e15c3d2d39aafabacf1ebb2f4df2dc9abfd65fe3ac82b8033d.jpg": {
+      "original_name": "ff9c220fecd740e15c3d2d39aafabacf1ebb2f4df2dc9abfd65fe3ac82b8033d.jpg",
+      "original_rel_path": "ff9c220fecd740e15c3d2d39aafabacf1ebb2f4df2dc9abfd65fe3ac82b8033d.jpg",
+      "friendly_name": "figure_436.jpg",
+      "abs_path": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\images\\figure_436.jpg",
+      "index": 436
+    }
+  },
+  "json_files": {
+    "04de4bd4-84e8-4b84-8239-e29b0f17f7c6_content_list.json": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\json\\04de4bd4-84e8-4b84-8239-e29b0f17f7c6_content_list.json",
+    "04de4bd4-84e8-4b84-8239-e29b0f17f7c6_model.json": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\json\\04de4bd4-84e8-4b84-8239-e29b0f17f7c6_model.json",
+    "content_list_v2.json": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\json\\content_list_v2.json",
+    "layout.json": "data/mineru_cache\\chapter_03_p082-159_线性系统的时域分析法__082fadd0\\json\\layout.json"
+  }
+}

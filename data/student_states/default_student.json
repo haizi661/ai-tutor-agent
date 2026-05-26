@@ -1,0 +1,639 @@
+{
+  "student_id": "default_student",
+  "current_node_id": "KM001",
+  "last_question": "自动控制的一般概念",
+  "mastery_scores": {
+    "KM003": 10,
+    "KM001": 0
+  },
+  "visited_nodes": [],
+  "wrong_nodes": [
+    "KM003",
+    "KM001"
+  ],
+  "recommended_queue": [],
+  "notes": {},
+  "node_learning_records": {
+    "KM003": {
+      "started_at": "2026-05-06T14:45:57",
+      "completed_at": "",
+      "mastery_score": 10
+    },
+    "自动控制原理": {
+      "started_at": "2026-05-06T20:25:42",
+      "completed_at": "",
+      "mastery_score": 0.0
+    },
+    "KM001": {
+      "started_at": "2026-05-06T20:45:41",
+      "completed_at": "",
+      "mastery_score": 0
+    }
+  },
+  "homework": [],
+  "homework_assignments": [],
+  "homework_history": [],
+  "question_attempts": [
+    {
+      "question_id": "AI-Q1",
+      "node_id": "KM003",
+      "answer": "B",
+      "expected": "A",
+      "quiz_score": 10,
+      "quiz_passed": false,
+      "created_at": "2026-05-06T15:00:41"
+    },
+    {
+      "question_id": "AI-Q2",
+      "node_id": "KM003",
+      "answer": "C",
+      "expected": "A",
+      "quiz_score": 10,
+      "quiz_passed": false,
+      "created_at": "2026-05-06T15:00:41"
+    },
+    {
+      "question_id": "AI-Q3",
+      "node_id": "KM003",
+      "answer": "C",
+      "expected": "A",
+      "quiz_score": 10,
+      "quiz_passed": false,
+      "created_at": "2026-05-06T15:00:41"
+    },
+    {
+      "question_id": "AI-Q4",
+      "node_id": "KM003",
+      "answer": "C",
+      "expected": "A",
+      "quiz_score": 10,
+      "quiz_passed": false,
+      "created_at": "2026-05-06T15:00:41"
+    },
+    {
+      "question_id": "AI-Q5",
+      "node_id": "KM003",
+      "answer": "B",
+      "expected": "A",
+      "quiz_score": 10,
+      "quiz_passed": false,
+      "created_at": "2026-05-06T15:00:41"
+    },
+    {
+      "question_id": "AI-Q6",
+      "node_id": "KM003",
+      "answer": "B",
+      "expected": "A",
+      "quiz_score": 10,
+      "quiz_passed": false,
+      "created_at": "2026-05-06T15:00:41"
+    },
+    {
+      "question_id": "AI-Q7",
+      "node_id": "KM003",
+      "answer": "A",
+      "expected": "A",
+      "quiz_score": 10,
+      "quiz_passed": false,
+      "created_at": "2026-05-06T15:00:41"
+    },
+    {
+      "question_id": "AI-Q8",
+      "node_id": "KM003",
+      "answer": "B",
+      "expected": "A",
+      "quiz_score": 10,
+      "quiz_passed": false,
+      "created_at": "2026-05-06T15:00:41"
+    },
+    {
+      "question_id": "AI-Q9",
+      "node_id": "KM003",
+      "answer": "C",
+      "expected": "A",
+      "quiz_score": 10,
+      "quiz_passed": false,
+      "created_at": "2026-05-06T15:00:41"
+    },
+    {
+      "question_id": "AI-Q10",
+      "node_id": "KM003",
+      "answer": "C",
+      "expected": "A",
+      "quiz_score": 10,
+      "quiz_passed": false,
+      "created_at": "2026-05-06T15:00:41"
+    },
+    {
+      "question_id": "AI-Q1",
+      "node_id": "KM001",
+      "answer": "B",
+      "expected": "A",
+      "quiz_score": 10,
+      "quiz_passed": false,
+      "created_at": "2026-05-06T21:25:00"
+    },
+    {
+      "question_id": "AI-Q2",
+      "node_id": "KM001",
+      "answer": "B",
+      "expected": "A",
+      "quiz_score": 10,
+      "quiz_passed": false,
+      "created_at": "2026-05-06T21:25:00"
+    },
+    {
+      "question_id": "AI-Q3",
+      "node_id": "KM001",
+      "answer": "A",
+      "expected": "A",
+      "quiz_score": 10,
+      "quiz_passed": false,
+      "created_at": "2026-05-06T21:25:00"
+    },
+    {
+      "question_id": "AI-Q4",
+      "node_id": "KM001",
+      "answer": "C",
+      "expected": "A",
+      "quiz_score": 10,
+      "quiz_passed": false,
+      "created_at": "2026-05-06T21:25:00"
+    },
+    {
+      "question_id": "AI-Q5",
+      "node_id": "KM001",
+      "answer": "B",
+      "expected": "A",
+      "quiz_score": 10,
+      "quiz_passed": false,
+      "created_at": "2026-05-06T21:25:00"
+    },
+    {
+      "question_id": "AI-Q6",
+      "node_id": "KM001",
+      "answer": "D",
+      "expected": "A",
+      "quiz_score": 10,
+      "quiz_passed": false,
+      "created_at": "2026-05-06T21:25:00"
+    },
+    {
+      "question_id": "AI-Q7",
+      "node_id": "KM001",
+      "answer": "C",
+      "expected": "A",
+      "quiz_score": 10,
+      "quiz_passed": false,
+      "created_at": "2026-05-06T21:25:00"
+    },
+    {
+      "question_id": "AI-Q8",
+      "node_id": "KM001",
+      "answer": "B",
+      "expected": "A",
+      "quiz_score": 10,
+      "quiz_passed": false,
+      "created_at": "2026-05-06T21:25:00"
+    },
+    {
+      "question_id": "AI-Q9",
+      "node_id": "KM001",
+      "answer": "D",
+      "expected": "A",
+      "quiz_score": 10,
+      "quiz_passed": false,
+      "created_at": "2026-05-06T21:25:00"
+    },
+    {
+      "question_id": "AI-Q10",
+      "node_id": "KM001",
+      "answer": "D",
+      "expected": "A",
+      "quiz_score": 10,
+      "quiz_passed": false,
+      "created_at": "2026-05-06T21:25:00"
+    },
+    {
+      "question_id": "V-Q1",
+      "node_id": "KM001",
+      "answer": "B",
+      "expected": "A",
+      "quiz_score": 56,
+      "quiz_passed": false,
+      "created_at": "2026-05-19T15:12:10"
+    },
+    {
+      "question_id": "V-Q2",
+      "node_id": "KM001",
+      "answer": "B",
+      "expected": "A",
+      "quiz_score": 56,
+      "quiz_passed": false,
+      "created_at": "2026-05-19T15:12:10"
+    },
+    {
+      "question_id": "V-Q4",
+      "node_id": "KM001",
+      "answer": "C",
+      "expected": "A",
+      "quiz_score": 56,
+      "quiz_passed": false,
+      "created_at": "2026-05-19T15:12:10"
+    },
+    {
+      "question_id": "V-Q5",
+      "node_id": "KM001",
+      "answer": "D",
+      "expected": "A",
+      "quiz_score": 56,
+      "quiz_passed": false,
+      "created_at": "2026-05-19T15:12:10"
+    },
+    {
+      "question_id": "V-Q6",
+      "node_id": "KM001",
+      "answer": "A",
+      "expected": "A",
+      "quiz_score": 56,
+      "quiz_passed": false,
+      "created_at": "2026-05-19T15:12:10"
+    },
+    {
+      "question_id": "V-Q7",
+      "node_id": "KM001",
+      "answer": "A",
+      "expected": "A",
+      "quiz_score": 56,
+      "quiz_passed": false,
+      "created_at": "2026-05-19T15:12:10"
+    },
+    {
+      "question_id": "V-Q8",
+      "node_id": "KM001",
+      "answer": "A",
+      "expected": "A",
+      "quiz_score": 56,
+      "quiz_passed": false,
+      "created_at": "2026-05-19T15:12:10"
+    },
+    {
+      "question_id": "V-Q9",
+      "node_id": "KM001",
+      "answer": "A",
+      "expected": "A",
+      "quiz_score": 56,
+      "quiz_passed": false,
+      "created_at": "2026-05-19T15:12:10"
+    },
+    {
+      "question_id": "V-Q10",
+      "node_id": "KM001",
+      "answer": "A",
+      "expected": "A",
+      "quiz_score": 56,
+      "quiz_passed": false,
+      "created_at": "2026-05-19T15:12:10"
+    },
+    {
+      "question_id": "V-Q1",
+      "node_id": "KM001",
+      "answer": "B",
+      "expected": "A",
+      "quiz_score": 0,
+      "quiz_passed": false,
+      "created_at": "2026-05-19T15:13:04"
+    },
+    {
+      "question_id": "V-Q2",
+      "node_id": "KM001",
+      "answer": "C",
+      "expected": "A",
+      "quiz_score": 0,
+      "quiz_passed": false,
+      "created_at": "2026-05-19T15:13:04"
+    },
+    {
+      "question_id": "V-Q4",
+      "node_id": "KM001",
+      "answer": "B",
+      "expected": "A",
+      "quiz_score": 0,
+      "quiz_passed": false,
+      "created_at": "2026-05-19T15:13:04"
+    },
+    {
+      "question_id": "V-Q5",
+      "node_id": "KM001",
+      "answer": "B",
+      "expected": "A",
+      "quiz_score": 0,
+      "quiz_passed": false,
+      "created_at": "2026-05-19T15:13:04"
+    }
+  ],
+  "evidence_events": [],
+  "daily_learning_records": {
+    "2026-05-06": [
+      "KM003",
+      "KM001"
+    ],
+    "2026-05-19": [
+      "KM001"
+    ]
+  },
+  "last_learning_at": "2026-05-19T15:13:04",
+  "teaching_strategy": "explain",
+  "difficulty_level": 3,
+  "knowledge_graph": {
+    "KM003": {
+      "title": "自动控制系统示例",
+      "status": "in_progress",
+      "score": 10,
+      "attempts": 1,
+      "wrong_questions": [
+        {
+          "question_id": "AI-Q1",
+          "stem": "在一个典型的反馈控制系统中，比较元件的作用是什么？",
+          "student_answer": "",
+          "correct_answer": "A",
+          "feedback": "",
+          "source": "quiz",
+          "time": "2026-05-06T15:00:41"
+        },
+        {
+          "question_id": "AI-Q2",
+          "stem": "在反馈控制系统中，前向通路是指：",
+          "student_answer": "",
+          "correct_answer": "A",
+          "feedback": "",
+          "source": "quiz",
+          "time": "2026-05-06T15:00:41"
+        },
+        {
+          "question_id": "AI-Q3",
+          "stem": "一个反馈控制系统必然包含的两大部分是：",
+          "student_answer": "",
+          "correct_answer": "A",
+          "feedback": "",
+          "source": "quiz",
+          "time": "2026-05-06T15:00:41"
+        },
+        {
+          "question_id": "AI-Q4",
+          "stem": "在反馈控制系统中，扰动的作用是：",
+          "student_answer": "",
+          "correct_answer": "A",
+          "feedback": "",
+          "source": "quiz",
+          "time": "2026-05-06T15:00:41"
+        },
+        {
+          "question_id": "AI-Q5",
+          "stem": "在典型反馈控制系统方框图中，负反馈的表示方式是：",
+          "student_answer": "",
+          "correct_answer": "A",
+          "feedback": "",
+          "source": "quiz",
+          "time": "2026-05-06T15:00:41"
+        },
+        {
+          "question_id": "AI-Q6",
+          "stem": "一个系统如果只包含一个主反馈通路，则称为：",
+          "student_answer": "",
+          "correct_answer": "A",
+          "feedback": "",
+          "source": "quiz",
+          "time": "2026-05-06T15:00:41"
+        },
+        {
+          "question_id": "AI-Q8",
+          "stem": "以下哪个例子中，被控对象是“房间的温度”？",
+          "student_answer": "",
+          "correct_answer": "A",
+          "feedback": "",
+          "source": "quiz",
+          "time": "2026-05-06T15:00:41"
+        },
+        {
+          "question_id": "AI-Q9",
+          "stem": "在反馈控制系统中，有用输入的作用是：",
+          "student_answer": "",
+          "correct_answer": "A",
+          "feedback": "",
+          "source": "quiz",
+          "time": "2026-05-06T15:00:41"
+        },
+        {
+          "question_id": "AI-Q10",
+          "stem": "一个多回路系统与单回路系统的区别在于：",
+          "student_answer": "",
+          "correct_answer": "A",
+          "feedback": "",
+          "source": "quiz",
+          "time": "2026-05-06T15:00:41"
+        }
+      ],
+      "evidence": [
+        {
+          "type": "quiz_fail",
+          "score": 10,
+          "detail": "quiz 未通过，得分 10",
+          "time": "2026-05-06T15:00:41"
+        }
+      ],
+      "last_updated": "2026-05-06T15:00:41"
+    },
+    "自动控制原理": {
+      "title": "自动控制原理",
+      "status": "in_progress",
+      "score": 0,
+      "attempts": 0,
+      "wrong_questions": [],
+      "evidence": [],
+      "last_updated": "2026-05-06T20:25:42"
+    },
+    "KM001": {
+      "title": "自动控制的一般概念",
+      "status": "in_progress",
+      "score": 0,
+      "attempts": 3,
+      "wrong_questions": [
+        {
+          "question_id": "AI-Q1",
+          "stem": "在自动控制系统中，被控对象的输出量通常称为？",
+          "student_answer": "",
+          "correct_answer": "A",
+          "feedback": "",
+          "source": "quiz",
+          "time": "2026-05-06T21:25:00"
+        },
+        {
+          "question_id": "AI-Q2",
+          "stem": "反馈控制系统的核心原理是什么？",
+          "student_answer": "",
+          "correct_answer": "A",
+          "feedback": "",
+          "source": "quiz",
+          "time": "2026-05-06T21:25:00"
+        },
+        {
+          "question_id": "AI-Q4",
+          "stem": "在反馈控制系统中，比较元件的作用是？",
+          "student_answer": "",
+          "correct_answer": "A",
+          "feedback": "",
+          "source": "quiz",
+          "time": "2026-05-06T21:25:00"
+        },
+        {
+          "question_id": "AI-Q5",
+          "stem": "在反馈控制系统中，主反馈通路通常采用什么连接方式？",
+          "student_answer": "",
+          "correct_answer": "A",
+          "feedback": "",
+          "source": "quiz",
+          "time": "2026-05-06T21:25:00"
+        },
+        {
+          "question_id": "AI-Q6",
+          "stem": "自动控制系统的基本组成部分是？",
+          "student_answer": "",
+          "correct_answer": "A",
+          "feedback": "",
+          "source": "quiz",
+          "time": "2026-05-06T21:25:00"
+        },
+        {
+          "question_id": "AI-Q7",
+          "stem": "在反馈控制系统中，控制作用是如何产生的？",
+          "student_answer": "",
+          "correct_answer": "A",
+          "feedback": "",
+          "source": "quiz",
+          "time": "2026-05-06T21:25:00"
+        },
+        {
+          "question_id": "AI-Q8",
+          "stem": "在“人用手取书”的反馈控制系统中，眼睛的作用相当于什么？",
+          "student_answer": "",
+          "correct_answer": "A",
+          "feedback": "",
+          "source": "quiz",
+          "time": "2026-05-06T21:25:00"
+        },
+        {
+          "question_id": "AI-Q9",
+          "stem": "反馈控制系统中的“偏差”是指什么？",
+          "student_answer": "",
+          "correct_answer": "A",
+          "feedback": "",
+          "source": "quiz",
+          "time": "2026-05-06T21:25:00"
+        },
+        {
+          "question_id": "AI-Q10",
+          "stem": "下列哪一项是反馈控制系统的典型特点？",
+          "student_answer": "",
+          "correct_answer": "A",
+          "feedback": "",
+          "source": "quiz",
+          "time": "2026-05-06T21:25:00"
+        },
+        {
+          "question_id": "V-Q1",
+          "stem": "在温度控制系统中，热电偶检测到的炉温实际值通常称为？",
+          "student_answer": "",
+          "correct_answer": "A",
+          "feedback": "",
+          "source": "quiz",
+          "time": "2026-05-19T15:12:10"
+        },
+        {
+          "question_id": "V-Q2",
+          "stem": "在自动调温系统中，比较器将设定温度与实际温度比较后，根据差值调节加热功率。这种控制方式属于？",
+          "student_answer": "",
+          "correct_answer": "A",
+          "feedback": "",
+          "source": "quiz",
+          "time": "2026-05-19T15:12:10"
+        },
+        {
+          "question_id": "V-Q4",
+          "stem": "在速度控制系统中，测速发电机将实际转速转换为电压，并与给定电压比较后产生误差信号。这一功能由哪个元件完成？",
+          "student_answer": "",
+          "correct_answer": "A",
+          "feedback": "",
+          "source": "quiz",
+          "time": "2026-05-19T15:12:10"
+        },
+        {
+          "question_id": "V-Q5",
+          "stem": "在闭环控制系统中，反馈信号与输入信号通常以什么方式连接，以实现自动纠正偏差？",
+          "student_answer": "",
+          "correct_answer": "A",
+          "feedback": "",
+          "source": "quiz",
+          "time": "2026-05-19T15:12:10"
+        },
+        {
+          "question_id": "V-Q1",
+          "stem": "在液位控制系统中，液位传感器检测到的实际液位值通常称为？",
+          "student_answer": "",
+          "correct_answer": "A",
+          "feedback": "",
+          "source": "quiz",
+          "time": "2026-05-19T15:13:04"
+        },
+        {
+          "question_id": "V-Q2",
+          "stem": "在恒温箱中，控制器根据设定温度与实测温度的差值来调节加热丝的电流。这种控制方式属于？",
+          "student_answer": "",
+          "correct_answer": "A",
+          "feedback": "",
+          "source": "quiz",
+          "time": "2026-05-19T15:13:04"
+        },
+        {
+          "question_id": "V-Q4",
+          "stem": "在位置控制系统中，电位计将实际位置转换为电压，并与指令电压比较后产生误差信号。这一功能由哪个元件完成？",
+          "student_answer": "",
+          "correct_answer": "A",
+          "feedback": "",
+          "source": "quiz",
+          "time": "2026-05-19T15:13:04"
+        },
+        {
+          "question_id": "V-Q5",
+          "stem": "在闭环控制系统中，为使系统能自动纠正偏差，反馈信号与输入信号通常以什么方式连接？",
+          "student_answer": "",
+          "correct_answer": "A",
+          "feedback": "",
+          "source": "quiz",
+          "time": "2026-05-19T15:13:04"
+        }
+      ],
+      "evidence": [
+        {
+          "type": "quiz_fail",
+          "score": 10,
+          "detail": "quiz 未通过，得分 10",
+          "time": "2026-05-06T21:25:00"
+        },
+        {
+          "type": "quiz_fail",
+          "score": 56,
+          "detail": "quiz 未通过，得分 56",
+          "time": "2026-05-19T15:12:10"
+        },
+        {
+          "type": "quiz_fail",
+          "score": 0,
+          "detail": "quiz 未通过，得分 0",
+          "time": "2026-05-19T15:13:04"
+        }
+      ],
+      "last_updated": "2026-05-19T15:13:04"
+    }
+  }
+}

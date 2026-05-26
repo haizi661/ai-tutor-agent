@@ -1,0 +1,17 @@
+{
+  "version": 1,
+  "source_path": "E:\\ai_code\\ai-tutor-agent\\data\\course_materials\\artificial_intelligence\\splits\\nn_dl_chapter_13_p323-343_第_13_章_深度生成模型.pdf",
+  "source_filename": "nn_dl_chapter_13_p323-343_第_13_章_深度生成模型.pdf",
+  "source_size_bytes": 1382197,
+  "source_mtime": 1779694338,
+  "cache_key": "07235defdde0",
+  "batch_id": "32c7cc35-7abe-4263-b495-bf8a7d415d46",
+  "full_zip_url": "https://cdn-mineru.openxlab.org.cn/pdf/2026-05-25/97c57d68-44bc-449f-b0f3-c439f23f7766.zip",
+  "saved_at": 1779697180,
+  "proxy_mode": "inherit",
+  "proxy_desc": "继承环境变量 HTTP_PROXY / HTTPS_PROXY",
+  "full_md_path": "full.md",
+  "relative_md_path_in_extract": "full.md",
+  "result_zip_path": "result.zip",
+  "extract_dir": "extracted"
+}

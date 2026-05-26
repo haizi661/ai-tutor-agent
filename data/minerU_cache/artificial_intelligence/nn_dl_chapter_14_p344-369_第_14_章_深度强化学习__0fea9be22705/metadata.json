@@ -1,0 +1,17 @@
+{
+  "version": 1,
+  "source_path": "E:\\ai_code\\ai-tutor-agent\\data\\course_materials\\artificial_intelligence\\splits\\nn_dl_chapter_14_p344-369_第_14_章_深度强化学习.pdf",
+  "source_filename": "nn_dl_chapter_14_p344-369_第_14_章_深度强化学习.pdf",
+  "source_size_bytes": 928061,
+  "source_mtime": 1779694338,
+  "cache_key": "0fea9be22705",
+  "batch_id": "03e1be83-8b1f-429d-ba78-47ae28529be3",
+  "full_zip_url": "https://cdn-mineru.openxlab.org.cn/pdf/2026-05-25/63f3eb1e-1fad-4e2d-bc1f-9194b60cb8af.zip",
+  "saved_at": 1779697278,
+  "proxy_mode": "inherit",
+  "proxy_desc": "继承环境变量 HTTP_PROXY / HTTPS_PROXY",
+  "full_md_path": "full.md",
+  "relative_md_path_in_extract": "full.md",
+  "result_zip_path": "result.zip",
+  "extract_dir": "extracted"
+}

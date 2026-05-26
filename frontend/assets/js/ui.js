@@ -1365,6 +1365,7 @@
         if (kind === 'homework_learning_html') return 'graph_rag_answer';
         if (kind === 'graph_rag_answer') return 'graph_rag_answer';
         if (kind === 'graph_rag_debug_report') return 'graph_rag_debug_report';
+        if (kind === 'ai_path_lesson' || kind === 'ai_path_lesson_qa') return 'graph_rag_answer';
         if (kind === 'evaluator_card') return 'evaluation';
         if (kind === 'assessment_result') return 'profile';
         return 'teacher';
@@ -1713,7 +1714,7 @@
             }
             const turnRole = options.turnRole || app.roleFromMessageKind(options.kind);
             app.appendAgentTurnShell(text, turnRole, {
-                allowLearningHtml: options.allowLearningHtml === true || options.kind === 'graph_rag_answer' || options.kind === 'homework_answer_prompt' || options.kind === 'homework_learning_html',
+                allowLearningHtml: options.allowLearningHtml === true || options.kind === 'graph_rag_answer' || options.kind === 'homework_answer_prompt' || options.kind === 'homework_learning_html' || String(text || '').includes('learning-answer-content'),
                 allowGraphRagHtml: options.allowGraphRagHtml === true || options.kind === 'graph_rag_debug_report',
             });
             app.finalizeAgentTurn();
@@ -3117,6 +3118,9 @@
     };
 
     function applySessionArtifacts(stateSnapshot) {
+        const isAiPathSession = Boolean(stateSnapshot.ai_path_mode)
+            || stateSnapshot.active_course === 'artificial_intelligence'
+            || stateSnapshot.flow_status === 'ai_path';
         state.currentTopic = stateSnapshot.current_topic || stateSnapshot.currentTopic || stateSnapshot.current_user_goal || stateSnapshot.session_goal || '';
         state.currentTopicFocus = stateSnapshot.topic_focus || stateSnapshot.currentTopicFocus || '';
         state.graphTopicHint = state.currentTopic || stateSnapshot.proposed_topic || state.graphTopicHint || '';
@@ -3131,7 +3135,7 @@
         if (stateSnapshot.assessment_radar && stateSnapshot.assessment_radar.dimensions) {
             app.showRadar(stateSnapshot.assessment_radar);
         }
-        if (state.currentGraphNode || state.currentGraphNodeId) {
+        if (!isAiPathSession && (state.currentGraphNode || state.currentGraphNodeId)) {
             app.renderKnowledgeGraphVisualCard?.({
                 title: state.currentGraphNode,
                 id: state.currentGraphNodeId,
@@ -3299,9 +3303,19 @@
                 app.renderHomeworkAnswerCard?.(data.homework_items || data.items || stateSnapshot?.homework_items || [], data);
                 return;
             }
-            if (item.kind === 'graph_rag_answer' || item.kind === 'graph_rag_debug_report' || item.kind === 'homework_learning_html') {
+            if (
+                item.kind === 'graph_rag_answer'
+                || item.kind === 'graph_rag_debug_report'
+                || item.kind === 'homework_learning_html'
+                || item.kind === 'ai_path_lesson'
+                || item.kind === 'ai_path_lesson_qa'
+                || String(content || '').includes('learning-answer-content')
+            ) {
                 const fallbackHtml = item.kind === 'graph_rag_answer'
                     || item.kind === 'homework_learning_html'
+                    || item.kind === 'ai_path_lesson'
+                    || item.kind === 'ai_path_lesson_qa'
+                    || String(content || '').includes('learning-answer-content')
                     ? '<section class="learning-answer-content"><p></p></section>'
                     : '<section class="graph-rag-answer-panel"><div class="answer"></div></section>';
                 app.appendMessage('agent', content || fallbackHtml, { kind: item.kind });

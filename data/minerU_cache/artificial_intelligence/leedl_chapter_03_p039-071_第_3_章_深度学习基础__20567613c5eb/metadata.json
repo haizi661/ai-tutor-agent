@@ -1,0 +1,17 @@
+{
+  "version": 1,
+  "source_path": "E:\\ai_code\\ai-tutor-agent\\data\\course_materials\\artificial_intelligence\\splits\\leedl_chapter_03_p039-071_第_3_章_深度学习基础.pdf",
+  "source_filename": "leedl_chapter_03_p039-071_第_3_章_深度学习基础.pdf",
+  "source_size_bytes": 10474603,
+  "source_mtime": 1779694337,
+  "cache_key": "20567613c5eb",
+  "batch_id": "1f662ad5-51a1-4214-94a2-10762af4f77d",
+  "full_zip_url": "https://cdn-mineru.openxlab.org.cn/pdf/2026-05-25/f26eff7c-b824-4943-888d-82cfc7d3d748.zip",
+  "saved_at": 1779694623,
+  "proxy_mode": "inherit",
+  "proxy_desc": "继承环境变量 HTTP_PROXY / HTTPS_PROXY",
+  "full_md_path": "full.md",
+  "relative_md_path_in_extract": "full.md",
+  "result_zip_path": "result.zip",
+  "extract_dir": "extracted"
+}

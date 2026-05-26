@@ -1,0 +1,2396 @@
+{
+  "pdf_name": "chapter_05_p205-262_线性系统的频域分析法.pdf",
+  "pdf_md5": "df0165aae88191f7307b82a2d295238f",
+  "cache_dir": "data/mineru_cache\\chapter_05_p205-262_线性系统的频域分析法__df0165aa",
+  "full_md_path": "data/mineru_cache\\chapter_05_p205-262_线性系统的频域分析法__df0165aa\\full.md",
+  "images_dir": "data/mineru_cache\\chapter_05_p205-262_线性系统的频域分析法__df0165aa\\images",
+  "json_dir": "data/mineru_cache\\chapter_05_p205-262_线性系统的频域分析法__df0165aa\\json",
+  "images": {
+    "00791265d6f36df1d9891f4894d173015fc2706a7307d8b4cf0789c95b037162.jpg": {
+      "original_name": "00791265d6f36df1d9891f4894d173015fc2706a7307d8b4cf0789c95b037162.jpg",
+      "original_rel_path": "00791265d6f36df1d9891f4894d173015fc2706a7307d8b4cf0789c95b037162.jpg",
+      "friendly_name": "figure_01.jpg",
+      "abs_path": "data/mineru_cache\\chapter_05_p205-262_线性系统的频域分析法__df0165aa\\images\\figure_01.jpg",
+      "index": 1
+    },
+    "00f68e4ea0a384823f2ba373590207b049445758260b23326a2cb8a216657e62.jpg": {
+      "original_name": "00f68e4ea0a384823f2ba373590207b049445758260b23326a2cb8a216657e62.jpg",
+      "original_rel_path": "00f68e4ea0a384823f2ba373590207b049445758260b23326a2cb8a216657e62.jpg",
+      "friendly_name": "figure_02.jpg",
+      "abs_path": "data/mineru_cache\\chapter_05_p205-262_线性系统的频域分析法__df0165aa\\images\\figure_02.jpg",
+      "index": 2
+    },
+    "0128db01d9b334eedb2a80b2671e7fd53441939ad3609f112c5413aec0196ab0.jpg": {
+      "original_name": "0128db01d9b334eedb2a80b2671e7fd53441939ad3609f112c5413aec0196ab0.jpg",
+      "original_rel_path": "0128db01d9b334eedb2a80b2671e7fd53441939ad3609f112c5413aec0196ab0.jpg",
+      "friendly_name": "figure_03.jpg",
+      "abs_path": "data/mineru_cache\\chapter_05_p205-262_线性系统的频域分析法__df0165aa\\images\\figure_03.jpg",
+      "index": 3
+    },
+    "017f7d949709f1e35b470242e3762890a55c07743dc12cae05df8b4fb3fea54a.jpg": {
+      "original_name": "017f7d949709f1e35b470242e3762890a55c07743dc12cae05df8b4fb3fea54a.jpg",
+      "original_rel_path": "017f7d949709f1e35b470242e3762890a55c07743dc12cae05df8b4fb3fea54a.jpg",
+      "friendly_name": "figure_04.jpg",
+      "abs_path": "data/mineru_cache\\chapter_05_p205-262_线性系统的频域分析法__df0165aa\\images\\figure_04.jpg",
+      "index": 4
+    },
+    "01c20cdd32bf0196ec607b98dc9651879645f73db01c424a87036e03fba6aa54.jpg": {
+      "original_name": "01c20cdd32bf0196ec607b98dc9651879645f73db01c424a87036e03fba6aa54.jpg",
+      "original_rel_path": "01c20cdd32bf0196ec607b98dc9651879645f73db01c424a87036e03fba6aa54.jpg",
+      "friendly_name": "figure_05.jpg",
+      "abs_path": "data/mineru_cache\\chapter_05_p205-262_线性系统的频域分析法__df0165aa\\images\\figure_05.jpg",
+      "index": 5
+    },
+    "01cb079b11cbdd4d1d9a6d90aebec60737881a2c17e4b897818f55b533fe4fc3.jpg": {
+      "original_name": "01cb079b11cbdd4d1d9a6d90aebec60737881a2c17e4b897818f55b533fe4fc3.jpg",
+      "original_rel_path": "01cb079b11cbdd4d1d9a6d90aebec60737881a2c17e4b897818f55b533fe4fc3.jpg",
+      "friendly_name": "figure_06.jpg",
+      "abs_path": "data/mineru_cache\\chapter_05_p205-262_线性系统的频域分析法__df0165aa\\images\\figure_06.jpg",
+      "index": 6
+    },
+    "01e93fc36f8d976de812d30126e0b6e0ffe1b24b7e9d2f503f1ae02d2bffb3ed.jpg": {
+      "original_name": "01e93fc36f8d976de812d30126e0b6e0ffe1b24b7e9d2f503f1ae02d2bffb3ed.jpg",
+      "original_rel_path": "01e93fc36f8d976de812d30126e0b6e0ffe1b24b7e9d2f503f1ae02d2bffb3ed.jpg",
+      "friendly_name": "figure_07.jpg",
+      "abs_path": "data/mineru_cache\\chapter_05_p205-262_线性系统的频域分析法__df0165aa\\images\\figure_07.jpg",
+      "index": 7
+    },
+    "01f58e604a585ec622d9b458b4d61371e26426ea774ed497672b5efae71d7753.jpg": {
+      "original_name": "01f58e604a585ec622d9b458b4d61371e26426ea774ed497672b5efae71d7753.jpg",
+      "original_rel_path": "01f58e604a585ec622d9b458b4d61371e26426ea774ed497672b5efae71d7753.jpg",
+      "friendly_name": "figure_08.jpg",
+      "abs_path": "data/mineru_cache\\chapter_05_p205-262_线性系统的频域分析法__df0165aa\\images\\figure_08.jpg",
+      "index": 8
+    },
+    "0325698879688636b15716c9858eb0988d74cdfb7275c3e2f9f0746ecffc133b.jpg": {
+      "original_name": "0325698879688636b15716c9858eb0988d74cdfb7275c3e2f9f0746ecffc133b.jpg",
+      "original_rel_path": "0325698879688636b15716c9858eb0988d74cdfb7275c3e2f9f0746ecffc133b.jpg",
+      "friendly_name": "figure_09.jpg",
+      "abs_path": "data/mineru_cache\\chapter_05_p205-262_线性系统的频域分析法__df0165aa\\images\\figure_09.jpg",
+      "index": 9
+    },
+    "03dd4e23861b663f653be4d0743d622b73cc002316fb83abb504d2dc3f6fddd0.jpg": {
+      "original_name": "03dd4e23861b663f653be4d0743d622b73cc002316fb83abb504d2dc3f6fddd0.jpg",
+      "original_rel_path": "03dd4e23861b663f653be4d0743d622b73cc002316fb83abb504d2dc3f6fddd0.jpg",
+      "friendly_name": "figure_10.jpg",
+      "abs_path": "data/mineru_cache\\chapter_05_p205-262_线性系统的频域分析法__df0165aa\\images\\figure_10.jpg",
+      "index": 10
+    },
+    "04cef0d1de1d93504830a8ea26d91ee9fa12be118b554051e1f1439e1fc8bdad.jpg": {
+      "original_name": "04cef0d1de1d93504830a8ea26d91ee9fa12be118b554051e1f1439e1fc8bdad.jpg",
+      "original_rel_path": "04cef0d1de1d93504830a8ea26d91ee9fa12be118b554051e1f1439e1fc8bdad.jpg",
+      "friendly_name": "figure_11.jpg",
+      "abs_path": "data/mineru_cache\\chapter_05_p205-262_线性系统的频域分析法__df0165aa\\images\\figure_11.jpg",
+      "index": 11
+    },
+    "0550f14975b406d6f3302e1849e2189d8fc8f4756fc65a86759d9e23b9242ed1.jpg": {
+      "original_name": "0550f14975b406d6f3302e1849e2189d8fc8f4756fc65a86759d9e23b9242ed1.jpg",
+      "original_rel_path": "0550f14975b406d6f3302e1849e2189d8fc8f4756fc65a86759d9e23b9242ed1.jpg",
+      "friendly_name": "figure_12.jpg",
+      "abs_path": "data/mineru_cache\\chapter_05_p205-262_线性系统的频域分析法__df0165aa\\images\\figure_12.jpg",
+      "index": 12
+    },
+    "06bf252e45b46b399e046eaa27e9d6ce625ef7ce3da043deab1538a677094247.jpg": {
+      "original_name": "06bf252e45b46b399e046eaa27e9d6ce625ef7ce3da043deab1538a677094247.jpg",
+      "original_rel_path": "06bf252e45b46b399e046eaa27e9d6ce625ef7ce3da043deab1538a677094247.jpg",
+      "friendly_name": "figure_13.jpg",
+      "abs_path": "data/mineru_cache\\chapter_05_p205-262_线性系统的频域分析法__df0165aa\\images\\figure_13.jpg",
+      "index": 13
+    },
+    "06c65d1ef807fbbc68b2544c85749fd0640dc048101ca3cbd619e0700fb52b3b.jpg": {
+      "original_name": "06c65d1ef807fbbc68b2544c85749fd0640dc048101ca3cbd619e0700fb52b3b.jpg",
+      "original_rel_path": "06c65d1ef807fbbc68b2544c85749fd0640dc048101ca3cbd619e0700fb52b3b.jpg",
+      "friendly_name": "figure_14.jpg",
+      "abs_path": "data/mineru_cache\\chapter_05_p205-262_线性系统的频域分析法__df0165aa\\images\\figure_14.jpg",
+      "index": 14
+    },
+    "07491a252313a5ae2ce30c0d8409ab18b4476c4bb5a41808a383645f6e74ac4d.jpg": {
+      "original_name": "07491a252313a5ae2ce30c0d8409ab18b4476c4bb5a41808a383645f6e74ac4d.jpg",
+      "original_rel_path": "07491a252313a5ae2ce30c0d8409ab18b4476c4bb5a41808a383645f6e74ac4d.jpg",
+      "friendly_name": "figure_15.jpg",
+      "abs_path": "data/mineru_cache\\chapter_05_p205-262_线性系统的频域分析法__df0165aa\\images\\figure_15.jpg",
+      "index": 15
+    },
+    "08b3883dfabfc7a11138c50a3c3c0f3f247c2176c8598eb29d56551d28f85408.jpg": {
+      "original_name": "08b3883dfabfc7a11138c50a3c3c0f3f247c2176c8598eb29d56551d28f85408.jpg",
+      "original_rel_path": "08b3883dfabfc7a11138c50a3c3c0f3f247c2176c8598eb29d56551d28f85408.jpg",
+      "friendly_name": "figure_16.jpg",
+      "abs_path": "data/mineru_cache\\chapter_05_p205-262_线性系统的频域分析法__df0165aa\\images\\figure_16.jpg",
+      "index": 16
+    },
+    "09c61d598077847c0e40398fe1c80a63a51b9911b67739b29d643417e8b4fc0c.jpg": {
+      "original_name": "09c61d598077847c0e40398fe1c80a63a51b9911b67739b29d643417e8b4fc0c.jpg",
+      "original_rel_path": "09c61d598077847c0e40398fe1c80a63a51b9911b67739b29d643417e8b4fc0c.jpg",
+      "friendly_name": "figure_17.jpg",
+      "abs_path": "data/mineru_cache\\chapter_05_p205-262_线性系统的频域分析法__df0165aa\\images\\figure_17.jpg",
+      "index": 17
+    },
+    "09f63b53bd2958298a7f73a0397d8bb8606cda476a888cd56682de7622e575c8.jpg": {
+      "original_name": "09f63b53bd2958298a7f73a0397d8bb8606cda476a888cd56682de7622e575c8.jpg",
+      "original_rel_path": "09f63b53bd2958298a7f73a0397d8bb8606cda476a888cd56682de7622e575c8.jpg",
+      "friendly_name": "figure_18.jpg",
+      "abs_path": "data/mineru_cache\\chapter_05_p205-262_线性系统的频域分析法__df0165aa\\images\\figure_18.jpg",
+      "index": 18
+    },
+    "0b40ada50934e2998b01dd2000efcd935073329158fcdf9ed8c95d42abd68d51.jpg": {
+      "original_name": "0b40ada50934e2998b01dd2000efcd935073329158fcdf9ed8c95d42abd68d51.jpg",
+      "original_rel_path": "0b40ada50934e2998b01dd2000efcd935073329158fcdf9ed8c95d42abd68d51.jpg",
+      "friendly_name": "figure_19.jpg",
+      "abs_path": "data/mineru_cache\\chapter_05_p205-262_线性系统的频域分析法__df0165aa\\images\\figure_19.jpg",
+      "index": 19
+    },
+    "0c56552df24e667dbbb11f389baa6f8b9fbe2c2daeae44ddf2393da4f322a12f.jpg": {
+      "original_name": "0c56552df24e667dbbb11f389baa6f8b9fbe2c2daeae44ddf2393da4f322a12f.jpg",
+      "original_rel_path": "0c56552df24e667dbbb11f389baa6f8b9fbe2c2daeae44ddf2393da4f322a12f.jpg",
+      "friendly_name": "figure_20.jpg",
+      "abs_path": "data/mineru_cache\\chapter_05_p205-262_线性系统的频域分析法__df0165aa\\images\\figure_20.jpg",
+      "index": 20
+    },
+    "0e51bc2abb7b8d984e8f26016f6dea17afcc86d3c4a2d8a2df56bad43fc569f1.jpg": {
+      "original_name": "0e51bc2abb7b8d984e8f26016f6dea17afcc86d3c4a2d8a2df56bad43fc569f1.jpg",
+      "original_rel_path": "0e51bc2abb7b8d984e8f26016f6dea17afcc86d3c4a2d8a2df56bad43fc569f1.jpg",
+      "friendly_name": "figure_21.jpg",
+      "abs_path": "data/mineru_cache\\chapter_05_p205-262_线性系统的频域分析法__df0165aa\\images\\figure_21.jpg",
+      "index": 21
+    },
+    "0ea31b24318b27c3a230f6862893fbbe04ebeafda1110e8c0515ef2d06a16e50.jpg": {
+      "original_name": "0ea31b24318b27c3a230f6862893fbbe04ebeafda1110e8c0515ef2d06a16e50.jpg",
+      "original_rel_path": "0ea31b24318b27c3a230f6862893fbbe04ebeafda1110e8c0515ef2d06a16e50.jpg",
+      "friendly_name": "figure_22.jpg",
+      "abs_path": "data/mineru_cache\\chapter_05_p205-262_线性系统的频域分析法__df0165aa\\images\\figure_22.jpg",
+      "index": 22
+    },
+    "0ed2619567eb4fb9e1279ed0b6d1796faeea2caf5b43e4b98d60fdecf99e1a17.jpg": {
+      "original_name": "0ed2619567eb4fb9e1279ed0b6d1796faeea2caf5b43e4b98d60fdecf99e1a17.jpg",
+      "original_rel_path": "0ed2619567eb4fb9e1279ed0b6d1796faeea2caf5b43e4b98d60fdecf99e1a17.jpg",
+      "friendly_name": "figure_23.jpg",
+      "abs_path": "data/mineru_cache\\chapter_05_p205-262_线性系统的频域分析法__df0165aa\\images\\figure_23.jpg",
+      "index": 23
+    },
+    "0f3e715eba9da736a349d615d0951e95a683f777b8a9bd3f8977c4f61f8925f0.jpg": {
+      "original_name": "0f3e715eba9da736a349d615d0951e95a683f777b8a9bd3f8977c4f61f8925f0.jpg",
+      "original_rel_path": "0f3e715eba9da736a349d615d0951e95a683f777b8a9bd3f8977c4f61f8925f0.jpg",
+      "friendly_name": "figure_24.jpg",
+      "abs_path": "data/mineru_cache\\chapter_05_p205-262_线性系统的频域分析法__df0165aa\\images\\figure_24.jpg",
+      "index": 24
+    },
+    "0ff2081b44dd9e91ed4337dda155951cb499fce72e0dc49efa09f789f418ded5.jpg": {
+      "original_name": "0ff2081b44dd9e91ed4337dda155951cb499fce72e0dc49efa09f789f418ded5.jpg",
+      "original_rel_path": "0ff2081b44dd9e91ed4337dda155951cb499fce72e0dc49efa09f789f418ded5.jpg",
+      "friendly_name": "figure_25.jpg",
+      "abs_path": "data/mineru_cache\\chapter_05_p205-262_线性系统的频域分析法__df0165aa\\images\\figure_25.jpg",
+      "index": 25
+    },
+    "1097d24b29b3e15a33f68ad9fe042a3a63b7a84b8786f61365221c8e3a324c24.jpg": {
+      "original_name": "1097d24b29b3e15a33f68ad9fe042a3a63b7a84b8786f61365221c8e3a324c24.jpg",
+      "original_rel_path": "1097d24b29b3e15a33f68ad9fe042a3a63b7a84b8786f61365221c8e3a324c24.jpg",
+      "friendly_name": "figure_26.jpg",
+      "abs_path": "data/mineru_cache\\chapter_05_p205-262_线性系统的频域分析法__df0165aa\\images\\figure_26.jpg",
+      "index": 26
+    },
+    "11bc066c32a4258c3cb1287970b0b527614e4a13ea9e0a9d3454cd3b1cfc1ec0.jpg": {
+      "original_name": "11bc066c32a4258c3cb1287970b0b527614e4a13ea9e0a9d3454cd3b1cfc1ec0.jpg",
+      "original_rel_path": "11bc066c32a4258c3cb1287970b0b527614e4a13ea9e0a9d3454cd3b1cfc1ec0.jpg",
+      "friendly_name": "figure_27.jpg",
+      "abs_path": "data/mineru_cache\\chapter_05_p205-262_线性系统的频域分析法__df0165aa\\images\\figure_27.jpg",
+      "index": 27
+    },
+    "1290faed5aee80d974c9592827690239fcac392717dfeee41ffbced1e923ae8e.jpg": {
+      "original_name": "1290faed5aee80d974c9592827690239fcac392717dfeee41ffbced1e923ae8e.jpg",
+      "original_rel_path": "1290faed5aee80d974c9592827690239fcac392717dfeee41ffbced1e923ae8e.jpg",
+      "friendly_name": "figure_28.jpg",
+      "abs_path": "data/mineru_cache\\chapter_05_p205-262_线性系统的频域分析法__df0165aa\\images\\figure_28.jpg",
+      "index": 28
+    },
+    "12afa35f8d9660c62f67719c55831ff11b50a67b5ccb38e563526a92fbb8c1a7.jpg": {
+      "original_name": "12afa35f8d9660c62f67719c55831ff11b50a67b5ccb38e563526a92fbb8c1a7.jpg",
+      "original_rel_path": "12afa35f8d9660c62f67719c55831ff11b50a67b5ccb38e563526a92fbb8c1a7.jpg",
+      "friendly_name": "figure_29.jpg",
+      "abs_path": "data/mineru_cache\\chapter_05_p205-262_线性系统的频域分析法__df0165aa\\images\\figure_29.jpg",
+      "index": 29
+    },
+    "1404376cd57f91bf63ff788458049ed7167181a3a18d6e6ed50cd2372a04a480.jpg": {
+      "original_name": "1404376cd57f91bf63ff788458049ed7167181a3a18d6e6ed50cd2372a04a480.jpg",
+      "original_rel_path": "1404376cd57f91bf63ff788458049ed7167181a3a18d6e6ed50cd2372a04a480.jpg",
+      "friendly_name": "figure_30.jpg",
+      "abs_path": "data/mineru_cache\\chapter_05_p205-262_线性系统的频域分析法__df0165aa\\images\\figure_30.jpg",
+      "index": 30
+    },
+    "14c005234dbcad69f9f52e477879249cf0db61ac44538e08188213d0375dd00e.jpg": {
+      "original_name": "14c005234dbcad69f9f52e477879249cf0db61ac44538e08188213d0375dd00e.jpg",
+      "original_rel_path": "14c005234dbcad69f9f52e477879249cf0db61ac44538e08188213d0375dd00e.jpg",
+      "friendly_name": "figure_31.jpg",
+      "abs_path": "data/mineru_cache\\chapter_05_p205-262_线性系统的频域分析法__df0165aa\\images\\figure_31.jpg",
+      "index": 31
+    },
+    "15a9cf6574a2f293eb6f9aaf0b2cf01280eb425634af9cfec456513d0d5ec3a1.jpg": {
+      "original_name": "15a9cf6574a2f293eb6f9aaf0b2cf01280eb425634af9cfec456513d0d5ec3a1.jpg",
+      "original_rel_path": "15a9cf6574a2f293eb6f9aaf0b2cf01280eb425634af9cfec456513d0d5ec3a1.jpg",
+      "friendly_name": "figure_32.jpg",
+      "abs_path": "data/mineru_cache\\chapter_05_p205-262_线性系统的频域分析法__df0165aa\\images\\figure_32.jpg",
+      "index": 32
+    },
+    "1665a93fb329d632d0e7afe3a0af7344e7e7ca98112c58d19f5d5e978c28bf72.jpg": {
+      "original_name": "1665a93fb329d632d0e7afe3a0af7344e7e7ca98112c58d19f5d5e978c28bf72.jpg",
+      "original_rel_path": "1665a93fb329d632d0e7afe3a0af7344e7e7ca98112c58d19f5d5e978c28bf72.jpg",
+      "friendly_name": "figure_33.jpg",
+      "abs_path": "data/mineru_cache\\chapter_05_p205-262_线性系统的频域分析法__df0165aa\\images\\figure_33.jpg",
+      "index": 33
+    },
+    "16afdf2d878a1af07de9e2bfa4b8bc8c8f27b41ef94b9c4d4ca88e384899c673.jpg": {
+      "original_name": "16afdf2d878a1af07de9e2bfa4b8bc8c8f27b41ef94b9c4d4ca88e384899c673.jpg",
+      "original_rel_path": "16afdf2d878a1af07de9e2bfa4b8bc8c8f27b41ef94b9c4d4ca88e384899c673.jpg",
+      "friendly_name": "figure_34.jpg",
+      "abs_path": "data/mineru_cache\\chapter_05_p205-262_线性系统的频域分析法__df0165aa\\images\\figure_34.jpg",
+      "index": 34
+    },
+    "181dc031997871355aeab3189acd384f2a5fe8a11840c251bd6f19efe7f2ff51.jpg": {
+      "original_name": "181dc031997871355aeab3189acd384f2a5fe8a11840c251bd6f19efe7f2ff51.jpg",
+      "original_rel_path": "181dc031997871355aeab3189acd384f2a5fe8a11840c251bd6f19efe7f2ff51.jpg",
+      "friendly_name": "figure_35.jpg",
+      "abs_path": "data/mineru_cache\\chapter_05_p205-262_线性系统的频域分析法__df0165aa\\images\\figure_35.jpg",
+      "index": 35
+    },
+    "188e81fcba8b534165aff333870bdc208c9ed9097cfcdb6f3add79ede69cc7dd.jpg": {
+      "original_name": "188e81fcba8b534165aff333870bdc208c9ed9097cfcdb6f3add79ede69cc7dd.jpg",
+      "original_rel_path": "188e81fcba8b534165aff333870bdc208c9ed9097cfcdb6f3add79ede69cc7dd.jpg",
+      "friendly_name": "figure_36.jpg",
+      "abs_path": "data/mineru_cache\\chapter_05_p205-262_线性系统的频域分析法__df0165aa\\images\\figure_36.jpg",
+      "index": 36
+    },
+    "1ab492f2a184b314c4925ef05e16a7c209ee65d7bb58c93b2f93667ba4415c07.jpg": {
+      "original_name": "1ab492f2a184b314c4925ef05e16a7c209ee65d7bb58c93b2f93667ba4415c07.jpg",
+      "original_rel_path": "1ab492f2a184b314c4925ef05e16a7c209ee65d7bb58c93b2f93667ba4415c07.jpg",
+      "friendly_name": "figure_37.jpg",
+      "abs_path": "data/mineru_cache\\chapter_05_p205-262_线性系统的频域分析法__df0165aa\\images\\figure_37.jpg",
+      "index": 37
+    },
+    "1bf2a327de6c7fd8d50a4ab7f7ef4b2dcd198d2200758f705ab9f003036af247.jpg": {
+      "original_name": "1bf2a327de6c7fd8d50a4ab7f7ef4b2dcd198d2200758f705ab9f003036af247.jpg",
+      "original_rel_path": "1bf2a327de6c7fd8d50a4ab7f7ef4b2dcd198d2200758f705ab9f003036af247.jpg",
+      "friendly_name": "figure_38.jpg",
+      "abs_path": "data/mineru_cache\\chapter_05_p205-262_线性系统的频域分析法__df0165aa\\images\\figure_38.jpg",
+      "index": 38
+    },
+    "1d78a6c4649a0c24c98959d98bb962d1581485d703431ad1397e1a832f52ce6a.jpg": {
+      "original_name": "1d78a6c4649a0c24c98959d98bb962d1581485d703431ad1397e1a832f52ce6a.jpg",
+      "original_rel_path": "1d78a6c4649a0c24c98959d98bb962d1581485d703431ad1397e1a832f52ce6a.jpg",
+      "friendly_name": "figure_39.jpg",
+      "abs_path": "data/mineru_cache\\chapter_05_p205-262_线性系统的频域分析法__df0165aa\\images\\figure_39.jpg",
+      "index": 39
+    },
+    "1ddabc6bfd7b597186b0b39a2d6c84008662fd47130029f39af77f3b8d1eddd5.jpg": {
+      "original_name": "1ddabc6bfd7b597186b0b39a2d6c84008662fd47130029f39af77f3b8d1eddd5.jpg",
+      "original_rel_path": "1ddabc6bfd7b597186b0b39a2d6c84008662fd47130029f39af77f3b8d1eddd5.jpg",
+      "friendly_name": "figure_40.jpg",
+      "abs_path": "data/mineru_cache\\chapter_05_p205-262_线性系统的频域分析法__df0165aa\\images\\figure_40.jpg",
+      "index": 40
+    },
+    "1e0106ac37a01ac933f60e74854abf0631e6c422c623af1e56205b3e8916cf0f.jpg": {
+      "original_name": "1e0106ac37a01ac933f60e74854abf0631e6c422c623af1e56205b3e8916cf0f.jpg",
+      "original_rel_path": "1e0106ac37a01ac933f60e74854abf0631e6c422c623af1e56205b3e8916cf0f.jpg",
+      "friendly_name": "figure_41.jpg",
+      "abs_path": "data/mineru_cache\\chapter_05_p205-262_线性系统的频域分析法__df0165aa\\images\\figure_41.jpg",
+      "index": 41
+    },
+    "1e490081f28c16d592eb8d142c25e3c616719171f6be618d77be0b551068394f.jpg": {
+      "original_name": "1e490081f28c16d592eb8d142c25e3c616719171f6be618d77be0b551068394f.jpg",
+      "original_rel_path": "1e490081f28c16d592eb8d142c25e3c616719171f6be618d77be0b551068394f.jpg",
+      "friendly_name": "figure_42.jpg",
+      "abs_path": "data/mineru_cache\\chapter_05_p205-262_线性系统的频域分析法__df0165aa\\images\\figure_42.jpg",
+      "index": 42
+    },
+    "1e4a40a95e566e55ec1fb56bc026459d5664e4bf44f75d2372d233c93c7c1191.jpg": {
+      "original_name": "1e4a40a95e566e55ec1fb56bc026459d5664e4bf44f75d2372d233c93c7c1191.jpg",
+      "original_rel_path": "1e4a40a95e566e55ec1fb56bc026459d5664e4bf44f75d2372d233c93c7c1191.jpg",
+      "friendly_name": "figure_43.jpg",
+      "abs_path": "data/mineru_cache\\chapter_05_p205-262_线性系统的频域分析法__df0165aa\\images\\figure_43.jpg",
+      "index": 43
+    },
+    "1f96e8a4559d6966f5b32ed9f38d0ff42e4f2e8cdd98283c2611969563e4924d.jpg": {
+      "original_name": "1f96e8a4559d6966f5b32ed9f38d0ff42e4f2e8cdd98283c2611969563e4924d.jpg",
+      "original_rel_path": "1f96e8a4559d6966f5b32ed9f38d0ff42e4f2e8cdd98283c2611969563e4924d.jpg",
+      "friendly_name": "figure_44.jpg",
+      "abs_path": "data/mineru_cache\\chapter_05_p205-262_线性系统的频域分析法__df0165aa\\images\\figure_44.jpg",
+      "index": 44
+    },
+    "1fff64c5a69e760107ae879e06512d62abbbff1a9e4d9a88810cb6c1aea6fbb7.jpg": {
+      "original_name": "1fff64c5a69e760107ae879e06512d62abbbff1a9e4d9a88810cb6c1aea6fbb7.jpg",
+      "original_rel_path": "1fff64c5a69e760107ae879e06512d62abbbff1a9e4d9a88810cb6c1aea6fbb7.jpg",
+      "friendly_name": "figure_45.jpg",
+      "abs_path": "data/mineru_cache\\chapter_05_p205-262_线性系统的频域分析法__df0165aa\\images\\figure_45.jpg",
+      "index": 45
+    },
+    "20b820f272133534f04d2dcab5858a8d5cbe9823b1d1ffcd807ca2c8b0c261da.jpg": {
+      "original_name": "20b820f272133534f04d2dcab5858a8d5cbe9823b1d1ffcd807ca2c8b0c261da.jpg",
+      "original_rel_path": "20b820f272133534f04d2dcab5858a8d5cbe9823b1d1ffcd807ca2c8b0c261da.jpg",
+      "friendly_name": "figure_46.jpg",
+      "abs_path": "data/mineru_cache\\chapter_05_p205-262_线性系统的频域分析法__df0165aa\\images\\figure_46.jpg",
+      "index": 46
+    },
+    "21c322c9d1b4e1c4843aa53000b53d5e36145c5a296fd4ff1ed26341d967a3f8.jpg": {
+      "original_name": "21c322c9d1b4e1c4843aa53000b53d5e36145c5a296fd4ff1ed26341d967a3f8.jpg",
+      "original_rel_path": "21c322c9d1b4e1c4843aa53000b53d5e36145c5a296fd4ff1ed26341d967a3f8.jpg",
+      "friendly_name": "figure_47.jpg",
+      "abs_path": "data/mineru_cache\\chapter_05_p205-262_线性系统的频域分析法__df0165aa\\images\\figure_47.jpg",
+      "index": 47
+    },
+    "2418811aa2b9c86e65f4ac64ad2105d044756ba896d1a1d5a0a3f3ab68abc4a7.jpg": {
+      "original_name": "2418811aa2b9c86e65f4ac64ad2105d044756ba896d1a1d5a0a3f3ab68abc4a7.jpg",
+      "original_rel_path": "2418811aa2b9c86e65f4ac64ad2105d044756ba896d1a1d5a0a3f3ab68abc4a7.jpg",
+      "friendly_name": "figure_48.jpg",
+      "abs_path": "data/mineru_cache\\chapter_05_p205-262_线性系统的频域分析法__df0165aa\\images\\figure_48.jpg",
+      "index": 48
+    },
+    "25ce803d3a6653cb8b020da943d65208305d71fad7d95641425bf5cd22e6e1c0.jpg": {
+      "original_name": "25ce803d3a6653cb8b020da943d65208305d71fad7d95641425bf5cd22e6e1c0.jpg",
+      "original_rel_path": "25ce803d3a6653cb8b020da943d65208305d71fad7d95641425bf5cd22e6e1c0.jpg",
+      "friendly_name": "figure_49.jpg",
+      "abs_path": "data/mineru_cache\\chapter_05_p205-262_线性系统的频域分析法__df0165aa\\images\\figure_49.jpg",
+      "index": 49
+    },
+    "25efa5fddd347a966d935718beeb79741617eac6fee010a608961f4bea2c9b27.jpg": {
+      "original_name": "25efa5fddd347a966d935718beeb79741617eac6fee010a608961f4bea2c9b27.jpg",
+      "original_rel_path": "25efa5fddd347a966d935718beeb79741617eac6fee010a608961f4bea2c9b27.jpg",
+      "friendly_name": "figure_50.jpg",
+      "abs_path": "data/mineru_cache\\chapter_05_p205-262_线性系统的频域分析法__df0165aa\\images\\figure_50.jpg",
+      "index": 50
+    },
+    "28587408c17187b524ae4d159017162917e3eae7542edd5c9bfef16125385f21.jpg": {
+      "original_name": "28587408c17187b524ae4d159017162917e3eae7542edd5c9bfef16125385f21.jpg",
+      "original_rel_path": "28587408c17187b524ae4d159017162917e3eae7542edd5c9bfef16125385f21.jpg",
+      "friendly_name": "figure_51.jpg",
+      "abs_path": "data/mineru_cache\\chapter_05_p205-262_线性系统的频域分析法__df0165aa\\images\\figure_51.jpg",
+      "index": 51
+    },
+    "28b29f4c3d6441394000c683b252c3f34d7c1ed4eadffc093398cbbb5a5f7a1d.jpg": {
+      "original_name": "28b29f4c3d6441394000c683b252c3f34d7c1ed4eadffc093398cbbb5a5f7a1d.jpg",
+      "original_rel_path": "28b29f4c3d6441394000c683b252c3f34d7c1ed4eadffc093398cbbb5a5f7a1d.jpg",
+      "friendly_name": "figure_52.jpg",
+      "abs_path": "data/mineru_cache\\chapter_05_p205-262_线性系统的频域分析法__df0165aa\\images\\figure_52.jpg",
+      "index": 52
+    },
+    "2923c2addf5c988714330b898f73e8ce874228afef2acbb8169b010d79c2aaaf.jpg": {
+      "original_name": "2923c2addf5c988714330b898f73e8ce874228afef2acbb8169b010d79c2aaaf.jpg",
+      "original_rel_path": "2923c2addf5c988714330b898f73e8ce874228afef2acbb8169b010d79c2aaaf.jpg",
+      "friendly_name": "figure_53.jpg",
+      "abs_path": "data/mineru_cache\\chapter_05_p205-262_线性系统的频域分析法__df0165aa\\images\\figure_53.jpg",
+      "index": 53
+    },
+    "29fc335df059eea365d52381ca6cf7f833b485fba03e4d054dd13956176316cf.jpg": {
+      "original_name": "29fc335df059eea365d52381ca6cf7f833b485fba03e4d054dd13956176316cf.jpg",
+      "original_rel_path": "29fc335df059eea365d52381ca6cf7f833b485fba03e4d054dd13956176316cf.jpg",
+      "friendly_name": "figure_54.jpg",
+      "abs_path": "data/mineru_cache\\chapter_05_p205-262_线性系统的频域分析法__df0165aa\\images\\figure_54.jpg",
+      "index": 54
+    },
+    "2c5a854849e6eab7ef2c40cc26046980c796b3f288c14d25f2b27f5aef5e4f95.jpg": {
+      "original_name": "2c5a854849e6eab7ef2c40cc26046980c796b3f288c14d25f2b27f5aef5e4f95.jpg",
+      "original_rel_path": "2c5a854849e6eab7ef2c40cc26046980c796b3f288c14d25f2b27f5aef5e4f95.jpg",
+      "friendly_name": "figure_55.jpg",
+      "abs_path": "data/mineru_cache\\chapter_05_p205-262_线性系统的频域分析法__df0165aa\\images\\figure_55.jpg",
+      "index": 55
+    },
+    "2c730a111879c8a4505ef33e1af232ad235d6a93a219bd175be430a50475c1f2.jpg": {
+      "original_name": "2c730a111879c8a4505ef33e1af232ad235d6a93a219bd175be430a50475c1f2.jpg",
+      "original_rel_path": "2c730a111879c8a4505ef33e1af232ad235d6a93a219bd175be430a50475c1f2.jpg",
+      "friendly_name": "figure_56.jpg",
+      "abs_path": "data/mineru_cache\\chapter_05_p205-262_线性系统的频域分析法__df0165aa\\images\\figure_56.jpg",
+      "index": 56
+    },
+    "2cdc0b9673708d1374fa96566aea00eb72c6b79373776e5cf2761e783a1457c6.jpg": {
+      "original_name": "2cdc0b9673708d1374fa96566aea00eb72c6b79373776e5cf2761e783a1457c6.jpg",
+      "original_rel_path": "2cdc0b9673708d1374fa96566aea00eb72c6b79373776e5cf2761e783a1457c6.jpg",
+      "friendly_name": "figure_57.jpg",
+      "abs_path": "data/mineru_cache\\chapter_05_p205-262_线性系统的频域分析法__df0165aa\\images\\figure_57.jpg",
+      "index": 57
+    },
+    "2cf09f32a13084206e2180056124a300b4eb40fd896ebb6b81985582023597f3.jpg": {
+      "original_name": "2cf09f32a13084206e2180056124a300b4eb40fd896ebb6b81985582023597f3.jpg",
+      "original_rel_path": "2cf09f32a13084206e2180056124a300b4eb40fd896ebb6b81985582023597f3.jpg",
+      "friendly_name": "figure_58.jpg",
+      "abs_path": "data/mineru_cache\\chapter_05_p205-262_线性系统的频域分析法__df0165aa\\images\\figure_58.jpg",
+      "index": 58
+    },
+    "2d1c23851e9cf158ef7dc9470ca3d00dcaba713f13bf734eafea39a68c975eab.jpg": {
+      "original_name": "2d1c23851e9cf158ef7dc9470ca3d00dcaba713f13bf734eafea39a68c975eab.jpg",
+      "original_rel_path": "2d1c23851e9cf158ef7dc9470ca3d00dcaba713f13bf734eafea39a68c975eab.jpg",
+      "friendly_name": "figure_59.jpg",
+      "abs_path": "data/mineru_cache\\chapter_05_p205-262_线性系统的频域分析法__df0165aa\\images\\figure_59.jpg",
+      "index": 59
+    },
+    "2e9a914376dd258ce0586b862b297ecff7faa1b4865bc0184feaad873f1d5447.jpg": {
+      "original_name": "2e9a914376dd258ce0586b862b297ecff7faa1b4865bc0184feaad873f1d5447.jpg",
+      "original_rel_path": "2e9a914376dd258ce0586b862b297ecff7faa1b4865bc0184feaad873f1d5447.jpg",
+      "friendly_name": "figure_60.jpg",
+      "abs_path": "data/mineru_cache\\chapter_05_p205-262_线性系统的频域分析法__df0165aa\\images\\figure_60.jpg",
+      "index": 60
+    },
+    "2eb2130359fb2791bcb4ca01575793749edf0a4db1c733b6a7e23c38dd2565f1.jpg": {
+      "original_name": "2eb2130359fb2791bcb4ca01575793749edf0a4db1c733b6a7e23c38dd2565f1.jpg",
+      "original_rel_path": "2eb2130359fb2791bcb4ca01575793749edf0a4db1c733b6a7e23c38dd2565f1.jpg",
+      "friendly_name": "figure_61.jpg",
+      "abs_path": "data/mineru_cache\\chapter_05_p205-262_线性系统的频域分析法__df0165aa\\images\\figure_61.jpg",
+      "index": 61
+    },
+    "2fc36be2830f592f4bd90d5ee66f880b2285638d921ae31afa15c1207c4df70c.jpg": {
+      "original_name": "2fc36be2830f592f4bd90d5ee66f880b2285638d921ae31afa15c1207c4df70c.jpg",
+      "original_rel_path": "2fc36be2830f592f4bd90d5ee66f880b2285638d921ae31afa15c1207c4df70c.jpg",
+      "friendly_name": "figure_62.jpg",
+      "abs_path": "data/mineru_cache\\chapter_05_p205-262_线性系统的频域分析法__df0165aa\\images\\figure_62.jpg",
+      "index": 62
+    },
+    "306838d1b26be317bb8788c3176b6dfea0c112866c3621d3401a44c5de3557a4.jpg": {
+      "original_name": "306838d1b26be317bb8788c3176b6dfea0c112866c3621d3401a44c5de3557a4.jpg",
+      "original_rel_path": "306838d1b26be317bb8788c3176b6dfea0c112866c3621d3401a44c5de3557a4.jpg",
+      "friendly_name": "figure_63.jpg",
+      "abs_path": "data/mineru_cache\\chapter_05_p205-262_线性系统的频域分析法__df0165aa\\images\\figure_63.jpg",
+      "index": 63
+    },
+    "31a9d3c73e06658350c6b685002186a1a1a08fa7ce47142bdef227f033c41efa.jpg": {
+      "original_name": "31a9d3c73e06658350c6b685002186a1a1a08fa7ce47142bdef227f033c41efa.jpg",
+      "original_rel_path": "31a9d3c73e06658350c6b685002186a1a1a08fa7ce47142bdef227f033c41efa.jpg",
+      "friendly_name": "figure_64.jpg",
+      "abs_path": "data/mineru_cache\\chapter_05_p205-262_线性系统的频域分析法__df0165aa\\images\\figure_64.jpg",
+      "index": 64
+    },
+    "3282824463c5ce2a369f642f654b3841d4584acb8892510952eac6782147bb40.jpg": {
+      "original_name": "3282824463c5ce2a369f642f654b3841d4584acb8892510952eac6782147bb40.jpg",
+      "original_rel_path": "3282824463c5ce2a369f642f654b3841d4584acb8892510952eac6782147bb40.jpg",
+      "friendly_name": "figure_65.jpg",
+      "abs_path": "data/mineru_cache\\chapter_05_p205-262_线性系统的频域分析法__df0165aa\\images\\figure_65.jpg",
+      "index": 65
+    },
+    "32dc86b2bca0589688dd4d07aeb3a5e2761cabd03d8dfedd392a5b734e63491f.jpg": {
+      "original_name": "32dc86b2bca0589688dd4d07aeb3a5e2761cabd03d8dfedd392a5b734e63491f.jpg",
+      "original_rel_path": "32dc86b2bca0589688dd4d07aeb3a5e2761cabd03d8dfedd392a5b734e63491f.jpg",
+      "friendly_name": "figure_66.jpg",
+      "abs_path": "data/mineru_cache\\chapter_05_p205-262_线性系统的频域分析法__df0165aa\\images\\figure_66.jpg",
+      "index": 66
+    },
+    "336404a15184ad60036174fa61efc990f5bc366b1b3a753214fec10df3906e10.jpg": {
+      "original_name": "336404a15184ad60036174fa61efc990f5bc366b1b3a753214fec10df3906e10.jpg",
+      "original_rel_path": "336404a15184ad60036174fa61efc990f5bc366b1b3a753214fec10df3906e10.jpg",
+      "friendly_name": "figure_67.jpg",
+      "abs_path": "data/mineru_cache\\chapter_05_p205-262_线性系统的频域分析法__df0165aa\\images\\figure_67.jpg",
+      "index": 67
+    },
+    "3499510daa1774466b23a2f71069f64c64a3c63881e16af296574c0f6ac6bd6e.jpg": {
+      "original_name": "3499510daa1774466b23a2f71069f64c64a3c63881e16af296574c0f6ac6bd6e.jpg",
+      "original_rel_path": "3499510daa1774466b23a2f71069f64c64a3c63881e16af296574c0f6ac6bd6e.jpg",
+      "friendly_name": "figure_68.jpg",
+      "abs_path": "data/mineru_cache\\chapter_05_p205-262_线性系统的频域分析法__df0165aa\\images\\figure_68.jpg",
+      "index": 68
+    },
+    "353e956cc2c2c4a0ebad84464bffa9a9124b28249e38e856977b70238b3704eb.jpg": {
+      "original_name": "353e956cc2c2c4a0ebad84464bffa9a9124b28249e38e856977b70238b3704eb.jpg",
+      "original_rel_path": "353e956cc2c2c4a0ebad84464bffa9a9124b28249e38e856977b70238b3704eb.jpg",
+      "friendly_name": "figure_69.jpg",
+      "abs_path": "data/mineru_cache\\chapter_05_p205-262_线性系统的频域分析法__df0165aa\\images\\figure_69.jpg",
+      "index": 69
+    },
+    "36025ed158c9f79fbb9b5ad019c0274195f34c315bda1547583b42512c59afaa.jpg": {
+      "original_name": "36025ed158c9f79fbb9b5ad019c0274195f34c315bda1547583b42512c59afaa.jpg",
+      "original_rel_path": "36025ed158c9f79fbb9b5ad019c0274195f34c315bda1547583b42512c59afaa.jpg",
+      "friendly_name": "figure_70.jpg",
+      "abs_path": "data/mineru_cache\\chapter_05_p205-262_线性系统的频域分析法__df0165aa\\images\\figure_70.jpg",
+      "index": 70
+    },
+    "36838cd8819d733aee8436ebbfc34065e56577f96166c96ac2da20cbb7c704dd.jpg": {
+      "original_name": "36838cd8819d733aee8436ebbfc34065e56577f96166c96ac2da20cbb7c704dd.jpg",
+      "original_rel_path": "36838cd8819d733aee8436ebbfc34065e56577f96166c96ac2da20cbb7c704dd.jpg",
+      "friendly_name": "figure_71.jpg",
+      "abs_path": "data/mineru_cache\\chapter_05_p205-262_线性系统的频域分析法__df0165aa\\images\\figure_71.jpg",
+      "index": 71
+    },
+    "37f7d3e8f992c6957d7b4b323d5d436ee7446fe1d7ce80a5ba1e58c649607e7b.jpg": {
+      "original_name": "37f7d3e8f992c6957d7b4b323d5d436ee7446fe1d7ce80a5ba1e58c649607e7b.jpg",
+      "original_rel_path": "37f7d3e8f992c6957d7b4b323d5d436ee7446fe1d7ce80a5ba1e58c649607e7b.jpg",
+      "friendly_name": "figure_72.jpg",
+      "abs_path": "data/mineru_cache\\chapter_05_p205-262_线性系统的频域分析法__df0165aa\\images\\figure_72.jpg",
+      "index": 72
+    },
+    "391474f5fb2d945dc4cb2c4f30c490ca69a09dac4f7da2fc8e27db0e450873ca.jpg": {
+      "original_name": "391474f5fb2d945dc4cb2c4f30c490ca69a09dac4f7da2fc8e27db0e450873ca.jpg",
+      "original_rel_path": "391474f5fb2d945dc4cb2c4f30c490ca69a09dac4f7da2fc8e27db0e450873ca.jpg",
+      "friendly_name": "figure_73.jpg",
+      "abs_path": "data/mineru_cache\\chapter_05_p205-262_线性系统的频域分析法__df0165aa\\images\\figure_73.jpg",
+      "index": 73
+    },
+    "395dd183644d65d54e1142ec8b24059dbe55daf550cf3bd074d1a718266c6fc1.jpg": {
+      "original_name": "395dd183644d65d54e1142ec8b24059dbe55daf550cf3bd074d1a718266c6fc1.jpg",
+      "original_rel_path": "395dd183644d65d54e1142ec8b24059dbe55daf550cf3bd074d1a718266c6fc1.jpg",
+      "friendly_name": "figure_74.jpg",
+      "abs_path": "data/mineru_cache\\chapter_05_p205-262_线性系统的频域分析法__df0165aa\\images\\figure_74.jpg",
+      "index": 74
+    },
+    "39ace8d376662a664ebefa3f528567071a0af0b8b75e041bc80e09a513176f32.jpg": {
+      "original_name": "39ace8d376662a664ebefa3f528567071a0af0b8b75e041bc80e09a513176f32.jpg",
+      "original_rel_path": "39ace8d376662a664ebefa3f528567071a0af0b8b75e041bc80e09a513176f32.jpg",
+      "friendly_name": "figure_75.jpg",
+      "abs_path": "data/mineru_cache\\chapter_05_p205-262_线性系统的频域分析法__df0165aa\\images\\figure_75.jpg",
+      "index": 75
+    },
+    "39c6d3dc26b7a55b5c3e9c0065ed73ddcf6e866faad57b21b152722ce12fe7f6.jpg": {
+      "original_name": "39c6d3dc26b7a55b5c3e9c0065ed73ddcf6e866faad57b21b152722ce12fe7f6.jpg",
+      "original_rel_path": "39c6d3dc26b7a55b5c3e9c0065ed73ddcf6e866faad57b21b152722ce12fe7f6.jpg",
+      "friendly_name": "figure_76.jpg",
+      "abs_path": "data/mineru_cache\\chapter_05_p205-262_线性系统的频域分析法__df0165aa\\images\\figure_76.jpg",
+      "index": 76
+    },
+    "39da59086f901cf83c229293f7bbddf4cb347f653efc08f0acaa7f9ce0370865.jpg": {
+      "original_name": "39da59086f901cf83c229293f7bbddf4cb347f653efc08f0acaa7f9ce0370865.jpg",
+      "original_rel_path": "39da59086f901cf83c229293f7bbddf4cb347f653efc08f0acaa7f9ce0370865.jpg",
+      "friendly_name": "figure_77.jpg",
+      "abs_path": "data/mineru_cache\\chapter_05_p205-262_线性系统的频域分析法__df0165aa\\images\\figure_77.jpg",
+      "index": 77
+    },
+    "3a55cc2ef49462979a4b8b6c57bf69c384550f7a90f72f2763f46d8863a48206.jpg": {
+      "original_name": "3a55cc2ef49462979a4b8b6c57bf69c384550f7a90f72f2763f46d8863a48206.jpg",
+      "original_rel_path": "3a55cc2ef49462979a4b8b6c57bf69c384550f7a90f72f2763f46d8863a48206.jpg",
+      "friendly_name": "figure_78.jpg",
+      "abs_path": "data/mineru_cache\\chapter_05_p205-262_线性系统的频域分析法__df0165aa\\images\\figure_78.jpg",
+      "index": 78
+    },
+    "3b207dce26087bdc5b4814d0e49c3607f6bc29d8305fdc1ea9dcfe622fa43d7f.jpg": {
+      "original_name": "3b207dce26087bdc5b4814d0e49c3607f6bc29d8305fdc1ea9dcfe622fa43d7f.jpg",
+      "original_rel_path": "3b207dce26087bdc5b4814d0e49c3607f6bc29d8305fdc1ea9dcfe622fa43d7f.jpg",
+      "friendly_name": "figure_79.jpg",
+      "abs_path": "data/mineru_cache\\chapter_05_p205-262_线性系统的频域分析法__df0165aa\\images\\figure_79.jpg",
+      "index": 79
+    },
+    "3c1fd7984388cd62642de1aa1dcdc2526859e0bacecd778d05b060d4c87dc55b.jpg": {
+      "original_name": "3c1fd7984388cd62642de1aa1dcdc2526859e0bacecd778d05b060d4c87dc55b.jpg",
+      "original_rel_path": "3c1fd7984388cd62642de1aa1dcdc2526859e0bacecd778d05b060d4c87dc55b.jpg",
+      "friendly_name": "figure_80.jpg",
+      "abs_path": "data/mineru_cache\\chapter_05_p205-262_线性系统的频域分析法__df0165aa\\images\\figure_80.jpg",
+      "index": 80
+    },
+    "3cc4c6ea6349d07c50c6c7e7e2db223b5b640c2e2d061b493f1e05d380e29590.jpg": {
+      "original_name": "3cc4c6ea6349d07c50c6c7e7e2db223b5b640c2e2d061b493f1e05d380e29590.jpg",
+      "original_rel_path": "3cc4c6ea6349d07c50c6c7e7e2db223b5b640c2e2d061b493f1e05d380e29590.jpg",
+      "friendly_name": "figure_81.jpg",
+      "abs_path": "data/mineru_cache\\chapter_05_p205-262_线性系统的频域分析法__df0165aa\\images\\figure_81.jpg",
+      "index": 81
+    },
+    "3ed221cbda6070bdc65f8f632c1a1292528314920b36e8e127099a72e58a15c8.jpg": {
+      "original_name": "3ed221cbda6070bdc65f8f632c1a1292528314920b36e8e127099a72e58a15c8.jpg",
+      "original_rel_path": "3ed221cbda6070bdc65f8f632c1a1292528314920b36e8e127099a72e58a15c8.jpg",
+      "friendly_name": "figure_82.jpg",
+      "abs_path": "data/mineru_cache\\chapter_05_p205-262_线性系统的频域分析法__df0165aa\\images\\figure_82.jpg",
+      "index": 82
+    },
+    "3f727c68370269718b850f5473507b6f2a939c2c721df5914eeeef8f28452e0b.jpg": {
+      "original_name": "3f727c68370269718b850f5473507b6f2a939c2c721df5914eeeef8f28452e0b.jpg",
+      "original_rel_path": "3f727c68370269718b850f5473507b6f2a939c2c721df5914eeeef8f28452e0b.jpg",
+      "friendly_name": "figure_83.jpg",
+      "abs_path": "data/mineru_cache\\chapter_05_p205-262_线性系统的频域分析法__df0165aa\\images\\figure_83.jpg",
+      "index": 83
+    },
+    "403595c6641c6eb3a4101e123ee4e565ff049b7d110b62169ba0ce771583aba4.jpg": {
+      "original_name": "403595c6641c6eb3a4101e123ee4e565ff049b7d110b62169ba0ce771583aba4.jpg",
+      "original_rel_path": "403595c6641c6eb3a4101e123ee4e565ff049b7d110b62169ba0ce771583aba4.jpg",
+      "friendly_name": "figure_84.jpg",
+      "abs_path": "data/mineru_cache\\chapter_05_p205-262_线性系统的频域分析法__df0165aa\\images\\figure_84.jpg",
+      "index": 84
+    },
+    "40d28b252def2420aa6a967200f05d6d4896af418526f019110d6f18a6098924.jpg": {
+      "original_name": "40d28b252def2420aa6a967200f05d6d4896af418526f019110d6f18a6098924.jpg",
+      "original_rel_path": "40d28b252def2420aa6a967200f05d6d4896af418526f019110d6f18a6098924.jpg",
+      "friendly_name": "figure_85.jpg",
+      "abs_path": "data/mineru_cache\\chapter_05_p205-262_线性系统的频域分析法__df0165aa\\images\\figure_85.jpg",
+      "index": 85
+    },
+    "40db5e22c3a553b8622264e598e9c69c07898c56b7f45423a82e95b865db0a3c.jpg": {
+      "original_name": "40db5e22c3a553b8622264e598e9c69c07898c56b7f45423a82e95b865db0a3c.jpg",
+      "original_rel_path": "40db5e22c3a553b8622264e598e9c69c07898c56b7f45423a82e95b865db0a3c.jpg",
+      "friendly_name": "figure_86.jpg",
+      "abs_path": "data/mineru_cache\\chapter_05_p205-262_线性系统的频域分析法__df0165aa\\images\\figure_86.jpg",
+      "index": 86
+    },
+    "40ff331b5fe0898d4184d4854d944f8a5ca0d99f88a1d042356eede5373824c3.jpg": {
+      "original_name": "40ff331b5fe0898d4184d4854d944f8a5ca0d99f88a1d042356eede5373824c3.jpg",
+      "original_rel_path": "40ff331b5fe0898d4184d4854d944f8a5ca0d99f88a1d042356eede5373824c3.jpg",
+      "friendly_name": "figure_87.jpg",
+      "abs_path": "data/mineru_cache\\chapter_05_p205-262_线性系统的频域分析法__df0165aa\\images\\figure_87.jpg",
+      "index": 87
+    },
+    "414be03e856f5d258b522c96eb77ee279607254b168697a9eb8a019f584ae3c6.jpg": {
+      "original_name": "414be03e856f5d258b522c96eb77ee279607254b168697a9eb8a019f584ae3c6.jpg",
+      "original_rel_path": "414be03e856f5d258b522c96eb77ee279607254b168697a9eb8a019f584ae3c6.jpg",
+      "friendly_name": "figure_88.jpg",
+      "abs_path": "data/mineru_cache\\chapter_05_p205-262_线性系统的频域分析法__df0165aa\\images\\figure_88.jpg",
+      "index": 88
+    },
+    "4188dec1b4986976ec58af0f1274b9bc7ffad01de4d08afda5fca9b892e87a0c.jpg": {
+      "original_name": "4188dec1b4986976ec58af0f1274b9bc7ffad01de4d08afda5fca9b892e87a0c.jpg",
+      "original_rel_path": "4188dec1b4986976ec58af0f1274b9bc7ffad01de4d08afda5fca9b892e87a0c.jpg",
+      "friendly_name": "figure_89.jpg",
+      "abs_path": "data/mineru_cache\\chapter_05_p205-262_线性系统的频域分析法__df0165aa\\images\\figure_89.jpg",
+      "index": 89
+    },
+    "41c91f23bfdd28423c2596e1a757469972bfff7563e2cc824a238764f3832933.jpg": {
+      "original_name": "41c91f23bfdd28423c2596e1a757469972bfff7563e2cc824a238764f3832933.jpg",
+      "original_rel_path": "41c91f23bfdd28423c2596e1a757469972bfff7563e2cc824a238764f3832933.jpg",
+      "friendly_name": "figure_90.jpg",
+      "abs_path": "data/mineru_cache\\chapter_05_p205-262_线性系统的频域分析法__df0165aa\\images\\figure_90.jpg",
+      "index": 90
+    },
+    "420d911b0d6913b61e84f19ab469bc7a8605329e3421aba9fb91b168cd3b0025.jpg": {
+      "original_name": "420d911b0d6913b61e84f19ab469bc7a8605329e3421aba9fb91b168cd3b0025.jpg",
+      "original_rel_path": "420d911b0d6913b61e84f19ab469bc7a8605329e3421aba9fb91b168cd3b0025.jpg",
+      "friendly_name": "figure_91.jpg",
+      "abs_path": "data/mineru_cache\\chapter_05_p205-262_线性系统的频域分析法__df0165aa\\images\\figure_91.jpg",
+      "index": 91
+    },
+    "4264a4e194b93586a6c5ce48a08a1615f0d8511094f2df57b4a48377bc7c8f39.jpg": {
+      "original_name": "4264a4e194b93586a6c5ce48a08a1615f0d8511094f2df57b4a48377bc7c8f39.jpg",
+      "original_rel_path": "4264a4e194b93586a6c5ce48a08a1615f0d8511094f2df57b4a48377bc7c8f39.jpg",
+      "friendly_name": "figure_92.jpg",
+      "abs_path": "data/mineru_cache\\chapter_05_p205-262_线性系统的频域分析法__df0165aa\\images\\figure_92.jpg",
+      "index": 92
+    },
+    "43fd67f733a7c5f24ebfe1cc08872999e6b7b127dc0326fa0bf669dd8a110f8f.jpg": {
+      "original_name": "43fd67f733a7c5f24ebfe1cc08872999e6b7b127dc0326fa0bf669dd8a110f8f.jpg",
+      "original_rel_path": "43fd67f733a7c5f24ebfe1cc08872999e6b7b127dc0326fa0bf669dd8a110f8f.jpg",
+      "friendly_name": "figure_93.jpg",
+      "abs_path": "data/mineru_cache\\chapter_05_p205-262_线性系统的频域分析法__df0165aa\\images\\figure_93.jpg",
+      "index": 93
+    },
+    "448a26981e8994eecc4e05e20743e9a64dac003fb4b3ee72ee5b93209437612c.jpg": {
+      "original_name": "448a26981e8994eecc4e05e20743e9a64dac003fb4b3ee72ee5b93209437612c.jpg",
+      "original_rel_path": "448a26981e8994eecc4e05e20743e9a64dac003fb4b3ee72ee5b93209437612c.jpg",
+      "friendly_name": "figure_94.jpg",
+      "abs_path": "data/mineru_cache\\chapter_05_p205-262_线性系统的频域分析法__df0165aa\\images\\figure_94.jpg",
+      "index": 94
+    },
+    "44fe9848365d3233d65b90cd59ef840d9c39e4bfcabd56acf1343642871fcadc.jpg": {
+      "original_name": "44fe9848365d3233d65b90cd59ef840d9c39e4bfcabd56acf1343642871fcadc.jpg",
+      "original_rel_path": "44fe9848365d3233d65b90cd59ef840d9c39e4bfcabd56acf1343642871fcadc.jpg",
+      "friendly_name": "figure_95.jpg",
+      "abs_path": "data/mineru_cache\\chapter_05_p205-262_线性系统的频域分析法__df0165aa\\images\\figure_95.jpg",
+      "index": 95
+    },
+    "466e60ecd6ba3a0f12e0e2439883f8ec5e426f4b20985b6ae09a9b4e9858830d.jpg": {
+      "original_name": "466e60ecd6ba3a0f12e0e2439883f8ec5e426f4b20985b6ae09a9b4e9858830d.jpg",
+      "original_rel_path": "466e60ecd6ba3a0f12e0e2439883f8ec5e426f4b20985b6ae09a9b4e9858830d.jpg",
+      "friendly_name": "figure_96.jpg",
+      "abs_path": "data/mineru_cache\\chapter_05_p205-262_线性系统的频域分析法__df0165aa\\images\\figure_96.jpg",
+      "index": 96
+    },
+    "4741a747235d0e128b333df73e34f9a5e8d3da82e5ba874311775f75a2d78352.jpg": {
+      "original_name": "4741a747235d0e128b333df73e34f9a5e8d3da82e5ba874311775f75a2d78352.jpg",
+      "original_rel_path": "4741a747235d0e128b333df73e34f9a5e8d3da82e5ba874311775f75a2d78352.jpg",
+      "friendly_name": "figure_97.jpg",
+      "abs_path": "data/mineru_cache\\chapter_05_p205-262_线性系统的频域分析法__df0165aa\\images\\figure_97.jpg",
+      "index": 97
+    },
+    "48900bfd6ee4f55b168ae06f5db316d09f6b24c937ae082c78c38c72b3c99b25.jpg": {
+      "original_name": "48900bfd6ee4f55b168ae06f5db316d09f6b24c937ae082c78c38c72b3c99b25.jpg",
+      "original_rel_path": "48900bfd6ee4f55b168ae06f5db316d09f6b24c937ae082c78c38c72b3c99b25.jpg",
+      "friendly_name": "figure_98.jpg",
+      "abs_path": "data/mineru_cache\\chapter_05_p205-262_线性系统的频域分析法__df0165aa\\images\\figure_98.jpg",
+      "index": 98
+    },
+    "49ec6faf2f4e80c4d59dfab4b60f23eafefa0237745f5a14e5b541df249c7d58.jpg": {
+      "original_name": "49ec6faf2f4e80c4d59dfab4b60f23eafefa0237745f5a14e5b541df249c7d58.jpg",
+      "original_rel_path": "49ec6faf2f4e80c4d59dfab4b60f23eafefa0237745f5a14e5b541df249c7d58.jpg",
+      "friendly_name": "figure_99.jpg",
+      "abs_path": "data/mineru_cache\\chapter_05_p205-262_线性系统的频域分析法__df0165aa\\images\\figure_99.jpg",
+      "index": 99
+    },
+    "4e40c10d016684e636992dd6ec1f16723281b0f84bc1d6ad231c5d16bdbb1664.jpg": {
+      "original_name": "4e40c10d016684e636992dd6ec1f16723281b0f84bc1d6ad231c5d16bdbb1664.jpg",
+      "original_rel_path": "4e40c10d016684e636992dd6ec1f16723281b0f84bc1d6ad231c5d16bdbb1664.jpg",
+      "friendly_name": "figure_100.jpg",
+      "abs_path": "data/mineru_cache\\chapter_05_p205-262_线性系统的频域分析法__df0165aa\\images\\figure_100.jpg",
+      "index": 100
+    },
+    "4fc4ac353e9a24b808db13ec69cdf50db9f2c212a6eef30634b81923925013fd.jpg": {
+      "original_name": "4fc4ac353e9a24b808db13ec69cdf50db9f2c212a6eef30634b81923925013fd.jpg",
+      "original_rel_path": "4fc4ac353e9a24b808db13ec69cdf50db9f2c212a6eef30634b81923925013fd.jpg",
+      "friendly_name": "figure_101.jpg",
+      "abs_path": "data/mineru_cache\\chapter_05_p205-262_线性系统的频域分析法__df0165aa\\images\\figure_101.jpg",
+      "index": 101
+    },
+    "50575919f4645d08ad74edf9af85299611f494e9dd39a243e1c9cd45c5566fb0.jpg": {
+      "original_name": "50575919f4645d08ad74edf9af85299611f494e9dd39a243e1c9cd45c5566fb0.jpg",
+      "original_rel_path": "50575919f4645d08ad74edf9af85299611f494e9dd39a243e1c9cd45c5566fb0.jpg",
+      "friendly_name": "figure_102.jpg",
+      "abs_path": "data/mineru_cache\\chapter_05_p205-262_线性系统的频域分析法__df0165aa\\images\\figure_102.jpg",
+      "index": 102
+    },
+    "506b0176a27ae9af14d5c9749d985efbd13e5bf5221ef984f3786b0335d484cc.jpg": {
+      "original_name": "506b0176a27ae9af14d5c9749d985efbd13e5bf5221ef984f3786b0335d484cc.jpg",
+      "original_rel_path": "506b0176a27ae9af14d5c9749d985efbd13e5bf5221ef984f3786b0335d484cc.jpg",
+      "friendly_name": "figure_103.jpg",
+      "abs_path": "data/mineru_cache\\chapter_05_p205-262_线性系统的频域分析法__df0165aa\\images\\figure_103.jpg",
+      "index": 103
+    },
+    "510c4ba34e7c84f12eb21fd5e24ac936e42fa0a21a85d3263de59e44a00e75cb.jpg": {
+      "original_name": "510c4ba34e7c84f12eb21fd5e24ac936e42fa0a21a85d3263de59e44a00e75cb.jpg",
+      "original_rel_path": "510c4ba34e7c84f12eb21fd5e24ac936e42fa0a21a85d3263de59e44a00e75cb.jpg",
+      "friendly_name": "figure_104.jpg",
+      "abs_path": "data/mineru_cache\\chapter_05_p205-262_线性系统的频域分析法__df0165aa\\images\\figure_104.jpg",
+      "index": 104
+    },
+    "518a5e7a76a4352f767b3bff782542a6601113ea1ac61e755afe904890514a2f.jpg": {
+      "original_name": "518a5e7a76a4352f767b3bff782542a6601113ea1ac61e755afe904890514a2f.jpg",
+      "original_rel_path": "518a5e7a76a4352f767b3bff782542a6601113ea1ac61e755afe904890514a2f.jpg",
+      "friendly_name": "figure_105.jpg",
+      "abs_path": "data/mineru_cache\\chapter_05_p205-262_线性系统的频域分析法__df0165aa\\images\\figure_105.jpg",
+      "index": 105
+    },
+    "51b0d83458e69737372a1f1fc1f3272bea44be30c3f6a7916723112800a4a556.jpg": {
+      "original_name": "51b0d83458e69737372a1f1fc1f3272bea44be30c3f6a7916723112800a4a556.jpg",
+      "original_rel_path": "51b0d83458e69737372a1f1fc1f3272bea44be30c3f6a7916723112800a4a556.jpg",
+      "friendly_name": "figure_106.jpg",
+      "abs_path": "data/mineru_cache\\chapter_05_p205-262_线性系统的频域分析法__df0165aa\\images\\figure_106.jpg",
+      "index": 106
+    },
+    "532ddbcfe9f86cb53138defbd3e7c14932d48fb202643e50b870799164d00bee.jpg": {
+      "original_name": "532ddbcfe9f86cb53138defbd3e7c14932d48fb202643e50b870799164d00bee.jpg",
+      "original_rel_path": "532ddbcfe9f86cb53138defbd3e7c14932d48fb202643e50b870799164d00bee.jpg",
+      "friendly_name": "figure_107.jpg",
+      "abs_path": "data/mineru_cache\\chapter_05_p205-262_线性系统的频域分析法__df0165aa\\images\\figure_107.jpg",
+      "index": 107
+    },
+    "537939e6f5e3c03d831d40a849b195007c372ae165a095dbdecc9d6f2c85e7e6.jpg": {
+      "original_name": "537939e6f5e3c03d831d40a849b195007c372ae165a095dbdecc9d6f2c85e7e6.jpg",
+      "original_rel_path": "537939e6f5e3c03d831d40a849b195007c372ae165a095dbdecc9d6f2c85e7e6.jpg",
+      "friendly_name": "figure_108.jpg",
+      "abs_path": "data/mineru_cache\\chapter_05_p205-262_线性系统的频域分析法__df0165aa\\images\\figure_108.jpg",
+      "index": 108
+    },
+    "538ff73056fe0cd24a8e8eb470252083acb02913681730d8093167a96f3828ac.jpg": {
+      "original_name": "538ff73056fe0cd24a8e8eb470252083acb02913681730d8093167a96f3828ac.jpg",
+      "original_rel_path": "538ff73056fe0cd24a8e8eb470252083acb02913681730d8093167a96f3828ac.jpg",
+      "friendly_name": "figure_109.jpg",
+      "abs_path": "data/mineru_cache\\chapter_05_p205-262_线性系统的频域分析法__df0165aa\\images\\figure_109.jpg",
+      "index": 109
+    },
+    "53c9b7f8fde81b8cebb5b7904158dce10abcd5d22b3db62012d257d64afde8c1.jpg": {
+      "original_name": "53c9b7f8fde81b8cebb5b7904158dce10abcd5d22b3db62012d257d64afde8c1.jpg",
+      "original_rel_path": "53c9b7f8fde81b8cebb5b7904158dce10abcd5d22b3db62012d257d64afde8c1.jpg",
+      "friendly_name": "figure_110.jpg",
+      "abs_path": "data/mineru_cache\\chapter_05_p205-262_线性系统的频域分析法__df0165aa\\images\\figure_110.jpg",
+      "index": 110
+    },
+    "53d30f0ef3228f220333476dd336caad262442614ff6a726de63e31c919ac54b.jpg": {
+      "original_name": "53d30f0ef3228f220333476dd336caad262442614ff6a726de63e31c919ac54b.jpg",
+      "original_rel_path": "53d30f0ef3228f220333476dd336caad262442614ff6a726de63e31c919ac54b.jpg",
+      "friendly_name": "figure_111.jpg",
+      "abs_path": "data/mineru_cache\\chapter_05_p205-262_线性系统的频域分析法__df0165aa\\images\\figure_111.jpg",
+      "index": 111
+    },
+    "548eb986b85eec5c2089a89882eeb3035290f1435e5fc9b96bd95fdada65fe76.jpg": {
+      "original_name": "548eb986b85eec5c2089a89882eeb3035290f1435e5fc9b96bd95fdada65fe76.jpg",
+      "original_rel_path": "548eb986b85eec5c2089a89882eeb3035290f1435e5fc9b96bd95fdada65fe76.jpg",
+      "friendly_name": "figure_112.jpg",
+      "abs_path": "data/mineru_cache\\chapter_05_p205-262_线性系统的频域分析法__df0165aa\\images\\figure_112.jpg",
+      "index": 112
+    },
+    "55526a156d76fe6f00b1e0f4616a5a76056a93f5454a49bc0596165ecf23d354.jpg": {
+      "original_name": "55526a156d76fe6f00b1e0f4616a5a76056a93f5454a49bc0596165ecf23d354.jpg",
+      "original_rel_path": "55526a156d76fe6f00b1e0f4616a5a76056a93f5454a49bc0596165ecf23d354.jpg",
+      "friendly_name": "figure_113.jpg",
+      "abs_path": "data/mineru_cache\\chapter_05_p205-262_线性系统的频域分析法__df0165aa\\images\\figure_113.jpg",
+      "index": 113
+    },
+    "5826e7069da0d7cc5ad98b548ba79b36d28911ac985ed333f656ed6a7bb7dbe5.jpg": {
+      "original_name": "5826e7069da0d7cc5ad98b548ba79b36d28911ac985ed333f656ed6a7bb7dbe5.jpg",
+      "original_rel_path": "5826e7069da0d7cc5ad98b548ba79b36d28911ac985ed333f656ed6a7bb7dbe5.jpg",
+      "friendly_name": "figure_114.jpg",
+      "abs_path": "data/mineru_cache\\chapter_05_p205-262_线性系统的频域分析法__df0165aa\\images\\figure_114.jpg",
+      "index": 114
+    },
+    "5888423f4c2dcf10bbf846728c995a91fe4184f3429198c23bbd1b4b1d4de3f3.jpg": {
+      "original_name": "5888423f4c2dcf10bbf846728c995a91fe4184f3429198c23bbd1b4b1d4de3f3.jpg",
+      "original_rel_path": "5888423f4c2dcf10bbf846728c995a91fe4184f3429198c23bbd1b4b1d4de3f3.jpg",
+      "friendly_name": "figure_115.jpg",
+      "abs_path": "data/mineru_cache\\chapter_05_p205-262_线性系统的频域分析法__df0165aa\\images\\figure_115.jpg",
+      "index": 115
+    },
+    "592eb876861764f2fe873169485d9795133b2a101bca5a457c79c0440877da73.jpg": {
+      "original_name": "592eb876861764f2fe873169485d9795133b2a101bca5a457c79c0440877da73.jpg",
+      "original_rel_path": "592eb876861764f2fe873169485d9795133b2a101bca5a457c79c0440877da73.jpg",
+      "friendly_name": "figure_116.jpg",
+      "abs_path": "data/mineru_cache\\chapter_05_p205-262_线性系统的频域分析法__df0165aa\\images\\figure_116.jpg",
+      "index": 116
+    },
+    "595837d92dd9b55dd2280ba54a39a7ac51b0b97bb20ca3db691bbc7471430253.jpg": {
+      "original_name": "595837d92dd9b55dd2280ba54a39a7ac51b0b97bb20ca3db691bbc7471430253.jpg",
+      "original_rel_path": "595837d92dd9b55dd2280ba54a39a7ac51b0b97bb20ca3db691bbc7471430253.jpg",
+      "friendly_name": "figure_117.jpg",
+      "abs_path": "data/mineru_cache\\chapter_05_p205-262_线性系统的频域分析法__df0165aa\\images\\figure_117.jpg",
+      "index": 117
+    },
+    "5989bfe4aa656decf64aa22ebddaa6fa9756f4e320d160fd0afe209bd9c44e09.jpg": {
+      "original_name": "5989bfe4aa656decf64aa22ebddaa6fa9756f4e320d160fd0afe209bd9c44e09.jpg",
+      "original_rel_path": "5989bfe4aa656decf64aa22ebddaa6fa9756f4e320d160fd0afe209bd9c44e09.jpg",
+      "friendly_name": "figure_118.jpg",
+      "abs_path": "data/mineru_cache\\chapter_05_p205-262_线性系统的频域分析法__df0165aa\\images\\figure_118.jpg",
+      "index": 118
+    },
+    "5add49c8b9df632caa119324efc529f74b6cdf0cda469aa14d2c80455b630261.jpg": {
+      "original_name": "5add49c8b9df632caa119324efc529f74b6cdf0cda469aa14d2c80455b630261.jpg",
+      "original_rel_path": "5add49c8b9df632caa119324efc529f74b6cdf0cda469aa14d2c80455b630261.jpg",
+      "friendly_name": "figure_119.jpg",
+      "abs_path": "data/mineru_cache\\chapter_05_p205-262_线性系统的频域分析法__df0165aa\\images\\figure_119.jpg",
+      "index": 119
+    },
+    "5b302e706570e85fd52f694c659a54d3b4690bcf369897851b5e26a0e8cf6478.jpg": {
+      "original_name": "5b302e706570e85fd52f694c659a54d3b4690bcf369897851b5e26a0e8cf6478.jpg",
+      "original_rel_path": "5b302e706570e85fd52f694c659a54d3b4690bcf369897851b5e26a0e8cf6478.jpg",
+      "friendly_name": "figure_120.jpg",
+      "abs_path": "data/mineru_cache\\chapter_05_p205-262_线性系统的频域分析法__df0165aa\\images\\figure_120.jpg",
+      "index": 120
+    },
+    "5be8f9a98ea6118a0ddbae1a0c7fd11c0c3d2b336bbda482f77d07ac9055b920.jpg": {
+      "original_name": "5be8f9a98ea6118a0ddbae1a0c7fd11c0c3d2b336bbda482f77d07ac9055b920.jpg",
+      "original_rel_path": "5be8f9a98ea6118a0ddbae1a0c7fd11c0c3d2b336bbda482f77d07ac9055b920.jpg",
+      "friendly_name": "figure_121.jpg",
+      "abs_path": "data/mineru_cache\\chapter_05_p205-262_线性系统的频域分析法__df0165aa\\images\\figure_121.jpg",
+      "index": 121
+    },
+    "5c2844eafc67796256b52b4e878ff41e1a28ca5bcd0e26fdb6bb7477db111054.jpg": {
+      "original_name": "5c2844eafc67796256b52b4e878ff41e1a28ca5bcd0e26fdb6bb7477db111054.jpg",
+      "original_rel_path": "5c2844eafc67796256b52b4e878ff41e1a28ca5bcd0e26fdb6bb7477db111054.jpg",
+      "friendly_name": "figure_122.jpg",
+      "abs_path": "data/mineru_cache\\chapter_05_p205-262_线性系统的频域分析法__df0165aa\\images\\figure_122.jpg",
+      "index": 122
+    },
+    "5c89662084056d9ca54755cbdb0cdecc62d014077fefb4d9011cca3f74138980.jpg": {
+      "original_name": "5c89662084056d9ca54755cbdb0cdecc62d014077fefb4d9011cca3f74138980.jpg",
+      "original_rel_path": "5c89662084056d9ca54755cbdb0cdecc62d014077fefb4d9011cca3f74138980.jpg",
+      "friendly_name": "figure_123.jpg",
+      "abs_path": "data/mineru_cache\\chapter_05_p205-262_线性系统的频域分析法__df0165aa\\images\\figure_123.jpg",
+      "index": 123
+    },
+    "5c9281261f3eaffb151214ecf064bdb99384aa7cebddd1ac8132dc3be446d47c.jpg": {
+      "original_name": "5c9281261f3eaffb151214ecf064bdb99384aa7cebddd1ac8132dc3be446d47c.jpg",
+      "original_rel_path": "5c9281261f3eaffb151214ecf064bdb99384aa7cebddd1ac8132dc3be446d47c.jpg",
+      "friendly_name": "figure_124.jpg",
+      "abs_path": "data/mineru_cache\\chapter_05_p205-262_线性系统的频域分析法__df0165aa\\images\\figure_124.jpg",
+      "index": 124
+    },
+    "5d475ca1f9b4505b5bb987d8a4c7b2cd109628473e16a5a1d4b6f98b8338b37b.jpg": {
+      "original_name": "5d475ca1f9b4505b5bb987d8a4c7b2cd109628473e16a5a1d4b6f98b8338b37b.jpg",
+      "original_rel_path": "5d475ca1f9b4505b5bb987d8a4c7b2cd109628473e16a5a1d4b6f98b8338b37b.jpg",
+      "friendly_name": "figure_125.jpg",
+      "abs_path": "data/mineru_cache\\chapter_05_p205-262_线性系统的频域分析法__df0165aa\\images\\figure_125.jpg",
+      "index": 125
+    },
+    "5df71721095c44310bce9386e2b7fe262063ce0e2860563dcb44671473a926d1.jpg": {
+      "original_name": "5df71721095c44310bce9386e2b7fe262063ce0e2860563dcb44671473a926d1.jpg",
+      "original_rel_path": "5df71721095c44310bce9386e2b7fe262063ce0e2860563dcb44671473a926d1.jpg",
+      "friendly_name": "figure_126.jpg",
+      "abs_path": "data/mineru_cache\\chapter_05_p205-262_线性系统的频域分析法__df0165aa\\images\\figure_126.jpg",
+      "index": 126
+    },
+    "5e11b9ce3c74f3d9544f6174a2f7d2669d9feaf4c74f6e0af4f70036c427502b.jpg": {
+      "original_name": "5e11b9ce3c74f3d9544f6174a2f7d2669d9feaf4c74f6e0af4f70036c427502b.jpg",
+      "original_rel_path": "5e11b9ce3c74f3d9544f6174a2f7d2669d9feaf4c74f6e0af4f70036c427502b.jpg",
+      "friendly_name": "figure_127.jpg",
+      "abs_path": "data/mineru_cache\\chapter_05_p205-262_线性系统的频域分析法__df0165aa\\images\\figure_127.jpg",
+      "index": 127
+    },
+    "5e3ff689d59e5201fa8a632f02972b799b468fa0636a7ac507396aeac68251cd.jpg": {
+      "original_name": "5e3ff689d59e5201fa8a632f02972b799b468fa0636a7ac507396aeac68251cd.jpg",
+      "original_rel_path": "5e3ff689d59e5201fa8a632f02972b799b468fa0636a7ac507396aeac68251cd.jpg",
+      "friendly_name": "figure_128.jpg",
+      "abs_path": "data/mineru_cache\\chapter_05_p205-262_线性系统的频域分析法__df0165aa\\images\\figure_128.jpg",
+      "index": 128
+    },
+    "5ee9ff5965772dc73d9c26bfad53c9b71c97e954fd8770ecbce54f264cc665fe.jpg": {
+      "original_name": "5ee9ff5965772dc73d9c26bfad53c9b71c97e954fd8770ecbce54f264cc665fe.jpg",
+      "original_rel_path": "5ee9ff5965772dc73d9c26bfad53c9b71c97e954fd8770ecbce54f264cc665fe.jpg",
+      "friendly_name": "figure_129.jpg",
+      "abs_path": "data/mineru_cache\\chapter_05_p205-262_线性系统的频域分析法__df0165aa\\images\\figure_129.jpg",
+      "index": 129
+    },
+    "5f064e5b22410a0f61c31bb8bced228bfd26e0243000bbdcb5f0ade8f228a1d0.jpg": {
+      "original_name": "5f064e5b22410a0f61c31bb8bced228bfd26e0243000bbdcb5f0ade8f228a1d0.jpg",
+      "original_rel_path": "5f064e5b22410a0f61c31bb8bced228bfd26e0243000bbdcb5f0ade8f228a1d0.jpg",
+      "friendly_name": "figure_130.jpg",
+      "abs_path": "data/mineru_cache\\chapter_05_p205-262_线性系统的频域分析法__df0165aa\\images\\figure_130.jpg",
+      "index": 130
+    },
+    "5f5eb4b7ecc6919f866770b82bfb3f3a28857c38148a6ba2a4318d67d7e496cb.jpg": {
+      "original_name": "5f5eb4b7ecc6919f866770b82bfb3f3a28857c38148a6ba2a4318d67d7e496cb.jpg",
+      "original_rel_path": "5f5eb4b7ecc6919f866770b82bfb3f3a28857c38148a6ba2a4318d67d7e496cb.jpg",
+      "friendly_name": "figure_131.jpg",
+      "abs_path": "data/mineru_cache\\chapter_05_p205-262_线性系统的频域分析法__df0165aa\\images\\figure_131.jpg",
+      "index": 131
+    },
+    "5f65a7650c48568bd76655b715160c1b7ac5f361682c4755afdff4bad58b80da.jpg": {
+      "original_name": "5f65a7650c48568bd76655b715160c1b7ac5f361682c4755afdff4bad58b80da.jpg",
+      "original_rel_path": "5f65a7650c48568bd76655b715160c1b7ac5f361682c4755afdff4bad58b80da.jpg",
+      "friendly_name": "figure_132.jpg",
+      "abs_path": "data/mineru_cache\\chapter_05_p205-262_线性系统的频域分析法__df0165aa\\images\\figure_132.jpg",
+      "index": 132
+    },
+    "5ff75d8744c4c41ff2013fef7c67a64479bf7f88c5497562ff2f30f5442df00d.jpg": {
+      "original_name": "5ff75d8744c4c41ff2013fef7c67a64479bf7f88c5497562ff2f30f5442df00d.jpg",
+      "original_rel_path": "5ff75d8744c4c41ff2013fef7c67a64479bf7f88c5497562ff2f30f5442df00d.jpg",
+      "friendly_name": "figure_133.jpg",
+      "abs_path": "data/mineru_cache\\chapter_05_p205-262_线性系统的频域分析法__df0165aa\\images\\figure_133.jpg",
+      "index": 133
+    },
+    "60310d0c8cd874bdf474b47f5f4b49df599a30245c4f6fd03a2f818ef6b4842a.jpg": {
+      "original_name": "60310d0c8cd874bdf474b47f5f4b49df599a30245c4f6fd03a2f818ef6b4842a.jpg",
+      "original_rel_path": "60310d0c8cd874bdf474b47f5f4b49df599a30245c4f6fd03a2f818ef6b4842a.jpg",
+      "friendly_name": "figure_134.jpg",
+      "abs_path": "data/mineru_cache\\chapter_05_p205-262_线性系统的频域分析法__df0165aa\\images\\figure_134.jpg",
+      "index": 134
+    },
+    "60757d3620176980be08ab39ed7e55d668955be826fd49a1f96850fcd7c67c31.jpg": {
+      "original_name": "60757d3620176980be08ab39ed7e55d668955be826fd49a1f96850fcd7c67c31.jpg",
+      "original_rel_path": "60757d3620176980be08ab39ed7e55d668955be826fd49a1f96850fcd7c67c31.jpg",
+      "friendly_name": "figure_135.jpg",
+      "abs_path": "data/mineru_cache\\chapter_05_p205-262_线性系统的频域分析法__df0165aa\\images\\figure_135.jpg",
+      "index": 135
+    },
+    "61598a9822032e4aa0f32aa416fa89ecfaba9f5cf905c3229c36892ff45b086d.jpg": {
+      "original_name": "61598a9822032e4aa0f32aa416fa89ecfaba9f5cf905c3229c36892ff45b086d.jpg",
+      "original_rel_path": "61598a9822032e4aa0f32aa416fa89ecfaba9f5cf905c3229c36892ff45b086d.jpg",
+      "friendly_name": "figure_136.jpg",
+      "abs_path": "data/mineru_cache\\chapter_05_p205-262_线性系统的频域分析法__df0165aa\\images\\figure_136.jpg",
+      "index": 136
+    },
+    "62f49fe72b9e55885c24a0ef3f6444631c7dfe8190420470c14e803965421c3a.jpg": {
+      "original_name": "62f49fe72b9e55885c24a0ef3f6444631c7dfe8190420470c14e803965421c3a.jpg",
+      "original_rel_path": "62f49fe72b9e55885c24a0ef3f6444631c7dfe8190420470c14e803965421c3a.jpg",
+      "friendly_name": "figure_137.jpg",
+      "abs_path": "data/mineru_cache\\chapter_05_p205-262_线性系统的频域分析法__df0165aa\\images\\figure_137.jpg",
+      "index": 137
+    },
+    "63982934a20e5892ad78166a8589a80e80c1ee325e713891639d39e604c85b54.jpg": {
+      "original_name": "63982934a20e5892ad78166a8589a80e80c1ee325e713891639d39e604c85b54.jpg",
+      "original_rel_path": "63982934a20e5892ad78166a8589a80e80c1ee325e713891639d39e604c85b54.jpg",
+      "friendly_name": "figure_138.jpg",
+      "abs_path": "data/mineru_cache\\chapter_05_p205-262_线性系统的频域分析法__df0165aa\\images\\figure_138.jpg",
+      "index": 138
+    },
+    "64149231258fc29f692e673d628da512053976b07e3a2eadb5906b7518900e59.jpg": {
+      "original_name": "64149231258fc29f692e673d628da512053976b07e3a2eadb5906b7518900e59.jpg",
+      "original_rel_path": "64149231258fc29f692e673d628da512053976b07e3a2eadb5906b7518900e59.jpg",
+      "friendly_name": "figure_139.jpg",
+      "abs_path": "data/mineru_cache\\chapter_05_p205-262_线性系统的频域分析法__df0165aa\\images\\figure_139.jpg",
+      "index": 139
+    },
+    "655d32b71d4651d502bdc8985a65b60992ebc46b93c0769b8fb796d495e5df93.jpg": {
+      "original_name": "655d32b71d4651d502bdc8985a65b60992ebc46b93c0769b8fb796d495e5df93.jpg",
+      "original_rel_path": "655d32b71d4651d502bdc8985a65b60992ebc46b93c0769b8fb796d495e5df93.jpg",
+      "friendly_name": "figure_140.jpg",
+      "abs_path": "data/mineru_cache\\chapter_05_p205-262_线性系统的频域分析法__df0165aa\\images\\figure_140.jpg",
+      "index": 140
+    },
+    "65e32cb46b8708cb26f5a6cec14dc9a53cd341ea0688d6c6720225b0d9372234.jpg": {
+      "original_name": "65e32cb46b8708cb26f5a6cec14dc9a53cd341ea0688d6c6720225b0d9372234.jpg",
+      "original_rel_path": "65e32cb46b8708cb26f5a6cec14dc9a53cd341ea0688d6c6720225b0d9372234.jpg",
+      "friendly_name": "figure_141.jpg",
+      "abs_path": "data/mineru_cache\\chapter_05_p205-262_线性系统的频域分析法__df0165aa\\images\\figure_141.jpg",
+      "index": 141
+    },
+    "663bafb3ef82ed31c99f691d1fff2c0e3040f5cc752cfb1088a8dfcf2cf67d8f.jpg": {
+      "original_name": "663bafb3ef82ed31c99f691d1fff2c0e3040f5cc752cfb1088a8dfcf2cf67d8f.jpg",
+      "original_rel_path": "663bafb3ef82ed31c99f691d1fff2c0e3040f5cc752cfb1088a8dfcf2cf67d8f.jpg",
+      "friendly_name": "figure_142.jpg",
+      "abs_path": "data/mineru_cache\\chapter_05_p205-262_线性系统的频域分析法__df0165aa\\images\\figure_142.jpg",
+      "index": 142
+    },
+    "681dbcd344ff049829b6bd6d864e0a4e0c6eae37dd47bd35dc944d0eb393717d.jpg": {
+      "original_name": "681dbcd344ff049829b6bd6d864e0a4e0c6eae37dd47bd35dc944d0eb393717d.jpg",
+      "original_rel_path": "681dbcd344ff049829b6bd6d864e0a4e0c6eae37dd47bd35dc944d0eb393717d.jpg",
+      "friendly_name": "figure_143.jpg",
+      "abs_path": "data/mineru_cache\\chapter_05_p205-262_线性系统的频域分析法__df0165aa\\images\\figure_143.jpg",
+      "index": 143
+    },
+    "689a9068e2ac011897d7bd9dbd5636f15524609b40283e26a5c9da596dcc43c5.jpg": {
+      "original_name": "689a9068e2ac011897d7bd9dbd5636f15524609b40283e26a5c9da596dcc43c5.jpg",
+      "original_rel_path": "689a9068e2ac011897d7bd9dbd5636f15524609b40283e26a5c9da596dcc43c5.jpg",
+      "friendly_name": "figure_144.jpg",
+      "abs_path": "data/mineru_cache\\chapter_05_p205-262_线性系统的频域分析法__df0165aa\\images\\figure_144.jpg",
+      "index": 144
+    },
+    "693943eabf5abad33509087d17c9b39b92b07c4b527c9d85166fd285e1d2f025.jpg": {
+      "original_name": "693943eabf5abad33509087d17c9b39b92b07c4b527c9d85166fd285e1d2f025.jpg",
+      "original_rel_path": "693943eabf5abad33509087d17c9b39b92b07c4b527c9d85166fd285e1d2f025.jpg",
+      "friendly_name": "figure_145.jpg",
+      "abs_path": "data/mineru_cache\\chapter_05_p205-262_线性系统的频域分析法__df0165aa\\images\\figure_145.jpg",
+      "index": 145
+    },
+    "6b6896cbeb5dbd347feccf7431a40c751edab08b48c70f7ce0b336c103aae1ca.jpg": {
+      "original_name": "6b6896cbeb5dbd347feccf7431a40c751edab08b48c70f7ce0b336c103aae1ca.jpg",
+      "original_rel_path": "6b6896cbeb5dbd347feccf7431a40c751edab08b48c70f7ce0b336c103aae1ca.jpg",
+      "friendly_name": "figure_146.jpg",
+      "abs_path": "data/mineru_cache\\chapter_05_p205-262_线性系统的频域分析法__df0165aa\\images\\figure_146.jpg",
+      "index": 146
+    },
+    "6cea27771e3d2c1a2dd5143f24cd76fa372fb1fdc06ffe0b36d2ac29958479b3.jpg": {
+      "original_name": "6cea27771e3d2c1a2dd5143f24cd76fa372fb1fdc06ffe0b36d2ac29958479b3.jpg",
+      "original_rel_path": "6cea27771e3d2c1a2dd5143f24cd76fa372fb1fdc06ffe0b36d2ac29958479b3.jpg",
+      "friendly_name": "figure_147.jpg",
+      "abs_path": "data/mineru_cache\\chapter_05_p205-262_线性系统的频域分析法__df0165aa\\images\\figure_147.jpg",
+      "index": 147
+    },
+    "6d993ee68e1b5325f16c44c4818c20d09d83bbe05459a0b7e184b32622c96a39.jpg": {
+      "original_name": "6d993ee68e1b5325f16c44c4818c20d09d83bbe05459a0b7e184b32622c96a39.jpg",
+      "original_rel_path": "6d993ee68e1b5325f16c44c4818c20d09d83bbe05459a0b7e184b32622c96a39.jpg",
+      "friendly_name": "figure_148.jpg",
+      "abs_path": "data/mineru_cache\\chapter_05_p205-262_线性系统的频域分析法__df0165aa\\images\\figure_148.jpg",
+      "index": 148
+    },
+    "6db9fdea3440fc1fa0cba2ed71093953e5c6ce19cbb7c4876d5633b1a7223179.jpg": {
+      "original_name": "6db9fdea3440fc1fa0cba2ed71093953e5c6ce19cbb7c4876d5633b1a7223179.jpg",
+      "original_rel_path": "6db9fdea3440fc1fa0cba2ed71093953e5c6ce19cbb7c4876d5633b1a7223179.jpg",
+      "friendly_name": "figure_149.jpg",
+      "abs_path": "data/mineru_cache\\chapter_05_p205-262_线性系统的频域分析法__df0165aa\\images\\figure_149.jpg",
+      "index": 149
+    },
+    "6e15346c60dcbb80e46a7b016fd8879afac40b2cf3652f4fce191e10ef5e9a73.jpg": {
+      "original_name": "6e15346c60dcbb80e46a7b016fd8879afac40b2cf3652f4fce191e10ef5e9a73.jpg",
+      "original_rel_path": "6e15346c60dcbb80e46a7b016fd8879afac40b2cf3652f4fce191e10ef5e9a73.jpg",
+      "friendly_name": "figure_150.jpg",
+      "abs_path": "data/mineru_cache\\chapter_05_p205-262_线性系统的频域分析法__df0165aa\\images\\figure_150.jpg",
+      "index": 150
+    },
+    "6f6eae5fc6d86f5af1b52c65b8562d219bd8ff095202f1c67aded193b1b57d5c.jpg": {
+      "original_name": "6f6eae5fc6d86f5af1b52c65b8562d219bd8ff095202f1c67aded193b1b57d5c.jpg",
+      "original_rel_path": "6f6eae5fc6d86f5af1b52c65b8562d219bd8ff095202f1c67aded193b1b57d5c.jpg",
+      "friendly_name": "figure_151.jpg",
+      "abs_path": "data/mineru_cache\\chapter_05_p205-262_线性系统的频域分析法__df0165aa\\images\\figure_151.jpg",
+      "index": 151
+    },
+    "70c628ae6abc6f47f1da33fda5a02585722225f929e2a56f4b18cab70fc6afe7.jpg": {
+      "original_name": "70c628ae6abc6f47f1da33fda5a02585722225f929e2a56f4b18cab70fc6afe7.jpg",
+      "original_rel_path": "70c628ae6abc6f47f1da33fda5a02585722225f929e2a56f4b18cab70fc6afe7.jpg",
+      "friendly_name": "figure_152.jpg",
+      "abs_path": "data/mineru_cache\\chapter_05_p205-262_线性系统的频域分析法__df0165aa\\images\\figure_152.jpg",
+      "index": 152
+    },
+    "71124597b51eadfae824359f3774395412ab2fbf0681909d25b729696d4c523c.jpg": {
+      "original_name": "71124597b51eadfae824359f3774395412ab2fbf0681909d25b729696d4c523c.jpg",
+      "original_rel_path": "71124597b51eadfae824359f3774395412ab2fbf0681909d25b729696d4c523c.jpg",
+      "friendly_name": "figure_153.jpg",
+      "abs_path": "data/mineru_cache\\chapter_05_p205-262_线性系统的频域分析法__df0165aa\\images\\figure_153.jpg",
+      "index": 153
+    },
+    "748a4aa510afc59740b77b8ea1b26ad9c2377239103566450cb6d9d7d2f8723d.jpg": {
+      "original_name": "748a4aa510afc59740b77b8ea1b26ad9c2377239103566450cb6d9d7d2f8723d.jpg",
+      "original_rel_path": "748a4aa510afc59740b77b8ea1b26ad9c2377239103566450cb6d9d7d2f8723d.jpg",
+      "friendly_name": "figure_154.jpg",
+      "abs_path": "data/mineru_cache\\chapter_05_p205-262_线性系统的频域分析法__df0165aa\\images\\figure_154.jpg",
+      "index": 154
+    },
+    "74e8d144e8bcb52d575fc5038e4f32a36fec9e0a8b4782cdc9400c34c2ab099e.jpg": {
+      "original_name": "74e8d144e8bcb52d575fc5038e4f32a36fec9e0a8b4782cdc9400c34c2ab099e.jpg",
+      "original_rel_path": "74e8d144e8bcb52d575fc5038e4f32a36fec9e0a8b4782cdc9400c34c2ab099e.jpg",
+      "friendly_name": "figure_155.jpg",
+      "abs_path": "data/mineru_cache\\chapter_05_p205-262_线性系统的频域分析法__df0165aa\\images\\figure_155.jpg",
+      "index": 155
+    },
+    "74fad038651941b70d0e4be90a12f39c8e61d81f01bdc9d2a83cc8738959978c.jpg": {
+      "original_name": "74fad038651941b70d0e4be90a12f39c8e61d81f01bdc9d2a83cc8738959978c.jpg",
+      "original_rel_path": "74fad038651941b70d0e4be90a12f39c8e61d81f01bdc9d2a83cc8738959978c.jpg",
+      "friendly_name": "figure_156.jpg",
+      "abs_path": "data/mineru_cache\\chapter_05_p205-262_线性系统的频域分析法__df0165aa\\images\\figure_156.jpg",
+      "index": 156
+    },
+    "752b5d09937d4660e8908c7e0a8a66d5b8796e34c1be953ff1b79de638c1b44a.jpg": {
+      "original_name": "752b5d09937d4660e8908c7e0a8a66d5b8796e34c1be953ff1b79de638c1b44a.jpg",
+      "original_rel_path": "752b5d09937d4660e8908c7e0a8a66d5b8796e34c1be953ff1b79de638c1b44a.jpg",
+      "friendly_name": "figure_157.jpg",
+      "abs_path": "data/mineru_cache\\chapter_05_p205-262_线性系统的频域分析法__df0165aa\\images\\figure_157.jpg",
+      "index": 157
+    },
+    "758287754c3f8d630579f61cf1c378bfbf1712f2e539cbd60c285e2208fe07cc.jpg": {
+      "original_name": "758287754c3f8d630579f61cf1c378bfbf1712f2e539cbd60c285e2208fe07cc.jpg",
+      "original_rel_path": "758287754c3f8d630579f61cf1c378bfbf1712f2e539cbd60c285e2208fe07cc.jpg",
+      "friendly_name": "figure_158.jpg",
+      "abs_path": "data/mineru_cache\\chapter_05_p205-262_线性系统的频域分析法__df0165aa\\images\\figure_158.jpg",
+      "index": 158
+    },
+    "78ff813671737279f42df93cec4d5ce215df212c58aed8c2d2fa3ae7bb8f0084.jpg": {
+      "original_name": "78ff813671737279f42df93cec4d5ce215df212c58aed8c2d2fa3ae7bb8f0084.jpg",
+      "original_rel_path": "78ff813671737279f42df93cec4d5ce215df212c58aed8c2d2fa3ae7bb8f0084.jpg",
+      "friendly_name": "figure_159.jpg",
+      "abs_path": "data/mineru_cache\\chapter_05_p205-262_线性系统的频域分析法__df0165aa\\images\\figure_159.jpg",
+      "index": 159
+    },
+    "79233325536ca887a8c02023396b1c545a17019d4a2247d8e85314596111238e.jpg": {
+      "original_name": "79233325536ca887a8c02023396b1c545a17019d4a2247d8e85314596111238e.jpg",
+      "original_rel_path": "79233325536ca887a8c02023396b1c545a17019d4a2247d8e85314596111238e.jpg",
+      "friendly_name": "figure_160.jpg",
+      "abs_path": "data/mineru_cache\\chapter_05_p205-262_线性系统的频域分析法__df0165aa\\images\\figure_160.jpg",
+      "index": 160
+    },
+    "7924695c72d36eac77552ad84028f50752869ddfe5daed7d66001f9b9d13e132.jpg": {
+      "original_name": "7924695c72d36eac77552ad84028f50752869ddfe5daed7d66001f9b9d13e132.jpg",
+      "original_rel_path": "7924695c72d36eac77552ad84028f50752869ddfe5daed7d66001f9b9d13e132.jpg",
+      "friendly_name": "figure_161.jpg",
+      "abs_path": "data/mineru_cache\\chapter_05_p205-262_线性系统的频域分析法__df0165aa\\images\\figure_161.jpg",
+      "index": 161
+    },
+    "7951f2ad0cb33162a10786558e721c269f20dee4171d1f0016a29258ea9c19a6.jpg": {
+      "original_name": "7951f2ad0cb33162a10786558e721c269f20dee4171d1f0016a29258ea9c19a6.jpg",
+      "original_rel_path": "7951f2ad0cb33162a10786558e721c269f20dee4171d1f0016a29258ea9c19a6.jpg",
+      "friendly_name": "figure_162.jpg",
+      "abs_path": "data/mineru_cache\\chapter_05_p205-262_线性系统的频域分析法__df0165aa\\images\\figure_162.jpg",
+      "index": 162
+    },
+    "7a9fb5b97c645c1009923dd50391bccd849bf636ac9acff5b11fad1b5634696e.jpg": {
+      "original_name": "7a9fb5b97c645c1009923dd50391bccd849bf636ac9acff5b11fad1b5634696e.jpg",
+      "original_rel_path": "7a9fb5b97c645c1009923dd50391bccd849bf636ac9acff5b11fad1b5634696e.jpg",
+      "friendly_name": "figure_163.jpg",
+      "abs_path": "data/mineru_cache\\chapter_05_p205-262_线性系统的频域分析法__df0165aa\\images\\figure_163.jpg",
+      "index": 163
+    },
+    "7dbe2135fc63791433284a540bb10cf9fe6610f248ed232abb6432a5aabc919a.jpg": {
+      "original_name": "7dbe2135fc63791433284a540bb10cf9fe6610f248ed232abb6432a5aabc919a.jpg",
+      "original_rel_path": "7dbe2135fc63791433284a540bb10cf9fe6610f248ed232abb6432a5aabc919a.jpg",
+      "friendly_name": "figure_164.jpg",
+      "abs_path": "data/mineru_cache\\chapter_05_p205-262_线性系统的频域分析法__df0165aa\\images\\figure_164.jpg",
+      "index": 164
+    },
+    "7f1064b9b2eb9ba747c3cbf23c7fcea266e44d053ad6aa221a626e51b191c72f.jpg": {
+      "original_name": "7f1064b9b2eb9ba747c3cbf23c7fcea266e44d053ad6aa221a626e51b191c72f.jpg",
+      "original_rel_path": "7f1064b9b2eb9ba747c3cbf23c7fcea266e44d053ad6aa221a626e51b191c72f.jpg",
+      "friendly_name": "figure_165.jpg",
+      "abs_path": "data/mineru_cache\\chapter_05_p205-262_线性系统的频域分析法__df0165aa\\images\\figure_165.jpg",
+      "index": 165
+    },
+    "7f76ceceef96630a28aeb494e0b5c0091b6659d554dd36c67a596936ca497626.jpg": {
+      "original_name": "7f76ceceef96630a28aeb494e0b5c0091b6659d554dd36c67a596936ca497626.jpg",
+      "original_rel_path": "7f76ceceef96630a28aeb494e0b5c0091b6659d554dd36c67a596936ca497626.jpg",
+      "friendly_name": "figure_166.jpg",
+      "abs_path": "data/mineru_cache\\chapter_05_p205-262_线性系统的频域分析法__df0165aa\\images\\figure_166.jpg",
+      "index": 166
+    },
+    "7fc9deacfaa7d3887288e7b64f7c6e85fc49488673b5e178c004bfb38acef9a9.jpg": {
+      "original_name": "7fc9deacfaa7d3887288e7b64f7c6e85fc49488673b5e178c004bfb38acef9a9.jpg",
+      "original_rel_path": "7fc9deacfaa7d3887288e7b64f7c6e85fc49488673b5e178c004bfb38acef9a9.jpg",
+      "friendly_name": "figure_167.jpg",
+      "abs_path": "data/mineru_cache\\chapter_05_p205-262_线性系统的频域分析法__df0165aa\\images\\figure_167.jpg",
+      "index": 167
+    },
+    "8171c0816c1ae126ad9ec08542f06177017e12e575648386c7f7c3c23b5f9963.jpg": {
+      "original_name": "8171c0816c1ae126ad9ec08542f06177017e12e575648386c7f7c3c23b5f9963.jpg",
+      "original_rel_path": "8171c0816c1ae126ad9ec08542f06177017e12e575648386c7f7c3c23b5f9963.jpg",
+      "friendly_name": "figure_168.jpg",
+      "abs_path": "data/mineru_cache\\chapter_05_p205-262_线性系统的频域分析法__df0165aa\\images\\figure_168.jpg",
+      "index": 168
+    },
+    "81841ee5b421f1bd46a7d583038e77bdd99630bb40f880671b77bfd15e38724f.jpg": {
+      "original_name": "81841ee5b421f1bd46a7d583038e77bdd99630bb40f880671b77bfd15e38724f.jpg",
+      "original_rel_path": "81841ee5b421f1bd46a7d583038e77bdd99630bb40f880671b77bfd15e38724f.jpg",
+      "friendly_name": "figure_169.jpg",
+      "abs_path": "data/mineru_cache\\chapter_05_p205-262_线性系统的频域分析法__df0165aa\\images\\figure_169.jpg",
+      "index": 169
+    },
+    "825447afa075d25c171b78f7a46d0777d60d51798f613760fdd5c621eb3d4651.jpg": {
+      "original_name": "825447afa075d25c171b78f7a46d0777d60d51798f613760fdd5c621eb3d4651.jpg",
+      "original_rel_path": "825447afa075d25c171b78f7a46d0777d60d51798f613760fdd5c621eb3d4651.jpg",
+      "friendly_name": "figure_170.jpg",
+      "abs_path": "data/mineru_cache\\chapter_05_p205-262_线性系统的频域分析法__df0165aa\\images\\figure_170.jpg",
+      "index": 170
+    },
+    "849d778cbef26c3f1f002857bc957d6f6724a8c1a5bd61f1bc612f2e4a0d0b02.jpg": {
+      "original_name": "849d778cbef26c3f1f002857bc957d6f6724a8c1a5bd61f1bc612f2e4a0d0b02.jpg",
+      "original_rel_path": "849d778cbef26c3f1f002857bc957d6f6724a8c1a5bd61f1bc612f2e4a0d0b02.jpg",
+      "friendly_name": "figure_171.jpg",
+      "abs_path": "data/mineru_cache\\chapter_05_p205-262_线性系统的频域分析法__df0165aa\\images\\figure_171.jpg",
+      "index": 171
+    },
+    "84a3a2fc6bb89a4b6d029b3e3ce64f9f5ace2d127b6c99075d9e7feeb16855a0.jpg": {
+      "original_name": "84a3a2fc6bb89a4b6d029b3e3ce64f9f5ace2d127b6c99075d9e7feeb16855a0.jpg",
+      "original_rel_path": "84a3a2fc6bb89a4b6d029b3e3ce64f9f5ace2d127b6c99075d9e7feeb16855a0.jpg",
+      "friendly_name": "figure_172.jpg",
+      "abs_path": "data/mineru_cache\\chapter_05_p205-262_线性系统的频域分析法__df0165aa\\images\\figure_172.jpg",
+      "index": 172
+    },
+    "8629f1547e163d8839356592c3f5d8aacbb9ba5cd7bd6a82a354a9294ac4be4e.jpg": {
+      "original_name": "8629f1547e163d8839356592c3f5d8aacbb9ba5cd7bd6a82a354a9294ac4be4e.jpg",
+      "original_rel_path": "8629f1547e163d8839356592c3f5d8aacbb9ba5cd7bd6a82a354a9294ac4be4e.jpg",
+      "friendly_name": "figure_173.jpg",
+      "abs_path": "data/mineru_cache\\chapter_05_p205-262_线性系统的频域分析法__df0165aa\\images\\figure_173.jpg",
+      "index": 173
+    },
+    "86509ba47041573eba78853f97f77f778ff5c6d68c31bbc361dc25c385fc9997.jpg": {
+      "original_name": "86509ba47041573eba78853f97f77f778ff5c6d68c31bbc361dc25c385fc9997.jpg",
+      "original_rel_path": "86509ba47041573eba78853f97f77f778ff5c6d68c31bbc361dc25c385fc9997.jpg",
+      "friendly_name": "figure_174.jpg",
+      "abs_path": "data/mineru_cache\\chapter_05_p205-262_线性系统的频域分析法__df0165aa\\images\\figure_174.jpg",
+      "index": 174
+    },
+    "86913e8316daabfc6256a88194be01e61eb9e99d09b455aad21d7102ab26bf09.jpg": {
+      "original_name": "86913e8316daabfc6256a88194be01e61eb9e99d09b455aad21d7102ab26bf09.jpg",
+      "original_rel_path": "86913e8316daabfc6256a88194be01e61eb9e99d09b455aad21d7102ab26bf09.jpg",
+      "friendly_name": "figure_175.jpg",
+      "abs_path": "data/mineru_cache\\chapter_05_p205-262_线性系统的频域分析法__df0165aa\\images\\figure_175.jpg",
+      "index": 175
+    },
+    "86b738d343949992ea58ed6fcab728b0f84bb39474bfde78c47a9800980cfeea.jpg": {
+      "original_name": "86b738d343949992ea58ed6fcab728b0f84bb39474bfde78c47a9800980cfeea.jpg",
+      "original_rel_path": "86b738d343949992ea58ed6fcab728b0f84bb39474bfde78c47a9800980cfeea.jpg",
+      "friendly_name": "figure_176.jpg",
+      "abs_path": "data/mineru_cache\\chapter_05_p205-262_线性系统的频域分析法__df0165aa\\images\\figure_176.jpg",
+      "index": 176
+    },
+    "86d9dd69e3d2c6fa089ee6ef5dd7a28c36183ba075ec78edcd70ac07bb8e9d30.jpg": {
+      "original_name": "86d9dd69e3d2c6fa089ee6ef5dd7a28c36183ba075ec78edcd70ac07bb8e9d30.jpg",
+      "original_rel_path": "86d9dd69e3d2c6fa089ee6ef5dd7a28c36183ba075ec78edcd70ac07bb8e9d30.jpg",
+      "friendly_name": "figure_177.jpg",
+      "abs_path": "data/mineru_cache\\chapter_05_p205-262_线性系统的频域分析法__df0165aa\\images\\figure_177.jpg",
+      "index": 177
+    },
+    "87bef7db3ddf14067f7388754ad45dbad4ef52cd1e79619de9871266aec10fad.jpg": {
+      "original_name": "87bef7db3ddf14067f7388754ad45dbad4ef52cd1e79619de9871266aec10fad.jpg",
+      "original_rel_path": "87bef7db3ddf14067f7388754ad45dbad4ef52cd1e79619de9871266aec10fad.jpg",
+      "friendly_name": "figure_178.jpg",
+      "abs_path": "data/mineru_cache\\chapter_05_p205-262_线性系统的频域分析法__df0165aa\\images\\figure_178.jpg",
+      "index": 178
+    },
+    "886f253fdea83e169ac39885d29dbe85e4e428615275ffc478c6dae76adee644.jpg": {
+      "original_name": "886f253fdea83e169ac39885d29dbe85e4e428615275ffc478c6dae76adee644.jpg",
+      "original_rel_path": "886f253fdea83e169ac39885d29dbe85e4e428615275ffc478c6dae76adee644.jpg",
+      "friendly_name": "figure_179.jpg",
+      "abs_path": "data/mineru_cache\\chapter_05_p205-262_线性系统的频域分析法__df0165aa\\images\\figure_179.jpg",
+      "index": 179
+    },
+    "88976978863c1e7a925c19813c847c94da3feb617072464385d0b239bf4235ea.jpg": {
+      "original_name": "88976978863c1e7a925c19813c847c94da3feb617072464385d0b239bf4235ea.jpg",
+      "original_rel_path": "88976978863c1e7a925c19813c847c94da3feb617072464385d0b239bf4235ea.jpg",
+      "friendly_name": "figure_180.jpg",
+      "abs_path": "data/mineru_cache\\chapter_05_p205-262_线性系统的频域分析法__df0165aa\\images\\figure_180.jpg",
+      "index": 180
+    },
+    "89b8e318d1a3c3f63cffb135b334b30b2ba9c15d1822934a5b8742281d22eaa8.jpg": {
+      "original_name": "89b8e318d1a3c3f63cffb135b334b30b2ba9c15d1822934a5b8742281d22eaa8.jpg",
+      "original_rel_path": "89b8e318d1a3c3f63cffb135b334b30b2ba9c15d1822934a5b8742281d22eaa8.jpg",
+      "friendly_name": "figure_181.jpg",
+      "abs_path": "data/mineru_cache\\chapter_05_p205-262_线性系统的频域分析法__df0165aa\\images\\figure_181.jpg",
+      "index": 181
+    },
+    "8a65822f51e186604e2eaadd373d22b0cdbf7ec6d2dc21df75d414a9d1a6c82b.jpg": {
+      "original_name": "8a65822f51e186604e2eaadd373d22b0cdbf7ec6d2dc21df75d414a9d1a6c82b.jpg",
+      "original_rel_path": "8a65822f51e186604e2eaadd373d22b0cdbf7ec6d2dc21df75d414a9d1a6c82b.jpg",
+      "friendly_name": "figure_182.jpg",
+      "abs_path": "data/mineru_cache\\chapter_05_p205-262_线性系统的频域分析法__df0165aa\\images\\figure_182.jpg",
+      "index": 182
+    },
+    "8ad2e3b247105cfbad1e517ddda690a0967eeefcd11f8c2262b2b6c860290673.jpg": {
+      "original_name": "8ad2e3b247105cfbad1e517ddda690a0967eeefcd11f8c2262b2b6c860290673.jpg",
+      "original_rel_path": "8ad2e3b247105cfbad1e517ddda690a0967eeefcd11f8c2262b2b6c860290673.jpg",
+      "friendly_name": "figure_183.jpg",
+      "abs_path": "data/mineru_cache\\chapter_05_p205-262_线性系统的频域分析法__df0165aa\\images\\figure_183.jpg",
+      "index": 183
+    },
+    "8cd9ee6d30c275029153c326ad60a364f0b58f216eb9267371d0206d9e548842.jpg": {
+      "original_name": "8cd9ee6d30c275029153c326ad60a364f0b58f216eb9267371d0206d9e548842.jpg",
+      "original_rel_path": "8cd9ee6d30c275029153c326ad60a364f0b58f216eb9267371d0206d9e548842.jpg",
+      "friendly_name": "figure_184.jpg",
+      "abs_path": "data/mineru_cache\\chapter_05_p205-262_线性系统的频域分析法__df0165aa\\images\\figure_184.jpg",
+      "index": 184
+    },
+    "8d593c028819044dae0eae43c9a6fb6015dc7738fcf935d6e024d067507319dd.jpg": {
+      "original_name": "8d593c028819044dae0eae43c9a6fb6015dc7738fcf935d6e024d067507319dd.jpg",
+      "original_rel_path": "8d593c028819044dae0eae43c9a6fb6015dc7738fcf935d6e024d067507319dd.jpg",
+      "friendly_name": "figure_185.jpg",
+      "abs_path": "data/mineru_cache\\chapter_05_p205-262_线性系统的频域分析法__df0165aa\\images\\figure_185.jpg",
+      "index": 185
+    },
+    "8dcd3155dd50f3f6599a572e33696975e721f4f338fa8decde734087f24d84e5.jpg": {
+      "original_name": "8dcd3155dd50f3f6599a572e33696975e721f4f338fa8decde734087f24d84e5.jpg",
+      "original_rel_path": "8dcd3155dd50f3f6599a572e33696975e721f4f338fa8decde734087f24d84e5.jpg",
+      "friendly_name": "figure_186.jpg",
+      "abs_path": "data/mineru_cache\\chapter_05_p205-262_线性系统的频域分析法__df0165aa\\images\\figure_186.jpg",
+      "index": 186
+    },
+    "8e0b5278cbd75abcbb4b146fee43e0c5759096e721f5d25145088119b998d726.jpg": {
+      "original_name": "8e0b5278cbd75abcbb4b146fee43e0c5759096e721f5d25145088119b998d726.jpg",
+      "original_rel_path": "8e0b5278cbd75abcbb4b146fee43e0c5759096e721f5d25145088119b998d726.jpg",
+      "friendly_name": "figure_187.jpg",
+      "abs_path": "data/mineru_cache\\chapter_05_p205-262_线性系统的频域分析法__df0165aa\\images\\figure_187.jpg",
+      "index": 187
+    },
+    "8e0f0b2cb0c2fb84e7c030039d56bbe012188b30b43521317038dfae6ecc3ed1.jpg": {
+      "original_name": "8e0f0b2cb0c2fb84e7c030039d56bbe012188b30b43521317038dfae6ecc3ed1.jpg",
+      "original_rel_path": "8e0f0b2cb0c2fb84e7c030039d56bbe012188b30b43521317038dfae6ecc3ed1.jpg",
+      "friendly_name": "figure_188.jpg",
+      "abs_path": "data/mineru_cache\\chapter_05_p205-262_线性系统的频域分析法__df0165aa\\images\\figure_188.jpg",
+      "index": 188
+    },
+    "8eb48d5fc4b699493c756ce8110fbce3e12750349fdfacf5d0a45eab04e086e4.jpg": {
+      "original_name": "8eb48d5fc4b699493c756ce8110fbce3e12750349fdfacf5d0a45eab04e086e4.jpg",
+      "original_rel_path": "8eb48d5fc4b699493c756ce8110fbce3e12750349fdfacf5d0a45eab04e086e4.jpg",
+      "friendly_name": "figure_189.jpg",
+      "abs_path": "data/mineru_cache\\chapter_05_p205-262_线性系统的频域分析法__df0165aa\\images\\figure_189.jpg",
+      "index": 189
+    },
+    "900b6373c81a08b1c1805a9ef284b345a3d918aeb71f6869a96a6e98d640ae0c.jpg": {
+      "original_name": "900b6373c81a08b1c1805a9ef284b345a3d918aeb71f6869a96a6e98d640ae0c.jpg",
+      "original_rel_path": "900b6373c81a08b1c1805a9ef284b345a3d918aeb71f6869a96a6e98d640ae0c.jpg",
+      "friendly_name": "figure_190.jpg",
+      "abs_path": "data/mineru_cache\\chapter_05_p205-262_线性系统的频域分析法__df0165aa\\images\\figure_190.jpg",
+      "index": 190
+    },
+    "919605f3275e1c6c9b901ad07420200bc7308e687d132e3413d2592ae22da02f.jpg": {
+      "original_name": "919605f3275e1c6c9b901ad07420200bc7308e687d132e3413d2592ae22da02f.jpg",
+      "original_rel_path": "919605f3275e1c6c9b901ad07420200bc7308e687d132e3413d2592ae22da02f.jpg",
+      "friendly_name": "figure_191.jpg",
+      "abs_path": "data/mineru_cache\\chapter_05_p205-262_线性系统的频域分析法__df0165aa\\images\\figure_191.jpg",
+      "index": 191
+    },
+    "95227914aeaa1cebaf7865309019d1fc4da53b258e8ccabf8a3f3979cb5e9a01.jpg": {
+      "original_name": "95227914aeaa1cebaf7865309019d1fc4da53b258e8ccabf8a3f3979cb5e9a01.jpg",
+      "original_rel_path": "95227914aeaa1cebaf7865309019d1fc4da53b258e8ccabf8a3f3979cb5e9a01.jpg",
+      "friendly_name": "figure_192.jpg",
+      "abs_path": "data/mineru_cache\\chapter_05_p205-262_线性系统的频域分析法__df0165aa\\images\\figure_192.jpg",
+      "index": 192
+    },
+    "9550970ffb715666f5505a9a9e3ca91331cab3289174ff29177fb39fdaf3287b.jpg": {
+      "original_name": "9550970ffb715666f5505a9a9e3ca91331cab3289174ff29177fb39fdaf3287b.jpg",
+      "original_rel_path": "9550970ffb715666f5505a9a9e3ca91331cab3289174ff29177fb39fdaf3287b.jpg",
+      "friendly_name": "figure_193.jpg",
+      "abs_path": "data/mineru_cache\\chapter_05_p205-262_线性系统的频域分析法__df0165aa\\images\\figure_193.jpg",
+      "index": 193
+    },
+    "95f5a327f50a84f51aa07ac2e1ef2c75df72cb954cd64524afc6fda0ec646d3e.jpg": {
+      "original_name": "95f5a327f50a84f51aa07ac2e1ef2c75df72cb954cd64524afc6fda0ec646d3e.jpg",
+      "original_rel_path": "95f5a327f50a84f51aa07ac2e1ef2c75df72cb954cd64524afc6fda0ec646d3e.jpg",
+      "friendly_name": "figure_194.jpg",
+      "abs_path": "data/mineru_cache\\chapter_05_p205-262_线性系统的频域分析法__df0165aa\\images\\figure_194.jpg",
+      "index": 194
+    },
+    "961f7f2b5eaa32ee8ac74a709b97aea3710686877dcc10f684691b01d83fb6f1.jpg": {
+      "original_name": "961f7f2b5eaa32ee8ac74a709b97aea3710686877dcc10f684691b01d83fb6f1.jpg",
+      "original_rel_path": "961f7f2b5eaa32ee8ac74a709b97aea3710686877dcc10f684691b01d83fb6f1.jpg",
+      "friendly_name": "figure_195.jpg",
+      "abs_path": "data/mineru_cache\\chapter_05_p205-262_线性系统的频域分析法__df0165aa\\images\\figure_195.jpg",
+      "index": 195
+    },
+    "96e3f4818b05ae1e7b243ebfd587c852e10fc76df69a1834e9f21b23cc2cc1cb.jpg": {
+      "original_name": "96e3f4818b05ae1e7b243ebfd587c852e10fc76df69a1834e9f21b23cc2cc1cb.jpg",
+      "original_rel_path": "96e3f4818b05ae1e7b243ebfd587c852e10fc76df69a1834e9f21b23cc2cc1cb.jpg",
+      "friendly_name": "figure_196.jpg",
+      "abs_path": "data/mineru_cache\\chapter_05_p205-262_线性系统的频域分析法__df0165aa\\images\\figure_196.jpg",
+      "index": 196
+    },
+    "96f67eeb07fd70f56811ae5934243ba94aae84a7e5cbc38eacdaa7ea215435ef.jpg": {
+      "original_name": "96f67eeb07fd70f56811ae5934243ba94aae84a7e5cbc38eacdaa7ea215435ef.jpg",
+      "original_rel_path": "96f67eeb07fd70f56811ae5934243ba94aae84a7e5cbc38eacdaa7ea215435ef.jpg",
+      "friendly_name": "figure_197.jpg",
+      "abs_path": "data/mineru_cache\\chapter_05_p205-262_线性系统的频域分析法__df0165aa\\images\\figure_197.jpg",
+      "index": 197
+    },
+    "98a9882d3d480c636a047bdb3b8aa345c1e64511194fea59b99a164fef2f37c6.jpg": {
+      "original_name": "98a9882d3d480c636a047bdb3b8aa345c1e64511194fea59b99a164fef2f37c6.jpg",
+      "original_rel_path": "98a9882d3d480c636a047bdb3b8aa345c1e64511194fea59b99a164fef2f37c6.jpg",
+      "friendly_name": "figure_198.jpg",
+      "abs_path": "data/mineru_cache\\chapter_05_p205-262_线性系统的频域分析法__df0165aa\\images\\figure_198.jpg",
+      "index": 198
+    },
+    "98f425289355ad7876e9f26e746a90cd3147ca58fb8430975c62d7af0e2c9510.jpg": {
+      "original_name": "98f425289355ad7876e9f26e746a90cd3147ca58fb8430975c62d7af0e2c9510.jpg",
+      "original_rel_path": "98f425289355ad7876e9f26e746a90cd3147ca58fb8430975c62d7af0e2c9510.jpg",
+      "friendly_name": "figure_199.jpg",
+      "abs_path": "data/mineru_cache\\chapter_05_p205-262_线性系统的频域分析法__df0165aa\\images\\figure_199.jpg",
+      "index": 199
+    },
+    "9a09e112a4145ddc2ec11a23470f99b82cf5d09b65ba277724940a81c622ad22.jpg": {
+      "original_name": "9a09e112a4145ddc2ec11a23470f99b82cf5d09b65ba277724940a81c622ad22.jpg",
+      "original_rel_path": "9a09e112a4145ddc2ec11a23470f99b82cf5d09b65ba277724940a81c622ad22.jpg",
+      "friendly_name": "figure_200.jpg",
+      "abs_path": "data/mineru_cache\\chapter_05_p205-262_线性系统的频域分析法__df0165aa\\images\\figure_200.jpg",
+      "index": 200
+    },
+    "9aa8e861e9773847f0c57322f03dc6785e53a5d65893d14eea8340c4c7c7dfaf.jpg": {
+      "original_name": "9aa8e861e9773847f0c57322f03dc6785e53a5d65893d14eea8340c4c7c7dfaf.jpg",
+      "original_rel_path": "9aa8e861e9773847f0c57322f03dc6785e53a5d65893d14eea8340c4c7c7dfaf.jpg",
+      "friendly_name": "figure_201.jpg",
+      "abs_path": "data/mineru_cache\\chapter_05_p205-262_线性系统的频域分析法__df0165aa\\images\\figure_201.jpg",
+      "index": 201
+    },
+    "9b6d9f528048c1817183bab37d91b58d92257def56244b3c96103f6b7e24fae4.jpg": {
+      "original_name": "9b6d9f528048c1817183bab37d91b58d92257def56244b3c96103f6b7e24fae4.jpg",
+      "original_rel_path": "9b6d9f528048c1817183bab37d91b58d92257def56244b3c96103f6b7e24fae4.jpg",
+      "friendly_name": "figure_202.jpg",
+      "abs_path": "data/mineru_cache\\chapter_05_p205-262_线性系统的频域分析法__df0165aa\\images\\figure_202.jpg",
+      "index": 202
+    },
+    "9c067bfb5693224c4fd82664be031c34e2fb895075eff8f321579f518eb14c8a.jpg": {
+      "original_name": "9c067bfb5693224c4fd82664be031c34e2fb895075eff8f321579f518eb14c8a.jpg",
+      "original_rel_path": "9c067bfb5693224c4fd82664be031c34e2fb895075eff8f321579f518eb14c8a.jpg",
+      "friendly_name": "figure_203.jpg",
+      "abs_path": "data/mineru_cache\\chapter_05_p205-262_线性系统的频域分析法__df0165aa\\images\\figure_203.jpg",
+      "index": 203
+    },
+    "9e626144be38dd2d7673b67cab22fa170865078571409caefb7649d14dff55cf.jpg": {
+      "original_name": "9e626144be38dd2d7673b67cab22fa170865078571409caefb7649d14dff55cf.jpg",
+      "original_rel_path": "9e626144be38dd2d7673b67cab22fa170865078571409caefb7649d14dff55cf.jpg",
+      "friendly_name": "figure_204.jpg",
+      "abs_path": "data/mineru_cache\\chapter_05_p205-262_线性系统的频域分析法__df0165aa\\images\\figure_204.jpg",
+      "index": 204
+    },
+    "9fc515f6fa4969dca4f63e3fac9e62fa086f2cf940ad0682c251f3d9cdd6e1bf.jpg": {
+      "original_name": "9fc515f6fa4969dca4f63e3fac9e62fa086f2cf940ad0682c251f3d9cdd6e1bf.jpg",
+      "original_rel_path": "9fc515f6fa4969dca4f63e3fac9e62fa086f2cf940ad0682c251f3d9cdd6e1bf.jpg",
+      "friendly_name": "figure_205.jpg",
+      "abs_path": "data/mineru_cache\\chapter_05_p205-262_线性系统的频域分析法__df0165aa\\images\\figure_205.jpg",
+      "index": 205
+    },
+    "a08125bd1d8044e81a594c4f6375531e089867e448febd16930c9420defdf0a9.jpg": {
+      "original_name": "a08125bd1d8044e81a594c4f6375531e089867e448febd16930c9420defdf0a9.jpg",
+      "original_rel_path": "a08125bd1d8044e81a594c4f6375531e089867e448febd16930c9420defdf0a9.jpg",
+      "friendly_name": "figure_206.jpg",
+      "abs_path": "data/mineru_cache\\chapter_05_p205-262_线性系统的频域分析法__df0165aa\\images\\figure_206.jpg",
+      "index": 206
+    },
+    "a17fef8214b8bf7cf021e153d15880928013913a386d6f439d84ca2ee153c922.jpg": {
+      "original_name": "a17fef8214b8bf7cf021e153d15880928013913a386d6f439d84ca2ee153c922.jpg",
+      "original_rel_path": "a17fef8214b8bf7cf021e153d15880928013913a386d6f439d84ca2ee153c922.jpg",
+      "friendly_name": "figure_207.jpg",
+      "abs_path": "data/mineru_cache\\chapter_05_p205-262_线性系统的频域分析法__df0165aa\\images\\figure_207.jpg",
+      "index": 207
+    },
+    "a25418a4f258b045c30d860f77ee5a93f37dac8883fa1ae852448f169796505b.jpg": {
+      "original_name": "a25418a4f258b045c30d860f77ee5a93f37dac8883fa1ae852448f169796505b.jpg",
+      "original_rel_path": "a25418a4f258b045c30d860f77ee5a93f37dac8883fa1ae852448f169796505b.jpg",
+      "friendly_name": "figure_208.jpg",
+      "abs_path": "data/mineru_cache\\chapter_05_p205-262_线性系统的频域分析法__df0165aa\\images\\figure_208.jpg",
+      "index": 208
+    },
+    "a26106b2a541091f78fbe41c04c119e568d005f8fe9f8209bd84c5b0c10402a0.jpg": {
+      "original_name": "a26106b2a541091f78fbe41c04c119e568d005f8fe9f8209bd84c5b0c10402a0.jpg",
+      "original_rel_path": "a26106b2a541091f78fbe41c04c119e568d005f8fe9f8209bd84c5b0c10402a0.jpg",
+      "friendly_name": "figure_209.jpg",
+      "abs_path": "data/mineru_cache\\chapter_05_p205-262_线性系统的频域分析法__df0165aa\\images\\figure_209.jpg",
+      "index": 209
+    },
+    "a28028996890e1006e4e4914f87be1060676e9a6031eeff19a3adb42424b7eac.jpg": {
+      "original_name": "a28028996890e1006e4e4914f87be1060676e9a6031eeff19a3adb42424b7eac.jpg",
+      "original_rel_path": "a28028996890e1006e4e4914f87be1060676e9a6031eeff19a3adb42424b7eac.jpg",
+      "friendly_name": "figure_210.jpg",
+      "abs_path": "data/mineru_cache\\chapter_05_p205-262_线性系统的频域分析法__df0165aa\\images\\figure_210.jpg",
+      "index": 210
+    },
+    "a39ff4aad936f89c8667318d6fd34599fff2aea6f0cde9a9ef2b0c375be857d5.jpg": {
+      "original_name": "a39ff4aad936f89c8667318d6fd34599fff2aea6f0cde9a9ef2b0c375be857d5.jpg",
+      "original_rel_path": "a39ff4aad936f89c8667318d6fd34599fff2aea6f0cde9a9ef2b0c375be857d5.jpg",
+      "friendly_name": "figure_211.jpg",
+      "abs_path": "data/mineru_cache\\chapter_05_p205-262_线性系统的频域分析法__df0165aa\\images\\figure_211.jpg",
+      "index": 211
+    },
+    "a3b0e0a7c68c05b6f142b282d35e7711e90485b228e5a4b24e725865adb29127.jpg": {
+      "original_name": "a3b0e0a7c68c05b6f142b282d35e7711e90485b228e5a4b24e725865adb29127.jpg",
+      "original_rel_path": "a3b0e0a7c68c05b6f142b282d35e7711e90485b228e5a4b24e725865adb29127.jpg",
+      "friendly_name": "figure_212.jpg",
+      "abs_path": "data/mineru_cache\\chapter_05_p205-262_线性系统的频域分析法__df0165aa\\images\\figure_212.jpg",
+      "index": 212
+    },
+    "a56676d36bdecd76a3e93127045192c9db067382fc64a91b96839a75b0efed94.jpg": {
+      "original_name": "a56676d36bdecd76a3e93127045192c9db067382fc64a91b96839a75b0efed94.jpg",
+      "original_rel_path": "a56676d36bdecd76a3e93127045192c9db067382fc64a91b96839a75b0efed94.jpg",
+      "friendly_name": "figure_213.jpg",
+      "abs_path": "data/mineru_cache\\chapter_05_p205-262_线性系统的频域分析法__df0165aa\\images\\figure_213.jpg",
+      "index": 213
+    },
+    "a584b88748beb8cce97f749437acf1e2e8a1e1c825c6d57d80d3aeac9dff1db0.jpg": {
+      "original_name": "a584b88748beb8cce97f749437acf1e2e8a1e1c825c6d57d80d3aeac9dff1db0.jpg",
+      "original_rel_path": "a584b88748beb8cce97f749437acf1e2e8a1e1c825c6d57d80d3aeac9dff1db0.jpg",
+      "friendly_name": "figure_214.jpg",
+      "abs_path": "data/mineru_cache\\chapter_05_p205-262_线性系统的频域分析法__df0165aa\\images\\figure_214.jpg",
+      "index": 214
+    },
+    "a5d6532316f59deb18b97ce4fe9d8e6858e3a6ccf06b1f3528b045279eb31c1f.jpg": {
+      "original_name": "a5d6532316f59deb18b97ce4fe9d8e6858e3a6ccf06b1f3528b045279eb31c1f.jpg",
+      "original_rel_path": "a5d6532316f59deb18b97ce4fe9d8e6858e3a6ccf06b1f3528b045279eb31c1f.jpg",
+      "friendly_name": "figure_215.jpg",
+      "abs_path": "data/mineru_cache\\chapter_05_p205-262_线性系统的频域分析法__df0165aa\\images\\figure_215.jpg",
+      "index": 215
+    },
+    "a5f9c5a709e907090e2c038ef13a669d243b69e3a312c3412e2cfd05ec32b1f1.jpg": {
+      "original_name": "a5f9c5a709e907090e2c038ef13a669d243b69e3a312c3412e2cfd05ec32b1f1.jpg",
+      "original_rel_path": "a5f9c5a709e907090e2c038ef13a669d243b69e3a312c3412e2cfd05ec32b1f1.jpg",
+      "friendly_name": "figure_216.jpg",
+      "abs_path": "data/mineru_cache\\chapter_05_p205-262_线性系统的频域分析法__df0165aa\\images\\figure_216.jpg",
+      "index": 216
+    },
+    "a6600b5e210b4d99b2c6927f73e69ab1e23f8f02c143a8cac7b6a4842691932f.jpg": {
+      "original_name": "a6600b5e210b4d99b2c6927f73e69ab1e23f8f02c143a8cac7b6a4842691932f.jpg",
+      "original_rel_path": "a6600b5e210b4d99b2c6927f73e69ab1e23f8f02c143a8cac7b6a4842691932f.jpg",
+      "friendly_name": "figure_217.jpg",
+      "abs_path": "data/mineru_cache\\chapter_05_p205-262_线性系统的频域分析法__df0165aa\\images\\figure_217.jpg",
+      "index": 217
+    },
+    "a6ac2053ef55ba4d5916142da77af5d3015b3dbd9d4909a9e6af00bc78522211.jpg": {
+      "original_name": "a6ac2053ef55ba4d5916142da77af5d3015b3dbd9d4909a9e6af00bc78522211.jpg",
+      "original_rel_path": "a6ac2053ef55ba4d5916142da77af5d3015b3dbd9d4909a9e6af00bc78522211.jpg",
+      "friendly_name": "figure_218.jpg",
+      "abs_path": "data/mineru_cache\\chapter_05_p205-262_线性系统的频域分析法__df0165aa\\images\\figure_218.jpg",
+      "index": 218
+    },
+    "a6ee8a6755fe563341fac8b2443c15aa5a9e9958441bea730aeb28761a73ca65.jpg": {
+      "original_name": "a6ee8a6755fe563341fac8b2443c15aa5a9e9958441bea730aeb28761a73ca65.jpg",
+      "original_rel_path": "a6ee8a6755fe563341fac8b2443c15aa5a9e9958441bea730aeb28761a73ca65.jpg",
+      "friendly_name": "figure_219.jpg",
+      "abs_path": "data/mineru_cache\\chapter_05_p205-262_线性系统的频域分析法__df0165aa\\images\\figure_219.jpg",
+      "index": 219
+    },
+    "a865998962a77b6176e91eae7f37db34e2e9ea3900bd0effd4157d1b1972a56d.jpg": {
+      "original_name": "a865998962a77b6176e91eae7f37db34e2e9ea3900bd0effd4157d1b1972a56d.jpg",
+      "original_rel_path": "a865998962a77b6176e91eae7f37db34e2e9ea3900bd0effd4157d1b1972a56d.jpg",
+      "friendly_name": "figure_220.jpg",
+      "abs_path": "data/mineru_cache\\chapter_05_p205-262_线性系统的频域分析法__df0165aa\\images\\figure_220.jpg",
+      "index": 220
+    },
+    "a86e63292bfd2bdb1a23f8a5cdd6e448ff672870745d67d49536acb521aab81f.jpg": {
+      "original_name": "a86e63292bfd2bdb1a23f8a5cdd6e448ff672870745d67d49536acb521aab81f.jpg",
+      "original_rel_path": "a86e63292bfd2bdb1a23f8a5cdd6e448ff672870745d67d49536acb521aab81f.jpg",
+      "friendly_name": "figure_221.jpg",
+      "abs_path": "data/mineru_cache\\chapter_05_p205-262_线性系统的频域分析法__df0165aa\\images\\figure_221.jpg",
+      "index": 221
+    },
+    "a9121dc8165e2e37795115b9033852702f9ab254065f0d8808a848c76096de62.jpg": {
+      "original_name": "a9121dc8165e2e37795115b9033852702f9ab254065f0d8808a848c76096de62.jpg",
+      "original_rel_path": "a9121dc8165e2e37795115b9033852702f9ab254065f0d8808a848c76096de62.jpg",
+      "friendly_name": "figure_222.jpg",
+      "abs_path": "data/mineru_cache\\chapter_05_p205-262_线性系统的频域分析法__df0165aa\\images\\figure_222.jpg",
+      "index": 222
+    },
+    "a943bc6cb528f7ffab7eb53acdcaa08c5c962846cd02708f87b2ff1c8fdbcdf1.jpg": {
+      "original_name": "a943bc6cb528f7ffab7eb53acdcaa08c5c962846cd02708f87b2ff1c8fdbcdf1.jpg",
+      "original_rel_path": "a943bc6cb528f7ffab7eb53acdcaa08c5c962846cd02708f87b2ff1c8fdbcdf1.jpg",
+      "friendly_name": "figure_223.jpg",
+      "abs_path": "data/mineru_cache\\chapter_05_p205-262_线性系统的频域分析法__df0165aa\\images\\figure_223.jpg",
+      "index": 223
+    },
+    "ab824d87f4e99b21683e5002200fea1ae64f9dba4350e6c6144a935d6e793bdf.jpg": {
+      "original_name": "ab824d87f4e99b21683e5002200fea1ae64f9dba4350e6c6144a935d6e793bdf.jpg",
+      "original_rel_path": "ab824d87f4e99b21683e5002200fea1ae64f9dba4350e6c6144a935d6e793bdf.jpg",
+      "friendly_name": "figure_224.jpg",
+      "abs_path": "data/mineru_cache\\chapter_05_p205-262_线性系统的频域分析法__df0165aa\\images\\figure_224.jpg",
+      "index": 224
+    },
+    "acaf5852c7c0e2fc03986f1830b031ef55bd5b6b0b7b10d47027e568346135cb.jpg": {
+      "original_name": "acaf5852c7c0e2fc03986f1830b031ef55bd5b6b0b7b10d47027e568346135cb.jpg",
+      "original_rel_path": "acaf5852c7c0e2fc03986f1830b031ef55bd5b6b0b7b10d47027e568346135cb.jpg",
+      "friendly_name": "figure_225.jpg",
+      "abs_path": "data/mineru_cache\\chapter_05_p205-262_线性系统的频域分析法__df0165aa\\images\\figure_225.jpg",
+      "index": 225
+    },
+    "acc4e3ad345bfa8866589a2c68783ebd7424f5421feafbcad173cbc602f4d29b.jpg": {
+      "original_name": "acc4e3ad345bfa8866589a2c68783ebd7424f5421feafbcad173cbc602f4d29b.jpg",
+      "original_rel_path": "acc4e3ad345bfa8866589a2c68783ebd7424f5421feafbcad173cbc602f4d29b.jpg",
+      "friendly_name": "figure_226.jpg",
+      "abs_path": "data/mineru_cache\\chapter_05_p205-262_线性系统的频域分析法__df0165aa\\images\\figure_226.jpg",
+      "index": 226
+    },
+    "ad448ca86d11208437d4c6e5881449ba102b54219fcab16b34addc5c6459ac6e.jpg": {
+      "original_name": "ad448ca86d11208437d4c6e5881449ba102b54219fcab16b34addc5c6459ac6e.jpg",
+      "original_rel_path": "ad448ca86d11208437d4c6e5881449ba102b54219fcab16b34addc5c6459ac6e.jpg",
+      "friendly_name": "figure_227.jpg",
+      "abs_path": "data/mineru_cache\\chapter_05_p205-262_线性系统的频域分析法__df0165aa\\images\\figure_227.jpg",
+      "index": 227
+    },
+    "aeff58ef0897f1aab2209726a9094d19840da359248152ef2e7af981bc263aaf.jpg": {
+      "original_name": "aeff58ef0897f1aab2209726a9094d19840da359248152ef2e7af981bc263aaf.jpg",
+      "original_rel_path": "aeff58ef0897f1aab2209726a9094d19840da359248152ef2e7af981bc263aaf.jpg",
+      "friendly_name": "figure_228.jpg",
+      "abs_path": "data/mineru_cache\\chapter_05_p205-262_线性系统的频域分析法__df0165aa\\images\\figure_228.jpg",
+      "index": 228
+    },
+    "af039b3f609873e6256017eba0c3e08981c1f8f23d3fba5286fb4d39b7a89235.jpg": {
+      "original_name": "af039b3f609873e6256017eba0c3e08981c1f8f23d3fba5286fb4d39b7a89235.jpg",
+      "original_rel_path": "af039b3f609873e6256017eba0c3e08981c1f8f23d3fba5286fb4d39b7a89235.jpg",
+      "friendly_name": "figure_229.jpg",
+      "abs_path": "data/mineru_cache\\chapter_05_p205-262_线性系统的频域分析法__df0165aa\\images\\figure_229.jpg",
+      "index": 229
+    },
+    "b003827a0f56e3361cfdfdff5ecfac9ead15270bdd9b07803c83c806ef88e535.jpg": {
+      "original_name": "b003827a0f56e3361cfdfdff5ecfac9ead15270bdd9b07803c83c806ef88e535.jpg",
+      "original_rel_path": "b003827a0f56e3361cfdfdff5ecfac9ead15270bdd9b07803c83c806ef88e535.jpg",
+      "friendly_name": "figure_230.jpg",
+      "abs_path": "data/mineru_cache\\chapter_05_p205-262_线性系统的频域分析法__df0165aa\\images\\figure_230.jpg",
+      "index": 230
+    },
+    "b1212767ca1c750196de1339f4be21f778a5ef6d099df9637769cd0acab588b5.jpg": {
+      "original_name": "b1212767ca1c750196de1339f4be21f778a5ef6d099df9637769cd0acab588b5.jpg",
+      "original_rel_path": "b1212767ca1c750196de1339f4be21f778a5ef6d099df9637769cd0acab588b5.jpg",
+      "friendly_name": "figure_231.jpg",
+      "abs_path": "data/mineru_cache\\chapter_05_p205-262_线性系统的频域分析法__df0165aa\\images\\figure_231.jpg",
+      "index": 231
+    },
+    "b1305e757c92e9191a432ebe4f525c01826c523edff540933c43c8c0e76270e1.jpg": {
+      "original_name": "b1305e757c92e9191a432ebe4f525c01826c523edff540933c43c8c0e76270e1.jpg",
+      "original_rel_path": "b1305e757c92e9191a432ebe4f525c01826c523edff540933c43c8c0e76270e1.jpg",
+      "friendly_name": "figure_232.jpg",
+      "abs_path": "data/mineru_cache\\chapter_05_p205-262_线性系统的频域分析法__df0165aa\\images\\figure_232.jpg",
+      "index": 232
+    },
+    "b1b80bf24e252d5e385205b4e077e3adc341a9b7f08820de8b3f5338fbabb351.jpg": {
+      "original_name": "b1b80bf24e252d5e385205b4e077e3adc341a9b7f08820de8b3f5338fbabb351.jpg",
+      "original_rel_path": "b1b80bf24e252d5e385205b4e077e3adc341a9b7f08820de8b3f5338fbabb351.jpg",
+      "friendly_name": "figure_233.jpg",
+      "abs_path": "data/mineru_cache\\chapter_05_p205-262_线性系统的频域分析法__df0165aa\\images\\figure_233.jpg",
+      "index": 233
+    },
+    "b203bf431d073d49d3b9b1daa6ad54e8b287da79ef44dfff1d426fb27ac09965.jpg": {
+      "original_name": "b203bf431d073d49d3b9b1daa6ad54e8b287da79ef44dfff1d426fb27ac09965.jpg",
+      "original_rel_path": "b203bf431d073d49d3b9b1daa6ad54e8b287da79ef44dfff1d426fb27ac09965.jpg",
+      "friendly_name": "figure_234.jpg",
+      "abs_path": "data/mineru_cache\\chapter_05_p205-262_线性系统的频域分析法__df0165aa\\images\\figure_234.jpg",
+      "index": 234
+    },
+    "b214db2028da1004466fe90cf8313430c6b6eeb1d1b4ed9bbf22564d4a1d5207.jpg": {
+      "original_name": "b214db2028da1004466fe90cf8313430c6b6eeb1d1b4ed9bbf22564d4a1d5207.jpg",
+      "original_rel_path": "b214db2028da1004466fe90cf8313430c6b6eeb1d1b4ed9bbf22564d4a1d5207.jpg",
+      "friendly_name": "figure_235.jpg",
+      "abs_path": "data/mineru_cache\\chapter_05_p205-262_线性系统的频域分析法__df0165aa\\images\\figure_235.jpg",
+      "index": 235
+    },
+    "b24119ef0a6f07737545b17f1a345e5cc64e3669f08ce8cb8224d6d0afe7b4e2.jpg": {
+      "original_name": "b24119ef0a6f07737545b17f1a345e5cc64e3669f08ce8cb8224d6d0afe7b4e2.jpg",
+      "original_rel_path": "b24119ef0a6f07737545b17f1a345e5cc64e3669f08ce8cb8224d6d0afe7b4e2.jpg",
+      "friendly_name": "figure_236.jpg",
+      "abs_path": "data/mineru_cache\\chapter_05_p205-262_线性系统的频域分析法__df0165aa\\images\\figure_236.jpg",
+      "index": 236
+    },
+    "b2818a93008b019d7f785e029fa24808184754e2d767ce70ef37d0f8702a65ea.jpg": {
+      "original_name": "b2818a93008b019d7f785e029fa24808184754e2d767ce70ef37d0f8702a65ea.jpg",
+      "original_rel_path": "b2818a93008b019d7f785e029fa24808184754e2d767ce70ef37d0f8702a65ea.jpg",
+      "friendly_name": "figure_237.jpg",
+      "abs_path": "data/mineru_cache\\chapter_05_p205-262_线性系统的频域分析法__df0165aa\\images\\figure_237.jpg",
+      "index": 237
+    },
+    "b2f8c979c5b6571340824b85df1899aa6de9d04b1833d7a39dbdff0d53c2d107.jpg": {
+      "original_name": "b2f8c979c5b6571340824b85df1899aa6de9d04b1833d7a39dbdff0d53c2d107.jpg",
+      "original_rel_path": "b2f8c979c5b6571340824b85df1899aa6de9d04b1833d7a39dbdff0d53c2d107.jpg",
+      "friendly_name": "figure_238.jpg",
+      "abs_path": "data/mineru_cache\\chapter_05_p205-262_线性系统的频域分析法__df0165aa\\images\\figure_238.jpg",
+      "index": 238
+    },
+    "b51653fff86cbf2c5ab7173273dc8b62450e42f352ce05e951a66a46439e39cc.jpg": {
+      "original_name": "b51653fff86cbf2c5ab7173273dc8b62450e42f352ce05e951a66a46439e39cc.jpg",
+      "original_rel_path": "b51653fff86cbf2c5ab7173273dc8b62450e42f352ce05e951a66a46439e39cc.jpg",
+      "friendly_name": "figure_239.jpg",
+      "abs_path": "data/mineru_cache\\chapter_05_p205-262_线性系统的频域分析法__df0165aa\\images\\figure_239.jpg",
+      "index": 239
+    },
+    "b69f73e43ce2f941650e68747cbda0b88cca8cd3d5ab19b970ce1d1bdf48cd6a.jpg": {
+      "original_name": "b69f73e43ce2f941650e68747cbda0b88cca8cd3d5ab19b970ce1d1bdf48cd6a.jpg",
+      "original_rel_path": "b69f73e43ce2f941650e68747cbda0b88cca8cd3d5ab19b970ce1d1bdf48cd6a.jpg",
+      "friendly_name": "figure_240.jpg",
+      "abs_path": "data/mineru_cache\\chapter_05_p205-262_线性系统的频域分析法__df0165aa\\images\\figure_240.jpg",
+      "index": 240
+    },
+    "b6e3b57601584ad7f7da4153e4d53d0c931b154ef877a44e9461ad9ae25365dd.jpg": {
+      "original_name": "b6e3b57601584ad7f7da4153e4d53d0c931b154ef877a44e9461ad9ae25365dd.jpg",
+      "original_rel_path": "b6e3b57601584ad7f7da4153e4d53d0c931b154ef877a44e9461ad9ae25365dd.jpg",
+      "friendly_name": "figure_241.jpg",
+      "abs_path": "data/mineru_cache\\chapter_05_p205-262_线性系统的频域分析法__df0165aa\\images\\figure_241.jpg",
+      "index": 241
+    },
+    "b7575cbfdf841e14390deee1634ff2b6033b5f20c0e5c3ddb82c19026ba97f46.jpg": {
+      "original_name": "b7575cbfdf841e14390deee1634ff2b6033b5f20c0e5c3ddb82c19026ba97f46.jpg",
+      "original_rel_path": "b7575cbfdf841e14390deee1634ff2b6033b5f20c0e5c3ddb82c19026ba97f46.jpg",
+      "friendly_name": "figure_242.jpg",
+      "abs_path": "data/mineru_cache\\chapter_05_p205-262_线性系统的频域分析法__df0165aa\\images\\figure_242.jpg",
+      "index": 242
+    },
+    "b8d9a5f8b0f02395319b40927a80ec02ea402efd6faa80f69eac28a06af7fd2d.jpg": {
+      "original_name": "b8d9a5f8b0f02395319b40927a80ec02ea402efd6faa80f69eac28a06af7fd2d.jpg",
+      "original_rel_path": "b8d9a5f8b0f02395319b40927a80ec02ea402efd6faa80f69eac28a06af7fd2d.jpg",
+      "friendly_name": "figure_243.jpg",
+      "abs_path": "data/mineru_cache\\chapter_05_p205-262_线性系统的频域分析法__df0165aa\\images\\figure_243.jpg",
+      "index": 243
+    },
+    "ba4b06833abc9937280b14d2150516ba54f6d76d18ce2b1272174e10615e581a.jpg": {
+      "original_name": "ba4b06833abc9937280b14d2150516ba54f6d76d18ce2b1272174e10615e581a.jpg",
+      "original_rel_path": "ba4b06833abc9937280b14d2150516ba54f6d76d18ce2b1272174e10615e581a.jpg",
+      "friendly_name": "figure_244.jpg",
+      "abs_path": "data/mineru_cache\\chapter_05_p205-262_线性系统的频域分析法__df0165aa\\images\\figure_244.jpg",
+      "index": 244
+    },
+    "ba61efa659d4e6f9a05be7e93161a58ba6517f179a2e986f00d0a7006039790b.jpg": {
+      "original_name": "ba61efa659d4e6f9a05be7e93161a58ba6517f179a2e986f00d0a7006039790b.jpg",
+      "original_rel_path": "ba61efa659d4e6f9a05be7e93161a58ba6517f179a2e986f00d0a7006039790b.jpg",
+      "friendly_name": "figure_245.jpg",
+      "abs_path": "data/mineru_cache\\chapter_05_p205-262_线性系统的频域分析法__df0165aa\\images\\figure_245.jpg",
+      "index": 245
+    },
+    "baf39f84acdedc0cec1a7fe0067ff77d72867af1eded039e014a43db01efe466.jpg": {
+      "original_name": "baf39f84acdedc0cec1a7fe0067ff77d72867af1eded039e014a43db01efe466.jpg",
+      "original_rel_path": "baf39f84acdedc0cec1a7fe0067ff77d72867af1eded039e014a43db01efe466.jpg",
+      "friendly_name": "figure_246.jpg",
+      "abs_path": "data/mineru_cache\\chapter_05_p205-262_线性系统的频域分析法__df0165aa\\images\\figure_246.jpg",
+      "index": 246
+    },
+    "bb04ab6816c83e3c129d2604b62d768cf9d655de491641fbf65253e755691219.jpg": {
+      "original_name": "bb04ab6816c83e3c129d2604b62d768cf9d655de491641fbf65253e755691219.jpg",
+      "original_rel_path": "bb04ab6816c83e3c129d2604b62d768cf9d655de491641fbf65253e755691219.jpg",
+      "friendly_name": "figure_247.jpg",
+      "abs_path": "data/mineru_cache\\chapter_05_p205-262_线性系统的频域分析法__df0165aa\\images\\figure_247.jpg",
+      "index": 247
+    },
+    "bb98901a1c0b041dba8f053af0b895ddedb969c3700f9e9abf2dc36cb8ae661f.jpg": {
+      "original_name": "bb98901a1c0b041dba8f053af0b895ddedb969c3700f9e9abf2dc36cb8ae661f.jpg",
+      "original_rel_path": "bb98901a1c0b041dba8f053af0b895ddedb969c3700f9e9abf2dc36cb8ae661f.jpg",
+      "friendly_name": "figure_248.jpg",
+      "abs_path": "data/mineru_cache\\chapter_05_p205-262_线性系统的频域分析法__df0165aa\\images\\figure_248.jpg",
+      "index": 248
+    },
+    "bbd726a6964ad2da58ddd9817e1200520003ebc030dc351082262e6f013199b7.jpg": {
+      "original_name": "bbd726a6964ad2da58ddd9817e1200520003ebc030dc351082262e6f013199b7.jpg",
+      "original_rel_path": "bbd726a6964ad2da58ddd9817e1200520003ebc030dc351082262e6f013199b7.jpg",
+      "friendly_name": "figure_249.jpg",
+      "abs_path": "data/mineru_cache\\chapter_05_p205-262_线性系统的频域分析法__df0165aa\\images\\figure_249.jpg",
+      "index": 249
+    },
+    "bbf3a3bc00cd645ffe8d975b010a521fdc0639ae88300a8be6530d8df4a8e476.jpg": {
+      "original_name": "bbf3a3bc00cd645ffe8d975b010a521fdc0639ae88300a8be6530d8df4a8e476.jpg",
+      "original_rel_path": "bbf3a3bc00cd645ffe8d975b010a521fdc0639ae88300a8be6530d8df4a8e476.jpg",
+      "friendly_name": "figure_250.jpg",
+      "abs_path": "data/mineru_cache\\chapter_05_p205-262_线性系统的频域分析法__df0165aa\\images\\figure_250.jpg",
+      "index": 250
+    },
+    "bc20004e6956b3c9747d91a218b7aeca76b43cd903cc6feec1528ba2847bac9c.jpg": {
+      "original_name": "bc20004e6956b3c9747d91a218b7aeca76b43cd903cc6feec1528ba2847bac9c.jpg",
+      "original_rel_path": "bc20004e6956b3c9747d91a218b7aeca76b43cd903cc6feec1528ba2847bac9c.jpg",
+      "friendly_name": "figure_251.jpg",
+      "abs_path": "data/mineru_cache\\chapter_05_p205-262_线性系统的频域分析法__df0165aa\\images\\figure_251.jpg",
+      "index": 251
+    },
+    "bc5a9db6404c3ef6692302ed8492fb5b4a4d5cef5396689d1c1123ce99069b67.jpg": {
+      "original_name": "bc5a9db6404c3ef6692302ed8492fb5b4a4d5cef5396689d1c1123ce99069b67.jpg",
+      "original_rel_path": "bc5a9db6404c3ef6692302ed8492fb5b4a4d5cef5396689d1c1123ce99069b67.jpg",
+      "friendly_name": "figure_252.jpg",
+      "abs_path": "data/mineru_cache\\chapter_05_p205-262_线性系统的频域分析法__df0165aa\\images\\figure_252.jpg",
+      "index": 252
+    },
+    "bc7947eb779c138c5755ccec361445d0dcb8ee3d319b8db880dbf9d2378bae42.jpg": {
+      "original_name": "bc7947eb779c138c5755ccec361445d0dcb8ee3d319b8db880dbf9d2378bae42.jpg",
+      "original_rel_path": "bc7947eb779c138c5755ccec361445d0dcb8ee3d319b8db880dbf9d2378bae42.jpg",
+      "friendly_name": "figure_253.jpg",
+      "abs_path": "data/mineru_cache\\chapter_05_p205-262_线性系统的频域分析法__df0165aa\\images\\figure_253.jpg",
+      "index": 253
+    },
+    "bc9e31611011a5c0224934e543edfb061d1d83809fb2d045a2e984d5ea38f007.jpg": {
+      "original_name": "bc9e31611011a5c0224934e543edfb061d1d83809fb2d045a2e984d5ea38f007.jpg",
+      "original_rel_path": "bc9e31611011a5c0224934e543edfb061d1d83809fb2d045a2e984d5ea38f007.jpg",
+      "friendly_name": "figure_254.jpg",
+      "abs_path": "data/mineru_cache\\chapter_05_p205-262_线性系统的频域分析法__df0165aa\\images\\figure_254.jpg",
+      "index": 254
+    },
+    "bcbb5bb0a17fdbf2f1605f612ebe370ecc5c03355d7adaf7e0fbdff196c52390.jpg": {
+      "original_name": "bcbb5bb0a17fdbf2f1605f612ebe370ecc5c03355d7adaf7e0fbdff196c52390.jpg",
+      "original_rel_path": "bcbb5bb0a17fdbf2f1605f612ebe370ecc5c03355d7adaf7e0fbdff196c52390.jpg",
+      "friendly_name": "figure_255.jpg",
+      "abs_path": "data/mineru_cache\\chapter_05_p205-262_线性系统的频域分析法__df0165aa\\images\\figure_255.jpg",
+      "index": 255
+    },
+    "bf775dbc9228ba90c5b2321bdb305d637b3f43e9c507bf1ea5ec64c5d08d4df3.jpg": {
+      "original_name": "bf775dbc9228ba90c5b2321bdb305d637b3f43e9c507bf1ea5ec64c5d08d4df3.jpg",
+      "original_rel_path": "bf775dbc9228ba90c5b2321bdb305d637b3f43e9c507bf1ea5ec64c5d08d4df3.jpg",
+      "friendly_name": "figure_256.jpg",
+      "abs_path": "data/mineru_cache\\chapter_05_p205-262_线性系统的频域分析法__df0165aa\\images\\figure_256.jpg",
+      "index": 256
+    },
+    "bf8512fdd6c87792895532f5cb4b993f6ac5aa9af730ae821fd7c29ab9916330.jpg": {
+      "original_name": "bf8512fdd6c87792895532f5cb4b993f6ac5aa9af730ae821fd7c29ab9916330.jpg",
+      "original_rel_path": "bf8512fdd6c87792895532f5cb4b993f6ac5aa9af730ae821fd7c29ab9916330.jpg",
+      "friendly_name": "figure_257.jpg",
+      "abs_path": "data/mineru_cache\\chapter_05_p205-262_线性系统的频域分析法__df0165aa\\images\\figure_257.jpg",
+      "index": 257
+    },
+    "c0a7f7655550744883cd68bec90044a7cb4b5bc73380c092d3b519d22fb3f58a.jpg": {
+      "original_name": "c0a7f7655550744883cd68bec90044a7cb4b5bc73380c092d3b519d22fb3f58a.jpg",
+      "original_rel_path": "c0a7f7655550744883cd68bec90044a7cb4b5bc73380c092d3b519d22fb3f58a.jpg",
+      "friendly_name": "figure_258.jpg",
+      "abs_path": "data/mineru_cache\\chapter_05_p205-262_线性系统的频域分析法__df0165aa\\images\\figure_258.jpg",
+      "index": 258
+    },
+    "c0b0a9fdbec45e1018b3450faf6eb2444742014bca1dfcb83e02443018a3bc1e.jpg": {
+      "original_name": "c0b0a9fdbec45e1018b3450faf6eb2444742014bca1dfcb83e02443018a3bc1e.jpg",
+      "original_rel_path": "c0b0a9fdbec45e1018b3450faf6eb2444742014bca1dfcb83e02443018a3bc1e.jpg",
+      "friendly_name": "figure_259.jpg",
+      "abs_path": "data/mineru_cache\\chapter_05_p205-262_线性系统的频域分析法__df0165aa\\images\\figure_259.jpg",
+      "index": 259
+    },
+    "c1218d3b6a600729a55ccdfe6562f5f99bf8f56f1a22ede4cdda58e8219bc520.jpg": {
+      "original_name": "c1218d3b6a600729a55ccdfe6562f5f99bf8f56f1a22ede4cdda58e8219bc520.jpg",
+      "original_rel_path": "c1218d3b6a600729a55ccdfe6562f5f99bf8f56f1a22ede4cdda58e8219bc520.jpg",
+      "friendly_name": "figure_260.jpg",
+      "abs_path": "data/mineru_cache\\chapter_05_p205-262_线性系统的频域分析法__df0165aa\\images\\figure_260.jpg",
+      "index": 260
+    },
+    "c299b40ec46c4f162a286524491b556059fd9379f4579339dee442bc865f7e25.jpg": {
+      "original_name": "c299b40ec46c4f162a286524491b556059fd9379f4579339dee442bc865f7e25.jpg",
+      "original_rel_path": "c299b40ec46c4f162a286524491b556059fd9379f4579339dee442bc865f7e25.jpg",
+      "friendly_name": "figure_261.jpg",
+      "abs_path": "data/mineru_cache\\chapter_05_p205-262_线性系统的频域分析法__df0165aa\\images\\figure_261.jpg",
+      "index": 261
+    },
+    "c2f0cdfef4ca069a3d026aa5b0ece9392868b28d1fc19ef906f441572019aa40.jpg": {
+      "original_name": "c2f0cdfef4ca069a3d026aa5b0ece9392868b28d1fc19ef906f441572019aa40.jpg",
+      "original_rel_path": "c2f0cdfef4ca069a3d026aa5b0ece9392868b28d1fc19ef906f441572019aa40.jpg",
+      "friendly_name": "figure_262.jpg",
+      "abs_path": "data/mineru_cache\\chapter_05_p205-262_线性系统的频域分析法__df0165aa\\images\\figure_262.jpg",
+      "index": 262
+    },
+    "c3b32627ea34800f24cb2c5f1cdfb1b8da7594dcbbbf64f9f1875a786a1233ba.jpg": {
+      "original_name": "c3b32627ea34800f24cb2c5f1cdfb1b8da7594dcbbbf64f9f1875a786a1233ba.jpg",
+      "original_rel_path": "c3b32627ea34800f24cb2c5f1cdfb1b8da7594dcbbbf64f9f1875a786a1233ba.jpg",
+      "friendly_name": "figure_263.jpg",
+      "abs_path": "data/mineru_cache\\chapter_05_p205-262_线性系统的频域分析法__df0165aa\\images\\figure_263.jpg",
+      "index": 263
+    },
+    "c4a1ac4c03c68f25ebe5fd5e988b89dd1dfd0fca3aa59e6598d04ce87cf18011.jpg": {
+      "original_name": "c4a1ac4c03c68f25ebe5fd5e988b89dd1dfd0fca3aa59e6598d04ce87cf18011.jpg",
+      "original_rel_path": "c4a1ac4c03c68f25ebe5fd5e988b89dd1dfd0fca3aa59e6598d04ce87cf18011.jpg",
+      "friendly_name": "figure_264.jpg",
+      "abs_path": "data/mineru_cache\\chapter_05_p205-262_线性系统的频域分析法__df0165aa\\images\\figure_264.jpg",
+      "index": 264
+    },
+    "c5025f73dbd1299984e523a49ace4cf5a317be3ed75372874de10cf10a24ba3b.jpg": {
+      "original_name": "c5025f73dbd1299984e523a49ace4cf5a317be3ed75372874de10cf10a24ba3b.jpg",
+      "original_rel_path": "c5025f73dbd1299984e523a49ace4cf5a317be3ed75372874de10cf10a24ba3b.jpg",
+      "friendly_name": "figure_265.jpg",
+      "abs_path": "data/mineru_cache\\chapter_05_p205-262_线性系统的频域分析法__df0165aa\\images\\figure_265.jpg",
+      "index": 265
+    },
+    "c59c7f167dba9d93a914945b240ed37a3e0718316bb219e576b32d46611bd855.jpg": {
+      "original_name": "c59c7f167dba9d93a914945b240ed37a3e0718316bb219e576b32d46611bd855.jpg",
+      "original_rel_path": "c59c7f167dba9d93a914945b240ed37a3e0718316bb219e576b32d46611bd855.jpg",
+      "friendly_name": "figure_266.jpg",
+      "abs_path": "data/mineru_cache\\chapter_05_p205-262_线性系统的频域分析法__df0165aa\\images\\figure_266.jpg",
+      "index": 266
+    },
+    "c5eb606d4b90eb857e0d6076748cfa9a48d708589d29971d93c017db0816c4a7.jpg": {
+      "original_name": "c5eb606d4b90eb857e0d6076748cfa9a48d708589d29971d93c017db0816c4a7.jpg",
+      "original_rel_path": "c5eb606d4b90eb857e0d6076748cfa9a48d708589d29971d93c017db0816c4a7.jpg",
+      "friendly_name": "figure_267.jpg",
+      "abs_path": "data/mineru_cache\\chapter_05_p205-262_线性系统的频域分析法__df0165aa\\images\\figure_267.jpg",
+      "index": 267
+    },
+    "c8da3359d74dcf16f1c38aa64fc1abb8b25555280285b21ab09d7a418c2b2e4b.jpg": {
+      "original_name": "c8da3359d74dcf16f1c38aa64fc1abb8b25555280285b21ab09d7a418c2b2e4b.jpg",
+      "original_rel_path": "c8da3359d74dcf16f1c38aa64fc1abb8b25555280285b21ab09d7a418c2b2e4b.jpg",
+      "friendly_name": "figure_268.jpg",
+      "abs_path": "data/mineru_cache\\chapter_05_p205-262_线性系统的频域分析法__df0165aa\\images\\figure_268.jpg",
+      "index": 268
+    },
+    "ca125bc0e66d856906e05026ef4aca33158f2b2f5abd71a051182b5bcaf3edd6.jpg": {
+      "original_name": "ca125bc0e66d856906e05026ef4aca33158f2b2f5abd71a051182b5bcaf3edd6.jpg",
+      "original_rel_path": "ca125bc0e66d856906e05026ef4aca33158f2b2f5abd71a051182b5bcaf3edd6.jpg",
+      "friendly_name": "figure_269.jpg",
+      "abs_path": "data/mineru_cache\\chapter_05_p205-262_线性系统的频域分析法__df0165aa\\images\\figure_269.jpg",
+      "index": 269
+    },
+    "cabd13e3553283c1c64de8c9a40c99c24dff024b614168683968fd18b0475d8f.jpg": {
+      "original_name": "cabd13e3553283c1c64de8c9a40c99c24dff024b614168683968fd18b0475d8f.jpg",
+      "original_rel_path": "cabd13e3553283c1c64de8c9a40c99c24dff024b614168683968fd18b0475d8f.jpg",
+      "friendly_name": "figure_270.jpg",
+      "abs_path": "data/mineru_cache\\chapter_05_p205-262_线性系统的频域分析法__df0165aa\\images\\figure_270.jpg",
+      "index": 270
+    },
+    "cb02035c31facf22d661da8435ac84eb398487cc919a6ced3534a51058498399.jpg": {
+      "original_name": "cb02035c31facf22d661da8435ac84eb398487cc919a6ced3534a51058498399.jpg",
+      "original_rel_path": "cb02035c31facf22d661da8435ac84eb398487cc919a6ced3534a51058498399.jpg",
+      "friendly_name": "figure_271.jpg",
+      "abs_path": "data/mineru_cache\\chapter_05_p205-262_线性系统的频域分析法__df0165aa\\images\\figure_271.jpg",
+      "index": 271
+    },
+    "cd230a2a010d6436a4f5cbec3adf0e53082b446623db74806527a55a867cb461.jpg": {
+      "original_name": "cd230a2a010d6436a4f5cbec3adf0e53082b446623db74806527a55a867cb461.jpg",
+      "original_rel_path": "cd230a2a010d6436a4f5cbec3adf0e53082b446623db74806527a55a867cb461.jpg",
+      "friendly_name": "figure_272.jpg",
+      "abs_path": "data/mineru_cache\\chapter_05_p205-262_线性系统的频域分析法__df0165aa\\images\\figure_272.jpg",
+      "index": 272
+    },
+    "cd7b7f8cf88880980f6618d55c8820d701ac2758052f55c53c4bd7e8f05a0d20.jpg": {
+      "original_name": "cd7b7f8cf88880980f6618d55c8820d701ac2758052f55c53c4bd7e8f05a0d20.jpg",
+      "original_rel_path": "cd7b7f8cf88880980f6618d55c8820d701ac2758052f55c53c4bd7e8f05a0d20.jpg",
+      "friendly_name": "figure_273.jpg",
+      "abs_path": "data/mineru_cache\\chapter_05_p205-262_线性系统的频域分析法__df0165aa\\images\\figure_273.jpg",
+      "index": 273
+    },
+    "cde340b2e14318908df683d3e80aaaeb276ee7f608bb314e957731e72b84584f.jpg": {
+      "original_name": "cde340b2e14318908df683d3e80aaaeb276ee7f608bb314e957731e72b84584f.jpg",
+      "original_rel_path": "cde340b2e14318908df683d3e80aaaeb276ee7f608bb314e957731e72b84584f.jpg",
+      "friendly_name": "figure_274.jpg",
+      "abs_path": "data/mineru_cache\\chapter_05_p205-262_线性系统的频域分析法__df0165aa\\images\\figure_274.jpg",
+      "index": 274
+    },
+    "ce918db9550df8268fae3a8416a68dcb4d171810800d874fe9ea3c207f6561bd.jpg": {
+      "original_name": "ce918db9550df8268fae3a8416a68dcb4d171810800d874fe9ea3c207f6561bd.jpg",
+      "original_rel_path": "ce918db9550df8268fae3a8416a68dcb4d171810800d874fe9ea3c207f6561bd.jpg",
+      "friendly_name": "figure_275.jpg",
+      "abs_path": "data/mineru_cache\\chapter_05_p205-262_线性系统的频域分析法__df0165aa\\images\\figure_275.jpg",
+      "index": 275
+    },
+    "d00e79ef62dcbf86b6abec58b2d0a0ad514100124e3b479b1153216c8844e4f3.jpg": {
+      "original_name": "d00e79ef62dcbf86b6abec58b2d0a0ad514100124e3b479b1153216c8844e4f3.jpg",
+      "original_rel_path": "d00e79ef62dcbf86b6abec58b2d0a0ad514100124e3b479b1153216c8844e4f3.jpg",
+      "friendly_name": "figure_276.jpg",
+      "abs_path": "data/mineru_cache\\chapter_05_p205-262_线性系统的频域分析法__df0165aa\\images\\figure_276.jpg",
+      "index": 276
+    },
+    "d050c11a045fac6113bb4747b9955998242bd05fc68a283ec6a2f9f072d3fa79.jpg": {
+      "original_name": "d050c11a045fac6113bb4747b9955998242bd05fc68a283ec6a2f9f072d3fa79.jpg",
+      "original_rel_path": "d050c11a045fac6113bb4747b9955998242bd05fc68a283ec6a2f9f072d3fa79.jpg",
+      "friendly_name": "figure_277.jpg",
+      "abs_path": "data/mineru_cache\\chapter_05_p205-262_线性系统的频域分析法__df0165aa\\images\\figure_277.jpg",
+      "index": 277
+    },
+    "d1984db89ae82973ec4e8c0fc3aeabc2d7da8e8aa430161f21f23729bc28c5dc.jpg": {
+      "original_name": "d1984db89ae82973ec4e8c0fc3aeabc2d7da8e8aa430161f21f23729bc28c5dc.jpg",
+      "original_rel_path": "d1984db89ae82973ec4e8c0fc3aeabc2d7da8e8aa430161f21f23729bc28c5dc.jpg",
+      "friendly_name": "figure_278.jpg",
+      "abs_path": "data/mineru_cache\\chapter_05_p205-262_线性系统的频域分析法__df0165aa\\images\\figure_278.jpg",
+      "index": 278
+    },
+    "d3382e92d40ac3fa75e9824220764316ca9a91881b0500e017c5efcfdb638bef.jpg": {
+      "original_name": "d3382e92d40ac3fa75e9824220764316ca9a91881b0500e017c5efcfdb638bef.jpg",
+      "original_rel_path": "d3382e92d40ac3fa75e9824220764316ca9a91881b0500e017c5efcfdb638bef.jpg",
+      "friendly_name": "figure_279.jpg",
+      "abs_path": "data/mineru_cache\\chapter_05_p205-262_线性系统的频域分析法__df0165aa\\images\\figure_279.jpg",
+      "index": 279
+    },
+    "d39b2678a1a085bd6f09febd8d35038460c8a1e8ca505263ede3151118c9a20b.jpg": {
+      "original_name": "d39b2678a1a085bd6f09febd8d35038460c8a1e8ca505263ede3151118c9a20b.jpg",
+      "original_rel_path": "d39b2678a1a085bd6f09febd8d35038460c8a1e8ca505263ede3151118c9a20b.jpg",
+      "friendly_name": "figure_280.jpg",
+      "abs_path": "data/mineru_cache\\chapter_05_p205-262_线性系统的频域分析法__df0165aa\\images\\figure_280.jpg",
+      "index": 280
+    },
+    "d4538e2521caa44eb3d21f227e3ec39af74a7a8cf045afa7f4387d22b368b485.jpg": {
+      "original_name": "d4538e2521caa44eb3d21f227e3ec39af74a7a8cf045afa7f4387d22b368b485.jpg",
+      "original_rel_path": "d4538e2521caa44eb3d21f227e3ec39af74a7a8cf045afa7f4387d22b368b485.jpg",
+      "friendly_name": "figure_281.jpg",
+      "abs_path": "data/mineru_cache\\chapter_05_p205-262_线性系统的频域分析法__df0165aa\\images\\figure_281.jpg",
+      "index": 281
+    },
+    "d5733a701c3008f1723bb69992448c8f4171112486498100f54993add12e713c.jpg": {
+      "original_name": "d5733a701c3008f1723bb69992448c8f4171112486498100f54993add12e713c.jpg",
+      "original_rel_path": "d5733a701c3008f1723bb69992448c8f4171112486498100f54993add12e713c.jpg",
+      "friendly_name": "figure_282.jpg",
+      "abs_path": "data/mineru_cache\\chapter_05_p205-262_线性系统的频域分析法__df0165aa\\images\\figure_282.jpg",
+      "index": 282
+    },
+    "d7f5401251cb239524ced012972d95aa5c935e8be43e40433d1a8d87b7561ae7.jpg": {
+      "original_name": "d7f5401251cb239524ced012972d95aa5c935e8be43e40433d1a8d87b7561ae7.jpg",
+      "original_rel_path": "d7f5401251cb239524ced012972d95aa5c935e8be43e40433d1a8d87b7561ae7.jpg",
+      "friendly_name": "figure_283.jpg",
+      "abs_path": "data/mineru_cache\\chapter_05_p205-262_线性系统的频域分析法__df0165aa\\images\\figure_283.jpg",
+      "index": 283
+    },
+    "d8f342e8e470ff75d40f10356181f4bf9a9a69b9bd1bc52dc009d73a21a49482.jpg": {
+      "original_name": "d8f342e8e470ff75d40f10356181f4bf9a9a69b9bd1bc52dc009d73a21a49482.jpg",
+      "original_rel_path": "d8f342e8e470ff75d40f10356181f4bf9a9a69b9bd1bc52dc009d73a21a49482.jpg",
+      "friendly_name": "figure_284.jpg",
+      "abs_path": "data/mineru_cache\\chapter_05_p205-262_线性系统的频域分析法__df0165aa\\images\\figure_284.jpg",
+      "index": 284
+    },
+    "d90b988f2db6de097c85d715cc7e9711867caaeae44edc8f3796d979485d9235.jpg": {
+      "original_name": "d90b988f2db6de097c85d715cc7e9711867caaeae44edc8f3796d979485d9235.jpg",
+      "original_rel_path": "d90b988f2db6de097c85d715cc7e9711867caaeae44edc8f3796d979485d9235.jpg",
+      "friendly_name": "figure_285.jpg",
+      "abs_path": "data/mineru_cache\\chapter_05_p205-262_线性系统的频域分析法__df0165aa\\images\\figure_285.jpg",
+      "index": 285
+    },
+    "d929961f7638f4dc20c2cd7062aa3f76887b442a3aacb8bb4eb84133b652908a.jpg": {
+      "original_name": "d929961f7638f4dc20c2cd7062aa3f76887b442a3aacb8bb4eb84133b652908a.jpg",
+      "original_rel_path": "d929961f7638f4dc20c2cd7062aa3f76887b442a3aacb8bb4eb84133b652908a.jpg",
+      "friendly_name": "figure_286.jpg",
+      "abs_path": "data/mineru_cache\\chapter_05_p205-262_线性系统的频域分析法__df0165aa\\images\\figure_286.jpg",
+      "index": 286
+    },
+    "d957a932c6965d1f3ca82267058ecd5e8d1649f5ed8a9a0370ffc3ab5bd01eae.jpg": {
+      "original_name": "d957a932c6965d1f3ca82267058ecd5e8d1649f5ed8a9a0370ffc3ab5bd01eae.jpg",
+      "original_rel_path": "d957a932c6965d1f3ca82267058ecd5e8d1649f5ed8a9a0370ffc3ab5bd01eae.jpg",
+      "friendly_name": "figure_287.jpg",
+      "abs_path": "data/mineru_cache\\chapter_05_p205-262_线性系统的频域分析法__df0165aa\\images\\figure_287.jpg",
+      "index": 287
+    },
+    "d9788ebdcc2ee14129eef3a6d2aa997c0a8accc3a381d3d781613829ddb3e3b6.jpg": {
+      "original_name": "d9788ebdcc2ee14129eef3a6d2aa997c0a8accc3a381d3d781613829ddb3e3b6.jpg",
+      "original_rel_path": "d9788ebdcc2ee14129eef3a6d2aa997c0a8accc3a381d3d781613829ddb3e3b6.jpg",
+      "friendly_name": "figure_288.jpg",
+      "abs_path": "data/mineru_cache\\chapter_05_p205-262_线性系统的频域分析法__df0165aa\\images\\figure_288.jpg",
+      "index": 288
+    },
+    "da5aca32575874ea8f13e87c092945def940063f984e33d5d40f1ddfe26422d8.jpg": {
+      "original_name": "da5aca32575874ea8f13e87c092945def940063f984e33d5d40f1ddfe26422d8.jpg",
+      "original_rel_path": "da5aca32575874ea8f13e87c092945def940063f984e33d5d40f1ddfe26422d8.jpg",
+      "friendly_name": "figure_289.jpg",
+      "abs_path": "data/mineru_cache\\chapter_05_p205-262_线性系统的频域分析法__df0165aa\\images\\figure_289.jpg",
+      "index": 289
+    },
+    "dc93022a8e4ec5f62c8f1466526baafcab699f8e3a31e6ab3a05b0eb10c871dc.jpg": {
+      "original_name": "dc93022a8e4ec5f62c8f1466526baafcab699f8e3a31e6ab3a05b0eb10c871dc.jpg",
+      "original_rel_path": "dc93022a8e4ec5f62c8f1466526baafcab699f8e3a31e6ab3a05b0eb10c871dc.jpg",
+      "friendly_name": "figure_290.jpg",
+      "abs_path": "data/mineru_cache\\chapter_05_p205-262_线性系统的频域分析法__df0165aa\\images\\figure_290.jpg",
+      "index": 290
+    },
+    "dcd7b5224fdb563916b4fefab2f0bb2ee2c31198837a5212eed9b06556ef183e.jpg": {
+      "original_name": "dcd7b5224fdb563916b4fefab2f0bb2ee2c31198837a5212eed9b06556ef183e.jpg",
+      "original_rel_path": "dcd7b5224fdb563916b4fefab2f0bb2ee2c31198837a5212eed9b06556ef183e.jpg",
+      "friendly_name": "figure_291.jpg",
+      "abs_path": "data/mineru_cache\\chapter_05_p205-262_线性系统的频域分析法__df0165aa\\images\\figure_291.jpg",
+      "index": 291
+    },
+    "dd88db3e0ac6ad53bf6edc57d21b39c596258b923873372f009abc28a2db7ba3.jpg": {
+      "original_name": "dd88db3e0ac6ad53bf6edc57d21b39c596258b923873372f009abc28a2db7ba3.jpg",
+      "original_rel_path": "dd88db3e0ac6ad53bf6edc57d21b39c596258b923873372f009abc28a2db7ba3.jpg",
+      "friendly_name": "figure_292.jpg",
+      "abs_path": "data/mineru_cache\\chapter_05_p205-262_线性系统的频域分析法__df0165aa\\images\\figure_292.jpg",
+      "index": 292
+    },
+    "ddeff987dc9a8355293508b66f441be6f0667670d23fb983e43233ae3e8b80b5.jpg": {
+      "original_name": "ddeff987dc9a8355293508b66f441be6f0667670d23fb983e43233ae3e8b80b5.jpg",
+      "original_rel_path": "ddeff987dc9a8355293508b66f441be6f0667670d23fb983e43233ae3e8b80b5.jpg",
+      "friendly_name": "figure_293.jpg",
+      "abs_path": "data/mineru_cache\\chapter_05_p205-262_线性系统的频域分析法__df0165aa\\images\\figure_293.jpg",
+      "index": 293
+    },
+    "dfd543c1991806653abfe78b2cc28add9a5f099ce6d9961454ff0c814940c90e.jpg": {
+      "original_name": "dfd543c1991806653abfe78b2cc28add9a5f099ce6d9961454ff0c814940c90e.jpg",
+      "original_rel_path": "dfd543c1991806653abfe78b2cc28add9a5f099ce6d9961454ff0c814940c90e.jpg",
+      "friendly_name": "figure_294.jpg",
+      "abs_path": "data/mineru_cache\\chapter_05_p205-262_线性系统的频域分析法__df0165aa\\images\\figure_294.jpg",
+      "index": 294
+    },
+    "e065d123574517f5ebda78d9729f67a8896dadc6ef284b420960bcfc3aa48034.jpg": {
+      "original_name": "e065d123574517f5ebda78d9729f67a8896dadc6ef284b420960bcfc3aa48034.jpg",
+      "original_rel_path": "e065d123574517f5ebda78d9729f67a8896dadc6ef284b420960bcfc3aa48034.jpg",
+      "friendly_name": "figure_295.jpg",
+      "abs_path": "data/mineru_cache\\chapter_05_p205-262_线性系统的频域分析法__df0165aa\\images\\figure_295.jpg",
+      "index": 295
+    },
+    "e1ba74acf0d04cb5e7d18a196c035a3a461e49b0868dd60039fc054f5b53af9f.jpg": {
+      "original_name": "e1ba74acf0d04cb5e7d18a196c035a3a461e49b0868dd60039fc054f5b53af9f.jpg",
+      "original_rel_path": "e1ba74acf0d04cb5e7d18a196c035a3a461e49b0868dd60039fc054f5b53af9f.jpg",
+      "friendly_name": "figure_296.jpg",
+      "abs_path": "data/mineru_cache\\chapter_05_p205-262_线性系统的频域分析法__df0165aa\\images\\figure_296.jpg",
+      "index": 296
+    },
+    "e2042deb3131e4e9b823a71064821edfc741f39797c1cfc92f90b9e4a00e93a5.jpg": {
+      "original_name": "e2042deb3131e4e9b823a71064821edfc741f39797c1cfc92f90b9e4a00e93a5.jpg",
+      "original_rel_path": "e2042deb3131e4e9b823a71064821edfc741f39797c1cfc92f90b9e4a00e93a5.jpg",
+      "friendly_name": "figure_297.jpg",
+      "abs_path": "data/mineru_cache\\chapter_05_p205-262_线性系统的频域分析法__df0165aa\\images\\figure_297.jpg",
+      "index": 297
+    },
+    "e2c3d86eb795569ad900322e5287c9bd20cbdc0820761cd8f28a26da649a8c07.jpg": {
+      "original_name": "e2c3d86eb795569ad900322e5287c9bd20cbdc0820761cd8f28a26da649a8c07.jpg",
+      "original_rel_path": "e2c3d86eb795569ad900322e5287c9bd20cbdc0820761cd8f28a26da649a8c07.jpg",
+      "friendly_name": "figure_298.jpg",
+      "abs_path": "data/mineru_cache\\chapter_05_p205-262_线性系统的频域分析法__df0165aa\\images\\figure_298.jpg",
+      "index": 298
+    },
+    "e32b0b79ef93b69e3fe24529d5b95cc2e8685c69d8630195facb1bac813b62f9.jpg": {
+      "original_name": "e32b0b79ef93b69e3fe24529d5b95cc2e8685c69d8630195facb1bac813b62f9.jpg",
+      "original_rel_path": "e32b0b79ef93b69e3fe24529d5b95cc2e8685c69d8630195facb1bac813b62f9.jpg",
+      "friendly_name": "figure_299.jpg",
+      "abs_path": "data/mineru_cache\\chapter_05_p205-262_线性系统的频域分析法__df0165aa\\images\\figure_299.jpg",
+      "index": 299
+    },
+    "e3e097c12ac11ee8292271275aa189d1cbf30ef89d9378467aebd8220eb823e7.jpg": {
+      "original_name": "e3e097c12ac11ee8292271275aa189d1cbf30ef89d9378467aebd8220eb823e7.jpg",
+      "original_rel_path": "e3e097c12ac11ee8292271275aa189d1cbf30ef89d9378467aebd8220eb823e7.jpg",
+      "friendly_name": "figure_300.jpg",
+      "abs_path": "data/mineru_cache\\chapter_05_p205-262_线性系统的频域分析法__df0165aa\\images\\figure_300.jpg",
+      "index": 300
+    },
+    "e44afc4f2e1ee7357d2080a4fa794894436f4f990cd6e65ba91842b888433d9d.jpg": {
+      "original_name": "e44afc4f2e1ee7357d2080a4fa794894436f4f990cd6e65ba91842b888433d9d.jpg",
+      "original_rel_path": "e44afc4f2e1ee7357d2080a4fa794894436f4f990cd6e65ba91842b888433d9d.jpg",
+      "friendly_name": "figure_301.jpg",
+      "abs_path": "data/mineru_cache\\chapter_05_p205-262_线性系统的频域分析法__df0165aa\\images\\figure_301.jpg",
+      "index": 301
+    },
+    "e50703a9b35d3237f48c3407e2db1cbc4829b6e8f207e015bc116455086d2c7c.jpg": {
+      "original_name": "e50703a9b35d3237f48c3407e2db1cbc4829b6e8f207e015bc116455086d2c7c.jpg",
+      "original_rel_path": "e50703a9b35d3237f48c3407e2db1cbc4829b6e8f207e015bc116455086d2c7c.jpg",
+      "friendly_name": "figure_302.jpg",
+      "abs_path": "data/mineru_cache\\chapter_05_p205-262_线性系统的频域分析法__df0165aa\\images\\figure_302.jpg",
+      "index": 302
+    },
+    "e5e23f47c7bf718fecbdd13eb4b9021385af781cbc7a95e88e38ae4adb3ae096.jpg": {
+      "original_name": "e5e23f47c7bf718fecbdd13eb4b9021385af781cbc7a95e88e38ae4adb3ae096.jpg",
+      "original_rel_path": "e5e23f47c7bf718fecbdd13eb4b9021385af781cbc7a95e88e38ae4adb3ae096.jpg",
+      "friendly_name": "figure_303.jpg",
+      "abs_path": "data/mineru_cache\\chapter_05_p205-262_线性系统的频域分析法__df0165aa\\images\\figure_303.jpg",
+      "index": 303
+    },
+    "e62edbbaf91791d27977bd277a149fb00408add10025b46167a599a15a745c84.jpg": {
+      "original_name": "e62edbbaf91791d27977bd277a149fb00408add10025b46167a599a15a745c84.jpg",
+      "original_rel_path": "e62edbbaf91791d27977bd277a149fb00408add10025b46167a599a15a745c84.jpg",
+      "friendly_name": "figure_304.jpg",
+      "abs_path": "data/mineru_cache\\chapter_05_p205-262_线性系统的频域分析法__df0165aa\\images\\figure_304.jpg",
+      "index": 304
+    },
+    "e6843d27258fa5d413e65c7e3ce95e4573acf3f8e661307237a07f6cce9a6eb1.jpg": {
+      "original_name": "e6843d27258fa5d413e65c7e3ce95e4573acf3f8e661307237a07f6cce9a6eb1.jpg",
+      "original_rel_path": "e6843d27258fa5d413e65c7e3ce95e4573acf3f8e661307237a07f6cce9a6eb1.jpg",
+      "friendly_name": "figure_305.jpg",
+      "abs_path": "data/mineru_cache\\chapter_05_p205-262_线性系统的频域分析法__df0165aa\\images\\figure_305.jpg",
+      "index": 305
+    },
+    "e6a4312e5eb4fa08548443d3cb65df8d04cb7f99594fb80e0a0341a08a87bb64.jpg": {
+      "original_name": "e6a4312e5eb4fa08548443d3cb65df8d04cb7f99594fb80e0a0341a08a87bb64.jpg",
+      "original_rel_path": "e6a4312e5eb4fa08548443d3cb65df8d04cb7f99594fb80e0a0341a08a87bb64.jpg",
+      "friendly_name": "figure_306.jpg",
+      "abs_path": "data/mineru_cache\\chapter_05_p205-262_线性系统的频域分析法__df0165aa\\images\\figure_306.jpg",
+      "index": 306
+    },
+    "e768c6debd4f1effe661e881a82a1b416fe7e74bb3ec774535ec438afa54d4a5.jpg": {
+      "original_name": "e768c6debd4f1effe661e881a82a1b416fe7e74bb3ec774535ec438afa54d4a5.jpg",
+      "original_rel_path": "e768c6debd4f1effe661e881a82a1b416fe7e74bb3ec774535ec438afa54d4a5.jpg",
+      "friendly_name": "figure_307.jpg",
+      "abs_path": "data/mineru_cache\\chapter_05_p205-262_线性系统的频域分析法__df0165aa\\images\\figure_307.jpg",
+      "index": 307
+    },
+    "e7fdbe55f21a731b06a2fa387e004850a3967faa0def2f187ff74cdb61ca763d.jpg": {
+      "original_name": "e7fdbe55f21a731b06a2fa387e004850a3967faa0def2f187ff74cdb61ca763d.jpg",
+      "original_rel_path": "e7fdbe55f21a731b06a2fa387e004850a3967faa0def2f187ff74cdb61ca763d.jpg",
+      "friendly_name": "figure_308.jpg",
+      "abs_path": "data/mineru_cache\\chapter_05_p205-262_线性系统的频域分析法__df0165aa\\images\\figure_308.jpg",
+      "index": 308
+    },
+    "e820a7c43418c953cd3af0f54e9af6b4572690c47d8355ddb66905cf69f8603e.jpg": {
+      "original_name": "e820a7c43418c953cd3af0f54e9af6b4572690c47d8355ddb66905cf69f8603e.jpg",
+      "original_rel_path": "e820a7c43418c953cd3af0f54e9af6b4572690c47d8355ddb66905cf69f8603e.jpg",
+      "friendly_name": "figure_309.jpg",
+      "abs_path": "data/mineru_cache\\chapter_05_p205-262_线性系统的频域分析法__df0165aa\\images\\figure_309.jpg",
+      "index": 309
+    },
+    "e84ef9adfb1b4e7c1ebaef387e26d4ff2719f5960d38fd5b6efc5cd5351bab82.jpg": {
+      "original_name": "e84ef9adfb1b4e7c1ebaef387e26d4ff2719f5960d38fd5b6efc5cd5351bab82.jpg",
+      "original_rel_path": "e84ef9adfb1b4e7c1ebaef387e26d4ff2719f5960d38fd5b6efc5cd5351bab82.jpg",
+      "friendly_name": "figure_310.jpg",
+      "abs_path": "data/mineru_cache\\chapter_05_p205-262_线性系统的频域分析法__df0165aa\\images\\figure_310.jpg",
+      "index": 310
+    },
+    "eb07720611f5b44610514940615ac5e88ffff6a4efaa6f787e2b8af66bbd3e26.jpg": {
+      "original_name": "eb07720611f5b44610514940615ac5e88ffff6a4efaa6f787e2b8af66bbd3e26.jpg",
+      "original_rel_path": "eb07720611f5b44610514940615ac5e88ffff6a4efaa6f787e2b8af66bbd3e26.jpg",
+      "friendly_name": "figure_311.jpg",
+      "abs_path": "data/mineru_cache\\chapter_05_p205-262_线性系统的频域分析法__df0165aa\\images\\figure_311.jpg",
+      "index": 311
+    },
+    "ebaa6af1ffb4db2619b94093fd9a963cbf873282ab4679e678877d7e9eb8b1e5.jpg": {
+      "original_name": "ebaa6af1ffb4db2619b94093fd9a963cbf873282ab4679e678877d7e9eb8b1e5.jpg",
+      "original_rel_path": "ebaa6af1ffb4db2619b94093fd9a963cbf873282ab4679e678877d7e9eb8b1e5.jpg",
+      "friendly_name": "figure_312.jpg",
+      "abs_path": "data/mineru_cache\\chapter_05_p205-262_线性系统的频域分析法__df0165aa\\images\\figure_312.jpg",
+      "index": 312
+    },
+    "ec9ca76ae6fe1c2373234ad34a7554772d3033bb0226a4cbd0bef04661b4538f.jpg": {
+      "original_name": "ec9ca76ae6fe1c2373234ad34a7554772d3033bb0226a4cbd0bef04661b4538f.jpg",
+      "original_rel_path": "ec9ca76ae6fe1c2373234ad34a7554772d3033bb0226a4cbd0bef04661b4538f.jpg",
+      "friendly_name": "figure_313.jpg",
+      "abs_path": "data/mineru_cache\\chapter_05_p205-262_线性系统的频域分析法__df0165aa\\images\\figure_313.jpg",
+      "index": 313
+    },
+    "ed159db9e62fc42cfba7fc616c9efef4f0ff0f8d2ea4bc874c5f5a9d511daaf5.jpg": {
+      "original_name": "ed159db9e62fc42cfba7fc616c9efef4f0ff0f8d2ea4bc874c5f5a9d511daaf5.jpg",
+      "original_rel_path": "ed159db9e62fc42cfba7fc616c9efef4f0ff0f8d2ea4bc874c5f5a9d511daaf5.jpg",
+      "friendly_name": "figure_314.jpg",
+      "abs_path": "data/mineru_cache\\chapter_05_p205-262_线性系统的频域分析法__df0165aa\\images\\figure_314.jpg",
+      "index": 314
+    },
+    "ee349e2295795b56868d99acfee168b976388c5ddcb22a475744bf5f2a445d60.jpg": {
+      "original_name": "ee349e2295795b56868d99acfee168b976388c5ddcb22a475744bf5f2a445d60.jpg",
+      "original_rel_path": "ee349e2295795b56868d99acfee168b976388c5ddcb22a475744bf5f2a445d60.jpg",
+      "friendly_name": "figure_315.jpg",
+      "abs_path": "data/mineru_cache\\chapter_05_p205-262_线性系统的频域分析法__df0165aa\\images\\figure_315.jpg",
+      "index": 315
+    },
+    "ee7862d6d5b49ed03e47c13099321442f7993e4006d0fb96aa65c7b39854c746.jpg": {
+      "original_name": "ee7862d6d5b49ed03e47c13099321442f7993e4006d0fb96aa65c7b39854c746.jpg",
+      "original_rel_path": "ee7862d6d5b49ed03e47c13099321442f7993e4006d0fb96aa65c7b39854c746.jpg",
+      "friendly_name": "figure_316.jpg",
+      "abs_path": "data/mineru_cache\\chapter_05_p205-262_线性系统的频域分析法__df0165aa\\images\\figure_316.jpg",
+      "index": 316
+    },
+    "ef49ccb81884b93a3ffda8d83c9618d5d4ccb0ea5119cf9b479cf7c868eba046.jpg": {
+      "original_name": "ef49ccb81884b93a3ffda8d83c9618d5d4ccb0ea5119cf9b479cf7c868eba046.jpg",
+      "original_rel_path": "ef49ccb81884b93a3ffda8d83c9618d5d4ccb0ea5119cf9b479cf7c868eba046.jpg",
+      "friendly_name": "figure_317.jpg",
+      "abs_path": "data/mineru_cache\\chapter_05_p205-262_线性系统的频域分析法__df0165aa\\images\\figure_317.jpg",
+      "index": 317
+    },
+    "f13f20ec5d671cfa058af60c69f83cfcc1c70b081291ae678806cc4f1176333c.jpg": {
+      "original_name": "f13f20ec5d671cfa058af60c69f83cfcc1c70b081291ae678806cc4f1176333c.jpg",
+      "original_rel_path": "f13f20ec5d671cfa058af60c69f83cfcc1c70b081291ae678806cc4f1176333c.jpg",
+      "friendly_name": "figure_318.jpg",
+      "abs_path": "data/mineru_cache\\chapter_05_p205-262_线性系统的频域分析法__df0165aa\\images\\figure_318.jpg",
+      "index": 318
+    },
+    "f1a29a2631fba0fafb886f0754a8cd2c08a4ffe1d6c3d66686b7c75eccc91791.jpg": {
+      "original_name": "f1a29a2631fba0fafb886f0754a8cd2c08a4ffe1d6c3d66686b7c75eccc91791.jpg",
+      "original_rel_path": "f1a29a2631fba0fafb886f0754a8cd2c08a4ffe1d6c3d66686b7c75eccc91791.jpg",
+      "friendly_name": "figure_319.jpg",
+      "abs_path": "data/mineru_cache\\chapter_05_p205-262_线性系统的频域分析法__df0165aa\\images\\figure_319.jpg",
+      "index": 319
+    },
+    "f3d400a1c4ddaea24528f917186cb6e4178d31528dc33dc48e3033b06f9f20c6.jpg": {
+      "original_name": "f3d400a1c4ddaea24528f917186cb6e4178d31528dc33dc48e3033b06f9f20c6.jpg",
+      "original_rel_path": "f3d400a1c4ddaea24528f917186cb6e4178d31528dc33dc48e3033b06f9f20c6.jpg",
+      "friendly_name": "figure_320.jpg",
+      "abs_path": "data/mineru_cache\\chapter_05_p205-262_线性系统的频域分析法__df0165aa\\images\\figure_320.jpg",
+      "index": 320
+    },
+    "f454c61e4f58e756a128202875fb1f5d0a3f7d5efdb95fb72ff9cefbdbb34d6c.jpg": {
+      "original_name": "f454c61e4f58e756a128202875fb1f5d0a3f7d5efdb95fb72ff9cefbdbb34d6c.jpg",
+      "original_rel_path": "f454c61e4f58e756a128202875fb1f5d0a3f7d5efdb95fb72ff9cefbdbb34d6c.jpg",
+      "friendly_name": "figure_321.jpg",
+      "abs_path": "data/mineru_cache\\chapter_05_p205-262_线性系统的频域分析法__df0165aa\\images\\figure_321.jpg",
+      "index": 321
+    },
+    "f4be0b4b1c6000fc052a23d77ffe52c8e5c7ec6532ca94683b2545dce064a161.jpg": {
+      "original_name": "f4be0b4b1c6000fc052a23d77ffe52c8e5c7ec6532ca94683b2545dce064a161.jpg",
+      "original_rel_path": "f4be0b4b1c6000fc052a23d77ffe52c8e5c7ec6532ca94683b2545dce064a161.jpg",
+      "friendly_name": "figure_322.jpg",
+      "abs_path": "data/mineru_cache\\chapter_05_p205-262_线性系统的频域分析法__df0165aa\\images\\figure_322.jpg",
+      "index": 322
+    },
+    "f5408e899f9dc9aec30059b6b40de81f269816ee9e0c7d2ee262de58dbe1b32d.jpg": {
+      "original_name": "f5408e899f9dc9aec30059b6b40de81f269816ee9e0c7d2ee262de58dbe1b32d.jpg",
+      "original_rel_path": "f5408e899f9dc9aec30059b6b40de81f269816ee9e0c7d2ee262de58dbe1b32d.jpg",
+      "friendly_name": "figure_323.jpg",
+      "abs_path": "data/mineru_cache\\chapter_05_p205-262_线性系统的频域分析法__df0165aa\\images\\figure_323.jpg",
+      "index": 323
+    },
+    "f671e38820dfe9747739cbfa581ab22e4ca35e4d551c8d2ce70423a260ae3e65.jpg": {
+      "original_name": "f671e38820dfe9747739cbfa581ab22e4ca35e4d551c8d2ce70423a260ae3e65.jpg",
+      "original_rel_path": "f671e38820dfe9747739cbfa581ab22e4ca35e4d551c8d2ce70423a260ae3e65.jpg",
+      "friendly_name": "figure_324.jpg",
+      "abs_path": "data/mineru_cache\\chapter_05_p205-262_线性系统的频域分析法__df0165aa\\images\\figure_324.jpg",
+      "index": 324
+    },
+    "f72911afaa13d269837f6cb9f4aa5717710d6bb15fcb593fa73873208ebf8f96.jpg": {
+      "original_name": "f72911afaa13d269837f6cb9f4aa5717710d6bb15fcb593fa73873208ebf8f96.jpg",
+      "original_rel_path": "f72911afaa13d269837f6cb9f4aa5717710d6bb15fcb593fa73873208ebf8f96.jpg",
+      "friendly_name": "figure_325.jpg",
+      "abs_path": "data/mineru_cache\\chapter_05_p205-262_线性系统的频域分析法__df0165aa\\images\\figure_325.jpg",
+      "index": 325
+    },
+    "f72f5ee2d514d7a4e2ef908b2dcd860a438327d3b0335d7e9035a085cc18dbb9.jpg": {
+      "original_name": "f72f5ee2d514d7a4e2ef908b2dcd860a438327d3b0335d7e9035a085cc18dbb9.jpg",
+      "original_rel_path": "f72f5ee2d514d7a4e2ef908b2dcd860a438327d3b0335d7e9035a085cc18dbb9.jpg",
+      "friendly_name": "figure_326.jpg",
+      "abs_path": "data/mineru_cache\\chapter_05_p205-262_线性系统的频域分析法__df0165aa\\images\\figure_326.jpg",
+      "index": 326
+    },
+    "f860babc2ea95087155bac13046e579e583a4ce93a8c07a79d958cda387e17d6.jpg": {
+      "original_name": "f860babc2ea95087155bac13046e579e583a4ce93a8c07a79d958cda387e17d6.jpg",
+      "original_rel_path": "f860babc2ea95087155bac13046e579e583a4ce93a8c07a79d958cda387e17d6.jpg",
+      "friendly_name": "figure_327.jpg",
+      "abs_path": "data/mineru_cache\\chapter_05_p205-262_线性系统的频域分析法__df0165aa\\images\\figure_327.jpg",
+      "index": 327
+    },
+    "f86eda329f6a6b463aea0a44f8336b548c6a3bded89bd5a816c3be611a0279bf.jpg": {
+      "original_name": "f86eda329f6a6b463aea0a44f8336b548c6a3bded89bd5a816c3be611a0279bf.jpg",
+      "original_rel_path": "f86eda329f6a6b463aea0a44f8336b548c6a3bded89bd5a816c3be611a0279bf.jpg",
+      "friendly_name": "figure_328.jpg",
+      "abs_path": "data/mineru_cache\\chapter_05_p205-262_线性系统的频域分析法__df0165aa\\images\\figure_328.jpg",
+      "index": 328
+    },
+    "f90b5253614bf4af1363535d95b03f1d36d77fc8754b66c655b71e61701a0209.jpg": {
+      "original_name": "f90b5253614bf4af1363535d95b03f1d36d77fc8754b66c655b71e61701a0209.jpg",
+      "original_rel_path": "f90b5253614bf4af1363535d95b03f1d36d77fc8754b66c655b71e61701a0209.jpg",
+      "friendly_name": "figure_329.jpg",
+      "abs_path": "data/mineru_cache\\chapter_05_p205-262_线性系统的频域分析法__df0165aa\\images\\figure_329.jpg",
+      "index": 329
+    },
+    "f95d78469d8107b62ca8f5848cdfd74b6f9f12bcec21e92b8eabd242ef3608cc.jpg": {
+      "original_name": "f95d78469d8107b62ca8f5848cdfd74b6f9f12bcec21e92b8eabd242ef3608cc.jpg",
+      "original_rel_path": "f95d78469d8107b62ca8f5848cdfd74b6f9f12bcec21e92b8eabd242ef3608cc.jpg",
+      "friendly_name": "figure_330.jpg",
+      "abs_path": "data/mineru_cache\\chapter_05_p205-262_线性系统的频域分析法__df0165aa\\images\\figure_330.jpg",
+      "index": 330
+    },
+    "fa55cdfd6ed8a50e56d4a02b9e25342582e974fbb05ee0571bcc626305f33bcd.jpg": {
+      "original_name": "fa55cdfd6ed8a50e56d4a02b9e25342582e974fbb05ee0571bcc626305f33bcd.jpg",
+      "original_rel_path": "fa55cdfd6ed8a50e56d4a02b9e25342582e974fbb05ee0571bcc626305f33bcd.jpg",
+      "friendly_name": "figure_331.jpg",
+      "abs_path": "data/mineru_cache\\chapter_05_p205-262_线性系统的频域分析法__df0165aa\\images\\figure_331.jpg",
+      "index": 331
+    },
+    "fa9947cba5377f7fe472b73cc99a8613cf93e89607c9694e7bba9b0c48f32df1.jpg": {
+      "original_name": "fa9947cba5377f7fe472b73cc99a8613cf93e89607c9694e7bba9b0c48f32df1.jpg",
+      "original_rel_path": "fa9947cba5377f7fe472b73cc99a8613cf93e89607c9694e7bba9b0c48f32df1.jpg",
+      "friendly_name": "figure_332.jpg",
+      "abs_path": "data/mineru_cache\\chapter_05_p205-262_线性系统的频域分析法__df0165aa\\images\\figure_332.jpg",
+      "index": 332
+    },
+    "faf5bbb610c5292311fa9c317a4d7fb0632a53dad0cffbd475bc995270ff4dc4.jpg": {
+      "original_name": "faf5bbb610c5292311fa9c317a4d7fb0632a53dad0cffbd475bc995270ff4dc4.jpg",
+      "original_rel_path": "faf5bbb610c5292311fa9c317a4d7fb0632a53dad0cffbd475bc995270ff4dc4.jpg",
+      "friendly_name": "figure_333.jpg",
+      "abs_path": "data/mineru_cache\\chapter_05_p205-262_线性系统的频域分析法__df0165aa\\images\\figure_333.jpg",
+      "index": 333
+    },
+    "fc4d825e49d5ec78d649165c69043650842e82ecc395a4d155e171ea6c035ebf.jpg": {
+      "original_name": "fc4d825e49d5ec78d649165c69043650842e82ecc395a4d155e171ea6c035ebf.jpg",
+      "original_rel_path": "fc4d825e49d5ec78d649165c69043650842e82ecc395a4d155e171ea6c035ebf.jpg",
+      "friendly_name": "figure_334.jpg",
+      "abs_path": "data/mineru_cache\\chapter_05_p205-262_线性系统的频域分析法__df0165aa\\images\\figure_334.jpg",
+      "index": 334
+    },
+    "fd637ffe9910c1d15d39c1df9332bc4d05a8b39d651f99bf414ee4389d5765d8.jpg": {
+      "original_name": "fd637ffe9910c1d15d39c1df9332bc4d05a8b39d651f99bf414ee4389d5765d8.jpg",
+      "original_rel_path": "fd637ffe9910c1d15d39c1df9332bc4d05a8b39d651f99bf414ee4389d5765d8.jpg",
+      "friendly_name": "figure_335.jpg",
+      "abs_path": "data/mineru_cache\\chapter_05_p205-262_线性系统的频域分析法__df0165aa\\images\\figure_335.jpg",
+      "index": 335
+    },
+    "fd89159e5fbcbc0ce96b83bdd6f02449a1dc25fa5d4e1ceb259cc143b30ccced.jpg": {
+      "original_name": "fd89159e5fbcbc0ce96b83bdd6f02449a1dc25fa5d4e1ceb259cc143b30ccced.jpg",
+      "original_rel_path": "fd89159e5fbcbc0ce96b83bdd6f02449a1dc25fa5d4e1ceb259cc143b30ccced.jpg",
+      "friendly_name": "figure_336.jpg",
+      "abs_path": "data/mineru_cache\\chapter_05_p205-262_线性系统的频域分析法__df0165aa\\images\\figure_336.jpg",
+      "index": 336
+    },
+    "fdced624f61dc75b4c1b3c0b8aac07feb65c7c20b898cfe1780da428fa9e6cd2.jpg": {
+      "original_name": "fdced624f61dc75b4c1b3c0b8aac07feb65c7c20b898cfe1780da428fa9e6cd2.jpg",
+      "original_rel_path": "fdced624f61dc75b4c1b3c0b8aac07feb65c7c20b898cfe1780da428fa9e6cd2.jpg",
+      "friendly_name": "figure_337.jpg",
+      "abs_path": "data/mineru_cache\\chapter_05_p205-262_线性系统的频域分析法__df0165aa\\images\\figure_337.jpg",
+      "index": 337
+    },
+    "fddf267ec40cfd37d1791fd47dd5f5cc132d685e77627ee786868916097f9a36.jpg": {
+      "original_name": "fddf267ec40cfd37d1791fd47dd5f5cc132d685e77627ee786868916097f9a36.jpg",
+      "original_rel_path": "fddf267ec40cfd37d1791fd47dd5f5cc132d685e77627ee786868916097f9a36.jpg",
+      "friendly_name": "figure_338.jpg",
+      "abs_path": "data/mineru_cache\\chapter_05_p205-262_线性系统的频域分析法__df0165aa\\images\\figure_338.jpg",
+      "index": 338
+    },
+    "fe4106cb03e9b595aaee6ee620bee4fa62bd54f4df8e3cb86045077e24634186.jpg": {
+      "original_name": "fe4106cb03e9b595aaee6ee620bee4fa62bd54f4df8e3cb86045077e24634186.jpg",
+      "original_rel_path": "fe4106cb03e9b595aaee6ee620bee4fa62bd54f4df8e3cb86045077e24634186.jpg",
+      "friendly_name": "figure_339.jpg",
+      "abs_path": "data/mineru_cache\\chapter_05_p205-262_线性系统的频域分析法__df0165aa\\images\\figure_339.jpg",
+      "index": 339
+    },
+    "feb9543d060b82931e20b3bd07145206bd64c71163c43c2df70ed90ab9148014.jpg": {
+      "original_name": "feb9543d060b82931e20b3bd07145206bd64c71163c43c2df70ed90ab9148014.jpg",
+      "original_rel_path": "feb9543d060b82931e20b3bd07145206bd64c71163c43c2df70ed90ab9148014.jpg",
+      "friendly_name": "figure_340.jpg",
+      "abs_path": "data/mineru_cache\\chapter_05_p205-262_线性系统的频域分析法__df0165aa\\images\\figure_340.jpg",
+      "index": 340
+    }
+  },
+  "json_files": {
+    "5b3ac156-250d-4e29-9b8c-afaa7174d98d_content_list.json": "data/mineru_cache\\chapter_05_p205-262_线性系统的频域分析法__df0165aa\\json\\5b3ac156-250d-4e29-9b8c-afaa7174d98d_content_list.json",
+    "5b3ac156-250d-4e29-9b8c-afaa7174d98d_model.json": "data/mineru_cache\\chapter_05_p205-262_线性系统的频域分析法__df0165aa\\json\\5b3ac156-250d-4e29-9b8c-afaa7174d98d_model.json",
+    "content_list_v2.json": "data/mineru_cache\\chapter_05_p205-262_线性系统的频域分析法__df0165aa\\json\\content_list_v2.json",
+    "layout.json": "data/mineru_cache\\chapter_05_p205-262_线性系统的频域分析法__df0165aa\\json\\layout.json"
+  }
+}

@@ -1,0 +1,217 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>AI Path Media Debug - AI060</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: #f6f7f9;
+      color: #1f2933;
+    }
+    main {
+      max-width: 1120px;
+      margin: 0 auto;
+      padding: 24px;
+    }
+    h1, h2 {
+      margin: 0 0 12px;
+      line-height: 1.25;
+    }
+    .panel {
+      background: #fff;
+      border: 1px solid #d8dee8;
+      border-radius: 8px;
+      padding: 18px;
+      margin-bottom: 18px;
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 10px;
+    }
+    .metric {
+      border: 1px solid #e2e8f0;
+      border-radius: 6px;
+      padding: 10px;
+      background: #fafafa;
+    }
+    .metric span {
+      display: block;
+      color: #64748b;
+      font-size: 12px;
+      margin-bottom: 3px;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+    }
+    th, td {
+      border: 1px solid #d8dee8;
+      padding: 8px;
+      vertical-align: top;
+      text-align: left;
+    }
+    th {
+      background: #edf2f7;
+    }
+    code {
+      word-break: break-all;
+      white-space: normal;
+    }
+    .learning-answer-content {
+      background: #fff;
+      border: 1px solid #d8dee8;
+      border-radius: 8px;
+      padding: 18px;
+    }
+    .learning-reference-block,
+    .learning-related-overview {
+      border: 1px solid #d8dee8;
+      border-radius: 8px;
+      padding: 14px;
+      margin: 14px 0;
+      background: #fbfcfe;
+    }
+    .learning-reference-media-title,
+    .learning-block-title {
+      font-weight: 700;
+      margin-bottom: 10px;
+    }
+    .learning-reference-media-grid,
+    .learning-related-media-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 12px;
+    }
+    .learning-evidence-card {
+      border: 1px solid #cbd5e1;
+      border-radius: 8px;
+      padding: 12px;
+      background: #fff;
+      overflow: hidden;
+    }
+    .learning-figure-viewport {
+      overflow: auto;
+      max-height: 520px;
+      border: 1px solid #e2e8f0;
+      border-radius: 6px;
+      background: #fff;
+      margin-top: 8px;
+    }
+    .learning-figure-viewport img {
+      display: block;
+      max-width: 100%;
+      height: auto;
+      margin: 0 auto;
+    }
+    .learning-formula-viewport {
+      overflow-x: auto;
+      padding: 10px;
+      background: #f8fafc;
+      border-radius: 6px;
+      font-family: "Times New Roman", serif;
+    }
+  </style>
+</head>
+<body>
+<main>
+  <section class="panel">
+    <h1>AI Path Media Debug</h1>
+    <div class="grid">
+      <div class="metric"><span>node</span>AI060 / 线性回归</div>
+      <div class="metric"><span>source doc</span><code>nn_dl_chapter_02_p037-067_第_2_章_机器学习概述__70e23af8eb7d</code></div>
+      <div class="metric"><span>media count</span>6 total, 1 figures, 5 formulas</div>
+      <div class="metric"><span>html output</span><code>data\debug_outputs\ai_path_media_AI060.html</code></div>
+    </div>
+    <ul><li><strong>media_enricher_loaded</strong>: yes</li>
+<li><strong>render_has_learning_answer_content</strong>: yes</li>
+<li><strong>render_has_figure_card</strong>: yes</li>
+<li><strong>render_has_formula_card</strong>: yes</li>
+<li><strong>render_has_img_tag</strong>: yes</li>
+<li><strong>render_has_reference_section</strong>: no</li></ul>
+  </section>
+
+  <section class="panel">
+    <h2>Mapped Media</h2>
+    <table>
+      <thead><tr><th>type</th><th>label</th><th>reference</th><th>image exists</th><th>resolved image path</th></tr></thead>
+      <tbody><tr><td>formula</td><td>式一</td><td><code>nn_dl_chapter_02_p037-067_第_2_章_机器学习概述__70e23af8eb7d:formula:256b2010d0e6</code></td><td>no</td><td>-</td></tr><tr><td>formula</td><td>式二</td><td><code>nn_dl_chapter_02_p037-067_第_2_章_机器学习概述__70e23af8eb7d:formula:2dada15fc169</code></td><td>no</td><td>-</td></tr><tr><td>figure</td><td>图一</td><td><code>nn_dl_chapter_02_p037-067_第_2_章_机器学习概述__70e23af8eb7d:figure:4de735051327</code></td><td>yes</td><td>E:\ai_code\ai-tutor-agent\data\minerU_cache\artificial_intelligence\nn_dl_chapter_02_p037-067_第_2_章_机器学习概述__70e23af8eb7d\extracted\images\2a09a7b8eb11efee9f45a9c4c00debbbf77506c4ca200d61248f151ab9c80665.jpg</td></tr><tr><td>formula</td><td>式三</td><td><code>nn_dl_chapter_02_p037-067_第_2_章_机器学习概述__70e23af8eb7d:formula:3c8be1e2b97d</code></td><td>no</td><td>-</td></tr><tr><td>formula</td><td>式四</td><td><code>nn_dl_chapter_02_p037-067_第_2_章_机器学习概述__70e23af8eb7d:formula:4664a6b95db0</code></td><td>no</td><td>-</td></tr><tr><td>formula</td><td>式五</td><td><code>nn_dl_chapter_02_p037-067_第_2_章_机器学习概述__70e23af8eb7d:formula:9165287e2a06</code></td><td>no</td><td>-</td></tr></tbody>
+    </table>
+  </section>
+
+  <section class="panel">
+    <h2>Rendered Lesson HTML</h2>
+    <div class="learning-answer-content"><h4>线性回归</h4><p>这里用当前节点的图表来辅助说明。如果媒体链路正常，下面应该出现真实图片卡片。</p><section class="learning-reference-block"><div class="learning-reference-media"><div class="learning-reference-media-title">相关公式与图表</div><div class="learning-reference-media-grid learning-media-group">
+            <section class="learning-evidence-card learning-evidence-card--figure learning-figure-card">
+              <div class="learning-block-header learning-evidence-header">
+                <div>
+                  <span class="learning-evidence-type">图表</span>
+                  <div class="learning-block-title learning-evidence-title">图一 · 线性回归</div>
+                </div>
+                <div class="learning-block-actions"><button type="button" data-learning-action="open">放大</button><button type="button" data-learning-action="copy">复制引用</button></div>
+              </div>
+              <div class="learning-figure-viewport"><img src='data:image/jpeg;base64,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gBm5QeZO/qADwv15PepdI8LaVo0huIYWmvG+/d3LeZM5/wB49PwxWblJu0V82dkKVCEVOrK9/sx3+b2Xyu+6Rm/bfE/iHiwthodi3/LxdqHuGH+zH0X/AIFV/SvCWmaXcfbGWS91A/evLtvMkJ9ieF/DFbtFCpq95asJ4yfK4UlyR7Lr6vd/fbyCqWr6TZa7pN1peowia0uUKSITjI9j2IPIPqKu0VocZ5N4f+AXh3RPEEWqS315ex28gkgt5QoUMOm8j72Dg9hxzxxXrNFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABXP+Kumi/8AYVg/rXQVz/irpov/AGFYP60AdBRRRQAUUUUAFFFFAHJ/ErxJd+E/AWo6tYKDdxhUiZlyELMF3Ee2ePfFfOfg34reLrPxfZSXWr3moW9zcIk9tO5kVlZsHYD9088Yx0HUcV9W6ppllrOmXGnahbrcWlwhSWNujD+h7g9jXC+Hfgn4R8N67Hq9ut5czwv5kCXUqskTdiAFGSO2SccHrzQB6LRRRQAV5D8TvjQ/gzW/7E0mwhur6JVe4kuCdke4ZCgAgk4IOc8ZHXt69XjXxR+C934v8QHXdFvLaG6mVVuYrosFYqAoZSAewAxjt1oA6/4afEOD4g6LPcfZvst9aOEuYQ25RnO1lPocHr0wfrXbVwfwu+Ha/D7RbiKa5S51C8dXuJIwQg2g7VXPJAy3PHWu8oAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigArn/FXTRf8AsKwf1roK5/xV00X/ALCsH9aAOgooooAKKKoazrNh4f0i51XU5xBZ267pHPPfAAHckkAD1NAF+ivN/DHxt8LeKNdj0iFby0uJ22wNdIoWRuy5DHBPYH6da9IoAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAK5/xV00X/sKwf1roK5/xV00X/sKwf1oA6CiiigArjvih4Vu/GHgW80uwcC8DLNCrNtEjKfuk+4zjtnFdjRQB8p+A/hL4tl8aWEt/pk+n2llcpNNPNhchGzhP7xOMAjIr6soooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiud1LQ/EF3fyz2Xi65sbdsbLdLGCQJx/eZST680AdFXJf8JJq8XxFtfD1za2KWdzZy3KSRSO8nyMAM5AA69MH61c0vRNfs9QjnvvFlzqFuoO63eygjDZHHzKoIwefwrldV13SI/jbo+/VLNfL0y4icmdQEcuMKeeDweKAPS65/xV00X/sKwf1roM5GRXJ+LNMtmk0mQibdJqsG7E7gck9BnA/CgDrKKhtraK1i8uLftzn53Zz+ZJNTUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAVz/AIq6aL/2FYP610Fc/wCKumi/9hWD+tAHQUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAVz/AIq6aL/2FYP610Fc/wCKumi/9hWD+tAHQUUUUAFFFFABRUFvci4luUCkGCXyyT3+VWz/AOPVPQAUUUUAFFFFABRRUF5ciztXnZSwXHA9yB/WgCeiiigAooooAKKKKACiioFuQ1/La7TujiSQt2O4sMf+O/rQBPRRRQAUUUUAFFFFABRTZX8uJ5CMhVJx9KZbTC4tYpwCBIgcA9sjNAEt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r745roKACiiigAooooA4T4r/APItad/2GLP/ANGCu7rnvFHhKLxXBDBdapqFrBDKk6x2piA3ocqxLRsevbOKsX2gNqC6b5ur6kr2NwJ98Uixmcj+GQKoBX2AFAGH4j0nxVZanf8AiHw/q9kQYE3add2mVkEYJwJA2RnJ7d66Pw/qy674e0/VViMQu4Em8snO3Izis+68MXN3e3jv4j1ZbG7/ANZZKYtijGCqsU3qD7EH3rdtraGztYrW2jWKCFAkaKOFUDAAoAlooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAorn/GM2sWXh271DRbmOO4s4mnMckQdZQvJXrxwDzUXhu+1fXWh117qCLRrqANb2IgzJzjDtJu78/LjjI70AdLRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFAGHqei32q6onn6mo0XYPNsFtxulcHPzSZ+70yuOce5qt4R8M3nhi0eyl1dryyjZhaQeSE8lCxbBOSWIzgHjjtRRQB0tFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQB//9k=' alt='' loading='lazy' /></div>
+              
+              <div class="learning-evidence-summary">可结合图形走势、关键拐点或结构特征进行分析</div>
+              <div class="learning-source-line">来源：线性回归</div>
+              <details class="learning-debug-details"><summary>查看来源详情</summary><code>nn_dl_chapter_02_p037-067_第_2_章_机器学习概述__70e23af8eb7d:figure:4de735051327</code></details>
+            </section>
+            </div></div></section>
+    <section class="learning-media-group learning-related-overview">
+      <div class="learning-block-header">
+        <div class="learning-block-title">更多可参考的公式与图表</div>
+        <div class="learning-block-actions">参考材料</div>
+      </div>
+      
+            <section class="learning-evidence-card learning-evidence-card--formula learning-formula-card">
+              <div class="learning-block-header learning-evidence-header">
+                <div>
+                  <span class="learning-evidence-type">公式</span>
+                  <div class="learning-block-title learning-evidence-title">式一 · 线性回归</div>
+                </div>
+                <div class="learning-block-actions"><button type="button" data-learning-action="open">放大</button><button type="button" data-learning-action="copy">复制公式</button></div>
+              </div>
+              <div class="learning-evidence-summary">给出最优控制问题中的性能指标或协态变量关系</div>
+              <div class="learning-formula-viewport"><div class="formula-math formula-render" data-latex="\boldsymbol {w} ^ {*} = \left(\boldsymbol {X} \boldsymbol {X} ^ {\top} + \lambda I\right) ^ {- 1} \boldsymbol {X} \boldsymbol {y}, \tag {2.43}">\boldsymbol {w} ^ {*} = \left(\boldsymbol {X} \boldsymbol {X} ^ {\top} + \lambda I\right) ^ {- 1} \boldsymbol {X} \boldsymbol {y}, \tag {2.43}</div></div>
+              <div class="learning-source-line">来源：线性回归</div>
+              <details class="learning-debug-details"><summary>查看来源详情</summary><code>nn_dl_chapter_02_p037-067_第_2_章_机器学习概述__70e23af8eb7d:formula:256b2010d0e6</code></details><details class="learning-latex-details"><summary>查看 LaTeX</summary><pre>\boldsymbol {w} ^ {*} = \left(\boldsymbol {X} \boldsymbol {X} ^ {\top} + \lambda I\right) ^ {- 1} \boldsymbol {X} \boldsymbol {y}, \tag {2.43}</pre></details>
+            </section>
+            
+            <section class="learning-evidence-card learning-evidence-card--formula learning-formula-card">
+              <div class="learning-block-header learning-evidence-header">
+                <div>
+                  <span class="learning-evidence-type">公式</span>
+                  <div class="learning-block-title learning-evidence-title">式二 · 线性回归</div>
+                </div>
+                <div class="learning-block-actions"><button type="button" data-learning-action="open">放大</button><button type="button" data-learning-action="copy">复制公式</button></div>
+              </div>
+              <div class="learning-evidence-summary">给出最优控制问题中的性能指标或协态变量关系</div>
+              <div class="learning-formula-viewport"><div class="formula-math formula-render" data-latex="\mathcal {R} (\boldsymbol {w}) = \frac {1}{2} \| \boldsymbol {y} - \boldsymbol {X} ^ {\top} \boldsymbol {w} \| ^ {2} + \frac {1}{2} \lambda \| \boldsymbol {w} \| ^ {2}, \tag {2.44}">\mathcal {R} (\boldsymbol {w}) = \frac {1}{2} \| \boldsymbol {y} - \boldsymbol {X} ^ {\top} \boldsymbol {w} \| ^ {2} + \frac {1}{2} \lambda \| \boldsymbol {w} \| ^ {2}, \tag {2.44}</div></div>
+              <div class="learning-source-line">来源：线性回归</div>
+              <details class="learning-debug-details"><summary>查看来源详情</summary><code>nn_dl_chapter_02_p037-067_第_2_章_机器学习概述__70e23af8eb7d:formula:2dada15fc169</code></details><details class="learning-latex-details"><summary>查看 LaTeX</summary><pre>\mathcal {R} (\boldsymbol {w}) = \frac {1}{2} \| \boldsymbol {y} - \boldsymbol {X} ^ {\top} \boldsymbol {w} \| ^ {2} + \frac {1}{2} \lambda \| \boldsymbol {w} \| ^ {2}, \tag {2.44}</pre></details>
+            </section>
+            
+            <section class="learning-evidence-card learning-evidence-card--formula learning-formula-card">
+              <div class="learning-block-header learning-evidence-header">
+                <div>
+                  <span class="learning-evidence-type">公式</span>
+                  <div class="learning-block-title learning-evidence-title">式三 · 线性回归</div>
+                </div>
+                <div class="learning-block-actions"><button type="button" data-learning-action="open">放大</button><button type="button" data-learning-action="copy">复制公式</button></div>
+              </div>
+              
+              <div class="learning-formula-viewport"><div class="formula-math formula-render" data-latex="\boldsymbol {w} ^ {M L} = \left(\boldsymbol {X} \boldsymbol {X} ^ {\top}\right) ^ {- 1} \boldsymbol {X} \boldsymbol {y}. \tag {2.52}">\boldsymbol {w} ^ {M L} = \left(\boldsymbol {X} \boldsymbol {X} ^ {\top}\right) ^ {- 1} \boldsymbol {X} \boldsymbol {y}. \tag {2.52}</div></div>
+              <div class="learning-source-line">来源：线性回归</div>
+              <details class="learning-debug-details"><summary>查看来源详情</summary><code>nn_dl_chapter_02_p037-067_第_2_章_机器学习概述__70e23af8eb7d:formula:3c8be1e2b97d</code></details><details class="learning-latex-details"><summary>查看 LaTeX</summary><pre>\boldsymbol {w} ^ {M L} = \left(\boldsymbol {X} \boldsymbol {X} ^ {\top}\right) ^ {- 1} \boldsymbol {X} \boldsymbol {y}. \tag {2.52}</pre></details>
+            </section>
+            
+    </section>
+    </div>
+  </section>
+</main>
+</body>
+</html>

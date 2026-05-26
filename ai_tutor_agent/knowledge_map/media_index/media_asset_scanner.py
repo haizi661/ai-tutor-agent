@@ -30,13 +30,12 @@ class MediaAssetScanner:
 
     def scan_document(self, doc_dir: str | Path) -> list[dict[str, Any]]:
         directory = Path(doc_dir)
-        manifest_path = directory / "manifest.json"
         full_md_path = directory / "full.md"
-        if not manifest_path.exists() or not full_md_path.exists():
+        if not full_md_path.exists():
             return []
 
         try:
-            manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+            manifest = self._load_document_manifest(directory)
             full_md = full_md_path.read_text(encoding="utf-8")
         except Exception:
             return []
@@ -78,6 +77,43 @@ class MediaAssetScanner:
             )
         return candidates
 
+    def _load_document_manifest(self, directory: Path) -> dict[str, Any]:
+        manifest_path = directory / "manifest.json"
+        if manifest_path.exists():
+            manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+        else:
+            metadata_path = directory / "metadata.json"
+            if not metadata_path.exists():
+                raise FileNotFoundError(f"MinerU metadata not found: {directory}")
+            metadata = json.loads(metadata_path.read_text(encoding="utf-8"))
+            manifest = {
+                "pdf_name": metadata.get("source_filename") or metadata.get("source_path") or directory.name,
+                "cache_dir": str(directory),
+                "images": {},
+                "_metadata_layout": True,
+            }
+
+        manifest.setdefault("cache_dir", str(directory))
+        manifest["images"] = self._merge_manifest_images(directory, manifest.get("images", {}) or {})
+        return manifest
+
+    def _merge_manifest_images(self, directory: Path, images: dict[str, Any]) -> dict[str, Any]:
+        merged = dict(images)
+        for image_root in (directory / "images", directory / "extracted" / "images"):
+            if not image_root.exists():
+                continue
+            for path in sorted(item for item in image_root.iterdir() if item.is_file()):
+                key = path.name
+                rel_key = f"images/{path.name}"
+                meta = {
+                    "abs_path": str(path.resolve()),
+                    "original_name": path.name,
+                    "friendly_name": path.name,
+                }
+                merged.setdefault(key, meta)
+                merged.setdefault(rel_key, meta)
+        return merged
+
     def write_jsonl(self, candidates: list[dict[str, Any]], output_path: str | Path | None = None) -> Path:
         target = resolve_project_path(output_path or self.config.raw_candidates_path)
         target.parent.mkdir(parents=True, exist_ok=True)
@@ -99,6 +135,7 @@ class MediaAssetScanner:
         candidates: list[dict[str, Any]] = []
         pending_images: list[str] = []
         pending_line_index = -1
+        nearby_lookbehind = 6 if manifest.get("_metadata_layout") else 3
 
         for idx, raw in enumerate(lines):
             line = (raw or "").strip()
@@ -119,6 +156,7 @@ class MediaAssetScanner:
                             source_doc_name=source_doc_name,
                             chapter_title=chapter_title,
                             doc_dir=doc_dir,
+                            nearby_lookbehind=nearby_lookbehind,
                         )
                     )
                     pending_images = []
@@ -137,6 +175,7 @@ class MediaAssetScanner:
                         source_doc_name=source_doc_name,
                         chapter_title=chapter_title,
                         doc_dir=doc_dir,
+                        nearby_lookbehind=nearby_lookbehind,
                     )
                 )
                 pending_images = []
@@ -144,7 +183,7 @@ class MediaAssetScanner:
                 continue
 
             if pending_images and idx - pending_line_index >= 2:
-                nearby_text = self._extract_nearby_text(lines, pending_line_index)
+                nearby_text = self._extract_nearby_text(lines, pending_line_index, lookbehind=nearby_lookbehind)
                 candidates.extend(
                     self._build_figure_candidates(
                         image_paths=pending_images,
@@ -157,13 +196,14 @@ class MediaAssetScanner:
                         chapter_title=chapter_title,
                         doc_dir=doc_dir,
                         nearby_text_override=nearby_text,
+                        nearby_lookbehind=nearby_lookbehind,
                     )
                 )
                 pending_images = []
                 pending_line_index = -1
 
         if pending_images:
-            nearby_text = self._extract_nearby_text(lines, pending_line_index)
+            nearby_text = self._extract_nearby_text(lines, pending_line_index, lookbehind=nearby_lookbehind)
             candidates.extend(
                 self._build_figure_candidates(
                     image_paths=pending_images,
@@ -176,6 +216,7 @@ class MediaAssetScanner:
                     chapter_title=chapter_title,
                     doc_dir=doc_dir,
                     nearby_text_override=nearby_text,
+                    nearby_lookbehind=nearby_lookbehind,
                 )
             )
 
@@ -194,6 +235,7 @@ class MediaAssetScanner:
         chapter_title: str,
         doc_dir: Path,
         nearby_text_override: str | None = None,
+        nearby_lookbehind: int = 3,
     ) -> list[dict[str, Any]]:
         results: list[dict[str, Any]] = []
         for image_path in image_paths:
@@ -207,7 +249,9 @@ class MediaAssetScanner:
             candidate["source_path"] = str(resolved_path)
             candidate["chapter_title"] = chapter_title
             candidate["caption_text"] = self._normalize_whitespace(caption_text)
-            candidate["nearby_text"] = nearby_text_override or self._extract_nearby_text(lines, line_index)
+            candidate["nearby_text"] = nearby_text_override or self._extract_nearby_text(
+                lines, line_index, lookbehind=nearby_lookbehind
+            )
             candidate["raw_text"] = candidate["caption_text"] or candidate["nearby_text"]
             candidate["content_hash"] = self._hash_text(
                 f"{candidate['source_path']}|{candidate['caption_text']}|{candidate['nearby_text']}"
@@ -335,10 +379,10 @@ class MediaAssetScanner:
                 return stripped[2:].strip()
         return fallback
 
-    def _extract_nearby_text(self, lines: list[str], line_index: int) -> str:
+    def _extract_nearby_text(self, lines: list[str], line_index: int, *, lookbehind: int = 3) -> str:
         if line_index < 0:
             return ""
-        start = max(0, line_index - 3)
+        start = max(0, line_index - lookbehind)
         end = min(len(lines), line_index + 4)
         window = []
         for raw in lines[start:end]:
@@ -369,6 +413,8 @@ class MediaAssetScanner:
                 resolved = resolve_existing_path(Path(str(trimmed).replace("\\", "/")).name, base_dir=doc_dir / "images")
         else:
             resolved = resolve_existing_path(Path(str(trimmed).replace("\\", "/")).name, base_dir=doc_dir / "images")
+        if resolved is None:
+            resolved = resolve_existing_path(Path(str(trimmed).replace("\\", "/")).name, base_dir=doc_dir / "extracted" / "images")
         return resolved
 
     def _looks_like_caption(self, text: str) -> bool:

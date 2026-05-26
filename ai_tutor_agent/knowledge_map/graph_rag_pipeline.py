@@ -1,6 +1,8 @@
 from __future__ import annotations
 
 import ast
+import json
+import re
 from dataclasses import replace
 from pathlib import Path
 from typing import Any
@@ -257,6 +259,16 @@ class GraphRAGPipeline:
         if not text:
             return default
         try:
+            return json.loads(text)
+        except Exception:
+            pass
+        try:
             return ast.literal_eval(text)
         except Exception:
+            if isinstance(default, list):
+                return [
+                    part.strip()
+                    for part in re.split(r"\s*(?:;|\|\|)\s*", text)
+                    if part.strip() and part.strip() != "无"
+                ]
             return default

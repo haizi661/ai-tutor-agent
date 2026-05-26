@@ -49,7 +49,7 @@ class GraphMediaEnricher:
             if not node:
                 continue
 
-            candidates = self._collect_annotated_media_items(traversed, question=question)
+            candidates = self._collect_annotated_media_items(traversed, node=node, question=question)
             doc = self._find_matching_doc(node)
             fallback_candidates: list[dict[str, Any]] = []
             if doc:
@@ -95,6 +95,7 @@ class GraphMediaEnricher:
         self,
         traversed: dict[str, Any],
         *,
+        node: dict[str, Any],
         question: str,
     ) -> list[dict[str, Any]]:
         node_id = str(traversed.get("node_id", "") or "")
@@ -117,6 +118,10 @@ class GraphMediaEnricher:
                 continue
             item["node_id"] = node_id
             item["node_name"] = node_name
+            node_extra = node.get("extra", {}) or {}
+            item["node_source_doc"] = str(
+                node_extra.get("retrieval_source_pdf", "") or node_extra.get("mineru_doc_name", "") or ""
+            ).strip()
             item["hop"] = hop
             item["node_role"] = node_role
             item["media_score"] = self._score_media_item(item, question=question)
@@ -176,6 +181,8 @@ class GraphMediaEnricher:
             "confidence": float(asset.get("confidence", 0.0) or 0.0),
             "vision_confidence": float(asset.get("vision_confidence", 0.0) or 0.0),
             "source_path": str(asset.get("source_path", "") or "").strip(),
+            "source_doc_id": str(asset.get("source_doc_id", "") or "").strip(),
+            "source_doc_name": str(asset.get("source_doc_name", "") or "").strip(),
             "visual_type": str(asset.get("visual_type", "") or "").strip(),
             "asset_anchor_node_id": str(asset.get("anchor_node_id", "") or "").strip(),
             "asset_anchor_node_name": str(asset.get("anchor_node_name", "") or "").strip(),
@@ -432,6 +439,18 @@ class GraphMediaEnricher:
         if role == "primary" and asset_anchor_node_id and asset_anchor_node_id != node_id:
             score -= 1.6
 
+        node_source_doc = self._normalize_doc_key(item.get("node_source_doc", ""))
+        source_doc_keys = {
+            self._normalize_doc_key(item.get("source_doc_id", "")),
+            self._normalize_doc_key(item.get("source_doc_name", "")),
+        }
+        source_doc_keys.discard("")
+        if node_source_doc and source_doc_keys:
+            if node_source_doc in source_doc_keys:
+                score += 3.0
+            elif role == "primary":
+                score -= 4.0
+
         if item["asset_type"] == "formula":
             score += 1.8
             if any(token in question for token in ["公式", "关系", "阻尼比", "超调量", "时间", "峰值"]):
@@ -474,6 +493,17 @@ class GraphMediaEnricher:
         score += min(float(item.get("vision_confidence", 0.0) or 0.0), 1.0) * 0.6
         score -= int(item.get("hop", 99)) * 0.6
         return round(score, 4)
+
+    def _normalize_doc_key(self, value: Any) -> str:
+        text = str(value or "").strip()
+        if not text:
+            return ""
+        text = text.replace("\\", "/")
+        text = Path(text).name
+        text = re.sub(r"(__[0-9a-f]{8,})", "", text, flags=re.IGNORECASE)
+        text = re.sub(r"\.pdf$", "", text, flags=re.IGNORECASE)
+        text = re.sub(r"\s+", "", text)
+        return text.lower()
 
     def _contains_all(self, text: str, needles: list[str]) -> bool:
         return all(needle in text for needle in needles)
@@ -575,11 +605,20 @@ class GraphMediaEnricher:
             if not item.is_dir():
                 continue
             manifest_path = item / "manifest.json"
+            metadata_path = item / "metadata.json"
             full_md_path = item / "full.md"
-            if not manifest_path.exists() or not full_md_path.exists():
+            if not full_md_path.exists() or (not manifest_path.exists() and not metadata_path.exists()):
                 continue
             try:
-                manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+                if manifest_path.exists():
+                    manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+                else:
+                    metadata = json.loads(metadata_path.read_text(encoding="utf-8"))
+                    manifest = {
+                        "pdf_name": metadata.get("source_filename") or metadata.get("source_path") or item.name,
+                        "cache_dir": str(item.resolve()),
+                        "images": {},
+                    }
                 full_md = full_md_path.read_text(encoding="utf-8")
             except Exception:
                 continue
@@ -588,6 +627,7 @@ class GraphMediaEnricher:
             if page_range is None:
                 continue
             manifest["cache_dir"] = str(item.resolve())
+            manifest["images"] = self._merge_manifest_images(item, manifest.get("images", {}) or {})
             docs.append(
                 {
                     "cache_dir": item,
@@ -600,6 +640,21 @@ class GraphMediaEnricher:
         docs.sort(key=lambda doc: doc["start_page"])
         return docs
 
+    def _merge_manifest_images(self, directory: Path, images: dict[str, Any]) -> dict[str, Any]:
+        merged = dict(images)
+        for image_root in (directory / "images", directory / "extracted" / "images"):
+            if not image_root.exists():
+                continue
+            for path in sorted(item for item in image_root.iterdir() if item.is_file()):
+                meta = {
+                    "abs_path": str(path.resolve()),
+                    "original_name": path.name,
+                    "friendly_name": path.name,
+                }
+                merged.setdefault(path.name, meta)
+                merged.setdefault(f"images/{path.name}", meta)
+        return merged
+
     def _extract_page_range(self, text: str) -> tuple[int, int] | None:
         match = re.search(r"_p(\d+)-(\d+)", text)
         if not match:
@@ -608,6 +663,21 @@ class GraphMediaEnricher:
 
     def _find_matching_doc(self, node: dict[str, Any]) -> dict[str, Any] | None:
         extra = node.get("extra", {}) or {}
+        source_doc_key = self._normalize_doc_key(
+            extra.get("retrieval_source_pdf", "") or extra.get("mineru_doc_name", "")
+        )
+        if source_doc_key:
+            source_matches = [
+                doc
+                for doc in self.chapter_docs
+                if source_doc_key
+                in {
+                    self._normalize_doc_key((doc.get("manifest", {}) or {}).get("pdf_name", "")),
+                    self._normalize_doc_key((doc.get("manifest", {}) or {}).get("cache_dir", "")),
+                }
+            ]
+            if source_matches:
+                return max(source_matches, key=lambda doc: self._doc_quality_score(doc))
         page_range = extra.get("chapter_page_range", []) or []
         if not isinstance(page_range, list) or len(page_range) != 2:
             return None
@@ -1065,10 +1135,14 @@ class GraphMediaEnricher:
             image_name = Path(trimmed).name
             if abs_path is None:
                 candidate = resolve_existing_path(image_name, base_dir=cache_dir / "images")
+                if candidate is None:
+                    candidate = resolve_existing_path(image_name, base_dir=cache_dir / "extracted" / "images")
             else:
                 candidate = resolve_existing_path(abs_path, base_dir=cache_dir)
                 if candidate is None:
                     candidate = resolve_existing_path(image_name, base_dir=cache_dir / "images")
+                if candidate is None:
+                    candidate = resolve_existing_path(image_name, base_dir=cache_dir / "extracted" / "images")
 
             if candidate is not None:
                 candidate_text = str(candidate)

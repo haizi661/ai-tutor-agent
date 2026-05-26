@@ -1,0 +1,17 @@
+{
+  "version": 1,
+  "source_path": "E:\\ai_code\\ai-tutor-agent\\data\\course_materials\\artificial_intelligence\\splits\\leedl_chapter_11_p211-220_第_11_章_自编码器.pdf",
+  "source_filename": "leedl_chapter_11_p211-220_第_11_章_自编码器.pdf",
+  "source_size_bytes": 5002851,
+  "source_mtime": 1779694337,
+  "cache_key": "643259fcdf36",
+  "batch_id": "4fbf3e21-1b84-4394-b0ff-f4807e914b1f",
+  "full_zip_url": "https://cdn-mineru.openxlab.org.cn/pdf/2026-05-25/5ac059cb-c4cd-4dff-8e37-b3f13f7c1a85.zip",
+  "saved_at": 1779695432,
+  "proxy_mode": "inherit",
+  "proxy_desc": "继承环境变量 HTTP_PROXY / HTTPS_PROXY",
+  "full_md_path": "full.md",
+  "relative_md_path_in_extract": "full.md",
+  "result_zip_path": "result.zip",
+  "extract_dir": "extracted"
+}

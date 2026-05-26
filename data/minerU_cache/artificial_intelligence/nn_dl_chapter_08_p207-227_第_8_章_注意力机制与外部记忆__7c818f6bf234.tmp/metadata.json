@@ -1,0 +1,17 @@
+{
+  "version": 1,
+  "source_path": "E:\\ai_code\\ai-tutor-agent\\data\\course_materials\\artificial_intelligence\\splits\\nn_dl_chapter_08_p207-227_第_8_章_注意力机制与外部记忆.pdf",
+  "source_filename": "nn_dl_chapter_08_p207-227_第_8_章_注意力机制与外部记忆.pdf",
+  "source_size_bytes": 972014,
+  "source_mtime": 1779694338,
+  "cache_key": "7c818f6bf234",
+  "batch_id": "4bb85c3d-3a91-49ea-bf5a-1c2a22b4be1f",
+  "full_zip_url": "https://cdn-mineru.openxlab.org.cn/pdf/2026-05-25/d8171add-0fb2-485d-b3a2-a10b6c015d1c.zip",
+  "saved_at": 1779696740,
+  "proxy_mode": "inherit",
+  "proxy_desc": "继承环境变量 HTTP_PROXY / HTTPS_PROXY",
+  "full_md_path": "full.md",
+  "relative_md_path_in_extract": "full.md",
+  "result_zip_path": "result.zip",
+  "extract_dir": "extracted"
+}

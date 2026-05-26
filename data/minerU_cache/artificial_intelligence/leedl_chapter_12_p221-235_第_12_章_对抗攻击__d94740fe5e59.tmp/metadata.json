@@ -1,0 +1,17 @@
+{
+  "version": 1,
+  "source_path": "E:\\ai_code\\ai-tutor-agent\\data\\course_materials\\artificial_intelligence\\splits\\leedl_chapter_12_p221-235_第_12_章_对抗攻击.pdf",
+  "source_filename": "leedl_chapter_12_p221-235_第_12_章_对抗攻击.pdf",
+  "source_size_bytes": 27993261,
+  "source_mtime": 1779694337,
+  "cache_key": "d94740fe5e59",
+  "batch_id": "94f0ca23-f6e7-498c-9145-e517d5cfad17",
+  "full_zip_url": "https://cdn-mineru.openxlab.org.cn/pdf/2026-05-25/da4abd14-beb6-4717-9d6a-053b135685f9.zip",
+  "saved_at": 1779695586,
+  "proxy_mode": "inherit",
+  "proxy_desc": "继承环境变量 HTTP_PROXY / HTTPS_PROXY",
+  "full_md_path": "full.md",
+  "relative_md_path_in_extract": "full.md",
+  "result_zip_path": "result.zip",
+  "extract_dir": "extracted"
+}

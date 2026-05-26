@@ -1,0 +1,17 @@
+{
+  "version": 1,
+  "source_path": "E:\\ai_code\\ai-tutor-agent\\data\\course_materials\\artificial_intelligence\\splits\\leedl_chapter_10_p186-210_第_10_章_自监督学习.pdf",
+  "source_filename": "leedl_chapter_10_p186-210_第_10_章_自监督学习.pdf",
+  "source_size_bytes": 4128243,
+  "source_mtime": 1779694337,
+  "cache_key": "c51dd4bae3b8",
+  "batch_id": "9f4762bd-7ada-4ba7-956c-74953a0039c0",
+  "full_zip_url": "https://cdn-mineru.openxlab.org.cn/pdf/2026-05-25/407e734c-d773-48c5-84e4-844aec48ff06.zip",
+  "saved_at": 1779695392,
+  "proxy_mode": "inherit",
+  "proxy_desc": "继承环境变量 HTTP_PROXY / HTTPS_PROXY",
+  "full_md_path": "full.md",
+  "relative_md_path_in_extract": "full.md",
+  "result_zip_path": "result.zip",
+  "extract_dir": "extracted"
+}

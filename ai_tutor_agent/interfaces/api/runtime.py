@@ -381,6 +381,7 @@ def _build_graph_rag_pipeline(settings: Settings) -> GraphRAGPipeline | None:
         graph_rag_pipeline = GraphRAGPipeline(
             enable_llm=settings.graph_rag_enable_llm,
             llm_profile=graph_llm_profile,
+            course_id=settings.default_course_id,
         )
         mode = f"LLM={'开启' if settings.graph_rag_enable_llm else '关闭'}"
         print(f"🕸️ Web: 图谱搜索 2.2 已加载（{mode}, profile={graph_llm_profile or 'default'}）。")

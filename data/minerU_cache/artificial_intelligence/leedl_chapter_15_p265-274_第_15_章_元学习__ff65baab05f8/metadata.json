@@ -1,0 +1,17 @@
+{
+  "version": 1,
+  "source_path": "E:\\ai_code\\ai-tutor-agent\\data\\course_materials\\artificial_intelligence\\splits\\leedl_chapter_15_p265-274_第_15_章_元学习.pdf",
+  "source_filename": "leedl_chapter_15_p265-274_第_15_章_元学习.pdf",
+  "source_size_bytes": 3090860,
+  "source_mtime": 1779694337,
+  "cache_key": "ff65baab05f8",
+  "batch_id": "efa94c53-930c-475f-9e46-0b50057d0bfa",
+  "full_zip_url": "https://cdn-mineru.openxlab.org.cn/pdf/2026-05-25/238cfe9c-79f6-4012-8e01-6e8278b8d3a9.zip",
+  "saved_at": 1779695764,
+  "proxy_mode": "inherit",
+  "proxy_desc": "继承环境变量 HTTP_PROXY / HTTPS_PROXY",
+  "full_md_path": "full.md",
+  "relative_md_path_in_extract": "full.md",
+  "result_zip_path": "result.zip",
+  "extract_dir": "extracted"
+}

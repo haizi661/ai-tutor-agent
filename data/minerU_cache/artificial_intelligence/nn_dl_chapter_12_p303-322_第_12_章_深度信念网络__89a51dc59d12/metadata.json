@@ -1,0 +1,17 @@
+{
+  "version": 1,
+  "source_path": "E:\\ai_code\\ai-tutor-agent\\data\\course_materials\\artificial_intelligence\\splits\\nn_dl_chapter_12_p303-322_第_12_章_深度信念网络.pdf",
+  "source_filename": "nn_dl_chapter_12_p303-322_第_12_章_深度信念网络.pdf",
+  "source_size_bytes": 916568,
+  "source_mtime": 1779694338,
+  "cache_key": "89a51dc59d12",
+  "batch_id": "82851201-100d-4894-a94a-21d68a89ef42",
+  "full_zip_url": "https://cdn-mineru.openxlab.org.cn/pdf/2026-05-25/0329220b-8cdd-49c3-906d-84252bd6b44e.zip",
+  "saved_at": 1779697022,
+  "proxy_mode": "inherit",
+  "proxy_desc": "继承环境变量 HTTP_PROXY / HTTPS_PROXY",
+  "full_md_path": "full.md",
+  "relative_md_path_in_extract": "full.md",
+  "result_zip_path": "result.zip",
+  "extract_dir": "extracted"
+}
