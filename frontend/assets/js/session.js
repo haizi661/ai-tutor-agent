@@ -4,10 +4,24 @@
     const DEFAULT_CHAT_PLACEHOLDER = '输入问题…';
     const ANSWER_CHAT_PLACEHOLDER = '输入回答…';
 
-    function closeEventSource() {
-        if (!state.eventSource) return;
-        state.eventSource.close();
-        state.eventSource = null;
+    // ── 加载图谱数据用于学习路径面板 ──────────────────────────────────────
+    async function loadGraphDataForPathPanel() {
+        try {
+            const resp = await fetch('/api/graph/b/data.json');
+            if (!resp.ok) return;
+            const data = await resp.json();
+            if (data && Array.isArray(data.nodes)) {
+                state.learningPathNodes = data.nodes;
+                app.showLearningPathPanel?.();
+                app.updateLearningPathPanel?.({
+                    nodes: data.nodes,
+                    currentNodeId: state.currentGraphNodeId,
+                    userKnowledgeGraph: state.userKnowledgeGraph,
+                });
+            }
+        } catch (err) {
+            console.warn('Failed to load graph data for path panel:', err);
+        }
     }
 
     function safelyParseEventData(raw) {
@@ -16,6 +30,12 @@
         } catch (_error) {
             return {};
         }
+    }
+
+    function closeEventSource() {
+        if (!state.eventSource) return;
+        state.eventSource.close();
+        state.eventSource = null;
     }
 
     function appendMeta(kind, text, tone = 'info', { createIfStreaming = true, fallbackToSystem = true } = {}) {
@@ -407,6 +427,10 @@
                     title: state.currentGraphNode,
                     id: state.currentGraphNodeId,
                 });
+                // 首次选择节点时，加载图谱数据并显示学习路径面板
+                if (!state.learningPathNodes) {
+                    loadGraphDataForPathPanel();
+                }
             }
             // 学习路径卡片：当 next_node_planner 推荐下一节点时显示
             if (data.source === 'next_node_planner' && data.data?.next_node_candidate) {
@@ -477,6 +501,15 @@
             }
             app.syncKnowledgeGraphVisualState?.();
             app.scheduleSidebarUpdate?.();
+            // 更新学习路径面板
+            if (state.learningPathNodes && state.learningPathNodes.length > 0) {
+                app.showLearningPathPanel?.();
+                app.updateLearningPathPanel?.({
+                    nodes: state.learningPathNodes,
+                    currentNodeId: state.currentGraphNodeId,
+                    userKnowledgeGraph: state.userKnowledgeGraph,
+                });
+            }
         });
 
         // ── 用户知识图谱全量同步（测评完成后触发）──
@@ -487,6 +520,14 @@
             app.refreshUserKgMapIfOpen?.();
             app.syncKnowledgeGraphVisualState?.();
             app.scheduleSidebarUpdate?.();
+            // 更新学习路径面板
+            if (state.learningPathNodes && state.learningPathNodes.length > 0) {
+                app.updateLearningPathPanel?.({
+                    nodes: state.learningPathNodes,
+                    currentNodeId: state.currentGraphNodeId,
+                    userKnowledgeGraph: state.userKnowledgeGraph,
+                });
+            }
         });
 
         state.eventSource.addEventListener('session.info', e => {

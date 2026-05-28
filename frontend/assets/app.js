@@ -240,6 +240,101 @@
         iframe.onload = () => app.syncKnowledgeGraphVisualState?.();
     };
 
+    // ── 学习路径面板控制 ──────────────────────────────────────────────────
+    app.toggleLearningPathPanel = function toggleLearningPathPanel(collapse) {
+        const panel = document.getElementById('learning-path-panel');
+        if (!panel) return;
+        const isCollapsed = collapse !== undefined ? collapse : !panel.classList.contains('lp-collapsed');
+        panel.classList.toggle('lp-collapsed', isCollapsed);
+        const btn = document.getElementById('lp-panel-toggle');
+        if (btn) {
+            btn.setAttribute('aria-label', isCollapsed ? '展开学习路径面板' : '折叠学习路径面板');
+        }
+    };
+
+    app.showLearningPathPanel = function showLearningPathPanel() {
+        const panel = document.getElementById('learning-path-panel');
+        if (panel) {
+            panel.hidden = false;
+        }
+    };
+
+    app.hideLearningPathPanel = function hideLearningPathPanel() {
+        const panel = document.getElementById('learning-path-panel');
+        if (panel) {
+            panel.hidden = true;
+        }
+    };
+
+    app.updateLearningPathPanel = function updateLearningPathPanel(graphData) {
+        const content = document.getElementById('lp-panel-content');
+        if (!content || !graphData) return;
+
+        const { nodes = [], currentNodeId, userKnowledgeGraph = {} } = graphData;
+
+        // Group nodes by chapter
+        const chapters = {};
+        nodes.forEach(node => {
+            const chapter = node.chapter || '未分类';
+            if (!chapters[chapter]) {
+                chapters[chapter] = { name: chapter, nodes: [], completed: 0, total: 0 };
+            }
+            chapters[chapter].nodes.push(node);
+            chapters[chapter].total++;
+            const kgEntry = userKnowledgeGraph[node.name] || {};
+            if (kgEntry.status === 'mastered' || kgEntry.status === 'completed') {
+                chapters[chapter].completed++;
+            }
+        });
+
+        // Determine current chapter
+        const currentNode = nodes.find(n => n.node_id === currentNodeId);
+        const currentChapter = currentNode?.chapter || '';
+
+        let html = '<div class="lp-node-list">';
+        Object.values(chapters).forEach(chapter => {
+            const isCurrent = chapter.name === currentChapter;
+            const isCompleted = chapter.completed === chapter.total && chapter.total > 0;
+            const chapterClass = isCurrent ? 'is-current' : isCompleted ? 'is-completed' : '';
+
+            html += `
+                <div class="lp-chapter ${chapterClass}" data-chapter="${chapter.name}">
+                    <div class="lp-chapter-header" onclick="this.parentElement.classList.toggle('expanded')">
+                        <div class="lp-chapter-info">
+                            <div class="lp-chapter-marker">${isCompleted ? '✓' : chapter.name.charAt(0)}</div>
+                            <span class="lp-chapter-name">${chapter.name}</span>
+                        </div>
+                        <span class="lp-chapter-progress">${chapter.completed}/${chapter.total}</span>
+                    </div>
+                    <div class="lp-chapter-nodes">
+            `;
+            chapter.nodes.forEach(node => {
+                const kgEntry = userKnowledgeGraph[node.name] || {};
+                const isNodeCurrent = node.node_id === currentNodeId;
+                const nodeStatus = isNodeCurrent ? 'is-current' : kgEntry.status === 'mastered' ? 'is-completed' : kgEntry.status === 'in_progress' ? 'is-in-progress' : '';
+                html += `
+                        <div class="lp-node ${nodeStatus}" data-node-id="${node.node_id}" onclick="app.focusGraphNode?.('${node.node_id}')">
+                            <div class="lp-node-dot"></div>
+                            <span class="lp-node-name">${node.name}</span>
+                        </div>
+                `;
+            });
+            html += `
+                    </div>
+                </div>
+            `;
+        });
+        html += '</div>';
+
+        content.innerHTML = html;
+
+        // Auto-expand current chapter
+        const currentChapterEl = content.querySelector('.lp-chapter.is-current');
+        if (currentChapterEl) {
+            currentChapterEl.classList.add('expanded');
+        }
+    };
+
     app.closeKnowledgeGraphModal = function closeKnowledgeGraphModal(event) {
         if (event && event.target && event.target !== event.currentTarget) return;
         setModalOpen('knowledge-graph-modal', false);

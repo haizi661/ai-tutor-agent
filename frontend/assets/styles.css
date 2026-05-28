@@ -1340,6 +1340,249 @@ body.header-collapsed .header {
     background: color-mix(in oklab, var(--accent-moss) 10%, var(--paper));
 }
 
+/* ── 学习路径面板（右侧） ────────────────────────────────────────────── */
+.learning-path-panel {
+    flex: 0 0 clamp(16rem, 18vw, 20rem);
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    border-left: 1px solid var(--line-soft);
+    background:
+        radial-gradient(circle at 90% 10%, color-mix(in oklab, var(--accent-moss) 5%, transparent), transparent 40%),
+        linear-gradient(180deg, color-mix(in oklab, var(--paper) 96%, white 2%), color-mix(in oklab, var(--bg-panel) 98%, var(--paper)));
+    transition: flex-basis 0.25s ease, opacity 0.2s ease;
+    overflow: hidden;
+}
+
+.learning-path-panel[hidden] {
+    display: none;
+}
+
+.learning-path-panel.lp-collapsed {
+    flex-basis: 2.8rem;
+}
+
+.learning-path-panel.lp-collapsed .lp-panel-content {
+    display: none;
+}
+
+.learning-path-panel.lp-collapsed .lp-panel-toggle svg {
+    transform: rotate(180deg);
+}
+
+.lp-panel-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.75rem 0.85rem;
+    border-bottom: 1px solid var(--line-soft);
+    min-height: 52px;
+}
+
+.lp-panel-title-row {
+    display: flex;
+    align-items: center;
+    gap: 0.45rem;
+}
+
+.lp-panel-icon {
+    font-size: 1rem;
+}
+
+.lp-panel-title {
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: var(--ink-strong);
+}
+
+.lp-panel-toggle {
+    width: 1.8rem;
+    height: 1.8rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid var(--line);
+    border-radius: 0.5rem;
+    background: var(--paper);
+    color: var(--ink-muted);
+    cursor: pointer;
+    transition: background 0.15s, color 0.15s;
+}
+
+.lp-panel-toggle:hover {
+    background: color-mix(in oklab, var(--accent-moss) 8%, var(--paper));
+    color: var(--ink);
+}
+
+.lp-panel-toggle svg {
+    transition: transform 0.2s ease;
+}
+
+.lp-panel-content {
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+    padding: 0.75rem;
+}
+
+.lp-panel-empty {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    color: var(--ink-muted);
+    font-size: 0.8rem;
+    text-align: center;
+    padding: 1rem;
+}
+
+/* ── 学习路径节点列表 ────────────────────────────────────────────── */
+.lp-node-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.lp-chapter {
+    border: 1px solid var(--line);
+    border-radius: 0.75rem;
+    overflow: hidden;
+    background: var(--paper);
+}
+
+.lp-chapter-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.65rem 0.75rem;
+    cursor: pointer;
+    transition: background 0.15s;
+}
+
+.lp-chapter-header:hover {
+    background: color-mix(in oklab, var(--accent-moss) 4%, var(--paper));
+}
+
+.lp-chapter-info {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    min-width: 0;
+}
+
+.lp-chapter-marker {
+    width: 1.4rem;
+    height: 1.4rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    font-size: 0.65rem;
+    font-weight: 700;
+    flex-shrink: 0;
+    border: 2px solid var(--line);
+    color: var(--ink-muted);
+    background: var(--paper);
+}
+
+.lp-chapter.is-current .lp-chapter-marker {
+    border-color: #f97316;
+    color: #9a3412;
+    background: #fed7aa;
+}
+
+.lp-chapter.is-completed .lp-chapter-marker {
+    border-color: #22c55e;
+    color: #15803d;
+    background: #dcfce7;
+}
+
+.lp-chapter-name {
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: var(--ink-strong);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.lp-chapter-progress {
+    font-size: 0.65rem;
+    color: var(--ink-muted);
+    flex-shrink: 0;
+}
+
+.lp-chapter-nodes {
+    display: none;
+    border-top: 1px solid var(--line-soft);
+    padding: 0.5rem;
+    background: color-mix(in oklab, var(--bg-soft) 30%, var(--paper));
+}
+
+.lp-chapter.expanded .lp-chapter-nodes {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+}
+
+.lp-node {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.45rem 0.55rem;
+    border: 1px solid transparent;
+    border-radius: 0.6rem;
+    cursor: pointer;
+    transition: background 0.15s, border-color 0.15s;
+}
+
+.lp-node:hover {
+    background: var(--paper);
+    border-color: var(--line);
+}
+
+.lp-node-dot {
+    width: 0.6rem;
+    height: 0.6rem;
+    border-radius: 50%;
+    background: var(--line);
+    flex-shrink: 0;
+    transition: background 0.15s;
+}
+
+.lp-node.is-current .lp-node-dot {
+    background: #f97316;
+    box-shadow: 0 0 0 3px rgba(249, 115, 22, 0.2);
+}
+
+.lp-node.is-completed .lp-node-dot {
+    background: #22c55e;
+}
+
+.lp-node.is-in-progress .lp-node-dot {
+    background: #38bdf8;
+}
+
+.lp-node-name {
+    font-size: 0.72rem;
+    color: var(--ink);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.lp-node.is-current .lp-node-name {
+    font-weight: 600;
+    color: var(--ink-strong);
+}
+
+/* ── 响应式：小屏幕隐藏面板 ────────────────────────────────────── */
+@media (max-width: 1200px) {
+    .learning-path-panel {
+        display: none;
+    }
+}
+
 .chat-topline {
     padding: 1.1rem clamp(1rem, 1.3vw + 0.6rem, 1.55rem) 0.85rem;
     border-bottom: 1px solid transparent;
