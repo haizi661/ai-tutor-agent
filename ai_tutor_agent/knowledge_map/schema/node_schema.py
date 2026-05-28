@@ -4,11 +4,13 @@ import copy
 from typing import Any
 
 
+# 节点字段分组：后面前端编辑时可以直接按组渲染
 NODE_FIELD_GROUPS: dict[str, list[str]] = {
     "basic": [
         "node_id",
         "name",
         "chapter",
+        "level",
         "summary",
         "tags",
         "keep",
@@ -38,6 +40,7 @@ NODE_FIELD_GROUPS: dict[str, list[str]] = {
         "related_nodes",
         "application_nodes",
         "recommended_next_nodes",
+        "part_of",
     ],
     "meta": [
         "extra",
@@ -45,10 +48,13 @@ NODE_FIELD_GROUPS: dict[str, list[str]] = {
 }
 
 
+# 节点默认字段模板
+# 后期你们要改字段名、加字段，优先改这里
 NODE_DEFAULT_TEMPLATE: dict[str, Any] = {
     "node_id": "",
     "name": "",
     "chapter": "",
+    "level": 1,
     "summary": "",
     "tags": [],
     "requirement_level": "",
@@ -72,76 +78,51 @@ NODE_DEFAULT_TEMPLATE: dict[str, Any] = {
     "related_nodes": [],
     "application_nodes": [],
     "recommended_next_nodes": [],
+    "part_of": "",
     "keep": True,
     "source_type": "skeleton",
     "extra": {},
 }
 
 
+# 边默认字段模板
 EDGE_DEFAULT_TEMPLATE: dict[str, Any] = {
     "edge_id": "",
     "source": "",
     "target": "",
     "relation": "",
-    "relation_type": "",
     "relation_label": "",
-    "relation_strength": 0.0,
-    "direction_type": "undirected",
     "keep": True,
-    "weight": 0.0,
+    "weight": 1.0,
     "source_type": "rule",
     "evidence": "",
-    "relation_note": "",
     "extra": {},
 }
 
 
-LEGACY_NODE_KEY_MAP: dict[str, str] = {
-    "level": "legacy_level",
-    "part_of": "legacy_part_of",
-}
-
-
 def build_empty_node() -> dict[str, Any]:
+    """构建一个空节点模板。"""
     return copy.deepcopy(NODE_DEFAULT_TEMPLATE)
 
 
 def build_empty_edge() -> dict[str, Any]:
+    """构建一条空边模板。"""
     return copy.deepcopy(EDGE_DEFAULT_TEMPLATE)
 
 
 def normalize_node_record(record: dict[str, Any]) -> dict[str, Any]:
-    record = copy.deepcopy(record or {})
-    extra = copy.deepcopy(record.get("extra", {}) or {})
-
-    for legacy_key, extra_key in LEGACY_NODE_KEY_MAP.items():
-        if legacy_key in record:
-            extra.setdefault(extra_key, record.pop(legacy_key))
-
+    """
+    用默认模板补齐缺失字段，保证后续 DataFrame / JSON 导出稳定。
+    """
     node = build_empty_node()
-    node.update(record)
-    node["extra"] = extra
+    node.update(record or {})
     return node
 
 
 def normalize_edge_record(record: dict[str, Any]) -> dict[str, Any]:
+    """
+    用默认模板补齐缺失字段，保证后续 DataFrame / JSON 导出稳定。
+    """
     edge = build_empty_edge()
-    edge.update(copy.deepcopy(record or {}))
-
-    if not edge.get("relation_type"):
-        edge["relation_type"] = edge.get("relation", "")
-    if not edge.get("relation"):
-        edge["relation"] = edge.get("relation_type", "")
-
-    strength = edge.get("relation_strength")
-    weight = edge.get("weight")
-
-    if (strength is None or strength == 0.0) and weight not in (None, 0.0):
-        edge["relation_strength"] = float(weight)
-    elif weight in (None, 0.0) and strength not in (None, 0.0):
-        edge["weight"] = float(strength)
-
-    if edge.get("direction_type") not in {"directed", "undirected"}:
-        edge["direction_type"] = "undirected"
-
+    edge.update(record or {})
     return edge
