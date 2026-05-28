@@ -25,6 +25,9 @@ class AgentState(TypedDict):
     homework_status: str               # none/pending/completed
     homework_assignment_id: str         # 当前作业批次 ID
     student_state_snapshot: dict       # StudentStateStore 读取到的快照
+    learning_track: str                # 当前会话学习方向: control_theory/artificial_intelligence
+    learning_track_label: str          # 当前会话学习方向中文名
+    learning_track_locked: bool        # 学习方向是否已固定
     current_topic: str
     current_user_goal: str
     session_goal: str
@@ -130,6 +133,9 @@ def build_initial_state(topic: str = "") -> AgentState:
         "homework_status": "none",
         "homework_assignment_id": "",
         "student_state_snapshot": {},
+        "learning_track": "",
+        "learning_track_label": "",
+        "learning_track_locked": False,
         "student_id": "default_student",
         "skip_reason": "",
         "interrupt_query": "",

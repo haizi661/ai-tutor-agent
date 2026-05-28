@@ -47,6 +47,11 @@ class CreateSessionRequest(BaseModel):
     thread_id: str
 
 
+class LearningDirectionRequest(BaseModel):
+    track: str
+    label: Optional[str] = ""
+
+
 class AnswerRequest(BaseModel):
     thread_id: str
     answer: str
@@ -86,6 +91,77 @@ class ThinkingModeRequest(BaseModel):
 
 def _thread_config(thread_id: str) -> dict:
     return {"configurable": {"thread_id": thread_id}}
+
+
+LEARNING_DIRECTIONS = {
+    "control_theory": {
+        "track": "control_theory",
+        "label": "自动控制原理",
+        "topic": "自动控制原理",
+    },
+    "artificial_intelligence": {
+        "track": "artificial_intelligence",
+        "label": "人工智能",
+        "topic": "人工智能学习路径",
+    },
+}
+
+LEARNING_DIRECTION_ALIASES = {
+    "control": "control_theory",
+    "auto_control": "control_theory",
+    "control_theory": "control_theory",
+    "a2-control-theory": "control_theory",
+    "自动控制": "control_theory",
+    "自动控制原理": "control_theory",
+    "ai": "artificial_intelligence",
+    "artificial_intelligence": "artificial_intelligence",
+    "artificial-intelligence": "artificial_intelligence",
+    "人工智能": "artificial_intelligence",
+}
+
+
+def _normalize_learning_direction(track: str) -> dict:
+    normalized = str(track or "").strip().lower()
+    normalized = LEARNING_DIRECTION_ALIASES.get(normalized, normalized)
+    if normalized not in LEARNING_DIRECTIONS:
+        raise HTTPException(status_code=400, detail=f"Unsupported learning direction: {track}")
+    return LEARNING_DIRECTIONS[normalized]
+
+
+def _append_learning_direction_history(history: list, direction: dict) -> list:
+    track = direction["track"]
+    label = direction["label"]
+    filtered = [
+        item
+        for item in list(history or [])
+        if not (
+            isinstance(item, dict)
+            and str(item.get("kind") or "").strip() in {"course_choice_card", "course_choice_selection"}
+        )
+    ]
+    return filtered + [
+        {
+            "role": "assistant",
+            "kind": "course_choice_card",
+            "content": "请选择本次学习方向",
+            "data": {
+                "selected_track": track,
+                "selected_label": label,
+                "locked": True,
+                "statusText": f"已选择：{label}",
+                "options": [
+                    {"track": "control_theory", "label": "自动控制原理"},
+                    {"track": "artificial_intelligence", "label": "人工智能"},
+                ],
+            },
+        },
+        {
+            "role": "user",
+            "kind": "course_choice_selection",
+            "content": label,
+            "data": {"track": track, "label": label},
+        },
+    ]
 
 
 def _checkpoint_state_patch(thread_id: str, runtime, patch: dict) -> None:
@@ -604,6 +680,71 @@ async def create_session(req: CreateSessionRequest, request: Request):
     created = _ensure_thread_checkpoint(thread_id, runtime)
     runtime.session_manager.get_or_create(thread_id)
     return {"status": "created" if created else "exists", "thread_id": thread_id}
+
+
+@router.post("/sessions/{thread_id}/learning-direction")
+async def set_learning_direction(thread_id: str, req: LearningDirectionRequest, request: Request):
+    runtime = get_runtime(request)
+    thread_id = thread_id.strip()
+    if not thread_id:
+        raise HTTPException(status_code=400, detail="thread_id is required")
+
+    direction = dict(_normalize_learning_direction(req.track))
+    if req.label and req.label.strip():
+        direction["label"] = req.label.strip()
+
+    _ensure_thread_checkpoint(thread_id, runtime)
+    runtime.session_manager.get_or_create(thread_id)
+
+    runtime_context = RuntimeContext(
+        knowledge_provider=runtime.knowledge_provider,
+        settings=runtime.settings,
+        graph_rag_pipeline=runtime.graph_rag_pipeline,
+        student_state_store=runtime.student_state_store,
+        question_bank_provider=getattr(runtime, "question_bank_provider", None),
+    )
+    graph_app, conn = runtime.workflow_factory(runtime.settings, runtime=runtime_context)
+    try:
+        thread_config = _thread_config(thread_id)
+        state = graph_app.get_state(thread_config).values or {}
+        existing_flow_status = str(state.get("flow_status") or "greeting").strip() or "greeting"
+        flow_status = (
+            "ai_path_active"
+            if direction["track"] == "artificial_intelligence"
+            and existing_flow_status in {"greeting", "topic_intake", "meta_qa", "smalltalk"}
+            else existing_flow_status
+        )
+        topic = str(state.get("current_topic") or "").strip()
+        if not topic:
+            topic = direction["topic"]
+
+        graph_app.update_state(
+            thread_config,
+            {
+                "learning_track": direction["track"],
+                "learning_track_label": direction["label"],
+                "learning_track_locked": True,
+                "current_topic": topic,
+                "current_user_goal": state.get("current_user_goal") or topic,
+                "session_goal": state.get("session_goal") or topic,
+                "turn_goal": state.get("turn_goal") or topic,
+                "flow_status": flow_status,
+                "message_history": _append_learning_direction_history(
+                    state.get("message_history") or [],
+                    direction,
+                ),
+            },
+        )
+    finally:
+        conn.close()
+
+    return {
+        "status": "success",
+        "thread_id": thread_id,
+        "learning_track": direction["track"],
+        "learning_track_label": direction["label"],
+        "locked": True,
+    }
 
 
 @router.post("/sessions/{thread_id}/resume")

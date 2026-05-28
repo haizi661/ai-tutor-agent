@@ -17,6 +17,11 @@ PRE_TOPIC_FLOW_STATUSES = {
     "meta_qa",
     "smalltalk",
 }
+LEARNING_DIRECTION_KEYS = (
+    "learning_track",
+    "learning_track_label",
+    "learning_track_locked",
+)
 ASK_PREFIXES = ("/ask", "问:", "问题:")
 QUESTION_HINTS = (
     "为什么",
@@ -171,6 +176,24 @@ def _clear_interrupt_history(history: list) -> list:
             continue
         cleaned.append(msg)
     return cleaned
+
+
+def _initial_state_preserving_learning_direction(topic: str, state_values: dict) -> dict:
+    initial_state = build_initial_state(topic)
+    for key in LEARNING_DIRECTION_KEYS:
+        if key in state_values:
+            initial_state[key] = state_values.get(key)
+
+    preserved_direction_history = [
+        item
+        for item in state_values.get("message_history", []) or []
+        if isinstance(item, dict)
+        and str(item.get("kind") or "").strip() in {"course_choice_card", "course_choice_selection"}
+    ]
+    topic_history = list(initial_state.get("message_history") or [])
+    if preserved_direction_history:
+        initial_state["message_history"] = preserved_direction_history + topic_history
+    return initial_state
 
 
 def _should_continue_with_new_turn(state_values: dict, topic: str) -> bool:
@@ -401,7 +424,7 @@ def run_learning_session(
                     },
                 )
             )
-            app.invoke(build_initial_state(topic), config=thread_config)
+            app.invoke(_initial_state_preserving_learning_direction(topic, state_values), config=thread_config)
             return
 
         if (
@@ -584,7 +607,7 @@ def run_learning_session(
                     data={"thread_id": thread_id, "topic": topic},
                 )
             )
-            app.invoke(build_initial_state(topic), config=thread_config)
+            app.invoke(_initial_state_preserving_learning_direction(topic, state_values), config=thread_config)
             return
 
         if state_values.get("flow_status") in PRE_TOPIC_FLOW_STATUSES:

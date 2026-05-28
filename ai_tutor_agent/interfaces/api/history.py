@@ -242,6 +242,9 @@ def _serialize_state(values: dict[str, Any]) -> dict[str, Any]:
         "homework_status": values.get("homework_status", ""),
         "post_lesson_choice": values.get("post_lesson_choice", ""),
         "continue_or_homework_choice": values.get("continue_or_homework_choice", ""),
+        "learning_track": values.get("learning_track", ""),
+        "learning_track_label": values.get("learning_track_label", ""),
+        "learning_track_locked": values.get("learning_track_locked", False),
         "is_assessed": values.get("is_assessed", False),
         "flow_status": values.get("flow_status", "greeting"),
     }
@@ -268,9 +271,12 @@ def _checkpoint_summary(thread_id: str, checkpoint_tuple, alias_title: str = "")
     flow_status = values.get("flow_status", "greeting")
     current_topic = str(values.get("current_topic", "") or "").strip()
     proposed_topic = str(values.get("proposed_topic", "") or "").strip()
+    learning_track_label = str(values.get("learning_track_label", "") or "").strip()
     custom_title = _normalize_custom_title(alias_title)
     if custom_title:
         display_title = custom_title
+    elif learning_track_label and flow_status == "ai_path_active":
+        display_title = learning_track_label
     elif flow_status == "awaiting_topic_confirmation" and proposed_topic:
         display_title = f"待确认：{proposed_topic}"
     elif flow_status in PRE_TOPIC_FLOW_STATUSES:
