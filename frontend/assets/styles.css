@@ -1217,6 +1217,129 @@ body.header-collapsed .header {
     border: none;
 }
 
+/* ── 学习路径卡片 ────────────────────────────────────────────────────── */
+.learning-path-card {
+    width: 100%;
+    overflow: hidden;
+    border: 1px solid color-mix(in oklab, var(--accent-moss) 18%, var(--line));
+    border-radius: 1rem;
+    background:
+        radial-gradient(circle at 8% 0%, color-mix(in oklab, var(--accent-moss) 10%, transparent), transparent 40%),
+        color-mix(in oklab, var(--paper) 92%, transparent);
+    box-shadow: 0 6px 20px rgba(33, 28, 55, 0.04);
+}
+
+.learning-path-header {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1rem;
+    border-bottom: 1px solid color-mix(in oklab, var(--accent-moss) 10%, var(--line-soft));
+}
+
+.learning-path-icon {
+    font-size: 1.1rem;
+}
+
+.learning-path-title {
+    font-size: 0.88rem;
+    font-weight: 700;
+    color: var(--ink-strong);
+}
+
+.learning-path-content {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 1rem;
+    flex-wrap: wrap;
+}
+
+.learning-path-node {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    flex: 1;
+    min-width: 140px;
+}
+
+.learning-path-node-marker {
+    width: 1.6rem;
+    height: 1.6rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    font-size: 0.75rem;
+    font-weight: 700;
+    flex-shrink: 0;
+}
+
+.learning-path-node--current .learning-path-node-marker {
+    background: color-mix(in oklab, var(--accent-moss) 20%, var(--paper));
+    color: var(--accent-moss-strong);
+    border: 2px solid var(--accent-moss);
+}
+
+.learning-path-node--next .learning-path-node-marker {
+    background: color-mix(in oklab, var(--accent-slate) 12%, var(--paper));
+    color: var(--accent-slate);
+    border: 2px solid color-mix(in oklab, var(--accent-slate) 30%, var(--line));
+}
+
+.learning-path-node-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.learning-path-node-label {
+    font-size: 0.7rem;
+    color: var(--ink-muted);
+    margin-bottom: 0.15rem;
+}
+
+.learning-path-node-name {
+    font-size: 0.88rem;
+    font-weight: 600;
+    color: var(--ink-strong);
+    line-height: 1.3;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+}
+
+.learning-path-arrow {
+    font-size: 1.2rem;
+    color: var(--ink-muted);
+    flex-shrink: 0;
+}
+
+.learning-path-footer {
+    display: flex;
+    justify-content: flex-end;
+    padding: 0.5rem 1rem 0.75rem;
+    border-top: 1px solid color-mix(in oklab, var(--accent-moss) 6%, var(--line-soft));
+}
+
+.learning-path-btn {
+    min-height: 1.8rem;
+    padding: 0.25rem 0.65rem;
+    border: 1px solid color-mix(in oklab, var(--accent-moss) 20%, var(--line));
+    border-radius: 999px;
+    background: color-mix(in oklab, var(--paper) 85%, var(--accent-moss) 5%);
+    color: var(--ink);
+    font-size: 0.72rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.15s;
+}
+
+.learning-path-btn:hover {
+    background: color-mix(in oklab, var(--accent-moss) 10%, var(--paper));
+}
+
 .chat-topline {
     padding: 1.1rem clamp(1rem, 1.3vw + 0.6rem, 1.55rem) 0.85rem;
     border-bottom: 1px solid transparent;

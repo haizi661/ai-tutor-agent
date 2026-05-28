@@ -408,6 +408,16 @@
                     id: state.currentGraphNodeId,
                 });
             }
+            // 学习路径卡片：当 next_node_planner 推荐下一节点时显示
+            if (data.source === 'next_node_planner' && data.data?.next_node_candidate) {
+                app.renderLearningPathCard?.({
+                    currentNode: state.currentGraphNode || '',
+                    currentNodeId: state.currentGraphNodeId || '',
+                    nextNode: data.data.next_node_candidate.name || data.data.next_node_candidate.node_id || '',
+                    nextNodeId: data.data.next_node_candidate.node_id || '',
+                    reason: data.data.reason || '',
+                });
+            }
             const evidence = Array.isArray(data.data?.evidence) ? data.data.evidence : [];
             if (data.source === 'tutor' && evidence.length) {
                 app.renderEvidencePanel?.(evidence, { tone: 'info', role: 'tutor' });

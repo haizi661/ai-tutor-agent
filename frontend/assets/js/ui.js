@@ -988,6 +988,54 @@
         if (state.userKgMapOpen) app.renderUserKnowledgeMap();
     };
 
+    /** 渲染学习路径卡片：显示当前节点和下一节点 */
+    app.renderLearningPathCard = function renderLearningPathCard(payload = {}) {
+        const container = document.getElementById('messages');
+        if (!container) return;
+        const { currentNode, currentNodeId, nextNode, nextNodeId, reason } = payload;
+        if (!nextNode) return;
+
+        const row = createAssistantCardRow('learning-path-card-row');
+        const card = document.createElement('section');
+        card.className = 'learning-path-card prompt-flow-card';
+
+        const reasonText = reason === 'related_unvisited' ? '前置知识已掌握，推荐进入'
+            : reason === 'smallest_unvisited' ? '按图谱顺序推进'
+            : '推荐下一步';
+
+        card.innerHTML = `
+            <div class="learning-path-header">
+                <div class="learning-path-icon">📚</div>
+                <div class="learning-path-title">学习路径</div>
+            </div>
+            <div class="learning-path-content">
+                ${currentNode ? `
+                <div class="learning-path-node learning-path-node--current">
+                    <div class="learning-path-node-marker">✓</div>
+                    <div class="learning-path-node-info">
+                        <div class="learning-path-node-label">当前节点</div>
+                        <div class="learning-path-node-name">${currentNode}</div>
+                    </div>
+                </div>
+                <div class="learning-path-arrow">→</div>
+                ` : ''}
+                <div class="learning-path-node learning-path-node--next">
+                    <div class="learning-path-node-marker">○</div>
+                    <div class="learning-path-node-info">
+                        <div class="learning-path-node-label">${reasonText}</div>
+                        <div class="learning-path-node-name">${nextNode}</div>
+                    </div>
+                </div>
+            </div>
+            <div class="learning-path-footer">
+                <button type="button" class="learning-path-btn learning-path-btn--graph" onclick="app.openKnowledgeGraphModal?.()">查看完整图谱</button>
+            </div>
+        `;
+        row.body.appendChild(card);
+        container.appendChild(row.wrap);
+        app.scrollMessagesToBottom?.();
+    };
+
     /** 在消息流中插入一条图谱事件 chip */
     function _appendGraphEventChip(text, kind) {
         const container = document.getElementById('messages');
