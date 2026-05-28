@@ -32,7 +32,10 @@
 
     function clearMessages() {
         const messages = document.getElementById('messages');
-        if (messages) messages.innerHTML = '';
+        if (messages) {
+            messages.innerHTML = '';
+            app.refreshChatSurfaceState?.();
+        }
     }
 
     function appendAgent(text) {
@@ -61,10 +64,83 @@
 
         messages.appendChild(row);
         messages.scrollTop = messages.scrollHeight;
+        app.refreshChatSurfaceState?.();
     }
 
     function makeThreadId() {
         return app.makeThreadId ? app.makeThreadId() : `ai_path_${Date.now()}`;
+    }
+
+    const COURSE_DIRECTIONS = {
+        control_theory: {
+            track: 'control_theory',
+            label: '自动控制原理',
+            description: '沿用原来的知识图谱伴学流程',
+            topic: '自动控制原理',
+        },
+        artificial_intelligence: {
+            track: 'artificial_intelligence',
+            label: '人工智能',
+            description: '通过多轮问答生成定制化学习路径',
+            topic: '人工智能学习路径',
+        },
+    };
+
+    function normalizeLearningTrack(track) {
+        const raw = String(track || '').trim().toLowerCase();
+        if (['ai', 'artificial_intelligence', 'artificial-intelligence', '人工智能'].includes(raw)) {
+            return 'artificial_intelligence';
+        }
+        if (['control', 'auto_control', 'control_theory', 'a2-control-theory', '自动控制', '自动控制原理'].includes(raw)) {
+            return 'control_theory';
+        }
+        return raw && COURSE_DIRECTIONS[raw] ? raw : '';
+    }
+
+    function inferLearningTrackFromText(text) {
+        const value = String(text || '').trim().toLowerCase();
+        if (!value) return 'control_theory';
+        if (/(人工智能|机器学习|深度学习|神经网络|大模型|llm|rag|yolo|目标检测|强化学习|ai\b)/i.test(value)) {
+            return 'artificial_intelligence';
+        }
+        return 'control_theory';
+    }
+
+    async function ensureCurrentThread() {
+        if (!state.currentThreadId) {
+            state.currentThreadId = makeThreadId();
+            window.localStorage?.setItem?.('ai_tutor_last_thread_id', state.currentThreadId);
+        }
+        try {
+            await postJson('/api/sessions', { thread_id: state.currentThreadId });
+        } catch (_error) {
+            // 方向选择本身仍可在前端固定；后续发送时 /api/start 会再次创建检查点。
+        }
+        return state.currentThreadId;
+    }
+
+    function patchLearningDirection(track) {
+        const normalized = normalizeLearningTrack(track);
+        const direction = COURSE_DIRECTIONS[normalized] || COURSE_DIRECTIONS.control_theory;
+        app.patchState?.({
+            learningTrack: direction.track,
+            learningTrackLabel: direction.label,
+            learningTrackLocked: true,
+            currentTopic: state.currentTopic || direction.topic,
+            graphTopicHint: state.graphTopicHint || direction.topic,
+        }, 'learning-direction');
+        return direction;
+    }
+
+    async function persistLearningDirection(track) {
+        const direction = patchLearningDirection(track);
+        const threadId = await ensureCurrentThread();
+        const data = await postJson(`/api/sessions/${encodeURIComponent(threadId)}/learning-direction`, {
+            track: direction.track,
+            label: direction.label,
+        });
+        app.fetchHistory?.();
+        return data;
     }
 
     function setAiMode(active) {
@@ -96,6 +172,7 @@
 
         messages.appendChild(row);
         messages.scrollTop = messages.scrollHeight;
+        app.refreshChatSurfaceState?.();
         return row;
     }
 
@@ -176,15 +253,39 @@
         app.applyPrimaryActionState?.();
     }
 
-    function renderCourseChoice() {
+    function renderCourseChoiceCard({
+        locked = false,
+        selectedTrack = state.learningTrack,
+        selectedLabel = state.learningTrackLabel,
+        statusText = '',
+        append = true,
+    } = {}) {
         setAiMode(false);
-        clearMessages();
 
         const messages = document.getElementById('messages');
-        if (!messages) return;
+        if (!messages) return null;
 
+        const direction = COURSE_DIRECTIONS[normalizeLearningTrack(selectedTrack)] || null;
+        const label = selectedLabel || direction?.label || '';
         const card = document.createElement('section');
-        card.className = 'course-choice-card';
+        card.className = `course-choice-card ${locked ? 'is-locked' : ''}`.trim();
+
+        if (locked && label) {
+            card.innerHTML = `
+                <div class="course-choice-kicker">LEARNING SESSION</div>
+                <h2>学习方向已固定</h2>
+                <p>本聊天后续会按已选择方向推进；刷新或从历史恢复时也会保留这个方向。</p>
+                <div class="course-choice-locked">
+                    <strong>${escapeHtml(label)}</strong>
+                    <span>${escapeHtml(statusText || `已选择：${label}`)}</span>
+                </div>
+            `;
+            if (append) messages.appendChild(card);
+            messages.scrollTop = messages.scrollHeight;
+            app.refreshChatSurfaceState?.();
+            return card;
+        }
+
         card.innerHTML = `
             <div class="course-choice-kicker">NEW LEARNING SESSION</div>
             <h2>请选择本次学习方向</h2>
@@ -201,27 +302,79 @@
             </div>
         `;
 
-        messages.appendChild(card);
+        if (append) messages.appendChild(card);
 
         document.getElementById('course-choice-auto')?.addEventListener('click', () => {
-            setAiMode(false);
-            if (originalStartNewSession) originalStartNewSession();
-            app.setStatusBanner?.('已选择自动控制原理', 'success');
+            selectLearningDirection('control_theory');
         });
 
         document.getElementById('course-choice-ai')?.addEventListener('click', () => {
-            startAiPathDialogue();
+            selectLearningDirection('artificial_intelligence');
         });
 
         app.setStatusBanner?.('请选择学习方向', 'awaiting');
+        messages.scrollTop = messages.scrollHeight;
+        app.refreshChatSurfaceState?.();
+        return card;
     }
 
-    async function startAiPathDialogue() {
-        setAiMode(true);
+    function renderCourseChoice() {
+        setAiMode(false);
         clearMessages();
+        renderCourseChoiceCard();
+    }
+
+    function lockVisibleCourseChoiceCard(direction) {
+        const existing = document.querySelector('.course-choice-card:not(.is-locked)');
+        const lockedCard = renderCourseChoiceCard({
+            locked: true,
+            selectedTrack: direction.track,
+            selectedLabel: direction.label,
+            statusText: `已选择：${direction.label}`,
+            append: false,
+        });
+        if (!lockedCard) return;
+        if (existing) {
+            existing.replaceWith(lockedCard);
+        } else {
+            document.getElementById('messages')?.appendChild(lockedCard);
+        }
+    }
+
+    async function selectLearningDirection(track) {
+        const direction = patchLearningDirection(track);
+        lockVisibleCourseChoiceCard(direction);
+        app.setStatusBanner?.(`已选择${direction.label}`, 'success');
+        try {
+            await persistLearningDirection(direction.track);
+        } catch (error) {
+            app.setStatusBanner?.(`方向已固定，但保存失败：${error.message}`, 'warning');
+        }
+        if (direction.track === 'artificial_intelligence') {
+            await startAiPathDialogue({ preserveMessages: true, reuseThread: true });
+            return;
+        }
+        setAiMode(false);
+        app.setChatInputPlaceholder?.('输入你想学的自动控制原理内容，例如：二阶系统时域分析');
+        app.applyPrimaryActionState?.();
+    }
+
+    async function startAiPathDialogue({ preserveMessages = false, reuseThread = true } = {}) {
+        const shouldPersistDirection = state.learningTrack !== 'artificial_intelligence' || !state.learningTrackLocked;
+        patchLearningDirection('artificial_intelligence');
+        setAiMode(true);
+        if (!preserveMessages) clearMessages();
         ensureAiPathSidePanel();
 
-        state.currentThreadId = makeThreadId();
+        if (!reuseThread || !state.currentThreadId) {
+            state.currentThreadId = makeThreadId();
+        }
+        await ensureCurrentThread();
+        if (shouldPersistDirection) {
+            try {
+                await persistLearningDirection('artificial_intelligence');
+            } catch (_error) {}
+        }
         state.currentTopic = '人工智能学习路径';
         state.graphTopicHint = '人工智能学习路径';
         state.currentGraphNode = '';
@@ -309,6 +462,7 @@
 
         messages.appendChild(row);
         messages.scrollTop = messages.scrollHeight;
+        app.refreshChatSurfaceState?.();
 
         row.querySelectorAll('[data-ai-choice]').forEach(btn => {
             btn.addEventListener('click', () => {
@@ -358,6 +512,7 @@
 
         messages.appendChild(card);
         messages.scrollTop = messages.scrollHeight;
+        app.refreshChatSurfaceState?.();
 
         card.querySelectorAll('[data-ai-choice]').forEach(btn => {
             btn.addEventListener('click', () => {
@@ -381,6 +536,7 @@
                 <p>暂时没有生成可用路径。</p>
             `;
             messages.appendChild(card);
+            app.refreshChatSurfaceState?.();
             return;
         }
 
@@ -418,6 +574,7 @@
 
         messages.appendChild(card);
         messages.scrollTop = messages.scrollHeight;
+        app.refreshChatSurfaceState?.();
 
         card.querySelectorAll('[data-node-id]').forEach(btn => {
             btn.addEventListener('click', () => {
@@ -449,6 +606,7 @@
 
         messages.appendChild(card);
         messages.scrollTop = messages.scrollHeight;
+        app.refreshChatSurfaceState?.();
 
         const input = card.querySelector('.ai-path-replan-input');
         const submit = card.querySelector('.ai-path-replan-submit');
@@ -653,6 +811,7 @@
         const message = String(text || input?.value || '').trim();
 
         if (!message) return;
+        await ensureCurrentThread();
 
         if (input && !fromChoice) {
             input.value = '';
@@ -696,11 +855,45 @@
     }
 
     app.startNewSession = function patchedStartNewSession() {
-        renderCourseChoice();
+        const renderAfterReset = () => renderCourseChoice();
+        if (originalStartNewSession) {
+            const result = originalStartNewSession();
+            if (result && typeof result.then === 'function') {
+                return result.then(renderAfterReset);
+            }
+        }
+        renderAfterReset();
     };
 
     app.handleSend = async function patchedHandleSend() {
         if (state.aiPathMode) {
+            await submitAiPathMessage();
+            return;
+        }
+
+        if (!state.learningTrackLocked) {
+            const input = document.getElementById('chat-input');
+            const message = String(input?.value || '').trim();
+            if (!message) return;
+            const inferredTrack = inferLearningTrackFromText(message);
+            const direction = patchLearningDirection(inferredTrack);
+            lockVisibleCourseChoiceCard(direction);
+            try {
+                await persistLearningDirection(direction.track);
+            } catch (error) {
+                app.setStatusBanner?.(`方向已固定，但保存失败：${error.message}`, 'warning');
+            }
+            if (direction.track === 'artificial_intelligence') {
+                setAiMode(true);
+                ensureAiPathSidePanel();
+                await submitAiPathMessage();
+                return;
+            }
+        }
+
+        if (state.learningTrack === 'artificial_intelligence') {
+            setAiMode(true);
+            ensureAiPathSidePanel();
             await submitAiPathMessage();
             return;
         }
@@ -712,6 +905,28 @@
 
     app.openAiPathMode = startAiPathDialogue;
     app.renderCourseChoice = renderCourseChoice;
+    app.renderCourseChoiceCard = renderCourseChoiceCard;
+    app.applyLearningDirectionFromState = function applyLearningDirectionFromState(snapshot = {}) {
+        const track = normalizeLearningTrack(snapshot.learning_track || snapshot.learningTrack || state.learningTrack);
+        if (!track) {
+            setAiMode(false);
+            return;
+        }
+        app.patchState?.({
+            learningTrack: track,
+            learningTrackLabel: snapshot.learning_track_label || snapshot.learningTrackLabel || COURSE_DIRECTIONS[track]?.label || '',
+            learningTrackLocked: Boolean(snapshot.learning_track_locked || snapshot.learningTrackLocked || state.learningTrackLocked),
+        }, 'learning-direction-restore');
+        if (track === 'artificial_intelligence') {
+            setAiMode(true);
+            ensureAiPathSidePanel();
+            updateAiPathProgressText('已恢复 AI 学习路径会话');
+            app.setChatInputPlaceholder?.('继续补充 AI 学习方向，或直接追问当前节点');
+            return;
+        }
+        setAiMode(false);
+        app.setChatInputPlaceholder?.('输入自动控制原理学习内容，或继续当前主线');
+    };
 
     window.startNewSession = () => app.startNewSession();
     window.handleSend = () => app.handleSend();

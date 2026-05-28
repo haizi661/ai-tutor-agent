@@ -15090,6 +15090,35 @@ body.ui-reduce-motion-pref *::after {
     line-height: 1.55;
 }
 
+.course-choice-card.is-locked {
+    border-color: color-mix(in oklab, var(--accent-blue) 30%, var(--line));
+    background:
+        linear-gradient(135deg, color-mix(in oklab, var(--accent-blue) 9%, transparent), transparent 55%),
+        color-mix(in oklab, var(--paper) 96%, transparent);
+}
+
+.course-choice-locked {
+    margin-top: 0.85rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+    padding: 0.9rem 1rem;
+    border-radius: 0.9rem;
+    border: 1px solid color-mix(in oklab, var(--accent-blue) 26%, var(--line));
+    background: color-mix(in oklab, var(--accent-blue) 8%, var(--paper));
+}
+
+.course-choice-locked strong {
+    color: var(--ink-strong);
+    font-size: 1.05rem;
+}
+
+.course-choice-locked span {
+    color: var(--ink-muted);
+    font-size: 0.86rem;
+}
+
 .ai-path-option-row {
     width: min(calc(100% - 2rem), 48rem);
     margin: -0.5rem auto 1rem;

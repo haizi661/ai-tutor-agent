@@ -3420,6 +3420,9 @@
         state.currentTopic = stateSnapshot.current_topic || stateSnapshot.currentTopic || stateSnapshot.current_user_goal || stateSnapshot.session_goal || '';
         state.currentTopicFocus = stateSnapshot.topic_focus || stateSnapshot.currentTopicFocus || '';
         state.graphTopicHint = state.currentTopic || stateSnapshot.proposed_topic || state.graphTopicHint || '';
+        state.learningTrack = stateSnapshot.learning_track || stateSnapshot.learningTrack || '';
+        state.learningTrackLabel = stateSnapshot.learning_track_label || stateSnapshot.learningTrackLabel || '';
+        state.learningTrackLocked = Boolean(stateSnapshot.learning_track_locked || stateSnapshot.learningTrackLocked);
         state.currentGraphNode = stateSnapshot.graph_anchor_title || stateSnapshot.current_node_name || stateSnapshot.currentGraphNode || '';
         if (stateSnapshot.user_knowledge_graph && typeof stateSnapshot.user_knowledge_graph === 'object') {
             state.userKnowledgeGraph = { ...stateSnapshot.user_knowledge_graph };
@@ -3563,6 +3566,23 @@
                     row.body.appendChild(card);
                     messages.appendChild(row.wrap);
                 }
+                return;
+            }
+            if (item.kind === 'course_choice_card') {
+                if (app.renderCourseChoiceCard) {
+                    app.renderCourseChoiceCard({
+                        locked: data.locked !== false,
+                        selectedTrack: data.selected_track || stateSnapshot?.learning_track || '',
+                        selectedLabel: data.selected_label || stateSnapshot?.learning_track_label || '',
+                        statusText: data.statusText || '',
+                        append: true,
+                    });
+                } else {
+                    app.appendSystemMessage(data.statusText || content || '学习方向已固定', 'info');
+                }
+                return;
+            }
+            if (item.kind === 'course_choice_selection') {
                 return;
             }
             if (
