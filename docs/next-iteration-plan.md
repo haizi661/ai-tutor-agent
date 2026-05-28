@@ -290,11 +290,11 @@ assessment_questions.jsonl
 
 ## 6. P1：端到端回归
 
-### Task 11：最小 API E2E 脚本
+### Task 11：已完成 — 最小 API E2E 脚本
 
 目标：不依赖浏览器，先用 HTTP/SSE 跑通一条主流程。
 
-建议文件：
+已实现文件：
 
 ```text
 scripts/smoke_strict_learning_flow.py
@@ -302,21 +302,29 @@ scripts/smoke_strict_learning_flow.py
 
 覆盖：
 
-1. `/api/start`
-2. `/api/stream`
-3. `/api/confirm_topic`
-4. `/api/assessment_answer` 或 `/api/submit_assessment`
-5. `/api/answer` 提交 post lesson choice
-6. `/api/answer` 提交客观题答案
-7. `/api/answer` 提交 continue/homework choice
-8. `/api/sessions/{thread_id}/resume`
+1. `/api/sessions` — 创建会话占位
+2. `/api/start` — 启动学习
+3. `/api/stream` — 消费 SSE 到 session.end
+4. `/api/confirm_topic` — 确认主题
+5. `/api/assessment_answer` — 对话式测评逐题作答
+6. `/api/answer` — 提交 post_lesson_choice (start_test / temporary_question)
+7. `/api/answer` — 提交客观题答案
+8. `/api/answer` — 提交 continue/homework choice
+9. `/api/sessions/{thread_id}/resume` — 测试会话恢复
 
-临时追问必须额外覆盖：在 post lesson 阶段直接提交一句卡点表达，验证后端进入 `temporary_question`；GraphRAG 回答后再回到 `post_lesson_choice`，选项仍是“继续追问 / 我懂了，进入小测”。
+额外覆盖临时追问流程：`--flow temporary_question` 模式下在 post lesson 阶段直接提交一句卡点表达，验证后端进入 `temporary_question`；GraphRAG 回答后再回到 `post_lesson_choice`。
 
 验收：
 
 ```bash
+# 完整主流程
 python scripts/smoke_strict_learning_flow.py --base-url http://127.0.0.1:8000
+
+# 临时追问流程
+python scripts/smoke_strict_learning_flow.py --base-url http://127.0.0.1:8000 --flow temporary_question
+
+# 两者都跑
+python scripts/smoke_strict_learning_flow.py --base-url http://127.0.0.1:8000 --flow both
 ```
 
 ### Task 12：浏览器 smoke
@@ -342,35 +350,28 @@ python scripts/smoke_strict_learning_flow.py --base-url http://127.0.0.1:8000
 
 ## 7. P2：运行资产与文档治理
 
-### Task 13：统一文档权威入口
+### Task 13：已完成 — 统一文档权威入口
 
-目标：让 `/docs` 不再让人不知道该看哪份。
+已创建 `docs/INDEX.md` 作为文档索引，明确：
+- 权威入口：`current-status-and-usage.md`、`next-iteration-plan.md`、交互验证契约
+- 功能说明文档：题库集成、运行资产、已完成改进、能力结构草案
+- 历史计划/报告已归档到 `docs/plans/` 和 `docs/reports/`
+- `docs/graph-mainflow-task-plan.md` 已标记为历史文档
 
-建议：
+### Task 14：已完成 — 运行资产状态检查命令固化
 
-- 保留 `docs/current-status-and-usage.md` 作为当前状态入口。
-- 保留 `docs/next-iteration-plan.md` 作为下一步入口。
-- 保留 `docs/plans/2026-04-30-interaction-artifact-validation-contract.md` 作为交互卡片/历史恢复验收入口。
-- 历史报告放 `docs/reports/`。
-- 历史计划放 `docs/plans/`。
-- 旧 `docs/graph-mainflow-task-plan.md` 标注为 historical。
+已创建 `scripts/check_runtime_assets.sh`，检查：
+- 图谱 B nodes/edges CSV 存在
+- 图谱 B JSON 存在且格式正确
+- media_evidence_index/batch_summary.json 存在
+- GraphRAGPipeline 引用图谱 B (v2)
+- 内部 dangling refs 检查
 
-### Task 14：运行资产状态检查命令固化
+运行：
 
-目标：把图谱、viewer、media index 的检查做成一个统一命令。
-
-建议文件：
-
-```text
-scripts/check_runtime_assets.sh
+```bash
+bash scripts/check_runtime_assets.sh
 ```
-
-检查：
-
-- 图谱 B nodes/edges CSV 存在。
-- GraphRAGPipeline 默认读取图谱 B 运行资产。
-- media_evidence_index/batch_summary.json 存在且 ok。
-- internal dangling refs 为 0。
 
 ### Task 15：清理 git 状态并分批提交
 

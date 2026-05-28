@@ -506,7 +506,32 @@ PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 pytest -q \
   tests/test_graph_integrity.py
 ```
 
-### 5.4 运行资产同步
+### 5.4 API E2E Smoke
+
+不依赖浏览器，用 HTTP/SSE 跑通主流程：
+
+```bash
+# 完整主流程
+python scripts/smoke_strict_learning_flow.py --base-url http://127.0.0.1:8000
+
+# 临时追问流程
+python scripts/smoke_strict_learning_flow.py --base-url http://127.0.0.1:8000 --flow temporary_question
+
+# 两者都跑
+python scripts/smoke_strict_learning_flow.py --base-url http://127.0.0.1:8000 --flow both
+```
+
+覆盖：会话创建 → 主题启动 → SSE 消费 → 主题确认 → 测评作答 → 课后停顿 → 客观题 → 继续/作业选择 → 会话恢复。需要服务已启动且 LLM 已配置。
+
+### 5.5 运行资产检查
+
+```bash
+bash scripts/check_runtime_assets.sh
+```
+
+检查图谱 B CSV/JSON、media_evidence_index、GraphRAGPipeline 配置和内部 dangling refs。
+
+### 5.6 运行资产同步
 
 如果 `data/media_evidence_index`、`data/mineru_cache` 或归档 viewer 投影 `docs/archive/a2-control-theory/viewer/data.js` 异常：
 
