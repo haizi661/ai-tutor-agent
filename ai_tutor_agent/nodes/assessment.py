@@ -67,7 +67,7 @@ def _build_concept_candidates(graph_nodes: dict) -> list[dict]:
             continue
         entry: dict = {
             "concept": title,
-            "concept_id": str(node.get("id") or title).strip(),
+            "concept_id": str(node.get("node_id") or node.get("id") or title).strip(),
             "concept_title": title,
         }
         if objectives:
@@ -823,6 +823,22 @@ def _resolve_course_start_label(graph_pipeline: Optional[object], topic: str) ->
 
 
 def build_user_profiler_node(llm, event_sink: EventSink, graph_pipeline=None):
+    def _find_node_id_by_name(node_map: dict, name: str) -> str:
+        """通过节点名称查找节点 ID（模糊匹配）。"""
+        target = str(name or "").strip()
+        if not target:
+            return ""
+        # 精确匹配
+        for node_id, node in node_map.items():
+            if target == str(node.get("name") or "").strip():
+                return str(node_id).strip()
+        # 包含匹配
+        for node_id, node in node_map.items():
+            node_name = str(node.get("name") or "").strip()
+            if target in node_name or node_name in target:
+                return str(node_id).strip()
+        return ""
+
     def node(state: AgentState) -> dict:
         topic = state["current_topic"]
         questions = state.get("assessment_questions", [])
@@ -876,16 +892,25 @@ def build_user_profiler_node(llm, event_sink: EventSink, graph_pipeline=None):
         )
         # ── Step 4: 初始化用户知识图谱（测评完成即有初始状态）──
         # 所有被测概念设为 not_started，携带校准分供 UI 展示
-        user_knowledge_graph = {
-            concept: {
+        # 使用节点 ID 作为 key，以便图谱界面正确匹配
+        node_map = dict(getattr(graph_pipeline, "node_map", {}) or {})
+        user_knowledge_graph = {}
+        for concept, v in concept_gaps.items():
+            concept_id = str(v.get("concept_id") or "").strip()
+            # 尝试通过名称查找节点 ID
+            node_id = _find_node_id_by_name(node_map, concept) or _find_node_id_by_name(node_map, concept_id) or concept_id or concept
+            node_name = concept
+            # 如果找到了节点 ID，使用节点名称作为显示名称
+            if node_id in node_map:
+                node_name = str(node_map[node_id].get("name") or concept).strip()
+            user_knowledge_graph[node_name] = {
                 "status": "not_started",
-                "id": v.get("concept_id") or concept,
+                "id": node_id,
+                "name": node_name,
                 "calibrated": v.get("calibrated", 50),
                 "gap_type": v.get("gap_type", ""),
                 "turn_count": 0,
             }
-            for concept, v in concept_gaps.items()
-        }
         event_sink.emit(
             make_event(
                 "user_knowledge_graph.sync",
