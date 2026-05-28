@@ -63,6 +63,54 @@
     .legend-line { width: 18px; height: 3px; border-radius: 999px; margin-top: 7px; background: #94a3b8; }
     .legend-title { font-weight: 700; color: #0f172a; }
     .legend-desc { color: #64748b; }
+
+    /* Fixed learning path view */
+    .view-switch { display:flex; gap:8px; align-items:center; padding:10px 12px; border-bottom:1px solid #e2e8f0; background:#fff; }
+    .view-switch button { background:#e2e8f0; color:#334155; }
+    .view-switch button.active { background:#0f766e; color:#fff; }
+    .path-view { display:none; height:65vh; overflow:auto; padding:22px 18px 28px; background:linear-gradient(180deg,#f8fafc 0%,#eef6f4 100%); }
+    .path-header { max-width:920px; margin:0 auto 16px; display:flex; justify-content:space-between; gap:14px; align-items:flex-end; }
+    .path-title { font-size:18px; font-weight:800; color:#0f172a; }
+    .path-subtitle { margin-top:4px; color:#64748b; font-size:12px; line-height:1.5; }
+    .path-total { min-width:132px; padding:10px 12px; border:1px solid #dbeafe; border-radius:14px; background:#fff; text-align:center; box-shadow:0 8px 20px rgba(15,23,42,.05); }
+    .path-total strong { display:block; font-size:22px; color:#0f766e; }
+    .path-road { max-width:920px; margin:0 auto; position:relative; display:grid; gap:18px; padding:8px 0 18px; }
+    .path-road::before { content:""; position:absolute; left:40px; top:36px; bottom:40px; width:5px; border-radius:999px; background:linear-gradient(180deg,#99f6e4,#cbd5e1); opacity:.85; }
+    .chapter-card { position:relative; display:grid; grid-template-columns:86px minmax(0,1fr); gap:14px; align-items:start; }
+    .chapter-orb { position:relative; z-index:1; width:78px; height:78px; border-radius:999px; display:grid; place-items:center; background:#fff; border:4px solid #cbd5e1; box-shadow:0 10px 24px rgba(15,23,42,.08); }
+    .chapter-orb-inner { width:58px; height:58px; border-radius:999px; display:grid; place-items:center; font-size:20px; font-weight:900; color:#334155; background:#f1f5f9; }
+    .chapter-card.is-current .chapter-orb { border-color:#f97316; box-shadow:0 0 0 8px rgba(249,115,22,.14), 0 12px 28px rgba(249,115,22,.18); }
+    .chapter-card.is-current .chapter-orb-inner { background:#fed7aa; color:#9a3412; }
+    .chapter-card.is-completed .chapter-orb { border-color:#22c55e; }
+    .chapter-card.is-completed .chapter-orb-inner { background:#dcfce7; color:#15803d; }
+    .chapter-card.is-started:not(.is-current):not(.is-completed) .chapter-orb { border-color:#38bdf8; }
+    .chapter-card.is-started:not(.is-current):not(.is-completed) .chapter-orb-inner { background:#e0f2fe; color:#0369a1; }
+    .chapter-main { border:1px solid #e2e8f0; border-radius:18px; background:rgba(255,255,255,.94); overflow:hidden; box-shadow:0 10px 26px rgba(15,23,42,.06); }
+    .chapter-btn { width:100%; padding:15px 16px; display:grid; grid-template-columns:minmax(0,1fr) auto; gap:12px; align-items:center; text-align:left; background:transparent; color:inherit; border-radius:0; }
+    .chapter-no { display:block; font-size:24px; line-height:1.1; font-weight:900; color:#0f172a; letter-spacing:-.02em; }
+    .chapter-name { display:block; margin-top:4px; font-size:13px; color:#64748b; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+    .chapter-meta { text-align:right; min-width:106px; }
+    .chapter-percent { display:block; font-size:22px; font-weight:900; color:#0f766e; }
+    .chapter-count { display:block; margin-top:2px; color:#64748b; font-size:12px; }
+    .chapter-progress { height:8px; background:#e2e8f0; overflow:hidden; }
+    .chapter-progress-fill { height:100%; width:0%; background:linear-gradient(90deg,#14b8a6,#22c55e); border-radius:0 999px 999px 0; transition:width .25s ease; }
+    .chapter-nodes { display:none; border-top:1px solid #e2e8f0; padding:8px 12px 12px; background:#f8fafc; }
+    .chapter-card.expanded .chapter-nodes { display:grid; gap:7px; }
+    .path-node { display:grid; grid-template-columns:auto minmax(0,1fr) auto; gap:9px; align-items:center; padding:8px 10px; border:1px solid #e2e8f0; border-radius:12px; background:#fff; cursor:pointer; }
+    .path-node:hover { border-color:#94a3b8; transform:translateY(-1px); }
+    .path-node-dot { width:13px; height:13px; border-radius:999px; background:#cbd5e1; box-shadow:0 0 0 3px rgba(203,213,225,.25); }
+    .path-node.current .path-node-dot { background:#f97316; box-shadow:0 0 0 4px rgba(249,115,22,.18); }
+    .path-node.mastered .path-node-dot { background:#22c55e; }
+    .path-node.in_progress .path-node-dot { background:#38bdf8; }
+    .path-node.skipped .path-node-dot { background:#94a3b8; }
+    .path-node-main { min-width:0; }
+    .path-node-name { font-size:13px; font-weight:650; color:#0f172a; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+    .path-node-id { margin-top:2px; font-size:11px; color:#94a3b8; }
+    .path-node-status { font-size:12px; color:#64748b; white-space:nowrap; }
+    body.embedded .view-switch { position:fixed; top:8px; left:8px; z-index:12; padding:6px; border-radius:999px; box-shadow:0 2px 8px rgba(0,0,0,.12); }
+    body.embedded .view-switch button { border-radius:999px; padding:6px 10px; }
+    body.embedded .path-view { height:100vh; padding-top:62px; }
+    body.embedded #network { height:100vh; }
   </style>
 </head>
 <body>
@@ -104,7 +152,12 @@
     </div>
 
     <div class="main">
+      <div class="view-switch" id="viewSwitch" aria-label="图谱展示模式">
+        <button type="button" class="active" id="pathViewBtn">学习路径</button>
+        <button type="button" id="graphViewBtn">完整图谱</button>
+      </div>
       <div id="loading" class="loading">正在从服务器加载图谱数据…</div>
+      <div id="learningPath" class="path-view" aria-label="固定学习路径"></div>
       <div id="network" style="display:none;"></div>
       <div class="detail">
         <div class="card">
@@ -156,6 +209,8 @@
 
     let rawNodes = [];
     let rawEdges = [];
+    let currentView = 'path';
+    const expandedChapters = new Set();
     let network = null;
     let currentNodeId = null;
     let parentFocusHint = focusHint;
@@ -304,6 +359,8 @@
       const networkEl = document.getElementById('network');
       if (!loading) return;
       if (networkEl) networkEl.style.display = 'none';
+      const pathEl = document.getElementById('learningPath');
+      if (pathEl) pathEl.style.display = 'none';
       loading.style.display = 'flex';
       loading.innerHTML = `
         <div class="loading-card">
@@ -379,6 +436,190 @@
         size: node.source_type.includes('chapter_anchor') ? 16 : 10,
         borderWidth: 1,
       };
+    }
+
+
+    function chapterNumber(chapter = '') {
+      const text = String(chapter || '').trim();
+      const cnMap = { '零': 0, '一': 1, '二': 2, '三': 3, '四': 4, '五': 5, '六': 6, '七': 7, '八': 8, '九': 9, '十': 10 };
+      const m = text.match(/第([一二三四五六七八九十0-9]+)章/);
+      if (!m) return text.includes('绪论') ? 0 : 999;
+      if (/^\d+$/.test(m[1])) return Number(m[1]);
+      if (m[1] === '十') return 10;
+      if (m[1].startsWith('十')) return 10 + (cnMap[m[1].slice(1)] || 0);
+      if (m[1].endsWith('十')) return (cnMap[m[1][0]] || 1) * 10;
+      if (m[1].includes('十')) {
+        const [a, b] = m[1].split('十');
+        return (cnMap[a] || 1) * 10 + (cnMap[b] || 0);
+      }
+      return cnMap[m[1]] ?? 999;
+    }
+
+    function nodeOrderValue(node) {
+      const m = String(node.node_id || '').match(/(\d+)/);
+      return m ? Number(m[1]) : 9999;
+    }
+
+    function getNodeStatus(node) {
+      const { status, isCurrent } = getNodeLearningState(node);
+      if (isCurrent) return 'current';
+      if (status === 'mastered' || status === 'passed') return 'mastered';
+      if (status === 'in_progress' || status === 'selected' || status === 'content_loaded' || status === 'quizzing') return 'in_progress';
+      if (status === 'skipped') return 'skipped';
+      return 'not_started';
+    }
+
+    function getNodeStatusLabel(status) {
+      return {
+        current: '当前学习',
+        mastered: '已掌握',
+        in_progress: '学习中',
+        skipped: '已跳过',
+        not_started: '未开始',
+      }[status] || '未开始';
+    }
+
+    function getNodeStatusIcon(status) {
+      return {
+        current: '🔥',
+        mastered: '✅',
+        in_progress: '🔄',
+        skipped: '⏭',
+        not_started: '○',
+      }[status] || '○';
+    }
+
+    function groupNodesByChapter() {
+      const map = new Map();
+      rawNodes.slice().sort((a, b) => nodeOrderValue(a) - nodeOrderValue(b)).forEach(node => {
+        const chapter = node.chapter || '未分章';
+        if (!map.has(chapter)) map.set(chapter, []);
+        map.get(chapter).push(node);
+      });
+      return [...map.entries()].sort((a, b) => {
+        const ca = chapterNumber(a[0]);
+        const cb = chapterNumber(b[0]);
+        if (ca !== cb) return ca - cb;
+        return Math.min(...a[1].map(nodeOrderValue)) - Math.min(...b[1].map(nodeOrderValue));
+      });
+    }
+
+    function pickChapterSubtitle(chapter, nodes) {
+      const anchor = nodes.find(n => String(n.source_type || '').includes('chapter_anchor')) || nodes[0];
+      const title = String(anchor?.name || '').trim();
+      return title || `${nodes.length} 个知识点`;
+    }
+
+    function renderLearningPath() {
+      const path = document.getElementById('learningPath');
+      if (!path) return;
+      if (!rawNodes.length) {
+        path.innerHTML = '<div class="loading-card"><div class="loading-title">暂无图谱节点</div></div>';
+        return;
+      }
+      const chapters = groupNodesByChapter();
+      const allStatuses = rawNodes.map(getNodeStatus);
+      const completedAll = allStatuses.filter(s => s === 'mastered').length;
+      const totalAll = rawNodes.length || 1;
+      const overall = Math.round((completedAll / totalAll) * 100);
+
+      path.innerHTML = `
+        <div class="path-header">
+          <div>
+            <div class="path-title">固定学习路径</div>
+            <div class="path-subtitle">按章节顺序固定展示，每次打开位置保持一致；点击章节可展开本章知识点。</div>
+          </div>
+          <div class="path-total"><strong>${overall}%</strong><span class="muted">总进度 ${completedAll}/${totalAll}</span></div>
+        </div>
+        <div class="path-road" id="pathRoad"></div>
+      `;
+
+      const road = document.getElementById('pathRoad');
+      chapters.forEach(([chapter, nodes], index) => {
+        const statuses = nodes.map(getNodeStatus);
+        const completed = statuses.filter(s => s === 'mastered').length;
+        const started = statuses.some(s => s === 'mastered' || s === 'in_progress' || s === 'current');
+        const isCurrent = statuses.includes('current');
+        const progress = nodes.length ? Math.round((completed / nodes.length) * 100) : 0;
+        const isCompleted = progress === 100 && nodes.length > 0;
+        const card = document.createElement('article');
+        card.className = `chapter-card ${isCurrent ? 'is-current' : ''} ${isCompleted ? 'is-completed' : ''} ${started ? 'is-started' : ''}`.trim();
+        card.dataset.chapter = chapter;
+        if (isCurrent || expandedChapters.has(chapter)) {
+          card.classList.add('expanded');
+          expandedChapters.add(chapter);
+        }
+        const orbText = chapter.includes('绪论') ? '绪' : String(index + 1);
+        card.innerHTML = `
+          <div class="chapter-orb" aria-hidden="true"><div class="chapter-orb-inner">${escapeHtml(orbText)}</div></div>
+          <div class="chapter-main">
+            <button type="button" class="chapter-btn">
+              <span>
+                <span class="chapter-no">${escapeHtml(chapter)}</span>
+                <span class="chapter-name">${escapeHtml(pickChapterSubtitle(chapter, nodes))}</span>
+              </span>
+              <span class="chapter-meta">
+                <span class="chapter-percent">${progress}%</span>
+                <span class="chapter-count">${completed}/${nodes.length} 已掌握</span>
+              </span>
+            </button>
+            <div class="chapter-progress"><div class="chapter-progress-fill" style="width:${progress}%"></div></div>
+            <div class="chapter-nodes"></div>
+          </div>
+        `;
+        const nodeBox = card.querySelector('.chapter-nodes');
+        nodes.forEach(node => {
+          const status = getNodeStatus(node);
+          const row = document.createElement('div');
+          row.className = `path-node ${status}`;
+          row.dataset.nodeId = node.node_id;
+          row.innerHTML = `
+            <span class="path-node-dot" aria-hidden="true"></span>
+            <span class="path-node-main">
+              <span class="path-node-name">${escapeHtml(node.name || node.node_id)}</span>
+              <span class="path-node-id">${escapeHtml(node.node_id)} · ${escapeHtml(node.requirement_level || node.chapter || '')}</span>
+            </span>
+            <span class="path-node-status">${getNodeStatusIcon(status)} ${getNodeStatusLabel(status)}</span>
+          `;
+          row.addEventListener('click', event => {
+            event.stopPropagation();
+            currentNodeId = node.node_id;
+            showNodeDetail(node.node_id);
+            showEdgeDetail(node.node_id);
+            notifyParent('a2-graph-viewer:status', { message: `已选中：${node.name || node.node_id}` });
+          });
+          row.addEventListener('dblclick', event => {
+            event.stopPropagation();
+            currentNodeId = node.node_id;
+            learnCurrentNode();
+          });
+          nodeBox.appendChild(row);
+        });
+        card.querySelector('.chapter-btn')?.addEventListener('click', () => {
+          card.classList.toggle('expanded');
+          if (card.classList.contains('expanded')) expandedChapters.add(chapter);
+          else expandedChapters.delete(chapter);
+        });
+        road.appendChild(card);
+      });
+    }
+
+    function setViewMode(mode) {
+      currentView = mode === 'graph' ? 'graph' : 'path';
+      document.getElementById('pathViewBtn')?.classList.toggle('active', currentView === 'path');
+      document.getElementById('graphViewBtn')?.classList.toggle('active', currentView === 'graph');
+      const path = document.getElementById('learningPath');
+      const networkEl = document.getElementById('network');
+      if (currentView === 'path') {
+        if (networkEl) networkEl.style.display = 'none';
+        if (path) path.style.display = 'block';
+        renderLearningPath();
+      } else {
+        if (path) path.style.display = 'none';
+        if (networkEl) networkEl.style.display = 'block';
+        renderGraph();
+        window.setTimeout(() => network?.fit?.(), 120);
+      }
     }
 
     function renderGraph() {
@@ -546,11 +787,10 @@
           return;
         }
         document.getElementById('loading').style.display = 'none';
-        document.getElementById('network').style.display = 'block';
         buildRelationChecks(rawEdges);
-        renderGraph();
+        setViewMode(currentView);
         notifyParent('a2-graph-viewer:ready', {});
-        if (parentFocusHint) window.setTimeout(() => focusOnNode(parentFocusHint), 250);
+        if (parentFocusHint && currentView === 'graph') window.setTimeout(() => focusOnNode(parentFocusHint), 250);
       } catch (err) {
         showGraphLoadMessage(
           '知识图谱加载失败',
@@ -570,11 +810,15 @@
         userKnowledgeGraph: payload.userKnowledgeGraph || parentGraphState.userKnowledgeGraph || {},
       };
       parentFocusHint = nextFocusHint;
-      if (!network || !rawNodes.length) return;
+      if (!rawNodes.length) return;
       if (nextStateSignature === lastAppliedStateSignature) return;
       lastAppliedStateSignature = nextStateSignature;
+      if (currentView === 'path') {
+        renderLearningPath();
+        return;
+      }
       renderGraph();
-      if (parentFocusHint && parentFocusHint !== lastAppliedFocusHint && !isUserDraggingGraph) {
+      if (network && parentFocusHint && parentFocusHint !== lastAppliedFocusHint && !isUserDraggingGraph) {
         window.setTimeout(() => {
           if (isUserDraggingGraph) return;
           focusOnNode(parentFocusHint);
@@ -591,15 +835,17 @@
     });
 
     // Bind events
-    document.getElementById('searchInput')?.addEventListener('input', renderGraph);
-    document.getElementById('embeddedSearch')?.addEventListener('input', renderGraph);
-    document.getElementById('fitBtn')?.addEventListener('click', () => network?.fit());
-    document.getElementById('embeddedFitBtn')?.addEventListener('click', () => network?.fit());
+    document.getElementById('searchInput')?.addEventListener('input', () => currentView === 'path' ? renderLearningPath() : renderGraph());
+    document.getElementById('embeddedSearch')?.addEventListener('input', () => currentView === 'path' ? renderLearningPath() : renderGraph());
+    document.getElementById('pathViewBtn')?.addEventListener('click', () => setViewMode('path'));
+    document.getElementById('graphViewBtn')?.addEventListener('click', () => setViewMode('graph'));
+    document.getElementById('fitBtn')?.addEventListener('click', () => currentView === 'graph' ? network?.fit() : renderLearningPath());
+    document.getElementById('embeddedFitBtn')?.addEventListener('click', () => currentView === 'graph' ? network?.fit() : renderLearningPath());
     document.getElementById('resetBtn')?.addEventListener('click', () => {
       const si = document.getElementById('searchInput'); if (si) si.value = '';
       document.querySelectorAll('#relationChecks input[type="checkbox"]').forEach(c => c.checked = true);
-      renderGraph();
-      network?.fit();
+      currentView === 'path' ? renderLearningPath() : renderGraph();
+      if (currentView === 'graph') network?.fit();
     });
     document.getElementById('learnNodeBtn')?.addEventListener('click', learnCurrentNode);
     document.getElementById('embeddedLearnBtn')?.addEventListener('click', learnCurrentNode);
