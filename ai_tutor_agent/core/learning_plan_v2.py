@@ -31,6 +31,7 @@ from .ability_mapper import (
     get_all_node_ids,
     get_node_difficulty,
     get_node_estimated_time,
+    get_node_importance,
     get_node_name_map,
     get_node_primary_ability,
 )
@@ -222,6 +223,9 @@ _CHAPTER_ORDER: dict[str, int] = {
 
 _DUMMY_EDGES: list[dict] = []
 
+# 节点重要性排序权重(core 优先于 supporting)
+_IMPORTANCE_ORDER: dict[str, int] = {"core": 0, "supporting": 1, "other": 2}
+
 
 # ── 工具函数 ───────────────────────────────────────
 
@@ -393,8 +397,8 @@ def select_nodes(
         for nid in sorted_candidates[:max(node_count * 2, total)]
     }
 
-    # 在已排序基础上,按"紧迫度降序"重排
-    # 但保留章序约束:同章内按紧迫度降
+    # 在已排序基础上,按"重要性 + 紧迫度降序"重排
+    # 但保留章序约束:同章内按重要性优先,再按紧迫度降
     chapter_groups: dict[str, list[str]] = defaultdict(list)
     for nid in sorted_candidates:
         ch = _get_node_chapter(nid)
@@ -402,8 +406,11 @@ def select_nodes(
     reordered: list[str] = []
     for ch in sorted(chapter_groups.keys(), key=lambda c: _CHAPTER_ORDER.get(c, 999)):
         group = chapter_groups[ch]
-        # 同章内按紧迫度降序
-        group.sort(key=lambda nid: -urgency_scores.get(nid, 0.5))
+        # 同章内: importance 优先(core→supporting), 同层内紧迫度降序
+        group.sort(key=lambda nid: (
+            _IMPORTANCE_ORDER.get(get_node_importance(nid), 2),
+            -urgency_scores.get(nid, 0.5),
+        ))
         reordered.extend(group)
 
     # 选前 node_count 个,弹性控制在 node_range 内

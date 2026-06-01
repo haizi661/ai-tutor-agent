@@ -240,6 +240,23 @@ class TestSelectNodes:
         selected = select_nodes(all_node_ids, default_profile)
         assert len(set(selected)) == len(selected)
 
+    def test_core_nodes_before_supporting(self, all_node_ids, default_profile):
+        """冷启动时同章内 core 节点在 supporting 之前。"""
+        from ai_tutor_agent.core.ability_mapper import get_node_importance
+        selected = select_nodes(all_node_ids, default_profile)
+        # 第二章 5 节点: 4 core(KM007-010) + 1 supporting(KM011)
+        ch2_selected = [n for n in selected
+                        if n in {"KM007", "KM008", "KM009", "KM010", "KM011"}]
+        # 4 个 core 节点应全部入选
+        for core in ("KM007", "KM008", "KM009", "KM010"):
+            assert core in ch2_selected, f"{core} 被 supporting 节点挤出"
+        # 如果 KM011 也在选中，它必须在 4 个 core 之后
+        if "KM011" in ch2_selected:
+            km011_idx = ch2_selected.index("KM011")
+            for core in ("KM007", "KM008", "KM009", "KM010"):
+                assert ch2_selected.index(core) < km011_idx, \
+                    f"{core} 应在 KM011 前, 实际顺序: {ch2_selected}"
+
 
 class TestClusterIntoSteps:
     def test_produces_4_steps(self, default_profile):

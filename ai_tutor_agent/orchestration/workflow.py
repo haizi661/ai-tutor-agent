@@ -306,8 +306,8 @@ def route_after_learning_plan_generator(state: AgentState) -> str:
 
 
 def route_after_next_node_planner(state: AgentState) -> str:
-    if state.get("learning_plan_source") == "plan_completed":
-        return "continue_or_homework_selector"
+    # 无论是否 plan_completed，都由 continue_or_homework_selector
+    # 询问用户"开始新一轮 / 今天就到这里"，避免静默跳转。
     return "continue_or_homework_selector"
 
 
@@ -646,7 +646,6 @@ def build_workflow(
         route_after_next_node_planner,
         {
             "continue_or_homework_selector": "continue_or_homework_selector",
-            "learning_plan_generator": "learning_plan_generator",
         },
     )
     workflow.add_conditional_edges(

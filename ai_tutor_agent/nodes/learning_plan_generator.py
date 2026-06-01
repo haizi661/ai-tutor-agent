@@ -97,8 +97,10 @@ def build_learning_plan_generator_node(llm: Any, runtime: RuntimeContext):
                             ),
                             data={
                                 "total_steps": len(plan.steps),
+                                "total_nodes": plan.total_nodes,
                                 "current_step": current_step,
                                 "source": "resume_v2",
+                                "session_index": plan.session_index + 1,
                                 "plan": steps_as_dicts,
                             },
                         )

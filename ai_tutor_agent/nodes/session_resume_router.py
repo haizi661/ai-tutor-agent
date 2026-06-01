@@ -25,20 +25,22 @@ CONSOLIDATION_OPTIONS = [
 ]
 
 
+_ACTIVE_HOMEWORK_STATUSES = {"assigned", "in_progress", "none", ""}
 _TERMINAL_HOMEWORK_STATUSES = {"completed", "submitted", "deferred"}
 
 
-def _has_homework(state: AgentState) -> bool:
-    """有作业且状态为活跃（非终态、非暂缓）。状态缺失时默认视为 assigned。"""
+def _has_active_homework(state: AgentState) -> bool:
+    """有活跃作业（状态为 assigned/in_progress/缺失）。deferred 被视为非活跃。"""
     if not state.get("homework_items"):
         return False
     status = str(state.get("homework_status") or "").strip()
     if not status:
         return True  # 状态丢失，有 items 就当有作业
-    return status not in _TERMINAL_HOMEWORK_STATUSES
+    return status in _ACTIVE_HOMEWORK_STATUSES
 
 
 def _has_deferred_homework(state: AgentState) -> bool:
+    """有暂缓作业（仅在 _has_active_homework 为 False 时检查,避免逻辑混淆）。"""
     return bool(state.get("homework_items")) and str(state.get("homework_status") or "").strip() == "deferred"
 
 
@@ -72,7 +74,7 @@ def build_session_resume_router_node(runtime: RuntimeContext):
                 "learning_resume_reason": "resume_pending_interaction",
             }
 
-        if _has_homework(state):
+        if _has_active_homework(state):
             event_sink.emit(
                 make_event(
                     "node.complete",

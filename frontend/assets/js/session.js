@@ -459,6 +459,9 @@
             const planData = data.data || {};
             state.learningPlan = planData.plan || [];
             state.learningPlanSummary = planData.plan_summary || [];
+            if (planData.session_index !== undefined) {
+                state.sessionIndex = planData.session_index;
+            }
             appendThinking(data.message || '学习路径已生成', 'success', 'learning_plan');
             app.showLearningPathPanel?.();
             app.renderLearningPlanPanel?.(state.learningPlan, state.currentGraphNodeId, state.userKnowledgeGraph);
@@ -480,6 +483,9 @@
             if (planData.plan && Array.isArray(planData.plan)) {
                 state.learningPlan = planData.plan;
                 state.learningPlanCurrentStep = planData.current_step || 0;
+            }
+            if (planData.session_index !== undefined) {
+                state.sessionIndex = planData.session_index;
             }
             appendThinking(data.message || '复用已有学习路径', 'info', 'learning_plan');
             app.showLearningPathPanel?.();
