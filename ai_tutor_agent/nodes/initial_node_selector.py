@@ -118,7 +118,22 @@ def build_initial_node_selector_node(runtime: RuntimeContext):
         snapshot = dict(state.get("student_state_snapshot") or {})
         visited = set(_string_list(snapshot.get("visited_nodes")))
 
-        selected_id, reason = _select_initial_root_node(node_map, visited)
+        # ── Try learning plan first ──
+        learning_plan = state.get("learning_plan") or snapshot.get("learning_plan") or []
+        selected_id = ""
+        reason = ""
+
+        if learning_plan:
+            first_step = learning_plan[0]
+            for node_id in first_step.get("node_ids", []):
+                if node_id not in visited and node_id in node_map:
+                    selected_id = node_id
+                    reason = "learning_plan_step0"
+                    break
+
+        # ── Fallback: original logic ──
+        if not selected_id:
+            selected_id, reason = _select_initial_root_node(node_map, visited)
         if not selected_id:
             selected_id, reason = _select_smallest_unvisited(node_map, visited)
 
@@ -151,6 +166,7 @@ def build_initial_node_selector_node(runtime: RuntimeContext):
             # ── 教学推理透明：解释节点选择原因 ──
             if state.get("thinking_mode", False):
                 reason_explain = {
+                    "learning_plan_step0": "学习路径第一步：根据用户画像生成的起点",
                     "course_root_start": "选择课程起点：无前置依赖的入门章节，适合作为学习起点",
                     "lowest_gap_unvisited": "根据前测薄弱点：该概念在前测中得分最低，优先补齐",
                     "smallest_unvisited": "选择最小未学节点：按图谱顺序推进，从最基础的未学节点开始",

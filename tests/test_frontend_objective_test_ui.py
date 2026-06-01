@@ -206,6 +206,8 @@ def test_frontend_restores_skipped_topic_and_assessment_as_locked_artifacts():
     assert "locked: isCompletedAssessment || data.locked === true" in ui_content
     assert "statusText: isCompletedAssessment ? '测评已完成，答案已固定' : data.statusText" in ui_content
     assert "_renderLockedAssessmentSummary(div, questions, state.answers, '已跳过学前测评，答案已固定')" in ui_content
+    assert "const skippedAssessment = statusText.includes('跳过')" in ui_content
+    assert "skippedAssessment ? '' : `<div class=\"assessment-locked-list\">${rows}</div>`" in ui_content
     assert "row.wrap.remove();\n                app.submitTopicConfirmation?.(true, 'direct_tutor')" not in ui_content
     assert "startMode === 'direct_tutor' ? '跳过摸底，直接开始'" in session_content
     assert "formatErrorMessage(error)" in session_content

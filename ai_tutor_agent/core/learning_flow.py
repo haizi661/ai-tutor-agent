@@ -13,8 +13,10 @@ PRE_TOPIC_FLOW_STATUSES = {
 LEARNING_PHASES = {
     "topic_init",
     "pre_assessment",
+    "node_selection",
     "profile_complete",
     "profiled",
+    "plan_generated",
     "node_selected",
     "node_content_loaded",
     "node_teaching",
@@ -48,6 +50,7 @@ RESUME_TARGETS = {
     "assessment_generator",
     "assessment_dialog",
     "user_profiler",
+    "learning_plan_generator",
     "initial_node_selector",
     "node_content_loader",
     "tutor",

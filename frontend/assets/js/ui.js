@@ -937,50 +937,14 @@
         return `/knowledge-graph/b/viewer/index.html?${params.toString()}`;
     }
 
+    /** 图谱视觉卡片：已移至侧边栏和右侧面板，不再插入聊天 */
     app.renderKnowledgeGraphVisualCard = function renderKnowledgeGraphVisualCard(payload = {}) {
         const nodeTitle = String(payload.title || payload.node_name || state.currentGraphNode || state.graph_anchor_title || '').trim();
         const nodeId = String(payload.id || payload.node_id || state.currentGraphNodeId || state.graph_anchor_id || '').trim();
         if (!nodeTitle && !nodeId) return;
-
         state.currentGraphNode = nodeTitle || state.currentGraphNode;
         state.currentGraphNodeId = nodeId || state.currentGraphNodeId;
-
-        document.querySelector('.assistant-card-row.graph-visual-card-row')?.remove();
-        const container = document.getElementById('messages');
-        if (!container) return;
-        const row = createAssistantCardRow('graph-visual-card-row');
-        const card = document.createElement('section');
-        card.className = 'graph-visual-card prompt-flow-card';
-        const graphSrc = _buildGraphViewerUrl({ nodeTitle, nodeId });
-        card.innerHTML = `
-            <div class="graph-visual-head">
-                <div>
-                    <div class="prompt-label">当前主讲节点</div>
-                    <div class="graph-visual-title">${nodeTitle || nodeId}</div>
-                    <div class="graph-visual-copy">这不是重新开始，而是在标记当前讲到图谱的哪个节点。临时问题会单独回答，不改变这里的主线进度。</div>
-                </div>
-                <button type="button" class="graph-visual-open">打开完整图谱</button>
-            </div>
-            <div class="graph-visual-frame-wrap">
-                <iframe
-                    class="graph-visual-frame"
-                    data-graph-mini-frame
-                    title="当前学习节点知识图谱"
-                    loading="lazy"
-                    src="${graphSrc}"
-                ></iframe>
-            </div>
-        `;
-        const frame = card.querySelector('[data-graph-mini-frame]');
-        if (frame) {
-            frame.dataset.src = graphSrc;
-            frame.onload = () => app.syncKnowledgeGraphVisualState?.();
-        }
-        card.querySelector('.graph-visual-open')?.addEventListener('click', () => app.openKnowledgeGraphModal?.());
-        row.body.appendChild(card);
-        container.appendChild(row.wrap);
-        app.syncKnowledgeGraphVisualState?.();
-        app.scrollMessagesToBottom?.();
+        // 只更新状态，不插入聊天。图谱在侧边栏/右侧面板中显示。
     };
 
     /** 若"掌握图"面板已打开则刷新 */
@@ -988,52 +952,9 @@
         if (state.userKgMapOpen) app.renderUserKnowledgeMap();
     };
 
-    /** 渲染学习路径卡片：显示当前节点和下一节点 */
-    app.renderLearningPathCard = function renderLearningPathCard(payload = {}) {
-        const container = document.getElementById('messages');
-        if (!container) return;
-        const { currentNode, currentNodeId, nextNode, nextNodeId, reason } = payload;
-        if (!nextNode) return;
-
-        const row = createAssistantCardRow('learning-path-card-row');
-        const card = document.createElement('section');
-        card.className = 'learning-path-card prompt-flow-card';
-
-        const reasonText = reason === 'related_unvisited' ? '前置知识已掌握，推荐进入'
-            : reason === 'smallest_unvisited' ? '按图谱顺序推进'
-            : '推荐下一步';
-
-        card.innerHTML = `
-            <div class="learning-path-header">
-                <div class="learning-path-icon">📚</div>
-                <div class="learning-path-title">学习路径</div>
-            </div>
-            <div class="learning-path-content">
-                ${currentNode ? `
-                <div class="learning-path-node learning-path-node--current">
-                    <div class="learning-path-node-marker">✓</div>
-                    <div class="learning-path-node-info">
-                        <div class="learning-path-node-label">当前节点</div>
-                        <div class="learning-path-node-name">${currentNode}</div>
-                    </div>
-                </div>
-                <div class="learning-path-arrow">→</div>
-                ` : ''}
-                <div class="learning-path-node learning-path-node--next">
-                    <div class="learning-path-node-marker">○</div>
-                    <div class="learning-path-node-info">
-                        <div class="learning-path-node-label">${reasonText}</div>
-                        <div class="learning-path-node-name">${nextNode}</div>
-                    </div>
-                </div>
-            </div>
-            <div class="learning-path-footer">
-                <button type="button" class="learning-path-btn learning-path-btn--graph" onclick="app.openKnowledgeGraphModal?.()">查看完整图谱</button>
-            </div>
-        `;
-        row.body.appendChild(card);
-        container.appendChild(row.wrap);
-        app.scrollMessagesToBottom?.();
+    /** 渲染学习路径卡片：已移至右侧面板，不再插入聊天 */
+    app.renderLearningPathCard = function renderLearningPathCard() {
+        // no-op: 学习路径现在只在右侧学习路径面板中显示
     };
 
     /** 在消息流中插入一条图谱事件 chip */
@@ -2131,6 +2052,7 @@
     }
 
     function _renderLockedAssessmentSummary(target, questions = [], answers = {}, statusText = '已提交，答案已固定') {
+        const skippedAssessment = statusText.includes('跳过');
         const rows = questions.map((q, index) => {
             const answer = _assessmentAnswerFor(q, answers, index);
             const concept = q.concept || q.concept_title || '';
@@ -2152,16 +2074,22 @@
                 </article>
             `;
         }).join('');
+        const lockedCopy = skippedAssessment
+            ? '已跳过学前测评，本轮不会再要求完成这些自评题，学习路径将按知识图谱默认顺序生成。'
+            : '这份测评记录将作为学习画像和初始图谱节点选择的依据，不能在当前流程中继续修改。';
+        const progressMeta = skippedAssessment
+            ? '<div class="assessment-progress-meta">已跳过摸底，直接进入正式学习。</div>'
+            : `<div class="assessment-progress-meta">${_assessmentProgressMetaHtml(questions, answers)}</div>`;
 
         target.classList.add('assessment-locked-summary');
         target.innerHTML = `
             <div class="prompt-card prompt-flow-shell">
                 <div class="prompt-label">快速摸底</div>
                 <div class="prompt-title">${statusText}</div>
-                <div class="prompt-copy">这份测评记录将作为学习画像和初始图谱节点选择的依据，不能在当前流程中继续修改。</div>
+                <div class="prompt-copy">${lockedCopy}</div>
             </div>
-            <div class="assessment-progress-meta">${_assessmentProgressMetaHtml(questions, answers)}</div>
-            <div class="assessment-locked-list">${rows}</div>
+            ${progressMeta}
+            ${skippedAssessment ? '' : `<div class="assessment-locked-list">${rows}</div>`}
         `;
         app.renderMath?.(target);
     }
@@ -3483,12 +3411,16 @@
             app.showRadar(stateSnapshot.assessment_radar);
         }
         if (state.currentGraphNode || state.currentGraphNodeId) {
-            app.renderKnowledgeGraphVisualCard?.({
-                title: state.currentGraphNode,
-                id: state.currentGraphNodeId,
-                status: stateSnapshot.current_node_status || 'in_progress',
-                type: 'current',
-            });
+            // 图谱状态只更新侧边栏和右侧面板，不插入聊天
+        }
+
+        // ── 恢复学习路径面板 ──
+        const snapshotPlan = stateSnapshot.learning_plan || stateSnapshot.learningPlan;
+        if (Array.isArray(snapshotPlan) && snapshotPlan.length > 0) {
+            state.learningPlan = snapshotPlan;
+            state.learningPlanCurrentStep = stateSnapshot.learning_plan_current_step || stateSnapshot.learningPlanCurrentStep || 0;
+            app.showLearningPathPanel?.();
+            app.renderLearningPlanPanel?.(state.learningPlan, state.currentGraphNodeId, state.userKnowledgeGraph);
         }
 
         if (stateSnapshot.flow_status === 'awaiting_topic_confirmation' && stateSnapshot.proposed_topic) {

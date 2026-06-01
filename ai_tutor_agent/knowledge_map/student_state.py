@@ -87,6 +87,24 @@ class StudentState:
     # 结构: {node_id: {title, status, score, attempts, wrong_questions, evidence, last_updated}}
     knowledge_graph: dict[str, dict[str, Any]] = field(default_factory=dict)
 
+    # 学习路径（Learning Plan v1）：多步学习计划
+    learning_plan: list[dict[str, Any]] = field(default_factory=list)
+    learning_plan_current_step: int = 0
+    learning_plan_generated_at: str = ""
+    learning_plan_source: str = ""
+
+    # ── v2 自适应学习路径字段 ──
+    # 学生画像: node_id → {mastery, confidence, source, risk, failure_count, last_score, last_updated}
+    concept_mastery: dict[str, dict[str, Any]] = field(default_factory=dict)
+    # v2 学习路径: LearningPlan.to_dict()
+    learning_plan_v2: dict[str, Any] = field(default_factory=dict)
+    # 当前第几次 session(从 0 开始)
+    session_index: int = 0
+    # 8 维自评原始分数(如 {A: 4, B: 3})
+    self_assessment_scores: dict[str, int] = field(default_factory=dict)
+    # 是否跳过自评
+    skip_self_assessment: bool = True
+
     def to_dict(self) -> dict[str, Any]:
         return asdict(self)
 
@@ -343,6 +361,16 @@ class StudentStateStore:
             knowledge_graph=raw.get("knowledge_graph", {}) or {},
             wrong_question_book=raw.get("wrong_question_book", []) or [],
             question_help_records=raw.get("question_help_records", []) or [],
+            learning_plan=raw.get("learning_plan", []) or [],
+            learning_plan_current_step=int(raw.get("learning_plan_current_step") or 0),
+            learning_plan_generated_at=raw.get("learning_plan_generated_at", "") or "",
+            learning_plan_source=raw.get("learning_plan_source", "") or "",
+            # v2 字段，向后兼容：旧数据没有则取默认
+            concept_mastery=raw.get("concept_mastery", {}) or {},
+            learning_plan_v2=raw.get("learning_plan_v2", {}) or {},
+            session_index=int(raw.get("session_index") or 0),
+            self_assessment_scores=raw.get("self_assessment_scores", {}) or {},
+            skip_self_assessment=bool(raw.get("skip_self_assessment", True)),
         )
 
         # 向后兼容：如果旧数据里只有 mastery_scores，没有 node_learning_records

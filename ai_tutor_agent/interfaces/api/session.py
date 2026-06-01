@@ -460,7 +460,7 @@ def _resume_topic_confirmation_worker(
                         "proposed_topic": "",
                         "flow_status": "assessment_pending" if requested_mode == "assessment" else "normal",
                         "learning_phase": "pre_assessment" if requested_mode == "assessment" else "node_selection",
-                        "learning_resume_target": "assessment_generator" if requested_mode == "assessment" else "initial_node_selector",
+                        "learning_resume_target": "assessment_generator" if requested_mode == "assessment" else "learning_plan_generator",
                         "learning_resume_reason": "topic_confirmed",
                         "teaching_strategy": "analogy" if requested_mode == "analogy_tutor" else "explain",
                         "topic_focus": topic_focus,

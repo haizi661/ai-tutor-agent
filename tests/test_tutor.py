@@ -464,8 +464,13 @@ def test_tutor_preserves_marker_lines_after_citation_filter_and_advances_graph_a
 
 
 def test_tutor_outputs_node_content_context_directly_without_graph_search_or_llm_rewrite():
+    """主流程有 node_content_context 时，不调图谱搜索/通用知识库，但会调 LLM 生成个性化讲解。
+
+    explanation_teacher_style 作为参考材料注入 prompt，LLM 基于它生成讲解。
+    如果 LLM 失败，回退到直接输出预置内容。
+    """
     sink = BufferedEventSink()
-    llm = FakeStreamingLLM("LLM 不应该改写当前节点的预置教师讲解。")
+    llm = FakeStreamingLLM("LLM 基于参考材料生成的个性化讲解。")
 
     class FailingGraphPipeline:
         def ask(self, query, *, traversal_mode=None):
@@ -505,12 +510,100 @@ def test_tutor_outputs_node_content_context_directly_without_graph_search_or_llm
         }
     )
 
-    assert result["tutor_content"] == teacher_explanation
-    assert llm.messages == []
-    streamed = "".join(event.data.get("text", "") for event in sink.events if event.type == "node.stream")
-    assert streamed == teacher_explanation
+    # LLM 被调用了（一次调用，包含 system + human 两条消息）
+    assert len(llm.messages) == 1
+    assert len(llm.messages[0]) == 2
+    # 参考材料被注入到 human prompt 中
+    assert teacher_explanation in llm.messages[0][1].content
+    # 输出是 LLM 生成的内容（不是直接输出预置内容）
+    assert "个性化讲解" in result["tutor_content"]
     assert "图谱2.2" not in result["tutor_content"]
     assert "relation_path" not in result["tutor_content"]
+
+
+def test_tutor_prompt_uses_node_teaching_contract_and_requires_detailed_node_lesson():
+    sink = BufferedEventSink()
+    llm = FakeStreamingLLM(
+        "稳定性要看系统受扰动后的最终趋势，而不是只看中间有没有振荡。比如温控系统开窗后还能回到设定温度附近，就是稳定性的直观判断。"
+    )
+    node = build_tutor_node(llm, RuntimeContext(event_sink=sink, knowledge_provider=StubKnowledgeProvider()))
+
+    node(
+        {
+            "current_topic": "自动控制原理",
+            "current_user_goal": "学习稳定性",
+            "current_node_id": "stability",
+            "current_node_name": "稳定性",
+            "graph_anchor_id": "stability",
+            "graph_anchor_title": "稳定性",
+            "node_content_context": "【预置教师讲解】稳定性基础说明系统受扰动后响应是否保持有界或回到平衡。",
+            "node_teaching_contract": {
+                "learning_goal": "判断系统响应是否收敛",
+                "must_know": ["稳定性的定义", "有界输入有界输出"],
+                "common_misconceptions": ["把振荡都当成不稳定"],
+                "worked_example": "温控系统开窗后温度能回到设定值附近。",
+                "assessment_targets": [
+                    {"target_objective": "稳定性的定义", "misconception": "把振荡都当成不稳定", "required": True}
+                ],
+                "exit_criteria": ["节点客观题总分达到 80 分", "关键目标正确率达到 70%"],
+            },
+            "difficulty_level": 3,
+            "attempt_count": 0,
+            "feedback": "",
+            "assessment_radar": {},
+        }
+    )
+
+    system_prompt = llm.messages[0][0].content
+    human_prompt = llm.messages[0][1].content
+    joined_prompt = system_prompt + "\n" + human_prompt
+    assert "【节点教学契约】" in joined_prompt
+    assert "学习目标：判断系统响应是否收敛" in joined_prompt
+    assert "必会要点：稳定性的定义；有界输入有界输出" in joined_prompt
+    assert "常见误区：把振荡都当成不稳定" in joined_prompt
+    assert "退出条件：节点客观题总分达到 80 分；关键目标正确率达到 70%" in joined_prompt
+    assert "完整讲解必须覆盖" in joined_prompt
+    assert "220-420 字" in joined_prompt
+
+
+def test_tutor_expands_too_brief_node_lesson_with_contract_fallback():
+    sink = BufferedEventSink()
+    llm = FakeStreamingLLM("稳定性就是最终能稳定。")
+    node = build_tutor_node(llm, RuntimeContext(event_sink=sink, knowledge_provider=StubKnowledgeProvider()))
+
+    result = node(
+        {
+            "current_topic": "自动控制原理",
+            "current_user_goal": "学习稳定性",
+            "current_node_id": "stability",
+            "current_node_name": "稳定性",
+            "graph_anchor_id": "stability",
+            "graph_anchor_title": "稳定性",
+            "node_content_context": "稳定性基础说明系统受扰动后响应是否保持有界或回到平衡。",
+            "node_teaching_contract": {
+                "learning_goal": "判断系统响应是否收敛",
+                "must_know": ["稳定性的定义", "有界输入有界输出"],
+                "common_misconceptions": ["把振荡都当成不稳定"],
+                "worked_example": "温控系统开窗后温度能回到设定值附近。",
+                "assessment_targets": [
+                    {"target_objective": "稳定性的定义", "misconception": "把振荡都当成不稳定", "required": True}
+                ],
+                "exit_criteria": ["节点客观题总分达到 80 分", "关键目标正确率达到 70%"],
+            },
+            "difficulty_level": 3,
+            "attempt_count": 0,
+            "feedback": "",
+            "assessment_radar": {},
+        }
+    )
+
+    content = result["tutor_content"]
+    assert len(content) > 120
+    assert "判断系统响应是否收敛" in content
+    assert "稳定性的定义" in content
+    assert "有界输入有界输出" in content
+    assert "把振荡都当成不稳定" in content
+    assert "温控系统开窗后温度能回到设定值附近" in content
 
 
 def test_tutor_retries_with_invoke_when_stream_breaks():

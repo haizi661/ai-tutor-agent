@@ -197,8 +197,26 @@
                             <span id="cl-node-text">等待开始</span>
                         </button>
                     </div>
-                    <div class="chat-header-right">
+                    <div class="chat-header-right" id="chat-header-right">
                         <button type="button" class="chat-header-btn" id="share-session-btn" onclick="shareCurrentSession()">分享</button>
+                        <div class="lp-header-wrap">
+                            <button type="button" class="chat-header-btn" id="lp-header-btn" onclick="window.AITutorApp.toggleLearningPathDropdown()" hidden><svg class="lp-icon" width="15" height="15" viewBox="0 0 16 16" fill="none" aria-hidden="true"><circle cx="4" cy="3" r="2" stroke="currentColor" stroke-width="1.4"/><circle cx="12" cy="8" r="2" stroke="currentColor" stroke-width="1.4"/><circle cx="4" cy="13" r="2" stroke="currentColor" stroke-width="1.4"/><path d="M6 3h4M6 13h4" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/><path d="M10 4.5v5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg> 学习路径</button>
+                            <div class="lp-dropdown" id="lp-dropdown">
+                                <!-- notch arrow connecting to button -->
+                                <div class="lp-dropdown-notch"></div>
+                                <div class="lp-dropdown-inner">
+                                    <div class="lp-dropdown-title-bar">
+                                        <span class="lp-dropdown-title"><svg class="lp-icon" width="14" height="14" viewBox="0 0 16 16" fill="none" aria-hidden="true"><circle cx="4" cy="3" r="2" stroke="currentColor" stroke-width="1.4"/><circle cx="12" cy="8" r="2" stroke="currentColor" stroke-width="1.4"/><circle cx="4" cy="13" r="2" stroke="currentColor" stroke-width="1.4"/><path d="M6 3h4M6 13h4" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/><path d="M10 4.5v5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg> 学习路径</span>
+                                        <button type="button" class="lp-dropdown-close" id="lp-dropdown-close" onclick="window.AITutorApp.toggleLearningPathDropdown()" aria-label="关闭">
+                                            <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M4 4l6 6M10 4l-6 6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+                                        </button>
+                                    </div>
+                                    <div class="lp-dropdown-body" id="lp-panel-content">
+                                        <div class="lp-panel-empty">开始学习后，这里会显示你的学习路径</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                         <div class="chat-header-more">
                             <button type="button" class="chat-header-icon-btn" id="header-more-btn" onclick="toggleHeaderMoreMenu()" aria-label="更多操作" aria-haspopup="menu" aria-expanded="false">
                                 <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><circle cx="3.25" cy="8" r="1.15" fill="currentColor"/><circle cx="8" cy="8" r="1.15" fill="currentColor"/><circle cx="12.75" cy="8" r="1.15" fill="currentColor"/></svg>
@@ -292,22 +310,6 @@
                     <div class="composer-disclaimer">AI 也可能会犯错，请核查重要信息。</div>
                 </div>
             </main>
-
-            <!-- ═══ LEARNING PATH PANEL ═══ -->
-            <aside class="learning-path-panel" id="learning-path-panel" aria-label="学习路径" hidden>
-                <div class="lp-panel-header">
-                    <div class="lp-panel-title-row">
-                        <span class="lp-panel-icon">📚</span>
-                        <span class="lp-panel-title">学习路径</span>
-                    </div>
-                    <button type="button" class="lp-panel-toggle" id="lp-panel-toggle" onclick="toggleLearningPathPanel()" aria-label="折叠学习路径面板">
-                        <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M9 3L5 7l4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
-                    </button>
-                </div>
-                <div class="lp-panel-content" id="lp-panel-content">
-                    <div class="lp-panel-empty">开始学习后，这里会显示你的学习路径</div>
-                </div>
-            </aside>
         </div>
     </div>
 

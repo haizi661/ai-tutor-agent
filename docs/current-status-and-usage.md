@@ -1,11 +1,11 @@
 # AI Tutor Agent 当前完成情况与使用说明
 
-更新时间：2026-05-03
+更新时间：2026-05-29
 项目根目录：本文所有命令默认都在本仓库根目录执行，路径统一使用项目内相对路径。
 
 ## 1. 当前一句话结论
 
-当前项目已经从普通 RAG 问答/单题陪练，推进到“知识图谱 2.1 节点路径 + 图谱 2.2 临时问答/证据增强 + LangGraph 显式状态机 + 学生长期状态”的节点制掌握学习原型。
+当前项目已经从普通 RAG 问答/单题陪练，推进到"知识图谱驱动 + 多步学习路径 + 节点制掌握学习"的自适应伴学原型，并接入了错题本、题目答疑和客观题复盘的基础学习工具。
 
 可运行主线已经具备：
 
@@ -13,16 +13,19 @@
 新主题输入
 → 主题确认
 → 学前诊断
-→ 初始图谱节点选择
+→ 学习路径生成（根据用户画像多步规划，每步含多个节点）
+→ 初始图谱节点选择（从路径第一步选节点）
 → 节点内容加载
 → Tutor 按当前节点讲解
 → 课后停顿：自由追问/表达卡点，或进入节点小测
 → 节点后客观题批量测试
 → 未通过：错题讲解 + 变式题
-→ 通过：下一节点规划
+→ 通过：下一节点规划（按当前 Step 内找 → Step 完了推进下一步 → 全部完成进作业）
 → 继续下一节点 / 结束本轮学习生成作业
-→ 二次登录恢复作业或继续学习
+→ 二次登录恢复作业或继续学习（从持久化路径恢复）
 ```
+
+旁路学习工具已经可用：侧边栏“错题本”按知识节点整理错题，侧边栏“题目答疑”用于临时文字/图片题解答。两者不会改变主线图谱推进状态，除非后续显式加入新的产品规则。
 
 但仍要严谨区分：这是“主流程主体闭合、可测试、可演示”的版本，还不是最终产品化版本。题库内容、真实端到端浏览器/API 回归、跨系统启动脚本与图谱运行资产治理仍需后续收敛。
 
@@ -103,7 +106,46 @@ python -m ai_tutor_agent.knowledge_map.runtime_assets --media-index data/media_e
 
 当前口径：学生长期状态已经参与主流程，但仍属于轻量 JSON/本地存储原型；后续如果产品化，应升级为更明确的数据库 schema、迁移策略和用户隔离策略。
 
-### 2.5 用户画像和学习情况生成口径
+### 2.5 学习路径（Learning Plan）
+
+已完成：
+
+- `learning_plan_builder.py` 实现了基于知识图谱拓扑排序 + 用户画像加权的多步学习路径生成算法。
+- 路径结构：多步（Step），每步包含 1-N 个节点，按拓扑层级聚合，同一 chapter 的节点归为一组。
+- 画像影响：诊断中薄弱概念（`concept_gaps` calibrated 分低）的节点优先级更高；`difficulty_level` 影响每步节点数（1=慢节奏，5=快节奏）。
+- `learning_plan_generator` 节点在 `user_profiler` 之后运行，生成路径并写入 `AgentState` + `StudentState`。
+- `initial_node_selector` 优先从 `learning_plan[0]` 选节点，fallback 保持原逻辑。
+- `next_node_planner` 改为按 Step 推进：先在当前 Step 内找未学节点 → Step 完了推进到下一步 → 全部完成进入作业。
+- `session_resume_router` 恢复时从持久化的 `learning_plan` 找当前 Step 中未 mastered 的节点。
+- 路径持久化到 `StudentState`（JSON），会话恢复时复用，不重新生成。
+- 设计文档：`docs/plans/2026-05-28-learning-plan-design.md`。
+- 测试：`tests/test_learning_plan.py`，覆盖拓扑排序、路径生成、分组、跳过已掌握、Step 导航、节点集成。
+
+2026-05-29 新增（v2 算法）：
+
+- `compute_relevance()` 实现目标相关性评分：前置链上 → 100、同 chapter → 50、related_to 边 → 30、无关 → 0。
+- `_score_node()` 扩展为多因子加权：calibrated 分 × gap_type_boost × importance_boost × topic_boost × relevance_boost × topo_boost。
+- `build_priority_plan()` 支持 `target_node_id` 参数，前置链节点优先级提升。
+- `update_learning_plan()` 实现学完一步后动态重算后续步骤。
+- 设计文档：`docs/plans/2026-05-29-learning-path-algorithm-v2.md`、`docs/plans/2026-05-29-learning-path-v2-implementation-plan.md`。
+
+事件协议：
+- `learning_plan.generated` — 路径生成时发送，含 total_steps、total_nodes、plan_summary
+- `learning_plan.progress` — 节点推进时发送，含 current_step、step_progress
+- `learning_plan.reused` — 恢复复用时发送
+
+当前口径：学习路径后端已完整（含 v2 目标聚焦与动态更新），前端路径面板已实现为聊天区右侧独立面板。
+
+### 2.5.1 学习路径面板（前端）
+
+已完成：
+
+- 独立面板渲染在聊天区右侧，显示完整学习路径进度。
+- 面板显示每个 Step 的名称、节点列表、完成状态（✅/🔵/⬜）和当前进度。
+- 当前 Step 展开显示节点详情，已完成和待学习 Step 折叠。
+- 节点 ID 作为 `userKnowledgeGraph` 的 key（不再使用中文标题），与后端 KG 数据结构一致。
+
+### 2.6 用户画像和学习情况生成口径
 
 当前画像不是一个单独的 `user_profile` 文件，而是由“学前诊断画像 + 学习过程状态”共同形成。
 
@@ -126,7 +168,27 @@ python -m ai_tutor_agent.knowledge_map.runtime_assets --media-index data/media_e
 - 当前学前测评要继续强化自评题与客观校准题的配对，否则只能得到主观起点，难以稳定识别"高估自己"的情况。
 - 初始节点选择后续应真正使用画像信号，但必须受知识图谱前置关系约束，不能只按最低分跳到任意节点。
 
-### 2.6 测试状态
+### 2.7 错题本、题目答疑、客观题复盘与公式渲染
+
+已完成基础闭环：
+
+- 错题本后端：`GET /api/students/{student_id}/wrong-questions` 支持 `node_id`、`mastered`、`page`、`page_size`、`sort`；`sort` 支持 `latest`、`wrong_count`、`reviewed`。响应包含 `items`、`total`、`total_all`、`total_unmastered`、`total_mastered` 和分页字段。
+- 错题本掌握状态：`POST /api/students/{student_id}/wrong-questions/{question_id}/master` 使用 `{ "mastered": true/false }` 标记已掌握或取消掌握；`POST /api/students/{student_id}/wrong-questions/{question_id}/review` 标记已复习。
+- 错题本前端：`frontend/assets/js/wrong-book.js` 默认显示待复习题，提供“全部 / 待复习 / 已掌握”筛选，按节点分组展示题干、答案、错因、讲解、判断依据、下一步和错误选项分析。
+- 题目答疑后端：`GET /api/students/{student_id}/question-help` 返回解答历史；`POST /api/students/{student_id}/question-help` 接收 `question_text`、`images`、`current_node_id`、`current_node_name`、`answer_mode`。`answer_mode` 包含 `quick`、`deep`、`vision`，有图片且模式无效时默认使用 `vision`。
+- 题目答疑前端：`frontend/assets/js/question-help.js` 提供当前解答工作区、解答方式选择、图片上传和历史记录列表。记录写入 `StudentState.question_help_records`，不自动进入错题本。
+- 题目答疑输出契约：模型回答应使用 `### 考点`、`### 解题步骤`、`### 最终答案`、`### 易错提醒` 四个 Markdown 小节；公式使用行内 `\(...\)` 和行间 `$$...$$`。
+- 客观题复盘：前端选项改为整行可读布局，提交后每题显示“本题解析”，并结构化展示判断依据、所选项问题、常见误区和下一步。
+- 本地渲染：`frontend/index.html` 加载本地 `marked` 与 `katex` vendor 文件；`frontend/assets/js/ui.js` 暴露 `app.renderMarkdownContent` 与 `app.renderMath`，题目答疑和复盘区域复用同一套 sanitizer 与公式渲染。
+
+仍未完成的边界：
+
+- 错题本还没有“复习本节点”按钮，也没有真正的“再做一遍原题”交互；当前只能展开讲解和切换掌握状态。
+- 错题本前端还没有暴露“按做错时间倒序 / 做错最多 / 最久未复习”的排序控件；后端排序参数已经存在。
+- 题目答疑当前是一次请求返回完整解答，不是真 token 流式输出。
+- 重复做错后的变式训练阈值、暂停规则和“讲解后是否继续训练”的确认动作还需要产品规则与测试。
+
+### 2.8 测试状态
 
 2026-04-28 复查记录中已运行聚焦回归：
 
@@ -227,7 +289,7 @@ PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 pytest -q
 452 passed, 5 warnings
 ```
 
-同日浏览器实测恢复 `awaiting_post_lesson_choice` 历史页：
+2026-05-02 浏览器实测恢复 `awaiting_post_lesson_choice` 历史页：
 
 - 顶部标题恢复为学习主题，当前节点恢复为图谱节点名；
 - 状态恢复为“等你决定课后步骤”，并自动定位到课后停顿卡片；
@@ -247,6 +309,34 @@ PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 pytest -q
 - `post_lesson_choice` 节点首次运行时重置 `post_lesson_choice: ""`，防止从临时问答返回后残留旧值导致路由错误进入临时问答。
 - `_START_TEST_MARKERS` 新增 `"start_test"` 和 `"temporary_question"`，修复系统内部命令被误判为自由提问。
 - 前端新增 `stripRedundantTextAfterTables()`：当答案含 `<table>` 时隐藏后续纯文本段落，遇到下一个结构化元素恢复显示。
+
+2026-05-29 学习路径 v2（ZPD 评分 + 目标聚焦 + 动态更新）、前端路径面板、KG key 修复后运行：
+
+```bash
+PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 pytest -q
+# 626 passed, 5 skipped, 5 warnings
+```
+
+2026-05-29 错题本、题目答疑、客观题复盘、公式渲染与历史恢复相关聚焦回归：
+
+```bash
+PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 pytest -q \
+  tests/test_frontend_learning_content_layout.py \
+  tests/test_frontend_question_help_ui.py \
+  tests/test_frontend_objective_test_ui.py \
+  tests/test_objective_learning_flow.py \
+  tests/test_question_help_api.py \
+  tests/test_objective_remediation_flow.py \
+  tests/test_objective_remediation_regressions.py \
+  tests/test_graph_rag_learning_answer_html.py \
+  tests/test_history.py \
+  tests/test_session_resume_router.py \
+  tests/test_frontend_wrong_book_ui.py \
+  tests/test_wrong_questions_api.py \
+  tests/test_objective_history_and_remediation_timeline.py \
+  tests/test_frontend_html_safety.py
+# 128 passed, 5 warnings
+```
 
 ## 3. 当前主要缺口
 
@@ -268,6 +358,24 @@ PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 pytest -q
 - provider 不可用或题目不足时，节点仍 fallback 到 AI 生成或内置 fallback，避免流程中断。
 
 当前仓库中只保留最小 `assessment_questions.jsonl` 资产；节点客观题、变式题、作业题仍需继续补内容质量。因此现阶段不能称为“正式题库完成”，只能称为“题库接入机制已就绪，题库内容待扩充”。
+
+### P1：错题本基础可用，但复习闭环还不完整
+
+当前错题本已经能筛选待复习/已掌握、展开讲解、按节点查看并标记掌握。还需要补齐：
+
+1. “复习本节点”：从错题节点回到对应图谱节点学习流程。
+2. “再做一遍”：先前端本地重做原题并即时判分，再决定是否写回后端。
+3. 排序控件：把后端已有 `latest`、`wrong_count`、`reviewed` 暴露到 UI。
+4. 变式训练边界：连续错到阈值后先完成讲解，再询问是否继续变式训练，而不是无限出题。
+
+### P1：题目答疑需要从一次性解答升级为可控解答工作区
+
+当前题目答疑已经支持文字/图片、解答模式、历史记录和 Markdown/公式渲染。后续需要继续收敛：
+
+1. 是否引入真正流式输出；
+2. 不同解答模型的前端选择与后端配置一致性；
+3. 答疑结果是否允许一键加入错题本，加入时需要什么错因与节点绑定规则；
+4. 图片题识别失败、公式解析失败、模型不可用时的可见错误提示。
 
 ### P1：用户画像仍需升级为证据驱动的长期学习者模型
 
@@ -429,6 +537,12 @@ A B C D A B C D A B
 
 选择结束本轮学习时，系统会生成作业并写入学生状态。
 
+### 4.3.1 错题本与题目答疑
+
+- 错题本入口在侧边栏；默认显示待复习错题。可切换“全部 / 待复习 / 已掌握”，展开单题讲解，并标记已掌握或取消掌握。
+- 题目答疑入口在侧边栏；可粘贴题干或上传图片，选择“快速解答 / 深度解析 / 图片题专用”。解答记录会保存在当前学生状态中。
+- 题目答疑记录不会自动进入错题本；错题本目前主要由节点小测/错题订正流程写入。
+
 ### 4.4 查看知识图谱
 
 启动服务后打开：
@@ -550,7 +664,8 @@ scripts/sync_knowledge_map_runtime_assets.sh
 3. `docs/reports/2026-04-28-langgraph-final-closure-report.md`：2026-04-28 最终闭合报告，记录 88 项聚焦回归和图谱资产状态。
 4. `docs/knowledge-map-runtime-assets.md`：运行资产同步说明。
 5. `docs/plans/2026-04-30-interaction-artifact-validation-contract.md`：交互卡片、历史恢复与浏览器验收契约。
-6. `docs/plans/2026-04-28-strict-kg-mastery-mainflow-plan.md`：严格主流程设计长计划，作为历史设计依据。
+6. `docs/plans/2026-05-29-teaching-optimization-plan.md`：教学能力优化计划，包含错题反馈回流、情绪感知、课后推荐等待实施方向。
+7. `docs/plans/2026-04-28-strict-kg-mastery-mainflow-plan.md`：严格主流程设计长计划，作为历史设计依据。
 
 ## 7. 严谨汇报口径
 

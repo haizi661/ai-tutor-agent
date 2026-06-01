@@ -17,6 +17,7 @@ from ..nodes.evaluator import build_evaluator_node
 from ..nodes.intake import build_intake_router_node
 from ..nodes.interruption import build_interruption_node
 from ..nodes.initial_node_selector import build_initial_node_selector_node
+from ..nodes.learning_plan_generator import build_learning_plan_generator_node
 from ..nodes.meta import build_meta_node
 from ..nodes.node_content_loader import build_node_content_loader_node
 from ..nodes.objective_test import build_objective_test_generator_node, build_objective_test_scorer_node
@@ -135,7 +136,11 @@ def get_entry_node(state: AgentState) -> str:
         return "post_eval_wrapup"
 
     if state.get("is_assessed", False):
-        return "tutor"
+        # 已完成诊断但还没有学习路径 → 先生成路径
+        has_plan = bool(state.get("learning_plan"))
+        if has_plan:
+            return "tutor"
+        return "learning_plan_generator"
     
     if state.get("tutor_content"):
         return "tutor"
@@ -180,6 +185,8 @@ def route_after_topic_confirmer(state: AgentState) -> str:
         return "pause"
     if state.get("flow_status") == "greeting":
         return "greeter"
+    if normalize_resume_target(state.get("learning_resume_target", "")) == "learning_plan_generator":
+        return "learning_plan_generator"
     if normalize_resume_target(state.get("learning_resume_target", "")) == "initial_node_selector":
         return "initial_node_selector"
     if state.get("flow_status") == "direct_tutor":
@@ -207,7 +214,7 @@ def route_after_assessment_dialog(state: AgentState) -> str:
 
 
 def route_after_user_profiler(state: AgentState) -> str:
-    return "initial_node_selector"
+    return "learning_plan_generator"
 
 
 def route_after_initial_node_selector(state: AgentState) -> str:
@@ -290,7 +297,15 @@ def route_after_variant_test_answer_dialog(state: AgentState) -> str:
     return "pause"
 
 
+def route_after_learning_plan_generator(state: AgentState) -> str:
+    if state.get("learning_plan_source") == "all_mastered":
+        return "continue_or_homework_selector"
+    return "initial_node_selector"
+
+
 def route_after_next_node_planner(state: AgentState) -> str:
+    if state.get("learning_plan_source") == "plan_completed":
+        return "learning_plan_generator"
     return "continue_or_homework_selector"
 
 
@@ -418,6 +433,7 @@ def build_workflow(
     workflow.add_node("topic_confirmer", build_topic_confirm_node(runtime.event_sink))
     
     workflow.add_node("initial_node_selector", build_initial_node_selector_node(runtime))
+    workflow.add_node("learning_plan_generator", build_learning_plan_generator_node(tutor_llm, runtime))
     workflow.add_node("node_content_loader", build_node_content_loader_node(runtime))
     workflow.add_node("tutor", build_tutor_node(tutor_llm, runtime))
     workflow.add_node("interruption_tutor", build_interruption_node(tutor_llm, runtime))
@@ -510,6 +526,7 @@ def build_workflow(
             "pause": END,
             "greeter": "greeter",
             "tutor": "tutor",
+            "learning_plan_generator": "learning_plan_generator",
             "initial_node_selector": "initial_node_selector",
             "assessment_generator": "assessment_generator",
         }
@@ -529,7 +546,15 @@ def build_workflow(
     workflow.add_conditional_edges(
         "user_profiler",
         route_after_user_profiler,
-        {"initial_node_selector": "initial_node_selector"},
+        {"learning_plan_generator": "learning_plan_generator"},
+    )
+    workflow.add_conditional_edges(
+        "learning_plan_generator",
+        route_after_learning_plan_generator,
+        {
+            "initial_node_selector": "initial_node_selector",
+            "continue_or_homework_selector": "continue_or_homework_selector",
+        },
     )
     workflow.add_conditional_edges(
         "initial_node_selector",
@@ -615,7 +640,10 @@ def build_workflow(
     workflow.add_conditional_edges(
         "next_node_planner",
         route_after_next_node_planner,
-        {"continue_or_homework_selector": "continue_or_homework_selector"},
+        {
+            "continue_or_homework_selector": "continue_or_homework_selector",
+            "learning_plan_generator": "learning_plan_generator",
+        },
     )
     workflow.add_conditional_edges(
         "continue_or_homework_selector",

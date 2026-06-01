@@ -189,6 +189,29 @@ def test_node_content_loader_uses_only_prebuilt_teacher_explanation_for_teaching
     )
 
 
+def test_node_content_loader_builds_node_teaching_contract_from_graph_fields():
+    graph = FakeGraphPipeline()
+    runtime = RuntimeContext(event_sink=BufferedEventSink(), graph_rag_pipeline=graph)
+    node = build_node_content_loader_node(runtime)
+
+    result = node({"current_topic": "自动控制原理", "current_node_id": "KM001", "current_node_name": "稳定性基础"})
+
+    contract = result["node_teaching_contract"]
+    assert contract["node_id"] == "KM001"
+    assert contract["node_name"] == "稳定性基础"
+    assert contract["learning_goal"] == "判断系统响应是否收敛"
+    assert contract["must_know"] == ["稳定性的定义", "有界输入有界输出"]
+    assert contract["common_misconceptions"] == ["把振荡都当成不稳定"]
+    assert contract["exit_criteria"] == [
+        "节点客观题总分达到 80 分",
+        "关键目标正确率达到 70%",
+        "常见误区题不能连续错 2 次",
+    ]
+    assert contract["assessment_targets"][0]["target_objective"] == "稳定性的定义"
+    assert contract["assessment_targets"][0]["required"] is True
+    assert contract["assessment_targets"][0]["misconception"] == "把振荡都当成不稳定"
+
+
 def test_node_content_loader_falls_back_to_structured_context_when_teacher_explanation_missing():
     class NoTeacherExplanationGraphPipeline(FakeGraphPipeline):
         def __init__(self):
@@ -252,6 +275,6 @@ def test_node_content_loader_does_not_query_graph_rag_or_include_relation_path_t
 
 
 def test_workflow_routes_profiler_to_initial_selector_then_loader():
-    assert workflow_module.route_after_user_profiler({"current_node_id": "KM001"}) == "initial_node_selector"
+    assert workflow_module.route_after_user_profiler({"current_node_id": "KM001"}) == "learning_plan_generator"
     assert workflow_module.route_after_initial_node_selector({"current_node_id": "KM001"}) == "node_content_loader"
     assert workflow_module.route_after_node_content_loader({"node_content_context": "context"}) == "tutor"

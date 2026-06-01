@@ -373,6 +373,22 @@ class TopicConfirmWorkflowFactory:
                         )
                     )
                     return
+                if state.get("learning_resume_target") == "learning_plan_generator":
+                    state["learning_plan"] = [
+                        {"step_index": 0, "step_name": "基础概念", "node_ids": ["KM001"], "node_names": ["自动控制的一般概念"], "status": "in_progress"},
+                    ]
+                    state["learning_plan_current_step"] = 0
+                    state["learning_plan_source"] = "profile_based"
+                    state["learning_resume_target"] = "initial_node_selector"
+                    self.checkpoint_store.save(thread_id, state, source="loop", step=3)
+                    self.runtime_context.event_sink.emit(
+                        make_event(
+                            "learning_plan.generated",
+                            "learning_plan_generator",
+                            message="已生成学习路径",
+                            data={"plan": state["learning_plan"], "total_steps": 1, "total_nodes": 1},
+                        )
+                    )
                 if state.get("learning_resume_target") == "initial_node_selector":
                     state["flow_status"] = "normal"
                     state["tutor_content"] = "开始直接讲解。"

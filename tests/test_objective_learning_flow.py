@@ -756,6 +756,87 @@ def test_objective_generator_prompt_contains_blueprint_and_balanced_answer_keys(
     assert '"answer_key": "D"' in prompt_content
 
 
+def test_objective_generator_uses_node_teaching_contract_for_coverage_plan():
+    llm = FakeLLM("not json")
+    runtime = RuntimeContext(event_sink=BufferedEventSink())
+    node = build_objective_test_generator_node(runtime, llm=llm, count=3)
+
+    result = node(
+        {
+            "current_node_id": "KM001",
+            "current_node_name": "稳定性基础",
+            "node_teaching_contract": {
+                "node_id": "KM001",
+                "node_name": "稳定性基础",
+                "learning_goal": "判断系统响应是否收敛",
+                "must_know": ["稳定性的定义", "有界输入有界输出"],
+                "common_misconceptions": ["把振荡都当成不稳定"],
+                "assessment_targets": [
+                    {
+                        "target_objective": "稳定性的定义",
+                        "assessment_focus": "概念辨析",
+                        "misconception": "把振荡都当成不稳定",
+                        "required": True,
+                    },
+                    {
+                        "target_objective": "有界输入有界输出",
+                        "assessment_focus": "应用迁移",
+                        "misconception": "只看瞬时振荡，不看最终是否有界",
+                        "required": True,
+                    },
+                ],
+                "exit_criteria": ["节点客观题总分达到 80 分", "关键目标正确率达到 70%"],
+            },
+        }
+    )
+
+    targets = [item["target_objective"] for item in result["node_quiz_items"]]
+    assert targets[:2] == ["稳定性的定义", "有界输入有界输出"]
+    assert result["node_quiz_coverage_plan"][0]["target_objective"] == "稳定性的定义"
+    assert result["node_quiz_coverage_plan"][0]["required"] is True
+    prompt_content = llm.calls[0][1].content
+    assert "节点教学契约" in prompt_content
+    assert "退出条件：节点客观题总分达到 80 分；关键目标正确率达到 70%" in prompt_content
+
+
+def test_objective_scorer_blocks_passing_when_required_contract_target_is_wrong():
+    runtime = RuntimeContext(event_sink=BufferedEventSink())
+    node = build_objective_test_scorer_node(runtime, pass_score=80)
+    items = [
+        {
+            "question_id": f"Q{i}",
+            "stem": f"题{i}",
+            "options": {"A": "对", "B": "错", "C": "干扰", "D": "干扰"},
+            "answer_key": "A",
+            "target_objective": "稳定性的定义" if i == 1 else "有界输入有界输出",
+            "assessment_focus": "概念辨析",
+            "misconception": "把振荡都当成不稳定",
+        }
+        for i in range(1, 6)
+    ]
+
+    result = node(
+        {
+            "current_node_id": "KM001",
+            "current_node_name": "稳定性基础",
+            "node_teaching_contract": {
+                "assessment_targets": [
+                    {"target_objective": "稳定性的定义", "required": True},
+                    {"target_objective": "有界输入有界输出", "required": True},
+                ]
+            },
+            "node_quiz_items": items,
+            "node_quiz_answers": {"Q1": "B", "Q2": "A", "Q3": "A", "Q4": "A", "Q5": "A"},
+        }
+    )
+
+    assert result["node_quiz_score"] == 80
+    assert result["current_node_status"] == "quizzing"
+    assert result["learning_resume_target"] == "wrong_question_explainer"
+    assert result["objective_mastery_summary"]["required_failed_targets"] == ["稳定性的定义"]
+    assert "关键目标未达标" in result["feedback"]
+
+
 def test_workflow_routes_tutor_to_post_lesson_choice_and_objective_scorer_to_next_node_planner():
     assert workflow_module.route_after_tutor({"interrupt_query": ""}) == "post_lesson_choice"
     assert workflow_module.route_after_post_lesson_choice({"post_lesson_choice": "start_test"}) == "objective_test_generator"

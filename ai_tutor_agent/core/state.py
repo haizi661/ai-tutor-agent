@@ -17,6 +17,8 @@ class AgentState(TypedDict):
     node_quiz_wrong_items: list        # 节点客观题错题
     node_quiz_score: int               # 节点客观题得分
     node_content_context: str           # 当前图谱节点抽取出的结构化讲解上下文
+    node_teaching_contract: dict        # 当前节点教学契约: goal/must_know/misconceptions/assessment_targets/exit_criteria
+    node_quiz_coverage_plan: list       # 当前节点测验覆盖计划，来自教学契约或节点字段
     next_node_candidate_reason: str     # 初始/下一节点选择原因
     homework_items: list               # 本轮布置的作业题
     homework_answers: dict             # 作业作答缓存
@@ -108,6 +110,11 @@ class AgentState(TypedDict):
     # ── 节点补救闭环状态 ──
     node_remediation_state: dict       # {original_score, variant_rounds, same_objective_failures, extra_count, status}
     remediation_decision: str          # 用户选择的补救决策: continue_variant/review_node/do_later/still_do_variant
+    # ── 学习路径（Learning Plan）──
+    learning_plan: list                # 多步学习计划 [{step_index, step_name, node_ids, status, reason, ...}]
+    learning_plan_current_step: int    # 当前在学习路径的第几步
+    learning_plan_generated_at: str    # 路径生成时间 ISO
+    learning_plan_source: str          # 生成来源: "profile_based" | "resume_reuse" | "manual"
 
 
 def build_initial_state(topic: str = "") -> AgentState:
@@ -125,6 +132,8 @@ def build_initial_state(topic: str = "") -> AgentState:
         "node_quiz_wrong_items": [],
         "node_quiz_score": 0,
         "node_content_context": "",
+        "node_teaching_contract": {},
+        "node_quiz_coverage_plan": [],
         "next_node_candidate_reason": "",
         "homework_items": [],
         "homework_answers": {},
@@ -214,4 +223,8 @@ def build_initial_state(topic: str = "") -> AgentState:
         "thinking_mode": False,
         "node_remediation_state": {},
         "remediation_decision": "",
+        "learning_plan": [],
+        "learning_plan_current_step": 0,
+        "learning_plan_generated_at": "",
+        "learning_plan_source": "",
     }

@@ -15,6 +15,19 @@ def test_learning_flow_scaffold_preserves_new_explicit_resume_targets():
     assert normalize_resume_target("temporary_question_collector") == "temporary_question_collector"
     assert normalize_resume_target("continue_or_homework_selector") == "continue_or_homework_selector"
     assert normalize_resume_target("homework_generator") == "homework_generator"
+    assert normalize_resume_target("learning_plan_generator") == "learning_plan_generator"
+
+
+def test_learning_flow_scaffold_preserves_skip_to_learning_plan_generator():
+    state = {
+        "learning_phase": "node_selection",
+        "learning_resume_target": "learning_plan_generator",
+        "flow_status": "normal",
+    }
+
+    patch = build_learning_flow_scaffold(state)
+
+    assert patch == {}
 
 
 def test_homework_assigned_second_login_scaffolds_to_session_resume_router():

@@ -12,12 +12,12 @@
             const data = await resp.json();
             if (data && Array.isArray(data.nodes)) {
                 state.learningPathNodes = data.nodes;
-                app.showLearningPathPanel?.();
-                app.updateLearningPathPanel?.({
-                    nodes: data.nodes,
-                    currentNodeId: state.currentGraphNodeId,
-                    userKnowledgeGraph: state.userKnowledgeGraph,
-                });
+                // Only show the full chapter view if we have no step-based learning plan
+                // and the user is actively learning (has a current node)
+                if (state.learningPlan && state.learningPlan.length > 0) {
+                    app.showLearningPathPanel?.();
+                    app.renderLearningPlanPanel?.(state.learningPlan, state.currentGraphNodeId, state.userKnowledgeGraph);
+                }
             }
         } catch (err) {
             console.warn('Failed to load graph data for path panel:', err);
@@ -423,24 +423,10 @@
             if (['initial_node_selector', 'node_content_loader'].includes(data.source) && data.data?.node_id) {
                 state.currentGraphNode = data.data?.node_name || state.currentGraphNode;
                 state.currentGraphNodeId = data.data?.node_id || state.currentGraphNodeId || '';
-                app.renderKnowledgeGraphVisualCard?.({
-                    title: state.currentGraphNode,
-                    id: state.currentGraphNodeId,
-                });
-                // 首次选择节点时，加载图谱数据并显示学习路径面板
+                // 首次选择节点时，加载图谱数据并显示右侧学习路径面板
                 if (!state.learningPathNodes) {
                     loadGraphDataForPathPanel();
                 }
-            }
-            // 学习路径卡片：当 next_node_planner 推荐下一节点时显示
-            if (data.source === 'next_node_planner' && data.data?.next_node_candidate) {
-                app.renderLearningPathCard?.({
-                    currentNode: state.currentGraphNode || '',
-                    currentNodeId: state.currentGraphNodeId || '',
-                    nextNode: data.data.next_node_candidate.name || data.data.next_node_candidate.node_id || '',
-                    nextNodeId: data.data.next_node_candidate.node_id || '',
-                    reason: data.data.reason || '',
-                });
             }
             const evidence = Array.isArray(data.data?.evidence) ? data.data.evidence : [];
             if (data.source === 'tutor' && evidence.length) {
@@ -460,6 +446,39 @@
                 });
             }
             app.clearTypingIndicator?.();
+        });
+
+        // ── 学习路径事件 ──
+        state.eventSource.addEventListener('learning_plan.generated', e => {
+            const data = safelyParseEventData(e.data);
+            const planData = data.data || {};
+            state.learningPlan = planData.plan || [];
+            state.learningPlanSummary = planData.plan_summary || [];
+            appendThinking(data.message || '学习路径已生成', 'success', 'learning_plan');
+            app.showLearningPathPanel?.();
+            app.renderLearningPlanPanel?.(state.learningPlan, state.currentGraphNodeId, state.userKnowledgeGraph);
+        });
+
+        state.eventSource.addEventListener('learning_plan.progress', e => {
+            const data = safelyParseEventData(e.data);
+            const progress = data.data || {};
+            state.learningPlanCurrentStep = progress.current_step || 0;
+            if (progress.step_completed) {
+                appendThinking(data.message || '步骤已完成', 'success', 'learning_plan');
+            }
+            app.renderLearningPlanPanel?.(state.learningPlan || [], state.currentGraphNodeId, state.userKnowledgeGraph);
+        });
+
+        state.eventSource.addEventListener('learning_plan.reused', e => {
+            const data = safelyParseEventData(e.data);
+            const planData = data.data || {};
+            if (planData.plan && Array.isArray(planData.plan)) {
+                state.learningPlan = planData.plan;
+                state.learningPlanCurrentStep = planData.current_step || 0;
+            }
+            appendThinking(data.message || '复用已有学习路径', 'info', 'learning_plan');
+            app.showLearningPathPanel?.();
+            app.renderLearningPlanPanel?.(state.learningPlan || [], state.currentGraphNodeId, state.userKnowledgeGraph);
         });
 
         state.eventSource.addEventListener('intent.detected', e => {
@@ -501,14 +520,10 @@
             }
             app.syncKnowledgeGraphVisualState?.();
             app.scheduleSidebarUpdate?.();
-            // 更新学习路径面板
-            if (state.learningPathNodes && state.learningPathNodes.length > 0) {
+            // 仅在有学习计划时更新面板
+            if (state.learningPlan && state.learningPlan.length > 0) {
                 app.showLearningPathPanel?.();
-                app.updateLearningPathPanel?.({
-                    nodes: state.learningPathNodes,
-                    currentNodeId: state.currentGraphNodeId,
-                    userKnowledgeGraph: state.userKnowledgeGraph,
-                });
+                app.renderLearningPlanPanel?.(state.learningPlan, state.currentGraphNodeId, state.userKnowledgeGraph);
             }
         });
 
@@ -520,13 +535,9 @@
             app.refreshUserKgMapIfOpen?.();
             app.syncKnowledgeGraphVisualState?.();
             app.scheduleSidebarUpdate?.();
-            // 更新学习路径面板
-            if (state.learningPathNodes && state.learningPathNodes.length > 0) {
-                app.updateLearningPathPanel?.({
-                    nodes: state.learningPathNodes,
-                    currentNodeId: state.currentGraphNodeId,
-                    userKnowledgeGraph: state.userKnowledgeGraph,
-                });
+            // 仅在有学习计划时更新面板
+            if (state.learningPlan && state.learningPlan.length > 0) {
+                app.renderLearningPlanPanel?.(state.learningPlan, state.currentGraphNodeId, state.userKnowledgeGraph);
             }
         });
 

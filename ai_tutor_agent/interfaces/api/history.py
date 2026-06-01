@@ -247,6 +247,8 @@ def _serialize_state(values: dict[str, Any]) -> dict[str, Any]:
         "learning_track_locked": values.get("learning_track_locked", False),
         "is_assessed": values.get("is_assessed", False),
         "flow_status": values.get("flow_status", "greeting"),
+        "learning_plan": values.get("learning_plan", []),
+        "learning_plan_current_step": values.get("learning_plan_current_step", 0),
     }
 
 

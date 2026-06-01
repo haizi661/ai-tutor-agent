@@ -1341,99 +1341,133 @@ body.header-collapsed .header {
 }
 
 /* ── 学习路径面板（右侧） ────────────────────────────────────────────── */
-.learning-path-panel {
-    flex: 0 0 clamp(16rem, 18vw, 20rem);
-    min-width: 0;
-    display: flex;
-    flex-direction: column;
-    border-left: 1px solid var(--line-soft);
-    background:
-        radial-gradient(circle at 90% 10%, color-mix(in oklab, var(--accent-moss) 5%, transparent), transparent 40%),
-        linear-gradient(180deg, color-mix(in oklab, var(--paper) 96%, white 2%), color-mix(in oklab, var(--bg-panel) 98%, var(--paper)));
-    transition: flex-basis 0.25s ease, opacity 0.2s ease;
-    overflow: hidden;
+/* ── 学习路径下拉菜单（从顶部按钮触发） ─────────────────────────── */
+.lp-header-wrap {
+    position: relative;
+    display: inline-flex;
 }
 
-.learning-path-panel[hidden] {
-    display: none;
+.lp-icon {
+    vertical-align: -2px;
+    margin-right: 1px;
+    flex-shrink: 0;
 }
 
-.learning-path-panel.lp-collapsed {
-    flex-basis: 2.8rem;
+#lp-header-btn.is-active {
+    background: color-mix(in oklab, var(--accent-moss) 10%, var(--paper)) !important;
+    color: var(--accent-moss) !important;
 }
 
-.learning-path-panel.lp-collapsed .lp-panel-content {
-    display: none;
+.lp-dropdown {
+    position: absolute;
+    top: calc(100% + 10px);
+    right: 0;
+    width: 360px;
+    min-width: 360px;
+    max-width: 360px;
+    max-height: min(60vh, 480px);
+    overflow: visible;
+    background: transparent;
+    box-shadow: none;
+    z-index: 100;
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(-6px);
+    pointer-events: none;
+    transition: opacity 0.18s ease, transform 0.18s ease, visibility 0s 0.18s;
 }
 
-.learning-path-panel.lp-collapsed .lp-panel-toggle svg {
-    transform: rotate(180deg);
+.lp-dropdown.is-open {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+    pointer-events: auto;
+    transition: opacity 0.18s ease, transform 0.18s ease, visibility 0s 0s;
 }
 
-.lp-panel-header {
+/* Notch arrow pointing up to the trigger button */
+.lp-dropdown-notch {
+    position: absolute;
+    top: -6px;
+    right: 24px;
+    width: 10px;
+    height: 10px;
+    background: var(--paper);
+    border: 1px solid var(--line);
+    border-right: none;
+    border-bottom: none;
+    transform: rotate(45deg);
+    z-index: 1;
+    border-radius: 2px 0 0 0;
+}
+
+/* Scrollable inner container (avoids clipping the notch) */
+.lp-dropdown-inner {
+    width: 100%;
+    max-height: inherit;
+    overflow-y: scroll;
+    overflow-x: hidden;
+    background: var(--paper);
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.12);
+    box-sizing: border-box;
+    scrollbar-gutter: stable;
+}
+
+/* Title bar inside the dropdown */
+.lp-dropdown-title-bar {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 0.75rem 0.85rem;
+    padding: 0.65rem 0.75rem 0.5rem;
     border-bottom: 1px solid var(--line-soft);
-    min-height: 52px;
+    position: sticky;
+    top: 0;
+    background: var(--paper);
+    z-index: 1;
 }
 
-.lp-panel-title-row {
-    display: flex;
-    align-items: center;
-    gap: 0.45rem;
-}
-
-.lp-panel-icon {
-    font-size: 1rem;
-}
-
-.lp-panel-title {
-    font-size: 0.85rem;
+.lp-dropdown-title {
+    font-size: 0.82rem;
     font-weight: 700;
     color: var(--ink-strong);
 }
 
-.lp-panel-toggle {
-    width: 1.8rem;
-    height: 1.8rem;
+.lp-dropdown-close {
+    width: 1.5rem;
+    height: 1.5rem;
     display: flex;
     align-items: center;
     justify-content: center;
-    border: 1px solid var(--line);
-    border-radius: 0.5rem;
-    background: var(--paper);
+    border: none;
+    border-radius: 6px;
+    background: transparent;
     color: var(--ink-muted);
     cursor: pointer;
-    transition: background 0.15s, color 0.15s;
+    transition: background 0.12s, color 0.12s;
 }
 
-.lp-panel-toggle:hover {
-    background: color-mix(in oklab, var(--accent-moss) 8%, var(--paper));
+.lp-dropdown-close:hover {
+    background: color-mix(in oklab, var(--ink) 6%, transparent);
     color: var(--ink);
 }
 
-.lp-panel-toggle svg {
-    transition: transform 0.2s ease;
-}
-
-.lp-panel-content {
-    flex: 1;
-    min-height: 0;
-    overflow-y: auto;
-    padding: 0.75rem;
+.lp-dropdown-body {
+    padding: 0.5rem 0.75rem 0.75rem;
+    box-sizing: border-box;
+    overflow: hidden;
 }
 
 .lp-panel-empty {
     display: flex;
     align-items: center;
     justify-content: center;
-    height: 100%;
+    min-height: 80px;
     color: var(--ink-muted);
     font-size: 0.8rem;
     text-align: center;
-    padding: 1rem;
+    padding: 1rem 0.5rem;
 }
 
 /* ── 学习路径节点列表 ────────────────────────────────────────────── */
@@ -1534,6 +1568,10 @@ body.header-collapsed .header {
     border-radius: 0.6rem;
     cursor: pointer;
     transition: background 0.15s, border-color 0.15s;
+    min-width: 0;
+    max-width: 100%;
+    overflow: hidden;
+    box-sizing: border-box;
 }
 
 .lp-node:hover {
@@ -1563,12 +1601,23 @@ body.header-collapsed .header {
     background: #38bdf8;
 }
 
+/* Issue 2: Pending (not started) nodes — hollow circle, muted text */
+.lp-node.is-pending .lp-node-dot {
+    background: transparent;
+    border: 1.5px solid var(--line);
+}
+
+.lp-node.is-pending .lp-node-name {
+    color: var(--ink-muted);
+}
+
 .lp-node-name {
     font-size: 0.72rem;
     color: var(--ink);
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
+    min-width: 0;
 }
 
 .lp-node.is-current .lp-node-name {
@@ -1576,10 +1625,180 @@ body.header-collapsed .header {
     color: var(--ink-strong);
 }
 
-/* ── 响应式：小屏幕隐藏面板 ────────────────────────────────────── */
+/* Brief flash when clicking a node (visual feedback, not state change) */
+.lp-node--flash {
+    background: color-mix(in oklab, var(--accent-moss) 12%, transparent) !important;
+    transition: background 0s;
+}
+
+/* ── 学习路径 Step 面板 ──────────────────────────────────────── */
+.lp-plan-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.5rem 0.6rem;
+    margin-bottom: 0.5rem;
+    background: var(--paper);
+    border-radius: 0.6rem;
+    border: 1px solid var(--line);
+    box-sizing: border-box;
+    max-width: 100%;
+}
+
+.lp-plan-progress-text {
+    font-size: 0.72rem;
+    color: var(--ink-muted);
+}
+
+.lp-plan-pct {
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: var(--ink-strong);
+}
+
+.lp-plan-steps {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+    max-width: 100%;
+}
+
+.lp-step {
+    border: 1px solid var(--line);
+    border-radius: 0.75rem;
+    overflow: hidden;
+    background: var(--paper);
+    transition: border-color 0.15s;
+    min-width: 0;
+    max-width: 100%;
+    box-sizing: border-box;
+}
+
+.lp-step.is-current {
+    border-color: #f97316;
+    box-shadow: 0 0 0 1px rgba(249, 115, 22, 0.15);
+}
+
+.lp-step.is-completed {
+    opacity: 0.7;
+}
+
+.lp-step-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.5rem 0.6rem;
+    cursor: pointer;
+    transition: background 0.15s;
+    min-width: 0;
+    overflow: hidden;
+}
+
+.lp-step-header:hover {
+    background: var(--paper);
+}
+
+.lp-step-info {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    min-width: 0;
+}
+
+.lp-step-marker {
+    width: 1rem;
+    height: 1rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.lp-marker-dot {
+    width: 0.55rem;
+    height: 0.55rem;
+    border-radius: 50%;
+    background: var(--line);
+    transition: background 0.2s, box-shadow 0.2s;
+}
+
+.lp-marker--pending .lp-marker-dot {
+    background: var(--line);
+}
+
+.lp-marker--active .lp-marker-dot {
+    background: #f97316;
+    box-shadow: 0 0 0 3px rgba(249, 115, 22, 0.25);
+    animation: lp-marker-pulse 2s ease-in-out infinite;
+}
+
+@keyframes lp-marker-pulse {
+    0%, 100% { box-shadow: 0 0 0 3px rgba(249, 115, 22, 0.25); }
+    50% { box-shadow: 0 0 0 5px rgba(249, 115, 22, 0.12); }
+}
+
+.lp-marker--done .lp-marker-dot {
+    background: #22c55e;
+}
+
+.lp-step-name {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--ink-strong);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    min-width: 0;
+    flex: 1;
+}
+
+.lp-step-progress {
+    font-size: 0.68rem;
+    color: var(--ink-muted);
+    flex-shrink: 0;
+}
+
+.lp-step-nodes {
+    display: none;
+    flex-direction: column;
+    gap: 0.15rem;
+    padding: 0 0.5rem 0.5rem;
+    max-width: 100%;
+    overflow: hidden;
+}
+
+.lp-step.expanded .lp-step-nodes {
+    display: flex;
+}
+
+.lp-step-right {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    flex-shrink: 0;
+}
+
+.lp-chevron {
+    color: var(--ink-muted);
+    transition: transform 0.2s ease;
+    flex-shrink: 0;
+}
+
+.lp-chevron--open {
+    transform: rotate(180deg);
+}
+
+.lp-step.expanded .lp-chevron {
+    transform: rotate(180deg);
+}
+
+/* ── 响应式：小屏幕 dropdown 右对齐并调整宽度 ───────────────────── */
 @media (max-width: 1200px) {
-    .learning-path-panel {
-        display: none;
+    .lp-dropdown {
+        right: 0;
+        width: 320px;
+        min-width: 320px;
+        max-width: 320px;
     }
 }
 

@@ -88,6 +88,43 @@ def _join_list(values: Any, *, limit: int = 6) -> str:
     return "；".join(_string_list(values)[:limit])
 
 
+def _teaching_contract(state: AgentState | dict[str, Any]) -> dict[str, Any]:
+    contract = state.get("node_teaching_contract") if isinstance(state, dict) else {}
+    return dict(contract or {}) if isinstance(contract, dict) else {}
+
+
+def _contract_assessment_targets(state: AgentState | dict[str, Any]) -> list[dict[str, Any]]:
+    contract = _teaching_contract(state)
+    targets = contract.get("assessment_targets")
+    if not isinstance(targets, list):
+        return []
+    normalized: list[dict[str, Any]] = []
+    for raw in targets:
+        if not isinstance(raw, dict):
+            continue
+        target = str(raw.get("target_objective") or raw.get("objective") or "").strip()
+        if not target or _is_unsuitable_focus_text(target):
+            continue
+        normalized.append(
+            {
+                "target_objective": _clip_text(target, limit=70),
+                "assessment_focus": str(raw.get("assessment_focus") or "").strip(),
+                "misconception": _clip_text(str(raw.get("misconception") or "").strip(), limit=70),
+                "required": bool(raw.get("required")),
+            }
+        )
+    return normalized
+
+
+def _contract_required_targets(state: AgentState | dict[str, Any]) -> list[str]:
+    required: list[str] = []
+    for item in _contract_assessment_targets(state):
+        target = str(item.get("target_objective") or "").strip()
+        if item.get("required") and target and target not in required:
+            required.append(target)
+    return required
+
+
 def _first_nonempty(values: Any, *, fallback: str = "") -> str:
     for value in _string_list(values):
         if value:
@@ -97,6 +134,11 @@ def _first_nonempty(values: Any, *, fallback: str = "") -> str:
 
 def _default_assessment_focus(state: AgentState | dict[str, Any], index: int = 1) -> str:
     focuses = ["概念辨析", "判断依据", "常见误区", "应用迁移"]
+    targets = _contract_assessment_targets(state)
+    if targets:
+        focus = str(targets[(max(index, 1) - 1) % len(targets)].get("assessment_focus") or "").strip()
+        if focus:
+            return focus
     explicit = str(state.get("assessment_focus") or state.get("graph_assessment_focus") or "").strip()
     return explicit or focuses[(max(index, 1) - 1) % len(focuses)]
 
@@ -108,6 +150,9 @@ def _default_target_objective(
     concept: str = "",
     index: int = 1,
 ) -> str:
+    targets = _contract_assessment_targets(state)
+    if targets:
+        return str(targets[(max(index, 1) - 1) % len(targets)]["target_objective"])
     must_know = _clean_focus_candidates(state.get("graph_must_know"), limit=70)
     if must_know:
         return must_know[(max(index, 1) - 1) % len(must_know)]
@@ -125,6 +170,14 @@ def _default_misconception(
     fallback: str = "",
     index: int = 1,
 ) -> str:
+    targets = _contract_assessment_targets(state)
+    if targets:
+        misconception = str(targets[(max(index, 1) - 1) % len(targets)].get("misconception") or "").strip()
+        if misconception and not _is_unsuitable_focus_text(misconception):
+            return _clip_text(misconception, limit=70)
+    contract_errors = _clean_focus_candidates(_teaching_contract(state).get("common_misconceptions"), limit=70)
+    if contract_errors:
+        return contract_errors[(max(index, 1) - 1) % len(contract_errors)]
     errors = _clean_focus_candidates(state.get("graph_common_errors"), limit=70)
     if errors:
         return errors[(max(index, 1) - 1) % len(errors)]
@@ -370,12 +423,28 @@ def _build_objective_generation_context(state: AgentState, node_id: str, node_na
         lines.append(f"目标掌握层级：{target_level}")
     if difficulty:
         lines.append(f"难度标签：{difficulty}")
+    contract = _teaching_contract(state)
+    if contract:
+        lines.append("节点教学契约：")
+        goal = str(contract.get("learning_goal") or "").strip()
+        if goal:
+            lines.append(f"契约目标：{goal}")
+        must_know = _join_list(contract.get("must_know"))
+        if must_know:
+            lines.append(f"契约必会：{must_know}")
+        misconceptions = _join_list(contract.get("common_misconceptions"))
+        if misconceptions:
+            lines.append(f"契约误区：{misconceptions}")
+        exit_criteria = _join_list(contract.get("exit_criteria"))
+        if exit_criteria:
+            lines.append(f"退出条件：{exit_criteria}")
     if content:
         lines.append(f"节点讲解/检索内容摘要：\n{content}")
     return "\n".join(lines)
 
 
 def _build_question_blueprints(state: AgentState, node_id: str, node_name: str, count: int, *, start_index: int = 1) -> list[dict[str, Any]]:
+    contract_targets = _contract_assessment_targets(state)
     must_know = _clean_focus_candidates(state.get("graph_must_know"), limit=70)
     objectives = _clean_focus_candidates(state.get("graph_learning_objectives"), limit=70)
     common_errors = _clean_focus_candidates(state.get("graph_common_errors"), limit=70)
@@ -385,16 +454,18 @@ def _build_question_blueprints(state: AgentState, node_id: str, node_name: str, 
     blueprints: list[dict[str, Any]] = []
     for offset in range(max(0, count)):
         index = start_index + offset
-        concept = concepts[offset % len(concepts)]
-        misconception = errors[offset % len(errors)]
+        contract_target = contract_targets[offset % len(contract_targets)] if contract_targets else {}
+        concept = str(contract_target.get("target_objective") or concepts[offset % len(concepts)]).strip()
+        misconception = str(contract_target.get("misconception") or errors[offset % len(errors)]).strip()
         blueprints.append(
             {
                 "question_id": f"AI-Q{index}",
-                "assessment_focus": _default_assessment_focus(state, index),
+                "assessment_focus": str(contract_target.get("assessment_focus") or _default_assessment_focus(state, index)).strip(),
                 "target_objective": _default_target_objective(state, node_name=node_name, concept=concept, index=index),
                 "misconception": _default_misconception(state, fallback=misconception, index=index),
                 "difficulty": _question_difficulty(state, index),
                 "answer_key": answer_keys[(index - 1) % len(answer_keys)],
+                "required": bool(contract_target.get("required")),
             }
         )
     return blueprints
@@ -900,6 +971,42 @@ def _quiz_review_history_entry(
     }
 
 
+def _build_objective_mastery_summary(
+    *,
+    items: list[dict[str, Any]],
+    answers: dict[str, str],
+    required_targets: list[str],
+) -> dict[str, Any]:
+    stats: dict[str, dict[str, Any]] = {}
+    for index, item in enumerate(items, start=1):
+        target = str(item.get("target_objective") or "").strip() or "未分类目标"
+        qid = _question_id(item, index)
+        expected = _answer_key(item)
+        user_answer = _normalize_answer(answers.get(qid) or answers.get(str(index)) or answers.get(f"Q{index}"))
+        bucket = stats.setdefault(target, {"target_objective": target, "total": 0, "correct": 0, "accuracy": 0.0})
+        bucket["total"] += 1
+        if expected and user_answer == expected:
+            bucket["correct"] += 1
+
+    for bucket in stats.values():
+        total = int(bucket.get("total") or 0)
+        correct = int(bucket.get("correct") or 0)
+        bucket["accuracy"] = round(correct / total, 3) if total else 0.0
+
+    required_failed: list[str] = []
+    for target in required_targets:
+        bucket = stats.get(target)
+        if not bucket or float(bucket.get("accuracy") or 0) < 0.7:
+            required_failed.append(target)
+
+    return {
+        "target_stats": list(stats.values()),
+        "required_targets": required_targets,
+        "required_failed_targets": required_failed,
+        "required_target_threshold": 0.7,
+    }
+
+
 def build_objective_test_generator_node(runtime: RuntimeContext, llm: Any | None = None, *, count: int = 10):
     event_sink = runtime.event_sink
 
@@ -909,6 +1016,7 @@ def build_objective_test_generator_node(runtime: RuntimeContext, llm: Any | None
         quiz_kind = str(state.get("node_quiz_kind") or "").strip()
         # 短复测只出 5 题
         effective_count = 5 if quiz_kind == "node_retest" else count
+        coverage_plan = _build_question_blueprints(state, node_id, node_name, effective_count)
         provider = getattr(runtime, "question_bank_provider", None)
         questions: list[dict[str, Any]] = []
         if provider is not None and hasattr(provider, "get_objective_questions"):
@@ -929,12 +1037,13 @@ def build_objective_test_generator_node(runtime: RuntimeContext, llm: Any | None
                 "node.start",
                 "objective_test_generator",
                 message=prompt,
-                data={"questions": questions, "requires_input": True},
+                data={"questions": questions, "coverage_plan": coverage_plan, "requires_input": True},
             )
         )
         used_kind = "objective_test_answers" if quiz_kind != "node_retest" else "node_retest"
         return {
             "node_quiz_items": questions,
+            "node_quiz_coverage_plan": coverage_plan,
             "node_quiz_answers": {},
             "node_quiz_wrong_items": [],
             "node_quiz_score": 0,
@@ -1020,7 +1129,14 @@ def build_objective_test_scorer_node(runtime: RuntimeContext, *, pass_score: int
                 )
 
         score = int(round((correct / total) * 100)) if total else 0
-        passed = score >= pass_score
+        objective_mastery_summary = _build_objective_mastery_summary(
+            items=items,
+            answers=answers,
+            required_targets=_contract_required_targets(state),
+        )
+        contract_failed_targets = list(objective_mastery_summary.get("required_failed_targets") or [])
+        score_passed = score >= pass_score
+        passed = score_passed and not contract_failed_targets
         student_id = str(state.get("student_id") or "default_student").strip() or "default_student"
         updated_snapshot = update_student_state_after_evaluation(
             getattr(runtime, "student_state_store", None),
@@ -1063,6 +1179,7 @@ def build_objective_test_scorer_node(runtime: RuntimeContext, *, pass_score: int
                     "score": score,
                     "passed": passed,
                     "wrong_count": len(wrong_items),
+                    "objective_mastery_summary": objective_mastery_summary,
                     "review": review_entry.get("data", {}),
                     "review_content": review_entry.get("content", ""),
                 },
@@ -1104,9 +1221,14 @@ def build_objective_test_scorer_node(runtime: RuntimeContext, *, pass_score: int
                     "node_quiz_wrong_items": wrong_items,
                     "node_quiz_score": score,
                     "score": score,
-                    "feedback": f"短复测得分 {score}，未达到 80 分。需返回补救决策。",
+                    "feedback": (
+                        f"短复测得分 {score}，关键目标未达标：{'、'.join(contract_failed_targets)}。需返回补救决策。"
+                        if contract_failed_targets
+                        else f"短复测得分 {score}，未达到 80 分。需返回补救决策。"
+                    ),
                     "wrong_question_explanations": [],
                     "variant_questions": [],
+                    "objective_mastery_summary": objective_mastery_summary,
                     "flow_status": "normal",
                     "learning_phase": "node_quiz_retry",
                     "learning_resume_target": "remediation_decision",
@@ -1134,6 +1256,8 @@ def build_objective_test_scorer_node(runtime: RuntimeContext, *, pass_score: int
             if is_variant:
                 # 变式未通过 → 回到补救决策（不再重复讲解）
                 feedback = f"变式得分 {score}，未达到 {pass_score}。已记录变式失败，将决定是否继续补救或暂停。"
+                if contract_failed_targets:
+                    feedback = f"变式得分 {score}，但关键目标未达标：{'、'.join(contract_failed_targets)}。将决定是否继续补救或暂停。"
                 return {
                     "node_quiz_answers": answers,
                     "node_quiz_wrong_items": wrong_items,
@@ -1142,6 +1266,7 @@ def build_objective_test_scorer_node(runtime: RuntimeContext, *, pass_score: int
                     "feedback": feedback,
                     "wrong_question_explanations": [],
                     "variant_questions": [],
+                    "objective_mastery_summary": objective_mastery_summary,
                     "flow_status": "normal",
                     "learning_phase": "node_quiz_variant_retry",
                     "learning_resume_target": "remediation_decision",
@@ -1164,9 +1289,14 @@ def build_objective_test_scorer_node(runtime: RuntimeContext, *, pass_score: int
                 "node_quiz_wrong_items": wrong_items,
                 "node_quiz_score": score,
                 "score": score,
-                "feedback": f"本轮得分 {score}，未达到 {pass_score}，需要先订正错题并完成变式。",
+                "feedback": (
+                    f"本轮得分 {score}，但关键目标未达标：{'、'.join(contract_failed_targets)}，需要先订正错题并完成变式。"
+                    if contract_failed_targets
+                    else f"本轮得分 {score}，未达到 {pass_score}，需要先订正错题并完成变式。"
+                ),
                 "wrong_question_explanations": [],
                 "variant_questions": [],
+                "objective_mastery_summary": objective_mastery_summary,
                 "flow_status": "normal",
                 "learning_phase": "node_quiz_remediation",
                 "learning_resume_target": "wrong_question_explainer",
@@ -1204,6 +1334,7 @@ def build_objective_test_scorer_node(runtime: RuntimeContext, *, pass_score: int
                 "score": score,
                 "feedback": feedback,
                 "variant_questions": [],
+                "objective_mastery_summary": objective_mastery_summary,
                 "flow_status": "normal",
                 "learning_phase": "node_passed" if original_score >= 70 else "node_quiz_retest",
                 "learning_resume_target": next_target,
@@ -1232,6 +1363,7 @@ def build_objective_test_scorer_node(runtime: RuntimeContext, *, pass_score: int
                 "score": score,
                 "feedback": feedback,
                 "variant_questions": [],
+                "objective_mastery_summary": objective_mastery_summary,
                 "flow_status": "normal",
                 "learning_phase": "node_passed",
                 "learning_resume_target": "next_node_planner",
@@ -1257,6 +1389,7 @@ def build_objective_test_scorer_node(runtime: RuntimeContext, *, pass_score: int
             "score": score,
             "feedback": f"本轮得分 {score}，已达到 {pass_score}，可以进入下一节点决策。",
             "variant_questions": [],
+            "objective_mastery_summary": objective_mastery_summary,
             "flow_status": "normal",
             "learning_phase": "node_passed",
             "learning_resume_target": "next_node_planner",

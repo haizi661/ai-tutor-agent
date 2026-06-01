@@ -193,13 +193,63 @@ def build_session_resume_router_node(runtime: RuntimeContext):
         # 用户选择继续学习，找下一节点
         graph_pipeline = getattr(runtime, "graph_rag_pipeline", None)
         current_node_id = str(state.get("current_node_id") or state.get("graph_anchor_id") or "").strip()
-        next_candidate = recommend_next_node(
-            graph_pipeline=graph_pipeline,
-            student_state_snapshot=state.get("student_state_snapshot"),
-            current_node_id=current_node_id,
-        )
-        next_node_id = str(next_candidate.get("node_id") or state.get("next_node_candidate_id") or "").strip()
-        next_node_name = str(next_candidate.get("name") or state.get("next_node_candidate_name") or "").strip()
+        state_snapshot = dict(state.get("student_state_snapshot") or {})
+
+        # ── Try learning plan first ──
+        from ..core.learning_plan_builder import find_next_node_in_step, is_step_completed
+        learning_plan = state.get("learning_plan") or state_snapshot.get("learning_plan") or []
+        current_step_idx = int(state.get("learning_plan_current_step") or state_snapshot.get("learning_plan_current_step") or 0)
+        visited = set(str(n).strip() for n in (state_snapshot.get("visited_nodes") or []) if str(n).strip())
+        # Also consider mastered nodes as visited
+        for nid, entry in (state_snapshot.get("knowledge_graph") or {}).items():
+            if isinstance(entry, dict) and entry.get("status") == "mastered":
+                visited.add(nid)
+
+        next_node_id = ""
+        next_node_name = ""
+        next_reason = ""
+
+        if learning_plan and current_step_idx < len(learning_plan):
+            current_step = learning_plan[current_step_idx]
+            candidate = find_next_node_in_step(current_step, visited, current_node_id)
+            if candidate:
+                node_map = dict(getattr(graph_pipeline, "node_map", {}) or {})
+                next_node_id = candidate
+                next_node_name = str((node_map.get(candidate) or {}).get("name") or candidate).strip()
+                next_reason = "learning_plan_same_step"
+            elif is_step_completed(current_step, visited):
+                # Current step done, try next step
+                next_step_idx = current_step_idx + 1
+                if next_step_idx < len(learning_plan):
+                    next_step = learning_plan[next_step_idx]
+                    next_step["status"] = "in_progress"
+                    candidate = find_next_node_in_step(next_step, visited, "")
+                    if candidate:
+                        node_map = dict(getattr(graph_pipeline, "node_map", {}) or {})
+                        next_node_id = candidate
+                        next_node_name = str((node_map.get(candidate) or {}).get("name") or candidate).strip()
+                        next_reason = "learning_plan_next_step"
+                        current_step["status"] = "completed"
+                        # Persist step advancement
+                        from ..knowledge_map.student_state import StudentState
+                        store = getattr(runtime, "student_state_store", None)
+                        if store:
+                            sid = str(state.get("student_id") or "default_student").strip() or "default_student"
+                            def _update_step(ss: StudentState) -> None:
+                                ss.learning_plan = learning_plan
+                                ss.learning_plan_current_step = next_step_idx
+                            store.update(sid, _update_step)
+
+        # ── Fallback: original recommend_next_node ──
+        if not next_node_id:
+            next_candidate = recommend_next_node(
+                graph_pipeline=graph_pipeline,
+                student_state_snapshot=state.get("student_state_snapshot"),
+                current_node_id=current_node_id,
+            )
+            next_node_id = str(next_candidate.get("node_id") or state.get("next_node_candidate_id") or "").strip()
+            next_node_name = str(next_candidate.get("name") or state.get("next_node_candidate_name") or "").strip()
+            next_reason = str(next_candidate.get("reason") or "resume_next_node").strip()
 
         if next_node_id:
             graph_patch = build_graph_state_patch(graph_pipeline, next_node_id)
@@ -218,7 +268,7 @@ def build_session_resume_router_node(runtime: RuntimeContext):
                 "learning_resume_reason": "resume_continue_learning",
                 "next_node_candidate_id": next_node_id,
                 "next_node_candidate_name": next_node_name or next_node_id,
-                "next_node_candidate_reason": str(next_candidate.get("reason") or "resume_next_node").strip(),
+                "next_node_candidate_reason": next_reason or "resume_next_node",
                 "current_node_id": next_node_id,
                 "current_node_name": next_node_name or next_node_id,
                 "current_node_status": "selected",

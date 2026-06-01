@@ -240,33 +240,71 @@
         iframe.onload = () => app.syncKnowledgeGraphVisualState?.();
     };
 
-    // ── 学习路径面板控制 ──────────────────────────────────────────────────
-    app.toggleLearningPathPanel = function toggleLearningPathPanel(collapse) {
-        const panel = document.getElementById('learning-path-panel');
-        if (!panel) return;
-        const isCollapsed = collapse !== undefined ? collapse : !panel.classList.contains('lp-collapsed');
-        panel.classList.toggle('lp-collapsed', isCollapsed);
-        const btn = document.getElementById('lp-panel-toggle');
+    // ── 学习路径下拉控制（从顶部按钮触发） ─────────────────────────────────
+    app.toggleLearningPathDropdown = function toggleLearningPathDropdown() {
+        const dropdown = document.getElementById('lp-dropdown');
+        if (!dropdown) return;
+        dropdown.classList.toggle('is-open');
+        const btn = document.getElementById('lp-header-btn');
         if (btn) {
-            btn.setAttribute('aria-label', isCollapsed ? '展开学习路径面板' : '折叠学习路径面板');
+            btn.classList.toggle('is-active');
+            btn.setAttribute('aria-expanded', dropdown.classList.contains('is-open'));
         }
     };
 
+    // 点击外面关闭 dropdown
+    document.addEventListener('click', function _lpDocClick(e) {
+        const dropdown = document.getElementById('lp-dropdown');
+        if (!dropdown || !dropdown.classList.contains('is-open')) return;
+        const btn = document.getElementById('lp-header-btn');
+        if (btn && btn.contains(e.target)) return;
+        if (dropdown.contains(e.target)) return;
+        dropdown.classList.remove('is-open');
+        if (btn) {
+            btn.classList.remove('is-active');
+            btn.setAttribute('aria-expanded', 'false');
+        }
+    });
+
+    // 按 Escape 关闭 dropdown
+    document.addEventListener('keydown', function _lpEsc(e) {
+        if (e.key !== 'Escape') return;
+        const dropdown = document.getElementById('lp-dropdown');
+        if (!dropdown || !dropdown.classList.contains('is-open')) return;
+        dropdown.classList.remove('is-open');
+        const btn = document.getElementById('lp-header-btn');
+        if (btn) {
+            btn.classList.remove('is-active');
+            btn.setAttribute('aria-expanded', 'false');
+        }
+    });
+
     app.showLearningPathPanel = function showLearningPathPanel() {
-        const panel = document.getElementById('learning-path-panel');
-        if (panel) {
-            panel.hidden = false;
+        const btn = document.getElementById('lp-header-btn');
+        if (btn) {
+            btn.hidden = false;
         }
     };
 
     app.hideLearningPathPanel = function hideLearningPathPanel() {
-        const panel = document.getElementById('learning-path-panel');
-        if (panel) {
-            panel.hidden = true;
+        const btn = document.getElementById('lp-header-btn');
+        if (btn) {
+            btn.hidden = true;
+            btn.classList.remove('is-active');
+            btn.setAttribute('aria-expanded', 'false');
+        }
+        const dropdown = document.getElementById('lp-dropdown');
+        if (dropdown && dropdown.classList.contains('is-open')) {
+            dropdown.classList.remove('is-open');
         }
     };
 
     app.updateLearningPathPanel = function updateLearningPathPanel(graphData) {
+        // If we have a learning plan, use the Step-based renderer instead
+        if (state.learningPlan && state.learningPlan.length > 0) {
+            app.renderLearningPlanPanel(state.learningPlan, state.currentGraphNodeId, state.userKnowledgeGraph);
+            return;
+        }
         const content = document.getElementById('lp-panel-content');
         if (!content || !graphData) return;
 
@@ -313,7 +351,7 @@
                 const isNodeCurrent = node.node_id === currentNodeId;
                 const nodeStatus = isNodeCurrent ? 'is-current' : kgEntry.status === 'mastered' ? 'is-completed' : kgEntry.status === 'in_progress' ? 'is-in-progress' : '';
                 html += `
-                        <div class="lp-node ${nodeStatus}" data-node-id="${node.node_id}" onclick="app.focusGraphNode?.('${node.node_id}')">
+                        <div class="lp-node ${nodeStatus}" data-node-id="${node.node_id}" onclick="window.AITutorApp.focusGraphNode?.('${node.node_id}')">
                             <div class="lp-node-dot"></div>
                             <span class="lp-node-name">${node.name}</span>
                         </div>
@@ -332,6 +370,144 @@
         const currentChapterEl = content.querySelector('.lp-chapter.is-current');
         if (currentChapterEl) {
             currentChapterEl.classList.add('expanded');
+        }
+    };
+
+    app.focusGraphNode = function focusGraphNode(nodeId) {
+        if (!nodeId) return;
+        // Scroll the node into view (visual feedback only, do NOT change is-current)
+        const nodeEl = document.querySelector(`#lp-panel-content .lp-node[data-node-id="${CSS.escape(nodeId)}"]`);
+        if (nodeEl) {
+            nodeEl.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            // Brief highlight flash without changing the current marker
+            nodeEl.classList.add('lp-node--flash');
+            setTimeout(() => nodeEl.classList.remove('lp-node--flash'), 600);
+        }
+        // Dispatch for session layer to handle (scrolls KP view, etc.)
+        document.dispatchEvent(new CustomEvent('lp:focusNode', { detail: { nodeId } }));
+    };
+
+    app.renderLearningPlanPanel = function renderLearningPlanPanel(plan, currentNodeId, userKnowledgeGraph) {
+        const content = document.getElementById('lp-panel-content');
+        if (!content || !Array.isArray(plan) || plan.length === 0) return;
+
+        userKnowledgeGraph = userKnowledgeGraph || {};
+
+        // Build reverse index: node_id → KG entry
+        const kgByNodeId = {};
+        for (const [name, entry] of Object.entries(userKnowledgeGraph)) {
+            if (entry && entry.id) kgByNodeId[entry.id] = entry;
+            kgByNodeId[name] = entry;
+        }
+
+        const currentStepIdx = state.learningPlanCurrentStep || 0;
+
+        // Track which steps are expanded — preserve across re-renders
+        if (!state.expandedSteps) state.expandedSteps = new Set();
+        const expandedSteps = state.expandedSteps;
+
+        // Capture current expanded state from DOM before re-render
+        content.querySelectorAll('.lp-step.expanded').forEach(el => {
+            const stepIdx = el.dataset.step;
+            if (stepIdx !== undefined) expandedSteps.add(stepIdx);
+        });
+
+        const totalNodes = plan.reduce((sum, s) => sum + (s.node_ids || []).length, 0);
+        const completedNodes = plan.reduce((sum, s) => {
+            return sum + (s.node_ids || []).filter(nid => {
+                const kg = kgByNodeId[nid] || {};
+                return kg.status === 'mastered';
+            }).length;
+        }, 0);
+        const overallPct = totalNodes > 0 ? Math.round(completedNodes / totalNodes * 100) : 0;
+
+        let html = `<div class="lp-plan-header">
+            <span class="lp-plan-progress-text">总进度 ${completedNodes}/${totalNodes}</span>
+            <span class="lp-plan-pct">${overallPct}%</span>
+        </div>`;
+        html += '<div class="lp-plan-steps">';
+
+        plan.forEach((step, idx) => {
+            const nodeIds = step.node_ids || [];
+            const nodeNames = step.node_names || [];
+            const isCurrent = idx === currentStepIdx;
+
+            // Issue 1 & 4: Use actual KG status, not just step index position
+            const stepMasteredCount = nodeIds.filter(nid => {
+                const kg = kgByNodeId[nid] || {};
+                return kg.status === 'mastered';
+            }).length;
+            const isCompleted = stepMasteredCount === nodeIds.length && nodeIds.length > 0;
+            const stepClass = isCurrent ? 'is-current' : isCompleted ? 'is-completed' : '';
+
+            // Issue 4: Progress shows actual mastery, not inflated numbers
+            const stepCompletedCount = stepMasteredCount;
+
+            // Step marker: CSS-styled dot
+            const markerClass = isCompleted ? 'lp-marker--done'
+                : isCurrent ? 'lp-marker--active'
+                : 'lp-marker--pending';
+
+            const isExpanded = expandedSteps.has(String(idx)) || isCurrent;
+            const chevronClass = isExpanded ? 'lp-chevron--open' : '';
+
+            // Issue 3: Add tooltip with full step name
+            const stepName = step.step_name || '步骤 ' + (idx + 1);
+
+            html += `<div class="lp-step ${stepClass} ${isExpanded ? 'expanded' : ''}" data-step="${idx}">
+                <div class="lp-step-header" onclick="window.AITutorApp.toggleLearningPlanStep(this)">
+                    <div class="lp-step-info">
+                        <span class="lp-step-marker ${markerClass}"><span class="lp-marker-dot"></span></span>
+                        <span class="lp-step-name" title="${stepName}">${stepName}</span>
+                    </div>
+                    <div class="lp-step-right">
+                        <span class="lp-step-progress">${stepCompletedCount}/${nodeIds.length}</span>
+                        <svg class="lp-chevron ${chevronClass}" width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M3 4.5L6 7.5L9 4.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                    </div>
+                </div>
+                <div class="lp-step-nodes">`;
+
+            nodeIds.forEach((nid, ni) => {
+                const nname = (nodeNames[ni] || nid);
+                const kg = kgByNodeId[nid] || {};
+                const isNodeCurrent = nid === currentNodeId;
+
+                // Issue 2: Clear distinction between not-started, in-progress, current, completed
+                const nodeStatus = isNodeCurrent ? 'is-current'
+                    : kg.status === 'mastered' ? 'is-completed'
+                    : kg.status === 'in_progress' ? 'is-in-progress'
+                    : 'is-pending';
+
+                html += `<div class="lp-node ${nodeStatus}" data-node-id="${nid}" onclick="window.AITutorApp.focusGraphNode?.('${nid}')">
+                    <span class="lp-node-dot"></span>
+                    <span class="lp-node-name" title="${nname}">${nname}</span>
+                </div>`;
+            });
+
+            html += `</div></div>`;
+        });
+
+        html += '</div>';
+        content.innerHTML = html;
+    };
+
+    app.toggleLearningPlanStep = function toggleLearningPlanStep(headerEl) {
+        const stepEl = headerEl?.parentElement;
+        if (!stepEl || !stepEl.classList.contains('lp-step')) return;
+
+        const isExpanded = stepEl.classList.toggle('expanded');
+        const chevron = headerEl.querySelector('.lp-chevron');
+        if (chevron) chevron.classList.toggle('lp-chevron--open', isExpanded);
+
+        // Persist expanded state
+        if (!state.expandedSteps) state.expandedSteps = new Set();
+        const stepIdx = stepEl.dataset.step;
+        if (stepIdx !== undefined) {
+            if (isExpanded) {
+                state.expandedSteps.add(stepIdx);
+            } else {
+                state.expandedSteps.delete(stepIdx);
+            }
         }
     };
 

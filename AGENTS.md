@@ -1,6 +1,6 @@
 # AI Tutor Agent Guide
 
-Last synced: 2026-05-12
+Last synced: 2026-05-29
 
 This is a Web-first adaptive tutor for automatic control theory. The active product loop is graph-node mastery learning, not the older generic `Tutor -> Tester -> Evaluator` chat flow.
 
@@ -18,7 +18,7 @@ This is a Web-first adaptive tutor for automatic control theory. The active prod
 - Health check after launch: `http://127.0.0.1:8000/api/health`.
 - Local pytest should disable unrelated plugin autoloading: `PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 pytest -q`. A single test can be run as `PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 pytest -q tests/test_name.py`.
 - For API smoke tests, prefer `tests/asgi_test_client.py` over Starlette `TestClient`; the latter has caused blocking-portal hangs in the Python 3.9 environment.
-- Frontend has no bundler pipeline; `package.json` only pins `marked`. Browser code is served directly from `frontend/`.
+- Frontend has no bundler pipeline; `package.json` pins `marked` and `katex`, with local vendor files under `frontend/assets/vendor/marked/` and `frontend/assets/vendor/katex/`. Browser code is served directly from `frontend/`.
 - Retrieval regression command lives in README: `python scripts/evaluate_retrieval.py --eval-file data/retrieval_eval/sample_eval.jsonl --k-values 1,3,5 --recall-k 12 --output data/retrieval_eval/latest_report.json`.
 
 ## Architecture that matters
@@ -44,6 +44,7 @@ This is a Web-first adaptive tutor for automatic control theory. The active prod
 - Long-running state is persisted by `StudentStateStore` in `data/student_states/*.json`.
 - `StudentState.knowledge_graph` starts empty and adds nodes only when learning begins. Each node tracks `score` (0-100), `status`, capped `wrong_questions`, capped `evidence`, and `attempts`.
 - Evidence entries (`quiz_pass/fail`, `homework_pass/fail`) are the source of truth for mastery decisions; do not reintroduce a separate global `evidence_events` log.
+- Wrong-question book entries live in `StudentState.wrong_question_book`; question-help history lives in `StudentState.question_help_records`. These are learner-state records, not separate course graph nodes.
 - Keep product language honest: this is a lightweight JSON learner-state prototype, not a calibrated long-term learner model.
 
 ## Frontend and interaction-card invariants
@@ -51,8 +52,12 @@ This is a Web-first adaptive tutor for automatic control theory. The active prod
 - Learning/homework/GraphRAG HTML must pass through the allowlist sanitizer in `frontend/assets/js/ui.js` before `innerHTML`.
 - Do not restore the old `rawText.includes(...)` trust heuristic. Dynamic question text, IDs, prompts, and labels should be inserted with DOM APIs such as `textContent` and `dataset`.
 - Long formulas, wide tables, and figures belong inside `learning-*` local viewports so they scroll within the card/bubble rather than widening the page.
+- Markdown/LaTeX answers should render through `app.renderMarkdownContent` / `app.renderMath` in `frontend/assets/js/ui.js`, then pass the existing sanitizer. Do not bypass the allowlist for question-help or review explanations.
 - GraphRAG answers should be learner-facing evidence cards: hide/fold raw asset IDs, long hashes, raw LaTeX, and raw HTML tables by default; show thumbnails when image paths resolve and clear unavailable placeholders otherwise.
 - Keep prose-cited media in the same `learning-reference-block` as the explanation. Unreferenced related media is a compact supplement capped at 3 cards; history restore applies the same de-noising.
+- Wrong-book UI defaults to待复习/未掌握 entries, groups by node, and uses `/api/students/{student_id}/wrong-questions/{question_id}/master` for 标记已掌握/取消掌握. Do not fake local-only mastery state when the API call fails.
+- Question-help UI is a side modal for ad hoc text/image problems, supports `quick` / `deep` / `vision` modes, and stores records separately from the wrong-question book. It should not auto-add records to wrong questions unless a dedicated product rule is added.
+- Objective-test review cards should keep options as stable full-width rows and explanations structured around 判断依据、所选项问题、常见误区、下一步.
 - `post_lesson_choice` is a natural pause: users may type a free-form stuck point directly, choose `temporary_question` via “继续追问”, or choose `start_test` via “我懂了，进入小测”. Do not make it a rigid two-button-only gate.
 - Active pending interaction kinds include `post_lesson_choice`, `temporary_question`, `objective_test_answers`, `variant_test_answers`, `continue_or_homework_choice`, `homework_review_choice`, `homework_answers`, and `consolidation_choice`.
 - Historical cards must lock once answered/submitted/skipped/reviewed; only the current unresolved interaction may remain pending.
@@ -74,4 +79,5 @@ This is a Web-first adaptive tutor for automatic control theory. The active prod
 - Useful focused groups:
   - Flow: `tests/test_workflow.py tests/test_objective_learning_flow.py tests/test_temporary_question_flow.py tests/test_session_resume_router.py`
   - History/session: `tests/test_history.py tests/test_session.py tests/test_session_persistence.py tests/test_session_resume_router_node.py`
-  - Frontend contracts: `tests/test_frontend_objective_test_ui.py tests/test_frontend_chat_layout.py tests/test_frontend_learning_content_layout.py tests/test_frontend_html_safety.py tests/test_homework_learning_ui_contract.py tests/test_graph_rag_learning_answer_html.py`
+  - Frontend contracts: `tests/test_frontend_objective_test_ui.py tests/test_frontend_chat_layout.py tests/test_frontend_learning_content_layout.py tests/test_frontend_html_safety.py tests/test_homework_learning_ui_contract.py tests/test_graph_rag_learning_answer_html.py tests/test_frontend_wrong_book_ui.py tests/test_frontend_question_help_ui.py`
+  - Student tools/API: `tests/test_wrong_questions_api.py tests/test_question_help_api.py`

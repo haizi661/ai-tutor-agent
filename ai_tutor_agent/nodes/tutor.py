@@ -42,8 +42,45 @@ _STRATEGY_MAP = {
     3: "socratic",      # 第4次+：苏格拉底引导法
 }
 
+# 错因 → 策略映射（优先于 attempt_count 轮转）
+_ERROR_TYPE_STRATEGY = {
+    "concept_confusion": "socratic",     # 概念混淆 → 引导辨析
+    "calculation_error": "stepbystep",   # 计算错误 → 逐步检查
+    "understanding_gap": "analogy",      # 理解偏差 → 换类比
+    "carelessness": "explain",           # 粗心 → 强调细节
+    "formula_error": "stepbystep",       # 公式错误 → 逐步拆解
+    "method_confusion": "socratic",      # 方法混淆 → 引导对比
+}
 
-def _select_strategy(attempt_count: int) -> str:
+
+def _infer_error_type(wrong_explanations: list[dict]) -> str:
+    """从错题记录推断主要错因类型。"""
+    if not wrong_explanations:
+        return ""
+    # 取最近一次错题的分析
+    latest = wrong_explanations[-1]
+    analysis = str(latest.get("analysis") or latest.get("explanation") or "").lower()
+    if not analysis:
+        return ""
+    # 简单关键词匹配
+    if any(kw in analysis for kw in ["混淆", "概念", "区分", "误解"]):
+        return "concept_confusion"
+    if any(kw in analysis for kw in ["计算", "运算", "数值", "代入"]):
+        return "calculation_error"
+    if any(kw in analysis for kw in ["公式", "代入", "符号"]):
+        return "formula_error"
+    if any(kw in analysis for kw in ["方法", "步骤", "过程"]):
+        return "method_confusion"
+    if any(kw in analysis for kw in ["粗心", "马虎", "看错", "漏看"]):
+        return "carelessness"
+    return "understanding_gap"
+
+
+def _select_strategy(attempt_count: int, wrong_explanations: list[dict] | None = None) -> str:
+    """选择教学策略：优先根据错因类型，其次按 attempt_count 轮转。"""
+    error_type = _infer_error_type(wrong_explanations or [])
+    if error_type and error_type in _ERROR_TYPE_STRATEGY:
+        return _ERROR_TYPE_STRATEGY[error_type]
     key = min(attempt_count, max(_STRATEGY_MAP.keys()))
     return _STRATEGY_MAP[key]
 
@@ -806,6 +843,86 @@ def _build_node_content_prompt(state: dict, citation_plan: list[dict]) -> tuple[
     return prompt, True
 
 
+def _build_node_teaching_contract_prompt(state: dict) -> str:
+    contract = state.get("node_teaching_contract")
+    if not isinstance(contract, dict) or not contract:
+        return ""
+
+    lines = ["【节点教学契约】"]
+    goal = str(contract.get("learning_goal") or "").strip()
+    if goal:
+        lines.append(f"学习目标：{goal}")
+    must_know = _string_list(contract.get("must_know"))
+    if must_know:
+        lines.append(f"必会要点：{'；'.join(must_know)}")
+    misconceptions = _string_list(contract.get("common_misconceptions"))
+    if misconceptions:
+        lines.append(f"常见误区：{'；'.join(misconceptions)}")
+    worked_example = str(contract.get("worked_example") or "").strip()
+    if worked_example:
+        lines.append(f"建议例子：{worked_example}")
+    targets = [item for item in list(contract.get("assessment_targets") or []) if isinstance(item, dict)]
+    if targets:
+        target_lines = []
+        for item in targets[:6]:
+            target = str(item.get("target_objective") or "").strip()
+            focus = str(item.get("assessment_focus") or "").strip()
+            misconception = str(item.get("misconception") or "").strip()
+            required = "必达" if item.get("required") else "覆盖"
+            bits = [bit for bit in (target, focus, misconception, required) if bit]
+            if bits:
+                target_lines.append(" / ".join(bits))
+        if target_lines:
+            lines.append(f"测验覆盖目标：{'；'.join(target_lines)}")
+    exit_criteria = _string_list(contract.get("exit_criteria"))
+    if exit_criteria:
+        lines.append(f"退出条件：{'；'.join(exit_criteria)}")
+    lines.append(
+        "完整讲解必须覆盖：学习目标、至少 2 个必会要点、1 个具体例子、1 个常见误区、1 个自检问题。"
+    )
+    lines.append("正常节点讲解控制在 220-420 字；不要只给一句概括。")
+    return "\n".join(lines)
+
+
+def _is_too_brief_node_lesson(text: str, state: dict) -> bool:
+    contract = state.get("node_teaching_contract")
+    if not isinstance(contract, dict) or not contract:
+        return False
+    plain = re.sub(r"<[^>]+>", "", str(text or "")).strip()
+    return len(plain) < 120
+
+
+def _build_contract_lesson_fallback(state: dict, raw_text: str = "") -> str:
+    contract = dict(state.get("node_teaching_contract") or {})
+    node_name = str(
+        contract.get("node_name")
+        or state.get("current_node_name")
+        or state.get("graph_anchor_title")
+        or "当前节点"
+    ).strip()
+    goal = str(contract.get("learning_goal") or f"理解{node_name}的核心判断").strip()
+    must_know = _string_list(contract.get("must_know"))
+    misconceptions = _string_list(contract.get("common_misconceptions"))
+    example = str(contract.get("worked_example") or "").strip()
+    targets = [item for item in list(contract.get("assessment_targets") or []) if isinstance(item, dict)]
+    target_text = str(targets[0].get("target_objective") or "").strip() if targets else ""
+    misconception = misconceptions[0] if misconceptions else "只看表面现象，忽略题干里的判断条件"
+    first = must_know[0] if must_know else target_text or goal
+    second = must_know[1] if len(must_know) > 1 else target_text or first
+    if not example:
+        example = f"把它放到一个实际控制系统里看：先看目标量，再看输出量是否被测量并反馈回来，最后看系统能否按目标收敛。"
+    prior = str(raw_text or "").strip()
+    prior_sentence = f"模型刚才的简短结论是：{prior} " if prior else ""
+    return collapse_blank_lines(
+        f"{prior_sentence}这一节点的目标是：{goal}。先抓住第一个必会点：{first}；"
+        f"它回答的是“判断时到底看什么”，不是让你背一个名词。第二个必会点是：{second}；"
+        f"它用来确认你能把定义放回具体系统里判断，而不是只凭直觉下结论。"
+        f"例如，{example} 这个例子里，关键不是中间有没有短暂波动，而是最终趋势是否满足节点目标。"
+        f"最容易错的是：{misconception}。所以做题时先圈出题干中的对象、输入/输出或反馈条件，再判断它是否符合{target_text or first}。"
+        f"你可以自检一下：如果系统中间振荡了几下，但最后仍保持有界或回到目标附近，你会把它判成什么状态？"
+    )
+
+
 
 def _filter_cited_lines(text: str, citation_count: int) -> str:
     valid_ids = {str(index) for index in range(1, citation_count + 1)}
@@ -931,12 +1048,13 @@ def build_tutor_node(tutor_llm, runtime: RuntimeContext):
         attempt_count = state.get("attempt_count", 0)
         feedback = state.get("feedback", "")
         radar = state.get("assessment_radar", {})
+        wrong_explanations = list(state.get("wrong_question_explanations") or [])
         preferred_opening_strategy = str(state.get("teaching_strategy") or "").strip()
         next_step_choice = str(state.get("next_step_choice") or "").strip()
         strategy = (
             preferred_opening_strategy
             if preferred_opening_strategy in set(_STRATEGY_MAP.values()) | {"summary"}
-            else _select_strategy(attempt_count)
+            else _select_strategy(attempt_count, wrong_explanations)
         )
         diff = _get_diff(difficulty_level)
         weak_hint = _weak_areas_hint(radar)
@@ -1005,11 +1123,12 @@ def build_tutor_node(tutor_llm, runtime: RuntimeContext):
                 )
             )
 
-        # 主流程当前节点讲解：已由 node_content_loader 固定写入 explanation_teacher_style。
-        # 这里必须直接输出该字段，不再调用图谱搜索、通用检索或 LLM 改写，避免 relation_path 等检索产物混入教学正文。
+        # 主流程当前节点讲解：
+        # 将 explanation_teacher_style 作为参考材料注入 prompt，
+        # 让 LLM 根据学生画像、薄弱点、教学策略生成个性化讲解。
         direct_node_content = str(state.get("node_content_context") or "").strip()
         # 主流程节点讲授不能再把 node_content_context 原样输出。
-        # 这里仅记录“有节点素材包”，后面统一交给 tutor LLM 生成详实讲解，
+        # 这里仅记录"有节点素材包"，后面统一交给 tutor LLM 生成详实讲解，
         # 并通过 GraphRAG 的 media_items 渲染公式/图/表卡片。
         has_direct_node_content = bool(direct_node_content)
 
@@ -1248,6 +1367,25 @@ def build_tutor_node(tutor_llm, runtime: RuntimeContext):
         if successor_path_hint:
             graph_instruction += successor_path_hint
 
+        # 教学契约、情绪调整、前置关联
+        teaching_contract_prompt = _build_node_teaching_contract_prompt(state)
+        affect_block = ""
+        if affect_label in ("困惑", "confused"):
+            affect_block = "\n- 【情绪调整】学生当前感到困惑，降低一档难度，增加一个具体例子"
+        elif affect_label in ("焦虑", "anxious", "受挫"):
+            affect_block = "\n- 【情绪调整】学生有些受挫，简化表述，先肯定已有理解，再小步推进"
+        elif affect_label in ("自信", "confident"):
+            affect_block = "\n- 【情绪调整】学生状态自信，减少铺垫，直接给进阶问题"
+        prereq_block = ""
+        prerequisites = _string_list(active_graph_context.get("prerequisites") or [])
+        if prerequisites:
+            mastered_prereqs = [p for p in prerequisites[:4] if isinstance(user_kg.get(p), dict) and user_kg[p].get("status") == "mastered"]
+            unmastered_prereqs = [p for p in prerequisites[:4] if p not in mastered_prereqs]
+            if mastered_prereqs:
+                prereq_block += f"\n- 【前置关联】学生已掌握：{'、'.join(mastered_prereqs)}，讲解时可说\"你已掌握X，现在扩展到Y\""
+            if unmastered_prereqs:
+                prereq_block += f"\n- 【前置提醒】学生对以下前置掌握不足：{'、'.join(unmastered_prereqs)}，需先简要回顾"
+
         system_content = build_teacher_voice(
             f"""你现在负责正式讲解环节，要把一个知识点讲得既有方向感，又让学生愿意继续跟着你走。
 
@@ -1255,11 +1393,11 @@ def build_tutor_node(tutor_llm, runtime: RuntimeContext):
 - 知识水平：{diff["depth"]}
 - 你的角色定位：{diff["persona"]}
 - 讲解风格：{diff["style"]}
-- 字数控制：{diff["length"]}{weak_hint}
+- 字数控制：{diff["length"]}{weak_hint}{affect_block}{prereq_block}
 
 讲解要求：
 1. 开头 **直接进入实质**，不说"好的让我解释"，不重复学生的问题
-2. 每轮只解释 **一个关键点**——宁可短，也不要让学生不知道抓住什么
+2. 每轮围绕一个核心目标展开，但必须讲清：学习目标、核心判断、具体例子、易错点、自检问题
 3. 如果适合，给一个贴近日常直觉的类比、判断口诀或观察角度
 4. 如果学生容易混淆两个概念，要直接点破"不要把 A 和 B 混在一起"
 5. **提问是教学工具**，每次提问都有明确预期——你期待学生回答什么、这个回答能告诉你什么
@@ -1271,7 +1409,10 @@ def build_tutor_node(tutor_llm, runtime: RuntimeContext):
    - 讲解内容必须准确、负责，不确定的地方要明确说明
    - 可以适当推荐学生查阅哪些经典教材或资料
    - 不要因为缺少资料就拒绝讲解或要求学生换问法
-11. 默认输出自然中文段落；除非确实在给步骤或对比，否则不要用列表{knowledge_source_hint}{graph_instruction}"""
+11. 如果有【节点教学契约】，它是本轮讲解、出题和通过判定的共同依据，必须优先覆盖
+12. 默认输出自然中文段落；除非确实在给步骤或对比，否则不要用列表{knowledge_source_hint}{graph_instruction}
+
+{teaching_contract_prompt}"""
         )
 
         strategy_inst = _strategy_instruction(strategy, feedback, attempt_count)
@@ -1283,6 +1424,19 @@ def build_tutor_node(tutor_llm, runtime: RuntimeContext):
         elif next_step_choice == "summarize_now":
             transition_hint = "\n【用户要求】这次先不要展开新内容，优先把刚才那一步压成一个短总结，方便学生抓住主线。"
 
+        # 错题反馈回流
+        wrong_feedback_block = ""
+        if wrong_explanations:
+            recent = wrong_explanations[-2:]
+            parts = []
+            for w in recent:
+                q = str(w.get("question") or w.get("stem") or "")[:60]
+                a = str(w.get("analysis") or w.get("explanation") or "")[:100]
+                if q or a:
+                    parts.append(f"- 题目：{q}；错因：{a}")
+            if parts:
+                wrong_feedback_block = f"【学生近期错题】请在讲解中针对性重讲错因：\n{chr(10).join(parts)}\n\n"
+
         if citation_plan and not has_node_content_context:
             human_content = f"""请讲解主题：【{topic}】
 当前用户这次最想解决的问题：【{updated_goal or topic}】
@@ -1290,7 +1444,7 @@ def build_tutor_node(tutor_llm, runtime: RuntimeContext):
 当前这一轮先抓：【{turn_goal or topic_focus or updated_goal or topic}】
 用户当前状态：【{topic_background or '未明确说明'}】
 
-{strategy_inst}{transition_hint}{knowledge_prompt}
+{wrong_feedback_block}{strategy_inst}{transition_hint}{knowledge_prompt}
 
 输出要求：
 - 直接输出 Markdown 或纯文本，不要输出 JSON，不要输出代码块
@@ -1307,18 +1461,18 @@ def build_tutor_node(tutor_llm, runtime: RuntimeContext):
 当前这一轮先抓：【{turn_goal or topic_focus or updated_goal or topic}】
 用户当前状态：【{topic_background or '未明确说明'}】
 
-{strategy_inst}{transition_hint}{knowledge_prompt}
+{wrong_feedback_block}{strategy_inst}{transition_hint}{knowledge_prompt}
 
 输出格式要求：
 - 直接输出 Markdown 或纯文本，不要输出 JSON，不要输出代码块
 - 主流程节点讲授必须详实，建议 650-1000 字；不要压缩成 2~4 句短回答
-- 必须按“主线解释 -> 定义归纳 -> 关键点拆解 -> 公式/图表/例子交叉说明 -> 常见误区 -> 小检查问题”的顺序组织
+- 必须围绕一个核心目标展开，讲清：学习目标、核心判断、具体例子、易错点、自检问题
 - 必须综合当前节点素材包中的 explanation_teacher_style、key_points、formulas、examples、figures_refs、definition_candidates、key_point_candidates、formula_candidates、example_candidates 等字段
 - 如果素材包中有公式/公式候选，至少选择 1~3 个最有代表性的公式解释变量含义、适用场景和直观意义
 - 如果素材包中有例子/例子候选，至少给出 1 个教材例子或工程类比，并说明它对应哪个关键点
 - 如果素材包中有图表线索或图谱媒体结果，请在正文真正讲到该图/式/表的位置单独输出一行 [[MEDIA:媒体reference]]；不要把所有媒体堆到最后
 - 可以使用小标题，但不要暴露字段名、CSV 痕迹、raw id 或调试信息
-- 不要写“好的”“当然”“总结一下”“希望这有帮助”
+- 不要写"好的""当然""总结一下""希望这有帮助"
 - 结尾只问一个能暴露理解边界的小问题"""
 
         if graph_result is not None and not has_node_content_context:
@@ -1358,6 +1512,8 @@ def build_tutor_node(tutor_llm, runtime: RuntimeContext):
                         learning_target=updated_goal or learning_target or topic,
                         graph_context=active_graph_context,
                     )
+            if _is_too_brief_node_lesson(full_response, state):
+                full_response = _build_contract_lesson_fallback(state, full_response)
 
             if has_node_content_context:
                 graph_payload = dict(graph_result or {})

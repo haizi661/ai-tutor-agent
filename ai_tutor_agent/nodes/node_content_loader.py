@@ -13,7 +13,13 @@ def _string_list(values: Any) -> list[str]:
         return [str(item).strip() for item in values if str(item).strip()]
     if isinstance(values, tuple):
         return [str(item).strip() for item in values if str(item).strip()]
-    return []
+    value = str(values or "").strip()
+    if not value or value in {"[]", "None", "none", "null", "无"}:
+        return []
+    for sep in ("||", ";", "；", ",", "，", "、"):
+        if sep in value:
+            return [item.strip() for item in value.split(sep) if item.strip()]
+    return [value]
 
 
 def _node_name(node: dict[str, Any], node_id: str) -> str:
@@ -216,6 +222,59 @@ def _build_structured_context(node_id: str, node: dict[str, Any], node_map: dict
     return "\n".join(lines)
 
 
+
+def _teacher_explanation(node: dict[str, Any]) -> str:
+    """Return the prebuilt node teaching text used by the main learning flow."""
+    return str(node.get("explanation_teacher_style") or "").strip()
+
+
+_CONTRACT_EXIT_CRITERIA = [
+    "节点客观题总分达到 80 分",
+    "关键目标正确率达到 70%",
+    "常见误区题不能连续错 2 次",
+]
+
+_ASSESSMENT_FOCUS_CYCLE = ("概念辨析", "判断依据", "常见误区", "应用迁移")
+
+
+def _build_node_teaching_contract(node_id: str, node: dict[str, Any], node_name: str) -> dict[str, Any]:
+    objectives = _string_list(node.get("learning_objectives")) or _string_list(node.get("key_points"))
+    must_know = _string_list(node.get("core_concepts")) or _string_list(node.get("must_know"))
+    common_errors = _common_errors(node)
+    prerequisites = _string_list(node.get("prerequisite_nodes"))
+    examples = _string_list(node.get("examples"))
+
+    learning_goal = objectives[0] if objectives else (must_know[0] if must_know else f"理解{node_name or node_id}的核心概念")
+    target_seeds = must_know + [item for item in objectives if item not in must_know]
+    if not target_seeds:
+        target_seeds = [learning_goal]
+
+    assessment_targets: list[dict[str, Any]] = []
+    for index, target in enumerate(target_seeds):
+        misconception = common_errors[index % len(common_errors)] if common_errors else "混淆题干条件与当前节点的核心判断依据"
+        assessment_targets.append(
+            {
+                "target_objective": target,
+                "assessment_focus": _ASSESSMENT_FOCUS_CYCLE[index % len(_ASSESSMENT_FOCUS_CYCLE)],
+                "misconception": misconception,
+                "required": index < max(1, min(2, len(must_know) or len(target_seeds))),
+            }
+        )
+
+    return {
+        "node_id": node_id,
+        "node_name": node_name or node_id,
+        "learning_goal": learning_goal,
+        "prerequisites": prerequisites,
+        "must_know": must_know,
+        "common_misconceptions": common_errors,
+        "worked_example": examples[0] if examples else "",
+        "assessment_targets": assessment_targets,
+        "exit_criteria": list(_CONTRACT_EXIT_CRITERIA),
+    }
+
+
+
 def build_node_content_loader_node(runtime: RuntimeContext):
     event_sink = runtime.event_sink
 
@@ -230,6 +289,7 @@ def build_node_content_loader_node(runtime: RuntimeContext):
         graph_patch = build_graph_state_patch(graph_pipeline, node_id) if node_id else {}
         rich_context = _build_rich_teaching_context(node_id=node_id, node=node, node_map=node_map) if node else ""
         structured_context = _build_structured_context(node_id, node, node_map) if node else ""
+        teaching_contract = _build_node_teaching_contract(node_id, node, node_name) if node else {}
         node_content_context = rich_context or structured_context
         citations: list[dict[str, Any]] = []
         evidence: list[dict[str, Any]] = []
@@ -266,6 +326,7 @@ def build_node_content_loader_node(runtime: RuntimeContext):
             "current_node_status": "content_loaded" if node_id else state.get("current_node_status", ""),
             "node_content_context": node_content_context,
             "node_content_source": "rich_node_material" if rich_context else "structured_node_context",
+            "node_teaching_contract": teaching_contract,
             "tutor_citations": citations,
             "tutor_evidence": evidence,
             "learning_phase": "node_content_loaded",
