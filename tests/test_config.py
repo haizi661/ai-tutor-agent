@@ -62,7 +62,7 @@ def test_settings_default_to_local_embedding_provider(monkeypatch):
     assert settings.embedding_provider == "local"
     assert settings.embedding_model_name == "sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2"
     assert settings.course_primary_enabled is False
-    assert settings.course_primary_dir == "docs/archive/a2-control-theory/source-notes"
+    assert settings.course_primary_dir == "data/knowledge_map_outputs"
     assert settings.default_course_id == "a2-control-theory"
     assert settings.pdf_parse_backend == "auto"
     get_settings.cache_clear()

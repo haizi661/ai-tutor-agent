@@ -483,6 +483,23 @@ def _get_diff(level: int) -> dict:
 
 
 # ─────────────────────────────────────────────────────
+# 跳过测评场景：把学生当作新手讲（Lv.1 + 类比版）
+# 单独抽出来便于单元测试，且让节点函数更易读
+# ─────────────────────────────────────────────────────
+def _resolve_novice_difficulty_on_skip(state: dict) -> tuple[int, str | None]:
+    """Return (difficulty_level, override_opening_strategy).
+
+    - 当 flow_status == 'direct_tutor'（学生选择跳过测评）时，强制当作新手：
+      difficulty_level=1（非常基础），首选 teaching_strategy=analogy（类比版讲解）。
+    - 其他场景按 state 中已有的 difficulty_level，preferred_opening_strategy 留空由调用方自行处理。
+    - 没有任何地方会自动升降难度，所以这里只覆盖"跳过"路径，不影响其他会话。
+    """
+    if state.get("flow_status") == "direct_tutor":
+        return 1, "analogy"
+    return int(state.get("difficulty_level", 3) or 3), None
+
+
+# ─────────────────────────────────────────────────────
 # 从雷达画像提取薄弱维度，生成教学提示
 # ─────────────────────────────────────────────────────
 def _weak_areas_hint(radar: dict) -> str:
@@ -877,10 +894,6 @@ def _build_node_teaching_contract_prompt(state: dict) -> str:
     exit_criteria = _string_list(contract.get("exit_criteria"))
     if exit_criteria:
         lines.append(f"退出条件：{'；'.join(exit_criteria)}")
-    lines.append(
-        "完整讲解必须覆盖：学习目标、至少 2 个必会要点、1 个具体例子、1 个常见误区、1 个自检问题。"
-    )
-    lines.append("正常节点讲解控制在 220-420 字；不要只给一句概括。")
     return "\n".join(lines)
 
 
@@ -1016,6 +1029,89 @@ def _collect_llm_text_with_fallback(
             return "", True
 
 
+def _entry_mode_instruction(mode: str) -> str:
+    """Return a system-prompt instruction snippet for the given entry mode."""
+    if mode == "short_learning":
+        return (
+            "\n- 【精简模式】请给出精简讲解（约正常篇幅的 50%），重点覆盖核心公式和关键概念，"
+            "减少例子和延伸讨论，直接进入实质。"
+        )
+    if mode == "full_learning":
+        return (
+            "\n- 【完整模式】请给出详实讲解（正常篇幅），确保学生能独立理解并运用该概念。"
+        )
+    return ""
+
+
+def _structure_instruction(mode: str) -> str:
+    """Return a fixed teaching template that MUST be followed.
+    
+    For short_learning: merge sections 3+4 into one concise block, keep only 1 example in section 5.
+    For full_learning: all 7 sections in full detail.
+    """
+    if mode == "short_learning":
+        merge_note = (
+            "\n（精简模式：第 3 节与第 4 节合并为「关键公式与图表」一个小节，"
+            "第 5 节只保留 1 个简洁例子，其余小节精简但不得省略）"
+        )
+    else:
+        merge_note = ""
+    return f"""教学格式必须严格按以下 7 个小节组织（用 Markdown #### 分隔），不得改变顺序，不得缺少任何小节{merge_note}：
+
+#### 1. 学习目标
+用 2-3 句话清晰说明本节点要掌握的核心能力。**必须标注掌握层级**（用加粗标出层级词）：
+- **记忆**：能复述定义或公式
+- **理解**：能解释概念的含义和关系
+- **应用**：能运用方法解决具体问题
+- **分析**：能比较不同方法或判断适用条件
+
+示例："能**理解**稳定性的定义，并能**应用**劳斯判据分析给定系统的稳定性。"
+
+#### 2. 核心概念
+给出本节点最核心的判断、定义或原理。如果是定理/方法，说清楚它的本质是什么、为什么有用、在控制系统中解决什么问题。
+
+#### 3. 公式讲解
+**如有公式必须用此小节**，不可在其它位置一带而过。每个公式按以下固定子结构逐一讲解：
+
+1. **公式**：写出完整表达式（LaTeX 格式）
+2. **变量含义**：每个符号的物理含义、单位、取值范围
+3. **直观理解**：从物理直觉解释公式为什么是这个形式，例如"分母的 $Ts+1$ 意味着系统惯性，$T$ 越大响应越慢"
+4. **适用条件**：该公式何时成立、参数需满足什么约束、边界在哪
+5. **典型数值**：给出 1-2 个典型取值下的表现，帮助建立数量感
+
+如果没有公式，直接写"本节点不涉及新公式"即可。
+
+#### 4. 图表说明
+**如有图表必须用此小节**，不可在其它位置一带而过。每张图表按以下固定子结构逐一说明：
+
+1. **图名**：图表名称或编号
+2. **坐标含义**：横纵轴含义、单位、刻度类型（线性 / 对数），或表格的行列含义
+3. **关键特征**：关键曲线形状、特殊点（交点、极值、渐近线、转折频率）的物理意义
+4. **读图方法**：从该图或表能得出什么工程判断，例如"相角裕度 > 30° 时系统有足够稳定裕量"
+
+如果没有图表，直接写"本节点不涉及图表"即可。
+
+#### 5. 具体例子
+至少给出 1 个完整的例题或工程类比，按以下固定子结构：
+
+1. **问题场景**：在什么场景下遇到这个问题
+2. **已知条件**：系统参数和初始条件
+3. **逐步推导**：分步骤的解决过程（每步紧接计算结果）
+4. **结论**：最终结果和判断
+5. **对应概念**：此例子对应第 2 节中的哪个核心概念
+
+#### 6. 常见误区与边界
+- 最容易混淆的两个概念以及如何区分（给出判断方法，不要说"要区分开"这种空话）
+- 公式或方法何时失效（边界条件）
+- 判断口诀或经验法则（如有）
+
+#### 7. 自检问题
+1 个能暴露理解盲区的小问题，要求必须：
+- 学生答对就能证明他真正理解了本节点
+- 不能是"你记住了吗"这种表面问题
+- 可包含选择、判断或简答"""
+
+
 # ─────────────────────────────────────────────────────
 # 主节点构建函数
 # ─────────────────────────────────────────────────────
@@ -1044,12 +1140,12 @@ def build_tutor_node(tutor_llm, runtime: RuntimeContext):
             topic_focus=topic_focus,
             topic_starter_options=topic_starter_options,
         )
-        difficulty_level = state.get("difficulty_level", 3)
+        difficulty_level, _direct_tutor_strategy = _resolve_novice_difficulty_on_skip(state)
         attempt_count = state.get("attempt_count", 0)
         feedback = state.get("feedback", "")
         radar = state.get("assessment_radar", {})
         wrong_explanations = list(state.get("wrong_question_explanations") or [])
-        preferred_opening_strategy = str(state.get("teaching_strategy") or "").strip()
+        preferred_opening_strategy = _direct_tutor_strategy or str(state.get("teaching_strategy") or "").strip()
         next_step_choice = str(state.get("next_step_choice") or "").strip()
         strategy = (
             preferred_opening_strategy
@@ -1059,17 +1155,21 @@ def build_tutor_node(tutor_llm, runtime: RuntimeContext):
         diff = _get_diff(difficulty_level)
         weak_hint = _weak_areas_hint(radar)
 
+        _cur_entry_mode = str(state.get("current_entry_mode") or "").strip()
+        entry_label = {"short_learning": "精简", "full_learning": "完整"}.get(_cur_entry_mode, "")
+        entry_tag = f" · {entry_label}学" if entry_label else ""
         event_sink.emit(
             make_event(
                 "node.start",
                 "tutor",
-                message=f"正在围绕【{learning_target or topic}】定制讲解方案（难度 Lv.{difficulty_level} · 策略: {strategy} · 第{attempt_count + 1}轮）",
+                message=f"正在围绕【{learning_target or topic}】定制讲解方案（难度 Lv.{difficulty_level} · 策略: {strategy} · 第{attempt_count + 1}轮{entry_tag}）",
                 data={
                     "topic": topic,
                     "learning_target": learning_target,
                     "difficulty": difficulty_level,
                     "attempt": attempt_count,
                     "strategy": strategy,
+                    "entry_mode": _cur_entry_mode,
                 },
             )
         )
@@ -1093,6 +1193,39 @@ def build_tutor_node(tutor_llm, runtime: RuntimeContext):
                     data={"signals": affect_signals, "primary": affect_label},
                 )
             )
+
+        # ── Entry mode: 读取学习路径的入口模式 ──
+        current_entry_mode = str(state.get("current_entry_mode") or "").strip()
+
+        # ── quick_check 模式：跳过讲解，直接进入快速检测 ──
+        if current_entry_mode == "quick_check":
+            node_name = str(state.get("current_node_name") or "").strip()
+            event_sink.emit(
+                make_event(
+                    "node.stream",
+                    "tutor",
+                    data={"text": f"**⚡ 快速检测**：正在验证你对【{node_name or topic}】的掌握程度。\n\n"},
+                )
+            )
+            event_sink.emit(
+                make_event(
+                    "node.complete",
+                    "tutor",
+                    message="快速检测已就位。",
+                    data={"entry_mode": "quick_check", "node_name": node_name},
+                )
+            )
+            return {
+                "tutor_content": "",
+                "current_node_status": "quick_check_pending",
+                "node_quiz_kind": "quick_check",
+                "learning_phase": "quick_check_ready",
+                "learning_resume_target": "objective_test_generator",
+                "learning_resume_reason": "quick_check_ready",
+                "current_entry_mode": current_entry_mode,
+                "user_knowledge_graph": state.get("user_knowledge_graph", {}),
+                "student_state_snapshot": state.get("student_state_snapshot", {}),
+            }
 
         # ── 教学推理透明：向学生解释当前教学决策 ──
         thinking_mode = bool(state.get("thinking_mode", False))
@@ -1386,6 +1519,7 @@ def build_tutor_node(tutor_llm, runtime: RuntimeContext):
             if unmastered_prereqs:
                 prereq_block += f"\n- 【前置提醒】学生对以下前置掌握不足：{'、'.join(unmastered_prereqs)}，需先简要回顾"
 
+        structure_instruction = _structure_instruction(current_entry_mode)
         system_content = build_teacher_voice(
             f"""你现在负责正式讲解环节，要把一个知识点讲得既有方向感，又让学生愿意继续跟着你走。
 
@@ -1394,23 +1528,18 @@ def build_tutor_node(tutor_llm, runtime: RuntimeContext):
 - 你的角色定位：{diff["persona"]}
 - 讲解风格：{diff["style"]}
 - 字数控制：{diff["length"]}{weak_hint}{affect_block}{prereq_block}
+{_entry_mode_instruction(current_entry_mode)}
 
-讲解要求：
-1. 开头 **直接进入实质**，不说"好的让我解释"，不重复学生的问题
-2. 每轮围绕一个核心目标展开，但必须讲清：学习目标、核心判断、具体例子、易错点、自检问题
-3. 如果适合，给一个贴近日常直觉的类比、判断口诀或观察角度
-4. 如果学生容易混淆两个概念，要直接点破"不要把 A 和 B 混在一起"
-5. **提问是教学工具**，每次提问都有明确预期——你期待学生回答什么、这个回答能告诉你什么
-6. 如果有【图谱 2.1 当前节点材料】，必须先覆盖该材料中的学习目标、必会要点、常见误区和节点解释，再做扩展
-7. 如果有证据资料，优先使用这些证据来组织讲解
-8. 如果使用了证据，每一句事实性内容后面都必须加上形如 [1]、[2] 的行内引用
-9. 不要输出"参考来源"列表，来源面板由系统单独渲染
-10. 如果没有证据资料，你仍然要基于你作为专业领域专家的知识来讲解，但请注意：
-   - 讲解内容必须准确、负责，不确定的地方要明确说明
-   - 可以适当推荐学生查阅哪些经典教材或资料
-   - 不要因为缺少资料就拒绝讲解或要求学生换问法
-11. 如果有【节点教学契约】，它是本轮讲解、出题和通过判定的共同依据，必须优先覆盖
-12. 默认输出自然中文段落；除非确实在给步骤或对比，否则不要用列表{knowledge_source_hint}{graph_instruction}
+{structure_instruction}
+
+通用要求：
+1. 开头 **直接进入实质**，先给出本节点的学习目标，不说"好的让我解释"
+2. 如果有【图谱 2.1 当前节点材料】，必须优先覆盖其中的学习目标、必会要点和节点解释
+3. 如果有证据资料，优先使用；每句事实性内容后加 [n] 行内引用
+4. 不要输出"参考来源"列表，来源面板由系统单独渲染
+5. 如果没有证据资料，基于专业知识讲解，不确定的地方要说明，不要拒绝讲解
+6. 如果有【节点教学契约】，它是本轮讲解与出题的共同依据，必须优先覆盖
+7. 每个主要公式、图表、关键结论都必须解释清楚，不能只是罗列{knowledge_source_hint}{graph_instruction}
 
 {teaching_contract_prompt}"""
         )
@@ -1446,14 +1575,11 @@ def build_tutor_node(tutor_llm, runtime: RuntimeContext):
 
 {wrong_feedback_block}{strategy_inst}{transition_hint}{knowledge_prompt}
 
-输出要求：
-- 直接输出 Markdown 或纯文本，不要输出 JSON，不要输出代码块
-- 正常情况控制在 2~4 句，先把当前节点最关键的判断讲透
-- 默认不要用列表，只有在明确分步骤时才用
+输出格式要求：
+- 严格按照 system prompt 中的教学模板输出（#### 分隔的 7 个小节），不得省略任何小节
+- 直接输出 Markdown，不要输出 JSON 或代码块
 - 每一句事实性内容后面都必须带 [n] 行内引用
-- 可以做教学组织和表述润色，但不要补充证据里没有的事实
-- 不要输出“参考来源”“资料如下”这类来源列表
-- 可以在最后补一个短问题来探学生卡点，但不要礼貌性收尾"""
+- 不要输出"参考来源""资料如下"这类来源列表"""
         else:
             human_content = f"""请讲解主题：【{topic}】
 当前用户这次最想解决的问题：【{updated_goal or topic}】
@@ -1464,16 +1590,12 @@ def build_tutor_node(tutor_llm, runtime: RuntimeContext):
 {wrong_feedback_block}{strategy_inst}{transition_hint}{knowledge_prompt}
 
 输出格式要求：
-- 直接输出 Markdown 或纯文本，不要输出 JSON，不要输出代码块
-- 主流程节点讲授必须详实，建议 650-1000 字；不要压缩成 2~4 句短回答
-- 必须围绕一个核心目标展开，讲清：学习目标、核心判断、具体例子、易错点、自检问题
-- 必须综合当前节点素材包中的 explanation_teacher_style、key_points、formulas、examples、figures_refs、definition_candidates、key_point_candidates、formula_candidates、example_candidates 等字段
-- 如果素材包中有公式/公式候选，至少选择 1~3 个最有代表性的公式解释变量含义、适用场景和直观意义
-- 如果素材包中有例子/例子候选，至少给出 1 个教材例子或工程类比，并说明它对应哪个关键点
-- 如果素材包中有图表线索或图谱媒体结果，请在正文真正讲到该图/式/表的位置单独输出一行 [[MEDIA:媒体reference]]；不要把所有媒体堆到最后
-- 可以使用小标题，但不要暴露字段名、CSV 痕迹、raw id 或调试信息
-- 不要写"好的""当然""总结一下""希望这有帮助"
-- 结尾只问一个能暴露理解边界的小问题"""
+- 严格按照 system prompt 中的教学模板输出（#### 分隔的 7 个小节），不得省略任何小节
+- 直接输出 Markdown，不要输出 JSON 或代码块
+- 必须综合当前节点素材包中的 explanation_teacher_style、key_points、formulas、examples、figures_refs 等字段填入对应小节
+- 如果素材包中有公式/公式候选，必须在"公式讲解"小节解释变量含义、适用场景和直观意义
+- 如果素材包中有图表线索或图谱媒体结果，必须在"图表说明"小节讲到该图/表，并输出 [[MEDIA:媒体reference]]
+- 不要写"好的""当然""总结一下""希望这有帮助"""
 
         if graph_result is not None and not has_node_content_context:
             graph_answer_text = normalize_graph_answer(
@@ -1612,7 +1734,9 @@ def build_tutor_node(tutor_llm, runtime: RuntimeContext):
         )
         return {
             "tutor_content": full_response,
+            "current_entry_mode": current_entry_mode,
             "teaching_strategy": strategy,
+            "difficulty_level": difficulty_level,
             "next_step_choice": "",
             "post_eval_choice": "",
             "practice_generation_mode": "",

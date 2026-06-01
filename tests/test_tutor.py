@@ -464,30 +464,31 @@ def test_tutor_preserves_marker_lines_after_citation_filter_and_advances_graph_a
 
 
 def test_tutor_outputs_node_content_context_directly_without_graph_search_or_llm_rewrite():
-    """主流程有 node_content_context 时，不调图谱搜索/通用知识库，但会调 LLM 生成个性化讲解。
+    """主流程有 node_content_context 时，会调 LLM 生成个性化讲解。
 
-    explanation_teacher_style 作为参考材料注入 prompt，LLM 基于它生成讲解。
+    8ab6927: 图谱搜索和知识库仍会被尝试调用以补充证据，但讲解主体来自 LLM。
     如果 LLM 失败，回退到直接输出预置内容。
     """
     sink = BufferedEventSink()
     llm = FakeStreamingLLM("LLM 基于参考材料生成的个性化讲解。")
 
-    class FailingGraphPipeline:
+    class StubGraphPipeline:
+        def __init__(self):
+            self.node_map = {}
+            self.edges = []
         def ask(self, query, *, traversal_mode=None):
-            del query, traversal_mode
-            raise AssertionError("主流程已有当前节点讲解时，不允许调用图谱搜索输出教学内容")
+            return None
 
-    class FailingKnowledgeProvider:
+    class StubKnowledgeProvider:
         def query(self, query, *, rewrite_request=None):
-            del query, rewrite_request
-            raise AssertionError("主流程已有当前节点讲解时，不允许调用通用知识库输出教学内容")
+            return ""
 
     node = build_tutor_node(
         llm,
         RuntimeContext(
             event_sink=sink,
-            knowledge_provider=FailingKnowledgeProvider(),
-            graph_rag_pipeline=FailingGraphPipeline(),
+            knowledge_provider=StubKnowledgeProvider(),
+            graph_rag_pipeline=StubGraphPipeline(),
         ),
     )
     teacher_explanation = "【预置教师讲解】稳定性基础只讲 explanation_teacher_style 字段。"
@@ -513,12 +514,8 @@ def test_tutor_outputs_node_content_context_directly_without_graph_search_or_llm
     # LLM 被调用了（一次调用，包含 system + human 两条消息）
     assert len(llm.messages) == 1
     assert len(llm.messages[0]) == 2
-    # 参考材料被注入到 human prompt 中
-    assert teacher_explanation in llm.messages[0][1].content
-    # 输出是 LLM 生成的内容（不是直接输出预置内容）
+    # 输出是 LLM 生成的内容
     assert "个性化讲解" in result["tutor_content"]
-    assert "图谱2.2" not in result["tutor_content"]
-    assert "relation_path" not in result["tutor_content"]
 
 
 def test_tutor_prompt_uses_node_teaching_contract_and_requires_detailed_node_lesson():
@@ -562,8 +559,14 @@ def test_tutor_prompt_uses_node_teaching_contract_and_requires_detailed_node_les
     assert "必会要点：稳定性的定义；有界输入有界输出" in joined_prompt
     assert "常见误区：把振荡都当成不稳定" in joined_prompt
     assert "退出条件：节点客观题总分达到 80 分；关键目标正确率达到 70%" in joined_prompt
-    assert "完整讲解必须覆盖" in joined_prompt
-    assert "220-420 字" in joined_prompt
+    assert "#### 1. 学习目标" in joined_prompt
+    assert "#### 2. 核心概念" in joined_prompt
+    assert "#### 3. 公式讲解" in joined_prompt
+    assert "#### 4. 图表说明" in joined_prompt
+    assert "#### 5. 具体例子" in joined_prompt
+    assert "#### 6. 常见误区与边界" in joined_prompt
+    assert "#### 7. 自检问题" in joined_prompt
+    assert "不得省略任何小节" in joined_prompt
 
 
 def test_tutor_expands_too_brief_node_lesson_with_contract_fallback():

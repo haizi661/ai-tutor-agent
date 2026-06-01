@@ -28,6 +28,10 @@ def _normalize_choice(text: str) -> str:
         "作业": "stop_today",
         "stop": "stop_today",
         "stop_today": "stop_today",
+        "开始新一轮": "start_next_round",
+        "新一轮": "start_next_round",
+        "继续下一轮": "start_next_round",
+        "start_next_round": "start_next_round",
     }
     return mapping.get(lowered, lowered)
 
@@ -40,17 +44,31 @@ def build_continue_or_homework_selector_node(runtime: RuntimeContext):
         awaiting_choice = state.get("flow_status") == "awaiting_continue_or_homework_choice"
         candidate_id = str(state.get("next_node_candidate_id") or "").strip()
         candidate_name = str(state.get("next_node_candidate_name") or "").strip()
-        options = list(CONTINUE_OR_HOMEWORK_OPTIONS)
-        if not candidate_id:
-            options = [item for item in options if item["value"] != "continue_next_node"]
-        recommended = "continue_next_node" if candidate_id else "stop_today"
+        is_plan_completed = state.get("learning_plan_source") == "plan_completed"
+
+        # ── Build options & prompt based on context ──
+        if is_plan_completed:
+            session_index = str(state.get("student_state_snapshot", {}).get("session_index", "") or "")
+            index_tag = f"（第{session_index}次）" if session_index else ""
+            options = [
+                {"value": "start_next_round", "label": "开始新一轮学习"},
+                {"value": "stop_today", "label": "今天就到这里"},
+            ]
+            recommended = "start_next_round"
+            prompt = f"本次学习路径{index_tag}已完成！你可以开始新一轮学习，或今天就到这里。"
+        else:
+            options = list(CONTINUE_OR_HOMEWORK_OPTIONS)
+            if not candidate_id:
+                options = [item for item in options if item["value"] != "continue_next_node"]
+            recommended = "continue_next_node" if candidate_id else "stop_today"
 
         if not awaiting_choice:
-            next_label = candidate_name or candidate_id or "暂无可继续的新节点"
-            prompt = (
-                f"当前节点已经通过。下一候选节点：{next_label}。"
-                "你现在只需要做一个选择：开始下一个节点，或今天不学了并生成作业。"
-            )
+            if not is_plan_completed:
+                next_label = candidate_name or candidate_id or "暂无可继续的新节点"
+                prompt = (
+                    f"当前节点已经通过。下一候选节点：{next_label}。"
+                    "你现在只需要做一个选择：开始下一个节点，或今天不学了并生成作业。"
+                )
             event_sink.emit(
                 make_event(
                     "node.start",
@@ -84,12 +102,42 @@ def build_continue_or_homework_selector_node(runtime: RuntimeContext):
                 },
             ).strip()
         normalized_choice = _normalize_choice(choice) or recommended
-        if normalized_choice not in {"continue_next_node", "stop_today"}:
+        valid_choices = {"continue_next_node", "stop_today", "start_next_round"}
+        if normalized_choice not in valid_choices:
             normalized_choice = recommended
         if normalized_choice == "continue_next_node" and not candidate_id:
             normalized_choice = "stop_today"
 
-        if normalized_choice == "continue_next_node":
+        if normalized_choice == "start_next_round":
+            event_sink.emit(
+                make_event(
+                    "node.complete",
+                    "continue_or_homework_selector",
+                    message="好，我们开始新一轮学习！",
+                )
+            )
+            return {
+                "continue_or_homework_choice": "start_next_round",
+                "flow_status": "normal",
+                "learning_phase": "next_round_requested",
+                "learning_resume_target": "learning_plan_generator",
+                "learning_resume_reason": "start_next_round_selected",
+                "pending_interaction_kind": "",
+                "pending_interaction_prompt": "",
+                "pending_interaction_options": [],
+                "pending_interaction_recommended": "",
+                "pending_interaction_answer": "",
+                "message_history": list(state.get("message_history", []))
+                + [
+                    {
+                        "role": "user",
+                        "kind": "continue_or_homework_choice",
+                        "content": choice or normalized_choice,
+                        "data": {"selected_value": normalized_choice},
+                    }
+                ],
+            }
+        elif normalized_choice == "continue_next_node":
             event_sink.emit(
                 make_event(
                     "node.complete",

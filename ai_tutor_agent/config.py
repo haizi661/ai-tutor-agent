@@ -210,7 +210,7 @@ class Settings:
     question_help_model_name: str = DEFAULT_QUESTION_HELP_MODEL
     question_help_openai_api_base: str = QWEN_OPENAI_COMPATIBLE_BASE
     course_primary_enabled: bool = False
-    course_primary_dir: str = "docs/archive/a2-control-theory/source-notes"
+    course_primary_dir: str = "data/knowledge_map_outputs"
     vector_store_backend: str = "chroma"
     vector_store_dir: str = "data/chroma_db"
     # RAG 2.0 新增字段
@@ -562,8 +562,8 @@ def get_settings() -> Settings:
         knowledge_dir=os.getenv("KNOWLEDGE_DIR", "data/knowledge").strip() or "data/knowledge",
         course_primary_enabled=_read_env_bool("COURSE_PRIMARY_ENABLED", False),
         course_primary_dir=(
-            os.getenv("COURSE_PRIMARY_DIR", "docs/archive/a2-control-theory/source-notes").strip()
-            or "docs/archive/a2-control-theory/source-notes"
+            os.getenv("COURSE_PRIMARY_DIR", "data/knowledge_map_outputs").strip()
+            or "data/knowledge_map_outputs"
         ),
         knowledge_chunk_size=_read_env_int("KNOWLEDGE_CHUNK_SIZE", 1000),
         knowledge_chunk_overlap=_read_env_int("KNOWLEDGE_CHUNK_OVERLAP", 150),

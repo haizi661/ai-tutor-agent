@@ -1015,7 +1015,7 @@ def build_objective_test_generator_node(runtime: RuntimeContext, llm: Any | None
         node_name = str(state.get("current_node_name") or state.get("graph_anchor_title") or "").strip()
         quiz_kind = str(state.get("node_quiz_kind") or "").strip()
         # 短复测只出 5 题
-        effective_count = 5 if quiz_kind == "node_retest" else count
+        effective_count = 2 if quiz_kind == "quick_check" else (5 if quiz_kind == "node_retest" else count)
         coverage_plan = _build_question_blueprints(state, node_id, node_name, effective_count)
         provider = getattr(runtime, "question_bank_provider", None)
         questions: list[dict[str, Any]] = []

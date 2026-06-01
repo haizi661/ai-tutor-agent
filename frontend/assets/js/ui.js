@@ -2110,7 +2110,7 @@
                 <div class="prompt-card prompt-flow-shell">
                     <div class="prompt-label">快速摸底</div>
                     <div class="prompt-title">暂时没有拿到测评题</div>
-                    <div class="prompt-copy">可以先跳过摸底，直接开始正式讲解。</div>
+                    <div class="prompt-copy">可以先跳过摸底，直接开始正式讲解（系统将按新手档从最基础的类比讲起）。</div>
                 </div>
                 <div class="q-stepper-nav">
                     <button type="button" class="q-stepper-btn q-stepper-skip">先不测，直接开始</button>
@@ -2118,7 +2118,7 @@
             `;
             div.querySelector('.q-stepper-skip').onclick = async () => {
                 _renderLockedAssessmentSummary(div, questions, state.answers, '已跳过学前测评，答案已固定');
-                app.setStatusBanner('已跳过摸底，正在进入正式讲解', 'processing');
+                app.setStatusBanner('已跳过摸底，将按新手档从类比讲起', 'processing');
                 try {
                     await app.submitTopicConfirmation?.(true, 'direct_tutor');
                 } catch (err) {
@@ -2877,7 +2877,7 @@
         }
         row.body.appendChild(card);
         container.appendChild(row.wrap);
-        app.scrollMessagesToBottom();
+        app.scrollMessagesToBottom({ force: true });
     };
 
     app.renderContinueOrHomeworkChoice = function renderContinueOrHomeworkChoice(options = [], renderOptions = {}) {
@@ -2887,11 +2887,20 @@
         const card = document.createElement('div');
         card.className = 'topic-confirm-card continue-homework-card prompt-flow-card';
         card.dataset.cardKind = 'continue_or_homework_choice';
+
+        // Detect plan completion from option values
+        const isPlanCompleted = Array.isArray(options) && options.length === 2
+            && options[0]?.value === 'start_next_round';
+
+        const label = renderOptions.titleLabel || (isPlanCompleted ? '学习路径完成' : '继续 / 收作业');
+        const title = renderOptions.titleText || (isPlanCompleted ? '本轮学习路径已完成' : '还学吗');
+        const copy = renderOptions.copyText || (isPlanCompleted ? '所有节点已通过，可以开始新一轮学习或今天就到这里。' : '继续下一个节点还是今天先到这里。');
+
         card.innerHTML = `
             <div class="prompt-card prompt-flow-shell">
-                <div class="prompt-label">继续 / 收作业</div>
-                <div class="prompt-title">还学吗</div>
-                <div class="prompt-copy">继续下一个节点还是今天先到这里。</div>
+                <div class="prompt-label">${label}</div>
+                <div class="prompt-title">${title}</div>
+                <div class="prompt-copy">${copy}</div>
             </div>
             <div class="suggestion-row topic-confirm-chip-list selector-chip-list continue-homework-actions"></div>
         `;
@@ -2917,7 +2926,7 @@
         }
         row.body.appendChild(card);
         container.appendChild(row.wrap);
-        app.scrollMessagesToBottom();
+        app.scrollMessagesToBottom({ force: true });
     };
 
     app.renderHomeworkReviewChoice = function renderHomeworkReviewChoice(options = [], renderOptions = {}) {
@@ -2958,7 +2967,7 @@
         }
         row.body.appendChild(card);
         container.appendChild(row.wrap);
-        app.scrollMessagesToBottom();
+        app.scrollMessagesToBottom({ force: true });
     };
 
     app.renderConsolidationChoice = function renderConsolidationChoice(options = [], renderOptions = {}) {
@@ -2998,7 +3007,7 @@
         }
         row.body.appendChild(card);
         container.appendChild(row.wrap);
-        app.scrollMessagesToBottom();
+        app.scrollMessagesToBottom({ force: true });
     };
 
     app.renderHomeworkAnswerCard = function renderHomeworkAnswerCard(items = [], renderOptions = {}) {
@@ -3931,6 +3940,6 @@
 
         row.body.appendChild(card);
         container.appendChild(row.wrap);
-        app.scrollMessagesToBottom();
+        app.scrollMessagesToBottom({ force: true });
     };
 })();

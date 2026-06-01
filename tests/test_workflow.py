@@ -76,6 +76,39 @@ def test_route_after_topic_confirmer_can_go_directly_to_tutor():
     assert decision == "tutor"
 
 
+def test_resolve_novice_difficulty_on_skip_direct_tutor_forces_lv1_analogy():
+    """跳过测评（flow_status='direct_tutor'）：强制 difficulty_level=1 + analogy 策略，
+    与 state 里之前的难度档位无关。
+    """
+    from ai_tutor_agent.nodes import tutor as tutor_module
+
+    difficulty, strategy = tutor_module._resolve_novice_difficulty_on_skip(
+        {"flow_status": "direct_tutor", "difficulty_level": 5, "teaching_strategy": "socratic"}
+    )
+
+    assert difficulty == 1
+    assert strategy == "analogy"
+
+
+def test_resolve_novice_difficulty_on_skip_keeps_existing_when_not_direct_tutor():
+    """非跳过路径：完全沿用 state 里的 difficulty_level，不注入 strategy。
+    保证这个改动只影响 direct_tutor 路径，不污染其他会话。
+    """
+    from ai_tutor_agent.nodes import tutor as tutor_module
+
+    # 测评过：难度=4
+    difficulty, strategy = tutor_module._resolve_novice_difficulty_on_skip(
+        {"flow_status": "normal", "difficulty_level": 4, "teaching_strategy": "socratic"}
+    )
+    assert difficulty == 4
+    assert strategy is None
+
+    # 完全空 state：兜底为 3
+    difficulty, strategy = tutor_module._resolve_novice_difficulty_on_skip({})
+    assert difficulty == 3
+    assert strategy is None
+
+
 def test_route_after_topic_confirmer_can_skip_assessment_to_initial_node_selector():
     decision = workflow_module.route_after_topic_confirmer(
         {"flow_status": "normal", "learning_resume_target": "initial_node_selector"}

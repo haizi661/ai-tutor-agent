@@ -18,8 +18,7 @@ FIXTURE_NODES_CSV = Path("tests/fixtures/knowledge_map_outputs/auto_control_know
 FIXTURE_EDGES_CSV = Path("tests/fixtures/knowledge_map_outputs/auto_control_knowledge_map_v2_edges.csv")
 RUNTIME_NODES_CSV = Path("data/knowledge_map_outputs/auto_control_knowledge_map_v2_nodes.csv")
 RUNTIME_EDGES_CSV = Path("data/knowledge_map_outputs/auto_control_knowledge_map_v2_edges.csv")
-ARCHIVED_A_GRAPH_JSON = Path("docs/archive/a2-control-theory/graph.json")
-ARCHIVED_A_VIEWER_DATA_JS = Path("docs/archive/a2-control-theory/viewer/data.js")
+CURRENT_GRAPH_JSON = Path("data/knowledge_map_outputs/auto_control_knowledge_map_v2.json")
 
 
 def test_fixture_graph_has_no_dangling_edges_or_node_references():
@@ -135,9 +134,9 @@ def test_graph_integrity_assertion_raises_with_actionable_preview():
             raise AssertionError(f"Knowledge graph integrity check failed with {report['issue_count']} blocking issues: {report['issues'][0]}")
 
 
-def test_archived_a2_control_theory_graph_json_is_kept_only_as_archive():
-    nodes, edges = load_graph_records(graph_json_path=ARCHIVED_A_GRAPH_JSON)
-    payload = json.loads(ARCHIVED_A_GRAPH_JSON.read_text(encoding="utf-8-sig"))
+def test_current_graph_json_integrity():
+    nodes, edges = load_graph_records(graph_json_path=CURRENT_GRAPH_JSON)
+    payload = json.loads(CURRENT_GRAPH_JSON.read_text(encoding="utf-8-sig"))
     report = audit_knowledge_graph(
         nodes,
         edges,
@@ -150,12 +149,12 @@ def test_archived_a2_control_theory_graph_json_is_kept_only_as_archive():
     dangling_edges = [issue for issue in report["issues"] if issue["kind"] in {"dangling_edge_source", "dangling_edge_target"}]
     external_refs = [issue for issue in report["issues"] if issue["kind"] == "external_node_reference"]
 
-    assert report["node_count"] >= 80
-    assert report["edge_count"] >= 200
+    assert report["node_count"] >= 40
+    assert report["edge_count"] >= 80
     assert missing_teaching == []
     assert dangling_edges == []
     assert dangling_refs == []
-    assert len(external_refs) >= 1
+    assert external_refs == []
 
 
 def _load_viewer_data_js(path: Path) -> dict:
@@ -165,20 +164,20 @@ def _load_viewer_data_js(path: Path) -> dict:
     return json.loads(match.group(1))
 
 
-def test_archived_a2_viewer_data_js_matches_archived_graph_json_shape():
-    graph_payload = json.loads(ARCHIVED_A_GRAPH_JSON.read_text(encoding="utf-8-sig"))
-    viewer_payload = _load_viewer_data_js(ARCHIVED_A_VIEWER_DATA_JS)
+def test_viewer_data_builder_works_with_current_graph():
+    graph_payload = json.loads(CURRENT_GRAPH_JSON.read_text(encoding="utf-8-sig"))
     rebuilt = build_viewer_data(graph_payload)
 
-    assert viewer_payload["meta"]["note_count"] == len(graph_payload["nodes"])
-    assert viewer_payload["meta"]["internal_edge_count"] == len(graph_payload["edges"])
-    assert viewer_payload["meta"]["generated_at"] == graph_payload["meta"]["generated_at"]
-    assert {node["id"] for node in viewer_payload["graph"]["nodes"]} == {node["id"] for node in graph_payload["nodes"]}
-    assert {(link["source"], link["target"]) for link in viewer_payload["graph"]["links"]} == {
+    def _nid(node):
+        return str(node.get("id") or node.get("node_id") or "").strip()
+
+    assert rebuilt["meta"]["note_count"] == len(graph_payload["nodes"])
+    assert rebuilt["meta"]["internal_edge_count"] == len(graph_payload["edges"])
+    assert {_nid(node) for node in rebuilt["graph"]["nodes"]} == {_nid(node) for node in graph_payload["nodes"]}
+    assert {(link["source"], link["target"]) for link in rebuilt["graph"]["links"]} == {
         (edge["source"], edge["target"]) for edge in graph_payload["edges"]
     }
-    assert set(viewer_payload["notes"]) == {node["id"] for node in graph_payload["nodes"]}
-    assert viewer_payload == rebuilt
+    assert set(rebuilt["notes"]) == {_nid(node) for node in graph_payload["nodes"]}
 
 
 def test_viewer_data_builder_preserves_teaching_fields_used_by_27_viewer():

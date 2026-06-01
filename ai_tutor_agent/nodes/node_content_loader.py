@@ -323,6 +323,8 @@ def build_node_content_loader_node(runtime: RuntimeContext):
             **graph_patch,
             "current_node_id": node_id,
             "current_node_name": node_name,
+            "current_entry_mode": state.get("current_entry_mode", ""),
+            "node_quiz_kind": "",  # clear stale quiz kind from previous node
             "current_node_status": "content_loaded" if node_id else state.get("current_node_status", ""),
             "node_content_context": node_content_context,
             "node_content_source": "rich_node_material" if rich_context else "structured_node_context",

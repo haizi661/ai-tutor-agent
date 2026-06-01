@@ -9,7 +9,7 @@ import shutil
 from contextlib import contextmanager
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Optional
 
 import fitz  # PyMuPDF
 import huggingface_hub
@@ -627,13 +627,78 @@ class LocalFileKnowledgeProvider(KnowledgeProvider):
         return f"{source_scope}::{filename}"
 
     def _load_course_graph_index(self) -> dict[str, dict[str, Any]]:
+        # Priority order: 1) v2.json (current Graph B), 2) notes.jsonl, 3) graph.json (legacy Graph A)
+        v2_graph_names = [
+            "auto_control_knowledge_map_v2.json",
+        ]
+        v2_graph_path: Optional[Path] = None
+        for name in v2_graph_names:
+            candidate = self.course_primary_dir / name
+            if candidate.exists():
+                v2_graph_path = candidate
+                break
         notes_path = self.course_primary_dir.parent / "notes.jsonl"
         graph_path = self.course_primary_dir.parent / "graph.json"
         index: dict[str, dict[str, Any]] = {}
         self.course_graph_nodes: dict[str, dict[str, Any]] = {}
         self.course_graph_lookup: dict[str, str] = {}
 
-        def ingest_item(item: dict[str, Any]) -> None:
+        def _normalize_str_list(value: Any) -> list[str]:
+            if isinstance(value, list):
+                return [str(v).strip() for v in value if v is not None]
+            if isinstance(value, str):
+                return [v.strip() for v in value.split(",") if v.strip()]
+            return []
+
+        def ingest_item_V2(item: dict[str, Any]) -> None:
+            """Ingest a node from the current v2.json format (Graph B)."""
+            node_id = str(item.get("node_id") or "").strip()
+            title = str(item.get("name") or node_id or "").strip()
+            filename = f"{node_id}.md" if node_id else title
+
+            node = {
+                "id": node_id,
+                "title": title,
+                "filename": filename,
+                "prerequisites": _normalize_str_list(item.get("prerequisite_nodes")),
+                "neighbors": _normalize_str_list(item.get("next_nodes")),
+                "learning_objectives": _normalize_str_list(item.get("core_concepts")),
+                "must_know": _normalize_str_list(item.get("key_points")),
+                "common_errors": [],
+                "teaching_modes": _normalize_str_list(item.get("tags")),
+                "assessment_modes": [],
+                "target_mastery_level": str(item.get("mastery_threshold") or "").strip(),
+                "difficulty": str(item.get("importance_level") or "").strip(),
+            }
+            if title:
+                self.course_graph_nodes[title] = node
+
+            for candidate in [node_id, title, Path(filename).stem]:
+                normalized_candidate = _normalize_lookup_text(candidate)
+                if normalized_candidate and title:
+                    self.course_graph_lookup[normalized_candidate] = title
+
+            enrichment = {
+                "summary": item.get("summary", ""),
+                "explanation_raw": item.get("explanation_raw", ""),
+                "explanation_teacher_style": item.get("explanation_teacher_style", ""),
+                "formulas": item.get("formulas", []),
+                "examples": item.get("examples", []),
+                "figures_refs": item.get("figures_refs", []),
+                "tags": item.get("tags", []),
+            }
+            enrichment = {k: v for k, v in enrichment.items() if v not in (None, "", [], {})}
+            if title:
+                enrichment["title"] = title
+                enrichment["_title"] = title
+            if filename:
+                enrichment["_filename"] = filename
+                index[filename] = enrichment
+            if title:
+                index[title] = enrichment
+
+        def ingest_item_legacy(item: dict[str, Any]) -> None:
+            """Ingest a node from legacy notes.jsonl / graph.json format (Graph A)."""
             source_path = str(item.get("source_path") or item.get("raw_copy_path") or "").strip()
             file_name = str(item.get("file_name") or "").strip()
             filename = Path(source_path).name if source_path else file_name
@@ -677,32 +742,46 @@ class LocalFileKnowledgeProvider(KnowledgeProvider):
                 index[title] = enrichment
 
         try:
+            if v2_graph_path and v2_graph_path.exists():
+                graph_obj = json.loads(v2_graph_path.read_text(encoding="utf-8"))
+                for item in list(graph_obj.get("nodes") or []):
+                    if isinstance(item, dict):
+                        ingest_item_V2(item)
+                print(
+                    f"✅ [RAG] 已加载课程图谱: {v2_graph_path.name} "
+                    f"({len(self.course_graph_nodes)} 节点)"
+                )
+                return index
+
             if notes_path.exists():
                 with notes_path.open("r", encoding="utf-8") as file_obj:
                     for line in file_obj:
                         line = line.strip()
                         if not line:
                             continue
-                        ingest_item(json.loads(line))
+                        ingest_item_legacy(json.loads(line))
+                print(
+                    "ℹ️ [RAG] 使用 legacy notes.jsonl 加载课程图谱"
+                )
                 return index
 
             if graph_path.exists():
                 graph_obj = json.loads(graph_path.read_text(encoding="utf-8"))
                 for item in list(graph_obj.get("nodes") or []):
                     if isinstance(item, dict):
-                        ingest_item(item)
+                        ingest_item_legacy(item)
                 print(
-                    "⚠️ [RAG] 未找到 notes.jsonl，已回退使用 graph.json 加载课程图谱。"
+                    "⚠️ [RAG] 未找到 v2.json 或 notes.jsonl，已回退使用 legacy graph.json 加载课程图谱。"
                 )
                 return index
 
             print(
-                "⚠️ [RAG] 课程图谱文件缺失：未找到 notes.jsonl 或 graph.json。"
-                f"期望路径: {notes_path} 或 {graph_path}"
+                "ℹ️ [RAG] 课程图谱文件不存在，跳过加载。"
+                f"已检查: {v2_graph_path} / {notes_path} / {graph_path}"
             )
             return index
         except Exception as exc:
-            print(f"⚠️ [RAG] 课程图谱精细化字段加载失败，已忽略: {exc}")
+            print(f"⚠️ [RAG] 课程图谱加载失败: {exc}")
             return {}
         return index
 

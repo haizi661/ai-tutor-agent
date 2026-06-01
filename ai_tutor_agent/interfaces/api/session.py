@@ -72,6 +72,11 @@ class AssessmentAnswerRequest(BaseModel):
     answer: str  # A/B/C/D
 
 
+class V2SelfAssessmentRequest(BaseModel):
+    thread_id: str
+    scores: Dict[str, int]  # {"A": 3, "B": 4, ...}
+
+
 class TopicConfirmRequest(BaseModel):
     thread_id: str
     confirmed: bool
@@ -348,6 +353,38 @@ def _resume_assessment_worker(
                 "session.info",
                 "api",
                 message="📝 已收到学前测评答案，正在校准起点，随后直接进入讲解…",
+            )
+        )
+        graph_app.invoke(None, config=thread_config)
+
+    _run_graph_session(thread_id, runtime, event_q, input_q, runner)
+
+
+def _resume_v2_self_assessment_worker(
+    thread_id: str,
+    scores: dict[str, int],
+    runtime,
+    event_q: queue.Queue,
+    input_q: queue.Queue,
+):
+    def runner(graph_app, runtime_context, thread_config):
+        graph_app.update_state(
+            thread_config,
+            {
+                "self_assessment_scores": scores,
+                "skip_self_assessment": False,
+                "is_assessed": True,
+                "flow_status": "profiling",
+                "learning_phase": "profile_complete",
+                "learning_resume_target": "user_profiler",
+                "learning_resume_reason": "v2_self_assessment_done",
+            },
+        )
+        runtime_context.event_sink.emit(
+            make_event(
+                "session.info",
+                "api",
+                message="已收到自评结果，正在生成学习路径…",
             )
         )
         graph_app.invoke(None, config=thread_config)
@@ -828,6 +865,20 @@ async def save_assessment_draft(req: AssessmentDraftRequest, request: Request):
         {"assessment_answers": req.answers},
     )
     return {"status": "ok", "message": "Assessment draft saved."}
+
+
+@router.post("/v2_self_assessment")
+async def v2_self_assessment(req: V2SelfAssessmentRequest, request: Request):
+    """V2 自评问卷：8 维能力 1-5 分，一次性提交。"""
+    runtime = get_runtime(request)
+    _schedule_resume_worker(
+        req.thread_id,
+        runtime,
+        _resume_v2_self_assessment_worker,
+        req.thread_id,
+        req.scores,
+    )
+    return {"status": "ok", "message": "Self-assessment received, generating learning plan."}
 
 
 @router.post("/assessment_answer")

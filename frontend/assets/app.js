@@ -387,6 +387,120 @@
         document.dispatchEvent(new CustomEvent('lp:focusNode', { detail: { nodeId } }));
     };
 
+    // ── V2 自评问卷：8 维能力 1-5 分紧凑表单 ──
+    app.renderV2SelfAssessment = function renderV2SelfAssessment(questions) {
+        const defaultQuestions = [
+            { ability: 'A', prompt: '你对复数、拉普拉斯变换、微分方程、极点零点的熟悉程度？' },
+            { ability: 'B', prompt: '你能否解释开环、闭环、反馈、误差、控制器、被控对象？' },
+            { ability: 'C', prompt: '你能否由微分方程、方块图或信号流图求传递函数？' },
+            { ability: 'D', prompt: '你能否根据特征方程、极点或劳斯判据判断系统稳定性？' },
+            { ability: 'E', prompt: '你能否计算二阶系统的超调量、峰值时间、调节时间？' },
+            { ability: 'F', prompt: '你能否判断系统型别并计算稳态误差？' },
+            { ability: 'G', prompt: '你能否根据开环零极点画根轨迹并判断参数稳定范围？' },
+            { ability: 'H', prompt: '你能否画 Bode 图、计算稳定裕度并选择校正方法？' },
+        ];
+        const abilities = { A: '数学基础', B: '控制系统基本概念', C: '系统建模能力', D: '稳定性分析能力', E: '时域性能分析能力', F: '稳态误差分析能力', G: '根轨迹分析能力', H: '频域分析与校正能力' };
+        const scaleLabels = ['', '完全不会', '听过但不会做题', '能看懂简单例题', '能独立完成常见题', '能解释原理并解决综合题'];
+
+        const items = (Array.isArray(questions) && questions.length === 8) ? questions : defaultQuestions;
+
+        document.querySelectorAll('.v2-sa-row').forEach(el => el.remove());
+
+        const container = document.getElementById('messages');
+        const row = createAssistantCardRow('v2-sa-row');
+        const card = document.createElement('div');
+        card.className = 'v2-sa-card prompt-flow-card';
+
+        const scores = {};
+        let questionsHtml = '';
+        items.forEach((q, idx) => {
+            const ab = q.ability || String.fromCharCode(65 + idx);
+            const abName = abilities[ab] || '';
+            const prompt = q.prompt || q.question || '';
+            const dots = [1, 2, 3, 4, 5].map(v =>
+                `<div class="v2-sa-dot" data-v="${v}" data-ability="${ab}">${v}</div>`
+            ).join('');
+            questionsHtml += `
+                <div class="v2-sa-question" data-ability="${ab}">
+                    <div class="v2-sa-q-header">
+                        <span class="v2-sa-badge">${ab} ${abName}</span>
+                        <span class="v2-sa-q-text">${prompt}</span>
+                    </div>
+                    <div class="v2-sa-dots">${dots}</div>
+                    <div class="v2-sa-desc" data-desc="${ab}"></div>
+                </div>`;
+        });
+
+        card.innerHTML = `
+            <div class="v2-sa-header">
+                <div class="v2-sa-title-row">
+                    <span class="v2-sa-title">快速自评</span>
+                    <span class="v2-sa-badge-tip">1 完全不会 → 5 非常确定</span>
+                </div>
+                <div class="v2-sa-subtitle">请根据真实水平打分，这会影响系统为你安排的学习路径</div>
+            </div>
+            <div class="v2-sa-body">${questionsHtml}</div>
+            <div class="v2-sa-footer">
+                <button class="v2-sa-submit" disabled>提交自评</button>
+            </div>
+        `;
+
+        // Dot click
+        card.querySelectorAll('.v2-sa-dot').forEach(dot => {
+            dot.addEventListener('click', () => {
+                const ability = dot.dataset.ability;
+                const val = parseInt(dot.dataset.v);
+                const parent = dot.closest('.v2-sa-question');
+                parent.querySelectorAll('.v2-sa-dot').forEach(d => d.classList.remove('selected'));
+                dot.classList.add('selected');
+                scores[ability] = val;
+                const descEl = parent.querySelector('.v2-sa-desc');
+                descEl.textContent = scaleLabels[val] ? ('你选了：' + scaleLabels[val]) : (val + ' 分');
+                const allAnswered = items.every(q => scores[q.ability] != null);
+                card.querySelector('.v2-sa-submit').disabled = !allAnswered;
+            });
+        });
+
+        // Submit
+        card.querySelector('.v2-sa-submit').addEventListener('click', async () => {
+            const btn = card.querySelector('.v2-sa-submit');
+            btn.disabled = true;
+            btn.textContent = '正在分析…';
+            app.setStatusBanner('正在生成学习路径…', 'processing');
+            try {
+                const resp = await fetch('/api/v2_self_assessment', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ thread_id: state.currentThreadId, scores }),
+                });
+                if (!resp.ok) throw new Error('v2_self_assessment failed: ' + resp.status);
+                card.querySelectorAll('.v2-sa-dot').forEach(d => d.style.pointerEvents = 'none');
+                card.classList.add('v2-sa--submitted');
+                btn.textContent = '已提交';
+                app.startStreamingTurn?.('自评完成，正在生成路径');
+                app.connectSSE();
+            } catch (err) {
+                console.error(err);
+                btn.disabled = false;
+                btn.textContent = '提交失败，重试';
+                app.setStatusBanner('自评提交失败，请稍后重试。', 'danger');
+            }
+        });
+
+        row.body.appendChild(card);
+        container.appendChild(row.wrap);
+        app.scrollMessagesToBottom();
+    };
+
+    // ── Entry mode badge helper for v2 learning plan ──
+    function _entryModeBadge(mode) {
+        const labels = { full_learning: '完整学', short_learning: '简学', quick_check: '快测' };
+        const clsMap = { full_learning: 'lp-mode--full', short_learning: 'lp-mode--short', quick_check: 'lp-mode--quick' };
+        const label = labels[mode] || mode;
+        const cls = clsMap[mode] || 'lp-mode--default';
+        return `<span class="lp-mode-badge ${cls}">${label}</span>`;
+    }
+
     app.renderLearningPlanPanel = function renderLearningPlanPanel(plan, currentNodeId, userKnowledgeGraph) {
         const content = document.getElementById('lp-panel-content');
         if (!content || !Array.isArray(plan) || plan.length === 0) return;
@@ -421,9 +535,13 @@
         }, 0);
         const overallPct = totalNodes > 0 ? Math.round(completedNodes / totalNodes * 100) : 0;
 
+        // Session index from v2 plan (stored in first step or plan-level data)
+        const sessionIndex = plan.session_index || state.sessionIndex || 0;
+
         let html = `<div class="lp-plan-header">
             <span class="lp-plan-progress-text">总进度 ${completedNodes}/${totalNodes}</span>
             <span class="lp-plan-pct">${overallPct}%</span>
+            ${sessionIndex > 0 ? `<span class="lp-plan-session">第${sessionIndex}次</span>` : ''}
         </div>`;
         html += '<div class="lp-plan-steps">';
 
@@ -478,9 +596,16 @@
                     : kg.status === 'in_progress' ? 'is-in-progress'
                     : 'is-pending';
 
+                // V2 entry mode badge (always show unless mastered)
+                const entryMode = (step.entry_modes && step.entry_modes[nid]) || '';
+                const modeBadge = entryMode && kg.status !== 'mastered'
+                    ? _entryModeBadge(entryMode)
+                    : '';
+
                 html += `<div class="lp-node ${nodeStatus}" data-node-id="${nid}" onclick="window.AITutorApp.focusGraphNode?.('${nid}')">
                     <span class="lp-node-dot"></span>
                     <span class="lp-node-name" title="${nname}">${nname}</span>
+                    ${modeBadge}
                 </div>`;
             });
 

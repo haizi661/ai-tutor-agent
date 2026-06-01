@@ -428,6 +428,11 @@
                     loadGraphDataForPathPanel();
                 }
             }
+            // 讲解完成后延迟滚动到底部，确保公式/图表卡片和课后选择按钮可见
+            if (data.source === 'tutor') {
+                setTimeout(() => app.scrollMessagesToBottom?.({ force: true }), 500);
+                setTimeout(() => app.scrollMessagesToBottom?.({ force: true }), 1500);
+            }
             const evidence = Array.isArray(data.data?.evidence) ? data.data.evidence : [];
             if (data.source === 'tutor' && evidence.length) {
                 app.renderEvidencePanel?.(evidence, { tone: 'info', role: 'tutor' });
@@ -590,6 +595,22 @@
                 showInChat: false,
                 render: () => app.renderAssessmentForm(data.data?.questions || []),
             });
+        });
+
+        // ── V2 自评问卷：8 维能力紧凑表单 ──
+        state.eventSource.addEventListener('assessment.v2_self_eval', e => {
+            const data = safelyParseEventData(e.data);
+            const questions = data.data?.questions || [];
+            app.updateLearningProgress?.({ step: 2, label: '学习进度 2/5' });
+            consumeAwaitingTurn(
+                data.message || '请完成 8 道快速自评',
+                '等你完成自评',
+                {
+                    role: 'assessment',
+                    showInChat: false,
+                    render: () => app.renderV2SelfAssessment(questions),
+                }
+            );
         });
 
         // ── 批量测评（步进器模式）──

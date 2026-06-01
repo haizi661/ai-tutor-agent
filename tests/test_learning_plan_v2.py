@@ -299,9 +299,9 @@ class TestResolveEntryModes:
 
 
 class TestGenerateStepNames:
-    def test_same_chapter_naming(self):
+    def test_naming_uses_first_node_name(self):
         names = generate_step_names([["KM001", "KM002", "KM003"]])
-        assert "第一章" in names[0]
+        assert "自动控制的一般概念" in names[0]
 
     def test_cross_chapter_naming(self):
         names = generate_step_names([["KM001", "KM007"]])

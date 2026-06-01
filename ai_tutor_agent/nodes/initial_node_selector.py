@@ -153,6 +153,13 @@ def build_initial_node_selector_node(runtime: RuntimeContext):
                 data={"node_id": selected_id, "node_name": selected_name, "reason": reason},
             )
         )
+        # ── Read entry_mode from learning plan ──
+        entry_mode = ""
+        if learning_plan and selected_id:
+            first_step = learning_plan[0]
+            entry_modes = first_step.get("entry_modes", {}) if isinstance(first_step, dict) else {}
+            entry_mode = str(entry_modes.get(selected_id, "")).strip()
+
         if selected_id and selected_name:
             event_sink.emit(
                 make_event(
@@ -191,6 +198,8 @@ def build_initial_node_selector_node(runtime: RuntimeContext):
         return {
             "current_node_id": selected_id,
             "current_node_name": selected_name,
+            "current_entry_mode": entry_mode,
+            "node_quiz_kind": "",  # clear any stale quiz kind from previous node
             "current_node_status": "selected" if selected_id else "",
             "next_node_candidate_reason": reason,
             "learning_phase": "node_selected",

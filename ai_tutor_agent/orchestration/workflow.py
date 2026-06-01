@@ -230,6 +230,8 @@ def route_after_node_content_loader(state: AgentState) -> str:
 def route_after_tutor(state: AgentState) -> str:
     if state.get("interrupt_query"):
         return "interruption"
+    if state.get("current_node_status") == "quick_check_pending":
+        return "objective_test_generator"
     return "post_lesson_choice"
 
 
@@ -305,7 +307,7 @@ def route_after_learning_plan_generator(state: AgentState) -> str:
 
 def route_after_next_node_planner(state: AgentState) -> str:
     if state.get("learning_plan_source") == "plan_completed":
-        return "learning_plan_generator"
+        return "continue_or_homework_selector"
     return "continue_or_homework_selector"
 
 
@@ -316,6 +318,8 @@ def route_after_continue_or_homework_selector(state: AgentState) -> str:
         return "node_content_loader"
     if state.get("continue_or_homework_choice") == "stop_today":
         return "homework_generator"
+    if state.get("continue_or_homework_choice") == "start_next_round":
+        return "learning_plan_generator"
     return "pause"
 
 

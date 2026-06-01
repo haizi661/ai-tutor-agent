@@ -8,6 +8,8 @@ const WrongBook = {
     pageSize: 50,
     lastTotal: 0,
     filter: 'unmastered',
+    sort: 'latest',
+    _redoState: null,  // {qid, options, correctAnswer, userAnswer, answered}
 
     init() {
         this._modalEl = document.getElementById('wrong-book-modal');
@@ -31,6 +33,37 @@ const WrongBook = {
             if (btn.classList.contains('wb-filter-tab')) {
                 event.preventDefault();
                 this._setFilter(btn.dataset.filter || 'unmastered');
+                return;
+            }
+
+            if (btn.classList.contains('wb-sort-btn')) {
+                event.preventDefault();
+                this._setSort(btn.dataset.sort || 'latest');
+                return;
+            }
+
+            if (btn.classList.contains('wb-review-node-btn')) {
+                event.preventDefault();
+                this._reviewNode(btn.dataset.nodeId || '');
+                return;
+            }
+
+            if (btn.classList.contains('wb-redo-btn')) {
+                event.preventDefault();
+                event.stopPropagation();
+                this._startRedo(btn);
+                return;
+            }
+
+            if (btn.classList.contains('wb-redo-option')) {
+                event.preventDefault();
+                this._handleRedoOption(btn);
+                return;
+            }
+
+            if (btn.classList.contains('wb-redo-continue')) {
+                event.preventDefault();
+                this._continueRedo(btn);
                 return;
             }
 
@@ -88,6 +121,7 @@ const WrongBook = {
             const params = new URLSearchParams();
             params.set('page', String(this.page));
             params.set('page_size', String(this.pageSize));
+            params.set('sort', this.sort || 'latest');
             if (this.filter === 'unmastered') {
                 params.set('mastered', 'false');
             } else if (this.filter === 'mastered') {
@@ -152,6 +186,12 @@ const WrongBook = {
             + '<button type="button" class="wb-filter-tab' + (this.filter === 'all' ? ' active' : '') + '" data-filter="all" aria-pressed="' + (this.filter === 'all' ? 'true' : 'false') + '">全部</button>'
             + '<button type="button" class="wb-filter-tab' + (this.filter === 'unmastered' ? ' active' : '') + '" data-filter="unmastered" aria-pressed="' + (this.filter === 'unmastered' ? 'true' : 'false') + '">待复习</button>'
             + '<button type="button" class="wb-filter-tab' + (this.filter === 'mastered' ? ' active' : '') + '" data-filter="mastered" aria-pressed="' + (this.filter === 'mastered' ? 'true' : 'false') + '">已掌握</button>'
+            + '</div>'
+            + '<div class="wb-sort-bar" role="group" aria-label="排序方式">'
+            + '<span class="wb-sort-label">排序：</span>'
+            + '<button type="button" class="wb-sort-btn' + (this.sort === 'latest' ? ' active' : '') + '" data-sort="latest">最近做错</button>'
+            + '<button type="button" class="wb-sort-btn' + (this.sort === 'wrong_count' ? ' active' : '') + '" data-sort="wrong_count">做错最多</button>'
+            + '<button type="button" class="wb-sort-btn' + (this.sort === 'reviewed' ? ' active' : '') + '" data-sort="reviewed">最久未复习</button>'
             + '</div>';
     },
 
@@ -162,6 +202,32 @@ const WrongBook = {
         this.page = 1;
         this._showLoading();
         this._fetchAndRender();
+    },
+
+    _setSort(sort) {
+        const next = ['latest', 'wrong_count', 'reviewed'].includes(sort) ? sort : 'latest';
+        if (this.sort === next) return;
+        this.sort = next;
+        this.page = 1;
+        this._showLoading();
+        this._fetchAndRender();
+    },
+
+    _reviewNode(nodeId) {
+        if (!nodeId) return;
+        this._setOpen(false);
+        const app = window.AITutorApp;
+        if (app && typeof app.applyStarterPrompt === 'function') {
+            app.applyStarterPrompt('我想复习这个知识点：' + nodeId, { submit: true });
+        } else if (app && typeof app.handlePrimaryAction === 'function') {
+            const input = document.getElementById('chat-input');
+            if (input) {
+                input.value = '我想复习这个知识点：' + nodeId;
+                input.dispatchEvent(new Event('input', { bubbles: true }));
+                input.focus();
+                app.handlePrimaryAction();
+            }
+        }
     },
 
     _groupByNode(items) {
@@ -214,6 +280,9 @@ const WrongBook = {
         html += '<span class="wb-group-count">' + group.items.length + ' 题</span>';
         html += '<span class="wb-group-progress">' + mastered + '/' + group.items.length + ' 已掌握</span>';
         html += '</button>';
+        html += '<div class="wb-group-actions">';
+        html += '<button type="button" class="chip chip-primary wb-review-node-btn" data-node-id="' + this._esc(group.node_id) + '">复习本节点</button>';
+        html += '</div>';
         html += '<div class="wb-group-body">';
         for (let i = 0; i < group.items.length; i += 1) {
             html += this._renderItem(group.items[i]);
@@ -253,6 +322,9 @@ const WrongBook = {
         html += '</div>';
         html += '<div class="wb-item-actions">';
         html += '<button type="button" class="chip" onclick="WrongBook._toggleDetail(this)">展开讲解</button>';
+        if (!mastered) {
+            html += '<button type="button" class="chip wb-redo-btn" data-qid="' + qid + '">再做一遍</button>';
+        }
         html += mastered
             ? '<button type="button" class="chip chip-muted wb-master-toggle" data-mastered="false">取消掌握</button>'
             : '<button type="button" class="chip chip-primary wb-master-toggle" data-mastered="true">标记已掌握</button>';
@@ -395,6 +467,110 @@ const WrongBook = {
         const text = String(value || '').trim();
         if (!text) return '';
         return text.replace('T', ' ').slice(0, 16);
+    },
+
+    _startRedo(btn) {
+        const qid = btn.dataset.qid;
+        if (!qid) return;
+        const item = btn.closest('.wb-item');
+        if (!item) return;
+
+        // Get question data from the item
+        const detail = item.querySelector('.wb-item-detail');
+        const optionsEl = detail ? detail.querySelectorAll('.wb-option') : [];
+        const options = {};
+        let correctAnswer = '';
+        optionsEl.forEach(opt => {
+            const key = opt.querySelector('span');
+            const val = opt.querySelector('p');
+            if (key && val) {
+                options[key.textContent.trim()] = val.textContent.trim();
+                if (opt.classList.contains('wb-option--correct')) correctAnswer = key.textContent.trim();
+            }
+        });
+
+        if (!Object.keys(options).length) {
+            // No options available, show detail instead
+            this._toggleDetail(btn);
+            return;
+        }
+
+        // Hide the redo button and show the redo UI
+        btn.hidden = true;
+        const actions = btn.closest('.wb-item-actions');
+        const detailDiv = item.querySelector('.wb-item-detail');
+        if (detailDiv) detailDiv.hidden = true;
+
+        // Build redo UI
+        let redoHtml = '<div class="wb-redo-panel">';
+        redoHtml += '<div class="wb-redo-prompt">再做一遍这道题：</div>';
+        redoHtml += '<div class="wb-redo-options">';
+        Object.keys(options).sort().forEach(key => {
+            redoHtml += '<button type="button" class="wb-redo-option" data-key="' + this._esc(key) + '">' + this._esc(key) + '. ' + this._esc(options[key]) + '</button>';
+        });
+        redoHtml += '</div>';
+        redoHtml += '<div class="wb-redo-result" hidden></div>';
+        redoHtml += '</div>';
+
+        // Insert after item-actions
+        const existingRedo = item.querySelector('.wb-redo-panel');
+        if (existingRedo) existingRedo.remove();
+        if (actions) actions.insertAdjacentHTML('afterend', redoHtml);
+
+        // Store state
+        this._redoState = {qid, options, correctAnswer, answered: false};
+    },
+
+    _handleRedoOption(btn) {
+        if (!this._redoState || this._redoState.answered) return;
+        const selectedKey = btn.dataset.key;
+        if (!selectedKey) return;
+
+        this._redoState.answered = true;
+        const isCorrect = selectedKey === this._redoState.correctAnswer;
+
+        // Highlight selected and correct
+        const panel = btn.closest('.wb-redo-panel');
+        if (!panel) return;
+        const allOpts = panel.querySelectorAll('.wb-redo-option');
+        allOpts.forEach(opt => {
+            opt.disabled = true;
+            if (opt.dataset.key === this._redoState.correctAnswer) {
+                opt.classList.add('wb-redo-option--correct');
+            } else if (opt.dataset.key === selectedKey && !isCorrect) {
+                opt.classList.add('wb-redo-option--wrong');
+            }
+        });
+
+        // Show result
+        const result = panel.querySelector('.wb-redo-result');
+        if (result) {
+            result.hidden = false;
+            if (isCorrect) {
+                result.innerHTML = '<span class="wb-redo-ok">✅ 回答正确！</span>'
+                    + '<button type="button" class="chip chip-primary wb-master-toggle" data-mastered="true">标记已掌握</button>';
+            } else {
+                result.innerHTML = '<span class="wb-redo-fail">❌ 回答错误。正确答案是 <strong>' + this._esc(this._redoState.correctAnswer) + '</strong></span>'
+                    + '<button type="button" class="chip wb-redo-continue">查看讲解</button>';
+            }
+        }
+    },
+
+    _continueRedo(btn) {
+        const item = btn.closest('.wb-item');
+        if (!item) return;
+        // Show the detail explanation
+        const detailDiv = item.querySelector('.wb-item-detail');
+        const toggleBtn = item.querySelector('.wb-item-actions .chip');
+        if (detailDiv) detailDiv.hidden = false;
+        if (toggleBtn) toggleBtn.textContent = '收起讲解';
+        // Remove redo panel
+        const redoPanel = item.querySelector('.wb-redo-panel');
+        if (redoPanel) redoPanel.remove();
+        // Restore redo button
+        const redoBtn = item.querySelector('.wb-redo-btn');
+        if (redoBtn) redoBtn.hidden = false;
+        this._redoState = null;
     },
 
     _esc(value) {

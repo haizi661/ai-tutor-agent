@@ -32,12 +32,14 @@ from ..core.text import content_to_text
 
 
 ASSESSMENT_DIMENSIONS = [
-    "基础概念",
-    "规则理解",
-    "逻辑推理",
-    "场景应用",
-    "细节辨析",
-    "综合应用",
+    "数学基础",
+    "控制系统基本概念",
+    "系统建模能力",
+    "稳定性分析能力",
+    "时域性能分析能力",
+    "稳态误差分析能力",
+    "根轨迹分析能力",
+    "频域分析与校正能力",
 ]
 
 SELF_SCORE_MAP = {"A": 25, "B": 50, "C": 75, "D": 100}
@@ -263,14 +265,14 @@ def _generate_llm_assessment_questions(llm, event_sink: EventSink, topic: str, c
         content=f"""请为学习主题【{topic}】设计 {count} 道自我评估选择题用于学前摸底。
 {concept_hint}
 任务说明：
-1. 选出 {count} 个能覆盖【{topic}】学习范围的核心概念（分散在基础/规则/推理/应用等不同层次）
+1. 选出 {count} 个能覆盖【{topic}】学习范围的核心概念（分散在数学基础、基本概念、建模、稳定性等不同能力维度）
 2. 每题让学生评估自己对某个概念的了解和熟悉程度（例如"关于「XX」，你目前的了解程度如何？"）
 3. 四个选项 A/B/C/D 从低到高依次为：没接触过 → 有所耳闻但模糊 → 比较了解 → 非常熟悉能运用
 4. 每题必须提供 score_map，A/B/C/D 分别映射为 25/50/75/100
 5. 选项描述要贴合该概念的学习场景，帮助学生准确定位自己的水平
 
-dimension 必须是以下六者之一：
-基础概念 / 规则理解 / 逻辑推理 / 场景应用 / 细节辨析 / 综合应用
+dimension 必须是以下八者之一（对应自动控制理论的核心能力）：
+数学基础 / 控制系统基本概念 / 系统建模能力 / 稳定性分析能力 / 时域性能分析能力 / 稳态误差分析能力 / 根轨迹分析能力 / 频域分析与校正能力
 
 输出 JSON Schema（直接输出，不加任何说明）：
 {{{{
@@ -281,7 +283,7 @@ dimension 必须是以下六者之一：
       "concept": "概念名称",
       "concept_id": "node_id",
       "concept_title": "概念名称",
-      "dimension": "基础概念",
+      "dimension": "数学基础",
       "question": "题干",
       "options": ["A. ...", "B. ...", "C. ...", "D. ..."],
       "score_map": {{{{"A": 25, "B": 50, "C": 75, "D": 100}}}}
@@ -1138,7 +1140,7 @@ def _select_initial_teaching_anchor(concept_gaps: dict) -> tuple[str, str]:
 
 
 # ===========================================================================
-# 兼容层：6 维雷达数据（保持前端兼容）
+# 雷达数据（8 维能力，匹配 V2 ability_mapper 的 A-H）
 # ===========================================================================
 
 def _question_dimension(question: dict, fallback_index: int) -> str:
@@ -1149,7 +1151,7 @@ def _question_dimension(question: dict, fallback_index: int) -> str:
 
 
 def _generate_radar_data(event_sink: EventSink, topic: str, questions: list, answers: dict) -> dict:
-    """生成 6 维雷达图数据（供前端 Chart.js 渲染，保持原有格式）。"""
+    """生成 8 维雷达图数据（对应 V2 能力体系 A-H，供前端 Chart.js 渲染）。"""
     del topic
     aggregates = {
         dim: {"self_total": 0, "self_count": 0, "objective_total": 0, "objective_count": 0}
