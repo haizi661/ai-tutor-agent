@@ -303,24 +303,25 @@ class StudentProfile:
 
         规则:
         - mastery 或 entry 不存在(冷启动) → full_learning
-        - source == "default"(未输入任何自评) → full_learning
+        - failure_count >= 2 → full_learning(多次失败,完整重学)
         - source == "self_assessment" 且 mastery < 0.7(自评不够高)
           → full_learning(仅凭自评,未经过真实学习,不可跳过完整讲解)
-        - failure_count >= 2 → full_learning(多次失败,完整重学)
         - mastery < 0.4 → full_learning
         - mastery < 0.7 → short_learning
         - mastery >= 0.7 → quick_check
+
+        注：source == "default" 不再一刀切返回 full_learning。
+        默认画像（未自评）时不同节点仍有不同 mastery 值（来自 ability_mapper
+        的 8 维默认分数），让 mastery 决定 entry_mode 即可。
+        首节点保护由 initial_node_selector 负责（强制 full_learning），
+        避免首个节点被 short_learning / quick_check 跳过完整讲解。
         """
         entry = self.concept_mastery.get(concept_id)
         if not entry:
             return "full_learning"
-        # 冷启动：从未填写自评 → 完整学
-        if entry.source == "default":
-            return "full_learning"
-        # 自评初始化但 mastery 不够高 → 完整学（学生未充分掌握，需完整讲解）
-        if entry.source == "self_assessment" and entry.mastery < 0.7:
-            return "full_learning"
         if entry.failure_count >= 2:
+            return "full_learning"
+        if entry.source == "self_assessment" and entry.mastery < 0.7:
             return "full_learning"
         if entry.mastery < 0.4:
             return "full_learning"

@@ -170,6 +170,14 @@ def build_initial_node_selector_node(runtime: RuntimeContext):
                 )
             )
 
+            # ── 第一个节点：强制完整教学（不跳过讲解） ──
+            # 如果学生还没有任何已学节点（visited 为空），此时不应该使用
+            # quick_check / short_learning：前者跳过讲解直接进检测，
+            # 后者只输出精简版。第一个节点需要让学生体验完整的教学流程，
+            # 建立对知识结构的完整认识。
+            if entry_mode in {"quick_check", "short_learning"} and not visited:
+                entry_mode = "full_learning"
+
             # ── 教学推理透明：解释节点选择原因 ──
             if state.get("thinking_mode", False):
                 reason_explain = {

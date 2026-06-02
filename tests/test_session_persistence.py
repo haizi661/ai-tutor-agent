@@ -3,7 +3,7 @@ from types import SimpleNamespace
 from ai_tutor_agent.application.session import _initial_state_preserving_learning_direction
 from ai_tutor_agent.interfaces.api.app import create_api_app
 from ai_tutor_agent.interfaces.api.runtime import SessionManager
-from ai_tutor_agent.interfaces.api.session import _ensure_thread_checkpoint
+from ai_tutor_agent.interfaces.api.session import _ensure_thread_checkpoint, _reset_in_progress_learning_state
 from asgi_test_client import SyncASGITestClient as TestClient
 
 
@@ -132,3 +132,114 @@ def test_initial_state_preserves_locked_learning_direction_when_topic_starts():
         "course_choice_selection",
         "topic_input",
     ]
+
+
+class _FakeStudentState:
+    def __init__(self, **kwargs):
+        for k, v in kwargs.items():
+            setattr(self, k, v)
+
+
+class _FakeStudentStateStore:
+    """Minimal stand-in for StudentStateStore used by _reset_in_progress_learning_state."""
+
+    def __init__(self, initial_state=None):
+        self.states: dict[str, _FakeStudentState] = {
+            "default_student": _FakeStudentState(**(initial_state or {}))
+        }
+        self.update_calls: list[str] = []
+
+    def update(self, student_id: str, mutator):
+        self.update_calls.append(student_id)
+        ss = self.states[student_id]
+        mutator(ss)
+        return ss
+
+
+def test_reset_in_progress_learning_state_resets_session_index():
+    """回归测试:新对话必须重置 session_index。
+
+    旧 bug:_reset_in_progress_learning_state 清掉了 learning_plan_v2 但
+    保留了 session_index,导致新对话生成路径时显示"第 N 号路径"(N 接着
+    累计),违背"新对话从第 1 号开始"的预期。
+    """
+    store = _FakeStudentStateStore(
+        initial_state={
+            "session_index": 3,
+            "learning_plan_v2": {"session_index": 2, "steps": []},
+            "concept_mastery": {"feedback": 0.6},
+        }
+    )
+    runtime = SimpleNamespace(student_state_store=store)
+
+    _reset_in_progress_learning_state(runtime)
+
+    ss = store.states["default_student"]
+    assert ss.session_index == 0, (
+        f"新对话 session_index 应重置为 0,实际为 {ss.session_index}"
+    )
+    # 画像仍要保留(用户花了时间做完自评的成果不能丢)
+    assert ss.concept_mastery["feedback"] == 0.6
+
+
+def test_reset_in_progress_learning_state_clears_in_progress_but_keeps_history():
+    """回归测试：新对话（_reset_in_progress_learning_state）必须清掉进行中状态。
+
+    旧 bug：default_student.json 残留 current_node_id="KM002" / learning_plan_v2 / visited_nodes，
+    新会话会读这些旧值 → initial_node_selector 跳过 KM001 直接选 KM002。
+    """
+    store = _FakeStudentStateStore(
+        initial_state={
+            "current_node_id": "KM002",
+            "last_question": "什么是反馈",
+            "learning_plan": [{"step_index": 0, "node_ids": ["KM001", "KM002"]}],
+            "learning_plan_v2": {"steps": [{"node_ids": ["KM001", "KM002"]}]},
+            "learning_plan_current_step": 0,
+            "learning_plan_generated_at": "2026-06-01T10:00:00",
+            "learning_plan_source": "resume_v2",
+            "visited_nodes": ["KM001", "KM003", "KM006", "KM004"],
+            "knowledge_graph": {
+                "KM003": {"status": "in_progress", "score": 40},
+                "KM004": {"status": "mastered", "score": 100},
+            },
+            "homework": [{"assignment_id": "HW-1", "status": "assigned"}],
+            "homework_assignments": [{"id": "HW-1"}],
+            "homework_history": [{"id": "HW-0", "status": "completed"}],
+            "wrong_question_book": [{"question_id": "Q1"}],
+            "question_help_records": [{"question": "help1"}],
+            "concept_mastery": {"feedback": 0.6},
+            "self_assessment_scores": {"auto_basic": 3},
+        }
+    )
+    runtime = SimpleNamespace(student_state_store=store)
+
+    _reset_in_progress_learning_state(runtime)
+
+    ss = store.states["default_student"]
+    # 进行中字段必须清空
+    assert ss.current_node_id == ""
+    assert ss.last_question == ""
+    assert ss.learning_plan == []
+    assert ss.learning_plan_v2 == {}
+    assert ss.learning_plan_current_step == 0
+    assert ss.learning_plan_generated_at == ""
+    assert ss.learning_plan_source == ""
+    assert ss.visited_nodes == []
+    # 长期记忆必须保留
+    assert "KM003" in ss.knowledge_graph
+    assert ss.knowledge_graph["KM004"]["status"] == "mastered"
+    assert len(ss.homework) == 1
+    assert ss.homework_history[0]["status"] == "completed"
+    assert ss.wrong_question_book[0]["question_id"] == "Q1"
+    assert ss.question_help_records[0]["question"] == "help1"
+    assert ss.concept_mastery["feedback"] == 0.6
+    assert ss.self_assessment_scores["auto_basic"] == 3
+    # 确认 update 被调用
+    assert store.update_calls == ["default_student"]
+
+
+def test_reset_in_progress_learning_state_handles_no_store():
+    """student_state_store 为 None 时不能抛异常（不影响新会话创建）。"""
+    runtime = SimpleNamespace(student_state_store=None)
+    # 不应抛任何异常
+    _reset_in_progress_learning_state(runtime)

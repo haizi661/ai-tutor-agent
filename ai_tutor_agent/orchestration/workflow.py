@@ -142,9 +142,10 @@ def get_entry_node(state: AgentState) -> str:
             return "tutor"
         return "learning_plan_generator"
     
-    if state.get("tutor_content"):
-        return "tutor"
-
+    # 不再把 tutor_content 存在当作"必须重新生成教学"的信号。
+    # 上面 flow_status 检查（awaiting_post_lesson_choice 等）和
+    # learning_resume_target 已覆盖了所有正常的恢复路由。
+    # 如果到这里还没有匹配，走 assessment 重新评估。
     return "assessment_generator"
 
 

@@ -1,7 +1,7 @@
 import queue
 import threading
 import time
-from typing import Dict, Optional
+from typing import Any, Dict, Optional
 
 from fastapi import APIRouter, HTTPException, Request
 from fastapi.responses import StreamingResponse
@@ -708,6 +708,51 @@ async def start_session(req: ChatRequest, request: Request):
     return {"status": "running", "thread_id": req.thread_id}
 
 
+def _reset_in_progress_learning_state(runtime) -> None:
+    """新对话 / 全新会话：清掉学生态里的"进行中"字段，让新一轮从学习路径起点开始。
+
+    保留：
+    - knowledge_graph（长期掌握度记录）
+    - learning_history / wrong_question_book / question_help_records
+    - homework_assignments / homework_history（已布置/已完成的作业）
+
+    清空：
+    - current_node_id（避免被旧 in-progress 节点续讲）
+    - learning_plan / learning_plan_v2 / learning_plan_current_step
+      （强制 learning_plan_generator 重新生成新计划）
+    - learning_plan_source
+    - visited_nodes（本轮进度清零；长期掌握度由 knowledge_graph 记录）
+    - last_question / last_learning_at / session_index 等短期状态
+    """
+    store = getattr(runtime, "student_state_store", None)
+    if store is None:
+        return
+    student_id = "default_student"
+
+    def _mutator(ss: Any) -> None:
+        ss.current_node_id = ""
+        ss.last_question = ""
+        ss.learning_plan = []
+        ss.learning_plan_v2 = {}
+        ss.learning_plan_current_step = 0
+        ss.learning_plan_generated_at = ""
+        ss.learning_plan_source = ""
+        ss.visited_nodes = []
+        # 关键:重置 session_index,让新对话生成"第 1 号路径"而不是接着旧的编号
+        # 否则用户开新对话,系统会说"已生成本次第 N 号路径"(N 接着累计),违背预期
+        ss.session_index = 0
+        # 保留 wrong_nodes / recommended_queue / notes（这些是跨会话的诊断信号）
+        # 保留 knowledge_graph（已掌握节点的稳定记录）
+        # 保留 homework_* （已布置/已完成的作业）
+        # 保留 concept_mastery / self_assessment_scores（画像数据）
+
+    try:
+        store.update(student_id, _mutator)
+    except Exception:
+        # 复位失败不应该阻塞新会话创建
+        pass
+
+
 @router.post("/sessions")
 async def create_session(req: CreateSessionRequest, request: Request):
     runtime = get_runtime(request)
@@ -715,6 +760,9 @@ async def create_session(req: CreateSessionRequest, request: Request):
     if not thread_id:
         raise HTTPException(status_code=400, detail="thread_id is required")
     created = _ensure_thread_checkpoint(thread_id, runtime)
+    if created:
+        # 全新会话：清掉旧进行中状态，让本轮从学习路径起点开始
+        _reset_in_progress_learning_state(runtime)
     runtime.session_manager.get_or_create(thread_id)
     return {"status": "created" if created else "exists", "thread_id": thread_id}
 

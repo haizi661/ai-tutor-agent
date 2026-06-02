@@ -144,6 +144,18 @@ def build_next_node_planner_node(runtime: RuntimeContext):
             )
         )
 
+        # ── Look up next node's entry_mode from learning plan ──
+        next_entry_mode = ""
+        if next_node_id and learning_plan:
+            for step in learning_plan:
+                if not isinstance(step, dict):
+                    continue
+                node_ids = step.get("node_ids", [])
+                if next_node_id in node_ids:
+                    entry_modes = step.get("entry_modes", {}) if isinstance(step, dict) else {}
+                    next_entry_mode = str(entry_modes.get(next_node_id, "")).strip()
+                    break
+
         # ── Emit learning plan progress event ──
         is_step_advance = False
         if learning_plan:
@@ -218,6 +230,7 @@ def build_next_node_planner_node(runtime: RuntimeContext):
             "next_node_candidate_id": next_node_id,
             "next_node_candidate_name": next_node_name,
             "next_node_candidate_reason": reason,
+            "current_entry_mode": next_entry_mode,
             "learning_plan": learning_plan,
             "learning_plan_current_step": new_step_idx,
             "learning_plan_source": "plan_completed" if source == "plan_completed" else state.get("learning_plan_source", ""),
