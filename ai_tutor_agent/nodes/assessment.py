@@ -950,6 +950,9 @@ def build_user_profiler_node(llm, event_sink: EventSink, graph_pipeline=None):
             "current_node_status": "",
             "turn_goal": state.get("turn_goal", "") or topic,
             "topic_focus": state.get("topic_focus", ""),
+            # 透传自评数据，确保下游 learning_plan_generator 能读到
+            "self_assessment_scores": state.get("self_assessment_scores") or {},
+            "skip_self_assessment": state.get("skip_self_assessment", False),
         }
 
     return node

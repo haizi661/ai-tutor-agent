@@ -76,6 +76,10 @@
                             <svg class="sb-nav-icon" width="15" height="15" viewBox="0 0 15 15" fill="none"><path d="M3 2.5H12V9.5H8.2L5.2 12.2V9.5H3V2.5Z" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/><path d="M5.2 5H9.8M5.2 7H8.4" stroke="currentColor" stroke-width="1.1" stroke-linecap="round"/></svg>
                             <span>题目答疑</span>
                         </button>
+                        <button type="button" id="open-teaching-insights-btn" class="sb-nav-item" onclick="openTeachingInsightsModal()" aria-label="打开教学洞察" aria-controls="teaching-insights-modal" aria-haspopup="dialog" aria-expanded="false">
+                            <svg class="sb-nav-icon" width="15" height="15" viewBox="0 0 15 15" fill="none"><path d="M2.5 2.5H12.5V7.5L8.5 10.5L12.5 12.5V13.5H2.5V12.5L6.5 10.5L2.5 7.5V2.5Z" stroke="currentColor" stroke-width="1.2" fill="none" stroke-linejoin="round"/><path d="M5 6H10M5 8.5H8" stroke="currentColor" stroke-width="1.1" stroke-linecap="round"/></svg>
+                            <span>教学洞察</span>
+                        </button>
                     </nav>
 
                     <div class="sb-divider"></div>
@@ -521,6 +525,26 @@
                         <div id="question-help-records" class="qh-record-list"></div>
                     </section>
                 </section>
+            </div>
+        </div>
+    </div>
+
+    <!-- Teaching Insights Modal -->
+    <div id="teaching-insights-modal" class="unified-modal" aria-hidden="true" onclick="closeTeachingInsightsModal(event)">
+        <div class="unified-dialog unified-dialog--teaching-insights" role="dialog" aria-modal="true" aria-labelledby="teaching-insights-title" onclick="event.stopPropagation()">
+            <div class="unified-dialog-header">
+                <div class="unified-dialog-title-group">
+                    <h3 id="teaching-insights-title" class="unified-dialog-title">教学洞察</h3>
+                    <span id="teaching-insights-subtitle" class="unified-dialog-subtitle">教学策略分布与效果追踪</span>
+                </div>
+                <div class="unified-dialog-actions">
+                    <button type="button" class="unified-close-btn" onclick="closeTeachingInsightsModal()" aria-label="关闭">
+                        <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2 2L12 12M12 2L2 12" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+                    </button>
+                </div>
+            </div>
+            <div id="teaching-insights-body" class="teaching-insights-body">
+                <div id="teaching-insights-loading" class="teaching-insights-loading">加载教学洞察数据…</div>
             </div>
         </div>
     </div>
@@ -1281,6 +1305,7 @@
     <script defer src="/assets/js/session.js"></script>
     <script defer src="/assets/js/wrong-book.js?v=20260521-wb-filter"></script>
     <script defer src="/assets/js/question-help.js"></script>
+    <script defer src="/assets/js/teaching-insights.js?v=20260602-ti"></script>
     <script defer src="/assets/app.js"></script>
     <script defer src="/assets/js/ai_path.js?v=20260525-ai-path-progress"></script>
 </body>

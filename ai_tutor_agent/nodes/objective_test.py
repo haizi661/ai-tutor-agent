@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import re
 from typing import Any
 
 from langchain_core.messages import HumanMessage, SystemMessage
@@ -394,6 +395,88 @@ def _question_quality_errors(item: dict[str, Any]) -> list[str]:
     return errors
 
 
+def _extract_teaching_points(tutor_content: str) -> list[str]:
+    """从 tutor 讲解输出中提取关键教学点。
+
+    按优先级从以下来源提取:
+    1. #### 关键要点 / #### 核心要点 / #### 掌握要点 小节下的条目
+    2. #### 核心讲解 小节中的第一句核心陈述
+    3. #### 公式讲解 小节中的公式名称(括号前文字)
+    4. #### 常见误区 小节中的条目
+    """
+    points: list[str] = []
+    seen: set[str] = set()
+
+    # 1) 提取 关键要点/核心要点/掌握要点 小节中的行
+    for section_header in ("关键要点", "核心要点", "掌握要点", "核心总结"):
+        pattern = re.compile(
+            rf'####\s*{section_header}\s*\n(.*?)(?=\n####\s|\Z)',
+            re.DOTALL,
+        )
+        for m in pattern.finditer(tutor_content):
+            section_text = m.group(1).strip()
+            for line in section_text.split("\n"):
+                text = re.sub(r'^\s*[-*\d.、]+\s*', '', line).strip()
+                if text and len(text) > 8 and text not in seen:
+                    seen.add(text)
+                    points.append(text)
+
+    # 2) 提取 核心讲解 小节首句
+    core_match = re.search(
+        r'####\s*核心讲解\s*\n(.{20,200}?)(?:[。！？\n])',
+        tutor_content,
+        re.DOTALL,
+    )
+    if core_match:
+        text = core_match.group(1).strip()
+        if text and text not in seen:
+            seen.add(text)
+            points.append(text)
+
+    # 3) 提取 公式讲解 中的公式名称
+    formula_section = re.search(
+        r'####\s*公式讲解\s*\n(.*?)(?=\n####\s|\Z)',
+        tutor_content,
+        re.DOTALL,
+    )
+    if formula_section:
+        for line in formula_section.group(1).split("\n"):
+            clean = line.strip()
+            # 匹配 "**变量名**：..." 或 "变量名（符号）" 格式
+            name_match = re.match(r'\*\*([^*]+)\*\*', clean)
+            if name_match:
+                text = name_match.group(1).strip()
+                if text and text not in seen:
+                    seen.add(text)
+                    points.append(text)
+
+    # 4) 提取 常见误区 中的条目
+    errors = _extract_section_items(tutor_content, "常见误区")
+    for err in errors:
+        if err not in seen:
+            seen.add(err)
+            points.append(f"【误区】{err}")
+
+    return points[:8]
+
+
+def _extract_section_items(content: str, section_title: str) -> list[str]:
+    """从 Markdown 小节中提取列表项。"""
+    pattern = re.compile(
+        rf'####\s*{section_title}\s*\n(.*?)(?=\n####\s|\Z)',
+        re.DOTALL,
+    )
+    m = pattern.search(content)
+    if not m:
+        return []
+    items: list[str] = []
+    for line in m.group(1).split("\n"):
+        text = re.sub(r'^\s*[-*\d.、]+\s*', '', line).strip()
+        if text and len(text) > 4:
+            items.append(text)
+    return items[:6]
+
+
 def _build_objective_generation_context(state: AgentState, node_id: str, node_name: str) -> str:
     content = str(
         state.get("node_content_context")
@@ -440,6 +523,14 @@ def _build_objective_generation_context(state: AgentState, node_id: str, node_na
             lines.append(f"退出条件：{exit_criteria}")
     if content:
         lines.append(f"节点讲解/检索内容摘要：\n{content}")
+    # 从 tutor 输出提取关键教学点作为显式出题约束
+    tutor_content_raw = str(state.get("tutor_content") or "").strip()
+    if tutor_content_raw:
+        teaching_points = _extract_teaching_points(tutor_content_raw)
+        if teaching_points:
+            lines.append("\n【已讲解的关键要点——出题时必须覆盖至少 3 项】")
+            for i, pt in enumerate(teaching_points, 1):
+                lines.append(f"{i}. {pt}")
     return "\n".join(lines)
 
 

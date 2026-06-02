@@ -283,6 +283,37 @@ def mark_student_node_started(
     return mutate_student_state_snapshot(student_state_store, student_id, apply_patch)
 
 
+def record_teaching_episode(
+    student_state_store: StudentStateStore | None,
+    *,
+    student_id: str,
+    node_id: str,
+    strategy: str,
+    attempt_count: int,
+    affect: str = "",
+    node_title: str = "",
+    entry_mode: str = "",
+) -> None:
+    """记录一次教学讲解事件，用于后续教学策略效果分析。"""
+    if student_state_store is None or not node_id:
+        return
+
+    def apply_patch(student_state: StudentState) -> None:
+        episodes = list(getattr(student_state, "teaching_episodes", []) or [])
+        episodes.append({
+            "node_id": node_id,
+            "node_title": node_title or node_id,
+            "strategy": strategy,
+            "attempt_count": attempt_count,
+            "affect": affect,
+            "entry_mode": entry_mode,
+            "created_at": now_ts(),
+        })
+        student_state.teaching_episodes = episodes[-200:]  # cap at 200
+
+    mutate_student_state_snapshot(student_state_store, student_id, apply_patch)
+
+
 def update_student_state_after_evaluation(
     student_state_store: StudentStateStore | None,
     *,

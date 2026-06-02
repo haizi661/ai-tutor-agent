@@ -14,6 +14,7 @@ from .matlab_experiment import router as matlab_experiment_router
 from .question_help import router as question_help_router
 from .runtime import ApiRuntime, create_lifespan, get_frontend_dir
 from .session import router as session_router
+from .teaching_insights import router as teaching_insights_router
 from .wrong_questions import router as wrong_questions_router
 from ai_tutor_agent.ai_learning_path.ai_path_routes import router as ai_path_router
 
@@ -45,6 +46,7 @@ def create_api_app(
     app.include_router(session_router)
     app.include_router(wrong_questions_router)
     app.include_router(question_help_router)
+    app.include_router(teaching_insights_router)
     app.include_router(ai_path_router)
 
     frontend_dir = get_frontend_dir()

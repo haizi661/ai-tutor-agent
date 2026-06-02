@@ -105,6 +105,10 @@ class StudentState:
     # 是否跳过自评
     skip_self_assessment: bool = True
 
+    # 教学效果追踪：记录每次讲解的策略和结果
+    # 每项结构: {node_id, strategy, attempt_count, affect, outcome, node_title, created_at}
+    teaching_episodes: list[dict[str, Any]] = field(default_factory=list)
+
     def to_dict(self) -> dict[str, Any]:
         return asdict(self)
 

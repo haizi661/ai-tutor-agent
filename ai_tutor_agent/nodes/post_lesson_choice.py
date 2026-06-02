@@ -72,19 +72,45 @@ def _looks_like_direct_question(text: str) -> bool:
     return len(value) >= 8
 
 
+def _compute_recommendation(state: AgentState) -> str:
+    """根据教学上下文动态推荐课后行为。
+
+    推荐规则:
+    - 学生复学(attempt_count > 0)或情绪信号显示受挫 → 推荐继续追问
+    - 节点交互轮次超过 2 轮 → 推荐进入小测(已有足够学习深度)
+    - 默认:推荐进入小测
+    """
+    attempt_count = int(state.get("attempt_count") or 0)
+    if attempt_count > 0:
+        return "temporary_question"
+
+    current_node = str(state.get("current_node_name") or state.get("graph_anchor_title") or "").strip()
+    user_kg: dict = dict(state.get("user_knowledge_graph") or {})
+    node_entry = user_kg.get(current_node, {})
+    if isinstance(node_entry, dict) and int(node_entry.get("turn_count") or 0) > 2:
+        return "start_test"
+
+    affect_str = str(state.get("last_affect") or "").strip()
+    if affect_str in ("困惑", "confused", "焦虑", "anxious", "受挫"):
+        return "temporary_question"
+
+    return "start_test"
+
+
 def build_post_lesson_choice_node(event_sink: EventSink, answer_provider: AnswerProvider):
     def node(state: AgentState) -> dict:
         current_node_name = str(state.get("current_node_name") or state.get("graph_anchor_title") or state.get("current_topic") or "当前节点").strip()
         awaiting = state.get("flow_status") == "awaiting_post_lesson_choice"
 
         if not awaiting:
+            recommended = _compute_recommendation(state)
             prompt = f"节点【{current_node_name}】先讲到这里。你可以直接追问，也可以一句话说卡点；如果已经顺了，就进入小测。"
             event_sink.emit(
                 make_event(
                     "node.start",
                     "post_lesson_choice",
                     message=prompt,
-                    data={"options": OPTIONS, "requires_input": True},
+                    data={"options": OPTIONS, "recommended": recommended, "requires_input": True},
                 )
             )
             return {
@@ -96,7 +122,7 @@ def build_post_lesson_choice_node(event_sink: EventSink, answer_provider: Answer
                 "pending_interaction_kind": "post_lesson_choice",
                 "pending_interaction_prompt": prompt,
                 "pending_interaction_options": OPTIONS,
-                "pending_interaction_recommended": "start_test",
+                "pending_interaction_recommended": recommended,
                 "pending_interaction_answer": "",
                 "current_node_status": "taught",
             }
