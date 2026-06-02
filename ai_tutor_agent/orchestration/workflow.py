@@ -139,6 +139,10 @@ def get_entry_node(state: AgentState) -> str:
         # 已完成诊断但还没有学习路径 → 先生成路径
         has_plan = bool(state.get("learning_plan"))
         if has_plan:
+            # 如果已有教学内容，说明之前已经讲过了，不要重新生成。
+            # 定位到 post_lesson_choice 等待用户选择下一步。
+            if state.get("tutor_content"):
+                return "post_lesson_choice"
             return "tutor"
         return "learning_plan_generator"
     
