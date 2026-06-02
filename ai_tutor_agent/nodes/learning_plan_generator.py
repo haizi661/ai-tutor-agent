@@ -84,7 +84,9 @@ def build_learning_plan_generator_node(llm: Any, runtime: RuntimeContext):
             if plan.resolve_status() == "in_progress":
                 profile = _rebuild_profile(concept_mastery_raw, student_id)
                 if profile:
-                    _refresh_previous_plan(plan, profile)
+                    # resume 路径:如果 step_name 看起来是老规则生成的(=首节点名),
+                    # 用 LLM 重新命名一次(避免老 plan 永远是老名字)
+                    _refresh_previous_plan(plan, profile, llm=llm)
                     steps_as_dicts = [s.to_dict() for s in plan.steps]
                     current_step = plan.get_current_step() or 0
                     event_sink.emit(
@@ -143,10 +145,14 @@ def build_learning_plan_generator_node(llm: Any, runtime: RuntimeContext):
             else state_snapshot.get("skip_self_assessment", True)
         )
 
+        # If self_scores exist, always use them regardless of skip flag.
+        # skip=True only matters when there are NO self-assessment scores at all.
+        use_default_only = bool(skip) and not bool(self_scores)
+
         profile = _rebuild_profile(concept_mastery_raw, student_id)
         if profile is None:
             profile = StudentProfile(profile_id=student_id)
-            if skip or not self_scores:
+            if use_default_only:
                 profile.init_from_default()
                 event_sink.emit(
                     make_event(
@@ -173,11 +179,14 @@ def build_learning_plan_generator_node(llm: Any, runtime: RuntimeContext):
         session_index = int(state_snapshot.get("session_index", 0))
 
         # ── Step 4: Generate learning plan ────────────────────────
+        # 把 llm 传进去,新生成路径时用它给 step 取更自然的中文主题名
+        # (续上路径时不调 LLM,见 _refresh_previous_plan)
         plan = generate_learning_plan_v2(
             profile=profile,
             edges=edges,
             previous_plan=None,
             session_index=session_index,
+            llm=llm,
         )
 
         steps_as_dicts = [s.to_dict() for s in plan.steps]

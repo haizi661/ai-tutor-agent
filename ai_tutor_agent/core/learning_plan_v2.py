@@ -350,18 +350,16 @@ def sort_candidates(
     candidates: list[str],
     edges: list[dict[str, str]] | None = None,
 ) -> list[str]:
-    """章序 + 拓扑序 + difficulty 排序。
+    """拓扑深度 + difficulty 排序。
 
     排序优先级:
-    1. 章序(第一优先级,跨章不递减)
-    2. 拓扑深度(浅在先)
-    3. 难度(低在先)
-    4. ID 数字升序
+    1. 拓扑深度(浅在先)
+    2. 难度(低在先)
+    3. ID 数字升序
     """
     topo_depth = _compute_topo_order(candidates, edges)
 
     def sort_key(node_id: str) -> tuple:
-        ch_order = _get_chapter_order(node_id)
         depth = topo_depth.get(node_id, 0)
         diff = get_node_difficulty(node_id)
         # ID 数字:KM042 → 42
@@ -370,7 +368,7 @@ def sort_candidates(
             id_num = int("".join(c for c in node_id if c.isdigit()))
         except ValueError:
             id_num = 9999
-        return (ch_order, depth, diff, id_num)
+        return (depth, diff, id_num)
 
     return sorted(candidates, key=sort_key)
 
@@ -382,44 +380,79 @@ def select_nodes(
     profile: StudentProfile,
     node_count: int = 10,
     node_range: tuple[int, int] = (9, 12),
+    edges: list[dict[str, str]] | None = None,
 ) -> list[str]:
-    """从已排序候选集中选 9-12 个节点。
+    """从候选集中选 9-12 个节点。
 
-    优先前部(章序小 + 拓扑浅),同时看紧迫度高的先选。
+    选择策略(知识图谱驱动,非章节):
+    1. importance (core → supporting → other)
+    2. 拓扑深度(浅在先;能力缺口拉取:同深度内薄弱能力优先)
+    3. 紧迫度(越高越先)
+    4. 难度(低在先)
+    5. ID 数字升序
     """
     if not sorted_candidates:
         return []
     total = len(sorted_candidates)
 
-    # 计算紧迫度作为辅助排序
+    # 计算紧迫度
     urgency_scores = {
         nid: compute_urgency(nid, profile)
         for nid in sorted_candidates[:max(node_count * 2, total)]
     }
 
-    # 在已排序基础上,按"重要性 + 紧迫度降序"重排
-    # 但保留章序约束:同章内按重要性优先,再按紧迫度降
-    chapter_groups: dict[str, list[str]] = defaultdict(list)
-    for nid in sorted_candidates:
-        ch = _get_node_chapter(nid)
-        chapter_groups[ch].append(nid)
-    reordered: list[str] = []
-    for ch in sorted(chapter_groups.keys(), key=lambda c: _CHAPTER_ORDER.get(c, 999)):
-        group = chapter_groups[ch]
-        # 同章内: importance 优先(core→supporting), 同层内紧迫度降序
-        group.sort(key=lambda nid: (
-            _IMPORTANCE_ORDER.get(get_node_importance(nid), 2),
-            -urgency_scores.get(nid, 0.5),
-        ))
-        reordered.extend(group)
+    # 从知识图谱前置边推导拓扑深度
+    topo_depth = _compute_topo_order(sorted_candidates, edges or _DUMMY_EDGES)
+    has_real_edges = bool(edges)
 
-    # 选前 node_count 个,弹性控制在 node_range 内
-    selected = reordered[:node_count]
+    # 评分排序(不再按章节分组)
+    if has_real_edges:
+        # 计算每能力的平均缺口(用于同深度内排序)
+        ability_gaps: dict[str, float] = {}
+        for nid2 in sorted_candidates:
+            ab2 = get_node_primary_ability(nid2)
+            if ab2 and ab2 not in ability_gaps:
+                ab_nodes2 = [x for x in sorted_candidates if get_node_primary_ability(x) == ab2]
+                if ab_nodes2:
+                    g2 = [1.0 - profile.get_mastery(x) for x in ab_nodes2]
+                    ability_gaps[ab2] = sum(g2) / len(g2) if g2 else 0.5
+                else:
+                    ability_gaps[ab2] = 0.5
 
-    # 补/截断到 range
+    scored: list[tuple] = []
+    for nid in sorted_candidates[:max(node_count * 2, total)]:
+        imp = _IMPORTANCE_ORDER.get(get_node_importance(nid), 2)
+        d = float(topo_depth.get(nid, 0))
+        urgency = urgency_scores.get(nid, 0.5)
+        diff = get_node_difficulty(nid)
+        id_num = int("".join(c for c in nid if c.isdigit()) or 0)
+
+        if has_real_edges:
+            # 能力缺口拉取:同深度内薄弱能力优先
+            ab = get_node_primary_ability(nid)
+            gap = ability_gaps.get(ab, 0.5)
+            pull = 0.0
+            if gap > 0.7:
+                pull = 0.5
+            elif gap > 0.5:
+                pull = 0.25
+            adj_depth = max(0.0, d - pull)
+
+            # 真实知识图谱: importance > 深度 > 紧迫度 > 难度 > ID
+            scored.append((imp, adj_depth, -urgency, diff, id_num, nid))
+        else:
+            # 无图(测试环境 fallback): importance > 难度 > ID
+            scored.append((imp, diff, id_num, nid))
+
+    scored.sort()
+    if has_real_edges:
+        selected = [nid for _, _, _, _, _, nid in scored]
+    else:
+        selected = [nid for _, _, _, nid in scored]
+
+    # 弹性控制范围
     if len(selected) < node_range[0]:
-        # 补:从 reordered 剩余头部补
-        tail = [n for n in reordered if n not in selected]
+        tail = [n for n in sorted_candidates if n not in selected]
         needed = node_range[0] - len(selected)
         selected.extend(tail[:needed])
     elif len(selected) > node_range[1]:
@@ -547,32 +580,225 @@ def resolve_entry_modes(
 
 # ── Step 7: step 命名 ──────────────────────────
 
-def generate_step_names(
-    raw_steps: list[list[str]],
-) -> list[str]:
-    """根据每个 step 的节点信息,生成有区分度的 step 名称。
+_STEP_NAME_MAX_LEN = 12
+_STEP_NAME_MIN_LEN = 4
 
-    规则:
-    - step 名称 = 第一个节点的名称(代表该 step 的核心内容主题)
-    - 不暴露章节、图谱 ID 等内部实现细节
-    - 若名称过长(>12 字)则截断并加"…"
-    - 纯 fallback → "第 N 步"
 
-    理由:step 可能跨章节或重组,用节点名作为 step 名让用户
-    直觉地知道该 step 学什么,且不受图谱结构变化影响。
+def _rule_based_step_names(raw_steps: list[list[str]]) -> list[str]:
+    """规则兜底:step 名称 = 第一个节点的名称(截断到 12 字)。
+
+    仅在 LLM 命名不可用(失败/未提供)时使用。
     """
     name_map = get_node_name_map()
-
     names: list[str] = []
     for idx, node_ids in enumerate(raw_steps):
         name = name_map.get(node_ids[0], node_ids[0]) if node_ids else ""
-        if len(name) > 12:
-            name = name[:11] + "…"
+        if len(name) > _STEP_NAME_MAX_LEN:
+            name = name[:_STEP_NAME_MAX_LEN - 1] + "…"
         if name:
             names.append(name)
         else:
             names.append(f"第{idx + 1}步")
     return names
+
+
+def _sanitize_llm_name(name: str) -> str:
+    """清理 LLM 返回的名字:strip、去掉引号/JSON 噪声、限长。"""
+    if not name:
+        return ""
+    name = str(name).strip()
+    # 去掉常见 LLM 噪声:引号、书名号、JSON 包装
+    for ch in ['"', "'", "`", "「", "」", "《", "》", "【", "】"]:
+        name = name.replace(ch, "")
+    name = name.strip()
+    if not name:
+        return ""
+    if len(name) > _STEP_NAME_MAX_LEN:
+        name = name[:_STEP_NAME_MAX_LEN - 1] + "…"
+    return name
+
+
+def _parse_llm_step_names(raw: str, expected_count: int) -> list[str] | None:
+    """解析 LLM 返回的 step 名字 JSON 数组。
+
+    兼容:
+    - 纯 JSON 数组: ["a","b","c","d"]
+    - JSON 嵌入在文本中(取第一个 [...] 块)
+    - 行号前缀("1. xxx")
+    - 退路:按行切,取前 N 行非空
+    """
+    import json
+    import re
+
+    text = (raw or "").strip()
+    if not text:
+        return None
+
+    # 1) 尝试找 [...] JSON 块
+    match = re.search(r"\[[^\[\]]*\]", text, re.DOTALL)
+    if match:
+        try:
+            parsed = json.loads(match.group(0))
+            if isinstance(parsed, list) and len(parsed) >= expected_count:
+                cleaned = [_sanitize_llm_name(str(x)) for x in parsed[:expected_count]]
+                if all(cleaned):
+                    return cleaned
+        except (json.JSONDecodeError, ValueError):
+            pass
+
+    # 2) 退路:按行切,去掉 "1." "1、" 等行号前缀
+    lines = [ln.strip() for ln in text.splitlines() if ln.strip()]
+    cleaned_lines: list[str] = []
+    for ln in lines:
+        # 去行号前缀
+        ln2 = re.sub(r"^\s*\d+[\.\、\:]\s*", "", ln)
+        ln2 = re.sub(r"^\s*[\-\*]\s*", "", ln2)
+        cleaned = _sanitize_llm_name(ln2)
+        if cleaned and len(cleaned) >= _STEP_NAME_MIN_LEN:
+            cleaned_lines.append(cleaned)
+    if len(cleaned_lines) >= expected_count:
+        return cleaned_lines[:expected_count]
+
+    return None
+
+
+def _build_step_naming_prompt(raw_steps: list[list[str]]) -> str:
+    """构造 LLM prompt,请求为每个 step 生成 4-12 字的主题名。"""
+    name_map = get_node_name_map()
+    ability_map = get_node_name_map()  # node name fallback
+    try:
+        from .ability_mapper import get_ability_names
+        ability_codes = get_ability_names()
+    except Exception:
+        ability_codes = {}
+
+    lines: list[str] = []
+    lines.append(
+        "你是「自动控制原理」教学助手。请为下面的每个学习步骤(step)生成一个简洁、有学习引导感的中文主题名。\n"
+    )
+    lines.append("严格要求:")
+    lines.append(f"- 每个名字 4-{_STEP_NAME_MAX_LEN} 个中文字符(避免太长或太短)")
+    lines.append("- 名字要覆盖该 step 多个节点的核心主题,而非只取第一个节点名")
+    lines.append("- 用动词/名词短语,如「建立自动控制基础」「掌握数学建模」「攻克时域分析」")
+    lines.append("- 多个 step 名字之间要有明显区分(不要重复主题词)")
+    lines.append(f"- 共 {len(raw_steps)} 步,直接返回 JSON 数组,不要任何额外说明\n")
+
+    for idx, node_ids in enumerate(raw_steps):
+        lines.append(f"Step {idx + 1} 包含以下 {len(node_ids)} 个节点:")
+        for nid in node_ids:
+            nname = name_map.get(nid, nid)
+            try:
+                ab = get_node_primary_ability(nid)
+                ab_label = ability_codes.get(ab, ab)
+            except Exception:
+                ab_label = ""
+            if ab_label:
+                lines.append(f"  - {nid} {nname} (主能力:{ab_label})")
+            else:
+                lines.append(f"  - {nid} {nname}")
+        lines.append("")
+
+    lines.append(
+        f"请返回 JSON 数组(共 {len(raw_steps)} 项,顺序与上面 step 对应):\n"
+        "[\"Step1名\", \"Step2名\", ...]"
+    )
+    return "\n".join(lines)
+
+
+def _call_llm_for_text(llm: Any, prompt: str) -> str | None:
+    """用多种接口适配 LLM 对象(ChatOpenAI / AnswerProvider 等)。
+
+    优先顺序:
+    1. .predict(text) — LangChain ChatOpenAI 单文本输入
+    2. .get_answer(prompt) — 项目自定义 AnswerProvider(测试 mock)
+    3. .invoke([HumanMessage(prompt)]) — LangChain 标准消息接口
+
+    Returns: LLM 返回文本,失败返回 None
+    """
+    # 1) predict (ChatOpenAI)
+    predict = getattr(llm, "predict", None)
+    if callable(predict):
+        try:
+            result = predict(prompt)
+            return str(result) if result else None
+        except Exception:
+            pass
+
+    # 2) get_answer (AnswerProvider, 测试用)
+    get_answer = getattr(llm, "get_answer", None)
+    if callable(get_answer):
+        try:
+            result = get_answer(prompt)
+            return str(result) if result else None
+        except Exception:
+            pass
+
+    # 3) invoke with messages (LangChain 标准)
+    invoke = getattr(llm, "invoke", None)
+    if callable(invoke):
+        try:
+            from langchain_core.messages import HumanMessage
+            result = invoke([HumanMessage(content=prompt)])
+            if hasattr(result, "content"):
+                return str(result.content)
+            return str(result) if result else None
+        except Exception:
+            pass
+
+    return None
+
+
+def generate_step_names_with_llm(
+    raw_steps: list[list[str]],
+    llm: Any | None,
+) -> list[str]:
+    """用 LLM 生成 step 名字;LLM 不可用或失败时降级到规则。
+
+    Args:
+        raw_steps: 每 step 的节点 ID 列表
+        llm: ChatOpenAI / AnswerProvider 实例(或 None/不可用 → 规则)
+
+    Returns:
+        与 raw_steps 等长的名字列表
+    """
+    fallback = _rule_based_step_names(raw_steps)
+    if not raw_steps or llm is None:
+        return fallback
+
+    prompt = _build_step_naming_prompt(raw_steps)
+    try:
+        raw_response = _call_llm_for_text(llm, prompt)
+    except Exception:
+        return fallback
+
+    if not raw_response:
+        return fallback
+
+    parsed = _parse_llm_step_names(raw_response, len(raw_steps))
+    if parsed is None:
+        return fallback
+    return parsed
+
+
+def generate_step_names(
+    raw_steps: list[list[str]],
+    llm: Any | None = None,
+) -> list[str]:
+    """根据每个 step 的节点信息,生成有区分度的 step 名称。
+
+    默认使用 LLM 命名(更自然、跨节点抽象);llm=None 或 LLM
+    失败时降级到规则(取第一个节点名 + 截断)。
+
+    Args:
+        raw_steps: 每 step 的节点 ID 列表
+        llm: AnswerProvider 实例(可选)
+
+    Returns:
+        与 raw_steps 等长的名字列表
+    """
+    if llm is not None:
+        return generate_step_names_with_llm(raw_steps, llm)
+    return _rule_based_step_names(raw_steps)
 
 
 # ── 主入口 ──────────────────────────────────────
@@ -586,12 +812,14 @@ def generate_learning_plan_v2(
     node_count_target: int = 10,
     node_range: tuple[int, int] = (9, 12),
     session_index: int = 0,
+    llm: Any | None = None,
 ) -> LearningPlan:
     """主入口:根据学生画像 + 图谱 + 历史路径,生成一次学习路径。
 
     逻辑:
     1. 如果 previous_plan 存在且有 in_progress step → 续上(resume)
-    2. 否则生成新 plan(cold_start / replan)
+       (resume 不重新生成 step 名字,保留已有名字)
+    2. 否则生成新 plan(cold_start / replan),可用 llm 生成 step 名字
 
     Args:
         profile: 学生画像
@@ -602,6 +830,7 @@ def generate_learning_plan_v2(
         node_count_target: 目标节点数
         node_range: 允许的节点数范围
         session_index: 第几次 session
+        llm: 可选 AnswerProvider,用于 LLM 生成 step 名字
 
     Returns:
         LearningPlan
@@ -620,25 +849,25 @@ def generate_learning_plan_v2(
     # Step 1: 候选集
     candidates = compute_candidates(all_node_ids, mastered)
 
-    # 如果候选太少(< 6) → 从已 mastered 补充 weakest
-    if len(candidates) < 6:
-        # 找已 mastered 中 mastery 最低的
+    # 如果候选不足 → 从已 mastered 补充 weakest 填到 range 下限
+    if len(candidates) < node_range[0]:
+        needed = node_range[0] - len(candidates)
         mastered_list = list(mastered)
         mastered_list.sort(key=lambda nid: profile.get_mastery(nid))
-        candidates.extend(mastered_list[:6])
+        candidates.extend(mastered_list[:needed])
 
     # Step 2-3: 排序
     sorted_candidates = sort_candidates(candidates, edges)
 
-    # Step 4: 选 9-12 节点
-    selected = select_nodes(sorted_candidates, profile, node_count_target, node_range)
+    # Step 4: 选 9-12 节点(知识图谱驱动,传递 edges 推导深度)
+    selected = select_nodes(sorted_candidates, profile, node_count_target, node_range, edges=edges)
 
     # Step 5: 聚类成 step
     raw_steps = cluster_into_steps(selected, n_steps=n_steps)
 
     # Step 6: entry_mode
     steps: list[StepEntry] = []
-    step_names = generate_step_names(raw_steps)
+    step_names = generate_step_names(raw_steps, llm=llm)
 
     # 计算每 step 的 ability
     for idx, node_ids in enumerate(raw_steps):
@@ -689,14 +918,55 @@ def generate_learning_plan_v2(
     return plan
 
 
-def _refresh_previous_plan(plan: LearningPlan, profile: StudentProfile) -> None:
-    """续上逻辑:更新已有 plan 的 entry_mode 与 step 名称(基于新画像与新命名逻辑)。"""
-    # 刷新 step 名称(内容驱动,可能随代码更新而变化)
-    raw_steps = [step.node_ids for step in plan.steps if step.node_ids]
-    if raw_steps:
-        new_names = generate_step_names(raw_steps)
-        for step, new_name in zip(plan.steps, new_names):
-            step.step_name = new_name
+def _step_name_looks_rule_based(step: StepEntry) -> bool:
+    """判断 step_name 是否由老规则生成(等于首节点名或"第N步"兜底)。
+
+    用于检测需要 LLM 重命名的旧 plan。规则:
+    - 空名 → 需要重命名
+    - "第N步"格式 → 规则兜底,需要重命名
+    - 等于该 step 第一个节点的名称 → 规则生成,需要重命名
+    - 其他 → 保留(可能是 LLM 生成或人工标注)
+    """
+    if not step.step_name:
+        return True
+    import re
+    if re.match(r"^第\d+步$", step.step_name):
+        return True
+    if step.node_ids:
+        first_name = get_node_name_map().get(step.node_ids[0], "")
+        if first_name and step.step_name == first_name:
+            return True
+    return False
+
+
+def _refresh_previous_plan(
+    plan: LearningPlan,
+    profile: StudentProfile,
+    llm: Any | None = None,
+) -> None:
+    """续上逻辑:更新已有 plan 的 entry_mode;必要时重命名。
+
+    重命名触发条件(满足任一):
+    - step_name 为空
+    - step_name 是"第N步"兜底
+    - step_name 等于该 step 第一个节点名(老规则生成特征)
+
+    重命名方式:
+    - llm 可用且所有需要重命名的 step 同属一个 raw_steps 列表
+      → 一次 LLM 调用批量重命名(避免多次 LLM 往返)
+    - 否则 → 单个 step 用规则兜底
+    """
+    needs_rename_idx = [i for i, s in enumerate(plan.steps) if _step_name_looks_rule_based(s)]
+    if not needs_rename_idx:
+        return
+
+    # 收集需要重命名的 raw_steps
+    raw_steps_to_rename = [plan.steps[i].node_ids for i in needs_rename_idx]
+    new_names = generate_step_names(raw_steps_to_rename, llm=llm)
+
+    for idx, new_name in zip(needs_rename_idx, new_names):
+        if new_name:
+            plan.steps[idx].step_name = new_name
 
     for step in plan.steps:
         step.entry_modes = resolve_entry_modes(step.node_ids, profile)

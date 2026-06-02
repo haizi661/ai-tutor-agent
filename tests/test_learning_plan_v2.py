@@ -215,14 +215,13 @@ class TestComputeUrgency:
 
 
 class TestSortCandidates:
-    def test_chapter_order(self, all_node_ids):
+    def test_returns_all_nodes_without_duplicates(self, all_node_ids):
         sorted_ids = sort_candidates(all_node_ids)
-        from ai_tutor_agent.core.learning_plan_v2 import _get_chapter_order
-        orders = [_get_chapter_order(nid) for nid in sorted_ids]
-        for i in range(1, len(orders)):
-            assert orders[i] >= orders[i - 1], f"章序错乱: {sorted_ids[i]} < {sorted_ids[i-1]}"
+        assert set(sorted_ids) == set(all_node_ids)
+        assert len(sorted_ids) == len(all_node_ids)
 
-    def test_km001_is_first(self, all_node_ids):
+    def test_km001_first_by_depth(self, all_node_ids):
+        """KM001(depth=0) 应是排序结果的第一个(无前置依赖,最低难度)。"""
         sorted_ids = sort_candidates(all_node_ids)
         assert sorted_ids[0] == "KM001"
 
@@ -232,30 +231,26 @@ class TestSelectNodes:
         selected = select_nodes(all_node_ids, default_profile)
         assert 9 <= len(selected) <= 12
 
-    def test_first_is_km001(self, all_node_ids, default_profile):
+    def test_includes_foundation(self, all_node_ids, default_profile):
+        """KM001(深度0,核心基础)应始终入选。"""
         selected = select_nodes(all_node_ids, default_profile)
-        assert selected[0] == "KM001"
+        assert "KM001" in selected, "基础节点 KM001 应在选中的列表中"
 
     def test_no_duplicates(self, all_node_ids, default_profile):
         selected = select_nodes(all_node_ids, default_profile)
         assert len(set(selected)) == len(selected)
 
     def test_core_nodes_before_supporting(self, all_node_ids, default_profile):
-        """冷启动时同章内 core 节点在 supporting 之前。"""
+        """全局重要性排序: 所有 core 节点在 supporting 之前。"""
         from ai_tutor_agent.core.ability_mapper import get_node_importance
         selected = select_nodes(all_node_ids, default_profile)
-        # 第二章 5 节点: 4 core(KM007-010) + 1 supporting(KM011)
-        ch2_selected = [n for n in selected
-                        if n in {"KM007", "KM008", "KM009", "KM010", "KM011"}]
-        # 4 个 core 节点应全部入选
-        for core in ("KM007", "KM008", "KM009", "KM010"):
-            assert core in ch2_selected, f"{core} 被 supporting 节点挤出"
-        # 如果 KM011 也在选中，它必须在 4 个 core 之后
-        if "KM011" in ch2_selected:
-            km011_idx = ch2_selected.index("KM011")
-            for core in ("KM007", "KM008", "KM009", "KM010"):
-                assert ch2_selected.index(core) < km011_idx, \
-                    f"{core} 应在 KM011 前, 实际顺序: {ch2_selected}"
+        seen_supporting = False
+        for nid in selected:
+            imp = get_node_importance(nid)
+            if imp == 'supporting':
+                seen_supporting = True
+            elif imp == 'core' and seen_supporting:
+                pytest.fail(f"Core {nid} 出现在 supporting 节点之后")
 
 
 class TestClusterIntoSteps:
@@ -306,6 +301,251 @@ class TestResolveEntryModes:
         modes = resolve_entry_modes(["KM001", "KM004"], profile)
         for nid, mode in modes.items():
             assert mode in ("quick_check",), f"{nid}: {mode} 不是 quick_check"
+
+    def test_default_profile_mastery_variation_produces_mixed_entry_modes(self):
+        """回归：默认画像（source=='default'）时各节点 mastery 不同，
+        不应一刀切返回 full_learning，至少出现 short_learning 或 quick_check。"""
+        profile = make_default_profile()
+        # 模拟真实冷启动：源为 default，但不同节点 mastery 分布在 0.2~0.6
+        # 第一个低 (0.2) → full_learning
+        # 第二个中 (0.55) → short_learning
+        # 第三个高 (0.85) → quick_check
+        profile.concept_mastery["KM001"] = ConceptMastery(
+            mastery=0.2, confidence=0.2, source="default", failure_count=0,
+        )
+        profile.concept_mastery["KM002"] = ConceptMastery(
+            mastery=0.55, confidence=0.3, source="default", failure_count=0,
+        )
+        profile.concept_mastery["KM003"] = ConceptMastery(
+            mastery=0.85, confidence=0.5, source="default", failure_count=0,
+        )
+        modes = resolve_entry_modes(["KM001", "KM002", "KM003"], profile)
+        assert modes["KM001"] == "full_learning", f"KM001 mastery=0.2 应为 full_learning, 实际 {modes['KM001']}"
+        assert modes["KM002"] == "short_learning", f"KM002 mastery=0.55 应为 short_learning, 实际 {modes['KM002']}"
+        assert modes["KM003"] == "quick_check", f"KM003 mastery=0.85 应为 quick_check, 实际 {modes['KM003']}"
+
+    def test_real_cold_start_default_profile_has_varied_entry_modes(self):
+        """回归：真实的冷启动默认画像应当产生混合的 entry_mode（不全是 full_learning）。
+        这防止 source=='default' 一刀切返回 full_learning 的旧 bug 回归。"""
+        profile = StudentProfile("test")
+        profile.init_from_default()
+        modes = resolve_entry_modes(list(profile.concept_mastery.keys()), profile)
+        all_modes = list(modes.values())
+        unique_modes = set(all_modes)
+        # 至少 2 种 entry_mode 才算"有变化"
+        assert len(unique_modes) >= 2, (
+            f"默认画像应产生变化的 entry_mode, 但全部是 {unique_modes}; "
+            f"全 {len(all_modes)} 个节点"
+        )
+
+
+class TestStepNames:
+    """step 名字生成的回归测试。"""
+
+    def test_rule_fallback_when_no_llm(self):
+        """llm=None 时,降级到规则(取第一个节点名 + 截断)。"""
+        from ai_tutor_agent.core.learning_plan_v2 import (
+            generate_step_names, get_node_name_map,
+        )
+        raw_steps = [["KM001", "KM002"], ["KM007", "KM008"]]
+        names = generate_step_names(raw_steps, llm=None)
+        assert len(names) == 2
+        # 第一步:第一个节点名(没超 12 字就直接用)
+        assert names[0] == get_node_name_map().get("KM001", "KM001")
+        assert names[1] == get_node_name_map().get("KM007", "KM007")
+
+    def test_rule_fallback_when_llm_raises(self):
+        """LLM 调用异常时,降级到规则。"""
+        from ai_tutor_agent.core.learning_plan_v2 import (
+            generate_step_names, get_node_name_map,
+        )
+
+        class BoomLLM:
+            def get_answer(self, prompt, *, state=None):
+                raise RuntimeError("LLM down")
+
+        raw_steps = [["KM001", "KM002"], ["KM007"]]
+        names = generate_step_names(raw_steps, llm=BoomLLM())
+        assert names[0] == get_node_name_map()["KM001"]
+        assert names[1] == get_node_name_map()["KM007"]
+
+    def test_rule_fallback_when_llm_returns_garbage(self):
+        """LLM 输出无法解析时,降级到规则。"""
+        from ai_tutor_agent.core.learning_plan_v2 import generate_step_names
+
+        class GarbageLLM:
+            def get_answer(self, prompt, *, state=None):
+                return "随便写点无关内容,没有任何 JSON 或结构"
+
+        names = generate_step_names([["KM001"], ["KM007"]], llm=GarbageLLM())
+        # 兜底,非空
+        assert all(names)
+        assert len(names) == 2
+
+    def test_llm_json_array_parsed(self):
+        """LLM 返回纯 JSON 数组时,正确解析。"""
+        from ai_tutor_agent.core.learning_plan_v2 import generate_step_names
+
+        class JsonLLM:
+            def __init__(self, payload):
+                self._payload = payload
+
+            def get_answer(self, prompt, *, state=None):
+                return self._payload
+
+        names = generate_step_names(
+            [["KM001", "KM002"], ["KM007", "KM008"], ["KM012"]],
+            llm=JsonLLM('["建立自动控制基础", "建立数学建模能力", "掌握时域分析"]'),
+        )
+        assert names == ["建立自动控制基础", "建立数学建模能力", "掌握时域分析"]
+
+    def test_llm_json_embedded_in_text(self):
+        """LLM 输出夹在文本中的 JSON,正确提取。"""
+        from ai_tutor_agent.core.learning_plan_v2 import generate_step_names
+
+        class JsonInTextLLM:
+            def get_answer(self, prompt, *, state=None):
+                return "好的,以下是命名:\n[\"建立基础认知\", \"掌握建模\", \"攻克时域\"]\n祝你学习顺利"
+
+        names = generate_step_names(
+            [["KM001"], ["KM007"], ["KM012"]], llm=JsonInTextLLM()
+        )
+        assert names == ["建立基础认知", "掌握建模", "攻克时域"]
+
+    def test_llm_numbered_lines_fallback(self):
+        """LLM 返回带行号的列表(没 JSON),按行解析。"""
+        from ai_tutor_agent.core.learning_plan_v2 import generate_step_names
+
+        class NumberedLLM:
+            def get_answer(self, prompt, *, state=None):
+                return "1. 建立自动控制基础\n2. 掌握数学建模\n3. 攻克时域分析"
+
+        names = generate_step_names(
+            [["KM001"], ["KM007"], ["KM012"]], llm=NumberedLLM()
+        )
+        assert names == ["建立自动控制基础", "掌握数学建模", "攻克时域分析"]
+
+    def test_llm_strips_quotes_and_brackets(self):
+        """LLM 返回带书名号/引号,正确清理。"""
+        from ai_tutor_agent.core.learning_plan_v2 import generate_step_names
+
+        class NoisyLLM:
+            def get_answer(self, prompt, *, state=None):
+                # 真实 LLM 偶尔会包书名号/引号,但内部 JSON 仍是合法的
+                return '["「建立控制基础」", "「掌握数学建模」", "「攻克时域分析」"]'
+
+        names = generate_step_names(
+            [["KM001"], ["KM007"], ["KM012"]], llm=NoisyLLM()
+        )
+        assert names == ["建立控制基础", "掌握数学建模", "攻克时域分析"]
+
+    def test_llm_name_too_long_truncated(self):
+        """LLM 返回超长名字,截断到 12 字。"""
+        from ai_tutor_agent.core.learning_plan_v2 import generate_step_names
+
+        class LongLLM:
+            def get_answer(self, prompt, *, state=None):
+                return '["建立自动控制的基础认知并理解原理", "短名"]'
+
+        names = generate_step_names(
+            [["KM001"], ["KM007"]], llm=LongLLM()
+        )
+        assert names[0].endswith("…")
+        assert len(names[0]) <= 12
+        assert names[1] == "短名"
+
+    def test_prompt_includes_step_node_info(self):
+        """生成的 prompt 包含每个 step 的节点信息(便于 LLM 命名)。"""
+        from ai_tutor_agent.core.learning_plan_v2 import _build_step_naming_prompt
+
+        prompt = _build_step_naming_prompt([["KM001", "KM002"], ["KM007"]])
+        assert "KM001" in prompt
+        assert "KM002" in prompt
+        assert "KM007" in prompt
+        assert "Step 1" in prompt
+        assert "Step 2" in prompt
+        # 节点名也包含
+        assert "自动控制" in prompt
+        assert "数学模型" in prompt
+
+    def test_resume_preserves_llm_named_steps(self):
+        """resume 路径:已用 LLM 命名(或明显非规则生成)的 step 保留,不调 LLM。"""
+        from ai_tutor_agent.core.learning_plan_v2 import _refresh_previous_plan
+        from ai_tutor_agent.core.student_profile import StudentProfile
+
+        class SpyLLM:
+            def __init__(self):
+                self.calls = 0
+
+            def get_answer(self, prompt, *, state=None):
+                self.calls += 1
+                return "[]"
+
+        profile = StudentProfile("test")
+        profile.init_from_default()
+        from ai_tutor_agent.core.learning_plan_v2 import LearningPlan, StepEntry
+        plan = LearningPlan(steps=[
+            StepEntry(step_index=0, step_name="建立控制基础认知", node_ids=["KM001"]),
+            StepEntry(step_index=1, step_name="攻克时域分析", node_ids=["KM012"]),
+        ])
+        spy = SpyLLM()
+        _refresh_previous_plan(plan, profile, llm=spy)
+        assert spy.calls == 0, "已 LLM 命名的 step 应保留,resume 不调 LLM"
+        assert plan.steps[0].step_name == "建立控制基础认知"
+        assert plan.steps[1].step_name == "攻克时域分析"
+
+    def test_resume_renames_old_rule_based_steps_via_llm(self):
+        """回归:已存 plan 是老规则生成的(等于首节点名),resume 时主动 LLM 重命名。"""
+        from ai_tutor_agent.core.learning_plan_v2 import _refresh_previous_plan
+        from ai_tutor_agent.core.student_profile import StudentProfile
+        from ai_tutor_agent.core.ability_mapper import get_node_name_map
+
+        class RenamingLLM:
+            def __init__(self, names):
+                self._names = names
+                self.calls = 0
+
+            def get_answer(self, prompt, *, state=None):
+                self.calls += 1
+                import json
+                return json.dumps(self._names, ensure_ascii=False)
+
+        profile = StudentProfile("test")
+        profile.init_from_default()
+
+        name_map = get_node_name_map()
+        # 模拟"老 plan":step_name = 首节点名(老规则特征)
+        plan = LearningPlan(steps=[
+            StepEntry(step_index=0, step_name=name_map["KM001"], node_ids=["KM001", "KM002", "KM003"]),
+            StepEntry(step_index=1, step_name=name_map["KM007"], node_ids=["KM007", "KM008", "KM009"]),
+        ])
+        llm = RenamingLLM(["建立控制基础认知", "构建数学建模能力"])
+        _refresh_previous_plan(plan, profile, llm=llm)
+        # 调了 LLM
+        assert llm.calls == 1
+        # 重命名了
+        assert plan.steps[0].step_name == "建立控制基础认知"
+        assert plan.steps[1].step_name == "构建数学建模能力"
+
+    def test_resume_renames_empty_and_fallback_steps(self):
+        """resume 时空名/"第N步" 也要重命名。"""
+        from ai_tutor_agent.core.learning_plan_v2 import _refresh_previous_plan
+        from ai_tutor_agent.core.student_profile import StudentProfile
+
+        class RenamingLLM:
+            def get_answer(self, prompt, *, state=None):
+                import json
+                return json.dumps(["攻克时域分析", "掌握稳定性"], ensure_ascii=False)
+
+        profile = StudentProfile("test")
+        profile.init_from_default()
+        plan = LearningPlan(steps=[
+            StepEntry(step_index=0, step_name="", node_ids=["KM001"]),
+            StepEntry(step_index=1, step_name="第2步", node_ids=["KM007"]),
+        ])
+        _refresh_previous_plan(plan, profile, llm=RenamingLLM())
+        assert plan.steps[0].step_name == "攻克时域分析"
+        assert plan.steps[1].step_name == "掌握稳定性"
 
     def test_full_learning_after_2_failures(self):
         profile = make_default_profile()
@@ -427,9 +667,9 @@ class TestEdgeCases:
         for nid in get_all_node_ids():
             profile.mark_mastered(nid)
         plan = generate_learning_plan_v2(profile)
-        # 补充 6 个 weakest mastered 节点
+        # 补充到 range 下限: 9-12 节点复习路径
         assert 1 <= len(plan.steps) <= 4, f"期望小复习路径, 实际 {len(plan.steps)} 步"
-        assert 6 <= plan.total_nodes <= 8, f"期望 6 节点左右, 实际 {plan.total_nodes}"
+        assert 9 <= plan.total_nodes <= 12, f"期望 9-12 节点, 实际 {plan.total_nodes}"
 
     def test_self_assessment_gives_higher_mastery(self):
         """自评全满分 → 更多 quick_check。"""
