@@ -1056,9 +1056,9 @@ def _structure_instruction(mode: str) -> str:
         )
     else:
         merge_note = ""
-    return f"""教学格式必须严格按以下 7 个小节组织（用 Markdown #### 分隔），不得改变顺序，不得缺少任何小节{merge_note}：
+    return f"""教学格式必须严格按以下 7 个小节组织（用 **加粗序号标题** 分隔，如 **1. 学习目标**），不得改变顺序，不得缺少任何小节{merge_note}：
 
-#### 1. 学习目标
+**1. 学习目标**
 用 2-3 句话清晰说明本节点要掌握的核心能力。**必须标注掌握层级**（用加粗标出层级词）：
 - **记忆**：能复述定义或公式
 - **理解**：能解释概念的含义和关系
@@ -1067,10 +1067,10 @@ def _structure_instruction(mode: str) -> str:
 
 示例："能**理解**稳定性的定义，并能**应用**劳斯判据分析给定系统的稳定性。"
 
-#### 2. 核心概念
+**2. 核心概念**
 给出本节点最核心的判断、定义或原理。如果是定理/方法，说清楚它的本质是什么、为什么有用、在控制系统中解决什么问题。
 
-#### 3. 公式讲解
+**3. 公式讲解**
 **如有公式必须用此小节**，不可在其它位置一带而过。每个公式按以下固定子结构逐一讲解：
 
 1. **公式**：写出完整表达式（LaTeX 格式）
@@ -1081,7 +1081,7 @@ def _structure_instruction(mode: str) -> str:
 
 如果没有公式，直接写"本节点不涉及新公式"即可。
 
-#### 4. 图表说明
+**4. 图表说明**
 **如有图表必须用此小节**，不可在其它位置一带而过。每张图表按以下固定子结构逐一说明：
 
 1. **图名**：图表名称或编号
@@ -1091,7 +1091,7 @@ def _structure_instruction(mode: str) -> str:
 
 如果没有图表，直接写"本节点不涉及图表"即可。
 
-#### 5. 具体例子
+**5. 具体例子**
 至少给出 1 个完整的例题或工程类比，按以下固定子结构：
 
 1. **问题场景**：在什么场景下遇到这个问题
@@ -1100,16 +1100,46 @@ def _structure_instruction(mode: str) -> str:
 4. **结论**：最终结果和判断
 5. **对应概念**：此例子对应第 2 节中的哪个核心概念
 
-#### 6. 常见误区与边界
+**6. 常见误区与边界**
 - 最容易混淆的两个概念以及如何区分（给出判断方法，不要说"要区分开"这种空话）
 - 公式或方法何时失效（边界条件）
 - 判断口诀或经验法则（如有）
 
-#### 7. 自检问题
+**7. 自检问题**
 1 个能暴露理解盲区的小问题，要求必须：
 - 学生答对就能证明他真正理解了本节点
 - 不能是"你记住了吗"这种表面问题
 - 可包含选择、判断或简答"""
+
+
+def _build_node_identity_header(state: dict) -> str:
+    """构建教学内容的节点标识头，包含节点名和教学侧重点。
+
+    格式:
+    ## 教学：{节点名}
+    > {教学侧重点描述}
+
+    ---
+    """
+    node_name = str(
+        state.get("current_node_name")
+        or state.get("graph_anchor_title")
+        or "当前节点"
+    ).strip()
+    entry_mode = str(state.get("current_entry_mode") or "").strip()
+    mode_label = {
+        "full_learning": "完整教学——系统讲解核心概念、公式、图表与典型应用",
+        "short_learning": "精简教学——聚焦核心概念与关键方法",
+        "quick_check": "快速检测——验证掌握程度",
+    }.get(entry_mode, "教学讲解")
+    lines = [
+        f"## 教学：{node_name}",
+        f"> {mode_label}",
+        "",
+        "---",
+        "",
+    ]
+    return "\n".join(lines)
 
 
 # ─────────────────────────────────────────────────────
@@ -1576,7 +1606,7 @@ def build_tutor_node(tutor_llm, runtime: RuntimeContext):
 {wrong_feedback_block}{strategy_inst}{transition_hint}{knowledge_prompt}
 
 输出格式要求：
-- 严格按照 system prompt 中的教学模板输出（#### 分隔的 7 个小节），不得省略任何小节
+- 严格按照 system prompt 中的教学模板输出（**加粗序号标题** 分隔的 7 个小节），不得省略任何小节
 - 直接输出 Markdown，不要输出 JSON 或代码块
 - 每一句事实性内容后面都必须带 [n] 行内引用
 - 不要输出"参考来源""资料如下"这类来源列表"""
@@ -1590,7 +1620,7 @@ def build_tutor_node(tutor_llm, runtime: RuntimeContext):
 {wrong_feedback_block}{strategy_inst}{transition_hint}{knowledge_prompt}
 
 输出格式要求：
-- 严格按照 system prompt 中的教学模板输出（#### 分隔的 7 个小节），不得省略任何小节
+- 严格按照 system prompt 中的教学模板输出（**加粗序号标题** 分隔的 7 个小节），不得省略任何小节
 - 直接输出 Markdown，不要输出 JSON 或代码块
 - 必须综合当前节点素材包中的 explanation_teacher_style、key_points、formulas、examples、figures_refs 等字段填入对应小节
 - 如果素材包中有公式/公式候选，必须在"公式讲解"小节解释变量含义、适用场景和直观意义
@@ -1656,6 +1686,8 @@ def build_tutor_node(tutor_llm, runtime: RuntimeContext):
                 else:
                     stream_text_chunks(event_sink, "tutor", full_response)
             else:
+                # ── 注入节点标识头（节点名 + 教学侧重点）──
+                full_response = _build_node_identity_header(state) + full_response
                 stream_text_chunks(event_sink, "tutor", full_response)
 
         # ── 提取并处理教学标记（掌握度更新、节点跳转）──

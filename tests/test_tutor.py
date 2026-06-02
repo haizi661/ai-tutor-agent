@@ -106,7 +106,8 @@ def test_tutor_fallback_keeps_plain_text_teacher_reply():
     )
 
     content = result["tutor_content"]
-    assert content.startswith("稳定性先看最终会不会回到平衡点")
+    assert "## 教学：" in content, "应包含节点头部"
+    assert "稳定性先看最终会不会回到平衡点" in content
     assert "比如温控系统扰动后还能回到设定温度附近" in content
 
 
@@ -559,13 +560,13 @@ def test_tutor_prompt_uses_node_teaching_contract_and_requires_detailed_node_les
     assert "必会要点：稳定性的定义；有界输入有界输出" in joined_prompt
     assert "常见误区：把振荡都当成不稳定" in joined_prompt
     assert "退出条件：节点客观题总分达到 80 分；关键目标正确率达到 70%" in joined_prompt
-    assert "#### 1. 学习目标" in joined_prompt
-    assert "#### 2. 核心概念" in joined_prompt
-    assert "#### 3. 公式讲解" in joined_prompt
-    assert "#### 4. 图表说明" in joined_prompt
-    assert "#### 5. 具体例子" in joined_prompt
-    assert "#### 6. 常见误区与边界" in joined_prompt
-    assert "#### 7. 自检问题" in joined_prompt
+    assert "**1. 学习目标**" in joined_prompt
+    assert "**2. 核心概念**" in joined_prompt
+    assert "**3. 公式讲解**" in joined_prompt
+    assert "**4. 图表说明**" in joined_prompt
+    assert "**5. 具体例子**" in joined_prompt
+    assert "**6. 常见误区与边界**" in joined_prompt
+    assert "**7. 自检问题**" in joined_prompt
     assert "不得省略任何小节" in joined_prompt
 
 
