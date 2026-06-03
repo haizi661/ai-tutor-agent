@@ -4,7 +4,7 @@
   "last_question": "自动控制的一般概念",
   "mastery_scores": {
     "KM003": 10,
-    "KM001": 0
+    "KM001": 30
   },
   "visited_nodes": [],
   "wrong_nodes": [
@@ -27,7 +27,7 @@
     "KM001": {
       "started_at": "2026-05-06T20:45:41",
       "completed_at": "",
-      "mastery_score": 0
+      "mastery_score": 30
     }
   },
   "homework": [],
@@ -330,6 +330,96 @@
       "quiz_score": 0,
       "quiz_passed": false,
       "created_at": "2026-05-19T15:13:04"
+    },
+    {
+      "question_id": "AI-Q1",
+      "node_id": "KM001",
+      "answer": "C",
+      "expected": "A",
+      "quiz_score": 30,
+      "quiz_passed": false,
+      "created_at": "2026-05-27T15:28:38"
+    },
+    {
+      "question_id": "AI-Q2",
+      "node_id": "KM001",
+      "answer": "A",
+      "expected": "A",
+      "quiz_score": 30,
+      "quiz_passed": false,
+      "created_at": "2026-05-27T15:28:38"
+    },
+    {
+      "question_id": "AI-Q3",
+      "node_id": "KM001",
+      "answer": "B",
+      "expected": "A",
+      "quiz_score": 30,
+      "quiz_passed": false,
+      "created_at": "2026-05-27T15:28:38"
+    },
+    {
+      "question_id": "AI-Q4",
+      "node_id": "KM001",
+      "answer": "B",
+      "expected": "A",
+      "quiz_score": 30,
+      "quiz_passed": false,
+      "created_at": "2026-05-27T15:28:38"
+    },
+    {
+      "question_id": "AI-Q5",
+      "node_id": "KM001",
+      "answer": "D",
+      "expected": "A",
+      "quiz_score": 30,
+      "quiz_passed": false,
+      "created_at": "2026-05-27T15:28:38"
+    },
+    {
+      "question_id": "AI-Q6",
+      "node_id": "KM001",
+      "answer": "B",
+      "expected": "A",
+      "quiz_score": 30,
+      "quiz_passed": false,
+      "created_at": "2026-05-27T15:28:38"
+    },
+    {
+      "question_id": "AI-Q7",
+      "node_id": "KM001",
+      "answer": "C",
+      "expected": "A",
+      "quiz_score": 30,
+      "quiz_passed": false,
+      "created_at": "2026-05-27T15:28:38"
+    },
+    {
+      "question_id": "AI-Q8",
+      "node_id": "KM001",
+      "answer": "B",
+      "expected": "A",
+      "quiz_score": 30,
+      "quiz_passed": false,
+      "created_at": "2026-05-27T15:28:38"
+    },
+    {
+      "question_id": "AI-Q9",
+      "node_id": "KM001",
+      "answer": "A",
+      "expected": "A",
+      "quiz_score": 30,
+      "quiz_passed": false,
+      "created_at": "2026-05-27T15:28:38"
+    },
+    {
+      "question_id": "AI-Q10",
+      "node_id": "KM001",
+      "answer": "A",
+      "expected": "A",
+      "quiz_score": 30,
+      "quiz_passed": false,
+      "created_at": "2026-05-27T15:28:38"
     }
   ],
   "evidence_events": [],
@@ -340,9 +430,12 @@
     ],
     "2026-05-19": [
       "KM001"
+    ],
+    "2026-05-27": [
+      "KM001"
     ]
   },
-  "last_learning_at": "2026-05-19T15:13:04",
+  "last_learning_at": "2026-05-27T15:28:38",
   "teaching_strategy": "explain",
   "difficulty_level": 3,
   "knowledge_graph": {
@@ -456,8 +549,8 @@
     "KM001": {
       "title": "自动控制的一般概念",
       "status": "in_progress",
-      "score": 0,
-      "attempts": 3,
+      "score": 30,
+      "attempts": 4,
       "wrong_questions": [
         {
           "question_id": "AI-Q1",
@@ -611,6 +704,69 @@
           "feedback": "",
           "source": "quiz",
           "time": "2026-05-19T15:13:04"
+        },
+        {
+          "question_id": "AI-Q1",
+          "stem": "在反馈控制系统中，控制装置对被控对象施加控制作用的依据是什么？",
+          "student_answer": "",
+          "correct_answer": "A",
+          "feedback": "",
+          "source": "quiz",
+          "time": "2026-05-27T15:28:38"
+        },
+        {
+          "question_id": "AI-Q3",
+          "stem": "反馈控制系统的核心工作原理是什么？",
+          "student_answer": "",
+          "correct_answer": "A",
+          "feedback": "",
+          "source": "quiz",
+          "time": "2026-05-27T15:28:38"
+        },
+        {
+          "question_id": "AI-Q4",
+          "stem": "在反馈控制系统中，比较元件的作用是什么？",
+          "student_answer": "",
+          "correct_answer": "A",
+          "feedback": "",
+          "source": "quiz",
+          "time": "2026-05-27T15:28:38"
+        },
+        {
+          "question_id": "AI-Q5",
+          "stem": "以下哪个选项正确描述了自动控制系统的组成？",
+          "student_answer": "",
+          "correct_answer": "A",
+          "feedback": "",
+          "source": "quiz",
+          "time": "2026-05-27T15:28:38"
+        },
+        {
+          "question_id": "AI-Q6",
+          "stem": "在反馈控制系统中，主反馈通路的作用是什么？",
+          "student_answer": "",
+          "correct_answer": "A",
+          "feedback": "",
+          "source": "quiz",
+          "time": "2026-05-27T15:28:38"
+        },
+        {
+          "question_id": "AI-Q7",
+          "stem": "在“人取书”的反馈控制系统中，眼睛、大脑和手臂共同扮演什么角色？",
+          "student_answer": "",
+          "correct_answer": "A",
+          "feedback": "",
+          "source": "quiz",
+          "time": "2026-05-27T15:28:38"
+        },
+        {
+          "question_id": "AI-Q8",
+          "stem": "反馈控制系统中的“负反馈”通常表示什么含义？",
+          "student_answer": "",
+          "correct_answer": "A",
+          "feedback": "",
+          "source": "quiz",
+          "time": "2026-05-27T15:28:38"
         }
       ],
       "evidence": [
@@ -631,9 +787,15 @@
           "score": 0,
           "detail": "quiz 未通过，得分 0",
           "time": "2026-05-19T15:13:04"
+        },
+        {
+          "type": "quiz_fail",
+          "score": 30,
+          "detail": "quiz 未通过，得分 30",
+          "time": "2026-05-27T15:28:38"
         }
       ],
-      "last_updated": "2026-05-19T15:13:04"
+      "last_updated": "2026-05-27T15:28:38"
     }
   }
 }

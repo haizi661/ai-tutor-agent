@@ -33,11 +33,10 @@
   "daily_records": [],
   "last_learning_time": "",
   "current_node": "AI060",
-  "current_goal": "强化学习概述、神经网络",
+  "current_goal": "强化学习、强化学习概述",
   "current_path": [
-    "AI001",
     "AI073",
-    "AI068",
+    "AI001",
     "AI002",
     "AI003",
     "AI004",
@@ -46,44 +45,49 @@
     "AI048",
     "AI022",
     "AI060",
-    "AI005",
-    "AI030",
-    "AI036",
-    "AI019",
-    "AI025",
-    "AI043",
-    "AI028",
-    "AI026",
-    "AI058",
-    "AI010",
-    "AI039",
-    "AI021",
-    "AI061",
-    "AI085",
-    "AI042",
-    "AI041",
-    "AI045",
-    "AI056",
-    "AI059",
-    "AI044",
-    "AI020",
-    "AI072",
-    "AI037",
-    "AI024",
-    "AI040",
-    "AI055",
-    "AI031",
-    "AI023",
-    "AI027",
-    "AI057",
-    "AI046",
-    "AI047",
-    "AI062",
-    "AI029",
-    "AI008",
     "AI038",
-    "AI156",
-    "AI082"
+    "AI039",
+    "AI040",
+    "AI041",
+    "AI042",
+    "AI005",
+    "AI043",
+    "AI044",
+    "AI057",
+    "AI008",
+    "AI047",
+    "AI082",
+    "AI045",
+    "AI085",
+    "AI025",
+    "AI029",
+    "AI079",
+    "AI077",
+    "AI056",
+    "AI076",
+    "AI021",
+    "AI217",
+    "AI075",
+    "AI019",
+    "AI059",
+    "AI074",
+    "AI062",
+    "AI061",
+    "AI010",
+    "AI020",
+    "AI031",
+    "AI216",
+    "AI011",
+    "AI024",
+    "AI046",
+    "AI023",
+    "AI078",
+    "AI058",
+    "AI055",
+    "AI016",
+    "AI072",
+    "AI009",
+    "AI156"
   ],
   "learned_nodes": {
     "AI001": {
@@ -984,6 +988,66 @@
       "stage": "learning",
       "updated_at": "2026-05-26T13:57:35",
       "latest_intent": "我就确定是现在的方向了"
+    },
+    {
+      "thread_id": "session_1s3s1ci",
+      "stage": "intent_refining",
+      "updated_at": "2026-05-26T15:30:33",
+      "latest_intent": ""
+    },
+    {
+      "thread_id": "session_g2e2onn",
+      "stage": "intent_refining",
+      "updated_at": "2026-05-27T15:31:00",
+      "latest_intent": ""
+    },
+    {
+      "thread_id": "session_g2e2onn",
+      "stage": "intent_refining",
+      "updated_at": "2026-05-27T15:31:18",
+      "latest_intent": "自动驾驶目标检测"
+    },
+    {
+      "thread_id": "session_g2e2onn",
+      "stage": "intent_refining",
+      "updated_at": "2026-05-27T15:31:33",
+      "latest_intent": "自动驾驶"
+    },
+    {
+      "thread_id": "session_g2e2onn",
+      "stage": "planned",
+      "updated_at": "2026-05-27T15:31:35",
+      "latest_intent": "我就确定是现在的方向了"
+    },
+    {
+      "thread_id": "session_g2e2onn",
+      "stage": "learning",
+      "updated_at": "2026-05-27T15:31:46",
+      "latest_intent": "我就确定是现在的方向了"
+    },
+    {
+      "thread_id": "session_6kkyyft",
+      "stage": "intent_refining",
+      "updated_at": "2026-06-01T21:17:18",
+      "latest_intent": ""
+    },
+    {
+      "thread_id": "session_6kkyyft",
+      "stage": "intent_refining",
+      "updated_at": "2026-06-01T21:17:27",
+      "latest_intent": "机器人强化学习"
+    },
+    {
+      "thread_id": "session_6kkyyft",
+      "stage": "planned",
+      "updated_at": "2026-06-01T21:17:31",
+      "latest_intent": "我就确定是现在的方向了"
+    },
+    {
+      "thread_id": "session_6kkyyft",
+      "stage": "learning",
+      "updated_at": "2026-06-01T21:17:38",
+      "latest_intent": "我就确定是现在的方向了"
     }
   ],
   "dialogue_sessions": {
@@ -1835,6 +1899,100 @@
         "target_names": [
           "强化学习概述",
           "神经网络"
+        ]
+      },
+      "replan_keep_progress": false
+    },
+    "session_1s3s1ci": {
+      "stage": "intent_refining",
+      "intent_history": [],
+      "candidate_nodes": [],
+      "selected_nodes": [],
+      "understood_goal": "",
+      "preference": {},
+      "created_at": "2026-05-26T15:30:33"
+    },
+    "session_g2e2onn": {
+      "stage": "learning",
+      "intent_history": [
+        "自动驾驶目标检测",
+        "自动驾驶",
+        "我就确定是现在的方向了"
+      ],
+      "candidate_nodes": [
+        "AI088",
+        "AI028",
+        "AI203",
+        "AI199",
+        "AI145",
+        "AI228",
+        "AI227",
+        "AI226",
+        "AI225",
+        "AI224",
+        "AI223",
+        "AI222"
+      ],
+      "selected_nodes": [
+        "AI145",
+        "AI199"
+      ],
+      "understood_goal": "自动驾驶目标检测",
+      "preference": {},
+      "created_at": "2026-05-27T15:31:00",
+      "last_reason": "学生明确提到自动驾驶目标检测，但未区分是视觉感知中的检测还是决策中的检测，因此需要进一步澄清具体方向，同时给出最可能的两个候选节点。",
+      "latest_plan": {
+        "total": 53,
+        "skipped": 7,
+        "target_ids": [
+          "AI145",
+          "AI199"
+        ],
+        "target_names": [
+          "自动驾驶视觉感知",
+          "强化学习在自动驾驶中的应用"
+        ]
+      },
+      "replan_keep_progress": false
+    },
+    "session_6kkyyft": {
+      "stage": "learning",
+      "intent_history": [
+        "机器人强化学习",
+        "我就确定是现在的方向了"
+      ],
+      "candidate_nodes": [
+        "AI009",
+        "AI156",
+        "AI157",
+        "AI158",
+        "AI159",
+        "AI160",
+        "AI161",
+        "AI162",
+        "AI163",
+        "AI164",
+        "AI165",
+        "AI166"
+      ],
+      "selected_nodes": [
+        "AI009",
+        "AI156"
+      ],
+      "understood_goal": "机器人强化学习",
+      "preference": {},
+      "created_at": "2026-06-01T21:17:17",
+      "last_reason": "学生输入较宽泛，仅提及机器人强化学习，未明确具体应用或学习层次，需要进一步澄清以缩小范围。",
+      "latest_plan": {
+        "total": 53,
+        "skipped": 9,
+        "target_ids": [
+          "AI009",
+          "AI156"
+        ],
+        "target_names": [
+          "强化学习",
+          "强化学习概述"
         ]
       },
       "replan_keep_progress": false
@@ -3399,10 +3557,154 @@
         "AI048",
         "AI022"
       ]
+    },
+    {
+      "created_at": "2026-05-27T15:31:35",
+      "target_nodes": [
+        "AI145",
+        "AI199"
+      ],
+      "path": [
+        "AI073",
+        "AI001",
+        "AI002",
+        "AI006",
+        "AI007",
+        "AI155",
+        "AI022",
+        "AI058",
+        "AI059",
+        "AI010",
+        "AI045",
+        "AI127",
+        "AI156",
+        "AI121",
+        "AI086",
+        "AI122",
+        "AI090",
+        "AI088",
+        "AI082",
+        "AI035",
+        "AI194",
+        "AI158",
+        "AI019",
+        "AI227",
+        "AI222",
+        "AI087",
+        "AI126",
+        "AI197",
+        "AI160",
+        "AI157",
+        "AI190",
+        "AI224",
+        "AI085",
+        "AI125",
+        "AI008",
+        "AI129",
+        "AI130",
+        "AI123",
+        "AI225",
+        "AI196",
+        "AI193",
+        "AI124",
+        "AI223",
+        "AI089",
+        "AI083",
+        "AI195",
+        "AI201",
+        "AI159",
+        "AI084",
+        "AI206",
+        "AI134",
+        "AI145",
+        "AI199"
+      ],
+      "skipped": [
+        "AI073",
+        "AI001",
+        "AI002",
+        "AI006",
+        "AI007",
+        "AI155",
+        "AI022"
+      ]
+    },
+    {
+      "created_at": "2026-06-01T21:17:31",
+      "target_nodes": [
+        "AI009",
+        "AI156"
+      ],
+      "path": [
+        "AI073",
+        "AI001",
+        "AI002",
+        "AI003",
+        "AI004",
+        "AI006",
+        "AI007",
+        "AI048",
+        "AI022",
+        "AI060",
+        "AI038",
+        "AI039",
+        "AI040",
+        "AI041",
+        "AI042",
+        "AI005",
+        "AI043",
+        "AI044",
+        "AI057",
+        "AI008",
+        "AI047",
+        "AI082",
+        "AI045",
+        "AI085",
+        "AI025",
+        "AI029",
+        "AI079",
+        "AI077",
+        "AI056",
+        "AI076",
+        "AI021",
+        "AI217",
+        "AI075",
+        "AI019",
+        "AI059",
+        "AI074",
+        "AI062",
+        "AI061",
+        "AI010",
+        "AI020",
+        "AI031",
+        "AI216",
+        "AI011",
+        "AI024",
+        "AI046",
+        "AI023",
+        "AI078",
+        "AI058",
+        "AI055",
+        "AI016",
+        "AI072",
+        "AI009",
+        "AI156"
+      ],
+      "skipped": [
+        "AI073",
+        "AI001",
+        "AI002",
+        "AI003",
+        "AI004",
+        "AI006",
+        "AI007",
+        "AI048",
+        "AI022"
+      ]
     }
   ],
   "confirmed_target_nodes": [
-    "AI156",
-    "AI082"
+    "AI009",
+    "AI156"
   ]
 }
