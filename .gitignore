@@ -64,6 +64,8 @@ data/student_states/
 data/test_outputs/
 data/tutor_memory.db
 data/vector_store/
+data\chroma_db\chroma.sqlite3
+data\student_states\artificial_intelligence\student_state.json
 
 # Tool caches
 .pytest_cache/
