@@ -49,9 +49,12 @@
     }
 
     function filterHistoryItems(items) {
+        const visibleByCourse = typeof app.historyEntryMatchesCourse === 'function'
+            ? items.filter(entry => app.historyEntryMatchesCourse(entry, state.activeCourse || ''))
+            : items;
         const query = normalizeHistoryQuery(historyUiState.searchQuery);
-        if (!query) return items;
-        return items.filter(entry => {
+        if (!query) return visibleByCourse;
+        return visibleByCourse.filter(entry => {
             const label = (entry.display_title || entry.current_topic || entry.thread_id || '').toLowerCase();
             return label.includes(query);
         });

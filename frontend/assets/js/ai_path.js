@@ -95,6 +95,14 @@
         window.history.replaceState(window.history.state, '', url);
     }
 
+    function clearResumeFlag() {
+        if (!window.history?.replaceState) return;
+        const url = new URL(window.location.href);
+        if (!url.searchParams.has('resume')) return;
+        url.searchParams.delete('resume');
+        window.history.replaceState(window.history.state, '', url);
+    }
+
     function applyCourseChrome(mode) {
         const subtitle = document.querySelector('.sb-brand-subtitle');
         if (subtitle) {
@@ -297,6 +305,25 @@
         return null;
     }
 
+    function historyEntryMatchesCourse(item, mode) {
+        if (!mode) return true;
+        if (mode === COURSE_MODE_AI) return isAiHistoryItem(item);
+        if (mode === COURSE_MODE_AUTO) return !isAiHistoryItem(item);
+        return true;
+    }
+
+    function openCourseWorkspace(mode) {
+        const url = new URL(window.location.href);
+        url.search = '';
+        url.hash = '';
+        url.searchParams.set('mode', mode === COURSE_MODE_AI ? 'ai_path' : 'auto_control');
+        url.searchParams.set('resume', '1');
+        const opened = window.open(url.toString(), '_blank', 'noopener');
+        if (!opened) {
+            window.location.assign(url.toString());
+        }
+    }
+
     async function restoreLatestCourseThread(mode) {
         if (!mode) {
             renderCourseChoice();
@@ -314,6 +341,7 @@
         const latest = findLatestThreadForCourse(mode, window._chatSearchHistoryCache || []);
         if (latest?.thread_id && app.loadSession) {
             await app.loadSession(latest.thread_id);
+            clearResumeFlag();
             return;
         }
 
@@ -323,6 +351,7 @@
             await originalStartNewSession();
             setAiMode(false, { updateUrl: true });
         }
+        clearResumeFlag();
     }
 
     async function submitAiPathReplan(goalText) {
@@ -392,12 +421,12 @@
 
         document.getElementById('course-choice-auto')?.addEventListener('click', () => {
             resetAiPathRuntimeUi();
-            restoreLatestCourseThread(COURSE_MODE_AUTO);
+            openCourseWorkspace(COURSE_MODE_AUTO);
             app.setStatusBanner?.('已选择自动控制原理', 'success');
         });
 
         document.getElementById('course-choice-ai')?.addEventListener('click', () => {
-            restoreLatestCourseThread(COURSE_MODE_AI);
+            openCourseWorkspace(COURSE_MODE_AI);
         });
 
         app.setStatusBanner?.('请选择学习方向', 'awaiting');
@@ -946,7 +975,23 @@
         };
     }
 
-    app.startNewSession = function patchedStartNewSession() {
+    app.startNewSession = async function patchedStartNewSession() {
+        const mode = state.aiPathMode
+            ? COURSE_MODE_AI
+            : (state.activeCourse || courseModeFromLocation());
+
+        if (mode === COURSE_MODE_AI) {
+            await startAiPathDialogue();
+            return;
+        }
+
+        if (mode === COURSE_MODE_AUTO && originalStartNewSession) {
+            resetAiPathRuntimeUi();
+            await originalStartNewSession();
+            setAiMode(false, { updateUrl: true });
+            return;
+        }
+
         renderCourseChoice();
     };
 
@@ -970,13 +1015,27 @@
     app.openAiPathMode = startAiPathDialogue;
     app.renderCourseChoice = renderCourseChoice;
     app.restoreLatestCourseThread = restoreLatestCourseThread;
+    app.historyEntryMatchesCourse = historyEntryMatchesCourse;
     app.restoreLastSessionIfAny = async function restoreLastCourseSessionIfAny() {
         const mode = courseModeFromLocation();
         if (!mode) {
             renderCourseChoice();
             return;
         }
-        await restoreLatestCourseThread(mode);
+        const shouldResume = new URL(window.location.href).searchParams.get('resume') === '1';
+        if (shouldResume) {
+            await restoreLatestCourseThread(mode);
+            return;
+        }
+
+        setCourseMode(mode, { updateUrl: true });
+        await app.fetchHistory?.();
+        if (mode === COURSE_MODE_AI) {
+            await startAiPathDialogue();
+        } else if (originalStartNewSession) {
+            await originalStartNewSession();
+            setAiMode(false, { updateUrl: true });
+        }
     };
 
     window.startNewSession = () => app.startNewSession();

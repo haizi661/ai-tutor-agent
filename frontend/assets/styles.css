@@ -15949,8 +15949,36 @@ body.course-choice-mode .composer-disclaimer {
     display: none !important;
 }
 
+body.course-choice-mode {
+    min-height: 100vh;
+    background:
+        radial-gradient(circle at 82% 22%, rgba(77, 139, 255, 0.20), transparent 34rem),
+        linear-gradient(180deg, #f8fbff 0%, #eef6ff 58%, #d9e9ff 100%);
+}
+
+body.course-choice-mode .page-shell,
+body.course-choice-mode .container,
+body.course-choice-mode .chat-main {
+    min-height: 100vh;
+}
+
+body.course-choice-mode .container {
+    display: block;
+}
+
+body.course-choice-mode .sidebar,
+body.course-choice-mode .chat-header,
+body.course-choice-mode .landing-stage {
+    display: none !important;
+}
+
 body.course-choice-mode .messages {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
     justify-content: center;
+    padding: 8vh 1.5rem;
+    overflow: auto;
 }
 
 .course-choice-kicker {
