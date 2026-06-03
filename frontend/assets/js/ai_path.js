@@ -798,7 +798,9 @@
         return Boolean(
             stateSnapshot?.ai_path_mode
             || stateSnapshot?.active_course === COURSE_MODE_AI
+            || stateSnapshot?.learning_track === COURSE_MODE_AI
             || stateSnapshot?.flow_status === 'ai_path'
+            || stateSnapshot?.flow_status === 'ai_path_active'
         );
     }
 

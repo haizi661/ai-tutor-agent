@@ -1,6 +1,8 @@
+from copy import deepcopy
 from typing import Any
 
 from fastapi import APIRouter, Request
+from langgraph.checkpoint.base import empty_checkpoint
 from pydantic import BaseModel
 
 from ai_tutor_agent.ai_learning_path.ai_path_service import get_ai_path_service
@@ -18,6 +20,10 @@ def _thread_config(thread_id: str) -> dict:
     return {"configurable": {"thread_id": thread_id}}
 
 
+def _checkpoint_put_config(thread_id: str) -> dict:
+    return {"configurable": {"thread_id": thread_id, "checkpoint_ns": ""}}
+
+
 def _checkpoint_values(thread_id: str, request: Request) -> dict[str, Any]:
     from ai_tutor_agent.interfaces.api.runtime import get_runtime
 
@@ -28,6 +34,68 @@ def _checkpoint_values(thread_id: str, request: Request) -> dict[str, Any]:
         if not checkpoint_tuple:
             return {}
         return dict(checkpoint_tuple.checkpoint.get("channel_values") or {})
+    finally:
+        saver_conn.close()
+
+
+def _next_channel_version(checkpoint_store: Any, current: Any) -> Any:
+    try:
+        return checkpoint_store.get_next_version(current, None)
+    except Exception:
+        if isinstance(current, int):
+            return current + 1
+        try:
+            return str(int(str(current or "0")) + 1)
+        except Exception:
+            return "1"
+
+
+def _save_ai_path_checkpoint(thread_id: str, runtime: Any, patch: dict[str, Any]) -> None:
+    """Persist AI-path session state without running the control-theory LangGraph.
+
+    AI path is a course-isolated side flow. Using graph_app.update_state() here can
+    trigger the main workflow's conditional routing, which is exactly what we must
+    avoid for /api/ai-path/* requests.
+    """
+    checkpoint_store, saver_conn = runtime.checkpoint_factory(runtime.settings.memory_db_path)
+    try:
+        if hasattr(checkpoint_store, "save"):
+            current = {}
+            checkpoint_tuple = checkpoint_store.get_tuple(_thread_config(thread_id))
+            if checkpoint_tuple:
+                current = dict(checkpoint_tuple.checkpoint.get("channel_values") or {})
+            current.update(patch)
+            checkpoint_store.save(thread_id, current, source="ai_path", step=1)
+            return
+
+        config = _checkpoint_put_config(thread_id)
+        checkpoint_tuple = checkpoint_store.get_tuple(config)
+        if checkpoint_tuple:
+            checkpoint = deepcopy(checkpoint_tuple.checkpoint)
+            put_config = deepcopy(checkpoint_tuple.config or config)
+            put_config.setdefault("configurable", {}).setdefault("checkpoint_ns", "")
+            metadata = dict(checkpoint_tuple.metadata or {})
+            step = int(metadata.get("step") or 0) + 1
+        else:
+            checkpoint = empty_checkpoint()
+            put_config = config
+            metadata = {}
+            step = 1
+
+        channel_values = dict(checkpoint.get("channel_values") or {})
+        channel_versions = dict(checkpoint.get("channel_versions") or {})
+        new_versions: dict[str, Any] = {}
+        channel_values.update(patch)
+        for key in patch:
+            next_version = _next_channel_version(checkpoint_store, channel_versions.get(key))
+            channel_versions[key] = next_version
+            new_versions[key] = next_version
+
+        checkpoint["channel_values"] = channel_values
+        checkpoint["channel_versions"] = channel_versions
+        checkpoint["updated_channels"] = list(patch)
+        metadata.update({"source": "ai_path", "step": step})
+        checkpoint_store.put(put_config, checkpoint, metadata, new_versions)
     finally:
         saver_conn.close()
 
@@ -48,7 +116,6 @@ def _response_message(response: dict[str, Any]) -> str:
 
 def _persist_ai_path_history(request: Request, payload: ChatRequest, response: dict[str, Any]) -> None:
     from ai_tutor_agent.interfaces.api.runtime import get_runtime
-    from ai_tutor_agent.interfaces.api.session import _checkpoint_state_patch
 
     thread_id = (payload.thread_id or "default_ai_path_thread").strip()
     if not thread_id:
@@ -85,7 +152,7 @@ def _persist_ai_path_history(request: Request, payload: ChatRequest, response: d
     if user_text and not current_goal:
         current_goal = user_text
 
-    _checkpoint_state_patch(
+    _save_ai_path_checkpoint(
         thread_id,
         runtime,
         {

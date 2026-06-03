@@ -112,3 +112,4 @@ backend/__pycache__/
 
 #claude
 .claude
+data/student_states/artificial_intelligence/student_state.json
