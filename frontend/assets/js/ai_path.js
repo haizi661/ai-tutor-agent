@@ -278,12 +278,17 @@
     }
 
     function isAiHistoryItem(item) {
+        const threadId = String(item?.thread_id || '');
+        const titleText = `${item?.display_title || ''} ${item?.current_topic || ''} ${item?.learning_track_label || ''}`;
         return Boolean(
-            item?.ai_path_mode
+            threadId.startsWith('ai_path_')
+            || item?.ai_path_mode
             || item?.active_course === COURSE_MODE_AI
             || item?.learning_track === COURSE_MODE_AI
             || item?.flow_status === 'ai_path'
             || item?.flow_status === 'ai_path_active'
+            || titleText.includes('人工智能')
+            || titleText.toLowerCase().includes('ai path')
         );
     }
 
@@ -318,9 +323,9 @@
         url.hash = '';
         url.searchParams.set('mode', mode === COURSE_MODE_AI ? 'ai_path' : 'auto_control');
         url.searchParams.set('resume', '1');
-        const opened = window.open(url.toString(), '_blank', 'noopener');
-        if (!opened) {
-            window.location.assign(url.toString());
+        const opened = window.open(url.toString(), '_blank');
+        if (!opened && app.setStatusBanner) {
+            app.setStatusBanner('浏览器阻止了新标签页，请允许弹窗后再试', 'warning');
         }
     }
 
@@ -390,6 +395,30 @@
         app.applyPrimaryActionState?.();
     }
 
+    function courseChoiceTemplate() {
+        return `
+            <div class="course-choice-brand">
+                <span class="course-choice-mark">AI</span>
+                <span>AI Tutor</span>
+            </div>
+            <div class="course-choice-kicker">COURSE GATEWAY</div>
+            <h1>选择你的学习空间</h1>
+            <p>这里是课程分流入口。选择课程后会打开新的学习标签页，当前欢迎页会保持不变，方便你随时回到这里切换方向。</p>
+            <div class="course-choice-actions">
+                <button type="button" id="course-choice-auto">
+                    <span class="course-choice-icon">AC</span>
+                    <strong>自动控制原理</strong>
+                    <span>恢复最近的自控学习页，继续图谱伴学流程。</span>
+                </button>
+                <button type="button" id="course-choice-ai">
+                    <span class="course-choice-icon">AI</span>
+                    <strong>人工智能</strong>
+                    <span>恢复最近的 AI 路径规划对话，继续当前学习路径。</span>
+                </button>
+            </div>
+        `;
+    }
+
     function renderCourseChoice() {
         resetAiPathRuntimeUi();
         setCourseMode('', { updateUrl: true });
@@ -417,6 +446,7 @@
             </div>
         `;
 
+        card.innerHTML = courseChoiceTemplate();
         messages.appendChild(card);
 
         document.getElementById('course-choice-auto')?.addEventListener('click', () => {

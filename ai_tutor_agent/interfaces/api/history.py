@@ -298,6 +298,19 @@ def _extract_topic_from_messages(values: dict[str, Any], max_len: int = 30) -> s
 def _checkpoint_summary(thread_id: str, checkpoint_tuple, alias_title: str = "") -> dict[str, Any]:
     values = checkpoint_tuple.checkpoint.get("channel_values", {})
     flow_status = values.get("flow_status", "greeting")
+    message_history = values.get("message_history") or []
+    inferred_ai_path = (
+        str(thread_id).startswith("ai_path_")
+        or bool(values.get("ai_path_mode"))
+        or values.get("active_course") == "artificial_intelligence"
+        or values.get("learning_track") == "artificial_intelligence"
+        or flow_status in {"ai_path", "ai_path_active"}
+        or any(
+            str(message.get("kind") or "").startswith("ai_path_")
+            for message in message_history
+            if isinstance(message, dict)
+        )
+    )
     current_topic = str(values.get("current_topic", "") or "").strip()
     proposed_topic = str(values.get("proposed_topic", "") or "").strip()
     learning_track_label = str(values.get("learning_track_label", "") or "").strip()
@@ -317,10 +330,10 @@ def _checkpoint_summary(thread_id: str, checkpoint_tuple, alias_title: str = "")
         "current_topic": current_topic,
         "display_title": display_title,
         "custom_title": custom_title,
-        "active_course": values.get("active_course", ""),
-        "ai_path_mode": values.get("ai_path_mode", False),
-        "learning_track": values.get("learning_track", ""),
-        "learning_track_label": values.get("learning_track_label", ""),
+        "active_course": values.get("active_course", "") or ("artificial_intelligence" if inferred_ai_path else ""),
+        "ai_path_mode": bool(values.get("ai_path_mode") or inferred_ai_path),
+        "learning_track": values.get("learning_track", "") or ("artificial_intelligence" if inferred_ai_path else ""),
+        "learning_track_label": values.get("learning_track_label", "") or ("人工智能" if inferred_ai_path else ""),
         "flow_status": flow_status,
         "is_assessed": values.get("is_assessed", False),
         "score": values.get("score", 0),

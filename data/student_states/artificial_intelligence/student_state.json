@@ -1106,6 +1106,12 @@
       "stage": "learning",
       "updated_at": "2026-06-03T15:49:41",
       "latest_intent": "我就确定是现在的方向了"
+    },
+    {
+      "thread_id": "session_elybp2w",
+      "stage": "intent_refining",
+      "updated_at": "2026-06-03T16:47:19",
+      "latest_intent": ""
     }
   ],
   "dialogue_sessions": {
@@ -2111,6 +2117,15 @@
         ]
       },
       "replan_keep_progress": false
+    },
+    "session_elybp2w": {
+      "stage": "intent_refining",
+      "intent_history": [],
+      "candidate_nodes": [],
+      "selected_nodes": [],
+      "understood_goal": "",
+      "preference": {},
+      "created_at": "2026-06-03T16:47:19"
     }
   },
   "path_versions": [
