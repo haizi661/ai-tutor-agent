@@ -3,8 +3,8 @@
   "current_node_id": "KM001",
   "last_question": "自动控制的一般概念",
   "mastery_scores": {
-    "KM003": 10,
-    "KM001": 30
+    "KM003": 10.0,
+    "KM001": 30.0
   },
   "visited_nodes": [],
   "wrong_nodes": [
@@ -17,7 +17,7 @@
     "KM003": {
       "started_at": "2026-05-06T14:45:57",
       "completed_at": "",
-      "mastery_score": 10
+      "mastery_score": 10.0
     },
     "自动控制原理": {
       "started_at": "2026-05-06T20:25:42",
@@ -27,7 +27,7 @@
     "KM001": {
       "started_at": "2026-05-06T20:45:41",
       "completed_at": "",
-      "mastery_score": 30
+      "mastery_score": 30.0
     }
   },
   "homework": [],
@@ -438,6 +438,8 @@
   "last_learning_at": "2026-05-27T15:28:38",
   "teaching_strategy": "explain",
   "difficulty_level": 3,
+  "wrong_question_book": [],
+  "question_help_records": [],
   "knowledge_graph": {
     "KM003": {
       "title": "自动控制系统示例",
@@ -797,5 +799,595 @@
       ],
       "last_updated": "2026-05-27T15:28:38"
     }
-  }
+  },
+  "learning_plan": [
+    {
+      "step_index": 0,
+      "step_name": "建立自动控制基础",
+      "step_goal": "掌握基本概念核心能力",
+      "step_ability": "B",
+      "chapter": "第一章",
+      "node_ids": [
+        "KM001",
+        "KM002",
+        "KM003"
+      ],
+      "node_names": [
+        "自动控制的一般概念",
+        "自动控制的基本原理与方式",
+        "自动控制系统示例"
+      ],
+      "entry_modes": {
+        "KM001": "short_learning",
+        "KM002": "short_learning",
+        "KM003": "short_learning"
+      },
+      "reason": "基于当前画像与递进逻辑的推荐",
+      "status": "in_progress"
+    },
+    {
+      "step_index": 1,
+      "step_name": "探究系统分类与要求",
+      "step_goal": "掌握基本概念核心能力",
+      "step_ability": "B",
+      "chapter": "第一章",
+      "node_ids": [
+        "KM004",
+        "KM005",
+        "KM006"
+      ],
+      "node_names": [
+        "自动控制系统的分类",
+        "对自动控制系统的基本要求",
+        "自动控制系统的分析与设计工具"
+      ],
+      "entry_modes": {
+        "KM004": "short_learning",
+        "KM005": "short_learning",
+        "KM006": "short_learning"
+      },
+      "reason": "基于当前画像与递进逻辑的推荐",
+      "status": "pending"
+    },
+    {
+      "step_index": 2,
+      "step_name": "掌握控制数学模型",
+      "step_goal": "掌握建模核心能力",
+      "step_ability": "C",
+      "chapter": "第二章",
+      "node_ids": [
+        "KM007",
+        "KM008",
+        "KM009"
+      ],
+      "node_names": [
+        "控制系统的数学模型",
+        "控制系统的时域数学模型",
+        "控制系统的复数域数学模型"
+      ],
+      "entry_modes": {
+        "KM007": "full_learning",
+        "KM008": "full_learning",
+        "KM009": "full_learning"
+      },
+      "reason": "含 3 个薄弱节点,需要完整学习",
+      "status": "pending"
+    },
+    {
+      "step_index": 3,
+      "step_name": "攻克时域分析入门",
+      "step_goal": "掌握时域核心能力",
+      "step_ability": "E",
+      "chapter": "第三章",
+      "node_ids": [
+        "KM012",
+        "KM013",
+        "KM014"
+      ],
+      "node_names": [
+        "线性系统的时域分析法",
+        "系统时间响应的性能指标",
+        "一阶系统的时域分析"
+      ],
+      "entry_modes": {
+        "KM012": "full_learning",
+        "KM013": "full_learning",
+        "KM014": "full_learning"
+      },
+      "reason": "含 3 个薄弱节点,需要完整学习",
+      "status": "pending"
+    }
+  ],
+  "learning_plan_current_step": 0,
+  "learning_plan_generated_at": "2026-06-03T08:14:09.457118+00:00",
+  "learning_plan_source": "profile_based",
+  "concept_mastery": {
+    "KM001": {
+      "mastery": 0.4,
+      "confidence": 0.2,
+      "source": "default",
+      "risk": "medium",
+      "failure_count": 0,
+      "last_score": 0.0,
+      "last_updated": "2026-06-03T08:14:07.598994+00:00"
+    },
+    "KM002": {
+      "mastery": 0.4,
+      "confidence": 0.2,
+      "source": "default",
+      "risk": "medium",
+      "failure_count": 0,
+      "last_score": 0.0,
+      "last_updated": "2026-06-03T08:14:07.598994+00:00"
+    },
+    "KM003": {
+      "mastery": 0.4,
+      "confidence": 0.2,
+      "source": "default",
+      "risk": "medium",
+      "failure_count": 0,
+      "last_score": 0.0,
+      "last_updated": "2026-06-03T08:14:07.598994+00:00"
+    },
+    "KM004": {
+      "mastery": 0.4,
+      "confidence": 0.2,
+      "source": "default",
+      "risk": "medium",
+      "failure_count": 0,
+      "last_score": 0.0,
+      "last_updated": "2026-06-03T08:14:07.598994+00:00"
+    },
+    "KM005": {
+      "mastery": 0.4,
+      "confidence": 0.2,
+      "source": "default",
+      "risk": "medium",
+      "failure_count": 0,
+      "last_score": 0.0,
+      "last_updated": "2026-06-03T08:14:07.598994+00:00"
+    },
+    "KM006": {
+      "mastery": 0.4,
+      "confidence": 0.2,
+      "source": "default",
+      "risk": "medium",
+      "failure_count": 0,
+      "last_score": 0.0,
+      "last_updated": "2026-06-03T08:14:07.598994+00:00"
+    },
+    "KM007": {
+      "mastery": 0.26,
+      "confidence": 0.2,
+      "source": "default",
+      "risk": "high",
+      "failure_count": 0,
+      "last_score": 0.0,
+      "last_updated": "2026-06-03T08:14:07.598994+00:00"
+    },
+    "KM008": {
+      "mastery": 0.3,
+      "confidence": 0.2,
+      "source": "default",
+      "risk": "high",
+      "failure_count": 0,
+      "last_score": 0.0,
+      "last_updated": "2026-06-03T08:14:07.598994+00:00"
+    },
+    "KM009": {
+      "mastery": 0.3,
+      "confidence": 0.2,
+      "source": "default",
+      "risk": "high",
+      "failure_count": 0,
+      "last_score": 0.0,
+      "last_updated": "2026-06-03T08:14:07.598994+00:00"
+    },
+    "KM010": {
+      "mastery": 0.26,
+      "confidence": 0.2,
+      "source": "default",
+      "risk": "high",
+      "failure_count": 0,
+      "last_score": 0.0,
+      "last_updated": "2026-06-03T08:14:07.598994+00:00"
+    },
+    "KM011": {
+      "mastery": 0.2,
+      "confidence": 0.2,
+      "source": "default",
+      "risk": "high",
+      "failure_count": 0,
+      "last_score": 0.0,
+      "last_updated": "2026-06-03T08:14:07.598994+00:00"
+    },
+    "KM012": {
+      "mastery": 0.2,
+      "confidence": 0.2,
+      "source": "default",
+      "risk": "high",
+      "failure_count": 0,
+      "last_score": 0.0,
+      "last_updated": "2026-06-03T08:14:07.598994+00:00"
+    },
+    "KM013": {
+      "mastery": 0.2,
+      "confidence": 0.2,
+      "source": "default",
+      "risk": "high",
+      "failure_count": 0,
+      "last_score": 0.0,
+      "last_updated": "2026-06-03T08:14:07.598994+00:00"
+    },
+    "KM014": {
+      "mastery": 0.2,
+      "confidence": 0.2,
+      "source": "default",
+      "risk": "high",
+      "failure_count": 0,
+      "last_score": 0.0,
+      "last_updated": "2026-06-03T08:14:07.598994+00:00"
+    },
+    "KM015": {
+      "mastery": 0.2,
+      "confidence": 0.2,
+      "source": "default",
+      "risk": "high",
+      "failure_count": 0,
+      "last_score": 0.0,
+      "last_updated": "2026-06-03T08:14:07.598994+00:00"
+    },
+    "KM016": {
+      "mastery": 0.2,
+      "confidence": 0.2,
+      "source": "default",
+      "risk": "high",
+      "failure_count": 0,
+      "last_score": 0.0,
+      "last_updated": "2026-06-03T08:14:07.598994+00:00"
+    },
+    "KM017": {
+      "mastery": 0.2,
+      "confidence": 0.2,
+      "source": "default",
+      "risk": "high",
+      "failure_count": 0,
+      "last_score": 0.0,
+      "last_updated": "2026-06-03T08:14:07.598994+00:00"
+    },
+    "KM018": {
+      "mastery": 0.2,
+      "confidence": 0.2,
+      "source": "default",
+      "risk": "high",
+      "failure_count": 0,
+      "last_score": 0.0,
+      "last_updated": "2026-06-03T08:14:07.598994+00:00"
+    },
+    "KM019": {
+      "mastery": 0.2,
+      "confidence": 0.2,
+      "source": "default",
+      "risk": "high",
+      "failure_count": 0,
+      "last_score": 0.0,
+      "last_updated": "2026-06-03T08:14:07.598994+00:00"
+    },
+    "KM020": {
+      "mastery": 0.2,
+      "confidence": 0.2,
+      "source": "default",
+      "risk": "high",
+      "failure_count": 0,
+      "last_score": 0.0,
+      "last_updated": "2026-06-03T08:14:07.598994+00:00"
+    },
+    "KM021": {
+      "mastery": 0.2,
+      "confidence": 0.2,
+      "source": "default",
+      "risk": "high",
+      "failure_count": 0,
+      "last_score": 0.0,
+      "last_updated": "2026-06-03T08:14:07.598994+00:00"
+    },
+    "KM022": {
+      "mastery": 0.2,
+      "confidence": 0.2,
+      "source": "default",
+      "risk": "high",
+      "failure_count": 0,
+      "last_score": 0.0,
+      "last_updated": "2026-06-03T08:14:07.598994+00:00"
+    },
+    "KM023": {
+      "mastery": 0.2,
+      "confidence": 0.2,
+      "source": "default",
+      "risk": "high",
+      "failure_count": 0,
+      "last_score": 0.0,
+      "last_updated": "2026-06-03T08:14:07.598994+00:00"
+    },
+    "KM024": {
+      "mastery": 0.2,
+      "confidence": 0.2,
+      "source": "default",
+      "risk": "high",
+      "failure_count": 0,
+      "last_score": 0.0,
+      "last_updated": "2026-06-03T08:14:07.598994+00:00"
+    },
+    "KM025": {
+      "mastery": 0.2,
+      "confidence": 0.2,
+      "source": "default",
+      "risk": "high",
+      "failure_count": 0,
+      "last_score": 0.0,
+      "last_updated": "2026-06-03T08:14:07.598994+00:00"
+    },
+    "KM026": {
+      "mastery": 0.2,
+      "confidence": 0.2,
+      "source": "default",
+      "risk": "high",
+      "failure_count": 0,
+      "last_score": 0.0,
+      "last_updated": "2026-06-03T08:14:07.598994+00:00"
+    },
+    "KM027": {
+      "mastery": 0.2,
+      "confidence": 0.2,
+      "source": "default",
+      "risk": "high",
+      "failure_count": 0,
+      "last_score": 0.0,
+      "last_updated": "2026-06-03T08:14:07.598994+00:00"
+    },
+    "KM028": {
+      "mastery": 0.2,
+      "confidence": 0.2,
+      "source": "default",
+      "risk": "high",
+      "failure_count": 0,
+      "last_score": 0.0,
+      "last_updated": "2026-06-03T08:14:07.598994+00:00"
+    },
+    "KM029": {
+      "mastery": 0.2,
+      "confidence": 0.2,
+      "source": "default",
+      "risk": "high",
+      "failure_count": 0,
+      "last_score": 0.0,
+      "last_updated": "2026-06-03T08:14:07.598994+00:00"
+    },
+    "KM030": {
+      "mastery": 0.2,
+      "confidence": 0.2,
+      "source": "default",
+      "risk": "high",
+      "failure_count": 0,
+      "last_score": 0.0,
+      "last_updated": "2026-06-03T08:14:07.598994+00:00"
+    },
+    "KM031": {
+      "mastery": 0.2,
+      "confidence": 0.2,
+      "source": "default",
+      "risk": "high",
+      "failure_count": 0,
+      "last_score": 0.0,
+      "last_updated": "2026-06-03T08:14:07.598994+00:00"
+    },
+    "KM032": {
+      "mastery": 0.2,
+      "confidence": 0.2,
+      "source": "default",
+      "risk": "high",
+      "failure_count": 0,
+      "last_score": 0.0,
+      "last_updated": "2026-06-03T08:14:07.598994+00:00"
+    },
+    "KM033": {
+      "mastery": 0.2,
+      "confidence": 0.2,
+      "source": "default",
+      "risk": "high",
+      "failure_count": 0,
+      "last_score": 0.0,
+      "last_updated": "2026-06-03T08:14:07.598994+00:00"
+    },
+    "KM034": {
+      "mastery": 0.2,
+      "confidence": 0.2,
+      "source": "default",
+      "risk": "high",
+      "failure_count": 0,
+      "last_score": 0.0,
+      "last_updated": "2026-06-03T08:14:07.598994+00:00"
+    },
+    "KM035": {
+      "mastery": 0.2,
+      "confidence": 0.2,
+      "source": "default",
+      "risk": "high",
+      "failure_count": 0,
+      "last_score": 0.0,
+      "last_updated": "2026-06-03T08:14:07.598994+00:00"
+    },
+    "KM036": {
+      "mastery": 0.26,
+      "confidence": 0.2,
+      "source": "default",
+      "risk": "high",
+      "failure_count": 0,
+      "last_score": 0.0,
+      "last_updated": "2026-06-03T08:14:07.598994+00:00"
+    },
+    "KM037": {
+      "mastery": 0.3,
+      "confidence": 0.2,
+      "source": "default",
+      "risk": "high",
+      "failure_count": 0,
+      "last_score": 0.0,
+      "last_updated": "2026-06-03T08:14:07.598994+00:00"
+    },
+    "KM038": {
+      "mastery": 0.2,
+      "confidence": 0.2,
+      "source": "default",
+      "risk": "high",
+      "failure_count": 0,
+      "last_score": 0.0,
+      "last_updated": "2026-06-03T08:14:07.598994+00:00"
+    },
+    "KM039": {
+      "mastery": 0.2,
+      "confidence": 0.2,
+      "source": "default",
+      "risk": "high",
+      "failure_count": 0,
+      "last_score": 0.0,
+      "last_updated": "2026-06-03T08:14:07.598994+00:00"
+    },
+    "KM040": {
+      "mastery": 0.2,
+      "confidence": 0.2,
+      "source": "default",
+      "risk": "high",
+      "failure_count": 0,
+      "last_score": 0.0,
+      "last_updated": "2026-06-03T08:14:07.598994+00:00"
+    },
+    "KM041": {
+      "mastery": 0.2,
+      "confidence": 0.2,
+      "source": "default",
+      "risk": "high",
+      "failure_count": 0,
+      "last_score": 0.0,
+      "last_updated": "2026-06-03T08:14:07.598994+00:00"
+    },
+    "KM042": {
+      "mastery": 0.2,
+      "confidence": 0.2,
+      "source": "default",
+      "risk": "high",
+      "failure_count": 0,
+      "last_score": 0.0,
+      "last_updated": "2026-06-03T08:14:07.598994+00:00"
+    }
+  },
+  "learning_plan_v2": {
+    "steps": [
+      {
+        "step_index": 0,
+        "step_name": "建立自动控制基础",
+        "step_goal": "掌握基本概念核心能力",
+        "step_ability": "B",
+        "chapter": "第一章",
+        "node_ids": [
+          "KM001",
+          "KM002",
+          "KM003"
+        ],
+        "node_names": [
+          "自动控制的一般概念",
+          "自动控制的基本原理与方式",
+          "自动控制系统示例"
+        ],
+        "entry_modes": {
+          "KM001": "short_learning",
+          "KM002": "short_learning",
+          "KM003": "short_learning"
+        },
+        "reason": "基于当前画像与递进逻辑的推荐",
+        "status": "in_progress"
+      },
+      {
+        "step_index": 1,
+        "step_name": "探究系统分类与要求",
+        "step_goal": "掌握基本概念核心能力",
+        "step_ability": "B",
+        "chapter": "第一章",
+        "node_ids": [
+          "KM004",
+          "KM005",
+          "KM006"
+        ],
+        "node_names": [
+          "自动控制系统的分类",
+          "对自动控制系统的基本要求",
+          "自动控制系统的分析与设计工具"
+        ],
+        "entry_modes": {
+          "KM004": "short_learning",
+          "KM005": "short_learning",
+          "KM006": "short_learning"
+        },
+        "reason": "基于当前画像与递进逻辑的推荐",
+        "status": "pending"
+      },
+      {
+        "step_index": 2,
+        "step_name": "掌握控制数学模型",
+        "step_goal": "掌握建模核心能力",
+        "step_ability": "C",
+        "chapter": "第二章",
+        "node_ids": [
+          "KM007",
+          "KM008",
+          "KM009"
+        ],
+        "node_names": [
+          "控制系统的数学模型",
+          "控制系统的时域数学模型",
+          "控制系统的复数域数学模型"
+        ],
+        "entry_modes": {
+          "KM007": "full_learning",
+          "KM008": "full_learning",
+          "KM009": "full_learning"
+        },
+        "reason": "含 3 个薄弱节点,需要完整学习",
+        "status": "pending"
+      },
+      {
+        "step_index": 3,
+        "step_name": "攻克时域分析入门",
+        "step_goal": "掌握时域核心能力",
+        "step_ability": "E",
+        "chapter": "第三章",
+        "node_ids": [
+          "KM012",
+          "KM013",
+          "KM014"
+        ],
+        "node_names": [
+          "线性系统的时域分析法",
+          "系统时间响应的性能指标",
+          "一阶系统的时域分析"
+        ],
+        "entry_modes": {
+          "KM012": "full_learning",
+          "KM013": "full_learning",
+          "KM014": "full_learning"
+        },
+        "reason": "含 3 个薄弱节点,需要完整学习",
+        "status": "pending"
+      }
+    ],
+    "total_nodes": 12,
+    "total_steps": 4,
+    "generated_at": "2026-06-03T08:14:09.457118+00:00",
+    "source": "cold_start",
+    "session_index": 0
+  },
+  "session_index": 1,
+  "self_assessment_scores": {},
+  "skip_self_assessment": true,
+  "teaching_episodes": []
 }

@@ -132,22 +132,45 @@ def _persist_ai_path_history(request: Request, payload: ChatRequest, response: d
             "content": user_text,
         })
 
+    response_type = str(response.get("type") or "").strip()
+    response_path = response.get("path") if isinstance(response.get("path"), list) else []
+    existing_path = values.get("ai_path_path") if isinstance(values.get("ai_path_path"), list) else []
+    ai_path_path = response_path or existing_path
+
     assistant_text = _response_message(response)
     if assistant_text:
         history.append({
             "role": "assistant",
-            "kind": f"ai_path_{response.get('type') or 'message'}",
+            "kind": f"ai_path_{response_type or 'message'}",
             "content": assistant_text,
             "data": {
-                "response_type": response.get("type", ""),
-                "path": response.get("path", []),
+                "response_type": response_type,
+                "path": ai_path_path,
                 "current_node": response.get("current_node", ""),
             },
         })
 
     node = response.get("node") if isinstance(response.get("node"), dict) else {}
     current_node_id = str(response.get("current_node") or node.get("node_id") or "").strip()
+    if not current_node_id:
+        current_node_id = next(
+            (
+                str(item.get("node_id") or "").strip()
+                for item in ai_path_path
+                if isinstance(item, dict) and item.get("status") == "current"
+            ),
+            "",
+        )
     current_node_name = str(node.get("name") or "").strip()
+    if not current_node_name and current_node_id:
+        current_node_name = next(
+            (
+                str(item.get("name") or "").strip()
+                for item in ai_path_path
+                if isinstance(item, dict) and item.get("node_id") == current_node_id
+            ),
+            "",
+        )
     current_goal = values.get("current_user_goal", "")
     if user_text and not current_goal:
         current_goal = user_text
@@ -158,13 +181,20 @@ def _persist_ai_path_history(request: Request, payload: ChatRequest, response: d
         {
             "active_course": "artificial_intelligence",
             "ai_path_mode": True,
-            "flow_status": "ai_path",
+            "learning_track": "artificial_intelligence",
+            "learning_track_label": "人工智能",
+            "learning_track_locked": True,
+            "flow_status": "ai_path_active",
             "current_topic": "人工智能学习路径",
             "current_user_goal": current_goal,
             "message_history": history[-80:],
             "current_node_id": current_node_id,
             "current_node_name": current_node_name or values.get("current_node_name", ""),
             "current_node_status": "in_progress" if current_node_id else values.get("current_node_status", ""),
+            "ai_path_path": ai_path_path,
+            "ai_path_current_node": current_node_id or values.get("ai_path_current_node", ""),
+            "ai_path_response_type": response_type,
+            "ai_path_summary": response.get("summary") if isinstance(response.get("summary"), dict) else values.get("ai_path_summary", {}),
             "is_assessed": True,
         },
     )

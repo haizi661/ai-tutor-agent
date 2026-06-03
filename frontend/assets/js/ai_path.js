@@ -109,6 +109,29 @@
         }
     }
 
+    function setElementsHidden(selectors, hidden) {
+        selectors.forEach(selector => {
+            document.querySelectorAll(selector).forEach(el => {
+                el.hidden = hidden;
+                el.classList.toggle('course-tool-hidden', hidden);
+            });
+        });
+    }
+
+    function applyCourseToolVisibility(mode) {
+        const hideAutoOnlyTools = mode !== COURSE_MODE_AUTO;
+        setElementsHidden([
+            '.sb-primary-nav button[onclick="openLibraryPanel()"]',
+            '.sb-primary-nav button[onclick="openErrorCorrectionPanel()"]',
+            '.sb-primary-nav button[onclick="openMatlabExperimentPanel()"]',
+            '#open-graph-modal-btn',
+            '#open-radar-modal-btn',
+            '#open-wrong-book-btn',
+            '#open-question-help-btn',
+            '#open-teaching-insights-btn',
+        ], hideAutoOnlyTools);
+    }
+
     function setCourseMode(mode, options = {}) {
         const nextMode = mode || '';
         const aiActive = nextMode === COURSE_MODE_AI;
@@ -118,7 +141,9 @@
         document.body.classList.toggle('ai-path-chat-mode', aiActive);
         document.body.classList.toggle('course-auto-control-mode', nextMode === COURSE_MODE_AUTO);
         document.body.classList.toggle('course-ai-mode', aiActive);
+        document.body.classList.toggle('course-choice-mode', !nextMode);
         applyCourseChrome(nextMode);
+        applyCourseToolVisibility(nextMode);
         app.patchState?.({ activeCourse: nextMode, aiPathMode: aiActive }, 'course-mode');
 
         try {
@@ -236,6 +261,70 @@
         aiPathProgressRow.classList.add(status === 'error' ? 'is-error' : 'is-done');
     }
 
+    function courseModeFromLocation() {
+        const url = new URL(window.location.href);
+        const mode = url.searchParams.get('mode');
+        if (mode === 'ai_path' || url.hash === '#ai-path') return COURSE_MODE_AI;
+        if (mode === 'auto_control') return COURSE_MODE_AUTO;
+        return '';
+    }
+
+    function isAiHistoryItem(item) {
+        return Boolean(
+            item?.ai_path_mode
+            || item?.active_course === COURSE_MODE_AI
+            || item?.learning_track === COURSE_MODE_AI
+            || item?.flow_status === 'ai_path'
+            || item?.flow_status === 'ai_path_active'
+        );
+    }
+
+    function updatedTime(item) {
+        const value = item?.updated_at || item?.updatedAt || item?.created_at || '';
+        const time = value ? new Date(value).getTime() : 0;
+        return Number.isFinite(time) ? time : 0;
+    }
+
+    function findLatestThreadForCourse(mode, items) {
+        const list = Array.isArray(items) ? items.slice() : [];
+        list.sort((a, b) => updatedTime(b) - updatedTime(a));
+        if (mode === COURSE_MODE_AI) {
+            return list.find(isAiHistoryItem);
+        }
+        if (mode === COURSE_MODE_AUTO) {
+            return list.find(item => !isAiHistoryItem(item));
+        }
+        return null;
+    }
+
+    async function restoreLatestCourseThread(mode) {
+        if (!mode) {
+            renderCourseChoice();
+            return;
+        }
+
+        setCourseMode(mode, { updateUrl: true });
+        if (mode === COURSE_MODE_AI) {
+            ensureAiPathSidePanel();
+        } else {
+            resetAiPathRuntimeUi();
+        }
+
+        await app.fetchHistory?.();
+        const latest = findLatestThreadForCourse(mode, window._chatSearchHistoryCache || []);
+        if (latest?.thread_id && app.loadSession) {
+            await app.loadSession(latest.thread_id);
+            return;
+        }
+
+        if (mode === COURSE_MODE_AI) {
+            await startAiPathDialogue();
+        } else if (originalStartNewSession) {
+            await originalStartNewSession();
+            setAiMode(false, { updateUrl: true });
+        }
+    }
+
     async function submitAiPathReplan(goalText) {
         const text = String(goalText || '').trim();
         if (!text) return;
@@ -250,8 +339,11 @@
         ]);
 
         try {
+            if (!state.currentThreadId) {
+                state.currentThreadId = makeThreadId();
+            }
             const data = await postJson('/api/ai-path/chat', {
-                thread_id: state.currentThreadId || makeThreadId(),
+                thread_id: state.currentThreadId,
                 message: text,
                 choice: 'restart_keep_progress',
             });
@@ -272,6 +364,7 @@
     function renderCourseChoice() {
         resetAiPathRuntimeUi();
         setCourseMode('', { updateUrl: true });
+        state.currentThreadId = '';
         clearMessages();
 
         const messages = document.getElementById('messages');
@@ -299,13 +392,12 @@
 
         document.getElementById('course-choice-auto')?.addEventListener('click', () => {
             resetAiPathRuntimeUi();
-            setAiMode(false, { updateUrl: true });
-            if (originalStartNewSession) originalStartNewSession();
+            restoreLatestCourseThread(COURSE_MODE_AUTO);
             app.setStatusBanner?.('已选择自动控制原理', 'success');
         });
 
         document.getElementById('course-choice-ai')?.addEventListener('click', () => {
-            startAiPathDialogue();
+            restoreLatestCourseThread(COURSE_MODE_AI);
         });
 
         app.setStatusBanner?.('请选择学习方向', 'awaiting');
@@ -766,8 +858,11 @@
         ]);
 
         try {
+            if (!state.currentThreadId) {
+                state.currentThreadId = makeThreadId();
+            }
             const data = await postJson('/api/ai-path/chat', {
-                thread_id: state.currentThreadId || makeThreadId(),
+                thread_id: state.currentThreadId,
                 message,
                 choice: fromChoice ? message : '',
             });
@@ -794,6 +889,29 @@
         app.applyPrimaryActionState?.();
     }
 
+    function latestPathFromTimeline(items) {
+        if (!Array.isArray(items)) return [];
+        for (let i = items.length - 1; i >= 0; i -= 1) {
+            const item = items[i] || {};
+            const path = item.data?.path || item.path;
+            if (Array.isArray(path) && path.length) return path;
+        }
+        return [];
+    }
+
+    function restoreAiPathVisualState(stateSnapshot, items = []) {
+        const path = Array.isArray(stateSnapshot?.ai_path_path) && stateSnapshot.ai_path_path.length
+            ? stateSnapshot.ai_path_path
+            : latestPathFromTimeline(items);
+        ensureAiPathSidePanel();
+        updateAiPathSidePanel(path);
+        state.currentGraphNodeId = stateSnapshot?.ai_path_current_node || stateSnapshot?.current_node_id || '';
+        state.currentGraphNode = stateSnapshot?.current_node_name || state.currentGraphNode || '';
+        state.currentTopic = stateSnapshot?.current_topic || state.currentTopic || '人工智能学习路径';
+        state.graphTopicHint = state.currentTopic;
+        app.updateSidebarState?.();
+    }
+
     function snapshotIsAiPath(stateSnapshot) {
         return Boolean(
             stateSnapshot?.ai_path_mode
@@ -809,9 +927,9 @@
             originalRestoreSessionState(stateSnapshot);
             if (snapshotIsAiPath(stateSnapshot)) {
                 setAiMode(true, { updateUrl: true });
-                ensureAiPathSidePanel();
+                restoreAiPathVisualState(stateSnapshot);
             } else {
-                setAiMode(false, { updateUrl: false });
+                setAiMode(false, { updateUrl: true });
             }
         };
     }
@@ -821,9 +939,9 @@
             originalRestoreMessageTimeline(items, stateSnapshot);
             if (snapshotIsAiPath(stateSnapshot)) {
                 setAiMode(true, { updateUrl: true });
-                ensureAiPathSidePanel();
+                restoreAiPathVisualState(stateSnapshot, items);
             } else {
-                setAiMode(false, { updateUrl: false });
+                setAiMode(false, { updateUrl: true });
             }
         };
     }
@@ -833,6 +951,12 @@
     };
 
     app.handleSend = async function patchedHandleSend() {
+        if (!state.activeCourse) {
+            renderCourseChoice();
+            app.setStatusBanner?.('璇峰厛閫夋嫨瀛︿範鏂瑰悜', 'awaiting');
+            return;
+        }
+
         if (state.aiPathMode) {
             await submitAiPathMessage();
             return;
@@ -845,18 +969,22 @@
 
     app.openAiPathMode = startAiPathDialogue;
     app.renderCourseChoice = renderCourseChoice;
+    app.restoreLatestCourseThread = restoreLatestCourseThread;
+    app.restoreLastSessionIfAny = async function restoreLastCourseSessionIfAny() {
+        const mode = courseModeFromLocation();
+        if (!mode) {
+            renderCourseChoice();
+            return;
+        }
+        await restoreLatestCourseThread(mode);
+    };
 
     window.startNewSession = () => app.startNewSession();
     window.handleSend = () => app.handleSend();
 
     document.addEventListener('DOMContentLoaded', () => {
-        const url = new URL(window.location.href);
-        const mode = url.searchParams.get('mode');
-
-        if (mode === 'ai_path' || url.hash === '#ai-path') {
-            startAiPathDialogue();
-        } else if (mode === 'auto_control') {
-            setAiMode(false, { updateUrl: false });
-        }
+        const mode = courseModeFromLocation();
+        setCourseMode(mode, { updateUrl: false });
+        if (!mode) renderCourseChoice();
     });
 })();

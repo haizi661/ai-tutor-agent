@@ -5,7 +5,7 @@ import os
 import re
 from collections import defaultdict, deque
 from datetime import datetime
-from typing import Any, Dict, List, Set, Tuple
+from typing import Any, Dict, List, Optional, Set, Tuple
 
 import requests
 
@@ -1201,6 +1201,52 @@ class AILearningPathService:
 
         _save_student_state(student)
 
+    def _dialogue_path_ids(self, dialogue: Dict[str, Any], student: Dict[str, Any]) -> List[str]:
+        path = dialogue.get("current_path")
+        if not isinstance(path, list) or not path:
+            path = student.get("current_path", [])
+        return [str(node_id) for node_id in path if str(node_id) in self.node_by_id]
+
+    def _dialogue_current_node(self, dialogue: Dict[str, Any], student: Dict[str, Any]) -> str:
+        current = str(dialogue.get("current_node") or "").strip()
+        path = self._dialogue_path_ids(dialogue, student)
+        if not current:
+            current = str(student.get("current_node") or "").strip()
+        if current not in self.node_by_id:
+            current = path[0] if path else ""
+        return current
+
+    def _format_path_for_dialogue(
+        self,
+        path: List[str],
+        current_node: str = "",
+        learned: Optional[Dict[str, Any]] = None,
+        mastery_scores: Optional[Dict[str, float]] = None,
+    ) -> List[Dict[str, Any]]:
+        learned = learned or {}
+        mastery_scores = mastery_scores or {}
+        formatted = []
+        for node_id in path:
+            if node_id not in self.node_by_id:
+                continue
+            threshold = float(self.node_by_id.get(node_id, {}).get("mastery_threshold") or 0.75)
+            progress = _node_progress_from_student(
+                {"learned_nodes": learned, "mastery_scores": mastery_scores},
+                node_id,
+                threshold=threshold,
+            )
+            if node_id == current_node:
+                status = "current"
+                reason = "当前正在学习的节点"
+            elif node_id in learned or progress["mastered"]:
+                status = "mastered"
+                reason = "已经完成学习"
+            else:
+                status = "not_started"
+                reason = "后续待学习节点"
+            formatted.append(self._format_node(node_id, progress["mastery"], status, reason))
+        return formatted
+
     def chat(
         self,
         thread_id: str,
@@ -1276,6 +1322,23 @@ class AILearningPathService:
                 )
                 dialogue["stage"] = "planned"
                 dialogue["latest_plan"] = plan.get("summary", {})
+                dialogue["latest_path"] = plan.get("path", [])
+                dialogue["current_path"] = [
+                    node.get("node_id")
+                    for node in plan.get("path", [])
+                    if isinstance(node, dict) and node.get("node_id")
+                ]
+                dialogue["current_node"] = (
+                    next(
+                        (
+                            node.get("node_id")
+                            for node in plan.get("path", [])
+                            if isinstance(node, dict) and node.get("status") == "current"
+                        ),
+                        "",
+                    )
+                    or (dialogue["current_path"][0] if dialogue["current_path"] else "")
+                )
                 dialogue["replan_keep_progress"] = False
                 self._save_dialogue(thread_id, dialogue)
 
@@ -1403,8 +1466,8 @@ class AILearningPathService:
         dialogue["stage"] = "learning"
         self._save_dialogue(thread_id, dialogue)
 
-        path = student.get("current_path", [])
-        current_node_id = student.get("current_node") or (path[0] if path else "")
+        path = self._dialogue_path_ids(dialogue, student)
+        current_node_id = self._dialogue_current_node(dialogue, student)
 
         if not current_node_id or current_node_id not in self.node_by_id:
             return {
@@ -1453,6 +1516,13 @@ class AILearningPathService:
             "status": "success",
             "type": "lesson",
             "node": node,
+            "current_node": current_node_id,
+            "path": self._format_path_for_dialogue(
+                path,
+                current_node_id,
+                student.get("learned_nodes", {}) or {},
+                student.get("mastery_scores", {}) or {},
+            ),
             "message": content,
             "options": [
                 *((llm_result or {}).get("options") or [
@@ -1466,8 +1536,9 @@ class AILearningPathService:
     
     def answer_current_node_question(self, thread_id: str, question: str) -> Dict[str, Any]:
         student = _load_student_state()
-        path = student.get("current_path", [])
-        current_node_id = student.get("current_node") or (path[0] if path else "")
+        dialogue = self._get_dialogue(thread_id)
+        path = self._dialogue_path_ids(dialogue, student)
+        current_node_id = self._dialogue_current_node(dialogue, student)
 
         if not current_node_id or current_node_id not in self.node_by_id:
             return {
@@ -1574,8 +1645,9 @@ options 给 3 到 4 个下一步按钮，例如：
     def advance_to_next_node(self, thread_id: str) -> Dict[str, Any]:
         student = _load_student_state()
 
-        path = student.get("current_path", [])
-        current = student.get("current_node") or (path[0] if path else "")
+        dialogue = self._get_dialogue(thread_id)
+        path = self._dialogue_path_ids(dialogue, student)
+        current = self._dialogue_current_node(dialogue, student)
 
         if not path or current not in path:
             return {
@@ -1620,7 +1692,15 @@ options 给 3 到 4 个下一步按钮，例如：
 
         if next_idx >= len(path):
             student["current_node"] = ""
+            dialogue["current_node"] = ""
+            dialogue["latest_path"] = self._format_path_for_dialogue(
+                path,
+                "",
+                learned,
+                mastery_scores,
+            )
             _save_student_state(student)
+            self._save_dialogue(thread_id, dialogue)
 
             return {
                 "status": "success",
@@ -1636,7 +1716,10 @@ options 给 3 到 4 个下一步按钮，例如：
 
         next_node = path[next_idx]
         student["current_node"] = next_node
+        dialogue["current_node"] = next_node
+        dialogue["current_path"] = path
         _save_student_state(student)
+        self._save_dialogue(thread_id, dialogue)
 
         lesson = self.teach_current_node(thread_id)
 
@@ -1666,6 +1749,8 @@ options 给 3 到 4 个下一步按钮，例如：
             )
 
         lesson["current_node"] = next_node
+        dialogue["latest_path"] = lesson["path"]
+        self._save_dialogue(thread_id, dialogue)
         lesson["skipped"] = auto_skipped
         return lesson
 

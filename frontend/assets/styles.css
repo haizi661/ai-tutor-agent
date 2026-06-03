@@ -15940,6 +15940,19 @@ body.ui-reduce-motion-pref *::after {
     background: color-mix(in oklab, var(--paper) 95%, transparent);
 }
 
+.course-tool-hidden {
+    display: none !important;
+}
+
+body.course-choice-mode .composer-shell,
+body.course-choice-mode .composer-disclaimer {
+    display: none !important;
+}
+
+body.course-choice-mode .messages {
+    justify-content: center;
+}
+
 .course-choice-kicker {
     font-size: 0.68rem;
     letter-spacing: 0.18em;
