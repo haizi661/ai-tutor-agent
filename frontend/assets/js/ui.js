@@ -25,6 +25,18 @@
     const SHORT_VISIBLE_FALLBACK_MS = 1600;
     const LONG_VISIBLE_FALLBACK_MS = 5200;
     const MAX_VISIBLE_FALLBACKS = 2;
+    const LEARNING_CONTENT_MARKERS = [
+        'learning-answer-content',
+        'homework-answer-content',
+        'learning-reference-block',
+        'learning-reference-media',
+        'learning-evidence-card',
+        'learning-formula-card',
+        'learning-figure-card',
+        'learning-table-card',
+        'learning-derivation-card',
+        'graph-rag-answer-panel',
+    ];
 
     function escapeHtml(value) {
         return String(value || '')
@@ -73,8 +85,28 @@
         return `${left}${normalizeLatexSource(inner)}${right}`;
     }
 
+    function basicMarkdownFallback(text) {
+        // 如果 marked.js 没加载，用最简正则兜底，至少渲染加粗/标题/引用
+        var html = String(text || '');
+        // **bold**
+        html = html.replace(/\*\*([^*\n]+)\*\*/g, '<strong>$1</strong>');
+        // ## heading
+        html = html.replace(/^#{1,3}\s+(.+?)(?:\n|$)/gm, function(m, title) {
+            var level = (m.match(/^#+/) || ['#'])[0].length;
+            var tag = 'h' + Math.min(level + 1, 4); // ## → h3, ### → h4
+            return '<' + tag + '>' + title + '</' + tag + '>';
+        });
+        // > blockquote
+        html = html.replace(/^>\s*(.+?)(?:\n|$)/gm, '<blockquote>$1</blockquote>');
+        // --- separator
+        html = html.replace(/^---\s*$/gm, '<hr>');
+        // 换行
+        html = html.replace(/\n\n/g, '<br><br>');
+        return html;
+    }
+
     function parseMarkdown(text) {
-        if (typeof marked === 'undefined') return text;
+        if (typeof marked === 'undefined') return basicMarkdownFallback(text);
         const mathBlocks = [];
         let processed = String(text || '').replace(/(\$\$[\s\S]*?\$\$|\$[\s\S]*?\$|\\\[[\s\S]*?\\\]|\\\([\s\S]*?\\\))/g, (match) => {
             mathBlocks.push(normalizeMathBlock(match));
@@ -109,9 +141,25 @@
         renderMarkdown(target, text, options);
     };
 
+    app.detectLearningContentKind = function detectLearningContentKind(text) {
+        const raw = String(text || '').trim();
+        if (raw.startsWith('<') && LEARNING_CONTENT_MARKERS.some(marker => raw.includes(marker))) {
+            return 'graph_rag_answer';
+        }
+        return 'tutor';
+    };
+
+    app.appendLearningTutorContent = function appendLearningTutorContent(text, options = {}) {
+        const content = String(text || '');
+        if (!content.trim()) return false;
+        const kind = options.kind || app.detectLearningContentKind(content);
+        app.appendMessage('agent', content, { ...options, kind });
+        return true;
+    };
+
     function renderLearningHtmlOrMarkdown(rawText = '') {
         const text = String(rawText || '');
-        if (/<(?:div|section)\b[^>]*class=["'][^"']*(?:learning-answer-content|homework-answer-content|learning-reference-block|learning-evidence-card|learning-formula-card|learning-figure-card|learning-table-card)/i.test(text)) {
+        if (app.detectLearningContentKind(text) === 'graph_rag_answer') {
             return text;
         }
         return parseMarkdown(text);
@@ -197,6 +245,7 @@
             'learning-reference-media-title',
             'learning-reference-media-grid',
             'learning-related-overview',
+            'learning-related-overview-note',
             'learning-formula-card',
             'learning-inline-formula-card',
             'learning-formula-viewport',
@@ -3402,6 +3451,11 @@
     };
 
     function applySessionArtifacts(stateSnapshot) {
+        const snapshotStudentId = String(stateSnapshot.student_id || stateSnapshot.studentId || '').trim();
+        if (snapshotStudentId) {
+            state.studentId = snapshotStudentId;
+            state.student_id = snapshotStudentId;
+        }
         state.currentTopic = stateSnapshot.current_topic || stateSnapshot.currentTopic || stateSnapshot.current_user_goal || stateSnapshot.session_goal || '';
         state.currentTopicFocus = stateSnapshot.topic_focus || stateSnapshot.currentTopicFocus || '';
         state.graphTopicHint = state.currentTopic || stateSnapshot.proposed_topic || state.graphTopicHint || '';
@@ -3678,6 +3732,25 @@
             renderTimelineItem(item);
         });
 
+        // 只在历史列表已经包含当前完整教学内容时才跳过补充。
+        // 旧 message_history 中可能有更短的 tutor 项，不能因此压掉 state.tutor_content。
+        var snapshotTutorContent = stateSnapshot?.tutor_content ? String(stateSnapshot.tutor_content) : '';
+        var hasCurrentTutorContent = items.some(function(item) {
+            return item.role === 'agent'
+                && (!item.kind || item.kind === 'tutor' || item.kind === 'graph_rag_answer')
+                && String(item.content || '').trim() === snapshotTutorContent.trim();
+        });
+        if (!hasCurrentTutorContent && snapshotTutorContent) {
+            app.appendLearningTutorContent(snapshotTutorContent);
+        }
+        // evidence 也同理：message_history 有 tutor_evidence 就不重复渲染
+        var hasInlineEvidence = items.some(function(item) {
+            return item.kind === 'tutor_evidence';
+        });
+        if (!hasInlineEvidence && (stateSnapshot?.tutor_evidence || []).length) {
+            app.renderEvidencePanel(stateSnapshot.tutor_evidence, { role: 'tutor', tone: 'info' });
+        }
+
         if (stateSnapshot) {
             applySessionArtifacts(stateSnapshot);
         }
@@ -3785,7 +3858,7 @@
             }
         }
 
-        if (stateSnapshot.tutor_content) app.appendMessage('agent', stateSnapshot.tutor_content, { kind: 'tutor' });
+        app.appendLearningTutorContent(stateSnapshot.tutor_content);
         if ((stateSnapshot.tutor_evidence || []).length) {
             app.renderEvidencePanel(stateSnapshot.tutor_evidence, { role: 'tutor', tone: 'info' });
         }

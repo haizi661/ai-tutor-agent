@@ -14,6 +14,26 @@ messages_router = APIRouter(prefix="/api/messages", tags=["history"])
 
 PRE_TOPIC_FLOW_STATUSES = {"greeting", "topic_intake", "meta_qa", "smalltalk"}
 
+LEARNING_CONTENT_MARKERS = (
+    "learning-answer-content",
+    "homework-answer-content",
+    "learning-reference-block",
+    "learning-reference-media",
+    "learning-evidence-card",
+    "learning-formula-card",
+    "learning-figure-card",
+    "learning-table-card",
+    "learning-derivation-card",
+    "graph-rag-answer-panel",
+)
+
+
+def _tutor_content_kind(content: Any) -> str:
+    text = str(content or "").strip()
+    if text.startswith("<") and any(marker in text for marker in LEARNING_CONTENT_MARKERS):
+        return "graph_rag_answer"
+    return "tutor"
+
 
 class ThreadTitlePayload(BaseModel):
     title: str = ""
@@ -167,6 +187,7 @@ def replay_graph_markers(values: dict[str, Any]) -> list[dict[str, Any]]:
 
 def _serialize_state(values: dict[str, Any]) -> dict[str, Any]:
     return {
+        "student_id": values.get("student_id", ""),
         "learning_phase": values.get("learning_phase", ""),
         "learning_resume_target": values.get("learning_resume_target", ""),
         "learning_resume_reason": values.get("learning_resume_reason", ""),
@@ -636,7 +657,7 @@ def _reconstruct_messages(checkpoint_store, thread_id: str, *, limit: int = 240)
 
         tutor_content = values.get("tutor_content", "")
         if tutor_content and tutor_content != previous_values.get("tutor_content", ""):
-            push("agent", "tutor", tutor_content, updated_at)
+            push("agent", _tutor_content_kind(tutor_content), tutor_content, updated_at)
 
         tutor_evidence = values.get("tutor_evidence") or []
         if tutor_evidence and tutor_evidence != previous_values.get("tutor_evidence", []):

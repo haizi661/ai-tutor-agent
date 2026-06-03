@@ -32,7 +32,7 @@ This is a Web-first adaptive tutor for automatic control theory. The active prod
 ## Runtime assets and local state
 
 - Active course graph is Graph B from 2026-04-27: `data/knowledge_map_outputs/auto_control_knowledge_map_v2_nodes.csv`, `..._edges.csv`, `..._v2.json`, plus `data/mineru_cache/` and `data/media_evidence_index/`.
-- Historical Graph A/A2 material is under `docs/archive/a2-control-theory/`; never treat its `graph.json` as the current teaching graph.
+- Historical Graph A/A2 assets are no longer kept in this repo; never treat any legacy `graph.json` / `notes.jsonl` (including those under `docs/archive/a2-control-theory/`) as the current teaching graph. The only authoritative teaching graph is Graph B under `data/knowledge_map_outputs/auto_control_knowledge_map_v2_*.{csv,json}`.
 - If graph/media assets are missing, use `scripts/sync_knowledge_map_runtime_assets.sh`, then check `python -m ai_tutor_agent.knowledge_map.runtime_assets --media-index data/media_evidence_index` and `PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 pytest -q tests/test_graph_integrity.py`.
 - Keep paths repo-relative (`data/...`, `docs/...`, `frontend/...`); do not add machine-specific absolute paths.
 - Do not commit `.env`, `.codex`, `.hermes/`, `data/chroma_db/**`, `data/student_states/*.json`, `data/tutor_memory.db`, vector DBs, local caches, or uploaded/private learner data.

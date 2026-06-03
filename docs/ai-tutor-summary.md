@@ -263,7 +263,7 @@ UKG 是个性化教学的核心方向，但当前仍是轻量原型。生产级�
 
 ## 七、已完成模块范围
 
-1. 课程图谱与可视化：图谱 B 运行资产 `data/knowledge_map_outputs/**`、`data/mineru_cache/**`、`data/media_evidence_index/**`；历史 A2 / Graph A 已归档到 `docs/archive/a2-control-theory/`。
+1. 课程图谱与可视化：图谱 B 运行资产 `data/knowledge_map_outputs/**`、`data/mineru_cache/**`、`data/media_evidence_index/**`；历史 A2 / Graph A 资料不再保留在仓库中，仅 Graph B 为当前权威教学图谱。
 2. 全局状态与图谱查询服务：ai_tutor_agent/core/
 3. 工作流与路由：ai_tutor_agent/orchestration/
 4. 测评、教学、下一步节点：ai_tutor_agent/nodes/

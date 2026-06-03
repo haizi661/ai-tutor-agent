@@ -29,8 +29,7 @@ const TeachingInsights = {
     },
 
     _studentId() {
-        // Match the pattern used by wrong-book.js and question-help.js
-        const s = window.state || window.appState || {};
+        const s = (window.AITutorApp && window.AITutorApp.state) || window.state || window.appState || {};
         return s.studentId || s.student_id || 'default_student';
     },
 

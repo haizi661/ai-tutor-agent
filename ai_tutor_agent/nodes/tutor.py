@@ -1033,8 +1033,8 @@ def _entry_mode_instruction(mode: str) -> str:
     """Return a system-prompt instruction snippet for the given entry mode."""
     if mode == "short_learning":
         return (
-            "\n- 【精简模式】请给出精简讲解（约正常篇幅的 50%），重点覆盖核心公式和关键概念，"
-            "减少例子和延伸讨论，直接进入实质。"
+            "\n- 【精简模式】请给出精简讲解（约正常篇幅的 50%），重点覆盖核心概念、关键方法，"
+            "只保留当前节点确实需要且正文会解释的公式/图表；减少例子和延伸讨论，直接进入实质。"
         )
     if mode == "full_learning":
         return (
@@ -1080,6 +1080,7 @@ def _structure_instruction(mode: str) -> str:
 5. **典型数值**：给出 1-2 个典型取值下的表现，帮助建立数量感
 
 如果没有公式，直接写"本节点不涉及新公式"即可。
+不要为了填充本小节而引入检索到但正文没有实际使用的公式。
 
 **4. 图表说明**
 **如有图表必须用此小节**，不可在其它位置一带而过。每张图表按以下固定子结构逐一说明：
@@ -1090,6 +1091,7 @@ def _structure_instruction(mode: str) -> str:
 4. **读图方法**：从该图或表能得出什么工程判断，例如"相角裕度 > 30° 时系统有足够稳定裕量"
 
 如果没有图表，直接写"本节点不涉及图表"即可。
+不要为了填充本小节而引入检索到但正文没有实际使用的图表。
 
 **5. 具体例子**
 至少给出 1 个完整的例题或工程类比，按以下固定子结构：
@@ -1636,9 +1638,14 @@ def build_tutor_node(tutor_llm, runtime: RuntimeContext):
                 graph_payload = dict(graph_result)
                 graph_payload["answer"] = graph_answer_text
                 full_response = build_learning_answer_html(graph_payload).strip()
+                # build_learning_answer_html emits <div class="learning-…"> markup
+                # that the frontend sanitizer only keeps when the event is
+                # tagged as graph_rag_answer (otherwise the learning classes are
+                # stripped and the lesson renders blank).
+                stream_text_chunks(event_sink, "tutor", full_response, kind="graph_rag_answer")
             else:
                 full_response = _build_evidence_backed_fallback(topic, citation_plan)
-            stream_text_chunks(event_sink, "tutor", full_response)
+                stream_text_chunks(event_sink, "tutor", full_response)
         else:
             system_msg = SystemMessage(content=system_content)
             human_msg = HumanMessage(content=human_content)

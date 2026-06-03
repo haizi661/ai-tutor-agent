@@ -43,13 +43,6 @@
 | `docs/reports/2026-04-28-langgraph-mainflow-completion-report.md` | 2026-04-28 主流程完成报告 |
 | `docs/reports/2026-04-28-langgraph-final-closure-report.md` | 2026-04-28 最终闭合报告（88 项聚焦回归） |
 
-## 归档资料
-
-| 目录 | 内容 |
-|------|------|
-| `docs/archive/a2-control-theory/` | 历史 Graph A / A2 资料（source-notes、viewer） |
-| `docs/archive/README.md` | 归档说明 |
-
 ## 其他
 
 | 文件 | 说明 |

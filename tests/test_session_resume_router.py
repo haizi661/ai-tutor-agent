@@ -50,3 +50,14 @@ def test_workflow_entry_can_resume_all_new_strict_mainflow_nodes():
     assert workflow_module.get_entry_node({"learning_resume_target": "objective_test_scorer"}) == "objective_test_scorer"
     assert workflow_module.get_entry_node({"learning_resume_target": "continue_or_homework_selector"}) == "continue_or_homework_selector"
     assert workflow_module.get_entry_node({"learning_resume_target": "homework_generator"}) == "homework_generator"
+
+
+def test_session_resume_router_routes_learning_plan_and_initial_selection_targets():
+    assert (
+        workflow_module.route_after_session_resume_router({"learning_resume_target": "learning_plan_generator"})
+        == "learning_plan_generator"
+    )
+    assert (
+        workflow_module.route_after_session_resume_router({"learning_resume_target": "initial_node_selector"})
+        == "initial_node_selector"
+    )

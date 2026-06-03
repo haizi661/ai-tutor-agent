@@ -337,6 +337,31 @@ def update_student_state_after_evaluation(
             student_state.teaching_strategy = teaching_strategy
         if difficulty_level:
             student_state.difficulty_level = difficulty_level
+
+        # ── 同步 concept_mastery 画像（驱动学习路径入口模式）──
+        cm_entry = dict(student_state.concept_mastery.get(node_id) or {})
+        if not cm_entry:
+            cm_entry = {"mastery": 0.0, "confidence": 0.0, "source": "default",
+                        "risk": "high", "failure_count": 0, "last_score": 0.0, "last_updated": ""}
+        old_mastery = float(cm_entry.get("mastery", 0))
+        old_confidence = float(cm_entry.get("confidence", 0))
+        old_failures = int(cm_entry.get("failure_count", 0))
+        new_confidence = max(old_confidence, 0.5)  # 测验后置信度至少 0.5
+        observed = max(0.0, min(1.0, score / 100.0))
+        new_mastery = old_mastery * (1 - new_confidence) + observed * new_confidence
+        new_failures = old_failures + (0 if passed else 1)
+        risk = "low" if new_mastery >= 0.7 else ("medium" if new_mastery >= 0.4 else "high")
+        cm_entry.update({
+            "mastery": round(new_mastery, 3),
+            "confidence": round(new_confidence, 3),
+            "source": "quiz_update",
+            "risk": risk,
+            "failure_count": new_failures,
+            "last_score": round(observed, 3),
+            "last_updated": now_ts(),
+        })
+        student_state.concept_mastery[node_id] = cm_entry
+
         # Evidence is recorded per-node via kg_update_score below (single source of truth).
         if passed:
             student_state.mark_node_completed(node_id)

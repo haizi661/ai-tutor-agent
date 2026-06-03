@@ -40,6 +40,34 @@ def test_main_learning_answer_html_is_supported_without_graphrag_debug_role():
     assert "streamKind === 'graph_rag_answer'" in session_content
 
 
+def test_history_restore_uses_current_tutor_content_not_any_older_inline_tutor():
+    ui_content = UI_JS.read_text(encoding="utf-8")
+
+    assert "app.detectLearningContentKind = function detectLearningContentKind" in ui_content
+    assert "snapshotTutorContent" in ui_content
+    assert "hasCurrentTutorContent" in ui_content
+    assert "String(item.content || '').trim() === snapshotTutorContent.trim()" in ui_content
+    assert "if (!hasCurrentTutorContent && snapshotTutorContent)" in ui_content
+
+
+def test_history_restore_detects_learning_media_fragments_as_graph_rag_answer():
+    ui_content = UI_JS.read_text(encoding="utf-8")
+
+    assert "learning-reference-block" in ui_content
+    assert "learning-reference-media" in ui_content
+    assert "learning-formula-card" in ui_content
+    assert "learning-figure-card" in ui_content
+    assert "learning-table-card" in ui_content
+    assert "app.appendLearningTutorContent" in ui_content
+
+
+def test_history_restore_syncs_student_id_for_independent_sessions():
+    ui_content = UI_JS.read_text(encoding="utf-8")
+
+    assert "state.studentId = snapshotStudentId;" in ui_content
+    assert "state.student_id = snapshotStudentId;" in ui_content
+
+
 def test_learning_content_components_have_readable_width_and_local_overflow_only():
     styles = STYLES.read_text(encoding="utf-8")
 
@@ -149,6 +177,7 @@ def test_frontend_limits_restored_related_media_overview_noise():
 
     assert "normalizeLearningRelatedOverview(target)" in ui_content
     assert "root.querySelectorAll?.('.learning-related-overview')" in ui_content
+    assert "learning-related-overview-note" in ui_content
     assert "kept >= 3" in ui_content
     assert "seen.has(key)" in ui_content
 

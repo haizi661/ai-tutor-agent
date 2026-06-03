@@ -146,10 +146,11 @@ def get_entry_node(state: AgentState) -> str:
             return "tutor"
         return "learning_plan_generator"
     
-    # 不再把 tutor_content 存在当作"必须重新生成教学"的信号。
-    # 上面 flow_status 检查（awaiting_post_lesson_choice 等）和
-    # learning_resume_target 已覆盖了所有正常的恢复路由。
-    # 如果到这里还没有匹配，走 assessment 重新评估。
+    # 兜底：有教学内容但 is_assessed 未置位（旧 session / 异常状态）
+    # 直接回到课后选择，不要重走 assessment
+    if state.get("tutor_content"):
+        return "post_lesson_choice"
+
     return "assessment_generator"
 
 
@@ -341,6 +342,8 @@ def route_after_session_resume_router(state: AgentState) -> str:
         "remediation_decision",
         "variant_question_generator",
         "variant_test_answer_dialog",
+        "learning_plan_generator",
+        "initial_node_selector",
         "continue_or_homework_selector",
         "node_content_loader",
         "next_node_planner",

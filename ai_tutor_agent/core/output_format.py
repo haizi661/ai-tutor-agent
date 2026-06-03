@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import json
 import re
-from typing import Any
+from typing import Any, Optional
 
 from .events import make_event
 
@@ -70,8 +70,25 @@ def split_sentences(text: str) -> list[str]:
     return sentences
 
 
-def stream_text_chunks(event_sink, source: str, text: str, *, chunk_size: int = 120) -> None:
+def stream_text_chunks(
+    event_sink,
+    source: str,
+    text: str,
+    *,
+    chunk_size: int = 120,
+    kind: Optional[str] = None,
+) -> None:
+    """Stream text chunks as ``node.stream`` events.
+
+    ``kind`` lets callers tag the payload (e.g. ``"graph_rag_answer"``) so the
+    frontend can route the chunks to the matching renderer. Omitting ``kind``
+    preserves the legacy behaviour where the frontend falls back to
+    ``turnRoleForSource(source)``.
+    """
     payload = text or ""
     for start in range(0, len(payload), chunk_size):
         chunk = payload[start:start + chunk_size]
-        event_sink.emit(make_event("node.stream", source, data={"text": chunk}))
+        data: dict = {"text": chunk}
+        if kind is not None:
+            data["kind"] = kind
+        event_sink.emit(make_event("node.stream", source, data=data))

@@ -1466,7 +1466,18 @@ def _build_temporary_reference_media_block(cards: list[str], *, title: str = "�
 
 
 def _build_learning_related_overview_block(cards: list[str]) -> str:
-    return _build_learning_media_block(cards, title="更多可参考的公式与图表", extra_class="learning-related-overview")
+    intro = (
+        '<p class="learning-related-overview-note">'
+        '这些材料不是本段正文的必需引用，作为扩展知识保留：可用于补充理解、对照教材原图/公式，'
+        '或在后续深入学习时查看。'
+        '</p>'
+    )
+    return _build_learning_media_block(
+        cards,
+        title="扩展知识：可选公式与图表",
+        extra_class="learning-related-overview",
+        intro_html=intro,
+    )
 
 
 def _build_media_block_for_refs(
@@ -1928,7 +1939,13 @@ def _extract_media_refs(line: str, media_cards_by_ref: dict[str, str] | None = N
     return clean_line, deduped_refs
 
 
-def _build_learning_media_block(cards: list[str], *, title: str = "相关公式与图表", extra_class: str = "") -> str:
+def _build_learning_media_block(
+    cards: list[str],
+    *,
+    title: str = "相关公式与图表",
+    extra_class: str = "",
+    intro_html: str = "",
+) -> str:
     title_html = html.escape(title)
     class_attr = "learning-media-group" + (f" {html.escape(extra_class)}" if extra_class else "")
     return f"""
@@ -1937,6 +1954,7 @@ def _build_learning_media_block(cards: list[str], *, title: str = "相关公式�
         <div class="learning-block-title">{title_html}</div>
         <div class="learning-block-actions">参考材料</div>
       </div>
+      {intro_html}
       {''.join(cards)}
     </section>
     """

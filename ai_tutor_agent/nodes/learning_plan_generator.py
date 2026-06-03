@@ -79,7 +79,20 @@ def build_learning_plan_generator_node(llm: Any, runtime: RuntimeContext):
         v2_plan_raw = state_snapshot.get("learning_plan_v2") or {}
         concept_mastery_raw = state_snapshot.get("concept_mastery") or {}
 
-        if v2_plan_raw.get("steps"):
+        # 自评后画像变了 → 强制重新生成学习路径，不续旧 plan
+        self_scores = (
+            state.get("self_assessment_scores")
+            or state_snapshot.get("self_assessment_scores")
+            or {}
+        )
+        skip = (
+            state.get("skip_self_assessment")
+            if state.get("skip_self_assessment") is not None
+            else state_snapshot.get("skip_self_assessment", True)
+        )
+        has_fresh_self_assessment = bool(self_scores) and not bool(skip)
+
+        if v2_plan_raw.get("steps") and not has_fresh_self_assessment:
             plan = LearningPlan.from_dict(v2_plan_raw)
             if plan.resolve_status() == "in_progress":
                 profile = _rebuild_profile(concept_mastery_raw, student_id)

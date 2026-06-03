@@ -70,7 +70,7 @@
 
 - 当前主教学图谱是 2026-04-27 图谱 B 运行资产：`data/knowledge_map_outputs/auto_control_knowledge_map_v2_nodes.csv` 与 `data/knowledge_map_outputs/auto_control_knowledge_map_v2_edges.csv`。
 - `GraphRAGPipeline` 默认读取图谱 B，并结合 `data/mineru_cache` 与 `data/media_evidence_index` 提供节点内容、临时问答与证据增强。
-- 历史 Graph A / A2 资料已归档到 `docs/archive/a2-control-theory/`，只保留作溯源与对照，不再作为当前主教学图谱，也不再由前端默认挂载为主 viewer。
+- 历史 Graph A / A2 资料不再保留在仓库中；唯一权威教学图谱是图谱 B 资产，前端不再默认挂载任何旧 viewer。
 - 迁移到新机器时，至少需要随代码提交或同步 `data/knowledge_map_outputs/auto_control_knowledge_map_v2_nodes.csv`、`data/knowledge_map_outputs/auto_control_knowledge_map_v2_edges.csv`、`data/knowledge_map_outputs/auto_control_knowledge_map_v2.json` 与 `data/media_evidence_index/`。`.env`、`data/chroma_db/`、上传 PDF 和 `data/mineru_cache/` 仍按本地资产处理，不应直接提交密钥或大体积缓存。
 - 如果新机器首次运行需要下载本地 embedding 模型，默认 HuggingFace 源不可达时会自动改用 `HF_MIRROR_ENDPOINT`，默认镜像为 `https://hf-mirror.com`；也可以在 `.env` 中改成自己的镜像或关闭 `HF_ENDPOINT_FALLBACK_ENABLED`。
 
@@ -569,13 +569,7 @@ A B C D A B C D A B
 
 ### 4.4 查看知识图谱
 
-启动服务后打开：
-
-```text
-当前默认不再挂载历史 A2 viewer；如需查看旧资料，请直接打开 `docs/archive/a2-control-theory/viewer/index.html`。
-```
-
-或者在 Web 左侧点击“知识图谱”。
+启动服务后在 Web 左侧点击“知识图谱”即可打开当前图谱 B 视图；仓库不再保留历史 A2 / Graph A viewer。
 
 ### 4.5 命令行运行方式
 
@@ -671,13 +665,13 @@ bash scripts/check_runtime_assets.sh
 
 ### 5.6 运行资产同步
 
-如果 `data/media_evidence_index`、`data/mineru_cache` 或归档 viewer 投影 `docs/archive/a2-control-theory/viewer/data.js` 异常：
+如果 `data/media_evidence_index` 或 `data/mineru_cache` 异常：
 
 ```bash
 scripts/sync_knowledge_map_runtime_assets.sh
 ```
 
-脚本会恢复图谱 B 运行资产、构建媒体索引并检查可用性；如果归档 A2 图谱包存在，还会顺手刷新 `docs/archive/a2-control-theory/viewer/data.js` 这个兼容性静态工件。历史 A2 viewer 不是当前主教学图谱，只是归档资料。
+脚本会恢复图谱 B 运行资产、构建媒体索引并检查可用性。如果外部传入了旧 `docs/archive/a2-control-theory/graph.json`，脚本会顺手刷新 `docs/archive/a2-control-theory/viewer/data.js` 这个兼容性静态工件；旧 A2 viewer 仅作归档查阅，不能作为当前主教学图谱。
 
 ## 6. 当前文档索引
 
@@ -695,7 +689,7 @@ scripts/sync_knowledge_map_runtime_assets.sh
 
 可以对外说：
 
-> 当前系统已经完成知识图谱驱动节点制掌握学习主流程的主体闭合：从主题确认、学前诊断、图谱节点选择、节点内容加载、讲解、自然追问、节点后客观测试、错题补救、下一节点规划、作业生成，到二次登录恢复和作业处理，均已形成显式节点和可测试路由。知识图谱 B 负责学习路径、节点内容、临时追问和证据增强；GraphRAG 证据已按公式/图表/表格卡片化展示，媒体证据索引当前包含 11 个章节、2928 条标注资产。历史 A2 / Graph A 已归档，不作为当前主教学图谱。聚焦回归已通过。
+> 当前系统已经完成知识图谱驱动节点制掌握学习主流程的主体闭合：从主题确认、学前诊断、图谱节点选择、节点内容加载、讲解、自然追问、节点后客观测试、错题补救、下一节点规划、作业生成，到二次登录恢复和作业处理，均已形成显式节点和可测试路由。知识图谱 B 负责学习路径、节点内容、临时追问和证据增强；GraphRAG 证据已按公式/图表/表格卡片化展示，媒体证据索引当前包含 11 个章节、2928 条标注资产。历史 A2 / Graph A 不再保留在仓库中，仅图谱 B 作为当前权威教学图谱。聚焦回归已通过。
 
 必须补一句：
 

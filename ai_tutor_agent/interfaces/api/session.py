@@ -195,7 +195,11 @@ def _checkpoint_exists(thread_id: str, runtime) -> bool:
 def _ensure_thread_checkpoint(thread_id: str, runtime) -> bool:
     if _checkpoint_exists(thread_id, runtime):
         return False
-    _checkpoint_state_patch(thread_id, runtime, build_initial_state(""))
+    safe_id = "".join(ch if ch.isalnum() or ch in {"_", "-"} else "_" for ch in thread_id[:24])
+    per_thread_student = f"student_{safe_id}" if safe_id else "default_student"
+    initial = build_initial_state("")
+    initial["student_id"] = per_thread_student
+    _checkpoint_state_patch(thread_id, runtime, initial)
     return True
 
 
@@ -309,7 +313,8 @@ def _graph_worker(thread_id: str, topic: str, runtime, event_q: queue.Queue, inp
         _store = getattr(runtime, "student_state_store", None)
         if _store is not None and current_state and current_state.values:
             try:
-                _snap = _store.load(thread_id)
+                student_id = str(current_state.values.get("student_id") or thread_id).strip() or thread_id
+                _snap = _store.load(student_id)
                 if _snap is not None:
                     graph_app.update_state(
                         thread_config,
@@ -378,8 +383,25 @@ def _resume_v2_self_assessment_worker(
                 "learning_phase": "profile_complete",
                 "learning_resume_target": "user_profiler",
                 "learning_resume_reason": "v2_self_assessment_done",
+                # 强制 learning_plan_generator 重新生成路径（不自评旧 plan）
+                "learning_plan_v2": {},
+                "learning_plan": [],
+                "learning_plan_source": "",
             },
         )
+        # 同步清掉 StudentState 里的旧 plan
+        store = getattr(runtime, "student_state_store", None)
+        if store:
+            safe_id = "".join(ch if ch.isalnum() or ch in {"_", "-"} else "_" for ch in thread_id[:24])
+            sid = f"student_{safe_id}" if safe_id else "default_student"
+            from ...core.learning_support import mutate_student_state_snapshot
+            def _clear_plan(ss):
+                ss.learning_plan_v2 = {}
+                ss.learning_plan = []
+            try:
+                mutate_student_state_snapshot(store, sid, _clear_plan)
+            except Exception:
+                pass
         runtime_context.event_sink.emit(
             make_event(
                 "session.info",
@@ -708,7 +730,7 @@ async def start_session(req: ChatRequest, request: Request):
     return {"status": "running", "thread_id": req.thread_id}
 
 
-def _reset_in_progress_learning_state(runtime) -> None:
+def _reset_in_progress_learning_state(runtime, student_id: str = "default_student") -> None:
     """新对话 / 全新会话：清掉学生态里的"进行中"字段，让新一轮从学习路径起点开始。
 
     保留：
@@ -727,7 +749,6 @@ def _reset_in_progress_learning_state(runtime) -> None:
     store = getattr(runtime, "student_state_store", None)
     if store is None:
         return
-    student_id = "default_student"
 
     def _mutator(ss: Any) -> None:
         ss.current_node_id = ""
@@ -761,8 +782,10 @@ async def create_session(req: CreateSessionRequest, request: Request):
         raise HTTPException(status_code=400, detail="thread_id is required")
     created = _ensure_thread_checkpoint(thread_id, runtime)
     if created:
-        # 全新会话：清掉旧进行中状态，让本轮从学习路径起点开始
-        _reset_in_progress_learning_state(runtime)
+        # 全新会话：每个 thread 有自己的 student_id，状态独立
+        safe_id = "".join(ch if ch.isalnum() or ch in {"_", "-"} else "_" for ch in thread_id[:24])
+        student_id = f"student_{safe_id}" if safe_id else "default_student"
+        _reset_in_progress_learning_state(runtime, student_id=student_id)
     runtime.session_manager.get_or_create(thread_id)
     return {"status": "created" if created else "exists", "thread_id": thread_id}
 

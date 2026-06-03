@@ -48,6 +48,7 @@ def test_serialize_state_includes_closed_loop_fields():
             "homework_status": "assigned",
             "continue_or_homework_choice": "stop_today",
             "pending_interaction_answer": "answer_homework",
+            "student_id": "student_session_abc",
             "student_state_snapshot": {"visited_nodes": ["KM001"]},
         }
     )
@@ -75,6 +76,7 @@ def test_serialize_state_includes_closed_loop_fields():
     assert serialized["homework_status"] == "assigned"
     assert serialized["continue_or_homework_choice"] == "stop_today"
     assert serialized["pending_interaction_answer"] == "answer_homework"
+    assert serialized["student_id"] == "student_session_abc"
     assert serialized["student_state_snapshot"]["visited_nodes"] == ["KM001"]
 
 
@@ -205,6 +207,61 @@ def test_reconstruct_messages_replays_message_history_before_agent_output():
     assert items[1]["role"] == "user"
     assert items[1]["content"] == "我是零基础入门"
     assert items[2]["kind"] == "tutor"
+
+
+def test_reconstruct_messages_preserves_learning_answer_kind_for_tutor_content():
+    rich_tutor_content = (
+        '<section class="learning-answer-content">'
+        '<h3>节点教学</h3><p>完整讲解内容。</p>'
+        '</section>'
+    )
+    store = FakeCheckpointStore(
+        [
+            _checkpoint(
+                {
+                    "tutor_content": rich_tutor_content,
+                },
+                "2026-04-12T10:00:00+00:00",
+            )
+        ]
+    )
+
+    items = _reconstruct_messages(store, "thread-rich-tutor")
+
+    assert items[-1]["kind"] == "graph_rag_answer"
+    assert items[-1]["content"] == rich_tutor_content
+
+
+def test_reconstruct_messages_preserves_learning_media_fragment_kind_for_tutor_content():
+    rich_tutor_content = (
+        '<div class="learning-reference-block">'
+        '<div class="learning-reference-text"><p>节点教学参考。</p></div>'
+        '<div class="learning-reference-media">'
+        '<section class="learning-evidence-card learning-evidence-card--formula learning-formula-card">'
+        '<div class="learning-formula-viewport"><div class="formula-render" data-latex="G(s)"></div></div>'
+        '</section>'
+        '<section class="learning-evidence-card learning-evidence-card--figure learning-figure-card">'
+        '<div class="learning-figure-viewport"><img src="/media/km001.png" alt="结构图"></div>'
+        '</section>'
+        '</div>'
+        '</div>'
+    )
+    store = FakeCheckpointStore(
+        [
+            _checkpoint(
+                {
+                    "tutor_content": rich_tutor_content,
+                },
+                "2026-04-12T10:00:00+00:00",
+            )
+        ]
+    )
+
+    items = _reconstruct_messages(store, "thread-rich-media-fragment")
+
+    assert items[-1]["kind"] == "graph_rag_answer"
+    assert "learning-formula-card" in items[-1]["content"]
+    assert "learning-figure-card" in items[-1]["content"]
 
 
 def test_reconstruct_messages_includes_structured_cards():

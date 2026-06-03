@@ -568,6 +568,8 @@ def test_tutor_prompt_uses_node_teaching_contract_and_requires_detailed_node_les
     assert "**6. 常见误区与边界**" in joined_prompt
     assert "**7. 自检问题**" in joined_prompt
     assert "不得省略任何小节" in joined_prompt
+    assert "不要为了填充本小节而引入检索到但正文没有实际使用的公式" in joined_prompt
+    assert "不要为了填充本小节而引入检索到但正文没有实际使用的图表" in joined_prompt
 
 
 def test_tutor_expands_too_brief_node_lesson_with_contract_fallback():

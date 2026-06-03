@@ -1,6 +1,8 @@
 window.AITutorApp = window.AITutorApp || {};
 window.AITutorApp.state = {
     currentThreadId: '',
+    studentId: '',
+    student_id: '',
     eventSource: null,
     isStreaming: false,
     isAwaitingInput: false,

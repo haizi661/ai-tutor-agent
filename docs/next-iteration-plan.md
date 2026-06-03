@@ -23,7 +23,7 @@
 - `GraphRAGPipeline` 与 `StudentStateStore` 已进入运行时 `RuntimeContext`。
 - `LocalQuestionBankProvider` 已实现并接入 `ApiRuntime`，但当前题库内容仍只到最小可用层。
 - 图谱 B 运行资产当前可用：`data/knowledge_map_outputs/**`、`data/mineru_cache/**`、`data/media_evidence_index/**`。
-- 历史 A2 / Graph A 已归档到 `docs/archive/a2-control-theory/`，不作为当前主教学图谱。
+- 历史 A2 / Graph A 资料不再保留在仓库中，仅图谱 B 作为当前主教学图谱。
 - `media_evidence_index` 当前可用。
 - 2026-04-28 复查记录中的聚焦测试：43 passed, 5 warnings。
 - 2026-04-28 闭合报告中的聚焦大回归：88 passed, 5 warnings。

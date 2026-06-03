@@ -1,7 +1,9 @@
+import queue
 from types import SimpleNamespace
 
 from ai_tutor_agent.application.session import _initial_state_preserving_learning_direction
 from ai_tutor_agent.interfaces.api.app import create_api_app
+from ai_tutor_agent.interfaces.api import session as session_module
 from ai_tutor_agent.interfaces.api.runtime import SessionManager
 from ai_tutor_agent.interfaces.api.session import _ensure_thread_checkpoint, _reset_in_progress_learning_state
 from asgi_test_client import SyncASGITestClient as TestClient
@@ -243,3 +245,43 @@ def test_reset_in_progress_learning_state_handles_no_store():
     runtime = SimpleNamespace(student_state_store=None)
     # 不应抛任何异常
     _reset_in_progress_learning_state(runtime)
+
+
+class _RecordingStudentStateStore:
+    def __init__(self):
+        self.load_calls = []
+
+    def load(self, student_id):
+        self.load_calls.append(student_id)
+        return SimpleNamespace(to_dict=lambda: {"current_node_id": "KM001"})
+
+
+def test_graph_worker_refreshes_student_snapshot_by_checkpoint_student_id(monkeypatch):
+    store = FakeCheckpointStore()
+    store.save(
+        "thread-rich-restore",
+        {
+            "student_id": "student_thread-rich-restore",
+            "current_topic": "自动控制原理",
+            "current_node_id": "KM001",
+        },
+    )
+    student_store = _RecordingStudentStateStore()
+    runtime = _runtime(store)
+    runtime.student_state_store = student_store
+
+    monkeypatch.setattr(
+        session_module,
+        "run_learning_session",
+        lambda graph_app, event_sink, **kwargs: None,
+    )
+
+    session_module._graph_worker(
+        "thread-rich-restore",
+        "",
+        runtime,
+        queue.Queue(),
+        queue.Queue(),
+    )
+
+    assert student_store.load_calls == ["student_thread-rich-restore"]

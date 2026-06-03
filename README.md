@@ -68,7 +68,7 @@ python -m pip install -e .
 	- 仅使用旧的最小依赖或不完整环境，可能缺少 `pymupdf`、`rank-bm25` 等解析依赖。
 2. 图谱数据目录是否存在：
 	- 当前主教学流程默认读取 2026-04-27 图谱 B 运行资产：`data/knowledge_map_outputs/auto_control_knowledge_map_v2_nodes.csv`、`data/knowledge_map_outputs/auto_control_knowledge_map_v2_edges.csv`、`data/mineru_cache` 与 `data/media_evidence_index`。
-	- 历史 Graph A / A2 资料已归档到 `docs/archive/a2-control-theory/`，不作为当前主教学图谱。
+	- 当前图谱 B 是唯一权威教学图谱；任何旧版 `graph.json` / `notes.jsonl` 都不应再被识别为主教学图谱。
 3. 快速自检：
 
 ```bash

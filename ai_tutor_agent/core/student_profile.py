@@ -303,10 +303,13 @@ class StudentProfile:
 
         规则:
         - mastery 或 entry 不存在(冷启动) → full_learning
+        - risk == "high" → full_learning(风险优先于 mastery)
         - failure_count >= 2 → full_learning(多次失败,完整重学)
         - source == "self_assessment" 且 mastery < 0.7(自评不够高)
           → full_learning(仅凭自评,未经过真实学习,不可跳过完整讲解)
         - mastery < 0.4 → full_learning
+        - 非自评来源 confidence < 0.35 且 mastery >= 0.7 → short_learning
+          (掌握度估计偏高但证据不足,先简学确认,不直接快测)
         - mastery < 0.7 → short_learning
         - mastery >= 0.7 → quick_check
 
@@ -319,12 +322,16 @@ class StudentProfile:
         entry = self.concept_mastery.get(concept_id)
         if not entry:
             return "full_learning"
+        if entry.risk == "high":
+            return "full_learning"
         if entry.failure_count >= 2:
             return "full_learning"
         if entry.source == "self_assessment" and entry.mastery < 0.7:
             return "full_learning"
         if entry.mastery < 0.4:
             return "full_learning"
+        if entry.source != "self_assessment" and entry.mastery >= 0.7 and entry.confidence < 0.35:
+            return "short_learning"
         if entry.mastery < 0.7:
             return "short_learning"
         return "quick_check"

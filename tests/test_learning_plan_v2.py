@@ -324,6 +324,24 @@ class TestResolveEntryModes:
         assert modes["KM002"] == "short_learning", f"KM002 mastery=0.55 应为 short_learning, 实际 {modes['KM002']}"
         assert modes["KM003"] == "quick_check", f"KM003 mastery=0.85 应为 quick_check, 实际 {modes['KM003']}"
 
+    def test_high_risk_forces_full_learning_even_with_mid_mastery(self):
+        """高风险画像不应被 mastery 分层误导进入简学。"""
+        profile = StudentProfile("test")
+        profile.concept_mastery["KM001"] = ConceptMastery(
+            mastery=0.68, confidence=0.8, source="merged", risk="high", failure_count=0,
+        )
+        modes = resolve_entry_modes(["KM001"], profile)
+        assert modes["KM001"] == "full_learning"
+
+    def test_low_confidence_high_mastery_uses_short_learning_not_quick_check(self):
+        """高 mastery 但低置信度时仍需简学确认，不能直接快测跳过。"""
+        profile = StudentProfile("test")
+        profile.concept_mastery["KM001"] = ConceptMastery(
+            mastery=0.86, confidence=0.25, source="default", risk="medium", failure_count=0,
+        )
+        modes = resolve_entry_modes(["KM001"], profile)
+        assert modes["KM001"] == "short_learning"
+
     def test_real_cold_start_default_profile_has_varied_entry_modes(self):
         """回归：真实的冷启动默认画像应当产生混合的 entry_mode（不全是 full_learning）。
         这防止 source=='default' 一刀切返回 full_learning 的旧 bug 回归。"""

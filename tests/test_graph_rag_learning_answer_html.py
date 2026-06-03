@@ -709,12 +709,13 @@ def test_learning_answer_keeps_unreferenced_media_as_compact_overview_after_text
 
     assert html_text.index("核心是测量输出") < html_text.index("learning-reference-media")
     assert html_text.index("举例：") < html_text.index("learning-related-overview")
-    assert "更多可参考的公式与图表" in html_text
+    assert "扩展知识：可选公式与图表" in html_text
+    assert "这些材料不是本段正文的必需引用" in html_text
     assert "KM001.formula_asset[1]" in html_text
     assert html_text.count('class="learning-reference-media"') == 1
 
 
-def test_learning_answer_limits_unreferenced_related_media_to_reduce_noise():
+def test_learning_answer_appends_unreferenced_related_media_as_extension_knowledge():
     result = {
         "question": "什么是自动控制原理？",
         "answer": "分析：图一说明闭环结构。 [[MEDIA:KM002.figure_asset[1]]]",
@@ -744,12 +745,45 @@ def test_learning_answer_limits_unreferenced_related_media_to_reduce_noise():
     html_text = build_learning_answer_html(result)
     overview = html_text.split("learning-related-overview", 1)[1]
 
-    assert "更多可参考的公式与图表" in html_text
+    assert "扩展知识：可选公式与图表" in html_text
+    assert "这些材料不是本段正文的必需引用" in html_text
     assert overview.count("learning-formula-card") == 3
     assert "KM001.formula_asset[1]" in overview
     assert "KM001.formula_asset[3]" in overview
     assert "KM001.formula_asset[4]" not in overview
     assert html_text.count("learning-figure-card") == 1
+
+
+def test_learning_answer_places_formula_extension_after_no_formula_lesson():
+    result = {
+        "question": "讲解自动控制的一般概念",
+        "answer": (
+            "**3. 公式讲解**\n"
+            "本节点不涉及新数学公式，但要记住偏差来自输入与反馈的比较。\n"
+            "**4. 图表说明**\n"
+            "这里先用文字说明测量、比较、执行三步。"
+        ),
+        "evidence_items": [],
+        "media_items": [
+            {
+                "asset_type": "formula",
+                "reference": "KM001.formula_asset[1]",
+                "display_label": "式一",
+                "node_name": "自动控制的一般概念",
+                "text": r"\dot y(t)+y(t)=r(t)",
+                "formula_meaning": "给出变量之间的定量关系。",
+            },
+        ],
+    }
+
+    html_text = build_learning_answer_html(result)
+
+    assert html_text.index("本节点不涉及新数学公式") < html_text.index("learning-related-overview")
+    assert "扩展知识：可选公式与图表" in html_text
+    assert "这些材料不是本段正文的必需引用" in html_text
+    assert "learning-formula-card" in html_text
+    assert "KM001.formula_asset[1]" in html_text
+    assert r"\dot y" in html_text
 
 
 def test_learning_answer_binds_bare_bracket_media_reference_in_prose():

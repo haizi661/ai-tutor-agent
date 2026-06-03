@@ -77,9 +77,8 @@ scripts/sync_knowledge_map_runtime_assets.sh
 随后会自动：
 
 1. 构建 `data/media_evidence_index`。
-2. 如果归档 A2 图谱包存在，则从 `docs/archive/a2-control-theory/graph.json` 重新生成 `docs/archive/a2-control-theory/viewer/data.js`，作为兼容性静态 viewer 工件。
+2. 如果当前工作区中仍然存在 `docs/archive/a2-control-theory/graph.json`（外部同步带入），则从该文件重新生成 `docs/archive/a2-control-theory/viewer/data.js`，作为兼容性静态 viewer 工件；该工件不是当前主教学图谱。
 3. 检查图谱 B nodes/edges CSV 与媒体证据索引是否达到最小可用状态。
-4. 历史 A2 / Graph A 资料仍只保留在 `docs/archive/a2-control-theory/`，不会被当作当前主教学图谱；viewer 刷新只是为了让归档静态页面继续可打开。
 
 ## 最小验证
 
@@ -90,7 +89,6 @@ test -f data/knowledge_map_outputs/auto_control_knowledge_map_v2_nodes.csv
 test -d data/mineru_cache
 test -f data/media_evidence_index/batch_summary.json
 test -f data/knowledge_map_outputs/auto_control_knowledge_map_v2_edges.csv
-test -f docs/archive/a2-control-theory/viewer/data.js
 python -m ai_tutor_agent.knowledge_map.runtime_assets --media-index data/media_evidence_index
 PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 pytest -q tests/test_graph_integrity.py
 ```
@@ -105,4 +103,4 @@ dangling edges: 0
 external_node_reference: 36
 ```
 
-说明：当前主教学图谱是 2026-04-27 图谱 B 运行资产，不再把历史 A2 / Graph A 的 `graph.json` 表述为当前主图谱。
+说明：当前主教学图谱是 2026-04-27 图谱 B 运行资产；任何 `graph.json` / `notes.jsonl` 都不再作为权威教学图谱。
