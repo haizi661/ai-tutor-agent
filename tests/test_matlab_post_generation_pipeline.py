@@ -51,7 +51,7 @@ def _make_test_workspace() -> Path:
 
 def _read_generated_m_file() -> str:
     if not _GENERATED_M_FILE.exists():
-        raise FileNotFoundError(
+        pytest.skip(
             f"Generated .m file not found at {_GENERATED_M_FILE}. "
             "Run the MATLAB agent first to generate this file."
         )
@@ -59,10 +59,10 @@ def _read_generated_m_file() -> str:
 
 
 def _require_matlab(service: MatlabExperimentService) -> None:
-    """Fail the test immediately if MATLAB is not installed."""
+    """Skip real MATLAB tests when this machine does not have MATLAB."""
     install = service.detect_install()
     if not install.available:
-        pytest.fail(
+        pytest.skip(
             f"MATLAB executable not found under {install.root}. "
             "Install MATLAB R2024b or set AI_TUTOR_MATLAB_ROOT environment variable "
             "to point to your MATLAB installation."

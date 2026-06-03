@@ -1,6 +1,6 @@
 # AI Tutor Agent 下一步迭代计划
 
-更新时间：2026-05-02
+更新时间：2026-06-01
 项目根目录：本文所有命令与路径均以本仓库根目录为基准，统一使用项目内相对路径。
 
 ## 1. 计划目标
@@ -23,7 +23,7 @@
 - `GraphRAGPipeline` 与 `StudentStateStore` 已进入运行时 `RuntimeContext`。
 - `LocalQuestionBankProvider` 已实现并接入 `ApiRuntime`，但当前题库内容仍只到最小可用层。
 - 图谱 B 运行资产当前可用：`data/knowledge_map_outputs/**`、`data/mineru_cache/**`、`data/media_evidence_index/**`。
-- 历史 A2 / Graph A 已归档到 `docs/archive/a2-control-theory/`，不作为当前主教学图谱。
+- 历史 A2 / Graph A 资料不再保留在仓库中，仅图谱 B 作为当前主教学图谱。
 - `media_evidence_index` 当前可用。
 - 2026-04-28 复查记录中的聚焦测试：43 passed, 5 warnings。
 - 2026-04-28 闭合报告中的聚焦大回归：88 passed, 5 warnings。
@@ -32,6 +32,14 @@
 - 2026-05-01 历史恢复与显示体验收敛：恢复页标题/当前节点/状态横幅同步，当前待处理卡片自动进入可视区，对话态输入框压缩，GraphRAG 相关媒体去重并限量到 3 张；全量测试 424 passed, 5 warnings，浏览器布局检查无横向溢出和输入框重叠。
 - 2026-05-02 用户知识图谱实现、evidence 架构统一、死代码清理：knowledge_graph 空图谱起点、学了才加节点、节点级 evidence 单一来源（移除全局 evidence_events 冗余日志和 record_evidence 死代码）、_persist_homework_result 精简；集成测试重写为走真实函数路径；全量测试 445 passed, 5 warnings。
 - 2026-05-02 会话恢复准确性 + 聊天记录命名：history.py fallback 链改为 `custom_title` → `proposed_topic` → `current_topic` → 首条用户消息 → "新对话"（不再显示 UUID）；history.js stateLabel 改为基于 flow_status；`_has_homework` 改为黑名单模式（状态缺失默认有作业）；`infer_learning_phase` 合并重复 homework 判断；+5 测试；450 passed。
+- 2026-05-03 post_lesson_choice 残留状态修复（首次运行重置 `post_lesson_choice: ""`）、`_START_TEST_MARKERS` 补全（新增 `"start_test"` 和 `"temporary_question"`）、前端 `stripRedundantTextAfterTables()` 表格冗余文本隐藏；+2 测试；452 passed。
+- 2026-05-28 学习路径（Learning Plan）实现：`learning_plan_builder.py` 拓扑排序+画像加权+分步聚合算法；`learning_plan_generator` 节点在 user_profiler 后生成多步路径；`initial_node_selector` 从路径第一步选节点；`next_node_planner` 按 Step 推进；`session_resume_router` 从持久化路径恢复；AgentState+StudentState 新增 learning_plan 字段；19 新测试；606 passed。
+- 2026-05-29 学习路径 v2 + 前端路径面板：`compute_relevance()` 目标相关性评分、`_score_node()` 多因子 ZPD 加权、`build_priority_plan()` 目标聚焦、`update_learning_plan()` 动态重算；前端路径面板（聊天右侧独立面板）显示 Step 进度与节点状态；KG key 改为 node_id（不再用中文标题）；全量测试 626 passed, 5 skipped。
+- 2026-05-29 错题本基础闭环：`/api/students/{student_id}/wrong-questions` 支持 mastered/node/page/sort 查询，`/review` 和 `/master` 支持复习/掌握状态写回；前端默认待复习筛选，支持全部/待复习/已掌握、按节点分组、展开讲解、标记已掌握/取消掌握。
+- 2026-05-29 题目答疑工作区：`/api/students/{student_id}/question-help` 支持文字题、图片题、当前节点上下文和 `quick`/`deep`/`vision` 解答模式；前端有当前解答区、模式选择、图片上传和历史记录。
+- 2026-05-29 客观题复盘与公式渲染：客观题选项改为整行布局，复盘解释结构化为判断依据、所选项问题、常见误区、下一步；前端加载本地 `marked`/`katex`，题目答疑和复盘解释复用 Markdown/LaTeX 渲染与 sanitizer。
+- 2026-05-29 错题本/题目答疑/客观题复盘相关聚焦回归：128 passed, 5 warnings。
+- 2026-06-01 学习路径面板宽度稳定：CSS 固定 `width: 360px` + `max-width: 100%; overflow: hidden` 防护，展开节点时宽度不再变化；浏览器 E2E 验收前端渲染、课程方向、主题确认、摸底触发链路全部正常；全量测试 630 passed, 5 skipped, 5 warnings。
 
 当前主要风险：
 
@@ -39,6 +47,11 @@
 - 题库接入机制已就绪，但节点客观题、变式题、作业题内容仍不完整。
 - 用户画像已经由学前诊断、`StudentStateStore` 和 `knowledge_graph`（节点级 evidence）共同支撑；掌握分尺度已统一为 0-100，测验/作业 evidence 已沉淀为节点级事件。仍需升级为完整长期学习者模型：confidence、next_review、教学策略信号。
 - 前端已支持新 `pending_interaction_kind` 的结构渲染与恢复，`post_lesson_choice` 已从僵硬二选一改为自由追问/进入小测；但还需要真实浏览器/API 验证 locked/pending 生命周期和真实 LLM 输出体验。
+- 学习路径后端已简化为纯拓扑 BFS + 分支优先级（评估只用于入口和同层排序）。v2 过度工程化代码已删除。
+- 错题本已有筛选与掌握状态，但还缺“复习本节点”“再做一遍原题”和前端排序控件；不能把它表述为完整复习闭环。
+- 题目答疑已有模式选择和公式渲染，但当前是一次请求返回完整解答，不是真 token 流式输出；模型选择、失败提示和图片 OCR 边界还需要真实浏览器验收。
+- 变式训练还缺硬边界：连续错误达到阈值后应先完成讲解并询问是否继续训练，避免无限出题。
+- 教学优化计划（`docs/plans/2026-05-29-teaching-optimization-plan.md`）部分已实施：错题反馈回流、情绪感知调整、前置节点关联已接入 tutor prompt；讲解字数从 80-150 字升级为 650-1000 字（cherry-pick 8ab6927 素材包融合）。剩余：间隔复习、测试题对齐讲解、教学效果追踪。
 - 文档较多，旧计划与新状态有重复和过期口径。
 
 ## 3. P0：状态口径与恢复稳定性
@@ -225,6 +238,31 @@ A B C D A B C D A B
 - 作业答题可提交。
 - 作业讲解后能继续进入下一节点或恢复路由。
 
+### Task 7.1：已完成基础 — 错题本、题目答疑与客观题复盘
+
+当前已落地：
+
+- 错题本：按节点分组、全部/待复习/已掌握筛选、展开讲解、标记已掌握/取消掌握。
+- 题目答疑：文字/图片输入、快速解答/深度解析/图片题专用模式、历史记录、本地 Markdown/KaTeX 渲染。
+- 客观题复盘：选项整行布局，提交后按题显示判断依据、所选项问题、常见误区和下一步。
+
+下一步补齐：
+
+1. 错题本增加“复习本节点”，点击后关闭错题本并回到对应知识节点学习流程。
+2. 错题本增加“再做一遍”，第一版先前端本地重做原题并即时判分，再决定是否写回后端。
+3. 错题本增加排序控件：按做错时间倒序、做错最多、最久未复习。
+4. 为连续错误设置边界：同一节点或同一题型连续错到阈值后，先给完整讲解，再询问是否继续变式训练。
+5. 题目答疑决定是否做真流式输出；如果做流式，需要保证公式块在未闭合时不触发错误渲染。
+
+验收：
+
+- `tests/test_frontend_wrong_book_ui.py`
+- `tests/test_wrong_questions_api.py`
+- `tests/test_frontend_question_help_ui.py`
+- `tests/test_question_help_api.py`
+- `tests/test_frontend_objective_test_ui.py`
+- 浏览器检查错题本标记掌握、题目答疑公式、客观题复盘布局无横向溢出。
+
 ## 5. P1：真实题库与作业题库
 
 ### Task 8：部分完成 — 最小本地题库 Provider 已接入，题库内容待扩充
@@ -289,11 +327,11 @@ assessment_questions.jsonl
 
 ## 6. P1：端到端回归
 
-### Task 11：最小 API E2E 脚本
+### Task 11：已完成 — 最小 API E2E 脚本
 
 目标：不依赖浏览器，先用 HTTP/SSE 跑通一条主流程。
 
-建议文件：
+已实现文件：
 
 ```text
 scripts/smoke_strict_learning_flow.py
@@ -301,21 +339,29 @@ scripts/smoke_strict_learning_flow.py
 
 覆盖：
 
-1. `/api/start`
-2. `/api/stream`
-3. `/api/confirm_topic`
-4. `/api/assessment_answer` 或 `/api/submit_assessment`
-5. `/api/answer` 提交 post lesson choice
-6. `/api/answer` 提交客观题答案
-7. `/api/answer` 提交 continue/homework choice
-8. `/api/sessions/{thread_id}/resume`
+1. `/api/sessions` — 创建会话占位
+2. `/api/start` — 启动学习
+3. `/api/stream` — 消费 SSE 到 session.end
+4. `/api/confirm_topic` — 确认主题
+5. `/api/assessment_answer` — 对话式测评逐题作答
+6. `/api/answer` — 提交 post_lesson_choice (start_test / temporary_question)
+7. `/api/answer` — 提交客观题答案
+8. `/api/answer` — 提交 continue/homework choice
+9. `/api/sessions/{thread_id}/resume` — 测试会话恢复
 
-临时追问必须额外覆盖：在 post lesson 阶段直接提交一句卡点表达，验证后端进入 `temporary_question`；GraphRAG 回答后再回到 `post_lesson_choice`，选项仍是“继续追问 / 我懂了，进入小测”。
+额外覆盖临时追问流程：`--flow temporary_question` 模式下在 post lesson 阶段直接提交一句卡点表达，验证后端进入 `temporary_question`；GraphRAG 回答后再回到 `post_lesson_choice`。
 
 验收：
 
 ```bash
+# 完整主流程
 python scripts/smoke_strict_learning_flow.py --base-url http://127.0.0.1:8000
+
+# 临时追问流程
+python scripts/smoke_strict_learning_flow.py --base-url http://127.0.0.1:8000 --flow temporary_question
+
+# 两者都跑
+python scripts/smoke_strict_learning_flow.py --base-url http://127.0.0.1:8000 --flow both
 ```
 
 ### Task 12：浏览器 smoke
@@ -333,6 +379,9 @@ python scripts/smoke_strict_learning_flow.py --base-url http://127.0.0.1:8000
 - post lesson 阶段直接输入一句卡点表达能够进入临时追问；回答后能继续追问或进入小测。
 - GraphRAG 证据展示不暴露 raw asset id、长 hash、raw LaTeX 或 raw HTML table；公式/图表/表格保持在卡片和局部滚动容器内。
 - 恢复旧历史时，正文引用媒体不重复出现；未引用的“更多可参考”媒体最多 3 张。
+- 错题本打开后默认显示待复习题，标记已掌握后列表和统计同步更新。
+- 题目答疑可提交文字题并渲染 Markdown/LaTeX；有图片时模式落到图片题专用。
+- 客观题提交后逐题复盘不挤压选项文本，公式不显示原始转义文本。
 
 验收：
 
@@ -341,35 +390,28 @@ python scripts/smoke_strict_learning_flow.py --base-url http://127.0.0.1:8000
 
 ## 7. P2：运行资产与文档治理
 
-### Task 13：统一文档权威入口
+### Task 13：已完成 — 统一文档权威入口
 
-目标：让 `/docs` 不再让人不知道该看哪份。
+已创建 `docs/INDEX.md` 作为文档索引，明确：
+- 权威入口：`current-status-and-usage.md`、`next-iteration-plan.md`、交互验证契约
+- 功能说明文档：题库集成、运行资产、已完成改进、能力结构草案
+- 历史计划/报告已归档到 `docs/plans/` 和 `docs/reports/`
+- `docs/graph-mainflow-task-plan.md` 已标记为历史文档
 
-建议：
+### Task 14：已完成 — 运行资产状态检查命令固化
 
-- 保留 `docs/current-status-and-usage.md` 作为当前状态入口。
-- 保留 `docs/next-iteration-plan.md` 作为下一步入口。
-- 保留 `docs/plans/2026-04-30-interaction-artifact-validation-contract.md` 作为交互卡片/历史恢复验收入口。
-- 历史报告放 `docs/reports/`。
-- 历史计划放 `docs/plans/`。
-- 旧 `docs/graph-mainflow-task-plan.md` 标注为 historical。
+已创建 `scripts/check_runtime_assets.sh`，检查：
+- 图谱 B nodes/edges CSV 存在
+- 图谱 B JSON 存在且格式正确
+- media_evidence_index/batch_summary.json 存在
+- GraphRAGPipeline 引用图谱 B (v2)
+- 内部 dangling refs 检查
 
-### Task 14：运行资产状态检查命令固化
+运行：
 
-目标：把图谱、viewer、media index 的检查做成一个统一命令。
-
-建议文件：
-
-```text
-scripts/check_runtime_assets.sh
+```bash
+bash scripts/check_runtime_assets.sh
 ```
-
-检查：
-
-- 图谱 B nodes/edges CSV 存在。
-- GraphRAGPipeline 默认读取图谱 B 运行资产。
-- media_evidence_index/batch_summary.json 存在且 ok。
-- internal dangling refs 为 0。
 
 ### Task 15：清理 git 状态并分批提交
 
@@ -398,9 +440,11 @@ PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 pytest -q \
 
 1. 执行最小 API E2E smoke，验证主流程 state 与 checkpoint/resume 结构，特别覆盖 post lesson 自由卡点表达进入临时追问。
 2. 执行真实浏览器 smoke，重点验证刷新/恢复后历史卡片 locked、当前卡片 pending、批改结果不丢，并检查 GraphRAG 证据卡片不暴露调试原文。
-3. 扩充 `data/question_bank/a2-control-theory/` 下 objective / variant / homework 题库内容。
-4. 继续扩展后端结构不变量测试和前端契约测试，覆盖新增的作业/临时追问边界。
-5. 最后做文档、运行资产、git 分批收敛。
+3. 对错题本、题目答疑、客观题复盘做浏览器验收：标记掌握写回、公式渲染、选项/解释布局、历史恢复一致性。
+4. 补齐错题本复习闭环：复习本节点、再做一遍、排序控件、连续错误后的变式训练边界。
+5. 扩充 `data/question_bank/a2-control-theory/` 下 objective / variant / homework 题库内容。
+6. 继续扩展后端结构不变量测试和前端契约测试，覆盖新增的作业/临时追问/错题复习边界。
+7. 最后做文档、运行资产、git 分批收敛。
 
 ## 9. 暂不做的事
 
@@ -410,6 +454,7 @@ PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 pytest -q \
 - 不急着把 StudentStateStore 升级成完整数据库。
 - 不重写整个前端。
 - 不追求大型题库自动生成流水线。
+- 不把错题本做成第二套知识图谱；它只服务复习动作和主学习流程回跳。
 - 不把所有历史 docs 重写一遍。
 - 不继续新增主流程节点，除非是为了修复已定义闭环的断点。
 

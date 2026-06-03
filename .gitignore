@@ -42,6 +42,10 @@ data/knowledge_map_outputs/
 !data/knowledge_map_outputs/auto_control_knowledge_map_v2_nodes.csv
 !data/knowledge_map_outputs/auto_control_knowledge_map_v2_edges.csv
 !data/knowledge_map_outputs/auto_control_knowledge_map_v2.json
+!data/knowledge_map_outputs/artificial_intelligence/
+!data/knowledge_map_outputs/artificial_intelligence/**
+!data/ai_knowledge_seed/
+!data/ai_knowledge_seed/**
 data/knowledge_splits/
 data/knowledge_map_vector_db/
 data/knowledge_index__*.json
@@ -68,6 +72,7 @@ data\chroma_db\chroma.sqlite3
 data\student_states\artificial_intelligence\student_state.json
 
 # Tool caches
+node_modules/
 .pytest_cache/
 .ruff_cache/
 .mypy_cache/

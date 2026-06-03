@@ -43,9 +43,9 @@ def test_marked_output_is_sanitized_for_plain_user_and_system_messages():
     ui = UI_JS.read_text(encoding="utf-8")
 
     assert "function sanitizeRenderedHtml" in ui
-    assert "sanitizeRenderedHtml(marked.parse(rawText))" in ui
-    assert "bubble.innerHTML = sanitizeRenderedHtml(marked.parse(text));" in ui
-    assert "${sanitizeRenderedHtml(marked.parse(text))}" in ui
+    assert "sanitizeRenderedHtml(parseMarkdown(rawText))" in ui
+    assert "bubble.innerHTML = sanitizeRenderedHtml(parseMarkdown(text));" in ui
+    assert "${sanitizeRenderedHtml(parseMarkdown(text))}" in ui
 
 
 def test_homework_answer_card_does_not_interpolate_prompt_or_qid_into_inner_html():

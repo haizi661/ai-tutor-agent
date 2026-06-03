@@ -6,6 +6,7 @@ import html
 import json
 import mimetypes
 import re
+from html.parser import HTMLParser
 from pathlib import Path
 
 from dotenv import load_dotenv
@@ -16,6 +17,11 @@ from ai_tutor_agent.platform_paths import resolve_existing_path, resolve_project
 load_dotenv()
 
 MAX_LEARNING_RELATED_MEDIA_CARDS = 3
+KM_INLINE_CITATION_RE = re.compile(
+    r"(?P<bracket>\[(?P<bracket_ref>KM\d+\.[A-Za-z_][\w]*(?:\[\d+\])?)\])"
+    r"|(?P<paren>[（(]\s*(?P<paren_refs>KM\d+(?:\s*[、,，]\s*KM\d+)*)\s*[）)])"
+    r"|(?P<numeric>\[\[CITE_INDEX:(?P<cite_index>\d{1,2})\]\])"
+)
 
 
 def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
@@ -103,6 +109,21 @@ def _build_learning_table_raw_by_ref(media_items: list[dict]) -> dict[str, str]:
     return table_raw_by_ref
 
 
+def _media_image_paths(item: dict) -> list[str]:
+    paths: list[str] = []
+    for key in ("image_paths_abs", "image_paths", "image_path", "path", "source_path"):
+        value = item.get(key)
+        if isinstance(value, (list, tuple)):
+            paths.extend(str(path).strip() for path in value if str(path).strip())
+        elif value:
+            paths.append(str(value).strip())
+    deduped: list[str] = []
+    for path in paths:
+        if path and path not in deduped:
+            deduped.append(path)
+    return deduped
+
+
 def _display_label_for_learning_item(asset_type: str, fallback_label: str, ordinal: int) -> str:
     if asset_type == "formula":
         return f"式{_to_chinese_numeral(ordinal)}"
@@ -152,17 +173,24 @@ def _media_hint(item: dict) -> str:
         item.get("relation_statement", ""),
     ]
     caption = str(item.get("caption", "") or item.get("title", "") or "").strip()
-    asset_type = str(item.get("asset_type", "") or "").strip()
-    formula_text = str(item.get("text", "") or item.get("raw_text", "") or "").strip()
     for value in candidates:
-        text = _sanitize_media_hint_text(
-            str(value or ""),
-            asset_type=asset_type,
-            formula_text=formula_text,
-        )
-        if text and text != caption:
+        text = str(value or "").strip()
+        if text and text != caption and _is_safe_media_hint(text):
             return text
     return ""
+
+
+def _is_safe_media_hint(text: str) -> bool:
+    cleaned = html.unescape(str(text or "")).strip()
+    if not cleaned:
+        return False
+    if len(cleaned) > 260:
+        return False
+    if re.search(r"</?\s*(?:table|tr|td|th|tbody|thead)\b", cleaned, flags=re.IGNORECASE):
+        return False
+    if cleaned.count("<") >= 2 or cleaned.count(">") >= 2:
+        return False
+    return True
 
 
 def _learning_source_label(item: dict) -> str:
@@ -175,41 +203,9 @@ def _learning_source_label(item: dict) -> str:
     return "来源：知识图谱检索结果"
 
 
-def _sanitize_media_hint_text(
-    value: str,
-    *,
-    asset_type: str = "",
-    formula_text: str = "",
-) -> str:
-    text = str(value or "").replace("\x00", " ").strip()
-    if not text:
+def _learning_debug_details(raw_ref: str, *, latex: str = "", show_debug_details: bool = True) -> str:
+    if not show_debug_details:
         return ""
-    text = html.unescape(text)
-    text = re.sub(r"<[^>]+>", " ", text)
-    text = re.sub(r"\[\[MEDIA:.+?\]\]", " ", text)
-    text = re.sub(r"\[[^\]]+:[^\]]+\]", " ", text)
-    text = re.sub(r"```(?:latex|math|tex)?", " ", text, flags=re.IGNORECASE)
-    text = text.replace("```", " ")
-    text = re.sub(r"\$\$.*?\$\$", " ", text)
-    text = re.sub(r"\\\[.*?\\\]", " ", text)
-    text = re.sub(r"\\\(.*?\\\)", " ", text)
-    if formula_text:
-        formula_key = _canonical_plain_text(_normalize_latex_text(formula_text))
-        if formula_key:
-            pieces = re.split(r"(?<=[,，。；;：:])|\s+", text)
-            kept_pieces = [piece for piece in pieces if _canonical_plain_text(piece) != formula_key]
-            text = " ".join(piece for piece in kept_pieces if piece.strip())
-    text = re.sub(r"\s+", " ", text).strip(" ,，。；;：:")
-    if asset_type == "formula":
-        if "\\" in text or "$" in text:
-            return ""
-        alpha_num = len(re.findall(r"[\w\u4e00-\u9fff]", text))
-        if alpha_num and len(re.findall(r"[{}_^]", text)) > alpha_num / 2:
-            return ""
-    return text.strip()
-
-
-def _learning_debug_details(raw_ref: str, *, latex: str = "") -> str:
     ref_text = html.escape(str(raw_ref or ""))
     details = (
         '<details class="learning-debug-details">'
@@ -228,7 +224,151 @@ def _learning_debug_details(raw_ref: str, *, latex: str = "") -> str:
     return details
 
 
-def _build_learning_media_render_parts(media_items: list[dict]) -> tuple[dict[str, str], dict[str, str]]:
+def _evidence_kind_label(item: dict) -> str:
+    attribute = str(item.get("attribute", "") or "").strip()
+    reference = str(item.get("reference", "") or "").strip()
+    key = attribute or reference.rsplit(".", 1)[-1].split("[", 1)[0]
+    labels = {
+        "summary": "摘要",
+        "definition": "定义",
+        "learning_objectives": "学习目标",
+        "must_know": "必备知识",
+        "common_errors": "常见错误",
+        "prerequisite_nodes": "前置关系",
+        "relation_path": "图谱关系",
+    }
+    return labels.get(key, key or "图谱证据")
+
+
+def _build_learning_citation_items(evidence_items: list[dict]) -> list[dict[str, str]]:
+    citations: list[dict[str, str]] = []
+    seen_refs: set[str] = set()
+    for item in evidence_items:
+        reference = str(item.get("reference", "") or "").strip()
+        text = str(item.get("text", "") or "").strip()
+        if not reference or reference in seen_refs:
+            continue
+        seen_refs.add(reference)
+        node_id = str(item.get("node_id", "") or "").strip() or reference.split(".", 1)[0]
+        node_name = str(item.get("node_name", "") or "").strip()
+        kind = _evidence_kind_label(item)
+        source_name = node_name or node_id or reference
+        citations.append(
+            {
+                "index": "",
+                "reference": reference,
+                "text": text,
+                "node_id": node_id,
+                "node_name": node_name,
+                "kind": kind,
+                "source_name": source_name,
+                "tooltip": f"知识图谱：{source_name} · {kind}（{reference}）",
+            }
+        )
+    return citations
+
+
+def _build_learning_citations_by_source_index(evidence_items: list[dict]) -> dict[str, dict[str, str]]:
+    citations: dict[str, dict[str, str]] = {}
+    for idx, item in enumerate(evidence_items, start=1):
+        reference = str(item.get("reference", "") or "").strip()
+        if not reference:
+            continue
+        node_id = str(item.get("node_id", "") or "").strip() or reference.split(".", 1)[0]
+        node_name = str(item.get("node_name", "") or "").strip()
+        kind = _evidence_kind_label(item)
+        source_name = node_name or node_id or reference
+        citations[str(idx)] = {
+            "index": "",
+            "reference": reference,
+            "text": str(item.get("text", "") or "").strip(),
+            "node_id": node_id,
+            "node_name": node_name,
+            "kind": kind,
+            "source_name": source_name,
+            "tooltip": f"知识图谱：{source_name} · {kind}（{reference}）",
+        }
+    return citations
+
+
+def _build_learning_node_name_lookup(result: dict, evidence_items: list[dict], media_items: list[dict]) -> dict[str, str]:
+    names: dict[str, str] = {}
+
+    def add(node_id: object, node_name: object = "") -> None:
+        key = str(node_id or "").strip()
+        value = str(node_name or "").strip()
+        if key and value and key not in names:
+            names[key] = value
+
+    for item in evidence_items:
+        add(item.get("node_id"), item.get("node_name"))
+    for item in media_items:
+        ref = str(item.get("reference", "") or "").strip()
+        add(item.get("node_id") or ref.split(".", 1)[0], item.get("node_name"))
+    for key in ["node_summaries", "anchor_nodes", "traversed_nodes"]:
+        for item in list(result.get(key) or []):
+            if isinstance(item, dict):
+                add(item.get("node_id"), item.get("name") or item.get("node_name"))
+    return names
+
+
+def _build_fallback_learning_citation(reference: str, node_names: dict[str, str]) -> dict[str, str]:
+    node_id = reference.split(".", 1)[0]
+    kind = _evidence_kind_label({"reference": reference})
+    source_name = node_names.get(node_id, "") or node_id or reference
+    return {
+        "index": "",
+        "reference": reference,
+        "text": "",
+        "node_id": node_id,
+        "node_name": node_names.get(node_id, ""),
+        "kind": kind,
+        "source_name": source_name,
+        "tooltip": f"知识图谱：{source_name} · {kind}（{reference}）",
+    }
+
+
+def _assign_learning_citation_index(
+    citation: dict[str, str],
+    assigned: dict[str, dict[str, str]],
+    ordered: list[dict[str, str]],
+) -> dict[str, str]:
+    reference = str(citation.get("reference", "") or "").strip()
+    if reference in assigned:
+        return assigned[reference]
+    numbered = dict(citation)
+    numbered["index"] = str(len(ordered) + 1)
+    source_name = numbered.get("source_name", "") or numbered.get("node_name", "") or numbered.get("node_id", "") or reference
+    kind = numbered.get("kind", "") or _evidence_kind_label(numbered)
+    numbered["tooltip"] = f"知识图谱：{source_name} · {kind}（{reference}）"
+    assigned[reference] = numbered
+    ordered.append(numbered)
+    return numbered
+
+
+def _citation_marker_html(citation: dict[str, str], *, include_reference: bool = True) -> str:
+    index = html.escape(citation["index"])
+    if include_reference:
+        tooltip_text = citation["tooltip"]
+    else:
+        source_name = citation.get("source_name", "") or citation.get("node_name", "") or citation.get("node_id", "") or "图谱证据"
+        kind = citation.get("kind", "") or "图谱证据"
+        tooltip_text = f"知识图谱：{source_name} · {kind}"
+    tooltip = html.escape(tooltip_text, quote=True)
+    label = html.escape(f"引用 {citation['index']}：{citation['source_name']}，{citation['kind']}", quote=True)
+    return (
+        f'<sup class="learning-citation" title="{tooltip}" aria-label="{label}">'
+        f'<span class="learning-citation-index">{index}</span>'
+        "</sup>"
+    )
+
+
+def _build_learning_media_render_parts(
+    media_items: list[dict],
+    *,
+    show_debug_details: bool = True,
+    compact_cards: bool = False,
+) -> tuple[dict[str, str], dict[str, str]]:
     media_cards_by_ref: dict[str, str] = {}
     media_labels_by_ref: dict[str, str] = {}
 
@@ -250,7 +390,7 @@ def _build_learning_media_render_parts(media_items: list[dict]) -> tuple[dict[st
         node_name = html.escape(node_name_raw)
         source_line = html.escape(_learning_source_label(item))
         hint = html.escape(_media_hint(item))
-        hint_html = f'<div class="learning-evidence-summary">{hint}</div>' if hint else ""
+        hint_html = f'<div class="learning-evidence-summary">{hint}</div>' if hint and not compact_cards else ""
         media_labels_by_ref[raw_ref] = display_label_raw
         title = node_name or display_label
 
@@ -270,7 +410,7 @@ def _build_learning_media_render_parts(media_items: list[dict]) -> tuple[dict[st
               {hint_html}
               <div class="learning-formula-viewport"><div class="formula-math formula-render" data-latex="{formula_attr}">{formula_text}</div></div>
               <div class="learning-source-line">{source_line}</div>
-              {_learning_debug_details(raw_ref, latex=formula_raw)}
+              {_learning_debug_details(raw_ref, latex=formula_raw, show_debug_details=show_debug_details)}
             </section>
             """
         elif asset_type == "table":
@@ -291,17 +431,19 @@ def _build_learning_media_render_parts(media_items: list[dict]) -> tuple[dict[st
               {hint_html}
               <div class="learning-table-viewport">{table_html}</div>
               <div class="learning-source-line">{source_line}</div>
-              {_learning_debug_details(raw_ref)}
+              {_learning_debug_details(raw_ref, show_debug_details=show_debug_details)}
             </section>
             """
         else:
             caption_raw = str(item.get("caption", "") or "").strip()
             caption = html.escape(caption_raw)
             figure_title = caption or title
-            paths = item.get("image_paths_abs", []) or []
+            paths = _media_image_paths(item)
             image_sources = [_image_path_to_data_uri(path) for path in paths]
             image_sources = [src for src in image_sources if src]
-            caption_html = f'<div class="learning-block-caption">{caption}</div>' if caption else ""
+            caption_html = ""
+            if caption and (not compact_cards or _canonical_plain_text(caption_raw) != _canonical_plain_text(figure_title)):
+                caption_html = f'<div class="learning-block-caption">{caption}</div>'
             if image_sources:
                 preview_img = f"<img src='{image_sources[0]}' alt='{caption}' loading='lazy' />"
                 figure_body = f'<div class="learning-figure-viewport">{preview_img}</div>'
@@ -327,11 +469,43 @@ def _build_learning_media_render_parts(media_items: list[dict]) -> tuple[dict[st
               {caption_html}
               {hint_html}
               <div class="learning-source-line">{source_line}</div>
-              {_learning_debug_details(raw_ref)}
+              {_learning_debug_details(raw_ref, show_debug_details=show_debug_details)}
             </section>
             """
 
     return media_cards_by_ref, media_labels_by_ref
+
+
+def _build_learning_media_aliases(media_items: list[dict], media_labels_by_ref: dict[str, str]) -> dict[str, list[str]]:
+    aliases_by_ref: dict[str, list[str]] = {}
+
+    def add(ref: str, alias: str) -> None:
+        normalized = re.sub(r"\s+", "", str(alias or "").strip())
+        if not ref or not normalized:
+            return
+        aliases = aliases_by_ref.setdefault(ref, [])
+        if normalized not in aliases:
+            aliases.append(normalized)
+
+    for item in media_items:
+        ref = str(item.get("reference", "") or "").strip()
+        if not ref:
+            continue
+        add(ref, media_labels_by_ref.get(ref, ""))
+        for value in [
+            item.get("caption", ""),
+            item.get("title", ""),
+            item.get("text", ""),
+            item.get("raw_text", ""),
+        ]:
+            text = str(value or "")
+            for kind, number in re.findall(r"(图|表|式)\s*([0-9]+(?:[-－][0-9]+)?)", text):
+                add(ref, f"{kind}{number.replace('－', '-')}")
+            for tag in re.findall(r"\\tag\s*\{\s*([^}]+?)\s*\}", text):
+                tag_text = str(tag or "").strip()
+                if tag_text:
+                    add(ref, f"式{tag_text}")
+    return aliases_by_ref
 
 def _build_media_render_parts(media_items: list[dict]) -> tuple[dict[str, str], dict[str, str], list[str]]:
     media_cards_by_ref: dict[str, str] = {}
@@ -382,7 +556,7 @@ def _build_media_render_parts(media_items: list[dict]) -> tuple[dict[str, str], 
             modal_body = f"<div class='table-full table-viewport'>{table_html}</div><p>{caption}</p>{hint_html}"
         else:
             caption = html.escape(item.get("caption", ""))
-            paths = item.get("image_paths_abs", []) or []
+            paths = _media_image_paths(item)
             preview_img = ""
             gallery = []
             image_sources = [_image_path_to_data_uri(path) for path in paths]
@@ -431,14 +605,34 @@ def _build_media_render_parts(media_items: list[dict]) -> tuple[dict[str, str], 
     return media_cards_by_ref, media_labels_by_ref, modal_cards
 
 
-def _build_learning_evidence_card(evidence_items: list[dict]) -> str:
+def _build_learning_evidence_card(
+    evidence_items: list[dict],
+    citations: list[dict[str, str]] | None = None,
+    *,
+    show_debug_details: bool = True,
+) -> str:
+    citations = citations if citations is not None else _build_learning_citation_items(evidence_items)
+    if citations and not str(citations[0].get("index", "")).strip():
+        assigned: dict[str, dict[str, str]] = {}
+        ordered: list[dict[str, str]] = []
+        citations = [
+            _assign_learning_citation_index(citation, assigned, ordered)
+            for citation in citations
+        ]
     rows = "".join(
-        "<li>"
-        f"<span>{html.escape(str(item.get('text', '')))}</span>"
-        f"<details class=\"learning-debug-details\"><summary>查看来源详情</summary><code>{html.escape(str(item.get('reference', '')))}</code></details>"
-        "</li>"
-        for item in evidence_items[:4]
-        if str(item.get("reference", "") or item.get("text", "")).strip()
+        '<li class="learning-source-item">'
+        f'{_citation_marker_html(citation, include_reference=show_debug_details)}'
+        '<div class="learning-source-body">'
+        f"<span>{html.escape(_learning_citation_text(citation))}</span>"
+        f'<div class="learning-source-line">节点：{html.escape(citation.get("source_name", ""))} · {html.escape(citation.get("kind", ""))}</div>'
+        + (
+            f"<details class=\"learning-debug-details\"><summary>查看来源详情</summary><code>{html.escape(citation.get('reference', ''))}</code></details>"
+            if show_debug_details
+            else ""
+        )
+        + "</div>"
+        + "</li>"
+        for citation in citations[:4]
     )
     if not rows:
         return ""
@@ -450,29 +644,68 @@ def _build_learning_evidence_card(evidence_items: list[dict]) -> str:
     )
 
 
-def build_learning_answer_html(result: dict) -> str:
+def _learning_citation_text(citation: dict[str, str]) -> str:
+    text = str(citation.get("text", "") or "").strip()
+    if text:
+        return text
+    source_name = str(citation.get("source_name", "") or "").strip() or str(citation.get("reference", "") or "").strip()
+    kind = str(citation.get("kind", "") or "").strip() or "图谱证据"
+    return f"引用知识图谱节点“{source_name}”的{kind}。"
+
+
+def build_learning_answer_html(result: dict, *, answer_context: str = "learning") -> str:
+    is_temporary_question = answer_context == "temporary_question"
     media_items = list(result.get("media_items", []) or [])
-    media_cards_by_ref, media_labels_by_ref = _build_learning_media_render_parts(media_items)
+    evidence_items = list(result.get("evidence_items", []) or [])
+    citations = _build_learning_citation_items(evidence_items)
+    citations_by_ref = {item["reference"]: item for item in citations}
+    citations_by_source_index = _build_learning_citations_by_source_index(evidence_items)
+    node_names = _build_learning_node_name_lookup(result, evidence_items, media_items)
+    assigned_citations: dict[str, dict[str, str]] = {}
+    ordered_citations: list[dict[str, str]] = []
+    media_cards_by_ref, media_labels_by_ref = _build_learning_media_render_parts(
+        media_items,
+        show_debug_details=not is_temporary_question,
+        compact_cards=is_temporary_question,
+    )
+    media_aliases_by_ref = _build_learning_media_aliases(media_items, media_labels_by_ref)
     media_types_by_ref, formula_refs_by_latex, table_refs_by_text = _build_learning_media_metadata(media_items)
     table_raw_by_ref = _build_learning_table_raw_by_ref(media_items)
     used_media_refs: set[str] = set()
     answer_html = _render_answer_html(
-        str(result.get("answer", "")),
+        _normalize_learning_answer_text(
+            _strip_embedded_learning_html(str(result.get("answer", ""))),
+            answer_context=answer_context,
+        ),
         media_cards_by_ref,
         media_labels_by_ref,
+        media_aliases_by_ref=media_aliases_by_ref,
         media_types_by_ref=media_types_by_ref,
         formula_refs_by_latex=formula_refs_by_latex,
         table_refs_by_text=table_refs_by_text,
         table_raw_by_ref=table_raw_by_ref,
-        media_block_renderer=_build_learning_reference_media_block,
+        media_block_renderer=_build_temporary_reference_media_block if is_temporary_question else _build_learning_reference_media_block,
         formula_block_renderer=_build_learning_answer_formula_block,
         linked_block_renderer=_build_learning_linked_block,
         used_media_refs=used_media_refs,
+        citations_by_ref=citations_by_ref,
+        citations_by_source_index=citations_by_source_index,
+        assigned_citations=assigned_citations,
+        ordered_citations=ordered_citations,
+        citation_node_names=node_names,
+        allow_fallback_citations=not is_temporary_question,
     )
     remaining_cards = _select_learning_related_media_cards(media_cards_by_ref, used_media_refs)
-    if remaining_cards:
+    if remaining_cards and not is_temporary_question:
         answer_html += _build_learning_related_overview_block(remaining_cards)
-    evidence_html = _build_learning_evidence_card(list(result.get("evidence_items", []) or []))
+    elif remaining_cards and is_temporary_question and not used_media_refs:
+        answer_html += _build_temporary_reference_media_block(remaining_cards, title="")
+    evidence_citations = ordered_citations or citations
+    evidence_html = _build_learning_evidence_card(
+        evidence_items,
+        evidence_citations,
+        show_debug_details=not is_temporary_question,
+    )
     return f'<div class="learning-answer-content">{answer_html}{evidence_html}</div>'
 
 
@@ -490,6 +723,91 @@ def _select_learning_related_media_cards(
         if len(cards) >= MAX_LEARNING_RELATED_MEDIA_CARDS:
             break
     return cards
+
+
+def _strip_embedded_learning_html(text: str) -> str:
+    cleaned = str(text or "")
+    if "learning-" not in cleaned and "formula-render" not in cleaned:
+        return cleaned
+    patterns = [
+        r"<section\b[^>]*class=[\"'][^\"']*learning-(?:evidence-card|reference-block|media-group)[^\"']*[\"'][\s\S]*?</section>",
+        r"<div\b[^>]*class=[\"'][^\"']*learning-(?:reference-media|reference-media-grid|formula-viewport|figure-viewport|table-viewport)[^\"']*[\"'][\s\S]*?</div>",
+    ]
+    previous = None
+    while previous != cleaned:
+        previous = cleaned
+        for pattern in patterns:
+            cleaned = re.sub(pattern, "", cleaned, flags=re.IGNORECASE)
+    return cleaned
+
+
+def _normalize_learning_answer_text(text: str, *, answer_context: str = "learning") -> str:
+    normalized = _collapse_standalone_numeric_citation_lines(text)
+    if answer_context == "temporary_question":
+        normalized = _strip_temporary_question_artifact_lines(normalized)
+    return normalized
+
+
+def _strip_temporary_question_artifact_lines(text: str) -> str:
+    text = re.sub(r"\s*\[\[CITE_INDEX:\d{1,2}\]\]\s*", " ", str(text or ""))
+    lines = text.splitlines()
+    cleaned: list[str] = []
+    in_authored_evidence = False
+    skip_handwritten_media_block = False
+
+    for line in lines:
+        stripped = line.strip()
+        if not stripped:
+            if in_authored_evidence or skip_handwritten_media_block:
+                continue
+            cleaned.append(line)
+            continue
+        if re.fullmatch(r"//\s*(?:图|表|式).+", stripped):
+            continue
+        if stripped in {"相关公式与图表", "更多可参考的公式与图表", "参考材料"}:
+            skip_handwritten_media_block = True
+            continue
+        if skip_handwritten_media_block:
+            if stripped.startswith(("举例：", "拓展：", "分析：", "结论：")):
+                skip_handwritten_media_block = False
+            else:
+                continue
+        if stripped in {"依据：", "依据:"}:
+            in_authored_evidence = True
+            continue
+        if in_authored_evidence:
+            if re.match(r"^\d+[.、]\s*", stripped) or stripped.startswith("[KM") or re.fullmatch(r"\[\[CITE_INDEX:\d{1,2}\]\].*", stripped):
+                continue
+            if stripped.startswith(("结论：", "分析：", "举例：", "拓展：")):
+                in_authored_evidence = False
+            else:
+                continue
+        cleaned.append(line)
+    return "\n".join(cleaned)
+
+
+def _collapse_standalone_numeric_citation_lines(text: str) -> str:
+    lines = str(text or "").splitlines()
+    collapsed: list[str] = []
+    index = 0
+    while index < len(lines):
+        stripped = lines[index].strip()
+        if re.fullmatch(r"\d{1,2}", stripped):
+            marker = f"[[CITE_INDEX:{stripped}]]"
+            next_line = lines[index + 1].strip() if index + 1 < len(lines) else ""
+            if collapsed and next_line:
+                collapsed[-1] = f"{collapsed[-1].rstrip()} {marker} {next_line}".strip()
+                index += 2
+                continue
+            if collapsed:
+                collapsed[-1] = f"{collapsed[-1].rstrip()} {marker}".strip()
+            else:
+                collapsed.append(marker)
+            index += 1
+            continue
+        collapsed.append(lines[index])
+        index += 1
+    return "\n".join(collapsed)
 
 
 def build_answer_media_html(result: dict) -> str:
@@ -564,7 +882,6 @@ def build_html_report(result: dict) -> str:
     .figure-viewport {{ margin-top: 10px; overflow: auto; max-width: 100%; max-height: 70vh; border-radius: 6px; background: #f8fafc; }}
     .formula-scroll.is-overflowing, .formula-viewport.is-overflowing {{ justify-content: flex-start; }}
     .formula-math {{ min-width: max-content; max-width: none; line-height: 1.8; text-align: center; white-space: nowrap; }}
-    .inline-formula-render {{ display: inline-block; vertical-align: middle; margin: 0 0.15em; max-width: 100%; }}
     .formula-math .katex {{ white-space: nowrap; }}
     .formula-full {{ font-size: 18px; }}
     .formula-raw {{ margin-top: 12px; }}
@@ -600,8 +917,7 @@ def build_html_report(result: dict) -> str:
         const latex = el.getAttribute('data-latex') || el.textContent || '';
         if (!latex.trim()) return;
         try {{
-          const displayMode = el.getAttribute('data-display-mode') !== 'false';
-          katex.render(latex, el, {{ displayMode, throwOnError: false, strict: 'ignore' }});
+          katex.render(latex, el, {{ displayMode: true, throwOnError: false, strict: 'ignore' }});
           const scroller = el.closest('.formula-scroll');
           if (scroller && el.scrollWidth > scroller.clientWidth) {{
             scroller.classList.add('is-overflowing');
@@ -647,41 +963,49 @@ def _image_path_to_data_uri(path: str) -> str:
 def _sanitize_table_html(table_text: str) -> str:
     raw = str(table_text or "").strip()
     if not raw:
-        return "<div class=\"table-empty\">表格内容为空</div>"
-    if re.search(r"<\s*table\b", raw, flags=re.IGNORECASE) and re.search(r"<\s*/\s*table\s*>", raw, flags=re.IGNORECASE):
-        return _sanitize_basic_table_html(raw)
+        return _learning_table_unavailable("表格内容为空")
+    parsed_table = _parse_table_html_to_clean_table(raw)
+    if parsed_table:
+        return parsed_table
     markdown_table = _markdown_table_to_html(raw)
     if markdown_table:
         return markdown_table
-    return f"<pre>{html.escape(raw)}</pre>"
+    return _learning_table_unavailable("表格内容暂不可用")
 
 
-def _sanitize_basic_table_html(raw: str) -> str:
-    allowed_tags = {"table", "thead", "tbody", "tr", "th", "td", "caption"}
-    escaped_placeholders: list[str] = []
+def _learning_table_unavailable(message: str) -> str:
+    return f'<div class="learning-table-empty" role="note">{html.escape(message)}</div>'
 
-    escaped = html.escape(
-        re.sub(
-            r"<\s*(/?)\s*([a-zA-Z0-9]+)([^>]*)>",
-            lambda m: _escape_or_placeholder_table_tag(m, escaped_placeholders, allowed_tags),
-            raw,
-        )
+
+def _parse_table_html_to_clean_table(raw: str) -> str:
+    source = str(raw or "").strip()
+    if not re.search(r"<\s*table\b|&lt;\s*table\b", source, flags=re.IGNORECASE):
+        return ""
+    if "&lt;" in source.lower() or "&gt;" in source.lower():
+        source = html.unescape(source)
+    source = _strip_table_ocr_line_numbers(source)
+    parser = _SafeTableParser()
+    try:
+        parser.feed(source)
+        parser.close()
+    except Exception:
+        return ""
+    return parser.to_html()
+
+
+def _strip_table_ocr_line_numbers(source: str) -> str:
+    cleaned = re.sub(
+        r"(<\s*tr\b[^>]*>)\s*\d+\s*(?=<\s*(?:tr|td|th)\b)",
+        r"\1",
+        source,
+        flags=re.IGNORECASE,
     )
-    for idx, tag in enumerate(escaped_placeholders):
-        escaped = escaped.replace(html.escape(f"\u0000{idx}\u0000"), tag)
-    return escaped
-
-
-def _escape_or_placeholder_table_tag(match: re.Match[str], placeholders: list[str], allowed_tags: set[str]) -> str:
-    tag_name = match.group(2).lower()
-    if tag_name not in allowed_tags:
-        return match.group(0)
-    closing = "/" if match.group(1) else ""
-    attrs = ""
-    if not closing and tag_name in {"td", "th"}:
-        attrs = _sanitize_table_cell_attrs(match.group(3) or "")
-    placeholders.append(f"<{closing}{tag_name}{attrs}>")
-    return f"\u0000{len(placeholders) - 1}\u0000"
+    return re.sub(
+        r"(<\s*t[dh]\b[^>]*>)\s*\d+\s*(?=<\s*(?:td|th)\b)",
+        r"\1",
+        cleaned,
+        flags=re.IGNORECASE,
+    )
 
 
 def _sanitize_table_cell_attrs(raw_attrs: str) -> str:
@@ -690,6 +1014,122 @@ def _sanitize_table_cell_attrs(raw_attrs: str) -> str:
         value = max(1, min(int(attr_value), 20))
         safe_attrs.append(f'{attr_name.lower()}="{value}"')
     return (" " + " ".join(safe_attrs)) if safe_attrs else ""
+
+
+def _sanitize_table_cell_attrs_from_pairs(attrs: list[tuple[str, object]]) -> str:
+    raw = " ".join(
+        f'{name}="{value}"'
+        for name, value in attrs
+        if value is not None and name.lower() in {"rowspan", "colspan"}
+    )
+    return _sanitize_table_cell_attrs(raw)
+
+
+class _SafeTableParser(HTMLParser):
+    def __init__(self) -> None:
+        super().__init__(convert_charrefs=False)
+        self.rows: list[list[dict[str, str]]] = []
+        self.current_row: list[dict[str, str]] | None = None
+        self.current_cell: dict[str, str] | None = None
+        self.in_table = False
+        self.cell_depth = 0
+
+    def handle_starttag(self, tag: str, attrs: list[tuple[str, str | None]]) -> None:
+        tag_name = tag.lower()
+        if tag_name == "table":
+            self.in_table = True
+            return
+        if not self.in_table:
+            return
+        if tag_name == "tr":
+            self._finish_cell()
+            self._finish_row()
+            self.current_row = []
+            return
+        if tag_name in {"td", "th"}:
+            if self.current_row is None:
+                self.current_row = []
+            self._finish_cell()
+            self.current_cell = {
+                "tag": tag_name,
+                "attrs": _sanitize_table_cell_attrs_from_pairs(attrs),
+                "text": "",
+            }
+            self.cell_depth = 1
+            return
+        if self.current_cell is not None:
+            self.cell_depth += 1
+            if tag_name == "br":
+                self.current_cell["text"] += "\n"
+
+    def handle_endtag(self, tag: str) -> None:
+        tag_name = tag.lower()
+        if not self.in_table:
+            return
+        if tag_name in {"td", "th"}:
+            self._finish_cell()
+            return
+        if tag_name == "tr":
+            self._finish_cell()
+            self._finish_row()
+            return
+        if tag_name == "table":
+            self._finish_cell()
+            self._finish_row()
+            self.in_table = False
+            return
+        if self.current_cell is not None and self.cell_depth > 0:
+            self.cell_depth -= 1
+
+    def handle_data(self, data: str) -> None:
+        if self.current_cell is not None:
+            self.current_cell["text"] += data
+
+    def handle_entityref(self, name: str) -> None:
+        if self.current_cell is not None:
+            self.current_cell["text"] += f"&{name};"
+
+    def handle_charref(self, name: str) -> None:
+        if self.current_cell is not None:
+            self.current_cell["text"] += f"&#{name};"
+
+    def _finish_cell(self) -> None:
+        if self.current_cell is None:
+            return
+        if self.current_row is None:
+            self.current_row = []
+        text = html.unescape(self.current_cell.get("text", ""))
+        text = re.sub(r"[ \t\r\f\v]+", " ", text)
+        text = re.sub(r"\n\s*", "\n", text).strip()
+        self.current_cell["text"] = text
+        self.current_row.append(self.current_cell)
+        self.current_cell = None
+        self.cell_depth = 0
+
+    def _finish_row(self) -> None:
+        if self.current_row is None:
+            return
+        cells = [cell for cell in self.current_row if str(cell.get("text", "")).strip()]
+        if cells:
+            self.rows.append(cells)
+        self.current_row = None
+
+    def to_html(self) -> str:
+        self._finish_cell()
+        self._finish_row()
+        if not self.rows:
+            return ""
+        row_html = []
+        for row in self.rows:
+            cells = []
+            for cell in row:
+                tag = "th" if cell.get("tag") == "th" else "td"
+                attrs = cell.get("attrs", "")
+                text = html.escape(str(cell.get("text", "")))
+                text = text.replace("\n", "<br>")
+                cells.append(f"<{tag}{attrs}>{text}</{tag}>")
+            row_html.append("<tr>" + "".join(cells) + "</tr>")
+        return "<table><tbody>" + "".join(row_html) + "</tbody></table>"
 
 def _markdown_table_to_html(raw: str) -> str:
     lines = [line.strip() for line in raw.splitlines() if line.strip()]
@@ -748,6 +1188,7 @@ def _render_answer_html(
     media_cards_by_ref: dict[str, str],
     media_labels_by_ref: dict[str, str],
     *,
+    media_aliases_by_ref: dict[str, list[str]] | None = None,
     media_types_by_ref: dict[str, str] | None = None,
     formula_refs_by_latex: dict[str, list[str]] | None = None,
     table_refs_by_text: dict[str, list[str]] | None = None,
@@ -756,12 +1197,19 @@ def _render_answer_html(
     formula_block_renderer: callable = None,
     linked_block_renderer: callable = None,
     used_media_refs: set[str] | None = None,
+    citations_by_ref: dict[str, dict[str, str]] | None = None,
+    citations_by_source_index: dict[str, dict[str, str]] | None = None,
+    assigned_citations: dict[str, dict[str, str]] | None = None,
+    ordered_citations: list[dict[str, str]] | None = None,
+    citation_node_names: dict[str, str] | None = None,
+    allow_fallback_citations: bool = True,
 ) -> str:
     if media_block_renderer is None:
         media_block_renderer = _build_media_block
     if formula_block_renderer is None:
         formula_block_renderer = _build_answer_formula_block
     is_learning_flow = linked_block_renderer is not None
+    media_aliases_by_ref = media_aliases_by_ref or {}
     media_types_by_ref = media_types_by_ref or {}
     formula_refs_by_latex = formula_refs_by_latex or {}
     table_refs_by_text = table_refs_by_text or {}
@@ -769,6 +1217,11 @@ def _render_answer_html(
     lines = [line.rstrip() for line in answer_text.splitlines()]
     raw_blocks: list[tuple[str, str, list[str], bool]] = []
     used_refs: set[str] = used_media_refs if used_media_refs is not None else set()
+    citations_by_ref = citations_by_ref or {}
+    citations_by_source_index = citations_by_source_index or {}
+    assigned_citations = assigned_citations if assigned_citations is not None else {}
+    ordered_citations = ordered_citations if ordered_citations is not None else []
+    citation_node_names = citation_node_names or {}
     index = 0
     while index < len(lines):
         stripped = lines[index].strip()
@@ -825,16 +1278,10 @@ def _render_answer_html(
         clean_line, refs = _extract_media_refs(stripped, media_cards_by_ref)
         line_block = ""
         if clean_line:
-            heading_match = re.match(r"^(#{1,6})\s+(.+)$", clean_line)
-            bullet_match = re.match(r"^[-*]\s+(.+)$", clean_line)
-            if heading_match:
-                level = min(len(heading_match.group(1)) + 1, 6)
-                rendered_line = _render_answer_line(heading_match.group(2), media_labels_by_ref, refs)
-                line_block = f"<h{level}>{rendered_line}</h{level}>"
-            elif bullet_match:
-                rendered_line = _render_answer_line(bullet_match.group(1), media_labels_by_ref, refs)
-                line_block = f"<ul><li>{rendered_line}</li></ul>"
-            elif _is_formula_line(clean_line):
+            if is_learning_flow and _is_learning_evidence_only_line(clean_line):
+                index += 1
+                continue
+            if _is_formula_line(clean_line):
                 latex = _normalize_latex_text(clean_line)
                 formula_ref = _find_media_ref_for_formula(latex, formula_refs_by_latex, used_refs)
                 if formula_ref:
@@ -845,12 +1292,22 @@ def _render_answer_html(
                 if is_learning_flow and _is_redundant_table_reference_line(clean_line, refs, media_types_by_ref):
                     line_block = ""
                 else:
-                    rendered_line = _render_answer_line(clean_line, media_labels_by_ref, refs)
+                    rendered_line = _render_answer_line(
+                        clean_line,
+                        media_labels_by_ref,
+                        refs,
+                        citations_by_ref,
+                        assigned_citations,
+                        ordered_citations,
+                        citation_node_names,
+                        citations_by_source_index,
+                        allow_fallback_citations=allow_fallback_citations,
+                    )
                     if _is_section_line(clean_line):
                         line_block = f"<p class=\"section-title\">{rendered_line}</p>"
                     else:
                         line_block = f"<p>{rendered_line}</p>"
-                refs.extend(_refs_mentioned_by_label(clean_line, media_cards_by_ref, media_labels_by_ref))
+                refs.extend(_refs_mentioned_by_label(clean_line, media_cards_by_ref, media_labels_by_ref, media_aliases_by_ref))
         next_index_after_payload = _skip_media_payload_after_refs(
             lines,
             index + 1,
@@ -874,6 +1331,7 @@ def _render_answer_html(
         }
         remaining_refs = [ref for ref in media_cards_by_ref if ref not in used_refs and ref not in planned_refs]
         if remaining_refs:
+            insert_at = _find_primary_media_insert_index([block_html for _, block_html, _, _ in raw_blocks])
             media_block = _build_media_block_for_refs(
                 remaining_refs,
                 media_cards_by_ref,
@@ -882,7 +1340,7 @@ def _render_answer_html(
                 media_block_renderer=media_block_renderer,
             )
             if media_block:
-                raw_blocks.append(("media", media_block, [], False))
+                raw_blocks.insert(insert_at, ("media", media_block, [], False))
 
     merged_blocks: list[str] = []
     pending_refs: list[str] = []
@@ -1003,8 +1461,23 @@ def _build_learning_reference_media_block(cards: list[str], *, title: str = "相
     return f'{title_html}<div class="learning-reference-media-grid learning-media-group">{"".join(cards)}</div>'
 
 
+def _build_temporary_reference_media_block(cards: list[str], *, title: str = "相关公式与图表") -> str:
+    return f'<div class="learning-reference-media-grid learning-media-group learning-media-temporary">{"".join(cards)}</div>'
+
+
 def _build_learning_related_overview_block(cards: list[str]) -> str:
-    return _build_learning_media_block(cards, title="更多可参考的公式与图表", extra_class="learning-related-overview")
+    intro = (
+        '<p class="learning-related-overview-note">'
+        '这些材料不是本段正文的必需引用，作为扩展知识保留：可用于补充理解、对照教材原图/公式，'
+        '或在后续深入学习时查看。'
+        '</p>'
+    )
+    return _build_learning_media_block(
+        cards,
+        title="扩展知识：可选公式与图表",
+        extra_class="learning-related-overview",
+        intro_html=intro,
+    )
 
 
 def _build_media_block_for_refs(
@@ -1018,7 +1491,10 @@ def _build_media_block_for_refs(
     if media_block_renderer is None:
         media_block_renderer = _build_media_block
     cards: list[str] = []
-    ordered_refs = [ref for ref in media_cards_by_ref if ref in refs]
+    ordered_refs: list[str] = []
+    for ref in refs:
+        if ref in media_cards_by_ref and ref not in ordered_refs:
+            ordered_refs.append(ref)
     for ref in ordered_refs:
         if not ref or ref in used_refs:
             continue
@@ -1156,6 +1632,11 @@ def _skip_media_payload_after_refs(
         if "formula" in ref_types and _is_formula_line(stripped):
             index += 1
             continue
+        if "formula" in ref_types:
+            formula_payload_end = _skip_loose_formula_payload(lines, index)
+            if formula_payload_end > index:
+                index = formula_payload_end
+                continue
         if "table" in ref_types:
             table_lines, next_index = _collect_markdown_table(lines, index)
             if table_lines:
@@ -1166,6 +1647,39 @@ def _skip_media_payload_after_refs(
             continue
         break
     return index
+
+
+def _skip_loose_formula_payload(lines: list[str], index: int) -> int:
+    window = [line.strip() for line in lines[index : min(len(lines), index + 40)] if line.strip()]
+    if len(window) < 4:
+        return index
+    math_like_prefix = 0
+    for value in window[:12]:
+        if _is_loose_formula_payload_line(value):
+            math_like_prefix += 1
+            continue
+        break
+    if math_like_prefix < 4:
+        return index
+    cursor = index
+    while cursor < len(lines):
+        stripped = lines[cursor].strip()
+        if not stripped:
+            cursor += 1
+            continue
+        if _is_section_line(stripped) or not _is_loose_formula_payload_line(stripped):
+            break
+        cursor += 1
+    return cursor
+
+
+def _is_loose_formula_payload_line(line: str) -> bool:
+    stripped = line.strip()
+    if not stripped or _is_section_line(stripped):
+        return False
+    if re.search(r"[\u4e00-\u9fff]", stripped):
+        return False
+    return bool(re.fullmatch(r"[A-Za-z0-9\\{}\[\]().,;:=+\-*/_^%<>\s≥≤√πζωσ]+", stripped))
 
 
 def _is_redundant_table_reference_line(line: str, refs: list[str], media_types_by_ref: dict[str, str]) -> bool:
@@ -1225,7 +1739,17 @@ def _is_plain_media_payload_line(line: str) -> bool:
     return False
 
 
-def _render_answer_line(line: str, media_labels_by_ref: dict[str, str], refs: list[str] | None = None) -> str:
+def _render_answer_line(
+    line: str,
+    media_labels_by_ref: dict[str, str],
+    refs: list[str] | None = None,
+    citations_by_ref: dict[str, dict[str, str]] | None = None,
+    assigned_citations: dict[str, dict[str, str]] | None = None,
+    ordered_citations: list[dict[str, str]] | None = None,
+    citation_node_names: dict[str, str] | None = None,
+    citations_by_source_index: dict[str, dict[str, str]] | None = None,
+    allow_fallback_citations: bool = True,
+) -> str:
     cleaned = _strip_stray_brackets(line)
     scoped_refs = refs if refs else list(media_labels_by_ref.keys())
     for ref in scoped_refs:
@@ -1253,57 +1777,66 @@ def _render_answer_line(line: str, media_labels_by_ref: dict[str, str], refs: li
             )
             cleaned = cleaned.replace(f"[[MEDIA:{ref_text}]]", label_text)
             cleaned = cleaned.replace(f"[{ref_text}]", label_text)
-    return _render_text_with_inline_math(cleaned)
-
-
-def _render_plain_markdown_text(text: str) -> str:
-    if not text:
-        return ""
-    escaped = html.escape(text)
-    escaped = re.sub(r"`([^`]+)`", r"<code>\1</code>", escaped)
-    escaped = re.sub(r"\*\*(.+?)\*\*", r"<strong>\1</strong>", escaped)
-    escaped = re.sub(r"(?<!\*)\*(?!\*)(.+?)(?<!\*)\*(?!\*)", r"<em>\1</em>", escaped)
-    return escaped
-
-
-def _render_text_with_inline_math(text: str) -> str:
-    if not text:
-        return ""
-    pattern = re.compile(
-        r"(\$\$(.+?)\$\$|\\\[(.+?)\\\]|\\\((.+?)\\\)|(?<!\$)\$(.+?)(?<!\\)\$)"
+    return _render_learning_citations(
+        cleaned,
+        citations_by_ref or {},
+        assigned_citations if assigned_citations is not None else {},
+        ordered_citations if ordered_citations is not None else [],
+        citation_node_names or {},
+        citations_by_source_index or {},
+        allow_fallback_citations=allow_fallback_citations,
     )
+
+
+def _render_learning_citations(
+    line: str,
+    citations_by_ref: dict[str, dict[str, str]],
+    assigned_citations: dict[str, dict[str, str]],
+    ordered_citations: list[dict[str, str]],
+    citation_node_names: dict[str, str],
+    citations_by_source_index: dict[str, dict[str, str]],
+    *,
+    allow_fallback_citations: bool = True,
+) -> str:
+    if not KM_INLINE_CITATION_RE.search(line):
+        return html.escape(line)
     parts: list[str] = []
-    last_end = 0
-    for match in pattern.finditer(text):
-        start, end = match.span(1)
-        if start > last_end:
-            parts.append(_render_plain_markdown_text(text[last_end:start]))
-        latex = (
-            match.group(2)
-            or match.group(3)
-            or match.group(4)
-            or match.group(5)
-            or ""
-        )
-        rendered = _render_inline_formula_span(latex)
-        parts.append(rendered if rendered else html.escape(match.group(1)))
-        last_end = end
-    if last_end < len(text):
-        parts.append(_render_plain_markdown_text(text[last_end:]))
+    cursor = 0
+    for match in KM_INLINE_CITATION_RE.finditer(line):
+        references = _citation_references_from_match(match)
+        if not references:
+            continue
+        parts.append(html.escape(line[cursor : match.start()]))
+        for reference in references:
+            citation = citations_by_source_index.get(reference) or citations_by_ref.get(reference)
+            if citation is None:
+                if not allow_fallback_citations:
+                    continue
+                citation = _build_fallback_learning_citation(reference, citation_node_names)
+            parts.append(
+                _citation_marker_html(
+                    _assign_learning_citation_index(
+                        citation,
+                        assigned_citations,
+                        ordered_citations,
+                    )
+                )
+            )
+        cursor = match.end()
+    parts.append(html.escape(line[cursor:]))
     return "".join(parts)
 
 
-def _render_inline_formula_span(latex: str) -> str:
-    formula_raw = _normalize_latex_text(latex)
-    if not formula_raw:
-        return ""
-    formula_text = html.escape(formula_raw)
-    formula_attr = html.escape(formula_raw, quote=True)
-    return (
-        '<span class="inline-formula-render formula-render" '
-        'data-display-mode="false" '
-        f'data-latex="{formula_attr}">{formula_text}</span>'
-    )
+def _citation_references_from_match(match: re.Match[str]) -> list[str]:
+    bracket_ref = match.groupdict().get("bracket_ref")
+    if bracket_ref:
+        return [bracket_ref]
+    cite_index = match.groupdict().get("cite_index")
+    if cite_index:
+        return [cite_index]
+    paren_refs = match.groupdict().get("paren_refs") or ""
+    node_ids = re.findall(r"KM\d+", paren_refs)
+    return [f"{node_id}.summary" for node_id in node_ids]
 
 
 def _strip_stray_brackets(line: str) -> str:
@@ -1317,6 +1850,13 @@ def _is_section_line(line: str) -> bool:
     return any(line.startswith(prefix) for prefix in ["结论：", "分析：", "举例：", "拓展：", "依据："])
 
 
+def _is_learning_evidence_only_line(line: str) -> bool:
+    stripped = line.strip()
+    if stripped == "依据：" or stripped == "依据:":
+        return True
+    return bool(re.match(r"^\d+[.、]\s*(?:\[[^\]]+\]|[A-Z]\d{3}|.+关系强度)", stripped))
+
+
 def _is_block_math_line(line: str) -> bool:
     stripped = line.strip()
     return stripped.startswith("$$") and stripped.endswith("$$") and len(stripped) >= 4
@@ -1326,18 +1866,49 @@ def _refs_mentioned_by_label(
     line: str,
     media_cards_by_ref: dict[str, str],
     media_labels_by_ref: dict[str, str],
+    media_aliases_by_ref: dict[str, list[str]] | None = None,
 ) -> list[str]:
-    deduped_refs: list[str] = []
-    for ref, label in sorted(media_labels_by_ref.items(), key=lambda item: len(str(item[1] or "")), reverse=True):
+    matches: list[tuple[int, int, str]] = []
+    compact_line = re.sub(r"\s+", "", line)
+
+    def alias_match_position(alias: str) -> int:
+        alias = re.sub(r"\s+", "", str(alias or "").strip())
+        if not alias or alias in {"图", "表", "式", "公式", "图表", "表格"}:
+            return -1
+        position = compact_line.find(alias)
+        if position < 0:
+            return -1
+        window_before = compact_line[max(0, position - 10):position]
+        window_after = compact_line[position:position + len(alias) + 8]
+        if any(marker in window_before for marker in ["不要", "不是", "无需", "不必", "别把", "别用"]):
+            return -1
+        if any(marker in window_after for marker in ["不用", "不要", "混进", "无关"]):
+            return -1
+        if re.match(r"^[图表式][一二三四五六七八九十百千万零〇两\d]+(?:[-－][一二三四五六七八九十百千万零〇两\d]+)?$", alias):
+            return position
+        if re.search(rf"(?<![\w\u4e00-\u9fff]){re.escape(alias)}(?![\w\u4e00-\u9fff])", compact_line):
+            return position
+        return -1
+
+    for ref, label in media_labels_by_ref.items():
         ref_text = str(ref or "").strip()
         label_text = str(label or "").strip()
-        if not ref_text or ref_text not in media_cards_by_ref or not label_text:
+        if not ref_text or ref_text not in media_cards_by_ref:
             continue
-        if label_text not in line:
+        aliases = [label_text, *(media_aliases_by_ref or {}).get(ref_text, [])]
+        aliases = [re.sub(r"\s+", "", alias) for alias in aliases if str(alias or "").strip()]
+        if not aliases:
             continue
-        if ref_text not in deduped_refs:
-            deduped_refs.append(ref_text)
-    return deduped_refs
+        positions = [alias_match_position(alias) for alias in aliases]
+        positions = [position for position in positions if position >= 0]
+        if not positions:
+            continue
+        matches.append((min(positions), -max(len(alias) for alias in aliases), ref_text))
+    ordered_refs: list[str] = []
+    for _, _, ref_text in sorted(matches):
+        if ref_text not in ordered_refs:
+            ordered_refs.append(ref_text)
+    return ordered_refs
 
 
 def _extract_media_refs(line: str, media_cards_by_ref: dict[str, str] | None = None) -> tuple[str, list[str]]:
@@ -1368,7 +1939,13 @@ def _extract_media_refs(line: str, media_cards_by_ref: dict[str, str] | None = N
     return clean_line, deduped_refs
 
 
-def _build_learning_media_block(cards: list[str], *, title: str = "相关公式与图表", extra_class: str = "") -> str:
+def _build_learning_media_block(
+    cards: list[str],
+    *,
+    title: str = "相关公式与图表",
+    extra_class: str = "",
+    intro_html: str = "",
+) -> str:
     title_html = html.escape(title)
     class_attr = "learning-media-group" + (f" {html.escape(extra_class)}" if extra_class else "")
     return f"""
@@ -1377,6 +1954,7 @@ def _build_learning_media_block(cards: list[str], *, title: str = "相关公式�
         <div class="learning-block-title">{title_html}</div>
         <div class="learning-block-actions">参考材料</div>
       </div>
+      {intro_html}
       {''.join(cards)}
     </section>
     """

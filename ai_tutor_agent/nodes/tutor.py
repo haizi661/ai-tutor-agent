@@ -42,8 +42,45 @@ _STRATEGY_MAP = {
     3: "socratic",      # 第4次+：苏格拉底引导法
 }
 
+# 错因 → 策略映射（优先于 attempt_count 轮转）
+_ERROR_TYPE_STRATEGY = {
+    "concept_confusion": "socratic",     # 概念混淆 → 引导辨析
+    "calculation_error": "stepbystep",   # 计算错误 → 逐步检查
+    "understanding_gap": "analogy",      # 理解偏差 → 换类比
+    "carelessness": "explain",           # 粗心 → 强调细节
+    "formula_error": "stepbystep",       # 公式错误 → 逐步拆解
+    "method_confusion": "socratic",      # 方法混淆 → 引导对比
+}
 
-def _select_strategy(attempt_count: int) -> str:
+
+def _infer_error_type(wrong_explanations: list[dict]) -> str:
+    """从错题记录推断主要错因类型。"""
+    if not wrong_explanations:
+        return ""
+    # 取最近一次错题的分析
+    latest = wrong_explanations[-1]
+    analysis = str(latest.get("analysis") or latest.get("explanation") or "").lower()
+    if not analysis:
+        return ""
+    # 简单关键词匹配
+    if any(kw in analysis for kw in ["混淆", "概念", "区分", "误解"]):
+        return "concept_confusion"
+    if any(kw in analysis for kw in ["计算", "运算", "数值", "代入"]):
+        return "calculation_error"
+    if any(kw in analysis for kw in ["公式", "代入", "符号"]):
+        return "formula_error"
+    if any(kw in analysis for kw in ["方法", "步骤", "过程"]):
+        return "method_confusion"
+    if any(kw in analysis for kw in ["粗心", "马虎", "看错", "漏看"]):
+        return "carelessness"
+    return "understanding_gap"
+
+
+def _select_strategy(attempt_count: int, wrong_explanations: list[dict] | None = None) -> str:
+    """选择教学策略：优先根据错因类型，其次按 attempt_count 轮转。"""
+    error_type = _infer_error_type(wrong_explanations or [])
+    if error_type and error_type in _ERROR_TYPE_STRATEGY:
+        return _ERROR_TYPE_STRATEGY[error_type]
     key = min(attempt_count, max(_STRATEGY_MAP.keys()))
     return _STRATEGY_MAP[key]
 
@@ -446,6 +483,23 @@ def _get_diff(level: int) -> dict:
 
 
 # ─────────────────────────────────────────────────────
+# 跳过测评场景：把学生当作新手讲（Lv.1 + 类比版）
+# 单独抽出来便于单元测试，且让节点函数更易读
+# ─────────────────────────────────────────────────────
+def _resolve_novice_difficulty_on_skip(state: dict) -> tuple[int, str | None]:
+    """Return (difficulty_level, override_opening_strategy).
+
+    - 当 flow_status == 'direct_tutor'（学生选择跳过测评）时，强制当作新手：
+      difficulty_level=1（非常基础），首选 teaching_strategy=analogy（类比版讲解）。
+    - 其他场景按 state 中已有的 difficulty_level，preferred_opening_strategy 留空由调用方自行处理。
+    - 没有任何地方会自动升降难度，所以这里只覆盖"跳过"路径，不影响其他会话。
+    """
+    if state.get("flow_status") == "direct_tutor":
+        return 1, "analogy"
+    return int(state.get("difficulty_level", 3) or 3), None
+
+
+# ─────────────────────────────────────────────────────
 # 从雷达画像提取薄弱维度，生成教学提示
 # ─────────────────────────────────────────────────────
 def _weak_areas_hint(radar: dict) -> str:
@@ -806,6 +860,82 @@ def _build_node_content_prompt(state: dict, citation_plan: list[dict]) -> tuple[
     return prompt, True
 
 
+def _build_node_teaching_contract_prompt(state: dict) -> str:
+    contract = state.get("node_teaching_contract")
+    if not isinstance(contract, dict) or not contract:
+        return ""
+
+    lines = ["【节点教学契约】"]
+    goal = str(contract.get("learning_goal") or "").strip()
+    if goal:
+        lines.append(f"学习目标：{goal}")
+    must_know = _string_list(contract.get("must_know"))
+    if must_know:
+        lines.append(f"必会要点：{'；'.join(must_know)}")
+    misconceptions = _string_list(contract.get("common_misconceptions"))
+    if misconceptions:
+        lines.append(f"常见误区：{'；'.join(misconceptions)}")
+    worked_example = str(contract.get("worked_example") or "").strip()
+    if worked_example:
+        lines.append(f"建议例子：{worked_example}")
+    targets = [item for item in list(contract.get("assessment_targets") or []) if isinstance(item, dict)]
+    if targets:
+        target_lines = []
+        for item in targets[:6]:
+            target = str(item.get("target_objective") or "").strip()
+            focus = str(item.get("assessment_focus") or "").strip()
+            misconception = str(item.get("misconception") or "").strip()
+            required = "必达" if item.get("required") else "覆盖"
+            bits = [bit for bit in (target, focus, misconception, required) if bit]
+            if bits:
+                target_lines.append(" / ".join(bits))
+        if target_lines:
+            lines.append(f"测验覆盖目标：{'；'.join(target_lines)}")
+    exit_criteria = _string_list(contract.get("exit_criteria"))
+    if exit_criteria:
+        lines.append(f"退出条件：{'；'.join(exit_criteria)}")
+    return "\n".join(lines)
+
+
+def _is_too_brief_node_lesson(text: str, state: dict) -> bool:
+    contract = state.get("node_teaching_contract")
+    if not isinstance(contract, dict) or not contract:
+        return False
+    plain = re.sub(r"<[^>]+>", "", str(text or "")).strip()
+    return len(plain) < 120
+
+
+def _build_contract_lesson_fallback(state: dict, raw_text: str = "") -> str:
+    contract = dict(state.get("node_teaching_contract") or {})
+    node_name = str(
+        contract.get("node_name")
+        or state.get("current_node_name")
+        or state.get("graph_anchor_title")
+        or "当前节点"
+    ).strip()
+    goal = str(contract.get("learning_goal") or f"理解{node_name}的核心判断").strip()
+    must_know = _string_list(contract.get("must_know"))
+    misconceptions = _string_list(contract.get("common_misconceptions"))
+    example = str(contract.get("worked_example") or "").strip()
+    targets = [item for item in list(contract.get("assessment_targets") or []) if isinstance(item, dict)]
+    target_text = str(targets[0].get("target_objective") or "").strip() if targets else ""
+    misconception = misconceptions[0] if misconceptions else "只看表面现象，忽略题干里的判断条件"
+    first = must_know[0] if must_know else target_text or goal
+    second = must_know[1] if len(must_know) > 1 else target_text or first
+    if not example:
+        example = f"把它放到一个实际控制系统里看：先看目标量，再看输出量是否被测量并反馈回来，最后看系统能否按目标收敛。"
+    prior = str(raw_text or "").strip()
+    prior_sentence = f"模型刚才的简短结论是：{prior} " if prior else ""
+    return collapse_blank_lines(
+        f"{prior_sentence}这一节点的目标是：{goal}。先抓住第一个必会点：{first}；"
+        f"它回答的是“判断时到底看什么”，不是让你背一个名词。第二个必会点是：{second}；"
+        f"它用来确认你能把定义放回具体系统里判断，而不是只凭直觉下结论。"
+        f"例如，{example} 这个例子里，关键不是中间有没有短暂波动，而是最终趋势是否满足节点目标。"
+        f"最容易错的是：{misconception}。所以做题时先圈出题干中的对象、输入/输出或反馈条件，再判断它是否符合{target_text or first}。"
+        f"你可以自检一下：如果系统中间振荡了几下，但最后仍保持有界或回到目标附近，你会把它判成什么状态？"
+    )
+
+
 
 def _filter_cited_lines(text: str, citation_count: int) -> str:
     valid_ids = {str(index) for index in range(1, citation_count + 1)}
@@ -899,6 +1029,121 @@ def _collect_llm_text_with_fallback(
             return "", True
 
 
+def _entry_mode_instruction(mode: str) -> str:
+    """Return a system-prompt instruction snippet for the given entry mode."""
+    if mode == "short_learning":
+        return (
+            "\n- 【精简模式】请给出精简讲解（约正常篇幅的 50%），重点覆盖核心概念、关键方法，"
+            "只保留当前节点确实需要且正文会解释的公式/图表；减少例子和延伸讨论，直接进入实质。"
+        )
+    if mode == "full_learning":
+        return (
+            "\n- 【完整模式】请给出详实讲解（正常篇幅），确保学生能独立理解并运用该概念。"
+        )
+    return ""
+
+
+def _structure_instruction(mode: str) -> str:
+    """Return a fixed teaching template that MUST be followed.
+    
+    For short_learning: merge sections 3+4 into one concise block, keep only 1 example in section 5.
+    For full_learning: all 7 sections in full detail.
+    """
+    if mode == "short_learning":
+        merge_note = (
+            "\n（精简模式：第 3 节与第 4 节合并为「关键公式与图表」一个小节，"
+            "第 5 节只保留 1 个简洁例子，其余小节精简但不得省略）"
+        )
+    else:
+        merge_note = ""
+    return f"""教学格式必须严格按以下 7 个小节组织（用 **加粗序号标题** 分隔，如 **1. 学习目标**），不得改变顺序，不得缺少任何小节{merge_note}：
+
+**1. 学习目标**
+用 2-3 句话清晰说明本节点要掌握的核心能力。**必须标注掌握层级**（用加粗标出层级词）：
+- **记忆**：能复述定义或公式
+- **理解**：能解释概念的含义和关系
+- **应用**：能运用方法解决具体问题
+- **分析**：能比较不同方法或判断适用条件
+
+示例："能**理解**稳定性的定义，并能**应用**劳斯判据分析给定系统的稳定性。"
+
+**2. 核心概念**
+给出本节点最核心的判断、定义或原理。如果是定理/方法，说清楚它的本质是什么、为什么有用、在控制系统中解决什么问题。
+
+**3. 公式讲解**
+**如有公式必须用此小节**，不可在其它位置一带而过。每个公式按以下固定子结构逐一讲解：
+
+1. **公式**：写出完整表达式（LaTeX 格式）
+2. **变量含义**：每个符号的物理含义、单位、取值范围
+3. **直观理解**：从物理直觉解释公式为什么是这个形式，例如"分母的 $Ts+1$ 意味着系统惯性，$T$ 越大响应越慢"
+4. **适用条件**：该公式何时成立、参数需满足什么约束、边界在哪
+5. **典型数值**：给出 1-2 个典型取值下的表现，帮助建立数量感
+
+如果没有公式，直接写"本节点不涉及新公式"即可。
+不要为了填充本小节而引入检索到但正文没有实际使用的公式。
+
+**4. 图表说明**
+**如有图表必须用此小节**，不可在其它位置一带而过。每张图表按以下固定子结构逐一说明：
+
+1. **图名**：图表名称或编号
+2. **坐标含义**：横纵轴含义、单位、刻度类型（线性 / 对数），或表格的行列含义
+3. **关键特征**：关键曲线形状、特殊点（交点、极值、渐近线、转折频率）的物理意义
+4. **读图方法**：从该图或表能得出什么工程判断，例如"相角裕度 > 30° 时系统有足够稳定裕量"
+
+如果没有图表，直接写"本节点不涉及图表"即可。
+不要为了填充本小节而引入检索到但正文没有实际使用的图表。
+
+**5. 具体例子**
+至少给出 1 个完整的例题或工程类比，按以下固定子结构：
+
+1. **问题场景**：在什么场景下遇到这个问题
+2. **已知条件**：系统参数和初始条件
+3. **逐步推导**：分步骤的解决过程（每步紧接计算结果）
+4. **结论**：最终结果和判断
+5. **对应概念**：此例子对应第 2 节中的哪个核心概念
+
+**6. 常见误区与边界**
+- 最容易混淆的两个概念以及如何区分（给出判断方法，不要说"要区分开"这种空话）
+- 公式或方法何时失效（边界条件）
+- 判断口诀或经验法则（如有）
+
+**7. 自检问题**
+1 个能暴露理解盲区的小问题，要求必须：
+- 学生答对就能证明他真正理解了本节点
+- 不能是"你记住了吗"这种表面问题
+- 可包含选择、判断或简答"""
+
+
+def _build_node_identity_header(state: dict) -> str:
+    """构建教学内容的节点标识头，包含节点名和教学侧重点。
+
+    格式:
+    ## 教学：{节点名}
+    > {教学侧重点描述}
+
+    ---
+    """
+    node_name = str(
+        state.get("current_node_name")
+        or state.get("graph_anchor_title")
+        or "当前节点"
+    ).strip()
+    entry_mode = str(state.get("current_entry_mode") or "").strip()
+    mode_label = {
+        "full_learning": "完整教学——系统讲解核心概念、公式、图表与典型应用",
+        "short_learning": "精简教学——聚焦核心概念与关键方法",
+        "quick_check": "快速检测——验证掌握程度",
+    }.get(entry_mode, "教学讲解")
+    lines = [
+        f"## 教学：{node_name}",
+        f"> {mode_label}",
+        "",
+        "---",
+        "",
+    ]
+    return "\n".join(lines)
+
+
 # ─────────────────────────────────────────────────────
 # 主节点构建函数
 # ─────────────────────────────────────────────────────
@@ -927,31 +1172,36 @@ def build_tutor_node(tutor_llm, runtime: RuntimeContext):
             topic_focus=topic_focus,
             topic_starter_options=topic_starter_options,
         )
-        difficulty_level = state.get("difficulty_level", 3)
+        difficulty_level, _direct_tutor_strategy = _resolve_novice_difficulty_on_skip(state)
         attempt_count = state.get("attempt_count", 0)
         feedback = state.get("feedback", "")
         radar = state.get("assessment_radar", {})
-        preferred_opening_strategy = str(state.get("teaching_strategy") or "").strip()
+        wrong_explanations = list(state.get("wrong_question_explanations") or [])
+        preferred_opening_strategy = _direct_tutor_strategy or str(state.get("teaching_strategy") or "").strip()
         next_step_choice = str(state.get("next_step_choice") or "").strip()
         strategy = (
             preferred_opening_strategy
             if preferred_opening_strategy in set(_STRATEGY_MAP.values()) | {"summary"}
-            else _select_strategy(attempt_count)
+            else _select_strategy(attempt_count, wrong_explanations)
         )
         diff = _get_diff(difficulty_level)
         weak_hint = _weak_areas_hint(radar)
 
+        _cur_entry_mode = str(state.get("current_entry_mode") or "").strip()
+        entry_label = {"short_learning": "精简", "full_learning": "完整"}.get(_cur_entry_mode, "")
+        entry_tag = f" · {entry_label}学" if entry_label else ""
         event_sink.emit(
             make_event(
                 "node.start",
                 "tutor",
-                message=f"正在围绕【{learning_target or topic}】定制讲解方案（难度 Lv.{difficulty_level} · 策略: {strategy} · 第{attempt_count + 1}轮）",
+                message=f"正在围绕【{learning_target or topic}】定制讲解方案（难度 Lv.{difficulty_level} · 策略: {strategy} · 第{attempt_count + 1}轮{entry_tag}）",
                 data={
                     "topic": topic,
                     "learning_target": learning_target,
                     "difficulty": difficulty_level,
                     "attempt": attempt_count,
                     "strategy": strategy,
+                    "entry_mode": _cur_entry_mode,
                 },
             )
         )
@@ -976,11 +1226,74 @@ def build_tutor_node(tutor_llm, runtime: RuntimeContext):
                 )
             )
 
-        # 主流程当前节点讲解：已由 node_content_loader 固定写入 explanation_teacher_style。
-        # 这里必须直接输出该字段，不再调用图谱搜索、通用检索或 LLM 改写，避免 relation_path 等检索产物混入教学正文。
+        # ── Entry mode: 读取学习路径的入口模式 ──
+        current_entry_mode = str(state.get("current_entry_mode") or "").strip()
+
+        # ── quick_check 模式：跳过讲解，直接进入快速检测 ──
+        if current_entry_mode == "quick_check":
+            node_name = str(state.get("current_node_name") or "").strip()
+            event_sink.emit(
+                make_event(
+                    "node.stream",
+                    "tutor",
+                    data={"text": f"**⚡ 快速检测**：正在验证你对【{node_name or topic}】的掌握程度。\n\n"},
+                )
+            )
+            event_sink.emit(
+                make_event(
+                    "node.complete",
+                    "tutor",
+                    message="快速检测已就位。",
+                    data={"entry_mode": "quick_check", "node_name": node_name},
+                )
+            )
+            return {
+                "tutor_content": "",
+                "current_node_status": "quick_check_pending",
+                "node_quiz_kind": "quick_check",
+                "learning_phase": "quick_check_ready",
+                "learning_resume_target": "objective_test_generator",
+                "learning_resume_reason": "quick_check_ready",
+                "current_entry_mode": current_entry_mode,
+                "user_knowledge_graph": state.get("user_knowledge_graph", {}),
+                "student_state_snapshot": state.get("student_state_snapshot", {}),
+            }
+
+        # ── 教学推理透明：向学生解释当前教学决策 ──
+        thinking_mode = bool(state.get("thinking_mode", False))
+        if thinking_mode:
+            strategy_reason = {
+                "explain": "标准讲解法：适合初次接触，直接给出定义和核心要点",
+                "analogy": "类比法：用生活中熟悉的例子类比抽象概念，降低理解门槛",
+                "stepbystep": "逐步分析法：把复杂概念拆成小步骤，逐步推进",
+                "socratic": "苏格拉底问答法：通过提问引导学生自己推导出结论",
+            }.get(strategy, "根据当前情况定制的讲解方式")
+            prereq_names = [str(p) for p in (state.get("graph_prerequisites") or [])[:3] if str(p)]
+            prerequisite_info = f"；前置知识：{'、'.join(prereq_names)}" if prereq_names else ""
+            affect_info = f"；检测到情绪信号「{affect_label}」，教学节奏会相应调整" if affect_signals else ""
+            event_sink.emit(
+                make_event(
+                    "thinking.step",
+                    "tutor",
+                    message=f"教学决策：{strategy_reason}{prerequisite_info}{affect_info}",
+                    data={
+                        "category": "teaching_strategy",
+                        "strategy": strategy,
+                        "difficulty_level": difficulty_level,
+                        "attempt_count": attempt_count,
+                        "affect": affect_label if affect_signals else "",
+                        "node_name": state.get("current_node_name", ""),
+                        "node_id": state.get("current_node_id", ""),
+                    },
+                )
+            )
+
+        # 主流程当前节点讲解：
+        # 将 explanation_teacher_style 作为参考材料注入 prompt，
+        # 让 LLM 根据学生画像、薄弱点、教学策略生成个性化讲解。
         direct_node_content = str(state.get("node_content_context") or "").strip()
         # 主流程节点讲授不能再把 node_content_context 原样输出。
-        # 这里仅记录“有节点素材包”，后面统一交给 tutor LLM 生成详实讲解，
+        # 这里仅记录"有节点素材包"，后面统一交给 tutor LLM 生成详实讲解，
         # 并通过 GraphRAG 的 media_items 渲染公式/图/表卡片。
         has_direct_node_content = bool(direct_node_content)
 
@@ -1219,6 +1532,26 @@ def build_tutor_node(tutor_llm, runtime: RuntimeContext):
         if successor_path_hint:
             graph_instruction += successor_path_hint
 
+        # 教学契约、情绪调整、前置关联
+        teaching_contract_prompt = _build_node_teaching_contract_prompt(state)
+        affect_block = ""
+        if affect_label in ("困惑", "confused"):
+            affect_block = "\n- 【情绪调整】学生当前感到困惑，降低一档难度，增加一个具体例子"
+        elif affect_label in ("焦虑", "anxious", "受挫"):
+            affect_block = "\n- 【情绪调整】学生有些受挫，简化表述，先肯定已有理解，再小步推进"
+        elif affect_label in ("自信", "confident"):
+            affect_block = "\n- 【情绪调整】学生状态自信，减少铺垫，直接给进阶问题"
+        prereq_block = ""
+        prerequisites = _string_list(active_graph_context.get("prerequisites") or [])
+        if prerequisites:
+            mastered_prereqs = [p for p in prerequisites[:4] if isinstance(user_kg.get(p), dict) and user_kg[p].get("status") == "mastered"]
+            unmastered_prereqs = [p for p in prerequisites[:4] if p not in mastered_prereqs]
+            if mastered_prereqs:
+                prereq_block += f"\n- 【前置关联】学生已掌握：{'、'.join(mastered_prereqs)}，讲解时可说\"你已掌握X，现在扩展到Y\""
+            if unmastered_prereqs:
+                prereq_block += f"\n- 【前置提醒】学生对以下前置掌握不足：{'、'.join(unmastered_prereqs)}，需先简要回顾"
+
+        structure_instruction = _structure_instruction(current_entry_mode)
         system_content = build_teacher_voice(
             f"""你现在负责正式讲解环节，要把一个知识点讲得既有方向感，又让学生愿意继续跟着你走。
 
@@ -1226,23 +1559,21 @@ def build_tutor_node(tutor_llm, runtime: RuntimeContext):
 - 知识水平：{diff["depth"]}
 - 你的角色定位：{diff["persona"]}
 - 讲解风格：{diff["style"]}
-- 字数控制：{diff["length"]}{weak_hint}
+- 字数控制：{diff["length"]}{weak_hint}{affect_block}{prereq_block}
+{_entry_mode_instruction(current_entry_mode)}
 
-讲解要求：
-1. 开头 **直接进入实质**，不说"好的让我解释"，不重复学生的问题
-2. 每轮只解释 **一个关键点**——宁可短，也不要让学生不知道抓住什么
-3. 如果适合，给一个贴近日常直觉的类比、判断口诀或观察角度
-4. 如果学生容易混淆两个概念，要直接点破"不要把 A 和 B 混在一起"
-5. **提问是教学工具**，每次提问都有明确预期——你期待学生回答什么、这个回答能告诉你什么
-6. 如果有【图谱 2.1 当前节点材料】，必须先覆盖该材料中的学习目标、必会要点、常见误区和节点解释，再做扩展
-7. 如果有证据资料，优先使用这些证据来组织讲解
-8. 如果使用了证据，每一句事实性内容后面都必须加上形如 [1]、[2] 的行内引用
-9. 不要输出"参考来源"列表，来源面板由系统单独渲染
-10. 如果没有证据资料，你仍然要基于你作为专业领域专家的知识来讲解，但请注意：
-   - 讲解内容必须准确、负责，不确定的地方要明确说明
-   - 可以适当推荐学生查阅哪些经典教材或资料
-   - 不要因为缺少资料就拒绝讲解或要求学生换问法
-11. 默认输出自然中文段落；除非确实在给步骤或对比，否则不要用列表{knowledge_source_hint}{graph_instruction}"""
+{structure_instruction}
+
+通用要求：
+1. 开头 **直接进入实质**，先给出本节点的学习目标，不说"好的让我解释"
+2. 如果有【图谱 2.1 当前节点材料】，必须优先覆盖其中的学习目标、必会要点和节点解释
+3. 如果有证据资料，优先使用；每句事实性内容后加 [n] 行内引用
+4. 不要输出"参考来源"列表，来源面板由系统单独渲染
+5. 如果没有证据资料，基于专业知识讲解，不确定的地方要说明，不要拒绝讲解
+6. 如果有【节点教学契约】，它是本轮讲解与出题的共同依据，必须优先覆盖
+7. 每个主要公式、图表、关键结论都必须解释清楚，不能只是罗列{knowledge_source_hint}{graph_instruction}
+
+{teaching_contract_prompt}"""
         )
 
         strategy_inst = _strategy_instruction(strategy, feedback, attempt_count)
@@ -1254,6 +1585,19 @@ def build_tutor_node(tutor_llm, runtime: RuntimeContext):
         elif next_step_choice == "summarize_now":
             transition_hint = "\n【用户要求】这次先不要展开新内容，优先把刚才那一步压成一个短总结，方便学生抓住主线。"
 
+        # 错题反馈回流
+        wrong_feedback_block = ""
+        if wrong_explanations:
+            recent = wrong_explanations[-2:]
+            parts = []
+            for w in recent:
+                q = str(w.get("question") or w.get("stem") or "")[:60]
+                a = str(w.get("analysis") or w.get("explanation") or "")[:100]
+                if q or a:
+                    parts.append(f"- 题目：{q}；错因：{a}")
+            if parts:
+                wrong_feedback_block = f"【学生近期错题】请在讲解中针对性重讲错因：\n{chr(10).join(parts)}\n\n"
+
         if citation_plan and not has_node_content_context:
             human_content = f"""请讲解主题：【{topic}】
 当前用户这次最想解决的问题：【{updated_goal or topic}】
@@ -1261,16 +1605,13 @@ def build_tutor_node(tutor_llm, runtime: RuntimeContext):
 当前这一轮先抓：【{turn_goal or topic_focus or updated_goal or topic}】
 用户当前状态：【{topic_background or '未明确说明'}】
 
-{strategy_inst}{transition_hint}{knowledge_prompt}
+{wrong_feedback_block}{strategy_inst}{transition_hint}{knowledge_prompt}
 
-输出要求：
-- 直接输出 Markdown 或纯文本，不要输出 JSON，不要输出代码块
-- 正常情况控制在 2~4 句，先把当前节点最关键的判断讲透
-- 默认不要用列表，只有在明确分步骤时才用
+输出格式要求：
+- 严格按照 system prompt 中的教学模板输出（**加粗序号标题** 分隔的 7 个小节），不得省略任何小节
+- 直接输出 Markdown，不要输出 JSON 或代码块
 - 每一句事实性内容后面都必须带 [n] 行内引用
-- 可以做教学组织和表述润色，但不要补充证据里没有的事实
-- 不要输出“参考来源”“资料如下”这类来源列表
-- 可以在最后补一个短问题来探学生卡点，但不要礼貌性收尾"""
+- 不要输出"参考来源""资料如下"这类来源列表"""
         else:
             human_content = f"""请讲解主题：【{topic}】
 当前用户这次最想解决的问题：【{updated_goal or topic}】
@@ -1278,19 +1619,15 @@ def build_tutor_node(tutor_llm, runtime: RuntimeContext):
 当前这一轮先抓：【{turn_goal or topic_focus or updated_goal or topic}】
 用户当前状态：【{topic_background or '未明确说明'}】
 
-{strategy_inst}{transition_hint}{knowledge_prompt}
+{wrong_feedback_block}{strategy_inst}{transition_hint}{knowledge_prompt}
 
 输出格式要求：
-- 直接输出 Markdown 或纯文本，不要输出 JSON，不要输出代码块
-- 主流程节点讲授必须详实，建议 650-1000 字；不要压缩成 2~4 句短回答
-- 必须按“主线解释 -> 定义归纳 -> 关键点拆解 -> 公式/图表/例子交叉说明 -> 常见误区 -> 小检查问题”的顺序组织
-- 必须综合当前节点素材包中的 explanation_teacher_style、key_points、formulas、examples、figures_refs、definition_candidates、key_point_candidates、formula_candidates、example_candidates 等字段
-- 如果素材包中有公式/公式候选，至少选择 1~3 个最有代表性的公式解释变量含义、适用场景和直观意义
-- 如果素材包中有例子/例子候选，至少给出 1 个教材例子或工程类比，并说明它对应哪个关键点
-- 如果素材包中有图表线索或图谱媒体结果，请在正文真正讲到该图/式/表的位置单独输出一行 [[MEDIA:媒体reference]]；不要把所有媒体堆到最后
-- 可以使用小标题，但不要暴露字段名、CSV 痕迹、raw id 或调试信息
-- 不要写“好的”“当然”“总结一下”“希望这有帮助”
-- 结尾只问一个能暴露理解边界的小问题"""
+- 严格按照 system prompt 中的教学模板输出（**加粗序号标题** 分隔的 7 个小节），不得省略任何小节
+- 直接输出 Markdown，不要输出 JSON 或代码块
+- 必须综合当前节点素材包中的 explanation_teacher_style、key_points、formulas、examples、figures_refs 等字段填入对应小节
+- 如果素材包中有公式/公式候选，必须在"公式讲解"小节解释变量含义、适用场景和直观意义
+- 如果素材包中有图表线索或图谱媒体结果，必须在"图表说明"小节讲到该图/表，并输出 [[MEDIA:媒体reference]]
+- 不要写"好的""当然""总结一下""希望这有帮助"""
 
         if graph_result is not None and not has_node_content_context:
             graph_answer_text = normalize_graph_answer(
@@ -1301,9 +1638,14 @@ def build_tutor_node(tutor_llm, runtime: RuntimeContext):
                 graph_payload = dict(graph_result)
                 graph_payload["answer"] = graph_answer_text
                 full_response = build_learning_answer_html(graph_payload).strip()
+                # build_learning_answer_html emits <div class="learning-…"> markup
+                # that the frontend sanitizer only keeps when the event is
+                # tagged as graph_rag_answer (otherwise the learning classes are
+                # stripped and the lesson renders blank).
+                stream_text_chunks(event_sink, "tutor", full_response, kind="graph_rag_answer")
             else:
                 full_response = _build_evidence_backed_fallback(topic, citation_plan)
-            stream_text_chunks(event_sink, "tutor", full_response)
+                stream_text_chunks(event_sink, "tutor", full_response)
         else:
             system_msg = SystemMessage(content=system_content)
             human_msg = HumanMessage(content=human_content)
@@ -1329,6 +1671,8 @@ def build_tutor_node(tutor_llm, runtime: RuntimeContext):
                         learning_target=updated_goal or learning_target or topic,
                         graph_context=active_graph_context,
                     )
+            if _is_too_brief_node_lesson(full_response, state):
+                full_response = _build_contract_lesson_fallback(state, full_response)
 
             if has_node_content_context:
                 graph_payload = dict(graph_result or {})
@@ -1349,6 +1693,8 @@ def build_tutor_node(tutor_llm, runtime: RuntimeContext):
                 else:
                     stream_text_chunks(event_sink, "tutor", full_response)
             else:
+                # ── 注入节点标识头（节点名 + 教学侧重点）──
+                full_response = _build_node_identity_header(state) + full_response
                 stream_text_chunks(event_sink, "tutor", full_response)
 
         # ── 提取并处理教学标记（掌握度更新、节点跳转）──
@@ -1427,7 +1773,9 @@ def build_tutor_node(tutor_llm, runtime: RuntimeContext):
         )
         return {
             "tutor_content": full_response,
+            "current_entry_mode": current_entry_mode,
             "teaching_strategy": strategy,
+            "difficulty_level": difficulty_level,
             "next_step_choice": "",
             "post_eval_choice": "",
             "practice_generation_mode": "",

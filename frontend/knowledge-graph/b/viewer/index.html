@@ -4,7 +4,12 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>知识图谱 B · 自动控制原理</title>
-  <script src="https://unpkg.com/vis-network/standalone/umd/vis-network.min.js"></script>
+  <script src="/assets/vendor/vis-network.min.js"></script>
+  <script>
+    if (!window.vis) {
+      document.write('<script src="https://cdn.jsdelivr.net/npm/vis-network@10.1.0/standalone/umd/vis-network.min.js"><\\/script>');
+    }
+  </script>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #f8fafc; color: #0f172a; }
@@ -367,6 +372,19 @@
       document.getElementById('retryLoadGraphBtn')?.addEventListener('click', loadGraphData);
     }
 
+    function ensureVisNetworkLoaded() {
+      if (window.vis && typeof window.vis.DataSet === 'function' && typeof window.vis.Network === 'function') return;
+      throw new Error('图谱渲染库 vis-network 未加载。请确认本地 /assets/vendor/vis-network.min.js 可访问；若本地文件缺失，请重新拉取前端静态资源后重启服务。');
+    }
+
+    function buildGraphLoadErrorDetail(error) {
+      const message = String(error?.message || error || '未知错误');
+      if (message.includes('vis-network') || message.includes('vis is not defined')) {
+        return `${message} 如果刚刚修复了静态文件，请刷新页面后再点击重新加载。`;
+      }
+      return `${message}。这通常是后端图谱 JSON 中存在 NaN/Infinity 或服务未重启导致，请修复后点击重新加载。`;
+    }
+
     function getNodeLearningState(node) {
       const kg = parentGraphState.userKnowledgeGraph || {};
       const entries = Object.entries(kg);
@@ -605,6 +623,8 @@
     }
 
     function renderGraph() {
+      ensureVisNetworkLoaded();
+
       const q = getSearchQuery();
       const enabled = getEnabledRelations();
 
@@ -774,7 +794,7 @@
       } catch (err) {
         showGraphLoadMessage(
           '知识图谱加载失败',
-          `${err.message || err}。这通常是后端图谱 JSON 中存在 NaN/Infinity 或服务未重启导致，请修复后点击重新加载。`,
+          buildGraphLoadErrorDetail(err),
           true
         );
         notifyParent('a2-graph-viewer:status', { message: `加载失败: ${err.message || err}` });

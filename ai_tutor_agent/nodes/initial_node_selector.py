@@ -3,7 +3,7 @@ from __future__ import annotations
 from typing import Any
 
 from ..core.events import make_event
-from ..core.learning_support import build_graph_state_patch
+from ..core.learning_support import build_graph_state_patch, graph_node_sort_key
 from ..core.ports import RuntimeContext
 from ..core.state import AgentState
 
@@ -15,8 +15,7 @@ def _string_list(values: Any) -> list[str]:
 
 
 def _node_numeric_key(node_id: str) -> tuple[int, str]:
-    digits = "".join(ch for ch in str(node_id or "") if ch.isdigit())
-    return (int(digits) if digits else 999999, str(node_id or ""))
+    return graph_node_sort_key(node_id)
 
 
 def _node_name(node: dict[str, Any], node_id: str) -> str:
@@ -119,7 +118,22 @@ def build_initial_node_selector_node(runtime: RuntimeContext):
         snapshot = dict(state.get("student_state_snapshot") or {})
         visited = set(_string_list(snapshot.get("visited_nodes")))
 
-        selected_id, reason = _select_initial_root_node(node_map, visited)
+        # ── Try learning plan first ──
+        learning_plan = state.get("learning_plan") or snapshot.get("learning_plan") or []
+        selected_id = ""
+        reason = ""
+
+        if learning_plan:
+            first_step = learning_plan[0]
+            for node_id in first_step.get("node_ids", []):
+                if node_id not in visited and node_id in node_map:
+                    selected_id = node_id
+                    reason = "learning_plan_step0"
+                    break
+
+        # ── Fallback: original logic ──
+        if not selected_id:
+            selected_id, reason = _select_initial_root_node(node_map, visited)
         if not selected_id:
             selected_id, reason = _select_smallest_unvisited(node_map, visited)
 
@@ -139,6 +153,13 @@ def build_initial_node_selector_node(runtime: RuntimeContext):
                 data={"node_id": selected_id, "node_name": selected_name, "reason": reason},
             )
         )
+        # ── Read entry_mode from learning plan ──
+        entry_mode = ""
+        if learning_plan and selected_id:
+            first_step = learning_plan[0]
+            entry_modes = first_step.get("entry_modes", {}) if isinstance(first_step, dict) else {}
+            entry_mode = str(entry_modes.get(selected_id, "")).strip()
+
         if selected_id and selected_name:
             event_sink.emit(
                 make_event(
@@ -149,9 +170,44 @@ def build_initial_node_selector_node(runtime: RuntimeContext):
                 )
             )
 
+            # ── 第一个节点：强制完整教学（不跳过讲解） ──
+            # 如果学生还没有任何已学节点（visited 为空），此时不应该使用
+            # quick_check / short_learning：前者跳过讲解直接进检测，
+            # 后者只输出精简版。第一个节点需要让学生体验完整的教学流程，
+            # 建立对知识结构的完整认识。
+            if entry_mode in {"quick_check", "short_learning"} and not visited:
+                entry_mode = "full_learning"
+
+            # ── 教学推理透明：解释节点选择原因 ──
+            if state.get("thinking_mode", False):
+                reason_explain = {
+                    "learning_plan_step0": "学习路径第一步：根据用户画像生成的起点",
+                    "course_root_start": "选择课程起点：无前置依赖的入门章节，适合作为学习起点",
+                    "lowest_gap_unvisited": "根据前测薄弱点：该概念在前测中得分最低，优先补齐",
+                    "smallest_unvisited": "选择最小未学节点：按图谱顺序推进，从最基础的未学节点开始",
+                }.get(reason, f"选择原因：{reason}")
+                prereq_count = len(_string_list(selected_node.get("prerequisite_nodes")))
+                prereq_note = f"；该节点有 {prereq_count} 个前置知识" if prereq_count > 0 else "；无前置依赖，可直接学习"
+                event_sink.emit(
+                    make_event(
+                        "thinking.step",
+                        "initial_node_selector",
+                        message=f"节点选择：{reason_explain}【{selected_name}】{prereq_note}",
+                        data={
+                            "category": "node_selection",
+                            "node_id": selected_id,
+                            "node_name": selected_name,
+                            "reason": reason,
+                            "prerequisite_count": prereq_count,
+                        },
+                    )
+                )
+
         return {
             "current_node_id": selected_id,
             "current_node_name": selected_name,
+            "current_entry_mode": entry_mode,
+            "node_quiz_kind": "",  # clear any stale quiz kind from previous node
             "current_node_status": "selected" if selected_id else "",
             "next_node_candidate_reason": reason,
             "learning_phase": "node_selected",

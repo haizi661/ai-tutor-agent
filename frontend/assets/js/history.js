@@ -132,6 +132,10 @@
         state.graphTopicHint = '';
         state.currentGraphNode = '';
         state.currentGraphNodeId = '';
+        state.learningTrack = '';
+        state.learningTrackLabel = '';
+        state.learningTrackLocked = false;
+        state.aiPathMode = false;
         state.userKnowledgeGraph = {};
         state.latestRadarData = null;
         app.setChatInputPlaceholder?.();
@@ -620,6 +624,7 @@
                 app.setStatusBanner('已回到这页', 'info');
             }
             app.focusRestoredSessionPosition?.(data.state || {});
+            app.applyLearningDirectionFromState?.(data.state || {});
         } catch (err) {
             app.appendMessage('agent', `恢复失败：${err.message}`);
             app.setStatusBanner(`恢复失败：${err.message}`, 'danger');

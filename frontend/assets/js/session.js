@@ -4,10 +4,24 @@
     const DEFAULT_CHAT_PLACEHOLDER = '输入问题…';
     const ANSWER_CHAT_PLACEHOLDER = '输入回答…';
 
-    function closeEventSource() {
-        if (!state.eventSource) return;
-        state.eventSource.close();
-        state.eventSource = null;
+    // ── 加载图谱数据用于学习路径面板 ──────────────────────────────────────
+    async function loadGraphDataForPathPanel() {
+        try {
+            const resp = await fetch('/api/graph/b/data.json');
+            if (!resp.ok) return;
+            const data = await resp.json();
+            if (data && Array.isArray(data.nodes)) {
+                state.learningPathNodes = data.nodes;
+                // Only show the full chapter view if we have no step-based learning plan
+                // and the user is actively learning (has a current node)
+                if (state.learningPlan && state.learningPlan.length > 0) {
+                    app.showLearningPathPanel?.();
+                    app.renderLearningPlanPanel?.(state.learningPlan, state.currentGraphNodeId, state.userKnowledgeGraph);
+                }
+            }
+        } catch (err) {
+            console.warn('Failed to load graph data for path panel:', err);
+        }
     }
 
     function safelyParseEventData(raw) {
@@ -16,6 +30,12 @@
         } catch (_error) {
             return {};
         }
+    }
+
+    function closeEventSource() {
+        if (!state.eventSource) return;
+        state.eventSource.close();
+        state.eventSource = null;
     }
 
     function appendMeta(kind, text, tone = 'info', { createIfStreaming = true, fallbackToSystem = true } = {}) {
@@ -403,10 +423,15 @@
             if (['initial_node_selector', 'node_content_loader'].includes(data.source) && data.data?.node_id) {
                 state.currentGraphNode = data.data?.node_name || state.currentGraphNode;
                 state.currentGraphNodeId = data.data?.node_id || state.currentGraphNodeId || '';
-                app.renderKnowledgeGraphVisualCard?.({
-                    title: state.currentGraphNode,
-                    id: state.currentGraphNodeId,
-                });
+                // 首次选择节点时，加载图谱数据并显示右侧学习路径面板
+                if (!state.learningPathNodes) {
+                    loadGraphDataForPathPanel();
+                }
+            }
+            // 讲解完成后延迟滚动到底部，确保公式/图表卡片和课后选择按钮可见
+            if (data.source === 'tutor') {
+                setTimeout(() => app.scrollMessagesToBottom?.({ force: true }), 500);
+                setTimeout(() => app.scrollMessagesToBottom?.({ force: true }), 1500);
             }
             const evidence = Array.isArray(data.data?.evidence) ? data.data.evidence : [];
             if (data.source === 'tutor' && evidence.length) {
@@ -417,18 +442,54 @@
             }
             if (data.source === 'wrong_question_explainer') {
                 const explanations = Array.isArray(data.data?.explanations) ? data.data.explanations : [];
-                const lines = ['错题订正讲解'];
-                explanations.forEach((item, index) => {
-                    const qid = item.question_id || `Q${index + 1}`;
-                    const stem = item.stem || '';
-                    const userAnswer = String(item.user_answer || '').toUpperCase() || '未作答';
-                    const answerKey = String(item.answer_key || '').toUpperCase() || '未提供';
-                    const explanation = item.explanation || '这题需要回到题干中的关键条件，重新区分正确概念与误区。';
-                    lines.push('', stem ? `${qid}. ${stem}` : `${qid}.`, `你的答案：${userAnswer}；正确答案：${answerKey}`, explanation);
+                app.renderWrongQuestionExplanationCard?.(explanations, { ...(data.data || {}), kind: 'wrong_question_explanations' });
+            }
+            if (data.source === 'remediation_decision' && data.data?.options) {
+                const payload = state.pendingInteractionData || data.data || {};
+                app.renderRemediationDecisionCard?.(payload, {
+                    options: data.data.options,
                 });
-                app.appendMessage?.('agent', lines.join('\n'), { kind: 'wrong_question_explanations' });
             }
             app.clearTypingIndicator?.();
+        });
+
+        // ── 学习路径事件 ──
+        state.eventSource.addEventListener('learning_plan.generated', e => {
+            const data = safelyParseEventData(e.data);
+            const planData = data.data || {};
+            state.learningPlan = planData.plan || [];
+            state.learningPlanSummary = planData.plan_summary || [];
+            if (planData.session_index !== undefined) {
+                state.sessionIndex = planData.session_index;
+            }
+            appendThinking(data.message || '学习路径已生成', 'success', 'learning_plan');
+            app.showLearningPathPanel?.();
+            app.renderLearningPlanPanel?.(state.learningPlan, state.currentGraphNodeId, state.userKnowledgeGraph);
+        });
+
+        state.eventSource.addEventListener('learning_plan.progress', e => {
+            const data = safelyParseEventData(e.data);
+            const progress = data.data || {};
+            state.learningPlanCurrentStep = progress.current_step || 0;
+            if (progress.step_completed) {
+                appendThinking(data.message || '步骤已完成', 'success', 'learning_plan');
+            }
+            app.renderLearningPlanPanel?.(state.learningPlan || [], state.currentGraphNodeId, state.userKnowledgeGraph);
+        });
+
+        state.eventSource.addEventListener('learning_plan.reused', e => {
+            const data = safelyParseEventData(e.data);
+            const planData = data.data || {};
+            if (planData.plan && Array.isArray(planData.plan)) {
+                state.learningPlan = planData.plan;
+                state.learningPlanCurrentStep = planData.current_step || 0;
+            }
+            if (planData.session_index !== undefined) {
+                state.sessionIndex = planData.session_index;
+            }
+            appendThinking(data.message || '复用已有学习路径', 'info', 'learning_plan');
+            app.showLearningPathPanel?.();
+            app.renderLearningPlanPanel?.(state.learningPlan || [], state.currentGraphNodeId, state.userKnowledgeGraph);
         });
 
         state.eventSource.addEventListener('intent.detected', e => {
@@ -471,6 +532,11 @@
             }
             app.syncKnowledgeGraphVisualState?.();
             app.scheduleSidebarUpdate?.();
+            // 仅在有学习计划时更新面板
+            if (state.learningPlan && state.learningPlan.length > 0) {
+                app.showLearningPathPanel?.();
+                app.renderLearningPlanPanel?.(state.learningPlan, state.currentGraphNodeId, state.userKnowledgeGraph);
+            }
         });
 
         // ── 用户知识图谱全量同步（测评完成后触发）──
@@ -481,6 +547,10 @@
             app.refreshUserKgMapIfOpen?.();
             app.syncKnowledgeGraphVisualState?.();
             app.scheduleSidebarUpdate?.();
+            // 仅在有学习计划时更新面板
+            if (state.learningPlan && state.learningPlan.length > 0) {
+                app.renderLearningPlanPanel?.(state.learningPlan, state.currentGraphNodeId, state.userKnowledgeGraph);
+            }
         });
 
         state.eventSource.addEventListener('session.info', e => {
@@ -510,6 +580,15 @@
             appendThinking(summary, 'info', 'route.decision');
         });
 
+        state.eventSource.addEventListener('session.thinking_mode', e => {
+            const data = safelyParseEventData(e.data);
+            const thinkingMode = Boolean(data.data?.thinking_mode);
+            if (state.thinkingMode !== thinkingMode) {
+                state.thinkingMode = thinkingMode;
+                app.toggleThinkingMode?.(thinkingMode, { silent: true });
+            }
+        });
+
         state.eventSource.addEventListener('assessment.form_ready', e => {
             const data = safelyParseEventData(e.data);
             const message = data.message || '小测已准备好。';
@@ -523,6 +602,22 @@
                 showInChat: false,
                 render: () => app.renderAssessmentForm(data.data?.questions || []),
             });
+        });
+
+        // ── V2 自评问卷：8 维能力紧凑表单 ──
+        state.eventSource.addEventListener('assessment.v2_self_eval', e => {
+            const data = safelyParseEventData(e.data);
+            const questions = data.data?.questions || [];
+            app.updateLearningProgress?.({ step: 2, label: '学习进度 2/5' });
+            consumeAwaitingTurn(
+                data.message || '请完成 8 道快速自评',
+                '等你完成自评',
+                {
+                    role: 'assessment',
+                    showInChat: false,
+                    render: () => app.renderV2SelfAssessment(questions),
+                }
+            );
         });
 
         // ── 批量测评（步进器模式）──
@@ -572,6 +667,16 @@
             if (payload.primary) {
                 appendThinking(`情绪信号：${payload.primary}`, 'info', 'affect');
             }
+        });
+
+        state.eventSource.addEventListener('thinking.step', e => {
+            const data = safelyParseEventData(e.data);
+            const message = data.message || '';
+            const payload = data.data || {};
+            const category = payload.category || 'general';
+            const toneMap = { teaching_strategy: 'info', route_decision: 'success', prerequisite_gap: 'warning', general: 'info' };
+            const tone = toneMap[category] || 'info';
+            if (message) appendThinking(message, tone, 'thinking.step');
         });
 
         state.eventSource.addEventListener('topic.confirmation_needed', e => {
@@ -690,6 +795,28 @@
                 });
                 return;
             }
+            if (payload.interaction_kind === 'remediation_decision') {
+                consumeAwaitingTurn(message, '等你决定补救方式', {
+                    role: 'prompt',
+                    awaitingInput: true,
+                    showInChat: false,
+                    render: () => {
+                        const moreData = {
+                            score: payload.score,
+                            wrong_count: payload.wrong_count,
+                            variant_rounds: payload.variant_rounds,
+                            tier: payload.tier,
+                            paused: payload.paused,
+                            extra_remediation_question_count: payload.extra_remediation_question_count,
+                        };
+                        app.renderRemediationDecisionCard?.(moreData, {
+                            options: payload.options || [],
+                        });
+                    },
+                    placeholder: '也可以直接输入选项',
+                });
+                return;
+            }
             if (payload.interaction_kind === 'consolidation_choice') {
                 consumeAwaitingTurn(message, '等你决定是否巩固复习', {
                     role: 'prompt',
@@ -779,6 +906,19 @@
                     showInChat: false,
                     render: () => app.renderObjectiveTestCard?.(endPayload.options || [], endKind),
                     placeholder: '也可以直接输入答案，如 ABCD',
+                });
+                app.fetchHistory();
+                return;
+            }
+            if (endKind === 'remediation_decision') {
+                consumeAwaitingTurn(endPayload.prompt || message, '等你决定补救方式', {
+                    role: 'prompt',
+                    awaitingInput: true,
+                    showInChat: false,
+                    render: () => app.renderRemediationDecisionCard?.(endPayload.data || {}, {
+                        options: endPayload.options || [],
+                    }),
+                    placeholder: '也可以直接输入选项',
                 });
                 app.fetchHistory();
                 return;

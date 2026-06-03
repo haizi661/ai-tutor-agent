@@ -17,7 +17,7 @@ def test_tutor_and_interruption_use_learning_answer_html_for_main_flow_graph_rag
     assert "build_learning_answer_html" in interruption
     assert "build_answer_media_html" in interruption  # debug/legacy renderer remains available
     assert "full_response = build_learning_answer_html(graph_payload).strip()" in tutor
-    assert "return build_learning_answer_html(payload)" in interruption
+    assert 'return build_learning_answer_html(payload, answer_context="temporary_question")' in interruption
     assert "build_answer_media_html(payload)" not in interruption.split("def _build_graph_rag_answer_html", 1)[1].split("def ", 1)[0]
 
 

@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import re
-from typing import Any
+from typing import Any, Callable
 
 from ai_tutor_agent.knowledge_map.student_state import StudentState, StudentStateStore, now_ts
 
@@ -32,6 +32,20 @@ def _string_list(values: Any) -> list[str]:
     parts = re.split(r"[;；\n,，、]+", text)
     return [part.strip().strip("'\"") for part in parts if part.strip().strip("'\"")]
     return []
+
+
+def graph_node_sort_key(node_id: object) -> tuple[int, str]:
+    """Sort graph nodes by their learner-facing numeric ID, starting at 1.
+
+    Prefer the canonical ``KM001``-style number. Falling back to the last numeric
+    group avoids accidental keys like ``chapter_01_KM002`` becoming ``1002``.
+    """
+    text = str(node_id or "").strip()
+    km_match = re.search(r"\bKM\s*0*(\d+)\b", text, flags=re.IGNORECASE)
+    if km_match:
+        return (int(km_match.group(1)), text)
+    groups = re.findall(r"\d+", text)
+    return (int(groups[-1]) if groups else 999999, text)
 
 
 def _node_name(node_map: dict[str, dict[str, Any]], node_id: str) -> str:
@@ -230,6 +244,24 @@ def save_student_state_snapshot(
     return student_state.to_dict()
 
 
+def mutate_student_state_snapshot(
+    student_state_store: StudentStateStore | None,
+    student_id: str,
+    mutator: Callable[[StudentState], Any],
+) -> dict[str, Any]:
+    if student_state_store is None:
+        return {}
+    update = getattr(student_state_store, "update", None)
+    if callable(update):
+        student_state = update(student_id, mutator)
+        return student_state.to_dict() if hasattr(student_state, "to_dict") else {}
+    student_state, _ = load_student_state_snapshot(student_state_store, student_id)
+    if student_state is None:
+        return {}
+    mutator(student_state)
+    return save_student_state_snapshot(student_state_store, student_state)
+
+
 def mark_student_node_started(
     student_state_store: StudentStateStore | None,
     *,
@@ -238,15 +270,48 @@ def mark_student_node_started(
     question: str,
     title: str = "",
 ) -> dict[str, Any]:
-    student_state, _ = load_student_state_snapshot(student_state_store, student_id)
-    if student_state is None or not node_id:
+    if student_state_store is None or not node_id:
         return {}
-    student_state.current_node_id = node_id
-    student_state.last_question = str(question or "").strip()
-    student_state.mark_node_started(node_id)
-    # Register node in knowledge_graph (学了才加进去)
-    student_state.kg_register_node(node_id, title)
-    return save_student_state_snapshot(student_state_store, student_state)
+
+    def apply_patch(student_state: StudentState) -> None:
+        student_state.current_node_id = node_id
+        student_state.last_question = str(question or "").strip()
+        student_state.mark_node_started(node_id)
+        # Register node in knowledge_graph (学了才加进去)
+        student_state.kg_register_node(node_id, title)
+
+    return mutate_student_state_snapshot(student_state_store, student_id, apply_patch)
+
+
+def record_teaching_episode(
+    student_state_store: StudentStateStore | None,
+    *,
+    student_id: str,
+    node_id: str,
+    strategy: str,
+    attempt_count: int,
+    affect: str = "",
+    node_title: str = "",
+    entry_mode: str = "",
+) -> None:
+    """记录一次教学讲解事件，用于后续教学策略效果分析。"""
+    if student_state_store is None or not node_id:
+        return
+
+    def apply_patch(student_state: StudentState) -> None:
+        episodes = list(getattr(student_state, "teaching_episodes", []) or [])
+        episodes.append({
+            "node_id": node_id,
+            "node_title": node_title or node_id,
+            "strategy": strategy,
+            "attempt_count": attempt_count,
+            "affect": affect,
+            "entry_mode": entry_mode,
+            "created_at": now_ts(),
+        })
+        student_state.teaching_episodes = episodes[-200:]  # cap at 200
+
+    mutate_student_state_snapshot(student_state_store, student_id, apply_patch)
 
 
 def update_student_state_after_evaluation(
@@ -261,42 +326,140 @@ def update_student_state_after_evaluation(
     wrong_items: list[dict[str, Any]] | None = None,
     node_title: str = "",
 ) -> dict[str, Any]:
-    student_state, _ = load_student_state_snapshot(student_state_store, student_id)
-    if student_state is None or not node_id:
+    if student_state_store is None or not node_id:
         return {}
 
-    student_state.current_node_id = node_id
-    student_state.update_mastery(node_id, score)
-    # Sync teaching strategy and difficulty from AgentState
-    if teaching_strategy:
-        student_state.teaching_strategy = teaching_strategy
-    if difficulty_level:
-        student_state.difficulty_level = difficulty_level
-    # Evidence is recorded per-node via kg_update_score below (single source of truth).
-    if passed:
-        student_state.mark_node_completed(node_id)
-        if node_id not in student_state.visited_nodes:
-            student_state.visited_nodes.append(node_id)
-        if node_id in student_state.wrong_nodes:
-            student_state.wrong_nodes.remove(node_id)
-    else:
-        if node_id not in student_state.wrong_nodes:
-            student_state.wrong_nodes.append(node_id)
+    def apply_patch(student_state: StudentState) -> None:
+        student_state.current_node_id = node_id
+        student_state.update_mastery(node_id, score)
+        # Sync teaching strategy and difficulty from AgentState
+        if teaching_strategy:
+            student_state.teaching_strategy = teaching_strategy
+        if difficulty_level:
+            student_state.difficulty_level = difficulty_level
+
+        # ── 同步 concept_mastery 画像（驱动学习路径入口模式）──
+        cm_entry = dict(student_state.concept_mastery.get(node_id) or {})
+        if not cm_entry:
+            cm_entry = {"mastery": 0.0, "confidence": 0.0, "source": "default",
+                        "risk": "high", "failure_count": 0, "last_score": 0.0, "last_updated": ""}
+        old_mastery = float(cm_entry.get("mastery", 0))
+        old_confidence = float(cm_entry.get("confidence", 0))
+        old_failures = int(cm_entry.get("failure_count", 0))
+        new_confidence = max(old_confidence, 0.5)  # 测验后置信度至少 0.5
+        observed = max(0.0, min(1.0, score / 100.0))
+        new_mastery = old_mastery * (1 - new_confidence) + observed * new_confidence
+        new_failures = old_failures + (0 if passed else 1)
+        risk = "low" if new_mastery >= 0.7 else ("medium" if new_mastery >= 0.4 else "high")
+        cm_entry.update({
+            "mastery": round(new_mastery, 3),
+            "confidence": round(new_confidence, 3),
+            "source": "quiz_update",
+            "risk": risk,
+            "failure_count": new_failures,
+            "last_score": round(observed, 3),
+            "last_updated": now_ts(),
+        })
+        student_state.concept_mastery[node_id] = cm_entry
+
+        # Evidence is recorded per-node via kg_update_score below (single source of truth).
+        if passed:
+            student_state.mark_node_completed(node_id)
+            if node_id not in student_state.visited_nodes:
+                student_state.visited_nodes.append(node_id)
+            if node_id in student_state.wrong_nodes:
+                student_state.wrong_nodes.remove(node_id)
+        else:
+            if node_id not in student_state.wrong_nodes:
+                student_state.wrong_nodes.append(node_id)
+            student_state.mark_node_started(node_id)
+        today = now_ts()[:10]
+        if hasattr(student_state, "daily_learning_records"):
+            learned_today = list(student_state.daily_learning_records.get(today, []) or [])
+            if node_id and node_id not in learned_today:
+                learned_today.append(node_id)
+            student_state.daily_learning_records[today] = learned_today
+        if hasattr(student_state, "last_learning_at"):
+            student_state.last_learning_at = now_ts()
+        # Update knowledge_graph (score, wrong_questions, evidence)
+        student_state.kg_update_score(
+            node_id, int(round(score)), passed=passed,
+            wrong_items=wrong_items, source="quiz", title=node_title,
+        )
+        # Update wrong_question_book (distinct from knowledge_graph)
+        if wrong_items:
+            student_state.wb_add_or_update(wrong_items, node_id, node_title or node_id)
+
+    return mutate_student_state_snapshot(student_state_store, student_id, apply_patch)
+
+
+def enrich_wrong_question_book(
+    student_state_store: StudentStateStore | None,
+    *,
+    student_id: str,
+    explanations: list[dict[str, Any]],
+) -> dict[str, Any]:
+    """在错题讲解生成后用富字段（wrong_reason / explanation / 等）补充错题本。"""
+    if student_state_store is None or not explanations:
+        return {}
+
+    def apply_patch(state: StudentState) -> None:
+        state.wb_enrich(explanations)
+
+    return mutate_student_state_snapshot(student_state_store, student_id, apply_patch)
+
+
+def record_student_temporary_question(
+    student_state_store: StudentStateStore | None,
+    *,
+    student_id: str,
+    node_id: str,
+    question: str,
+    title: str = "",
+    answer_kind: str = "",
+    references: list[str] | None = None,
+) -> dict[str, Any]:
+    node_id = str(node_id or "").strip()
+    clean_question = str(question or "").strip()
+    if student_state_store is None or not node_id or not clean_question:
+        return {}
+
+    def apply_patch(student_state: StudentState) -> None:
+        student_state.current_node_id = node_id
+        student_state.last_question = clean_question
         student_state.mark_node_started(node_id)
-    today = now_ts()[:10]
-    if hasattr(student_state, "daily_learning_records"):
-        learned_today = list(student_state.daily_learning_records.get(today, []) or [])
-        if node_id and node_id not in learned_today:
-            learned_today.append(node_id)
-        student_state.daily_learning_records[today] = learned_today
-    if hasattr(student_state, "last_learning_at"):
-        student_state.last_learning_at = now_ts()
-    # Update knowledge_graph (score, wrong_questions, evidence)
-    student_state.kg_update_score(
-        node_id, int(round(score)), passed=passed,
-        wrong_items=wrong_items, source="quiz", title=node_title,
-    )
-    return save_student_state_snapshot(student_state_store, student_state)
+        if hasattr(student_state, "last_learning_at"):
+            student_state.last_learning_at = now_ts()
+        today = now_ts()[:10]
+        if hasattr(student_state, "daily_learning_records"):
+            learned_today = list(student_state.daily_learning_records.get(today, []) or [])
+            if node_id not in learned_today:
+                learned_today.append(node_id)
+            student_state.daily_learning_records[today] = learned_today
+
+        entry = student_state.kg_register_node(node_id, title)
+        entry["status"] = entry.get("status") or "in_progress"
+        entry["last_updated"] = now_ts()
+        refs = [str(ref).strip() for ref in (references or []) if str(ref).strip()]
+        evidence = list(entry.get("evidence") or [])
+        event = {
+            "type": "temporary_question",
+            "question": clean_question[:500],
+            "detail": f"临时追问：{clean_question[:120]}",
+            "answer_kind": str(answer_kind or "").strip(),
+            "references": refs[:8],
+            "time": now_ts(),
+        }
+        if not (
+            evidence
+            and isinstance(evidence[-1], dict)
+            and evidence[-1].get("type") == event["type"]
+            and str(evidence[-1].get("question") or "").strip() == event["question"]
+        ):
+            evidence.append(event)
+        entry["evidence"] = evidence[-50:]
+
+    return mutate_student_state_snapshot(student_state_store, student_id, apply_patch)
 
 
 def recommend_next_node(
@@ -316,10 +479,6 @@ def recommend_next_node(
     candidate_ids = _string_list(current_node.get("recommended_next_nodes")) or _string_list(current_node.get("next_nodes"))
     candidate_ids += [node_id for node_id in _string_list(current_node.get("related_nodes")) if node_id not in candidate_ids]
 
-    def numeric_key(node_id: str) -> tuple[int, str]:
-        digits = "".join(ch for ch in node_id if ch.isdigit())
-        return (int(digits) if digits else 999999, node_id)
-
     for node_id in candidate_ids:
         if node_id == current_id or node_id in visited or node_id not in node_map:
             continue
@@ -329,7 +488,7 @@ def recommend_next_node(
             "reason": "related_unvisited",
         }
 
-    remaining = sorted((node_id for node_id in node_map if node_id not in visited and node_id != current_id), key=numeric_key)
+    remaining = sorted((node_id for node_id in node_map if node_id not in visited and node_id != current_id), key=graph_node_sort_key)
     if not remaining:
         return {}
     node_id = remaining[0]
@@ -403,26 +562,27 @@ def assign_homework_items(
     student_id: str,
     homework_items: list[dict[str, Any]] | None,
 ) -> dict[str, Any]:
-    student_state, _ = load_student_state_snapshot(student_state_store, student_id)
-    if student_state is None:
+    if student_state_store is None:
         return {}
 
-    student_state.homework = []
-    assignment_items: list[dict[str, Any]] = []
-    for item in homework_items or []:
-        question_id = str(item.get("question_id") or "").strip()
-        if question_id:
-            student_state.add_homework(question_id)
-            assignment_items.append(dict(item))
-    assignment_id = f"HW-{student_id}-{now_ts()}"
-    assigned_at = now_ts()
-    if hasattr(student_state, "homework_assignments"):
-        student_state.homework_assignments = [
-            {
-                "assignment_id": assignment_id,
-                "status": "assigned",
-                "assigned_at": assigned_at,
-                "items": assignment_items,
-            }
-        ] if assignment_items else []
-    return save_student_state_snapshot(student_state_store, student_state)
+    def apply_patch(student_state: StudentState) -> None:
+        student_state.homework = []
+        assignment_items: list[dict[str, Any]] = []
+        for item in homework_items or []:
+            question_id = str(item.get("question_id") or "").strip()
+            if question_id:
+                student_state.add_homework(question_id)
+                assignment_items.append(dict(item))
+        assignment_id = f"HW-{student_id}-{now_ts()}"
+        assigned_at = now_ts()
+        if hasattr(student_state, "homework_assignments"):
+            student_state.homework_assignments = [
+                {
+                    "assignment_id": assignment_id,
+                    "status": "assigned",
+                    "assigned_at": assigned_at,
+                    "items": assignment_items,
+                }
+            ] if assignment_items else []
+
+    return mutate_student_state_snapshot(student_state_store, student_id, apply_patch)

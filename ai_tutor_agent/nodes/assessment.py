@@ -32,15 +32,28 @@ from ..core.text import content_to_text
 
 
 ASSESSMENT_DIMENSIONS = [
-    "基础概念",
-    "规则理解",
-    "逻辑推理",
-    "场景应用",
-    "细节辨析",
-    "综合应用",
+    "数学基础",
+    "控制系统基本概念",
+    "系统建模能力",
+    "稳定性分析能力",
+    "时域性能分析能力",
+    "稳态误差分析能力",
+    "根轨迹分析能力",
+    "频域分析与校正能力",
 ]
 
 SELF_SCORE_MAP = {"A": 25, "B": 50, "C": 75, "D": 100}
+
+
+def _is_insufficient_balance_error(exc: Exception) -> bool:
+    text = str(exc).lower()
+    return "insufficient balance" in text or "error code: 402" in text or "余额不足" in text
+
+
+def _friendly_llm_error_message(exc: Exception) -> str:
+    if _is_insufficient_balance_error(exc):
+        return "模型服务余额不足，本次先使用本地规则完成分析；请在设置中切换可用模型或充值后再继续使用 AI 增强。"
+    return "模型服务暂时不可用，本次先使用本地规则完成分析；你可以稍后重试或检查 API Key、模型和网络配置。"
 
 # ===========================================================================
 # 内部辅助：从图谱节点构建概念候选列表
@@ -56,7 +69,7 @@ def _build_concept_candidates(graph_nodes: dict) -> list[dict]:
             continue
         entry: dict = {
             "concept": title,
-            "concept_id": str(node.get("id") or title).strip(),
+            "concept_id": str(node.get("node_id") or node.get("id") or title).strip(),
             "concept_title": title,
         }
         if objectives:
@@ -252,14 +265,14 @@ def _generate_llm_assessment_questions(llm, event_sink: EventSink, topic: str, c
         content=f"""请为学习主题【{topic}】设计 {count} 道自我评估选择题用于学前摸底。
 {concept_hint}
 任务说明：
-1. 选出 {count} 个能覆盖【{topic}】学习范围的核心概念（分散在基础/规则/推理/应用等不同层次）
+1. 选出 {count} 个能覆盖【{topic}】学习范围的核心概念（分散在数学基础、基本概念、建模、稳定性等不同能力维度）
 2. 每题让学生评估自己对某个概念的了解和熟悉程度（例如"关于「XX」，你目前的了解程度如何？"）
 3. 四个选项 A/B/C/D 从低到高依次为：没接触过 → 有所耳闻但模糊 → 比较了解 → 非常熟悉能运用
 4. 每题必须提供 score_map，A/B/C/D 分别映射为 25/50/75/100
 5. 选项描述要贴合该概念的学习场景，帮助学生准确定位自己的水平
 
-dimension 必须是以下六者之一：
-基础概念 / 规则理解 / 逻辑推理 / 场景应用 / 细节辨析 / 综合应用
+dimension 必须是以下八者之一（对应自动控制理论的核心能力）：
+数学基础 / 控制系统基本概念 / 系统建模能力 / 稳定性分析能力 / 时域性能分析能力 / 稳态误差分析能力 / 根轨迹分析能力 / 频域分析与校正能力
 
 输出 JSON Schema（直接输出，不加任何说明）：
 {{{{
@@ -270,7 +283,7 @@ dimension 必须是以下六者之一：
       "concept": "概念名称",
       "concept_id": "node_id",
       "concept_title": "概念名称",
-      "dimension": "基础概念",
+      "dimension": "数学基础",
       "question": "题干",
       "options": ["A. ...", "B. ...", "C. ...", "D. ..."],
       "score_map": {{{{"A": 25, "B": 50, "C": 75, "D": 100}}}}
@@ -288,7 +301,7 @@ dimension 必须是以下六者之一：
             make_event(
                 "session.warning",
                 "assessment_generator",
-                message=f"LLM 出题请求失败: {exc}",
+                message=f"{_friendly_llm_error_message(exc)}（测评题将使用本地兜底模板补齐。）",
             )
         )
         return []
@@ -812,6 +825,22 @@ def _resolve_course_start_label(graph_pipeline: Optional[object], topic: str) ->
 
 
 def build_user_profiler_node(llm, event_sink: EventSink, graph_pipeline=None):
+    def _find_node_id_by_name(node_map: dict, name: str) -> str:
+        """通过节点名称查找节点 ID（模糊匹配）。"""
+        target = str(name or "").strip()
+        if not target:
+            return ""
+        # 精确匹配
+        for node_id, node in node_map.items():
+            if target == str(node.get("name") or "").strip():
+                return str(node_id).strip()
+        # 包含匹配
+        for node_id, node in node_map.items():
+            node_name = str(node.get("name") or "").strip()
+            if target in node_name or node_name in target:
+                return str(node_id).strip()
+        return ""
+
     def node(state: AgentState) -> dict:
         topic = state["current_topic"]
         questions = state.get("assessment_questions", [])
@@ -865,16 +894,25 @@ def build_user_profiler_node(llm, event_sink: EventSink, graph_pipeline=None):
         )
         # ── Step 4: 初始化用户知识图谱（测评完成即有初始状态）──
         # 所有被测概念设为 not_started，携带校准分供 UI 展示
-        user_knowledge_graph = {
-            concept: {
+        # 使用节点 ID 作为 key，以便图谱界面正确匹配
+        node_map = dict(getattr(graph_pipeline, "node_map", {}) or {})
+        user_knowledge_graph = {}
+        for concept, v in concept_gaps.items():
+            concept_id = str(v.get("concept_id") or "").strip()
+            # 尝试通过名称查找节点 ID
+            node_id = _find_node_id_by_name(node_map, concept) or _find_node_id_by_name(node_map, concept_id) or concept_id or concept
+            node_name = concept
+            # 如果找到了节点 ID，使用节点名称作为显示名称
+            if node_id in node_map:
+                node_name = str(node_map[node_id].get("name") or concept).strip()
+            user_knowledge_graph[node_name] = {
                 "status": "not_started",
-                "id": v.get("concept_id") or concept,
+                "id": node_id,
+                "name": node_name,
                 "calibrated": v.get("calibrated", 50),
                 "gap_type": v.get("gap_type", ""),
                 "turn_count": 0,
             }
-            for concept, v in concept_gaps.items()
-        }
         event_sink.emit(
             make_event(
                 "user_knowledge_graph.sync",
@@ -912,6 +950,9 @@ def build_user_profiler_node(llm, event_sink: EventSink, graph_pipeline=None):
             "current_node_status": "",
             "turn_goal": state.get("turn_goal", "") or topic,
             "topic_focus": state.get("topic_focus", ""),
+            # 透传自评数据，确保下游 learning_plan_generator 能读到
+            "self_assessment_scores": state.get("self_assessment_scores") or {},
+            "skip_self_assessment": state.get("skip_self_assessment", False),
         }
 
     return node
@@ -1102,7 +1143,7 @@ def _select_initial_teaching_anchor(concept_gaps: dict) -> tuple[str, str]:
 
 
 # ===========================================================================
-# 兼容层：6 维雷达数据（保持前端兼容）
+# 雷达数据（8 维能力，匹配 V2 ability_mapper 的 A-H）
 # ===========================================================================
 
 def _question_dimension(question: dict, fallback_index: int) -> str:
@@ -1113,7 +1154,7 @@ def _question_dimension(question: dict, fallback_index: int) -> str:
 
 
 def _generate_radar_data(event_sink: EventSink, topic: str, questions: list, answers: dict) -> dict:
-    """生成 6 维雷达图数据（供前端 Chart.js 渲染，保持原有格式）。"""
+    """生成 8 维雷达图数据（对应 V2 能力体系 A-H，供前端 Chart.js 渲染）。"""
     del topic
     aggregates = {
         dim: {"self_total": 0, "self_count": 0, "objective_total": 0, "objective_count": 0}
@@ -1243,13 +1284,53 @@ def _generate_profile_report(
         )
     )
 
+    fallback_report = _fallback_profile_report(topic, concept_gaps, difficulty_level, strategy, start_label)
+    if llm is None:
+        event_sink.emit(make_event("node.stream", "user_profiler", message=fallback_report))
+        return fallback_report
+
     full_report = ""
-    for chunk in llm.stream([system_msg, human_msg]):
-        text = content_to_text(chunk.content)
-        if text:
-            full_report += text
-            event_sink.emit(
-                make_event("node.stream", "user_profiler", message=text)
+    try:
+        for chunk in llm.stream([system_msg, human_msg]):
+            text = content_to_text(chunk.content)
+            if text:
+                full_report += text
+                event_sink.emit(
+                    make_event("node.stream", "user_profiler", message=text)
+                )
+    except Exception as exc:
+        warning = _friendly_llm_error_message(exc)
+        event_sink.emit(
+            make_event(
+                "session.warning",
+                "user_profiler",
+                message=warning,
             )
+        )
+        event_sink.emit(make_event("node.stream", "user_profiler", message=fallback_report))
+        return fallback_report
+
+    if not full_report.strip():
+        event_sink.emit(make_event("node.stream", "user_profiler", message=fallback_report))
+        return fallback_report
 
     return full_report
+
+
+def _fallback_profile_report(
+    topic: str,
+    concept_gaps: dict,
+    difficulty_level: int,
+    strategy: str,
+    start_label: str,
+) -> str:
+    del strategy
+    weak = [c for c, v in concept_gaps.items() if v.get("gap_type") in {"overconfident", "aligned_low", "underconfident"}]
+    if weak:
+        finding = f"你在「{weak[0]}」附近还需要校准理解"
+    else:
+        finding = f"你对「{topic}」已有一定基础"
+    return (
+        f"我现在大致知道从哪里开始了，{finding}。"
+        f"接下来先从「{start_label or topic}」开始，把课程起点打稳。"
+    )

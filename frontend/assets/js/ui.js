@@ -25,6 +25,101 @@
     const SHORT_VISIBLE_FALLBACK_MS = 1600;
     const LONG_VISIBLE_FALLBACK_MS = 5200;
     const MAX_VISIBLE_FALLBACKS = 2;
+    const LEARNING_CONTENT_MARKERS = [
+        'learning-answer-content',
+        'homework-answer-content',
+        'learning-reference-block',
+        'learning-reference-media',
+        'learning-evidence-card',
+        'learning-formula-card',
+        'learning-figure-card',
+        'learning-table-card',
+        'learning-derivation-card',
+        'graph-rag-answer-panel',
+    ];
+
+    function escapeHtml(value) {
+        return String(value || '')
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#39;');
+    }
+
+    function normalizeCasesBody(body) {
+        return String(body || '')
+            .split(/(\\\\(?:\s*\[[^\]]+\])?)/)
+            .map((part) => {
+                if (part.startsWith('\\\\') || part.includes('&')) return part;
+                return part.replace(
+                    /,\s*((?:(?:\\?[a-zA-Z]|[^\s,])[\s\S]*?(?:\\leq?|\\geq?|[<>≤≥=])[\s\S]*))$/,
+                    ', & $1'
+                );
+            })
+            .join('');
+    }
+
+    function normalizeLatexSource(latex) {
+        return String(latex || '').replace(
+            /\\left\\\{\s*\\begin\{array\}\{[^}]*\}([\s\S]*?)\\end\{array\}\s*\\right\.?/g,
+            (_match, body) => `\\begin{cases}${normalizeCasesBody(body)}\\end{cases}`
+        ).replace(
+            /\\begin\{cases\}([\s\S]*?)\\end\{cases\}/g,
+            (_match, body) => `\\begin{cases}${normalizeCasesBody(body)}\\end{cases}`
+        );
+    }
+
+    function normalizeMathBlock(block) {
+        const value = String(block || '');
+        const wrappers = [
+            ['$$', '$$'],
+            ['\\[', '\\]'],
+            ['\\(', '\\)'],
+            ['$', '$'],
+        ];
+        const wrapper = wrappers.find(([left, right]) => value.startsWith(left) && value.endsWith(right));
+        if (!wrapper) return normalizeLatexSource(value);
+        const [left, right] = wrapper;
+        const inner = value.slice(left.length, value.length - right.length);
+        return `${left}${normalizeLatexSource(inner)}${right}`;
+    }
+
+    function basicMarkdownFallback(text) {
+        // 如果 marked.js 没加载，用最简正则兜底，至少渲染加粗/标题/引用
+        var html = String(text || '');
+        // **bold**
+        html = html.replace(/\*\*([^*\n]+)\*\*/g, '<strong>$1</strong>');
+        // ## heading
+        html = html.replace(/^#{1,3}\s+(.+?)(?:\n|$)/gm, function(m, title) {
+            var level = (m.match(/^#+/) || ['#'])[0].length;
+            var tag = 'h' + Math.min(level + 1, 4); // ## → h3, ### → h4
+            return '<' + tag + '>' + title + '</' + tag + '>';
+        });
+        // > blockquote
+        html = html.replace(/^>\s*(.+?)(?:\n|$)/gm, '<blockquote>$1</blockquote>');
+        // --- separator
+        html = html.replace(/^---\s*$/gm, '<hr>');
+        // 换行
+        html = html.replace(/\n\n/g, '<br><br>');
+        return html;
+    }
+
+    function parseMarkdown(text) {
+        if (typeof marked === 'undefined') return basicMarkdownFallback(text);
+        const mathBlocks = [];
+        let processed = String(text || '').replace(/(\$\$[\s\S]*?\$\$|\$[\s\S]*?\$|\\\[[\s\S]*?\\\]|\\\([\s\S]*?\\\))/g, (match) => {
+            mathBlocks.push(normalizeMathBlock(match));
+            return `@@MATH_BLOCK_${mathBlocks.length - 1}@@`;
+        });
+
+        let html = marked.parse(processed);
+
+        html = html.replace(/@@MATH_BLOCK_(\d+)@@/g, (match, i) => {
+            return mathBlocks[i];
+        });
+        return html;
+    }
 
     function renderMarkdown(target, text, options = {}) {
         const rawText = String(text || '');
@@ -33,13 +128,41 @@
         if (allowGraphRagHtml) {
             target.innerHTML = sanitizeLearningHtml(extractGraphRagReportBody(rawText), { allowDebugClasses: true });
         } else if (allowLearningHtml) {
-            target.innerHTML = sanitizeLearningHtml(rawText);
+            target.innerHTML = sanitizeLearningHtml(renderLearningHtmlOrMarkdown(rawText));
         } else {
-            target.innerHTML = sanitizeRenderedHtml(marked.parse(rawText));
+            target.innerHTML = sanitizeRenderedHtml(parseMarkdown(rawText));
         }
         normalizeLearningRelatedOverview(target);
         stripRedundantTextAfterTables(target);
         app.renderMath(target);
+    }
+
+    app.renderMarkdownContent = function renderMarkdownContent(target, text, options = {}) {
+        renderMarkdown(target, text, options);
+    };
+
+    app.detectLearningContentKind = function detectLearningContentKind(text) {
+        const raw = String(text || '').trim();
+        if (raw.startsWith('<') && LEARNING_CONTENT_MARKERS.some(marker => raw.includes(marker))) {
+            return 'graph_rag_answer';
+        }
+        return 'tutor';
+    };
+
+    app.appendLearningTutorContent = function appendLearningTutorContent(text, options = {}) {
+        const content = String(text || '');
+        if (!content.trim()) return false;
+        const kind = options.kind || app.detectLearningContentKind(content);
+        app.appendMessage('agent', content, { ...options, kind });
+        return true;
+    };
+
+    function renderLearningHtmlOrMarkdown(rawText = '') {
+        const text = String(rawText || '');
+        if (app.detectLearningContentKind(text) === 'graph_rag_answer') {
+            return text;
+        }
+        return parseMarkdown(text);
     }
 
     /**
@@ -83,8 +206,7 @@
         const template = document.createElement('template');
         template.innerHTML = source;
         const allowedTags = [
-            'a', 'article', 'b', 'blockquote', 'br', 'button', 'caption', 'code', 'details', 'div', 'em',
-            'figure',
+            'a', 'b', 'blockquote', 'br', 'button', 'caption', 'code', 'details', 'div', 'em',
             'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'hr', 'img', 'li', 'main', 'ol', 'p', 'pre',
             'section', 'span', 'strong', 'sub', 'summary', 'sup', 'table', 'tbody', 'td', 'th',
             'thead', 'tr', 'ul',
@@ -108,7 +230,11 @@
             'learning-evidence-type',
             'learning-evidence-title',
             'learning-evidence-summary',
+            'learning-citation',
+            'learning-citation-index',
             'learning-source-line',
+            'learning-source-item',
+            'learning-source-body',
             'learning-debug-details',
             'learning-latex-details',
             'learning-figure-unavailable',
@@ -119,6 +245,7 @@
             'learning-reference-media-title',
             'learning-reference-media-grid',
             'learning-related-overview',
+            'learning-related-overview-note',
             'learning-formula-card',
             'learning-inline-formula-card',
             'learning-formula-viewport',
@@ -126,6 +253,7 @@
             'learning-figure-viewport',
             'learning-table-card',
             'learning-table-viewport',
+            'learning-table-empty',
             'learning-derivation-card',
             'learning-derivation-steps',
             'learning-code-viewport',
@@ -141,19 +269,7 @@
             'homework-item-meta',
             'homework-item-index',
             'homework-item-id',
-            'homework-tag-row',
-            'homework-tag-chip',
             'homework-question-text',
-            'homework-question-body',
-            'homework-question-richtext',
-            'homework-question-image-card',
-            'homework-question-image',
-            'homework-option-list',
-            'homework-option-item',
-            'homework-option-key',
-            'homework-option-text',
-            'homework-option-image-wrap',
-            'homework-option-image',
             'homework-answer-viewport',
             'homework-reference',
             'homework-rubric-list',
@@ -308,11 +424,10 @@
     app.renderMath = function renderMath(el) {
         if (window.katex) {
             el.querySelectorAll?.('.formula-render[data-latex]').forEach((node) => {
-                const latex = node.getAttribute('data-latex') || node.textContent || '';
+                const latex = normalizeLatexSource(node.getAttribute('data-latex') || node.textContent || '');
                 if (!latex.trim()) return;
                 try {
-                    const displayMode = node.getAttribute('data-display-mode') !== 'false';
-                    katex.render(latex, node, { displayMode, throwOnError: false, strict: 'ignore' });
+                    katex.render(latex, node, { displayMode: true, throwOnError: false, strict: 'ignore' });
                     updateFormulaViewportOverflow(node.closest('.formula-scroll, .learning-formula-viewport') || node);
                 } catch (err) {
                     console.warn('KaTeX formula-render failed', err);
@@ -330,10 +445,20 @@
                 throwOnError: false,
             });
         }
+        markTaggedMathDisplays(el);
         updateFormulaViewportOverflow(el);
     };
-    app.sanitizeLearningHtml = sanitizeLearningHtml;
-    app.sanitizeRenderedHtml = sanitizeRenderedHtml;
+
+    function markTaggedMathDisplays(root) {
+        const scope = root || document;
+        scope.querySelectorAll?.('.katex-display .tag').forEach((tag) => {
+            const display = tag.closest('.katex-display');
+            if (!display) return;
+            const tagWidth = Math.ceil(tag.getBoundingClientRect().width || tag.offsetWidth || 0);
+            display.classList.add('katex-display--tagged');
+            display.style.setProperty('--katex-tag-space', `${Math.max(tagWidth + 16, 56)}px`);
+        });
+    }
 
     function updateFormulaViewportOverflow(root) {
         const scope = root || document;
@@ -861,55 +986,24 @@
         return `/knowledge-graph/b/viewer/index.html?${params.toString()}`;
     }
 
+    /** 图谱视觉卡片：已移至侧边栏和右侧面板，不再插入聊天 */
     app.renderKnowledgeGraphVisualCard = function renderKnowledgeGraphVisualCard(payload = {}) {
         const nodeTitle = String(payload.title || payload.node_name || state.currentGraphNode || state.graph_anchor_title || '').trim();
         const nodeId = String(payload.id || payload.node_id || state.currentGraphNodeId || state.graph_anchor_id || '').trim();
         if (!nodeTitle && !nodeId) return;
-
         state.currentGraphNode = nodeTitle || state.currentGraphNode;
         state.currentGraphNodeId = nodeId || state.currentGraphNodeId;
-
-        document.querySelector('.assistant-card-row.graph-visual-card-row')?.remove();
-        const container = document.getElementById('messages');
-        if (!container) return;
-        const row = createAssistantCardRow('graph-visual-card-row');
-        const card = document.createElement('section');
-        card.className = 'graph-visual-card prompt-flow-card';
-        const graphSrc = _buildGraphViewerUrl({ nodeTitle, nodeId });
-        card.innerHTML = `
-            <div class="graph-visual-head">
-                <div>
-                    <div class="prompt-label">当前主讲节点</div>
-                    <div class="graph-visual-title">${nodeTitle || nodeId}</div>
-                    <div class="graph-visual-copy">这不是重新开始，而是在标记当前讲到图谱的哪个节点。临时问题会单独回答，不改变这里的主线进度。</div>
-                </div>
-                <button type="button" class="graph-visual-open">打开完整图谱</button>
-            </div>
-            <div class="graph-visual-frame-wrap">
-                <iframe
-                    class="graph-visual-frame"
-                    data-graph-mini-frame
-                    title="当前学习节点知识图谱"
-                    loading="lazy"
-                    src="${graphSrc}"
-                ></iframe>
-            </div>
-        `;
-        const frame = card.querySelector('[data-graph-mini-frame]');
-        if (frame) {
-            frame.dataset.src = graphSrc;
-            frame.onload = () => app.syncKnowledgeGraphVisualState?.();
-        }
-        card.querySelector('.graph-visual-open')?.addEventListener('click', () => app.openKnowledgeGraphModal?.());
-        row.body.appendChild(card);
-        container.appendChild(row.wrap);
-        app.syncKnowledgeGraphVisualState?.();
-        app.scrollMessagesToBottom?.();
+        // 只更新状态，不插入聊天。图谱在侧边栏/右侧面板中显示。
     };
 
     /** 若"掌握图"面板已打开则刷新 */
     app.refreshUserKgMapIfOpen = function refreshUserKgMapIfOpen() {
         if (state.userKgMapOpen) app.renderUserKnowledgeMap();
+    };
+
+    /** 渲染学习路径卡片：已移至右侧面板，不再插入聊天 */
+    app.renderLearningPathCard = function renderLearningPathCard() {
+        // no-op: 学习路径现在只在右侧学习路径面板中显示
     };
 
     /** 在消息流中插入一条图谱事件 chip */
@@ -1274,15 +1368,75 @@
         return true;
     }
 
+    function _ensureThinkDrawer() {
+        if (!state.currentAgentTurnEl) return null;
+        const existing = state.currentAgentTurnEl.querySelector('.trace-drawer');
+        if (existing) return existing;
+
+        const bubble = state.currentAgentTurnEl.querySelector('.bubble.ai') || state.currentAgentTurnEl.querySelector('.agent-turn');
+        if (!bubble) return null;
+
+        const drawer = document.createElement('details');
+        drawer.className = 'trace-drawer';
+        drawer.dataset.thinkDrawer = '1';
+        if (!state.thinkingMode) drawer.setAttribute('hidden', '');
+
+        const summary = document.createElement('summary');
+        summary.innerHTML = '<span class="meta-title">教学推理</span><span class="meta-badge">0</span>';
+        drawer.appendChild(summary);
+
+        const list = document.createElement('ol');
+        list.className = 'trace-list';
+        drawer.appendChild(list);
+
+        bubble.insertBefore(drawer, bubble.firstChild);
+        return drawer;
+    }
+
+    function _updateThinkDrawerVisibility() {
+        if (!state.currentAgentTurnEl) return;
+        const drawer = state.currentAgentTurnEl.querySelector('.trace-drawer');
+        if (!drawer) return;
+        if (state.thinkingMode) {
+            drawer.removeAttribute('hidden');
+        } else {
+            drawer.setAttribute('hidden', '');
+        }
+    }
+
+    app.syncThinkDrawerVisibility = _updateThinkDrawerVisibility;
+
     app.addThinkingStep = function addThinkingStep(text, tone = 'info') {
         if (!text) return false;
         if (tone === 'warning' || tone === 'danger') app.setStatusBanner(text, tone);
+        // 推理模式关闭时静默吞掉推理事件，避免 appendMeta() fallback 成聊天区系统消息。
+        if (!state.thinkingMode) return true;
+        const drawer = _ensureThinkDrawer();
+        if (!drawer) return false;
+        const list = drawer.querySelector('.trace-list');
+        if (!list) return false;
+        const appended = appendMetaItem(list, text, tone, 'thinking');
+        if (appended) {
+            const badge = drawer.querySelector('.meta-badge');
+            if (badge) badge.textContent = String(list.children.length);
+        }
         return true;
     };
 
     app.addNote = function addNote(text, tone = 'info') {
         if (!text) return false;
         if (tone === 'warning' || tone === 'danger') app.setStatusBanner(text, tone);
+        // 推理模式关闭时静默吞掉注记事件，避免 appendMeta() fallback 成聊天区系统消息。
+        if (!state.thinkingMode) return true;
+        const drawer = _ensureThinkDrawer();
+        if (!drawer) return false;
+        const list = drawer.querySelector('.trace-list');
+        if (!list) return false;
+        const appended = appendMetaItem(list, text, tone, 'note');
+        if (appended) {
+            const badge = drawer.querySelector('.meta-badge');
+            if (badge) badge.textContent = String(list.children.length);
+        }
         return true;
     };
 
@@ -1362,10 +1516,8 @@
         if (kind === 'tutor_citations' || kind === 'tutor_evidence') return 'tutor';
         if (kind === 'coach') return 'coach';
         if (kind === 'tester_question') return 'tester';
-        if (kind === 'homework_learning_html') return 'graph_rag_answer';
         if (kind === 'graph_rag_answer') return 'graph_rag_answer';
         if (kind === 'graph_rag_debug_report') return 'graph_rag_debug_report';
-        if (kind === 'ai_path_lesson' || kind === 'ai_path_lesson_qa') return 'graph_rag_answer';
         if (kind === 'evaluator_card') return 'evaluation';
         if (kind === 'assessment_result') return 'profile';
         return 'teacher';
@@ -1714,7 +1866,7 @@
             }
             const turnRole = options.turnRole || app.roleFromMessageKind(options.kind);
             app.appendAgentTurnShell(text, turnRole, {
-                allowLearningHtml: options.allowLearningHtml === true || options.kind === 'graph_rag_answer' || options.kind === 'homework_answer_prompt' || options.kind === 'homework_learning_html' || String(text || '').includes('learning-answer-content'),
+                allowLearningHtml: options.allowLearningHtml === true || options.kind === 'graph_rag_answer' || options.kind === 'homework_answer_prompt',
                 allowGraphRagHtml: options.allowGraphRagHtml === true || options.kind === 'graph_rag_debug_report',
             });
             app.finalizeAgentTurn();
@@ -1736,7 +1888,7 @@
         bubbleWrap.className = 'bubble-wrap';
         const bubble = document.createElement('div');
         bubble.className = role === 'user' ? 'bubble user' : 'bubble ai';
-        bubble.innerHTML = sanitizeRenderedHtml(marked.parse(text));
+        bubble.innerHTML = sanitizeRenderedHtml(parseMarkdown(text));
         bubbleWrap.appendChild(bubble);
 
         if (role === 'user') {
@@ -1760,7 +1912,7 @@
             <div class="bubble-wrap">
                 <div class="msg-content system prompt-card">
                     <div class="system-kicker prompt-label">提示</div>
-                    <div class="system-body">${sanitizeRenderedHtml(marked.parse(text))}</div>
+                    <div class="system-body">${sanitizeRenderedHtml(parseMarkdown(text))}</div>
                 </div>
             </div>
         `;
@@ -1949,6 +2101,7 @@
     }
 
     function _renderLockedAssessmentSummary(target, questions = [], answers = {}, statusText = '已提交，答案已固定') {
+        const skippedAssessment = statusText.includes('跳过');
         const rows = questions.map((q, index) => {
             const answer = _assessmentAnswerFor(q, answers, index);
             const concept = q.concept || q.concept_title || '';
@@ -1970,16 +2123,22 @@
                 </article>
             `;
         }).join('');
+        const lockedCopy = skippedAssessment
+            ? '已跳过学前测评，本轮不会再要求完成这些自评题，学习路径将按知识图谱默认顺序生成。'
+            : '这份测评记录将作为学习画像和初始图谱节点选择的依据，不能在当前流程中继续修改。';
+        const progressMeta = skippedAssessment
+            ? '<div class="assessment-progress-meta">已跳过摸底，直接进入正式学习。</div>'
+            : `<div class="assessment-progress-meta">${_assessmentProgressMetaHtml(questions, answers)}</div>`;
 
         target.classList.add('assessment-locked-summary');
         target.innerHTML = `
             <div class="prompt-card prompt-flow-shell">
                 <div class="prompt-label">快速摸底</div>
                 <div class="prompt-title">${statusText}</div>
-                <div class="prompt-copy">这份测评记录将作为学习画像和初始图谱节点选择的依据，不能在当前流程中继续修改。</div>
+                <div class="prompt-copy">${lockedCopy}</div>
             </div>
-            <div class="assessment-progress-meta">${_assessmentProgressMetaHtml(questions, answers)}</div>
-            <div class="assessment-locked-list">${rows}</div>
+            ${progressMeta}
+            ${skippedAssessment ? '' : `<div class="assessment-locked-list">${rows}</div>`}
         `;
         app.renderMath?.(target);
     }
@@ -2000,7 +2159,7 @@
                 <div class="prompt-card prompt-flow-shell">
                     <div class="prompt-label">快速摸底</div>
                     <div class="prompt-title">暂时没有拿到测评题</div>
-                    <div class="prompt-copy">可以先跳过摸底，直接开始正式讲解。</div>
+                    <div class="prompt-copy">可以先跳过摸底，直接开始正式讲解（系统将按新手档从最基础的类比讲起）。</div>
                 </div>
                 <div class="q-stepper-nav">
                     <button type="button" class="q-stepper-btn q-stepper-skip">先不测，直接开始</button>
@@ -2008,7 +2167,7 @@
             `;
             div.querySelector('.q-stepper-skip').onclick = async () => {
                 _renderLockedAssessmentSummary(div, questions, state.answers, '已跳过学前测评，答案已固定');
-                app.setStatusBanner('已跳过摸底，正在进入正式讲解', 'processing');
+                app.setStatusBanner('已跳过摸底，将按新手档从类比讲起', 'processing');
                 try {
                     await app.submitTopicConfirmation?.(true, 'direct_tutor');
                 } catch (err) {
@@ -2199,6 +2358,15 @@
 
     function _parseOptionKey(optText) {
         return (optText || '').trim().charAt(0).toUpperCase();
+    }
+
+    function _stripObjectiveOptionLabel(optText, key = '') {
+        const text = String(optText || '').trim();
+        const normalizedKey = String(key || '').trim().toUpperCase();
+        if (normalizedKey && text.toUpperCase().startsWith(normalizedKey)) {
+            return text.slice(normalizedKey.length).replace(/^[\s.．、:：-]+/, '').trim() || text;
+        }
+        return text.replace(/^[A-Da-d][\s.．、:：-]+/, '').trim() || text;
     }
 
     /**
@@ -2758,7 +2926,7 @@
         }
         row.body.appendChild(card);
         container.appendChild(row.wrap);
-        app.scrollMessagesToBottom();
+        app.scrollMessagesToBottom({ force: true });
     };
 
     app.renderContinueOrHomeworkChoice = function renderContinueOrHomeworkChoice(options = [], renderOptions = {}) {
@@ -2768,11 +2936,20 @@
         const card = document.createElement('div');
         card.className = 'topic-confirm-card continue-homework-card prompt-flow-card';
         card.dataset.cardKind = 'continue_or_homework_choice';
+
+        // Detect plan completion from option values
+        const isPlanCompleted = Array.isArray(options) && options.length === 2
+            && options[0]?.value === 'start_next_round';
+
+        const label = renderOptions.titleLabel || (isPlanCompleted ? '学习路径完成' : '继续 / 收作业');
+        const title = renderOptions.titleText || (isPlanCompleted ? '本轮学习路径已完成' : '还学吗');
+        const copy = renderOptions.copyText || (isPlanCompleted ? '所有节点已通过，可以开始新一轮学习或今天就到这里。' : '继续下一个节点还是今天先到这里。');
+
         card.innerHTML = `
             <div class="prompt-card prompt-flow-shell">
-                <div class="prompt-label">继续 / 收作业</div>
-                <div class="prompt-title">还学吗</div>
-                <div class="prompt-copy">继续下一个节点还是今天先到这里。</div>
+                <div class="prompt-label">${label}</div>
+                <div class="prompt-title">${title}</div>
+                <div class="prompt-copy">${copy}</div>
             </div>
             <div class="suggestion-row topic-confirm-chip-list selector-chip-list continue-homework-actions"></div>
         `;
@@ -2798,7 +2975,7 @@
         }
         row.body.appendChild(card);
         container.appendChild(row.wrap);
-        app.scrollMessagesToBottom();
+        app.scrollMessagesToBottom({ force: true });
     };
 
     app.renderHomeworkReviewChoice = function renderHomeworkReviewChoice(options = [], renderOptions = {}) {
@@ -2839,7 +3016,7 @@
         }
         row.body.appendChild(card);
         container.appendChild(row.wrap);
-        app.scrollMessagesToBottom();
+        app.scrollMessagesToBottom({ force: true });
     };
 
     app.renderConsolidationChoice = function renderConsolidationChoice(options = [], renderOptions = {}) {
@@ -2879,7 +3056,7 @@
         }
         row.body.appendChild(card);
         container.appendChild(row.wrap);
-        app.scrollMessagesToBottom();
+        app.scrollMessagesToBottom({ force: true });
     };
 
     app.renderHomeworkAnswerCard = function renderHomeworkAnswerCard(items = [], renderOptions = {}) {
@@ -2985,13 +3162,22 @@
             const qText = q.question || q.stem || `第 ${idx + 1} 题`;
             const rawOpts = q.options || [];
             const optEntries = Array.isArray(rawOpts)
-                ? rawOpts.map(o => ({ key: _parseOptionKey(o), text: o }))
-                : Object.entries(rawOpts).map(([k, v]) => ({ key: k.toUpperCase(), text: `${k}. ${v}` }));
-            qEl.innerHTML = `
-                <div class="obj-test-q-text">${idx + 1}. ${qText}</div>
-                <div class="obj-test-q-opts"></div>
-            `;
-            const optContainer = qEl.querySelector('.obj-test-q-opts');
+                ? rawOpts.map((o, optIdx) => {
+                    const parsedKey = _parseOptionKey(o);
+                    const key = ['A', 'B', 'C', 'D'].includes(parsedKey) ? parsedKey : String.fromCharCode(65 + optIdx);
+                    return { key, text: _stripObjectiveOptionLabel(o, key) };
+                })
+                : Object.entries(rawOpts).map(([k, v]) => {
+                    const key = String(k || '').trim().toUpperCase();
+                    return { key, text: _stripObjectiveOptionLabel(v, key) };
+                });
+            const qTextEl = document.createElement('div');
+            qTextEl.className = 'obj-test-q-text';
+            qTextEl.textContent = `${idx + 1}. ${qText}`;
+            const optContainer = document.createElement('div');
+            optContainer.className = 'obj-test-q-opts';
+            qEl.appendChild(qTextEl);
+            qEl.appendChild(optContainer);
             optEntries.forEach(({ key, text }) => {
                 const btn = document.createElement('button');
                 btn.type = 'button';
@@ -2999,7 +3185,14 @@
                 btn.dataset.qIdx = String(idx);
                 btn.dataset.qid = qid;
                 btn.dataset.v = key;
-                btn.textContent = text;
+                const keyEl = document.createElement('span');
+                keyEl.className = 'obj-test-opt-key';
+                keyEl.textContent = key;
+                const textEl = document.createElement('span');
+                textEl.className = 'obj-test-opt-text';
+                textEl.textContent = text;
+                btn.appendChild(keyEl);
+                btn.appendChild(textEl);
                 btn.onclick = () => {
                     optContainer.querySelectorAll('.obj-test-opt').forEach(o => o.classList.remove('selected'));
                     btn.classList.add('selected');
@@ -3064,8 +3257,15 @@
         app.finalizeAgentTurn?.();
         const questions = Array.isArray(data.questions) ? data.questions : [];
         const answers = data.answers || {};
-        const kind = data.kind || 'objective_test_answers';
+        const kind = data.kind || data.quiz_kind || 'objective_test_answers';
         const title = data.title || (kind === 'variant_test_answers' ? '变式练习' : '客观测评');
+        const score = Number.isFinite(Number(data.score)) ? Number(data.score) : 0;
+        const passScore = Number.isFinite(Number(data.pass_score)) ? Number(data.pass_score) : 80;
+        const passed = Boolean(data.passed);
+        const questionCount = Number(data.question_count || questions.length || 0);
+        const correctCount = Number(data.correct_count || questions.filter(q => q.is_correct).length || 0);
+        const wrongCount = Number(data.wrong_count ?? Math.max(0, questionCount - correctCount));
+        const nodeName = data.node_name || '';
         const existingCards = Array.from(document.querySelectorAll('.obj-test-card'));
         const card = existingCards.find(candidate => candidate.dataset.quizKind === kind && !candidate.dataset.reviewRendered)
             || existingCards.find(candidate => !candidate.dataset.reviewRendered)
@@ -3079,51 +3279,189 @@
             return;
         }
         reviewCard.dataset.reviewRendered = 'true';
+        reviewCard.dataset.reviewState = data.review_state || 'graded';
         reviewCard.closest('.msg-wrapper')?.setAttribute('data-contains-objective-review', 'true');
         const qContainer = reviewCard.querySelector('.obj-test-questions');
         const submitBtn = reviewCard.querySelector('.obj-test-submit');
         const toggle = reviewCard.querySelector('.obj-test-review-toggle');
         const body = reviewCard.querySelector('.obj-test-review-body');
         const heading = reviewCard.querySelector('.prompt-label');
-        if (heading) heading.textContent = title;
+        const titleEl = reviewCard.querySelector('.prompt-title');
+        const copyEl = reviewCard.querySelector('.prompt-copy');
+        if (heading) heading.textContent = `${title} · 已批改`;
+        if (titleEl) titleEl.textContent = passed ? '本轮已通过，可以继续推进' : `本轮未通过，需要订正 ${wrongCount} 道错题`;
+        if (copyEl) copyEl.textContent = nodeName ? `节点：${nodeName}` : '提交后答案已锁定，下面是本轮复盘。';
         if (submitBtn) submitBtn.remove();
         reviewCard.querySelectorAll('.obj-test-opt').forEach(o => {
             o.style.pointerEvents = 'none';
             o.classList.add('locked');
         });
+
+        reviewCard.querySelectorAll('.obj-quiz-review-summary').forEach(el => el.remove());
+        reviewCard.querySelectorAll('.obj-test-answer-summary, .obj-test-explanation').forEach(el => el.remove());
+        const summary = document.createElement('section');
+        summary.className = `obj-quiz-review-summary ${passed ? 'is-passed' : 'is-failed'}`;
+        summary.innerHTML = `
+            <div class="obj-review-kicker">${passed ? '已通过' : '需要订正'} · 已锁定</div>
+            <div class="obj-review-score-row">
+                <div class="obj-review-score"><strong>${score}</strong><span>/100</span></div>
+                <div class="obj-review-result">通过线 ${passScore} · ${correctCount}/${questionCount} 正确</div>
+            </div>
+            <div class="obj-review-stats">
+                <span>错题 ${wrongCount} 道</span>
+                <span>${passed ? '下一步：进入后续节点决策' : '下一步：先看错题讲解，再做变式练习'}</span>
+            </div>
+        `;
+        reviewCard.querySelector('.prompt-card')?.after(summary);
+
         questions.forEach((q, idx) => {
             const qid = q.question_id || q.id || `Q${idx + 1}`;
-            const userKey = String(answers[qid] || answers[String(idx + 1)] || answers[`Q${idx + 1}`] || '').toUpperCase();
-            const correctKey = String(q.answer_key || q.correct_answer || q.correct || '').toUpperCase();
+            const userKey = String(q.chosen_answer || answers[qid] || answers[String(idx + 1)] || answers[`Q${idx + 1}`] || '').toUpperCase();
+            const correctKey = String(q.correct_answer || q.answer_key || q.correct || '').toUpperCase();
+            const isCorrect = typeof q.is_correct === 'boolean' ? q.is_correct : Boolean(correctKey && userKey === correctKey);
             const qEl = qContainer?.children?.[idx];
             if (!qEl) return;
+            qEl.classList.toggle('is-correct', isCorrect);
+            qEl.classList.toggle('is-wrong', !isCorrect);
             qEl.querySelectorAll('.obj-test-opt').forEach(o => {
                 const v = String(o.dataset.v || '').toUpperCase();
                 if (correctKey && v === correctKey) o.classList.add('correct-answer');
                 if (userKey && correctKey && v === userKey && userKey !== correctKey) o.classList.add('wrong-answer');
                 if (userKey && v === userKey) o.classList.add('selected');
             });
-            const summary = document.createElement('div');
-            summary.className = 'obj-test-answer-summary';
-            summary.textContent = `你的答案：${userKey || '未作答'}；正确答案：${correctKey || '未提供'}`;
-            qEl.appendChild(summary);
+            const itemSummary = document.createElement('div');
+            itemSummary.className = 'obj-test-answer-summary';
+            itemSummary.innerHTML = `
+                <span class="obj-result-pill ${isCorrect ? 'ok' : 'bad'}">${isCorrect ? '正确' : '错误'}</span>
+                <span>你的答案：${escapeHtml(userKey || '未作答')}</span>
+                <span>正确答案：${escapeHtml(correctKey || '未提供')}</span>
+                ${q.wrong_reason ? `<span>错因：${escapeHtml(q.wrong_reason)}</span>` : ''}
+            `;
+            qEl.appendChild(itemSummary);
+
+            const targetObjective = String(q.target_objective || q.objective || '').trim();
+            const explanationText = String(q.explanation || q.analysis || '').trim();
+            const wrong_option_analysis = q.wrong_option_analysis || {};
+            const chosenWrongAnalysis = !isCorrect ? String(wrong_option_analysis[userKey] || '').trim() : '';
+            const misconception = String(q.misconception || '').trim();
+            if (targetObjective || explanationText || chosenWrongAnalysis || misconception) {
+                const explanation = document.createElement('div');
+                explanation.className = 'obj-test-explanation';
+                const head = document.createElement('div');
+                head.className = 'obj-test-explanation-head';
+                const title = document.createElement('span');
+                title.className = 'obj-test-explanation-title';
+                title.textContent = '本题解析';
+                const state = document.createElement('span');
+                state.className = `obj-test-explanation-state ${isCorrect ? 'ok' : 'bad'}`;
+                state.textContent = isCorrect ? '已掌握' : '需订正';
+                head.appendChild(title);
+                head.appendChild(state);
+                explanation.appendChild(head);
+                const addLine = (label, value) => {
+                    const cleanValue = String(value || '').trim();
+                    if (!cleanValue) return;
+                    const line = document.createElement('div');
+                    line.className = 'obj-test-explanation-row';
+                    const labelEl = document.createElement('span');
+                    labelEl.className = 'obj-test-explanation-label';
+                    labelEl.textContent = label;
+                    const valueEl = document.createElement('span');
+                    valueEl.className = 'obj-test-explanation-value';
+                    valueEl.textContent = cleanValue;
+                    line.appendChild(labelEl);
+                    line.appendChild(valueEl);
+                    explanation.appendChild(line);
+                };
+                addLine('考察目标', targetObjective);
+                addLine('判断依据', explanationText);
+                addLine('所选项问题', chosenWrongAnalysis);
+                addLine('常见误区', misconception);
+                addLine('下一步', isCorrect ? '保留这条判断依据，后续遇到同类题先按这个条件定位。' : '先回看考察目标和所选项问题，再重做同类题验证是否真正掌握。');
+                qEl.appendChild(explanation);
+                app.renderMath?.(explanation);
+            }
         });
-        reviewCard.classList.add('submitted-collapsed');
+        reviewCard.classList.add('submitted-collapsed', 'review-locked');
         if (body) body.hidden = true;
         if (toggle) {
             toggle.hidden = false;
             toggle.setAttribute('aria-expanded', 'false');
-            toggle.textContent = `已提交${title}，点击展开查看作答情况`;
+            toggle.textContent = `已批改${title}，点击展开逐题结果`;
         }
     };
 
+    app.renderWrongQuestionExplanationCard = function renderWrongQuestionExplanationCard(explanations = [], options = {}) {
+        app.finalizeAgentTurn?.();
+        const items = Array.isArray(explanations) ? explanations : [];
+        const container = document.getElementById('messages');
+        if (!container) return;
+        const row = createAssistantCardRow('wrong-explanation-card');
+        const card = document.createElement('section');
+        card.className = 'topic-confirm-card prompt-flow-card wrong-explain-card';
+        card.dataset.reviewState = options.review_state || 'explained';
+        const count = items.length;
+        card.innerHTML = `
+            <div class="prompt-card prompt-flow-shell wrong-explain-head">
+                <div class="prompt-label">错题讲解 · 已生成</div>
+                <div class="prompt-title">${count ? `已整理 ${count} 道错题的订正思路` : '暂无需要订正的错题'}</div>
+                <div class="prompt-copy">默认收起详细讲解，展开后查看错因、判断依据和复习动作。</div>
+            </div>
+            <div class="wrong-explain-list"></div>
+        `;
+        const list = card.querySelector('.wrong-explain-list');
+        items.forEach((item, idx) => {
+            const qid = String(item.question_id || `Q${idx + 1}`);
+            const stem = String(item.stem || '未提供题干');
+            const userAnswer = String(item.user_answer || '').toUpperCase() || '未作答';
+            const answerKey = String(item.answer_key || item.correct_answer || '').toUpperCase() || '未提供';
+            const wrongReason = String(item.wrong_reason || '未分类');
+            const target = String(item.target_objective || '');
+            const block = document.createElement('article');
+            block.className = 'wrong-explain-item';
+            block.innerHTML = `
+                <button type="button" class="wrong-explain-summary" aria-expanded="false">
+                    <span class="wrong-explain-index">${idx + 1}</span>
+                    <span class="wrong-explain-main">
+                        <strong>${escapeHtml(stem)}</strong>
+                        <span>你的答案 ${escapeHtml(userAnswer)} · 正确答案 ${escapeHtml(answerKey)}${target ? ` · 考察：${escapeHtml(target)}` : ''}</span>
+                    </span>
+                    <span class="wrong-explain-reason">${escapeHtml(wrongReason)}</span>
+                </button>
+                <div class="wrong-explain-detail" hidden>
+                    ${item.why_user_wrong ? `<section><b>你错在</b><p>${escapeHtml(item.why_user_wrong)}</p></section>` : ''}
+                    ${item.why_correct ? `<section><b>正确理解</b><p>${escapeHtml(item.why_correct)}</p></section>` : ''}
+                    ${item.key_rule ? `<section><b>下次判断依据</b><p>${escapeHtml(item.key_rule)}</p></section>` : ''}
+                    <section><b>完整讲解</b><p>${escapeHtml(item.explanation || '这题需要回到题干条件和节点核心概念重新判断。')}</p></section>
+                    ${item.review_action ? `<section><b>下一步</b><p>${escapeHtml(item.review_action)}</p></section>` : ''}
+                </div>
+            `;
+            const btn = block.querySelector('.wrong-explain-summary');
+            const detail = block.querySelector('.wrong-explain-detail');
+            btn.onclick = () => {
+                const expanded = btn.getAttribute('aria-expanded') === 'true';
+                btn.setAttribute('aria-expanded', expanded ? 'false' : 'true');
+                detail.hidden = expanded;
+            };
+            list.appendChild(block);
+        });
+        row.body.appendChild(card);
+        container.appendChild(row.wrap);
+        app.scrollMessagesToBottom();
+    };
+
     function applySessionArtifacts(stateSnapshot) {
-        const isAiPathSession = Boolean(stateSnapshot.ai_path_mode)
-            || stateSnapshot.active_course === 'artificial_intelligence'
-            || stateSnapshot.flow_status === 'ai_path';
+        const snapshotStudentId = String(stateSnapshot.student_id || stateSnapshot.studentId || '').trim();
+        if (snapshotStudentId) {
+            state.studentId = snapshotStudentId;
+            state.student_id = snapshotStudentId;
+        }
         state.currentTopic = stateSnapshot.current_topic || stateSnapshot.currentTopic || stateSnapshot.current_user_goal || stateSnapshot.session_goal || '';
         state.currentTopicFocus = stateSnapshot.topic_focus || stateSnapshot.currentTopicFocus || '';
         state.graphTopicHint = state.currentTopic || stateSnapshot.proposed_topic || state.graphTopicHint || '';
+        state.learningTrack = stateSnapshot.learning_track || stateSnapshot.learningTrack || '';
+        state.learningTrackLabel = stateSnapshot.learning_track_label || stateSnapshot.learningTrackLabel || '';
+        state.learningTrackLocked = Boolean(stateSnapshot.learning_track_locked || stateSnapshot.learningTrackLocked);
         state.currentGraphNode = stateSnapshot.graph_anchor_title || stateSnapshot.current_node_name || stateSnapshot.currentGraphNode || '';
         if (stateSnapshot.user_knowledge_graph && typeof stateSnapshot.user_knowledge_graph === 'object') {
             state.userKnowledgeGraph = { ...stateSnapshot.user_knowledge_graph };
@@ -3135,13 +3473,17 @@
         if (stateSnapshot.assessment_radar && stateSnapshot.assessment_radar.dimensions) {
             app.showRadar(stateSnapshot.assessment_radar);
         }
-        if (!isAiPathSession && (state.currentGraphNode || state.currentGraphNodeId)) {
-            app.renderKnowledgeGraphVisualCard?.({
-                title: state.currentGraphNode,
-                id: state.currentGraphNodeId,
-                status: stateSnapshot.current_node_status || 'in_progress',
-                type: 'current',
-            });
+        if (state.currentGraphNode || state.currentGraphNodeId) {
+            // 图谱状态只更新侧边栏和右侧面板，不插入聊天
+        }
+
+        // ── 恢复学习路径面板 ──
+        const snapshotPlan = stateSnapshot.learning_plan || stateSnapshot.learningPlan;
+        if (Array.isArray(snapshotPlan) && snapshotPlan.length > 0) {
+            state.learningPlan = snapshotPlan;
+            state.learningPlanCurrentStep = stateSnapshot.learning_plan_current_step || stateSnapshot.learningPlanCurrentStep || 0;
+            app.showLearningPathPanel?.();
+            app.renderLearningPlanPanel?.(state.learningPlan, state.currentGraphNodeId, state.userKnowledgeGraph);
         }
 
         if (stateSnapshot.flow_status === 'awaiting_topic_confirmation' && stateSnapshot.proposed_topic) {
@@ -3219,7 +3561,10 @@
             app.setChatInputPlaceholder?.('请输入你的作业答案');
         }
         if (pik === 'objective_test_answers' || pik === 'variant_test_answers') {
-            app.renderObjectiveTestCard?.(pio, pik);
+            const selector = `.obj-test-card[data-quiz-kind="${pik}"]:not(.submitted-collapsed)`;
+            if (!document.querySelector(selector)) {
+                app.renderObjectiveTestCard?.(pio, pik);
+            }
         }
         app.updateSidebarState?.(stateSnapshot);
         app.refreshChatSurfaceState?.();
@@ -3266,6 +3611,23 @@
                 }
                 return;
             }
+            if (item.kind === 'course_choice_card') {
+                if (app.renderCourseChoiceCard) {
+                    app.renderCourseChoiceCard({
+                        locked: data.locked !== false,
+                        selectedTrack: data.selected_track || stateSnapshot?.learning_track || '',
+                        selectedLabel: data.selected_label || stateSnapshot?.learning_track_label || '',
+                        statusText: data.statusText || '',
+                        append: true,
+                    });
+                } else {
+                    app.appendSystemMessage(data.statusText || content || '学习方向已固定', 'info');
+                }
+                return;
+            }
+            if (item.kind === 'course_choice_selection') {
+                return;
+            }
             if (
                 item.kind === 'topic_confirmation_card'
                 && (data.proposed_topic || content.trim())
@@ -3295,6 +3657,10 @@
                 app.renderInterruptConfirmation?.();
                 return;
             }
+            if (item.kind === 'objective_test_card') {
+                app.renderObjectiveTestCard?.(data.questions || data.options || [], data.interaction_kind || 'objective_test_answers');
+                return;
+            }
             if (item.kind === 'objective_quiz_review') {
                 app.renderObjectiveQuizReviewCard?.(data, content);
                 return;
@@ -3303,26 +3669,20 @@
                 app.renderHomeworkAnswerCard?.(data.homework_items || data.items || stateSnapshot?.homework_items || [], data);
                 return;
             }
-            if (
-                item.kind === 'graph_rag_answer'
-                || item.kind === 'graph_rag_debug_report'
-                || item.kind === 'homework_learning_html'
-                || item.kind === 'ai_path_lesson'
-                || item.kind === 'ai_path_lesson_qa'
-                || String(content || '').includes('learning-answer-content')
-            ) {
+            if (item.kind === 'graph_rag_answer' || item.kind === 'graph_rag_debug_report') {
                 const fallbackHtml = item.kind === 'graph_rag_answer'
-                    || item.kind === 'homework_learning_html'
-                    || item.kind === 'ai_path_lesson'
-                    || item.kind === 'ai_path_lesson_qa'
-                    || String(content || '').includes('learning-answer-content')
                     ? '<section class="learning-answer-content"><p></p></section>'
                     : '<section class="graph-rag-answer-panel"><div class="answer"></div></section>';
                 app.appendMessage('agent', content || fallbackHtml, { kind: item.kind });
                 return;
             }
             if (item.kind === 'wrong_question_explanations') {
-                app.appendMessage('agent', content || '错题订正讲解', { kind: 'wrong_question_explanations' });
+                const explanations = Array.isArray(data.explanations) ? data.explanations : [];
+                if (explanations.length) {
+                    app.renderWrongQuestionExplanationCard?.(explanations, data);
+                } else {
+                    app.appendMessage('agent', content || '错题订正讲解', { kind: 'wrong_question_explanations' });
+                }
                 return;
             }
             if (item.kind === 'next_step_selector') {
@@ -3371,6 +3731,25 @@
         items.forEach(item => {
             renderTimelineItem(item);
         });
+
+        // 只在历史列表已经包含当前完整教学内容时才跳过补充。
+        // 旧 message_history 中可能有更短的 tutor 项，不能因此压掉 state.tutor_content。
+        var snapshotTutorContent = stateSnapshot?.tutor_content ? String(stateSnapshot.tutor_content) : '';
+        var hasCurrentTutorContent = items.some(function(item) {
+            return item.role === 'agent'
+                && (!item.kind || item.kind === 'tutor' || item.kind === 'graph_rag_answer')
+                && String(item.content || '').trim() === snapshotTutorContent.trim();
+        });
+        if (!hasCurrentTutorContent && snapshotTutorContent) {
+            app.appendLearningTutorContent(snapshotTutorContent);
+        }
+        // evidence 也同理：message_history 有 tutor_evidence 就不重复渲染
+        var hasInlineEvidence = items.some(function(item) {
+            return item.kind === 'tutor_evidence';
+        });
+        if (!hasInlineEvidence && (stateSnapshot?.tutor_evidence || []).length) {
+            app.renderEvidencePanel(stateSnapshot.tutor_evidence, { role: 'tutor', tone: 'info' });
+        }
 
         if (stateSnapshot) {
             applySessionArtifacts(stateSnapshot);
@@ -3479,12 +3858,7 @@
             }
         }
 
-        if (stateSnapshot.tutor_content) {
-            const tutorKind = String(stateSnapshot.tutor_content || '').includes('homework-answer-content')
-                ? 'homework_learning_html'
-                : 'tutor';
-            app.appendMessage('agent', stateSnapshot.tutor_content, { kind: tutorKind });
-        }
+        app.appendLearningTutorContent(stateSnapshot.tutor_content);
         if ((stateSnapshot.tutor_evidence || []).length) {
             app.renderEvidencePanel(stateSnapshot.tutor_evidence, { role: 'tutor', tone: 'info' });
         }
@@ -3536,5 +3910,109 @@
 
     app.toggleUserKgMap = function toggleUserKgMap() {
         app.focusUserKgMap();
+    };
+
+    // ── 补救决策卡 ────────────────────────────────────────────────────────────
+    app.renderRemediationDecisionCard = function renderRemediationDecisionCard(data = {}, renderOptions = {}) {
+        document.querySelector('.remediation-decision-card')?.remove();
+        const container = document.getElementById('messages');
+        const row = createAssistantCardRow('remediation-decision-card');
+        const card = document.createElement('div');
+        card.className = 'remediation-decision-card prompt-flow-card';
+        card.dataset.cardKind = 'remediation_decision';
+
+        const score = data.score ?? 0;
+        const passScore = data.pass_score ?? 80;
+        const tier = data.tier || (score >= passScore ? 'pass' : score >= 60 ? 'partial' : 'low');
+        const paused = data.paused || false;
+        const wrongCount = data.wrong_count ?? 0;
+        const variantRounds = data.variant_rounds ?? 0;
+        const maxVariantRounds = data.max_variant_rounds ?? 2;
+        const extraCount = data.extra_remediation_question_count ?? 0;
+        const maxExtra = data.max_extra_questions ?? 10;
+        const failures = data.same_objective_failures || {};
+        const pausedReasons = Array.isArray(data.paused_reasons) ? data.paused_reasons : [];
+        const options = Array.isArray(renderOptions.options) ? renderOptions.options : [];
+
+        let title, summary, recommendation;
+        if (paused) {
+            title = '补救已暂停';
+            summary = `本轮得分 ${score} / ${passScore}`;
+            recommendation = '这类错因已经连续出现，继续刷题效果不高。建议先回到节点讲解重点复习。';
+        } else if (tier === 'pass') {
+            title = '测验通过';
+            summary = `得分 ${score} / ${passScore}，已通过`;
+            recommendation = '可以进入下一节点。';
+        } else if (tier === 'partial') {
+            title = '需要补救';
+            summary = `得分 ${score} / ${passScore}，未通过 · 共 ${wrongCount} 个错因`;
+            recommendation = '已为你整理错因。建议先做变式训练巩固，如果感觉基础不稳也可以先复习本节点。';
+        } else {
+            title = '基础不牢';
+            summary = `得分 ${score} / ${passScore}，说明当前节点基础理解还不稳`;
+            recommendation = '建议先回到节点讲解重新学习，再做变式题。';
+        }
+
+        let html = `
+            <div class="prompt-card prompt-flow-shell remediation-decision-shell">
+                <div class="prompt-label">${title}</div>
+                <div class="prompt-title">节点补救决策</div>
+                <div class="prompt-copy">${summary}</div>
+        `;
+
+        if (paused && pausedReasons.length) {
+            html += '<div class="remediation-paused-reasons">';
+            pausedReasons.forEach(r => {
+                html += `<div class="remediation-paused-reason">⚠️ ${escapeHtml(r)}</div>`;
+            });
+            html += '</div>';
+        }
+
+        html += `
+                <div class="remediation-recommendation">${escapeHtml(recommendation)}</div>
+                <div class="remediation-stats">
+                    <span>错因 ${wrongCount} 个</span>
+                    <span>变式轮次 ${variantRounds}/${maxVariantRounds}</span>
+                    <span>补救题 ${extraCount}/${maxExtra}</span>
+                </div>
+        `;
+
+        if (Object.keys(failures).length > 0) {
+            html += '<div class="remediation-failures">';
+            for (const [obj, count] of Object.entries(failures)) {
+                html += `<div class="remediation-failure-item">「${escapeHtml(obj)}」错 ${count} 次</div>`;
+            }
+            html += '</div>';
+        }
+
+        html += '</div>';
+
+        if (options.length) {
+            html += '<div class="suggestion-row topic-confirm-chip-list selector-chip-list remediation-actions"></div>';
+        }
+
+        card.innerHTML = html;
+
+        const actions = card.querySelector('.remediation-actions');
+        if (actions) {
+            options.forEach(option => {
+                const button = document.createElement('button');
+                button.type = 'button';
+                button.className = 'chip topic-confirm-chip selector-chip';
+                button.textContent = option.label || option.value;
+                button.dataset.choiceValue = option.value;
+                button.dataset.choiceLabel = option.label || option.value;
+                button.onclick = () => app.submitAwaitingChoice?.(option.value, option.label || option.value);
+                actions.appendChild(button);
+            });
+        }
+
+        if (renderOptions.locked) {
+            app.lockChoiceCard(card, renderOptions.selectedValue || '', renderOptions.selectedLabel || renderOptions.statusText || '');
+        }
+
+        row.body.appendChild(card);
+        container.appendChild(row.wrap);
+        app.scrollMessagesToBottom({ force: true });
     };
 })();

@@ -4,12 +4,12 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AI Tutor</title>
-    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <script src="/assets/vendor/marked/marked.umd.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
-    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
-    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
-    <link rel="stylesheet" href="/assets/styles.css?v=20260521-matlab-trace-panel-1">
+    <link rel="stylesheet" href="/assets/vendor/katex/katex.min.css">
+    <script defer src="/assets/vendor/katex/katex.min.js"></script>
+    <script defer src="/assets/vendor/katex/contrib/auto-render.min.js"></script>
+    <link rel="stylesheet" href="/assets/styles.css">
 </head>
 <body>
     <div class="page-shell">
@@ -67,6 +67,18 @@
                         <button type="button" id="open-radar-modal-btn" class="sb-nav-item" onclick="openRadarModal()" aria-label="打开学习进度">
                             <svg class="sb-nav-icon" width="15" height="15" viewBox="0 0 15 15" fill="none"><path d="M7.5 2L11.5 4.2V8.8L7.5 11L3.5 8.8V4.2L7.5 2Z" stroke="currentColor" stroke-width="1.2"/><path d="M7.5 2V11M3.5 4.2L11.5 8.8M11.5 4.2L3.5 8.8" stroke="currentColor" stroke-width="1"/></svg>
                             <span>学习进度</span>
+                        </button>
+                        <button type="button" id="open-wrong-book-btn" class="sb-nav-item" onclick="openWrongBookModal()" aria-label="打开错题本" aria-controls="wrong-book-modal" aria-haspopup="dialog" aria-expanded="false">
+                            <svg class="sb-nav-icon" width="15" height="15" viewBox="0 0 15 15" fill="none"><path d="M2.5 2H12.5V13H2.5V2Z" stroke="currentColor" stroke-width="1.2"/><path d="M5 4.5H10M5 7H10M5 9.5H8" stroke="currentColor" stroke-width="1.1" stroke-linecap="round"/></svg>
+                            <span>错题本</span>
+                        </button>
+                        <button type="button" id="open-question-help-btn" class="sb-nav-item" onclick="openQuestionHelpModal()" aria-label="打开题目答疑" aria-controls="question-help-modal" aria-haspopup="dialog" aria-expanded="false">
+                            <svg class="sb-nav-icon" width="15" height="15" viewBox="0 0 15 15" fill="none"><path d="M3 2.5H12V9.5H8.2L5.2 12.2V9.5H3V2.5Z" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/><path d="M5.2 5H9.8M5.2 7H8.4" stroke="currentColor" stroke-width="1.1" stroke-linecap="round"/></svg>
+                            <span>题目答疑</span>
+                        </button>
+                        <button type="button" id="open-teaching-insights-btn" class="sb-nav-item" onclick="openTeachingInsightsModal()" aria-label="打开教学洞察" aria-controls="teaching-insights-modal" aria-haspopup="dialog" aria-expanded="false">
+                            <svg class="sb-nav-icon" width="15" height="15" viewBox="0 0 15 15" fill="none"><path d="M2.5 2.5H12.5V7.5L8.5 10.5L12.5 12.5V13.5H2.5V12.5L6.5 10.5L2.5 7.5V2.5Z" stroke="currentColor" stroke-width="1.2" fill="none" stroke-linejoin="round"/><path d="M5 6H10M5 8.5H8" stroke="currentColor" stroke-width="1.1" stroke-linecap="round"/></svg>
+                            <span>教学洞察</span>
                         </button>
                     </nav>
 
@@ -144,10 +156,8 @@
                         type="button"
                         class="sb-userbar"
                         id="sb-userbar-btn"
-                        onclick="toggleUserMenu()"
-                        aria-label="打开账户菜单"
-                        aria-haspopup="menu"
-                        aria-expanded="false"
+                        onclick="handleUserMenuAction('profile')"
+                        aria-label="配置个人资料"
                     >
                         <span class="sb-user-avatar" aria-hidden="true"></span>
                         <span class="sb-user-copy">
@@ -191,8 +201,26 @@
                             <span id="cl-node-text">等待开始</span>
                         </button>
                     </div>
-                    <div class="chat-header-right">
+                    <div class="chat-header-right" id="chat-header-right">
                         <button type="button" class="chat-header-btn" id="share-session-btn" onclick="shareCurrentSession()">分享</button>
+                        <div class="lp-header-wrap">
+                            <button type="button" class="chat-header-btn" id="lp-header-btn" onclick="window.AITutorApp.toggleLearningPathDropdown()" hidden><svg class="lp-icon" width="15" height="15" viewBox="0 0 16 16" fill="none" aria-hidden="true"><circle cx="4" cy="3" r="2" stroke="currentColor" stroke-width="1.4"/><circle cx="12" cy="8" r="2" stroke="currentColor" stroke-width="1.4"/><circle cx="4" cy="13" r="2" stroke="currentColor" stroke-width="1.4"/><path d="M6 3h4M6 13h4" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/><path d="M10 4.5v5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg> 学习路径</button>
+                            <div class="lp-dropdown" id="lp-dropdown">
+                                <!-- notch arrow connecting to button -->
+                                <div class="lp-dropdown-notch"></div>
+                                <div class="lp-dropdown-inner">
+                                    <div class="lp-dropdown-title-bar">
+                                        <span class="lp-dropdown-title"><svg class="lp-icon" width="14" height="14" viewBox="0 0 16 16" fill="none" aria-hidden="true"><circle cx="4" cy="3" r="2" stroke="currentColor" stroke-width="1.4"/><circle cx="12" cy="8" r="2" stroke="currentColor" stroke-width="1.4"/><circle cx="4" cy="13" r="2" stroke="currentColor" stroke-width="1.4"/><path d="M6 3h4M6 13h4" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/><path d="M10 4.5v5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg> 学习路径</span>
+                                        <button type="button" class="lp-dropdown-close" id="lp-dropdown-close" onclick="window.AITutorApp.toggleLearningPathDropdown()" aria-label="关闭">
+                                            <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M4 4l6 6M10 4l-6 6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+                                        </button>
+                                    </div>
+                                    <div class="lp-dropdown-body" id="lp-panel-content">
+                                        <div class="lp-panel-empty">开始学习后，这里会显示你的学习路径</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                         <div class="chat-header-more">
                             <button type="button" class="chat-header-icon-btn" id="header-more-btn" onclick="toggleHeaderMoreMenu()" aria-label="更多操作" aria-haspopup="menu" aria-expanded="false">
                                 <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><circle cx="3.25" cy="8" r="1.15" fill="currentColor"/><circle cx="8" cy="8" r="1.15" fill="currentColor"/><circle cx="12.75" cy="8" r="1.15" fill="currentColor"/></svg>
@@ -269,8 +297,8 @@
                         <div class="input-toolbar toolbar-row">
                             <div class="input-tools" aria-label="快捷操作">
                                 <button type="button" class="toolbar-btn tool-chip tool-chip--icon" onclick="triggerKnowledgeUpload()" aria-label="上传资料">+</button>
-                                <button type="button" id="thinking-toggle-btn" class="toolbar-btn tool-chip thinking-toggle" onclick="toggleThinkingMode()" aria-label="切换思考模式" aria-pressed="false">
-                                    <span class="thinking-toggle-label">思考</span>
+                                <button type="button" id="thinking-toggle-btn" class="toolbar-btn tool-chip thinking-toggle" onclick="toggleThinkingMode()" aria-label="切换教学推理透明模式" aria-pressed="false" title="查看 AI 的教学决策过程">
+                                    <span class="thinking-toggle-label">推理</span>
                                 </button>
                                 <button type="button" id="pause-btn" class="toolbar-btn tool-chip btn-pause" onclick="pauseCurrentSession()" aria-label="暂停当前学习页" hidden>暂停</button>
                             </div>
@@ -354,6 +382,173 @@
         </div>
     </div>
 
+    <!-- Thinking Mode Guide Modal -->
+    <div id="thinking-mode-guide-modal" class="unified-modal" aria-hidden="true" onclick="closeThinkingModeGuideModal(event)">
+        <div class="unified-dialog unified-dialog--thinking-guide" role="dialog" aria-modal="true" aria-labelledby="thinking-guide-title" onclick="event.stopPropagation()">
+            <div class="unified-dialog-header">
+                <div class="unified-dialog-title-group">
+                    <h3 id="thinking-guide-title" class="unified-dialog-title">推理模式</h3>
+                    <span id="thinking-guide-subtitle" class="unified-dialog-subtitle">查看 AI 的教学决策过程</span>
+                </div>
+                <div class="unified-dialog-actions">
+                    <button type="button" class="unified-close-btn" onclick="closeThinkingModeGuideModal()" aria-label="关闭">
+                        <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2 2L12 12M12 2L2 12" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+                    </button>
+                </div>
+            </div>
+            <div class="thinking-guide-body">
+                <div class="thinking-guide-intro">
+                    <p>开启推理模式后，AI 的每个教学决策都会以卡片形式展示在聊天区顶部。你可以看到：</p>
+                </div>
+                <div class="thinking-guide-features">
+                    <div class="thinking-guide-feature">
+                        <span class="feature-icon">🎯</span>
+                        <div class="feature-text">
+                            <strong>意图识别</strong>
+                            <span>系统如何理解你的输入：学习主题、系统问题还是闲聊</span>
+                        </div>
+                    </div>
+                    <div class="thinking-guide-feature">
+                        <span class="feature-icon">📍</span>
+                        <div class="feature-text">
+                            <strong>节点选择</strong>
+                            <span>为什么推荐从这个知识点开始学，前置关系是什么</span>
+                        </div>
+                    </div>
+                    <div class="thinking-guide-feature">
+                        <span class="feature-icon">🧠</span>
+                        <div class="feature-text">
+                            <strong>教学策略</strong>
+                            <span>为什么选择逐步讲解、类比、还是苏格拉底问答法</span>
+                        </div>
+                    </div>
+                    <div class="thinking-guide-feature">
+                        <span class="feature-icon">🔀</span>
+                        <div class="feature-text">
+                            <strong>路由决策</strong>
+                            <span>为什么通过、补讲还是重讲，分数和阈值是多少</span>
+                        </div>
+                    </div>
+                    <div class="thinking-guide-feature">
+                        <span class="feature-icon">📝</span>
+                        <div class="feature-text">
+                            <strong>作业设计</strong>
+                            <span>作业覆盖哪些已学节点，为什么这样出题</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="thinking-guide-footer">
+                    <p>随时点击底部「推理」按钮可以关闭此模式。</p>
+                    <button type="button" class="thinking-guide-ok-btn" onclick="closeThinkingModeGuideModal()">我知道了</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Wrong Book Modal -->
+    <div id="wrong-book-modal" class="unified-modal" aria-hidden="true" onclick="closeWrongBookModal(event)">
+        <div class="unified-dialog unified-dialog--wrong-book" role="dialog" aria-modal="true" aria-labelledby="wrong-book-title" onclick="event.stopPropagation()">
+            <div class="unified-dialog-header">
+                <div class="unified-dialog-title-group">
+                    <h3 id="wrong-book-title" class="unified-dialog-title">错题本</h3>
+                    <span id="wrong-book-subtitle" class="unified-dialog-subtitle">按节点分组查看错题，方便回顾与复习</span>
+                </div>
+                <div class="unified-dialog-actions">
+                    <button type="button" class="unified-close-btn" onclick="closeWrongBookModal()" aria-label="关闭">
+                        <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2 2L12 12M12 2L2 12" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+                    </button>
+                </div>
+            </div>
+            <div id="wrong-book-body" class="wrong-book-body">
+                <div class="wrong-book-loading">加载中…</div>
+            </div>
+            <div id="wrong-book-footer" class="wrong-book-footer" hidden>
+                <span id="wrong-book-summary"></span>
+                <div class="wrong-book-pagination">
+                    <button type="button" class="chip" id="wb-prev-page" onclick="wbChangePage(-1)">上一页</button>
+                    <span id="wb-page-info"></span>
+                    <button type="button" class="chip" id="wb-next-page" onclick="wbChangePage(1)">下一页</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Question Help Modal -->
+    <div id="question-help-modal" class="unified-modal" aria-hidden="true" onclick="closeQuestionHelpModal(event)">
+        <div class="unified-dialog unified-dialog--question-help" role="dialog" aria-modal="true" aria-labelledby="question-help-title" onclick="event.stopPropagation()">
+            <div class="unified-dialog-header">
+                <div class="unified-dialog-title-group">
+                    <h3 id="question-help-title" class="unified-dialog-title">题目答疑</h3>
+                    <span id="question-help-subtitle" class="unified-dialog-subtitle">上传图片题目或粘贴文字题干，保留每次解答记录</span>
+                </div>
+                <div class="unified-dialog-actions">
+                    <button type="button" class="unified-close-btn" onclick="closeQuestionHelpModal()" aria-label="关闭">
+                        <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2 2L12 12M12 2L2 12" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+                    </button>
+                </div>
+            </div>
+            <div class="question-help-layout">
+                <section class="qh-composer" aria-label="提交题目">
+                    <label class="qh-label" for="question-help-text">题目内容</label>
+                    <textarea id="question-help-text" class="qh-textarea" rows="6" placeholder="粘贴题目文字，或上传题目图片" aria-label="输入题目文字"></textarea>
+                    <label class="qh-label" for="question-help-answer-mode">解答方式</label>
+                    <select id="question-help-answer-mode" class="qh-mode-select" aria-label="选择题目解答方式">
+                        <option value="quick">快速解答</option>
+                        <option value="deep">深度解析</option>
+                        <option value="vision">图片题专用</option>
+                    </select>
+                    <div class="qh-upload-row">
+                        <input id="question-help-images" type="file" accept="image/png,image/jpeg,image/webp,image/gif" multiple hidden onchange="QuestionHelp.onImagesChanged()">
+                        <button type="button" class="chip" onclick="QuestionHelp.chooseImages()">上传图片</button>
+                        <span id="question-help-file-summary" class="qh-file-summary">未选择图片</span>
+                    </div>
+                    <div class="qh-actions">
+                        <button type="button" class="chip chip-primary" id="question-help-submit" onclick="QuestionHelp.submit()">开始解答</button>
+                    </div>
+                    <div id="question-help-status" class="qh-status" aria-live="polite"></div>
+                </section>
+                <section class="qh-workspace" aria-label="当前解答与最近记录">
+                    <section id="question-help-current" class="qh-current-answer" aria-label="当前解答" aria-live="polite">
+                        <div class="qh-current-head">
+                            <div>
+                                <div class="qh-current-kicker">当前解答</div>
+                                <div class="qh-current-title">提交题目后在这里显示解答</div>
+                            </div>
+                            <span id="question-help-current-mode" class="qh-current-mode">未开始</span>
+                        </div>
+                        <div id="question-help-current-body" class="qh-current-body">
+                            <div id="question-help-current-empty" class="qh-current-empty">粘贴题目或上传图片后，点击“开始解答”。</div>
+                        </div>
+                    </section>
+                    <section class="qh-history qh-history--recent" aria-label="最近解答">
+                        <div class="qh-history-title">最近解答</div>
+                        <div id="question-help-records" class="qh-record-list"></div>
+                    </section>
+                </section>
+            </div>
+        </div>
+    </div>
+
+    <!-- Teaching Insights Modal -->
+    <div id="teaching-insights-modal" class="unified-modal" aria-hidden="true" onclick="closeTeachingInsightsModal(event)">
+        <div class="unified-dialog unified-dialog--teaching-insights" role="dialog" aria-modal="true" aria-labelledby="teaching-insights-title" onclick="event.stopPropagation()">
+            <div class="unified-dialog-header">
+                <div class="unified-dialog-title-group">
+                    <h3 id="teaching-insights-title" class="unified-dialog-title">教学洞察</h3>
+                    <span id="teaching-insights-subtitle" class="unified-dialog-subtitle">教学策略分布与效果追踪</span>
+                </div>
+                <div class="unified-dialog-actions">
+                    <button type="button" class="unified-close-btn" onclick="closeTeachingInsightsModal()" aria-label="关闭">
+                        <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2 2L12 12M12 2L2 12" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+                    </button>
+                </div>
+            </div>
+            <div id="teaching-insights-body" class="teaching-insights-body">
+                <div id="teaching-insights-loading" class="teaching-insights-loading">加载教学洞察数据…</div>
+            </div>
+        </div>
+    </div>
+
     <div id="config-overlay" class="config-overlay" aria-hidden="true" onclick="closeLocalConfigPanel(event)">
         <div class="config-panel" role="dialog" aria-modal="true" aria-labelledby="local-config-title" onclick="event.stopPropagation()">
             <div class="settings-layout">
@@ -389,7 +584,7 @@
                         </button>
                         <button type="button" class="settings-nav-item" data-config-section-tab="error_correction" onclick="switchLocalConfigSection('error_correction')">
                             <span class="settings-nav-icon" aria-hidden="true">
-                                <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M4 3.2H11L14 6V14.8H4V3.2Z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/><path d="M10.9 3.2V6H14" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/><path d="M6.2 8.1H11.8M6.2 10.5H11.8M6.2 12.9H9.6" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
+                                <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><rect x="2.5" y="3" width="13" height="11.5" rx="2.3" stroke="currentColor" stroke-width="1.5"/><path d="M5.5 6.8H12.5M5.5 9.3H10.2M5.5 11.8H9" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
                             </span>
                             <span>题库加工</span>
                         </button>
@@ -572,6 +767,16 @@
                                     <select id="local-model-select" onchange="syncLocalConfigAccountSummary()"></select>
                                 </div>
                                 <div class="config-field">
+                                    <label for="question-help-model-select">题目答疑模型</label>
+                                    <select id="question-help-model-select">
+                                        <option value="qwen-vl-max-latest">Qwen VL Max Latest</option>
+                                        <option value="qwen-vl-plus-latest">Qwen VL Plus Latest</option>
+                                        <option value="qwen3-vl-plus">Qwen3 VL Plus</option>
+                                        <option value="qwen3-vl-flash">Qwen3 VL Flash</option>
+                                    </select>
+                                    <small>用于图片/文字题目答疑，默认走 Qwen 多模态，不影响主聊天模型。</small>
+                                </div>
+                                <div class="config-field">
                                     <label id="local-api-key-label" for="local-api-key">API Key</label>
                                     <input id="local-api-key" type="password" placeholder="只保存在本地环境">
                                 </div>
@@ -602,74 +807,29 @@
                                     </div>
                                 </details>
                             </div>
-
-                            <div class="settings-block" id="paddleocr-config-block">
-                                <div class="settings-block-title">题库加工 / PaddleOCR</div>
-                                <p class="settings-block-copy">题库加工里的 OCR 预览、题目分割前清洗和保存流程都走这一组接口配置。这样即使你当前停留在“应用”页，也能直接把 OCR 配好。</p>
-                                <div class="config-field">
-                                    <label for="local-paddleocr-api-url">PaddleOCR API URL</label>
-                                    <input id="local-paddleocr-api-url" type="text" placeholder="https://your-ocr-endpoint/jobs">
-                                    <small>未配置时，题库加工工作台会提示无法进行 OCR 识别。</small>
-                                </div>
-                                <div class="config-field">
-                                    <label for="local-paddleocr-api-token">PaddleOCR API Token</label>
-                                    <input id="local-paddleocr-api-token" type="password" placeholder="只保存在本地环境">
-                                </div>
-                                <div class="config-field">
-                                    <label for="local-paddleocr-model">PaddleOCR 模型名</label>
-                                    <input id="local-paddleocr-model" type="text" placeholder="PaddleOCR-VL-1.5">
-                                </div>
-                            </div>
                         </section>
+
 
                         <section class="settings-section" data-config-section="error_correction">
                             <div class="settings-block">
                                 <div class="settings-block-title">题库加工当前模型</div>
                                 <p class="settings-block-copy">题目分割、OCR 后纠错和保存链路当前默认沿用 AI Tutor 的聊天模型档案，不额外维护第二套大模型配置。</p>
                                 <div class="settings-note-grid">
-                                    <div class="settings-note-card">
-                                        <div class="settings-note-title">当前档案</div>
-                                        <div class="settings-note-value" id="config-ec-profile">未选择</div>
+                                    <div class="settings-note-card" id="paddleocr-config-block">
+                                        <div class="settings-note-title">PaddleOCR</div>
+                                        <div class="settings-note-value">本地 OCR / 版面识别</div>
                                     </div>
                                     <div class="settings-note-card">
-                                        <div class="settings-note-title">当前模型</div>
-                                        <div class="settings-note-value" id="config-ec-model">未选择</div>
-                                    </div>
-                                </div>
-                                <div class="settings-inline-actions">
-                                    <button type="button" class="settings-link-chip" onclick="switchLocalConfigSection('applications')">去改大模型</button>
-                                </div>
-                            </div>
-
-                            <div class="settings-block">
-                                <div class="settings-block-title">PaddleOCR 配置入口</div>
-                                <p class="settings-block-copy">为了避免设置分区切换受缓存或旧脚本影响，OCR 配置字段现在固定放在“应用”页里。你从这里点一下就能定位过去，不需要再单独找第二套表单。</p>
-                                <div class="settings-note-grid">
-                                    <div class="settings-note-card">
-                                        <div class="settings-note-title">当前 OCR Endpoint</div>
-                                        <div class="settings-note-value" id="config-ec-ocr-endpoint">未填写</div>
-                                    </div>
-                                    <div class="settings-note-card">
-                                        <div class="settings-note-title">当前 OCR 模型</div>
-                                        <div class="settings-note-value" id="config-ec-ocr-model">PaddleOCR-VL-1.5</div>
+                                        <div class="settings-note-title">题库视图</div>
+                                        <div class="settings-note-value">资料库 question_bank 分类</div>
                                     </div>
                                 </div>
                                 <div class="settings-inline-actions">
-                                    <button type="button" class="settings-link-chip" onclick="focusPaddleOcrConfig()">去配置 OCR</button>
-                                </div>
-                            </div>
-
-                            <div class="settings-block">
-                                <div class="settings-block-title">题库加工相关策略</div>
-                                <p class="settings-block-copy">PDF 解析方式、向量目录、代理和 MinerU 策略仍然和主应用共用，避免同一台机器维护多份运行参数。</p>
-                                <div class="settings-inline-actions">
-                                    <button type="button" class="settings-link-chip" onclick="switchLocalConfigSection('data')">去看 PDF / 数据设置</button>
-                                    <button type="button" class="settings-link-chip" onclick="switchLocalConfigSection('security')">去看代理 / OCR 网络</button>
+                                    <button type="button" class="settings-link-chip" onclick="focusPaddleOcrConfig()">查看 OCR 配置</button>
+                                    <button type="button" class="settings-link-chip" onclick="openErrorCorrectionPanel()">打开题库加工</button>
                                 </div>
                             </div>
                         </section>
-
-
                         <section class="settings-section" data-config-section="data">
                             <div class="settings-block">
                                 <div class="settings-block-title">资料检索</div>
@@ -778,6 +938,26 @@
                         <section class="settings-section" data-config-section="account">
                             <div class="settings-block">
                                 <div class="settings-block-title">个人资料</div>
+                                <div class="account-profile-editor">
+                                    <div class="account-avatar-preview" id="settings-account-avatar-preview" aria-hidden="true"></div>
+                                    <div class="account-avatar-controls">
+                                        <div class="account-avatar-title">头像</div>
+                                        <div class="account-avatar-grid" id="settings-account-avatar-grid" aria-label="选择头像">
+                                            <button type="button" class="account-avatar-choice" data-avatar-choice="default" aria-label="默认头像"></button>
+                                            <button type="button" class="account-avatar-choice account-avatar-choice--initial" data-avatar-choice="initial" aria-label="文字头像">学</button>
+                                            <button type="button" class="account-avatar-choice account-avatar-choice--blue" data-avatar-choice="blue" aria-label="蓝色头像"></button>
+                                            <button type="button" class="account-avatar-choice account-avatar-choice--green" data-avatar-choice="green" aria-label="绿色头像"></button>
+                                            <button type="button" class="account-avatar-choice account-avatar-choice--rose" data-avatar-choice="rose" aria-label="红色头像"></button>
+                                            <button type="button" class="account-avatar-choice account-avatar-choice--amber" data-avatar-choice="amber" aria-label="黄色头像"></button>
+                                        </div>
+                                        <div class="account-avatar-actions">
+                                            <input id="settings-account-avatar-upload" type="file" accept="image/png,image/jpeg,image/webp,image/gif" hidden>
+                                            <button type="button" class="settings-link-chip" onclick="triggerAccountAvatarUpload()">上传头像</button>
+                                            <button type="button" class="settings-link-chip" onclick="resetAccountAvatar()">恢复默认</button>
+                                        </div>
+                                        <small>头像只保存在当前浏览器本地。建议上传小于 1MB 的正方形图片。</small>
+                                    </div>
+                                </div>
                                 <div class="config-field">
                                     <label for="settings-account-name">显示名称</label>
                                     <input id="settings-account-name" type="text" placeholder="学习者">
@@ -853,13 +1033,6 @@
                             <span>全部文件</span>
                             <span class="library-nav-badge" id="lib-count-all">0</span>
                         </button>
-                        <button type="button" class="settings-nav-item" data-lib-filter="question_bank" onclick="switchLibraryFilter('question_bank')">
-                            <span class="settings-nav-icon" aria-hidden="true">
-                                <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M4 3.2H11L14 6V14.8H4V3.2Z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/><path d="M10.9 3.2V6H14" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/><path d="M6.2 8.2H11.8M6.2 10.6H11.8M6.2 13H9.8" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
-                            </span>
-                            <span>题库</span>
-                            <span class="library-nav-badge" id="lib-count-question_bank">0</span>
-                        </button>
                         <button type="button" class="settings-nav-item" data-lib-filter="pdf" onclick="switchLibraryFilter('pdf')">
                             <span class="settings-nav-icon" aria-hidden="true">
                                 <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M4.5 2.5H11.5L13.5 4.5V15.5H4.5V2.5Z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/><path d="M11.5 2.5V4.5H13.5" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/><path d="M6.5 8.5H8.5C9.05 8.5 9.5 8.95 9.5 9.5C9.5 10.05 9.05 10.5 8.5 10.5H6.5V8.5Z" stroke="currentColor" stroke-width="1.2"/><path d="M6.5 12.5H11.5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
@@ -887,6 +1060,13 @@
                             </span>
                             <span>图片</span>
                             <span class="library-nav-badge" id="lib-count-image">0</span>
+                        </button>
+                        <button type="button" class="settings-nav-item" data-lib-filter="question_bank" onclick="switchLibraryFilter('question_bank')">
+                            <span class="settings-nav-icon" aria-hidden="true">
+                                <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M4 3.2H11L14 6V14.8H4V3.2Z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/><path d="M10.9 3.2V6H14" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/><path d="M6.2 8.2H11.8M6.2 10.6H11.8" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
+                            </span>
+                            <span>题库</span>
+                            <span class="library-nav-badge" id="lib-count-question_bank">0</span>
                         </button>
                         <button type="button" class="settings-nav-item" data-lib-filter="other" onclick="switchLibraryFilter('other')">
                             <span class="settings-nav-icon" aria-hidden="true">
@@ -1114,18 +1294,19 @@
                     </div>
                 </section>
             </div>
-        </div>
-    </div>
 
-    <script defer src="/assets/js/state.js?v=20260519-ec-library-preview-1"></script>
-    <script defer src="/assets/js/ui.js?v=20260519-ec-library-preview-1"></script>
-    <script defer src="/assets/js/config.js?v=20260519-ec-library-preview-1"></script>
-    <script defer src="/assets/js/history.js?v=20260519-ec-library-preview-1"></script>
-    <script defer src="/assets/js/knowledge.js?v=20260519-ec-library-preview-1"></script>
-    <script defer src="/assets/js/error_correction.js?v=20260519-ec-library-preview-1"></script>
+    <script defer src="/assets/js/state.js"></script>
+    <script defer src="/assets/js/ui.js?v=20260602"></script>
+    <script defer src="/assets/js/config.js"></script>
+    <script defer src="/assets/js/history.js"></script>
+    <script defer src="/assets/js/knowledge.js"></script>
+    <script defer src="/assets/js/error_correction.js?v=20260525-integrated"></script>
     <script defer src="/assets/js/matlab_experiment.js?v=20260521-matlab-trace-panel-1"></script>
-    <script defer src="/assets/js/session.js?v=20260519-ec-library-preview-1"></script>
-    <script defer src="/assets/app.js?v=20260519-ec-library-preview-1"></script>
-    <script defer src="/assets/js/ai_path.js?v=20260520-ai-path-1"></script>
+    <script defer src="/assets/js/session.js"></script>
+    <script defer src="/assets/js/wrong-book.js?v=20260521-wb-filter"></script>
+    <script defer src="/assets/js/question-help.js"></script>
+    <script defer src="/assets/js/teaching-insights.js?v=20260602-ti"></script>
+    <script defer src="/assets/app.js"></script>
+    <script defer src="/assets/js/ai_path.js?v=20260525-ai-path-progress"></script>
 </body>
 </html>

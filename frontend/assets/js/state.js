@@ -1,6 +1,8 @@
 window.AITutorApp = window.AITutorApp || {};
 window.AITutorApp.state = {
     currentThreadId: '',
+    studentId: '',
+    student_id: '',
     eventSource: null,
     isStreaming: false,
     isAwaitingInput: false,
@@ -62,6 +64,9 @@ window.AITutorApp.state = {
     userKgMapOpen: true,          // 掌握图区块是否展开
     currentGraphNode: '',         // 当前正在教的图谱节点标题
     currentGraphNodeId: '',       // 当前正在教的图谱节点 ID
+    learningTrack: '',            // 当前会话学习方向：control_theory / artificial_intelligence
+    learningTrackLabel: '',       // 当前会话学习方向展示名
+    learningTrackLocked: false,   // 方向选择是否已固定
 };
 
 window.AITutorApp._stateSubscribers = new Set();

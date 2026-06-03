@@ -232,6 +232,26 @@ def build_intake_router_node(event_sink: EventSink):
             )
         )
 
+        # ── 教学推理透明：解释意图识别 ──
+        if state.get("thinking_mode", False):
+            intent_explain = {
+                "study_topic": f"识别为学习主题：「{user_input[:30]}{'...' if len(user_input) > 30 else ''}」，将进入主题确认流程",
+                "meta_qa": "识别为系统问题（关于功能/使用方式），将直接回答",
+                "smalltalk": "识别为轻闲聊，将友好回应后引导回学习",
+            }.get(intent, f"识别为：{intent}")
+            event_sink.emit(
+                make_event(
+                    "thinking.step",
+                    "intake_router",
+                    message=intent_explain,
+                    data={
+                        "category": "intent_detection",
+                        "intent": intent,
+                        "input_length": len(user_input),
+                    },
+                )
+            )
+
         next_status = {
             "study_topic": "topic_intake",
             "meta_qa": "meta_qa",

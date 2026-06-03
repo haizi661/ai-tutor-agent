@@ -17,6 +17,8 @@ def _clear_runtime_env(monkeypatch):
         "PADDLEOCR_MODEL",
         "LLM_PROVIDER",
         "MODEL_NAME",
+        "QUESTION_HELP_MODEL_NAME",
+        "QUESTION_HELP_OPENAI_API_BASE",
         "EMBEDDING_PROVIDER",
         "EMBEDDING_MODEL_NAME",
         "MINIMAX_API_KEY",
@@ -63,9 +65,37 @@ def test_settings_default_to_local_embedding_provider(monkeypatch):
     assert settings.embedding_provider == "local"
     assert settings.embedding_model_name == "sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2"
     assert settings.course_primary_enabled is False
-    assert settings.course_primary_dir == "docs/archive/a2-control-theory/source-notes"
+    assert settings.course_primary_dir == "data/knowledge_map_outputs"
     assert settings.default_course_id == "a2-control-theory"
     assert settings.pdf_parse_backend == "auto"
+    get_settings.cache_clear()
+
+
+def test_settings_default_question_help_to_qwen_multimodal(monkeypatch):
+    monkeypatch.setattr(config_module, "load_dotenv", lambda *args, **kwargs: None)
+    monkeypatch.setattr(config_module, "read_local_config_values", lambda: {})
+    _clear_runtime_env(monkeypatch)
+    monkeypatch.setenv("GOOGLE_API_KEY", "google-key")
+    get_settings.cache_clear()
+
+    settings = get_settings()
+
+    assert settings.question_help_model_name == "qwen-vl-max-latest"
+    assert settings.question_help_openai_api_base == "https://dashscope.aliyuncs.com/compatible-mode/v1"
+    get_settings.cache_clear()
+
+
+def test_settings_allow_question_help_model_override(monkeypatch):
+    monkeypatch.setattr(config_module, "load_dotenv", lambda *args, **kwargs: None)
+    monkeypatch.setattr(config_module, "read_local_config_values", lambda: {})
+    _clear_runtime_env(monkeypatch)
+    monkeypatch.setenv("GOOGLE_API_KEY", "google-key")
+    monkeypatch.setenv("QUESTION_HELP_MODEL_NAME", "qwen-vl-plus-latest")
+    get_settings.cache_clear()
+
+    settings = get_settings()
+
+    assert settings.question_help_model_name == "qwen-vl-plus-latest"
     get_settings.cache_clear()
 
 

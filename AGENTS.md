@@ -1,122 +1,83 @@
-# AI Tutor Agent Agent Guide
+# AI Tutor Agent Guide
 
-Last synced: 2026-05-01
+Last synced: 2026-05-29
 
-This project is a Web-first adaptive tutoring agent for automatic control theory. The active learning loop is graph-node mastery learning, not a generic one-shot chat flow.
+This is a Web-first adaptive tutor for automatic control theory. The active product loop is graph-node mastery learning, not the older generic `Tutor -> Tester -> Evaluator` chat flow.
 
-## Read First
+## Highest-value sources
 
-Use these as the current source of truth:
+- Start with `README.md`, then `docs/current-status-and-usage.md`, `docs/next-iteration-plan.md`, `docs/knowledge-map-runtime-assets.md`, and `docs/plans/2026-04-30-interaction-artifact-validation-contract.md`.
+- Treat `docs/reports/`, `docs/plans/2026-04-27-*`, and `docs/plans/2026-04-28-*` as historical unless a current doc points to them.
+- `CLAUDE.md` intentionally delegates project guidance back to this file.
 
-1. `README.md` for setup, launch, network policy, and user workflow.
-2. `docs/current-status-and-usage.md` for current capabilities and known gaps.
-3. `docs/next-iteration-plan.md` for the next engineering priorities.
-4. `docs/knowledge-map-runtime-assets.md` for graph/runtime asset rules.
-5. `docs/plans/2026-04-30-interaction-artifact-validation-contract.md` for interaction card/history restore validation.
+## Setup, run, and verify
 
-Files under `docs/reports/`, `docs/plans/2026-04-27-*`, and `docs/plans/2026-04-28-*` are historical unless a current document points to them.
+- Python target is `>=3.9`; install with `python -m pip install -r requirements.txt` or `python -m pip install -e .`.
+- Main Web entrypoint: `python main.py`; CLI compatibility entrypoint: `python main.py --cli`.
+- Web UI always uses port `8000`; `AI_TUTOR_HOST` only changes bind host. If `8000` is occupied, stop the old process instead of choosing another port.
+- Health check after launch: `http://127.0.0.1:8000/api/health`.
+- Local pytest should disable unrelated plugin autoloading: `PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 pytest -q`. A single test can be run as `PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 pytest -q tests/test_name.py`.
+- For API smoke tests, prefer `tests/asgi_test_client.py` over Starlette `TestClient`; the latter has caused blocking-portal hangs in the Python 3.9 environment.
+- Frontend has no bundler pipeline; `package.json` pins `marked` and `katex`, with local vendor files under `frontend/assets/vendor/marked/` and `frontend/assets/vendor/katex/`. Browser code is served directly from `frontend/`.
+- Retrieval regression command lives in README: `python scripts/evaluate_retrieval.py --eval-file data/retrieval_eval/sample_eval.jsonl --k-values 1,3,5 --recall-k 12 --output data/retrieval_eval/latest_report.json`.
 
-## Runtime Rules
+## Architecture that matters
 
-- Use port `8000` for the local Web UI. If it is occupied by an old project process, stop the old process instead of silently moving the app to another port.
-- Primary launch command is `python main.py`, then check `http://127.0.0.1:8000/api/health`.
-- The project is path-relative. Keep docs and code examples in `data/...`, `docs/...`, `frontend/...`; do not add machine-specific absolute paths.
-- Do not commit `.env`, `.codex`, `.hermes/`, `data/chroma_db/**`, `data/student_states/*.json`, `data/tutor_memory.db`, or local vector/cache state.
+- `main.py` dispatches to `ai_tutor_agent/interfaces/api/app.py`; FastAPI mounts API routers and static `frontend/` at `/`.
+- LangGraph wiring is in `ai_tutor_agent/orchestration/workflow.py`; add new teaching steps in `ai_tutor_agent/nodes/` first, then wire them there.
+- Core boundaries: `core/` state/events/ports, `application/` session coordination, `infrastructure/` LLM/RAG/storage/adapters, `interfaces/api/` Web API, `frontend/` chat/cards/history/settings.
+- Current main flow: topic confirmation → assessment → initial graph node selection → node content loading → tutor lesson → post-lesson pause → temporary question or objective test → remediation or next node planning → continue next node or homework → later homework/session restore.
+- Legacy nodes such as `tester`, `evaluator`, `coach`, `next_step_selector`, and `post_eval_selector` still exist for compatibility; do not make them the target path for new graph-node learning work.
 
-## Active Architecture
+## Runtime assets and local state
 
-- `ai_tutor_agent/core/` holds state, events, and ports.
-- `ai_tutor_agent/nodes/` holds LangGraph node behavior.
-- `ai_tutor_agent/orchestration/` wires the graph.
-- `ai_tutor_agent/application/` coordinates sessions and persistence.
-- `ai_tutor_agent/infrastructure/` holds LLM, retriever, question bank, and storage adapters.
-- `ai_tutor_agent/interfaces/api/` is the Web API surface.
-- `frontend/` renders chat, interaction cards, history restore, and settings.
-- `tests/` contains the regression contract.
+- Active course graph is Graph B from 2026-04-27: `data/knowledge_map_outputs/auto_control_knowledge_map_v2_nodes.csv`, `..._edges.csv`, `..._v2.json`, plus `data/mineru_cache/` and `data/media_evidence_index/`.
+- Historical Graph A/A2 assets are no longer kept in this repo; never treat any legacy `graph.json` / `notes.jsonl` (including those under `docs/archive/a2-control-theory/`) as the current teaching graph. The only authoritative teaching graph is Graph B under `data/knowledge_map_outputs/auto_control_knowledge_map_v2_*.{csv,json}`.
+- If graph/media assets are missing, use `scripts/sync_knowledge_map_runtime_assets.sh`, then check `python -m ai_tutor_agent.knowledge_map.runtime_assets --media-index data/media_evidence_index` and `PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 pytest -q tests/test_graph_integrity.py`.
+- Keep paths repo-relative (`data/...`, `docs/...`, `frontend/...`); do not add machine-specific absolute paths.
+- Do not commit `.env`, `.codex`, `.hermes/`, `data/chroma_db/**`, `data/student_states/*.json`, `data/tutor_memory.db`, vector DBs, local caches, or uploaded/private learner data.
+- `data/question_bank/a2-control-theory/assessment_questions.jsonl` is the only minimal local question-bank asset currently present; objective/variant/homework question-bank coverage is still incomplete.
 
-The current main flow is:
+## Learner state and mastery rules
 
-```text
-topic confirmation
--> assessment
--> initial graph node selection
--> node content loading
--> tutor lesson
--> post-lesson pause
--> free-form temporary question or objective test
--> remediation or next node planning
--> continue next node or generate homework
--> homework restore/answer/review on later sessions
-```
+- Initial learner profiling is generated in `ai_tutor_agent/nodes/assessment.py` as `assessment_concept_gaps`, `assessment_radar`, `difficulty_level`, `teaching_strategy`, and initial `user_knowledge_graph`.
+- Long-running state is persisted by `StudentStateStore` in `data/student_states/*.json`.
+- `StudentState.knowledge_graph` starts empty and adds nodes only when learning begins. Each node tracks `score` (0-100), `status`, capped `wrong_questions`, capped `evidence`, and `attempts`.
+- Evidence entries (`quiz_pass/fail`, `homework_pass/fail`) are the source of truth for mastery decisions; do not reintroduce a separate global `evidence_events` log.
+- Wrong-question book entries live in `StudentState.wrong_question_book`; question-help history lives in `StudentState.question_help_records`. These are learner-state records, not separate course graph nodes.
+- Keep product language honest: this is a lightweight JSON learner-state prototype, not a calibrated long-term learner model.
 
-## Knowledge Graph And Assets
+## Frontend and interaction-card invariants
 
-- Active course graph is the 2026-04-27 Graph B runtime asset set in `data/knowledge_map_outputs/`, `data/mineru_cache/`, and `data/media_evidence_index/`.
-- Historical Graph A / A2 material lives under `docs/archive/a2-control-theory/` and must not be treated as the active course graph.
-- `data/question_bank/a2-control-theory/assessment_questions.jsonl` is the only minimal local question-bank asset currently present. Objective, variant, and homework question-bank content still needs expansion.
+- Learning/homework/GraphRAG HTML must pass through the allowlist sanitizer in `frontend/assets/js/ui.js` before `innerHTML`.
+- Do not restore the old `rawText.includes(...)` trust heuristic. Dynamic question text, IDs, prompts, and labels should be inserted with DOM APIs such as `textContent` and `dataset`.
+- Long formulas, wide tables, and figures belong inside `learning-*` local viewports so they scroll within the card/bubble rather than widening the page.
+- Markdown/LaTeX answers should render through `app.renderMarkdownContent` / `app.renderMath` in `frontend/assets/js/ui.js`, then pass the existing sanitizer. Do not bypass the allowlist for question-help or review explanations.
+- GraphRAG answers should be learner-facing evidence cards: hide/fold raw asset IDs, long hashes, raw LaTeX, and raw HTML tables by default; show thumbnails when image paths resolve and clear unavailable placeholders otherwise.
+- Keep prose-cited media in the same `learning-reference-block` as the explanation. Unreferenced related media is a compact supplement capped at 3 cards; history restore applies the same de-noising.
+- Wrong-book UI defaults to待复习/未掌握 entries, groups by node, and uses `/api/students/{student_id}/wrong-questions/{question_id}/master` for 标记已掌握/取消掌握. Do not fake local-only mastery state when the API call fails.
+- Question-help UI is a side modal for ad hoc text/image problems, supports `quick` / `deep` / `vision` modes, and stores records separately from the wrong-question book. It should not auto-add records to wrong questions unless a dedicated product rule is added.
+- Objective-test review cards should keep options as stable full-width rows and explanations structured around 判断依据、所选项问题、常见误区、下一步.
+- `post_lesson_choice` is a natural pause: users may type a free-form stuck point directly, choose `temporary_question` via “继续追问”, or choose `start_test` via “我懂了，进入小测”. Do not make it a rigid two-button-only gate.
+- Active pending interaction kinds include `post_lesson_choice`, `temporary_question`, `objective_test_answers`, `variant_test_answers`, `continue_or_homework_choice`, `homework_review_choice`, `homework_answers`, and `consolidation_choice`.
+- Historical cards must lock once answered/submitted/skipped/reviewed; only the current unresolved interaction may remain pending.
 
-## Learner Profile And Student State
+## Session/history gotchas
 
-- Initial learner profiling is generated in `ai_tutor_agent/nodes/assessment.py`: assessment answers become `assessment_concept_gaps`, `assessment_radar`, `difficulty_level`, `teaching_strategy`, and the initial `user_knowledge_graph`.
-- Long-running learning state is stored by `StudentStateStore` in `data/student_states/*.json`: current node, `mastery_scores`, visited/wrong nodes, question attempts, homework assignments, homework history, daily records, last learning time, and `knowledge_graph` (per-node scores, wrong questions, evidence).
-- User knowledge graph (`StudentState.knowledge_graph`): starts empty, nodes added only when the user starts learning them. Each node tracks `score` (0-100), `status` (in_progress/mastered), `wrong_questions` (capped 100), `evidence` (capped 50, quiz_pass/fail/homework_pass/fail), and `attempts`. Evidence is the single source of truth for mastery decisions — no separate global `evidence_events` log. API: `GET /api/students/{student_id}/knowledge-graph`.
-- Treat the current learner model as a lightweight JSON prototype, not a production-grade learner profile. Do not overstate it as a fully calibrated long-term model.
-- Current gaps to preserve in plans: paired self-evaluation/objective calibration must be strengthened, mastery score scale must be normalized, and initial node selection should use profile signals while still respecting graph prerequisites.
+- New session, refresh, and history restore must not drop assigned/deferred/in-progress homework.
+- Frontend “新对话” first calls `POST /api/sessions` to create an empty checkpoint before the first user message; keep the route idempotent.
+- Restoring without a new topic must reuse existing topic, current node, and pending homework; it must not force topic confirmation again.
+- Restored sessions must sync sidebar/header title/current node from checkpoint and scroll the current pending card into view after rich media layout settles; the composer must not cover it.
+- Sidebar history titles use `_checkpoint_summary` in `interfaces/api/history.py`: `custom_title` → `proposed_topic` → `current_topic` → first user message (30 chars) → `新对话`; never display raw thread UUIDs.
+- `frontend/assets/js/history.js` state labels are based on `flow_status`, not title text matching.
+- `_has_homework` in `session_resume_router.py` uses blacklist mode: terminal statuses (`completed`, `submitted`, `deferred`) are excluded; missing/unknown status defaults to active homework when items exist.
 
-## Network Policy
+## Validation expectations
 
-- `GRAPH_RAG_ENABLE_LLM` defaults to true. Startup commands may override `.env` values.
-- Shell/process environment takes precedence over persisted `.env` proxy values.
-- Smart proxy behavior: foreign APIs go through the configured proxy; localhost, domestic model providers, MinerU/OpenXLab, `hf-mirror.com`, ModelScope, and common PyPI/npm mirrors are merged into `NO_PROXY` for direct access.
-- HuggingFace embedding download falls back to `HF_MIRROR_ENDPOINT`, defaulting to `https://hf-mirror.com`, when the default endpoint is unavailable.
-- Use `bash scripts/setup_cn_mirrors.sh` or the README pip/npm mirror commands for China mainland dependency setup.
-
-## Frontend And HTML Safety
-
-- Learning/homework/GraphRAG HTML must pass through the allowlist sanitizer in `frontend/assets/js/ui.js`.
-- Do not restore the old pattern where `rawText.includes(...)` decides that arbitrary text is trusted HTML.
-- Dynamic question text, IDs, and prompts must be inserted with DOM APIs such as `textContent` and `dataset`, not direct string interpolation into `innerHTML`.
-- Formula/table/figure content belongs inside `learning-*` viewports so long formulas and wide tables scroll inside their own containers instead of expanding the chat bubble.
-- GraphRAG learning answers should be user-facing evidence cards, not debug dumps: keep raw asset ids, long hashes, raw LaTeX, and raw HTML tables hidden or folded by default; show figure thumbnails when `image_paths_abs` resolves and a clear unavailable placeholder when it does not.
-- GraphRAG learning answers must keep media tied to the prose that cites it. Referenced formulas, figures, and tables belong in the same `learning-reference-block` as the explanation; unreferenced related media is only a compact supplement and is limited to 3 cards. Frontend restore also normalizes old saved HTML with the same de-noising rule.
-
-## Session And Homework Invariants
-
-- New, refresh, and history restore must not lose assigned/deferred/in-progress homework.
-- Frontend “新对话” first calls `POST /api/sessions` to create an empty checkpoint before the first user message; keep that route idempotent because history restore depends on it.
-- Restoring a session without a new topic must reuse the existing topic and pending homework state; it must not force topic re-confirmation.
-- Restoring a session must sync the header title/current node from the checkpoint and scroll the current pending card into view after media layout stabilizes. The composer must not occlude the pending card.
-- Historical interaction cards must render as locked once answered/submitted/skipped/reviewed, except the one current pending interaction.
-- Current active `pending_interaction_kind` values include `post_lesson_choice`, `temporary_question`, `objective_test_answers`, `variant_test_answers`, `continue_or_homework_choice`, `homework_review_choice`, `homework_answers`, and `consolidation_choice`.
-- `post_lesson_choice` is a natural pause: users may type a free-form stuck point directly, choose `temporary_question` via "继续追问", or choose `start_test` via "我懂了，进入小测". Do not revert it to a rigid "temporary question / start test" copy.
-
-## History Display Title
-
-- Sidebar history titles use `_checkpoint_summary` in `interfaces/api/history.py`. Fallback chain: `custom_title` → `proposed_topic` → `current_topic` → first user message (truncated 30 chars) → `"新对话"`. Never display raw `thread_id` UUID.
-- `stateLabel` and `historyState` in `frontend/assets/js/history.js` are based on `flow_status` field, not title text matching.
-
-## Session Resume
-
-- `_has_homework` in `session_resume_router.py` uses blacklist mode: terminal statuses (completed/submitted/deferred) are excluded; missing/unknown status defaults to active homework when items exist.
-- `infer_learning_phase` in `learning_flow.py` merges all homework-related flow statuses into a single set to avoid dead-code branches.
-
-## Testing
-
-Use plugin autoload disabling for local pytest runs:
-
-```bash
-PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 pytest -q
-```
-
-For API smoke tests, prefer the local `tests/asgi_test_client.py` helper. It avoids the Starlette `TestClient` blocking-portal hang observed in the Python 3.9 environment while still exercising the ASGI request path through `httpx.ASGITransport`.
-
-Before claiming a UI/history restore task is complete, run the relevant backend tests, frontend contract tests, and at least one browser or app health check. Passing a local string-contract test alone is not enough for interaction-card completion.
-
-2026-05-01 UI restore and GraphRAG display validation passed with:
-
-```bash
-PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 pytest -q
-# 450 passed, 5 warnings
-```
-
-Browser checks confirmed restored `awaiting_post_lesson_choice` sessions show the correct title/node/status, focus the post-lesson card, avoid composer overlap, keep page-level horizontal overflow at 0, and limit restored related media to 3 cards with no duplicate media keys.
+- For pure backend logic, run focused pytest for touched nodes/services plus any contract tests that cover the flow.
+- For GraphRAG HTML, frontend cards, history restore, temporary questions, or homework UI, run the relevant backend tests, frontend contract tests, and at least one app health/API/browser check; a string-only unit test is not enough.
+- Useful focused groups:
+  - Flow: `tests/test_workflow.py tests/test_objective_learning_flow.py tests/test_temporary_question_flow.py tests/test_session_resume_router.py`
+  - History/session: `tests/test_history.py tests/test_session.py tests/test_session_persistence.py tests/test_session_resume_router_node.py`
+  - Frontend contracts: `tests/test_frontend_objective_test_ui.py tests/test_frontend_chat_layout.py tests/test_frontend_learning_content_layout.py tests/test_frontend_html_safety.py tests/test_homework_learning_ui_contract.py tests/test_graph_rag_learning_answer_html.py tests/test_frontend_wrong_book_ui.py tests/test_frontend_question_help_ui.py`
+  - Student tools/API: `tests/test_wrong_questions_api.py tests/test_question_help_api.py`

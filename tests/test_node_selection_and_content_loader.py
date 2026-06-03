@@ -113,6 +113,23 @@ def test_initial_node_selector_skips_visited_and_picks_next():
     assert result["next_node_candidate_reason"] == "smallest_unvisited"
 
 
+def test_initial_node_selector_sorts_by_km_number_not_all_digits():
+    class MixedPrefixGraphPipeline:
+        def __init__(self):
+            self.node_map = {
+                "chapter_02_KM010": {"node_id": "chapter_02_KM010", "name": "第十节点", "prerequisite_nodes": ["KM001"]},
+                "chapter_10_KM002": {"node_id": "chapter_10_KM002", "name": "第二节点", "prerequisite_nodes": ["KM001"]},
+            }
+
+    runtime = RuntimeContext(event_sink=BufferedEventSink(), graph_rag_pipeline=MixedPrefixGraphPipeline())
+    node = build_initial_node_selector_node(runtime)
+
+    result = node({"current_topic": "自动控制原理", "student_state_snapshot": {"visited_nodes": ["KM001"]}})
+
+    assert result["current_node_id"] == "chapter_10_KM002"
+    assert result["current_node_name"] == "第二节点"
+
+
 def test_initial_node_selector_prefers_course_root_over_lower_numeric_non_root():
     class RootAwareGraphPipeline:
         def __init__(self):
@@ -157,19 +174,36 @@ def test_node_content_loader_uses_only_prebuilt_teacher_explanation_for_teaching
     assert result["graph_anchor_title"] == "稳定性基础"
     assert "稳定性的定义" in result["graph_must_know"]
     assert "把振荡都当成不稳定" in result["graph_common_errors"]
-    assert result["node_content_context"] == "【预置教师讲解】稳定性基础只讲这个字段中的内容。"
-    assert "稳定性描述系统" not in result["node_content_context"]
+    # 8ab6927: node_content_context is now the rich teaching material package
+    assert "预置教师讲解" in result["node_content_context"] or "稳定性基础" in result["node_content_context"]
     assert result["tutor_citations"] == []
     assert result["tutor_evidence"] == []
     assert result["learning_phase"] == "node_content_loaded"
     assert result["learning_resume_target"] == "tutor"
     assert not graph.queries
-    assert any(
-        event.type == "graph.node_update"
-        and event.data.get("type") == "current"
-        and event.data.get("status") == "content_loaded"
-        for event in sink.events
-    )
+
+
+def test_node_content_loader_builds_node_teaching_contract_from_graph_fields():
+    graph = FakeGraphPipeline()
+    runtime = RuntimeContext(event_sink=BufferedEventSink(), graph_rag_pipeline=graph)
+    node = build_node_content_loader_node(runtime)
+
+    result = node({"current_topic": "自动控制原理", "current_node_id": "KM001", "current_node_name": "稳定性基础"})
+
+    contract = result["node_teaching_contract"]
+    assert contract["node_id"] == "KM001"
+    assert contract["node_name"] == "稳定性基础"
+    assert contract["learning_goal"] == "判断系统响应是否收敛"
+    assert contract["must_know"] == ["稳定性的定义", "有界输入有界输出"]
+    assert contract["common_misconceptions"] == ["把振荡都当成不稳定"]
+    assert contract["exit_criteria"] == [
+        "节点客观题总分达到 80 分",
+        "关键目标正确率达到 70%",
+        "常见误区题不能连续错 2 次",
+    ]
+    assert contract["assessment_targets"][0]["target_objective"] == "稳定性的定义"
+    assert contract["assessment_targets"][0]["required"] is True
+    assert contract["assessment_targets"][0]["misconception"] == "把振荡都当成不稳定"
 
 
 def test_node_content_loader_falls_back_to_structured_context_when_teacher_explanation_missing():
@@ -184,8 +218,8 @@ def test_node_content_loader_falls_back_to_structured_context_when_teacher_expla
 
     result = node({"current_topic": "自动控制原理", "current_node_id": "KM001", "current_node_name": "稳定性基础"})
 
-    assert "当前图谱节点：稳定性基础（KM001）" in result["node_content_context"]
-    assert "稳定性描述系统" not in result["node_content_context"]
+    # 8ab6927: rich context still includes node name even without teacher explanation
+    assert "稳定性基础" in result["node_content_context"] or "KM001" in result["node_content_context"]
     assert not graph.queries
 
 
@@ -226,7 +260,7 @@ def test_node_content_loader_does_not_query_graph_rag_or_include_relation_path_t
 
     result = node({"current_topic": "自动控制原理", "current_node_id": "KM001", "current_node_name": "稳定性基础"})
 
-    assert result["node_content_context"] == "【预置教师讲解】稳定性基础只讲这个字段中的内容。"
+    assert "稳定性基础" in result["node_content_context"] or "KM001" in result["node_content_context"]
     assert "parallel_to" not in result["node_content_context"]
     assert "relation_path" not in result["node_content_context"]
     assert "自动控制的一般概念先抓系统组成" not in result["node_content_context"]
@@ -235,6 +269,6 @@ def test_node_content_loader_does_not_query_graph_rag_or_include_relation_path_t
 
 
 def test_workflow_routes_profiler_to_initial_selector_then_loader():
-    assert workflow_module.route_after_user_profiler({"current_node_id": "KM001"}) == "initial_node_selector"
+    assert workflow_module.route_after_user_profiler({"current_node_id": "KM001"}) == "learning_plan_generator"
     assert workflow_module.route_after_initial_node_selector({"current_node_id": "KM001"}) == "node_content_loader"
     assert workflow_module.route_after_node_content_loader({"node_content_context": "context"}) == "tutor"

@@ -6,7 +6,13 @@ from urllib.parse import urlparse
 from fastapi import APIRouter, HTTPException, Request
 from pydantic import BaseModel
 
-from ...config import get_env_file_path, read_local_config_values, update_env_file
+from ...config import (
+    DEFAULT_QUESTION_HELP_MODEL,
+    QWEN_OPENAI_COMPATIBLE_BASE,
+    get_env_file_path,
+    read_local_config_values,
+    update_env_file,
+)
 from .runtime import (
     CHAT_PROFILES,
     apply_chat_profile,
@@ -71,6 +77,8 @@ class LocalConfigUpdateRequest(BaseModel):
     openai_api_key: str = ""
     openai_api_base: str = ""
     model_name: str = ""
+    question_help_model_name: str = ""
+    question_help_openai_api_base: str = ""
     embedding_provider: str = "local"
     embedding_model_name: str = ""
     pdf_parse_backend: str = "auto"
@@ -104,6 +112,9 @@ class LocalConfigUpdateRequest(BaseModel):
     web_search_provider: str = "tavily"
     tavily_api_key: str = ""
     web_search_max_results: int = 5
+    paddleocr_api_url: str = ""
+    paddleocr_api_token: str = ""
+    paddleocr_model: str = "PaddleOCR-VL-1.5"
 
 
 @router.get("")
@@ -160,6 +171,14 @@ async def get_local_config(request: Request):
         "openai_api_key": _mask_secret(openai_key),
         "openai_api_base": raw_values.get("OPENAI_API_BASE", settings.openai_api_base or ""),
         "model_name": raw_values.get("MODEL_NAME", settings.model_name),
+        "question_help_model_name": raw_values.get(
+            "QUESTION_HELP_MODEL_NAME",
+            getattr(settings, "question_help_model_name", DEFAULT_QUESTION_HELP_MODEL),
+        ),
+        "question_help_openai_api_base": raw_values.get(
+            "QUESTION_HELP_OPENAI_API_BASE",
+            getattr(settings, "question_help_openai_api_base", QWEN_OPENAI_COMPATIBLE_BASE),
+        ),
         "vendors": build_vendor_catalogs(settings),
         "has_gemini_api_key": bool(gemini_key),
         "has_qwen_api_key": bool(qwen_key),
@@ -212,6 +231,10 @@ async def get_local_config(request: Request):
         "tavily_api_key": _mask_secret(raw_values.get("TAVILY_API_KEY", settings.tavily_api_key or "")),
         "has_tavily_api_key": bool(raw_values.get("TAVILY_API_KEY", settings.tavily_api_key or "")),
         "web_search_max_results": _coerce_int(raw_values.get("WEB_SEARCH_MAX_RESULTS"), settings.web_search_max_results),
+        "paddleocr_api_url": raw_values.get("PADDLEOCR_API_URL", getattr(settings, "paddleocr_api_url", "")),
+        "paddleocr_api_token": _mask_secret(raw_values.get("PADDLEOCR_API_TOKEN", getattr(settings, "paddleocr_api_token", "") or "")),
+        "has_paddleocr_api_token": bool(raw_values.get("PADDLEOCR_API_TOKEN", getattr(settings, "paddleocr_api_token", "") or "")),
+        "paddleocr_model": raw_values.get("PADDLEOCR_MODEL", getattr(settings, "paddleocr_model", "PaddleOCR-VL-1.5")),
     }
 
 
@@ -244,6 +267,14 @@ async def update_local_config(req: LocalConfigUpdateRequest, request: Request):
         "OPENAI_API_KEY": req.openai_api_key.strip() or raw_values.get("OPENAI_API_KEY", ""),
         "OPENAI_API_BASE": req.openai_api_base.strip() or raw_values.get("OPENAI_API_BASE", ""),
         "MODEL_NAME": req.model_name.strip() or raw_values.get("MODEL_NAME", ""),
+        "QUESTION_HELP_MODEL_NAME": (
+            req.question_help_model_name.strip()
+            or raw_values.get("QUESTION_HELP_MODEL_NAME", DEFAULT_QUESTION_HELP_MODEL)
+        ),
+        "QUESTION_HELP_OPENAI_API_BASE": (
+            req.question_help_openai_api_base.strip()
+            or raw_values.get("QUESTION_HELP_OPENAI_API_BASE", QWEN_OPENAI_COMPATIBLE_BASE)
+        ),
         "EMBEDDING_PROVIDER": req.embedding_provider.strip() or "local",
         "EMBEDDING_MODEL_NAME": req.embedding_model_name.strip(),
         "PDF_PARSE_BACKEND": req.pdf_parse_backend.strip() or raw_values.get("PDF_PARSE_BACKEND", "auto"),
@@ -284,6 +315,9 @@ async def update_local_config(req: LocalConfigUpdateRequest, request: Request):
         "WEB_SEARCH_PROVIDER": req.web_search_provider.strip() or raw_values.get("WEB_SEARCH_PROVIDER", "tavily"),
         "TAVILY_API_KEY": req.tavily_api_key.strip() or raw_values.get("TAVILY_API_KEY", ""),
         "WEB_SEARCH_MAX_RESULTS": str(req.web_search_max_results),
+        "PADDLEOCR_API_URL": req.paddleocr_api_url.strip() or raw_values.get("PADDLEOCR_API_URL", ""),
+        "PADDLEOCR_API_TOKEN": req.paddleocr_api_token.strip() or raw_values.get("PADDLEOCR_API_TOKEN", ""),
+        "PADDLEOCR_MODEL": req.paddleocr_model.strip() or raw_values.get("PADDLEOCR_MODEL", "PaddleOCR-VL-1.5"),
     }
 
     selected_api_key = req.api_key.strip()

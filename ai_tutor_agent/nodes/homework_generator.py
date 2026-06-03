@@ -308,6 +308,34 @@ def build_homework_generator_node(runtime: RuntimeContext):
             homework_items = _build_fallback_homework_item(graph_pipeline, state)
         homework_items = _enrich_homework_items(homework_items, graph_pipeline)
 
+        # ── 教学推理透明：解释作业设计 ──
+        if state.get("thinking_mode", False):
+            visited_count = len(snapshot.get("visited_nodes") or [])
+            covered_nodes = set()
+            for item in homework_items:
+                for nid in item.get("covered_node_ids") or []:
+                    covered_nodes.add(str(nid))
+            node_names = []
+            node_map = dict(getattr(graph_pipeline, "node_map", {}) or {})
+            for nid in covered_nodes:
+                n = node_map.get(nid) or {}
+                node_names.append(_node_name(n, nid))
+            coverage_note = f"覆盖 {len(covered_nodes)} 个已学节点" if covered_nodes else ""
+            event_sink.emit(
+                make_event(
+                    "thinking.step",
+                    "homework_generator",
+                    message=f"作业设计：生成 {len(homework_items)} 道作业题{f'，{coverage_note}' if coverage_note else ''}，本轮共学习 {visited_count} 个节点",
+                    data={
+                        "category": "homework_design",
+                        "homework_count": len(homework_items),
+                        "covered_node_count": len(covered_nodes),
+                        "visited_node_count": visited_count,
+                        "covered_nodes": list(covered_nodes),
+                    },
+                )
+            )
+
         updated_snapshot = assign_homework_items(
             student_state_store,
             student_id=student_id,

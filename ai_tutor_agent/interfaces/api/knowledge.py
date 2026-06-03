@@ -10,6 +10,8 @@ from pathlib import Path, PureWindowsPath
 
 from fastapi import APIRouter, File, Request, UploadFile
 
+from ai_tutor_agent.core.learning_support import graph_node_sort_key
+
 from .error_correction import get_error_correction_service
 from .runtime import get_runtime
 
@@ -105,6 +107,10 @@ def _sanitize_graph_record(record: object, *, edge: bool = False) -> dict:
         for key in ("relation_strength", "weight"):
             if key in sanitized and sanitized[key] is None:
                 sanitized[key] = _graph_numeric_default(key)
+    else:
+        node_id = str(sanitized.get("node_id") or sanitized.get("id") or "").strip()
+        if node_id:
+            sanitized["display_index"] = graph_node_sort_key(node_id)[0]
     return sanitized
 
 
@@ -150,12 +156,13 @@ async def save_question_bank_items(request: Request):
         return {"status": "error", "message": "selected_ids 必须是数组"}
     if source_files and not isinstance(source_files, list):
         return {"status": "error", "message": "source_files 必须是数组"}
+
     service = get_error_correction_service()
     try:
         result = service.save_questions_to_library(selected_ids=selected_ids, source_files=source_files)
         return {
             "status": "success",
-            "message": f"已保存 {result['saved_count']} 道题到资料库题库",
+            "message": f"已保存 {result.get('saved_count', 0)} 道题目到题库",
             **result,
         }
     except RuntimeError as exc:
@@ -254,7 +261,10 @@ async def get_graph_b_data(request: Request):
     pipeline = getattr(runtime, "graph_rag_pipeline", None)
     if pipeline is None:
         return {"nodes": [], "edges": [], "meta": {"error": "GraphRAGPipeline not loaded"}}
-    nodes = [_sanitize_graph_record(node) for node in (pipeline.nodes or [])]
+    nodes = sorted(
+        (_sanitize_graph_record(node) for node in (pipeline.nodes or [])),
+        key=lambda node: graph_node_sort_key(node.get("node_id") or node.get("id")),
+    )
     edges = [_sanitize_graph_record(edge, edge=True) for edge in (pipeline.edges or [])]
     return {
         "nodes": nodes,

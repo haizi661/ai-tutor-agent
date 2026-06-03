@@ -14,6 +14,26 @@ messages_router = APIRouter(prefix="/api/messages", tags=["history"])
 
 PRE_TOPIC_FLOW_STATUSES = {"greeting", "topic_intake", "meta_qa", "smalltalk"}
 
+LEARNING_CONTENT_MARKERS = (
+    "learning-answer-content",
+    "homework-answer-content",
+    "learning-reference-block",
+    "learning-reference-media",
+    "learning-evidence-card",
+    "learning-formula-card",
+    "learning-figure-card",
+    "learning-table-card",
+    "learning-derivation-card",
+    "graph-rag-answer-panel",
+)
+
+
+def _tutor_content_kind(content: Any) -> str:
+    text = str(content or "").strip()
+    if text.startswith("<") and any(marker in text for marker in LEARNING_CONTENT_MARKERS):
+        return "graph_rag_answer"
+    return "tutor"
+
 
 class ThreadTitlePayload(BaseModel):
     title: str = ""
@@ -169,6 +189,7 @@ def _serialize_state(values: dict[str, Any]) -> dict[str, Any]:
     return {
         "active_course": values.get("active_course", ""),
         "ai_path_mode": values.get("ai_path_mode", False),
+        "student_id": values.get("student_id", ""),
         "learning_phase": values.get("learning_phase", ""),
         "learning_resume_target": values.get("learning_resume_target", ""),
         "learning_resume_reason": values.get("learning_resume_reason", ""),
@@ -244,8 +265,13 @@ def _serialize_state(values: dict[str, Any]) -> dict[str, Any]:
         "homework_status": values.get("homework_status", ""),
         "post_lesson_choice": values.get("post_lesson_choice", ""),
         "continue_or_homework_choice": values.get("continue_or_homework_choice", ""),
+        "learning_track": values.get("learning_track", ""),
+        "learning_track_label": values.get("learning_track_label", ""),
+        "learning_track_locked": values.get("learning_track_locked", False),
         "is_assessed": values.get("is_assessed", False),
         "flow_status": values.get("flow_status", "greeting"),
+        "learning_plan": values.get("learning_plan", []),
+        "learning_plan_current_step": values.get("learning_plan_current_step", 0),
     }
 
 
@@ -270,9 +296,12 @@ def _checkpoint_summary(thread_id: str, checkpoint_tuple, alias_title: str = "")
     flow_status = values.get("flow_status", "greeting")
     current_topic = str(values.get("current_topic", "") or "").strip()
     proposed_topic = str(values.get("proposed_topic", "") or "").strip()
+    learning_track_label = str(values.get("learning_track_label", "") or "").strip()
     custom_title = _normalize_custom_title(alias_title)
     if custom_title:
         display_title = custom_title
+    elif learning_track_label and flow_status == "ai_path_active":
+        display_title = learning_track_label
     elif flow_status == "awaiting_topic_confirmation" and proposed_topic:
         display_title = f"待确认：{proposed_topic}"
     elif flow_status in PRE_TOPIC_FLOW_STATUSES:
@@ -418,6 +447,19 @@ def _reconstruct_messages(checkpoint_store, thread_id: str, *, limit: int = 240)
         text = (content or "").strip()
         if not text:
             return
+        if kind == "topic_confirmation_card":
+            proposed_topic = ""
+            if isinstance(data, dict):
+                proposed_topic = str(data.get("proposed_topic") or "").strip()
+            for existing in messages:
+                if existing.get("kind") != "topic_confirmation_card":
+                    continue
+                existing_data = existing.get("data")
+                existing_topic = ""
+                if isinstance(existing_data, dict):
+                    existing_topic = str(existing_data.get("proposed_topic") or "").strip()
+                if proposed_topic and existing_topic == proposed_topic:
+                    return
         if messages:
             last = messages[-1]
             if last["role"] == normalized_role and last["kind"] == kind and last["content"] == text:
@@ -545,7 +587,6 @@ def _reconstruct_messages(checkpoint_store, thread_id: str, *, limit: int = 240)
                 updated_at,
                 data={"interaction_kind": pending_kind, "homework_items": values.get("homework_items", [])},
             )
-
         current_message_history = values.get("message_history") or []
         previous_message_history = previous_values.get("message_history") or []
         if len(current_message_history) > len(previous_message_history):
@@ -559,6 +600,22 @@ def _reconstruct_messages(checkpoint_store, thread_id: str, *, limit: int = 240)
                     data=entry.get("data"),
                 )
             lock_open_assessment_forms_when_skipped(values)
+        if (
+            pending_kind in {"objective_test_answers", "variant_test_answers"}
+            and pending_options
+            and pending_kind != str(previous_values.get("pending_interaction_kind") or "").strip()
+        ):
+            push(
+                "agent",
+                "objective_test_card",
+                pending_prompt or "请逐题作答。",
+                updated_at,
+                data={
+                    "interaction_kind": pending_kind,
+                    "questions": pending_options,
+                    "options": pending_options,
+                },
+            )
 
         assessment_questions = values.get("assessment_questions") or []
         previous_assessment_questions = previous_values.get("assessment_questions") or []
@@ -574,7 +631,7 @@ def _reconstruct_messages(checkpoint_store, thread_id: str, *, limit: int = 240)
         awaiting_topic_confirmation = values.get("flow_status") == "awaiting_topic_confirmation"
         previous_awaiting_topic_confirmation = previous_values.get("flow_status") == "awaiting_topic_confirmation"
         proposed_topic = str(values.get("proposed_topic", "") or "").strip()
-        if proposed_topic and (
+        if awaiting_topic_confirmation and proposed_topic and (
             not previous_awaiting_topic_confirmation
             or proposed_topic != str(previous_values.get("proposed_topic", "") or "").strip()
         ):
@@ -602,7 +659,11 @@ def _reconstruct_messages(checkpoint_store, thread_id: str, *, limit: int = 240)
 
         tutor_content = values.get("tutor_content", "")
         if tutor_content and tutor_content != previous_values.get("tutor_content", ""):
-            tutor_kind = "homework_learning_html" if "homework-answer-content" in str(tutor_content) else "tutor"
+            tutor_kind = (
+                "homework_learning_html"
+                if "homework-answer-content" in str(tutor_content)
+                else _tutor_content_kind(tutor_content)
+            )
             push("agent", tutor_kind, tutor_content, updated_at)
 
         tutor_evidence = values.get("tutor_evidence") or []

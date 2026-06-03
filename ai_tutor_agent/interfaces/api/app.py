@@ -11,11 +11,13 @@ from .error_correction import router as error_correction_router
 from .history import messages_router, router as history_router
 from .knowledge import router as knowledge_router
 from .matlab_experiment import router as matlab_experiment_router
+from .question_help import router as question_help_router
 from .runtime import ApiRuntime, create_lifespan, get_frontend_dir
 from .session import router as session_router
-from ai_tutor_agent.ai_learning_path.ai_path_routes import (
-    router as ai_path_bp,
-)
+from .teaching_insights import router as teaching_insights_router
+from .wrong_questions import router as wrong_questions_router
+from ai_tutor_agent.ai_learning_path.ai_path_routes import router as ai_path_router
+
 
 def create_api_app(
     runtime_factory: Optional[Callable[[], ApiRuntime]] = None,
@@ -42,7 +44,10 @@ def create_api_app(
     app.include_router(knowledge_router)
     app.include_router(matlab_experiment_router)
     app.include_router(session_router)
-    app.include_router(ai_path_bp)
+    app.include_router(wrong_questions_router)
+    app.include_router(question_help_router)
+    app.include_router(teaching_insights_router)
+    app.include_router(ai_path_router)
 
     frontend_dir = get_frontend_dir()
     os.makedirs(frontend_dir, exist_ok=True)
@@ -69,7 +74,7 @@ def _ensure_api_port_available(host: str, port: int) -> None:
     if _is_port_available(host, port):
         return
     raise RuntimeError(
-        f"Web UI 端口 {port} 已被占用。请先关闭旧服务后再启动；本项目固定使用 http://localhost:{port}。"
+        f"Web UI port {port} is already in use. Stop the old process first; this project uses http://localhost:{port}."
     )
 
 
@@ -83,5 +88,5 @@ def run_api():
     host = (os.getenv("AI_TUTOR_HOST") or "0.0.0.0").strip() or "0.0.0.0"
     port = WEB_UI_PORT
     _ensure_api_port_available(host, port)
-    print(f"🚀 启动 Web UI: http://{_display_host(host)}:{port}")
+    print(f"Starting Web UI: http://{_display_host(host)}:{port}")
     uvicorn.run(app, host=host, port=port, log_level="warning")

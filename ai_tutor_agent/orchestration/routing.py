@@ -111,6 +111,28 @@ def build_route_logic(
             )
         )
 
+        # ── 教学推理透明：解释路由决策 ──
+        if state.get("thinking_mode", False):
+            decision_explain = {
+                "pass": f"✅ 通过（得分 {score} ≥ {pass_score}，逻辑 {logic_score} ≥ {logic_threshold}，概念 {concept_score} ≥ {concept_threshold}），进入下一节点规划",
+                "remediate": f"🔧 补讲（得分 {score} 在补救区间，方向{'正确' if is_correct_direction else '需调整'}），先讲错题再变式练习",
+                "reteach": f"🔄 重讲（得分 {score} 未达标，逻辑 {logic_score} / 概念 {concept_score}，第 {attempt_count + 1} 轮）" + (f"，建议先复习「{prerequisite_review_target}」" if prerequisite_review_target else ""),
+            }.get(decision, f"路由决策：{decision}")
+            sink.emit(
+                make_event(
+                    "thinking.step",
+                    "router",
+                    message=decision_explain,
+                    data={
+                        "category": "route_decision",
+                        "decision": decision,
+                        "score": score,
+                        "pass_score": pass_score,
+                        "attempt_count": attempt_count,
+                    },
+                )
+            )
+
         return decision
 
     return route_logic

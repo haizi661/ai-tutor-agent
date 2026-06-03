@@ -84,7 +84,19 @@
     const DEFAULT_ACCOUNT_PREFS = {
         display_name: '学习者',
         plan_label: 'Plus',
+        avatar_kind: 'default',
+        avatar_value: '',
     };
+
+    const ACCOUNT_AVATAR_CLASSES = [
+        'account-avatar--default',
+        'account-avatar--initial',
+        'account-avatar--blue',
+        'account-avatar--green',
+        'account-avatar--rose',
+        'account-avatar--amber',
+        'account-avatar--upload',
+    ];
 
     function readStoredPrefs(storageKey, defaults) {
         try {
@@ -118,6 +130,21 @@
         return readStoredPrefs(ACCOUNT_PREFS_STORAGE_KEY, DEFAULT_ACCOUNT_PREFS);
     }
 
+    function getNormalizedAccountPrefs(prefs = getAccountPrefs()) {
+        const displayName = String(prefs.display_name || DEFAULT_ACCOUNT_PREFS.display_name).trim() || DEFAULT_ACCOUNT_PREFS.display_name;
+        const planLabel = String(prefs.plan_label || DEFAULT_ACCOUNT_PREFS.plan_label).trim() || DEFAULT_ACCOUNT_PREFS.plan_label;
+        const avatarKind = ACCOUNT_AVATAR_CLASSES.includes(`account-avatar--${prefs.avatar_kind}`)
+            ? String(prefs.avatar_kind)
+            : DEFAULT_ACCOUNT_PREFS.avatar_kind;
+        const avatarValue = avatarKind === 'upload' ? String(prefs.avatar_value || '') : String(prefs.avatar_value || '');
+        return {
+            display_name: displayName,
+            plan_label: planLabel,
+            avatar_kind: avatarKind,
+            avatar_value: avatarValue,
+        };
+    }
+
     function applyNotificationPrefs(prefs = getNotificationPrefs()) {
         document.body.classList.toggle('ui-notify-hide-banner', !prefs.show_banner);
         document.body.classList.toggle('ui-notify-hide-events', !prefs.show_progress_events);
@@ -132,8 +159,9 @@
     }
 
     function applyAccountPrefs(prefs = getAccountPrefs()) {
-        const displayName = String(prefs.display_name || DEFAULT_ACCOUNT_PREFS.display_name).trim() || DEFAULT_ACCOUNT_PREFS.display_name;
-        const planLabel = String(prefs.plan_label || DEFAULT_ACCOUNT_PREFS.plan_label).trim() || DEFAULT_ACCOUNT_PREFS.plan_label;
+        const account = getNormalizedAccountPrefs(prefs);
+        const displayName = account.display_name;
+        const planLabel = account.plan_label;
 
         document.querySelectorAll('.sb-user-name, .sb-user-menu-name').forEach(node => {
             node.textContent = displayName;
@@ -141,6 +169,10 @@
         document.querySelectorAll('.sb-user-plan, .sb-user-menu-plan').forEach(node => {
             node.textContent = planLabel;
         });
+        document.querySelectorAll('.sb-user-avatar, .sb-user-menu-avatar, #settings-account-avatar-preview').forEach(node => {
+            applyAvatarToNode(node, account);
+        });
+        syncAccountAvatarChoiceState(account);
 
         const accountDisplayName = document.getElementById('config-account-display-name');
         if (accountDisplayName) accountDisplayName.textContent = displayName;
@@ -150,6 +182,33 @@
 
         const accountPlanSelect = document.getElementById('settings-account-plan');
         if (accountPlanSelect && accountPlanSelect.value !== planLabel) accountPlanSelect.value = planLabel;
+    }
+
+    function applyAvatarToNode(node, prefs) {
+        if (!node) return;
+        const account = getNormalizedAccountPrefs(prefs);
+        ACCOUNT_AVATAR_CLASSES.forEach(className => node.classList.remove(className));
+        node.classList.add(`account-avatar--${account.avatar_kind}`);
+        node.style.backgroundImage = '';
+        node.textContent = '';
+        if (account.avatar_kind === 'upload' && account.avatar_value) {
+            node.style.backgroundImage = `url("${account.avatar_value}")`;
+            node.setAttribute('aria-label', '自定义头像');
+            return;
+        }
+        if (account.avatar_kind === 'initial') {
+            node.textContent = account.display_name.slice(0, 1) || '学';
+        }
+        node.removeAttribute('aria-label');
+    }
+
+    function syncAccountAvatarChoiceState(prefs = getAccountPrefs()) {
+        const account = getNormalizedAccountPrefs(prefs);
+        document.querySelectorAll('[data-avatar-choice]').forEach(button => {
+            const active = button.dataset.avatarChoice === account.avatar_kind;
+            button.classList.toggle('is-active', active);
+            button.setAttribute('aria-pressed', active ? 'true' : 'false');
+        });
     }
 
     function updateNotificationPermissionLabel() {
@@ -198,8 +257,10 @@
         if (uiShowEventChips) uiShowEventChips.checked = Boolean(uiPrefs.show_event_chips);
         if (uiHideStatusBanner) uiHideStatusBanner.checked = Boolean(uiPrefs.hide_status_banner);
         if (uiReduceMotion) uiReduceMotion.checked = Boolean(uiPrefs.reduce_motion);
-        if (accountName && accountName !== document.activeElement) accountName.value = accountPrefs.display_name || DEFAULT_ACCOUNT_PREFS.display_name;
-        if (accountPlan) accountPlan.value = accountPrefs.plan_label || DEFAULT_ACCOUNT_PREFS.plan_label;
+        const normalizedAccount = getNormalizedAccountPrefs(accountPrefs);
+        if (accountName && accountName !== document.activeElement) accountName.value = normalizedAccount.display_name;
+        if (accountPlan) accountPlan.value = normalizedAccount.plan_label;
+        syncAccountAvatarChoiceState(normalizedAccount);
         updateNotificationPermissionLabel();
     }
 
@@ -224,9 +285,12 @@
     }
 
     function readAccountPrefsFromDom() {
+        const current = getNormalizedAccountPrefs();
         return {
             display_name: document.getElementById('settings-account-name')?.value?.trim() || DEFAULT_ACCOUNT_PREFS.display_name,
             plan_label: document.getElementById('settings-account-plan')?.value || DEFAULT_ACCOUNT_PREFS.plan_label,
+            avatar_kind: current.avatar_kind,
+            avatar_value: current.avatar_value,
         };
     }
 
@@ -274,8 +338,40 @@
     }
 
     function persistAccountPrefs(account = readAccountPrefsFromDom()) {
-        writeStoredPrefs(ACCOUNT_PREFS_STORAGE_KEY, account);
-        applyAccountPrefs(account);
+        const normalized = getNormalizedAccountPrefs(account);
+        writeStoredPrefs(ACCOUNT_PREFS_STORAGE_KEY, normalized);
+        applyAccountPrefs(normalized);
+    }
+
+    function persistAccountAvatar(avatarKind, avatarValue = '') {
+        const current = getNormalizedAccountPrefs();
+        persistAccountPrefs({
+            ...current,
+            display_name: document.getElementById('settings-account-name')?.value?.trim() || current.display_name,
+            plan_label: document.getElementById('settings-account-plan')?.value || current.plan_label,
+            avatar_kind: avatarKind,
+            avatar_value: avatarKind === 'upload' ? avatarValue : '',
+        });
+    }
+
+    function readUploadedAvatar(file) {
+        if (!file || !file.type?.startsWith('image/')) {
+            app.setInlineStatus?.('local-config-status', '请选择图片文件作为头像。', 'danger');
+            return;
+        }
+        if (file.size > 1024 * 1024) {
+            app.setInlineStatus?.('local-config-status', '头像图片超过 1MB，请换一张更小的图片。', 'danger');
+            return;
+        }
+        const reader = new FileReader();
+        reader.onload = () => {
+            persistAccountAvatar('upload', String(reader.result || ''));
+            app.setInlineStatus?.('local-config-status', '头像已更新。', 'success');
+        };
+        reader.onerror = () => {
+            app.setInlineStatus?.('local-config-status', '头像读取失败。', 'danger');
+        };
+        reader.readAsDataURL(file);
     }
 
     async function syncDesktopNotificationPermission(enabled) {
@@ -346,6 +442,16 @@
                 updateAccountEnvironmentSummary();
             });
         });
+        document.querySelectorAll('[data-avatar-choice]').forEach(button => {
+            button.addEventListener('click', () => {
+                persistAccountAvatar(button.dataset.avatarChoice || DEFAULT_ACCOUNT_PREFS.avatar_kind);
+            });
+        });
+        document.getElementById('settings-account-avatar-upload')?.addEventListener('change', event => {
+            const input = event.currentTarget;
+            readUploadedAvatar(input.files?.[0]);
+            input.value = '';
+        });
     }
 
     app.hydrateLocalClientSettings = function hydrateLocalClientSettings() {
@@ -358,9 +464,8 @@
     };
 
     function normalizeConfigSectionId(sectionId) {
-        const normalized = String(sectionId || '').trim();
+        const normalized = String(sectionId || '').trim().replaceAll('-', '_');
         if (!normalized) return 'applications';
-        if (normalized === 'error-correction') return 'error_correction';
         return normalized;
     }
 
@@ -369,6 +474,31 @@
         if (CONFIG_SECTION_META[normalized]) return normalized;
         if (document.querySelector(`[data-config-section="${normalized}"]`)) return normalized;
         return 'applications';
+    }
+
+    app.triggerAccountAvatarUpload = function triggerAccountAvatarUpload() {
+        document.getElementById('settings-account-avatar-upload')?.click();
+    };
+
+    app.resetAccountAvatar = function resetAccountAvatar() {
+        persistAccountAvatar(DEFAULT_ACCOUNT_PREFS.avatar_kind, '');
+    };
+
+    function normalizeConfigSectionId(sectionId) {
+        const normalized = String(sectionId || '').trim().replaceAll('-', '_'); // accepts legacy "error-correction"
+        return CONFIG_SECTION_META[normalized] ? normalized : 'applications';
+    }
+
+    function getResolvedConfigSection(sectionId) {
+        return normalizeConfigSectionId(sectionId);
+    }
+
+    function bindLocalConfigSectionNav() {
+        document.getElementById('local-config-nav')?.querySelectorAll('[data-config-section-tab]').forEach(tab => {
+            tab.addEventListener('click', () => {
+                app.switchLocalConfigSection?.(tab.dataset.configSectionTab || 'applications', { focus: true });
+            });
+        });
     }
 
     function focusLocalConfigSection(sectionId) {
@@ -712,6 +842,19 @@
         closeModelPicker();
     };
 
+    function populateQuestionHelpModel(modelName) {
+        const select = document.getElementById('question-help-model-select');
+        if (!select) return;
+        const desiredModel = String(modelName || 'qwen-vl-max-latest').trim() || 'qwen-vl-max-latest';
+        if (!select.querySelector(`option[value="${desiredModel}"]`)) {
+            const option = document.createElement('option');
+            option.value = desiredModel;
+            option.textContent = `${desiredModel}（当前）`;
+            select.appendChild(option);
+        }
+        select.value = desiredModel;
+    }
+
     app.populateLocalConfigForm = function populateLocalConfigForm(data) {
         if (!data) return;
         state.vendorCatalogs = data.vendors || state.vendorCatalogs;
@@ -719,6 +862,7 @@
         document.getElementById('local-llm-provider').value = data.llm_provider || 'openai';
         document.getElementById('local-openai-base').value = data.openai_api_base || '';
         document.getElementById('local-model-name').value = data.model_name || '';
+        populateQuestionHelpModel(data.question_help_model_name);
         document.getElementById('local-embedding-provider').value = data.embedding_provider || 'local';
         document.getElementById('local-embedding-model').value = data.embedding_model_name || '';
         document.getElementById('local-pdf-parse-backend').value = data.pdf_parse_backend || 'auto';
@@ -818,6 +962,8 @@
             openai_api_key: '',
             openai_api_base: document.getElementById('local-openai-base').value.trim(),
             model_name: vendorId === 'custom' ? document.getElementById('local-model-name').value.trim() : selectedModel,
+            question_help_model_name: document.getElementById('question-help-model-select')?.value || 'qwen-vl-max-latest',
+            question_help_openai_api_base: state.localConfig?.question_help_openai_api_base || '',
             embedding_provider: document.getElementById('local-embedding-provider').value,
             embedding_model_name: document.getElementById('local-embedding-model').value.trim(),
             pdf_parse_backend: document.getElementById('local-pdf-parse-backend').value,
@@ -885,12 +1031,23 @@
     window.focusPaddleOcrConfig = () => app.focusPaddleOcrConfig();
     window.switchLocalConfigSection = (sectionId) => app.switchLocalConfigSection(sectionId, { focus: true });
     window.syncLocalConfigAccountSummary = () => syncLocalConfigAccountSummary();
+    window.triggerAccountAvatarUpload = () => app.triggerAccountAvatarUpload();
+    window.resetAccountAvatar = () => app.resetAccountAvatar();
+    app.focusPaddleOcrConfig = function focusPaddleOcrConfig() {
+        app.openLocalConfigPanel?.('error_correction');
+        const block = document.getElementById('paddleocr-config-block');
+        block?.scrollIntoView?.({ block: 'center', behavior: 'smooth' });
+        block?.focus?.();
+    };
+    window.focusPaddleOcrConfig = () => app.focusPaddleOcrConfig();
 
     if (document.readyState === 'loading') {
         document.addEventListener('DOMContentLoaded', () => {
+            bindLocalConfigSectionNav();
             app.hydrateLocalClientSettings?.();
         }, { once: true });
     } else {
+        bindLocalConfigSectionNav();
         app.hydrateLocalClientSettings?.();
     }
 })();

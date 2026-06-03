@@ -18,6 +18,11 @@ PRE_TOPIC_FLOW_STATUSES = {
     "meta_qa",
     "smalltalk",
 }
+LEARNING_DIRECTION_KEYS = (
+    "learning_track",
+    "learning_track_label",
+    "learning_track_locked",
+)
 ASK_PREFIXES = ("/ask", "问:", "问题:")
 QUESTION_HINTS = (
     "为什么",
@@ -209,6 +214,24 @@ def _clear_interrupt_history(history: list) -> list:
     return cleaned
 
 
+def _initial_state_preserving_learning_direction(topic: str, state_values: dict) -> dict:
+    initial_state = build_initial_state(topic)
+    for key in LEARNING_DIRECTION_KEYS:
+        if key in state_values:
+            initial_state[key] = state_values.get(key)
+
+    preserved_direction_history = [
+        item
+        for item in state_values.get("message_history", []) or []
+        if isinstance(item, dict)
+        and str(item.get("kind") or "").strip() in {"course_choice_card", "course_choice_selection"}
+    ]
+    topic_history = list(initial_state.get("message_history") or [])
+    if preserved_direction_history:
+        initial_state["message_history"] = preserved_direction_history + topic_history
+    return initial_state
+
+
 def _should_continue_with_new_turn(state_values: dict, topic: str) -> bool:
     if not state_values or not topic.strip():
         return False
@@ -272,6 +295,18 @@ def run_learning_session(
     if state_snapshot and state_snapshot.values:
         state_values = dict(state_snapshot.values)
         state_values.update(build_learning_flow_scaffold(state_values))
+
+        # ── 同步推理模式状态到前端 ──
+        thinking_mode = bool(state_values.get("thinking_mode", False))
+        event_sink.emit(
+            make_event(
+                "session.thinking_mode",
+                "session",
+                message="推理模式已开启" if thinking_mode else "推理模式已关闭",
+                data={"thinking_mode": thinking_mode},
+            )
+        )
+
         homework_items = list(state_values.get("homework_items") or [])
         homework_status = str(state_values.get("homework_status") or "").strip()
 
@@ -425,7 +460,7 @@ def run_learning_session(
                     },
                 )
             )
-            app.invoke(build_initial_state(topic), config=thread_config)
+            app.invoke(_initial_state_preserving_learning_direction(topic, state_values), config=thread_config)
             return
 
         if (
@@ -608,7 +643,7 @@ def run_learning_session(
                     data={"thread_id": thread_id, "topic": topic},
                 )
             )
-            app.invoke(build_initial_state(topic), config=thread_config)
+            app.invoke(_initial_state_preserving_learning_direction(topic, state_values), config=thread_config)
             return
 
         if state_values.get("flow_status") in PRE_TOPIC_FLOW_STATUSES:
@@ -639,6 +674,14 @@ def run_learning_session(
             "session",
             message="\n这是一个全新的学习页，我们从头把这轮内容理顺。",
             data={"thread_id": thread_id},
+        )
+    )
+    event_sink.emit(
+        make_event(
+            "session.thinking_mode",
+            "session",
+            message="推理模式已关闭",
+            data={"thinking_mode": False},
         )
     )
     app.invoke(build_initial_state(topic), config=thread_config)

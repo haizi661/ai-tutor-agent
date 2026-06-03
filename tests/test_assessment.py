@@ -25,37 +25,46 @@ class FakeStreamingLLM:
         yield SimpleNamespace(content=response)
 
 
+class FailingStreamingLLM:
+    def __init__(self, message: str):
+        self.message = message
+
+    def stream(self, messages):
+        raise RuntimeError(self.message)
+        yield  # pragma: no cover
+
+
 def test_generate_radar_data_uses_rule_based_scores():
     questions = [
         {
             "id": 1,
             "type": "self_eval",
-            "dimension": "基础概念",
-            "question": "你对基础概念的掌握如何？",
+            "dimension": "控制系统基本概念",
+            "question": "你对控制系统基本概念的掌握如何？",
             "options": ["A", "B", "C", "D"],
             "correct_answer": "",
         },
         {
             "id": 2,
             "type": "objective",
-            "dimension": "基础概念",
-            "question": "基础题",
+            "dimension": "控制系统基本概念",
+            "question": "基本概念题",
             "options": ["A", "B", "C", "D"],
             "correct_answer": "C",
         },
         {
             "id": 3,
             "type": "self_eval",
-            "dimension": "逻辑推理",
-            "question": "你对逻辑推理的掌握如何？",
+            "dimension": "数学基础",
+            "question": "你对数学基础的掌握如何？",
             "options": ["A", "B", "C", "D"],
             "correct_answer": "",
         },
         {
             "id": 4,
             "type": "objective",
-            "dimension": "逻辑推理",
-            "question": "逻辑题",
+            "dimension": "数学基础",
+            "question": "数学基础题",
             "options": ["A", "B", "C", "D"],
             "correct_answer": "A",
         },
@@ -65,8 +74,8 @@ def test_generate_radar_data_uses_rule_based_scores():
     radar = _generate_radar_data(BufferedEventSink(), "控制理论", questions, answers)
 
     assert radar["dimensions"] == ASSESSMENT_DIMENSIONS
-    concept_index = ASSESSMENT_DIMENSIONS.index("基础概念")
-    logic_index = ASSESSMENT_DIMENSIONS.index("逻辑推理")
+    concept_index = ASSESSMENT_DIMENSIONS.index("控制系统基本概念")
+    logic_index = ASSESSMENT_DIMENSIONS.index("数学基础")
     assert radar["self_scores"][concept_index] == 100
     assert radar["objective_scores"][concept_index] == 100
     assert radar["gap_scores"][concept_index] == 0
@@ -85,7 +94,7 @@ def test_generate_radar_data_warns_when_objective_answer_key_missing():
             {
                 "id": 1,
                 "type": "objective",
-                "dimension": "基础概念",
+                "dimension": "控制系统基本概念",
                 "question": "缺少答案键",
                 "options": ["A", "B", "C", "D"],
                 "correct_answer": "",
@@ -117,6 +126,65 @@ def test_generate_profile_report_returns_bridge_copy_and_streams_chunks():
     assert len(stream_events) >= 1
     streamed_text = "".join(event.message for event in stream_events)
     assert streamed_text == report
+
+
+def test_generate_profile_report_falls_back_when_llm_balance_is_insufficient():
+    sink = BufferedEventSink()
+    llm = FailingStreamingLLM("Error code: 402 - {'error': {'message': 'Insufficient Balance'}}")
+
+    report = _generate_profile_report(
+        llm,
+        sink,
+        "自动控制原理",
+        {"传递函数": {"gap_type": "aligned_low"}},
+        2,
+        "explain",
+        "自动控制的一般概念",
+    )
+
+    assert report.startswith("我现在大致知道从哪里开始了")
+    assert "自动控制的一般概念" in report
+    warnings = [event for event in sink.events if event.type == "session.warning" and event.source == "user_profiler"]
+    assert warnings
+    assert "余额不足" in warnings[-1].message
+    stream_text = "".join(
+        event.message for event in sink.events
+        if event.type == "node.stream" and event.source == "user_profiler"
+    )
+    assert report in stream_text
+
+
+def test_user_profiler_continues_to_initial_node_selector_when_llm_balance_is_insufficient():
+    sink = BufferedEventSink()
+    llm = FailingStreamingLLM("Error code: 402 - {'error': {'message': 'Insufficient Balance'}}")
+
+    class GraphPipeline:
+        node_map = {
+            "KM001": {
+                "node_id": "KM001",
+                "name": "自动控制的一般概念",
+                "prerequisite_nodes": [],
+                "source_type": "skeleton_chapter_anchor",
+            }
+        }
+
+    node = build_user_profiler_node(llm, sink, GraphPipeline())
+    result = node(
+        {
+            "current_topic": "自动控制原理",
+            "assessment_questions": [
+                {"id": 1, "type": "subjective_choice", "concept": "传递函数", "question": "Q", "options": ["A", "B"], "score_map": {"A": 25, "B": 75}}
+            ],
+            "assessment_answers": {"1": "A"},
+            "turn_goal": "自动控制原理",
+            "topic_focus": "",
+        }
+    )
+
+    assert result["is_assessed"] is True
+    assert result["learning_resume_target"] == "initial_node_selector"
+    assert result["flow_status"] == "normal"
+    assert result["assessment_result"].startswith("我现在大致知道从哪里开始了")
 
 
 def test_user_profiler_hands_off_to_initial_node_selector_instead_of_preselecting_gap_node():

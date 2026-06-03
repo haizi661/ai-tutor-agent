@@ -1,11 +1,11 @@
 # AI Tutor Agent 当前完成情况与使用说明
 
-更新时间：2026-05-02
+更新时间：2026-06-01
 项目根目录：本文所有命令默认都在本仓库根目录执行，路径统一使用项目内相对路径。
 
 ## 1. 当前一句话结论
 
-当前项目已经从普通 RAG 问答/单题陪练，推进到“知识图谱 2.1 节点路径 + 图谱 2.2 临时问答/证据增强 + LangGraph 显式状态机 + 学生长期状态”的节点制掌握学习原型。
+当前项目已经从普通 RAG 问答/单题陪练，推进到"知识图谱驱动 + 多步学习路径 + 节点制掌握学习"的自适应伴学原型，并接入了错题本、题目答疑和客观题复盘的基础学习工具。
 
 可运行主线已经具备：
 
@@ -13,16 +13,19 @@
 新主题输入
 → 主题确认
 → 学前诊断
-→ 初始图谱节点选择
+→ 学习路径生成（根据用户画像多步规划，每步含多个节点）
+→ 初始图谱节点选择（从路径第一步选节点）
 → 节点内容加载
 → Tutor 按当前节点讲解
 → 课后停顿：自由追问/表达卡点，或进入节点小测
 → 节点后客观题批量测试
 → 未通过：错题讲解 + 变式题
-→ 通过：下一节点规划
+→ 通过：下一节点规划（按当前 Step 内找 → Step 完了推进下一步 → 全部完成进作业）
 → 继续下一节点 / 结束本轮学习生成作业
-→ 二次登录恢复作业或继续学习
+→ 二次登录恢复作业或继续学习（从持久化路径恢复）
 ```
+
+旁路学习工具已经可用：侧边栏“错题本”按知识节点整理错题，侧边栏“题目答疑”用于临时文字/图片题解答。两者不会改变主线图谱推进状态，除非后续显式加入新的产品规则。
 
 但仍要严谨区分：这是“主流程主体闭合、可测试、可演示”的版本，还不是最终产品化版本。题库内容、真实端到端浏览器/API 回归、跨系统启动脚本与图谱运行资产治理仍需后续收敛。
 
@@ -30,7 +33,7 @@
 
 ### 2.1 LangGraph 主流程节点
 
-当前 `ai_tutor_agent/orchestration/workflow.py` 已注册 26 个节点，其中与严格节点制学习主线直接相关的是：
+当前 `ai_tutor_agent/orchestration/workflow.py` 已注册 28 个节点，其中与严格节点制学习主线直接相关的是：
 
 - `intake_router`
 - `greeter`
@@ -38,6 +41,7 @@
 - `assessment_generator`
 - `assessment_dialog`
 - `user_profiler`
+- `learning_plan_generator`
 - `initial_node_selector`
 - `node_content_loader`
 - `tutor`
@@ -58,7 +62,7 @@
 - `homework_scorer`
 - `homework_explainer`
 
-旧流程节点 `tester/evaluator/coach/next_step_selector/post_eval_selector` 仍作为兼容路径或旧路径存在，不应再当作目标主线的核心。
+旧流程节点 `tester/evaluator/coach/next_step_selector/post_eval_selector` 仍注册在 workflow.py 中作为兼容路径存在（连接到旧路由分支），但已不作为目标主线的核心路径。
 
 ### 2.2 图谱 2.1：学习路径与节点内容
 
@@ -66,7 +70,7 @@
 
 - 当前主教学图谱是 2026-04-27 图谱 B 运行资产：`data/knowledge_map_outputs/auto_control_knowledge_map_v2_nodes.csv` 与 `data/knowledge_map_outputs/auto_control_knowledge_map_v2_edges.csv`。
 - `GraphRAGPipeline` 默认读取图谱 B，并结合 `data/mineru_cache` 与 `data/media_evidence_index` 提供节点内容、临时问答与证据增强。
-- 历史 Graph A / A2 资料已归档到 `docs/archive/a2-control-theory/`，只保留作溯源与对照，不再作为当前主教学图谱，也不再由前端默认挂载为主 viewer。
+- 历史 Graph A / A2 资料不再保留在仓库中；唯一权威教学图谱是图谱 B 资产，前端不再默认挂载任何旧 viewer。
 - 迁移到新机器时，至少需要随代码提交或同步 `data/knowledge_map_outputs/auto_control_knowledge_map_v2_nodes.csv`、`data/knowledge_map_outputs/auto_control_knowledge_map_v2_edges.csv`、`data/knowledge_map_outputs/auto_control_knowledge_map_v2.json` 与 `data/media_evidence_index/`。`.env`、`data/chroma_db/`、上传 PDF 和 `data/mineru_cache/` 仍按本地资产处理，不应直接提交密钥或大体积缓存。
 - 如果新机器首次运行需要下载本地 embedding 模型，默认 HuggingFace 源不可达时会自动改用 `HF_MIRROR_ENDPOINT`，默认镜像为 `https://hf-mirror.com`；也可以在 `.env` 中改成自己的镜像或关闭 `HF_ENDPOINT_FALLBACK_ENABLED`。
 
@@ -82,7 +86,7 @@
 - GraphRAG 学习回答会把正文引用的公式、图表、表格绑定在对应解释段落附近；未被正文引用的补充媒体只保留为最多 3 张参考卡，恢复旧历史时前端也会做同样的去重和限量。
 - `GraphMediaEnricher` 在节点 scope 没有可用图时，会从同章 MinerU `full.md` 的 Markdown 图片中 fallback，并通过 manifest/images 目录恢复真实图片路径。
 - `MediaCandidateFilter` 会过滤截断或结构不闭合的 LaTeX 公式候选，避免残缺公式进入证据卡片。
-- `data/media_evidence_index` 当前最小可用：10 个章节，3407 条标注资产。
+- `data/media_evidence_index` 当前最小可用：11 个章节，2928 条标注资产。
 
 可用检查命令：
 
@@ -103,7 +107,48 @@ python -m ai_tutor_agent.knowledge_map.runtime_assets --media-index data/media_e
 
 当前口径：学生长期状态已经参与主流程，但仍属于轻量 JSON/本地存储原型；后续如果产品化，应升级为更明确的数据库 schema、迁移策略和用户隔离策略。
 
-### 2.5 用户画像和学习情况生成口径
+### 2.5 学习路径（Learning Plan）
+
+已完成：
+
+- `learning_plan_builder.py` 实现了基于知识图谱拓扑排序 + 用户画像加权的多步学习路径生成算法。
+- 路径结构：多步（Step），每步包含 1-N 个节点，按拓扑层级聚合，同一 chapter 的节点归为一组。
+- 画像影响：诊断中薄弱概念（`concept_gaps` calibrated 分低）的节点优先级更高；`difficulty_level` 影响每步节点数（1=慢节奏，5=快节奏）。
+- `learning_plan_generator` 节点在 `user_profiler` 之后运行，生成路径并写入 `AgentState` + `StudentState`。
+- `initial_node_selector` 优先从 `learning_plan[0]` 选节点，fallback 保持原逻辑。
+- `next_node_planner` 改为按 Step 推进：先在当前 Step 内找未学节点 → Step 完了推进到下一步 → 全部完成进入作业。
+- `session_resume_router` 恢复时从持久化的 `learning_plan` 找当前 Step 中未 mastered 的节点。
+- 路径持久化到 `StudentState`（JSON），会话恢复时复用，不重新生成。
+- 设计文档：`docs/plans/2026-05-28-learning-plan-design.md`。
+- 测试：`tests/test_learning_plan.py`，覆盖拓扑排序、路径生成、分组、跳过已掌握、Step 导航、节点集成。
+
+2026-05-29 简化为纯拓扑 BFS + 分支优先级：
+
+- 删除 v2 过度工程化代码（`_score_node`、`build_priority_plan`、`_compute_ready_set`、`_group_into_steps` 等，共 356 行）。
+- `build_learning_plan()` 改为：图谱 prerequisite_of 拓扑排序 → 评估 calibrated >= 60 标记已掌握跳过 → 同层节点按评估分低优先 → 每 Step 最多 3 节点。
+- `_determine_mastered_from_assessment()` 合并 StudentState 掌握状态和评估数据。
+- `update_learning_plan()` 简化为保留已完成步骤 + 委托 `build_learning_plan()` 重建剩余。
+- 设计思路：图谱前置关系是硬约束，画像只影响入口和同层排序，不做跨层重排。
+
+事件协议：
+- `learning_plan.generated` — 路径生成时发送，含 total_steps、total_nodes、plan_summary
+- `learning_plan.progress` — 节点推进时发送，含 current_step、step_progress
+- `learning_plan.reused` — 恢复复用时发送
+
+当前口径：学习路径后端已简化为纯拓扑 BFS + 分支优先级，前端路径面板已实现为聊天区右侧独立面板。
+
+### 2.5.1 学习路径面板（前端）
+
+已完成：
+
+- 独立面板渲染在聊天区右侧，显示完整学习路径进度。
+- 面板显示每个 Step 的名称、节点列表、完成状态（✅/🔵/⬜）和当前进度。
+- 当前 Step 展开显示节点详情，已完成和待学习 Step 折叠。
+- 节点 ID 作为 `userKnowledgeGraph` 的 key（不再使用中文标题），与后端 KG 数据结构一致。
+- 面板宽度固定为 360px（`width`/`min-width`/`max-width`），展开节点时宽度不再变化。
+- CSS 防护：`scrollbar-gutter: stable` 确保滚动条始终占位；所有下级容器 `max-width: 100%; overflow: hidden` 防止内容推宽。
+
+### 2.6 用户画像和学习情况生成口径
 
 当前画像不是一个单独的 `user_profile` 文件，而是由“学前诊断画像 + 学习过程状态”共同形成。
 
@@ -126,20 +171,61 @@ python -m ai_tutor_agent.knowledge_map.runtime_assets --media-index data/media_e
 - 当前学前测评要继续强化自评题与客观校准题的配对，否则只能得到主观起点，难以稳定识别"高估自己"的情况。
 - 初始节点选择后续应真正使用画像信号，但必须受知识图谱前置关系约束，不能只按最低分跳到任意节点。
 
-### 2.6 测试状态
+### 2.7 错题本、题目答疑、客观题复盘与公式渲染
 
-2026-04-28 复查记录中已运行聚焦回归：
+已完成基础闭环：
+
+- 错题本后端：`GET /api/students/{student_id}/wrong-questions` 支持 `node_id`、`mastered`、`page`、`page_size`、`sort`；`sort` 支持 `latest`、`wrong_count`、`reviewed`。响应包含 `items`、`total`、`total_all`、`total_unmastered`、`total_mastered` 和分页字段。
+- 错题本掌握状态：`POST /api/students/{student_id}/wrong-questions/{question_id}/master` 使用 `{ "mastered": true/false }` 标记已掌握或取消掌握；`POST /api/students/{student_id}/wrong-questions/{question_id}/review` 标记已复习。
+- 错题本前端：`frontend/assets/js/wrong-book.js` 默认显示待复习题，提供“全部 / 待复习 / 已掌握”筛选，按节点分组展示题干、答案、错因、讲解、判断依据、下一步和错误选项分析。
+- 题目答疑后端：`GET /api/students/{student_id}/question-help` 返回解答历史；`POST /api/students/{student_id}/question-help` 接收 `question_text`、`images`、`current_node_id`、`current_node_name`、`answer_mode`。`answer_mode` 包含 `quick`、`deep`、`vision`，有图片且模式无效时默认使用 `vision`。
+- 题目答疑前端：`frontend/assets/js/question-help.js` 提供当前解答工作区、解答方式选择、图片上传和历史记录列表。记录写入 `StudentState.question_help_records`，不自动进入错题本。
+- 题目答疑输出契约：模型回答应使用 `### 考点`、`### 解题步骤`、`### 最终答案`、`### 易错提醒` 四个 Markdown 小节；公式使用行内 `\(...\)` 和行间 `$$...$$`。
+- 客观题复盘：前端选项改为整行可读布局，提交后每题显示“本题解析”，并结构化展示判断依据、所选项问题、常见误区和下一步。
+- 本地渲染：`frontend/index.html` 加载本地 `marked` 与 `katex` vendor 文件；`frontend/assets/js/ui.js` 暴露 `app.renderMarkdownContent` 与 `app.renderMath`，题目答疑和复盘区域复用同一套 sanitizer 与公式渲染。
+
+仍未完成的边界：
+
+- 错题本还没有“复习本节点”按钮，也没有真正的“再做一遍原题”交互；当前只能展开讲解和切换掌握状态。
+- 错题本前端还没有暴露“按做错时间倒序 / 做错最多 / 最久未复习”的排序控件；后端排序参数已经存在。
+- 题目答疑当前是一次请求返回完整解答，不是真 token 流式输出。
+- 重复做错后的变式训练阈值、暂停规则和“讲解后是否继续训练”的确认动作还需要产品规则与测试。
+
+### 2.8 测试状态
+
+当前全量测试基线：
 
 ```bash
-PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 pytest -q \
-  tests/test_workflow.py \
-  tests/test_node_selection_and_content_loader.py \
-  tests/test_temporary_question_flow.py \
-  tests/test_objective_learning_flow.py \
-  tests/test_homework_answer_flow.py \
-  tests/test_session_resume_router.py \
-  tests/test_graph_integrity.py
+PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 pytest -q
+# 630 passed, 5 skipped, 5 warnings
 ```
+
+warnings 为既有 SWIG DeprecationWarning，不是本轮主流程逻辑失败。
+
+测试演进时间线：
+
+| 日期 | 迭代内容 | 全量通过数 |
+|------|----------|-----------|
+| 2026-05-01 | 历史恢复、交流框高度、公式/图表顺序 | 452 |
+| 2026-05-02 | 用户知识图谱、evidence 统一、死代码清理 | 452 |
+| 2026-05-03 | post_lesson_choice 状态修复、前端表格冗余隐藏 | 452 |
+| 2026-05-28 | 学习路径 v1 实现（拓扑排序+分步聚合） | 606 |
+| 2026-05-29 | 学习路径 v2 简化（纯拓扑 BFS）、错题本、题目答疑、公式渲染 | 630 |
+| 2026-06-01 | 学习路径面板宽度稳定、CSS 防护加固、E2E 浏览器验收 | 630 |
+
+聚焦回归说明：
+
+- 后端路由、LLM prompt 契约、前端卡片文案、证据卡片 HTML、图表 fallback 与残缺公式过滤的结构契约已由多项聚焦回归覆盖（2026-04-28：88 passed / 2026-04-30：66 passed / 52+25 passed）。
+- 2026-05-29 错题本/题目答疑/客观题复盘相关聚焦回归：128 passed。
+- 2026-06-01 浏览器 E2E 验收：前端渲染、课程方向、主题确认、考前摸底触发链路验证通过；LLM 流式回答因 API 配置阻塞，属基础设施问题非代码问题。
+- 所有聚焦回归仍不能替代真实端到端浏览器/API 回归，详见 #3 缺口。
+
+2026-06-01 浏览器实测：
+
+- 首页渲染：课程方向卡片、侧边栏历史列、学习路径面板打开/关闭、聊天输入框均正常。
+- 点击方向 → 新会话创建 → 用户消息发送 → 主题确认卡片渲染 → 点击摸底：流程推进正确。
+- 学习路径面板宽度稳定（360px 固定），点击展开节点时宽度不变。
+- CSS 防护已加固：`width/min-width/max-width: 360px` + 所有下级容器 `max-width: 100%; overflow: hidden`。
 
 结果：
 
@@ -212,7 +298,7 @@ PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 pytest -q
 结果：
 
 ```text
-424 passed, 5 warnings
+452 passed, 5 warnings
 ```
 
 2026-05-02 用户知识图谱（KG）实现、evidence 架构统一、死代码清理后运行：
@@ -224,16 +310,57 @@ PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 pytest -q
 结果：
 
 ```text
-450 passed, 5 warnings
+452 passed, 5 warnings
 ```
 
-同日浏览器实测恢复 `awaiting_post_lesson_choice` 历史页：
+2026-05-02 浏览器实测恢复 `awaiting_post_lesson_choice` 历史页：
 
 - 顶部标题恢复为学习主题，当前节点恢复为图谱节点名；
 - 状态恢复为“等你决定课后步骤”，并自动定位到课后停顿卡片；
 - 底部交流框不遮挡当前卡片，页面无横向溢出；
 - 旧历史中的 GraphRAG 补充媒体被限制为 3 张，重复媒体为 0；
 - 宽表格和公式仍在局部 viewport 内滚动。
+
+2026-05-03 post_lesson_choice 残留状态修复、_START_TEST_MARKERS 补全、表格冗余文本隐藏后运行：
+
+```bash
+PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 pytest -q
+# 452 passed, 5 warnings
+```
+
+修复内容：
+
+- `post_lesson_choice` 节点首次运行时重置 `post_lesson_choice: ""`，防止从临时问答返回后残留旧值导致路由错误进入临时问答。
+- `_START_TEST_MARKERS` 新增 `"start_test"` 和 `"temporary_question"`，修复系统内部命令被误判为自由提问。
+- 前端新增 `stripRedundantTextAfterTables()`：当答案含 `<table>` 时隐藏后续纯文本段落，遇到下一个结构化元素恢复显示。
+
+2026-05-29 学习路径简化（纯拓扑 BFS + 分支优先级）、教学融合（cherry-pick 8ab6927 素材包 + 教学契约 + 错题反馈回流 + 情绪调整 + 前置关联）、前端选择卡片滚动修复后运行：
+
+```bash
+PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 pytest -q
+# 630 passed, 5 skipped, 5 warnings
+```
+
+2026-05-29 错题本、题目答疑、客观题复盘、公式渲染与历史恢复相关聚焦回归：
+
+```bash
+PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 pytest -q \
+  tests/test_frontend_learning_content_layout.py \
+  tests/test_frontend_question_help_ui.py \
+  tests/test_frontend_objective_test_ui.py \
+  tests/test_objective_learning_flow.py \
+  tests/test_question_help_api.py \
+  tests/test_objective_remediation_flow.py \
+  tests/test_objective_remediation_regressions.py \
+  tests/test_graph_rag_learning_answer_html.py \
+  tests/test_history.py \
+  tests/test_session_resume_router.py \
+  tests/test_frontend_wrong_book_ui.py \
+  tests/test_wrong_questions_api.py \
+  tests/test_objective_history_and_remediation_timeline.py \
+  tests/test_frontend_html_safety.py
+# 128 passed, 5 warnings
+```
 
 ## 3. 当前主要缺口
 
@@ -255,6 +382,24 @@ PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 pytest -q
 - provider 不可用或题目不足时，节点仍 fallback 到 AI 生成或内置 fallback，避免流程中断。
 
 当前仓库中只保留最小 `assessment_questions.jsonl` 资产；节点客观题、变式题、作业题仍需继续补内容质量。因此现阶段不能称为“正式题库完成”，只能称为“题库接入机制已就绪，题库内容待扩充”。
+
+### P1：错题本基础可用，但复习闭环还不完整
+
+当前错题本已经能筛选待复习/已掌握、展开讲解、按节点查看并标记掌握。还需要补齐：
+
+1. “复习本节点”：从错题节点回到对应图谱节点学习流程。
+2. “再做一遍”：先前端本地重做原题并即时判分，再决定是否写回后端。
+3. 排序控件：把后端已有 `latest`、`wrong_count`、`reviewed` 暴露到 UI。
+4. 变式训练边界：连续错到阈值后先完成讲解，再询问是否继续变式训练，而不是无限出题。
+
+### P1：题目答疑需要从一次性解答升级为可控解答工作区
+
+当前题目答疑已经支持文字/图片、解答模式、历史记录和 Markdown/公式渲染。后续需要继续收敛：
+
+1. 是否引入真正流式输出；
+2. 不同解答模型的前端选择与后端配置一致性；
+3. 答疑结果是否允许一键加入错题本，加入时需要什么错因与节点绑定规则；
+4. 图片题识别失败、公式解析失败、模型不可用时的可见错误提示。
 
 ### P1：用户画像仍需升级为证据驱动的长期学习者模型
 
@@ -416,15 +561,15 @@ A B C D A B C D A B
 
 选择结束本轮学习时，系统会生成作业并写入学生状态。
 
+### 4.3.1 错题本与题目答疑
+
+- 错题本入口在侧边栏；默认显示待复习错题。可切换“全部 / 待复习 / 已掌握”，展开单题讲解，并标记已掌握或取消掌握。
+- 题目答疑入口在侧边栏；可粘贴题干或上传图片，选择“快速解答 / 深度解析 / 图片题专用”。解答记录会保存在当前学生状态中。
+- 题目答疑记录不会自动进入错题本；错题本目前主要由节点小测/错题订正流程写入。
+
 ### 4.4 查看知识图谱
 
-启动服务后打开：
-
-```text
-当前默认不再挂载历史 A2 viewer；如需查看旧资料，请直接打开 `docs/archive/a2-control-theory/viewer/index.html`。
-```
-
-或者在 Web 左侧点击“知识图谱”。
+启动服务后在 Web 左侧点击“知识图谱”即可打开当前图谱 B 视图；仓库不再保留历史 A2 / Graph A viewer。
 
 ### 4.5 命令行运行方式
 
@@ -493,15 +638,40 @@ PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 pytest -q \
   tests/test_graph_integrity.py
 ```
 
-### 5.4 运行资产同步
+### 5.4 API E2E Smoke
 
-如果 `data/media_evidence_index`、`data/mineru_cache` 或归档 viewer 投影 `docs/archive/a2-control-theory/viewer/data.js` 异常：
+不依赖浏览器，用 HTTP/SSE 跑通主流程：
+
+```bash
+# 完整主流程
+python scripts/smoke_strict_learning_flow.py --base-url http://127.0.0.1:8000
+
+# 临时追问流程
+python scripts/smoke_strict_learning_flow.py --base-url http://127.0.0.1:8000 --flow temporary_question
+
+# 两者都跑
+python scripts/smoke_strict_learning_flow.py --base-url http://127.0.0.1:8000 --flow both
+```
+
+覆盖：会话创建 → 主题启动 → SSE 消费 → 主题确认 → 测评作答 → 课后停顿 → 客观题 → 继续/作业选择 → 会话恢复。需要服务已启动且 LLM 已配置。
+
+### 5.5 运行资产检查
+
+```bash
+bash scripts/check_runtime_assets.sh
+```
+
+检查图谱 B CSV/JSON、media_evidence_index、GraphRAGPipeline 配置和内部 dangling refs。
+
+### 5.6 运行资产同步
+
+如果 `data/media_evidence_index` 或 `data/mineru_cache` 异常：
 
 ```bash
 scripts/sync_knowledge_map_runtime_assets.sh
 ```
 
-脚本会恢复图谱 B 运行资产、构建媒体索引并检查可用性；如果归档 A2 图谱包存在，还会顺手刷新 `docs/archive/a2-control-theory/viewer/data.js` 这个兼容性静态工件。历史 A2 viewer 不是当前主教学图谱，只是归档资料。
+脚本会恢复图谱 B 运行资产、构建媒体索引并检查可用性。如果外部传入了旧 `docs/archive/a2-control-theory/graph.json`，脚本会顺手刷新 `docs/archive/a2-control-theory/viewer/data.js` 这个兼容性静态工件；旧 A2 viewer 仅作归档查阅，不能作为当前主教学图谱。
 
 ## 6. 当前文档索引
 
@@ -512,13 +682,14 @@ scripts/sync_knowledge_map_runtime_assets.sh
 3. `docs/reports/2026-04-28-langgraph-final-closure-report.md`：2026-04-28 最终闭合报告，记录 88 项聚焦回归和图谱资产状态。
 4. `docs/knowledge-map-runtime-assets.md`：运行资产同步说明。
 5. `docs/plans/2026-04-30-interaction-artifact-validation-contract.md`：交互卡片、历史恢复与浏览器验收契约。
-6. `docs/plans/2026-04-28-strict-kg-mastery-mainflow-plan.md`：严格主流程设计长计划，作为历史设计依据。
+6. `docs/plans/2026-05-29-teaching-optimization-plan.md`：教学能力优化计划，包含错题反馈回流、情绪感知、课后推荐等待实施方向。
+7. `docs/plans/2026-04-28-strict-kg-mastery-mainflow-plan.md`：严格主流程设计长计划，作为历史设计依据。
 
 ## 7. 严谨汇报口径
 
 可以对外说：
 
-> 当前系统已经完成知识图谱驱动节点制掌握学习主流程的主体闭合：从主题确认、学前诊断、图谱节点选择、节点内容加载、讲解、自然追问、节点后客观测试、错题补救、下一节点规划、作业生成，到二次登录恢复和作业处理，均已形成显式节点和可测试路由。知识图谱 B 负责学习路径、节点内容、临时追问和证据增强；GraphRAG 证据已按公式/图表/表格卡片化展示，媒体证据索引当前包含 10 个章节、3407 条标注资产。历史 A2 / Graph A 已归档，不作为当前主教学图谱。聚焦回归已通过。
+> 当前系统已经完成知识图谱驱动节点制掌握学习主流程的主体闭合：从主题确认、学前诊断、图谱节点选择、节点内容加载、讲解、自然追问、节点后客观测试、错题补救、下一节点规划、作业生成，到二次登录恢复和作业处理，均已形成显式节点和可测试路由。知识图谱 B 负责学习路径、节点内容、临时追问和证据增强；GraphRAG 证据已按公式/图表/表格卡片化展示，媒体证据索引当前包含 11 个章节、2928 条标注资产。历史 A2 / Graph A 不再保留在仓库中，仅图谱 B 作为当前权威教学图谱。聚焦回归已通过。
 
 必须补一句：
 

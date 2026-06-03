@@ -6,7 +6,7 @@ from langchain_core.messages import HumanMessage, SystemMessage
 from ai_tutor_agent.knowledge_map.debug_graph_rag import build_answer_media_html, build_learning_answer_html
 
 from ..core.events import make_event
-from ..core.learning_support import normalize_graph_answer, trim_message_history
+from ..core.learning_support import normalize_graph_answer, record_student_temporary_question, trim_message_history
 from ..core.ports import RuntimeContext
 from ..core.state import AgentState
 from ..core.teacher_voice import build_teacher_voice
@@ -112,11 +112,51 @@ def _graph_rag_used_llm(graph_result: dict[str, object] | None) -> bool:
     return isinstance(plan, dict) and plan.get("used_llm") is True
 
 
+def _build_search_query(state: AgentState, query: str) -> str:
+    parts = [
+        str(state.get("current_topic") or "").strip(),
+        str(state.get("graph_anchor_title") or state.get("current_node_name") or "").strip(),
+        query,
+    ]
+    return " ".join(part for part in parts if part).strip()
+
+
+def _resolve_temporary_question_node(state: AgentState, graph_result: dict[str, object] | None) -> tuple[str, str]:
+    node_id = str(state.get("current_node_id") or state.get("graph_anchor_id") or "").strip()
+    node_title = str(state.get("current_node_name") or state.get("graph_anchor_title") or "").strip()
+    anchors = list((graph_result or {}).get("anchor_nodes") or [])
+    if not node_id and anchors:
+        first = anchors[0] if isinstance(anchors[0], dict) else {}
+        node_id = str(first.get("node_id") or "").strip()
+        node_title = node_title or str(first.get("name") or "").strip()
+    return node_id, node_title or node_id
+
+
+def _extract_temporary_question_refs(graph_result: dict[str, object] | None) -> list[str]:
+    refs: list[str] = []
+
+    def add_ref(value: object) -> None:
+        ref = str(value or "").strip()
+        if ref and ref not in refs:
+            refs.append(ref)
+
+    for item in list((graph_result or {}).get("evidence_items") or []):
+        if isinstance(item, dict):
+            add_ref(item.get("reference") or item.get("node_id") or item.get("node_name"))
+    for item in list((graph_result or {}).get("media_items") or []):
+        if isinstance(item, dict):
+            add_ref(item.get("reference") or item.get("node_name"))
+    for item in list((graph_result or {}).get("anchor_nodes") or []):
+        if isinstance(item, dict):
+            add_ref(item.get("node_id") or item.get("name"))
+    return refs
+
+
 def _build_graph_rag_answer_html(graph_result: dict[str, object], *, answer_override: str = "") -> str:
     payload = dict(graph_result or {})
     if answer_override:
         payload["answer"] = answer_override
-    return build_learning_answer_html(payload)
+    return build_learning_answer_html(payload, answer_context="temporary_question")
 
 
 def _build_graph_rag_debug_answer_html(graph_result: dict[str, object], *, answer_override: str = "") -> str:
@@ -151,7 +191,9 @@ def _build_graph_rag_llm_messages(state: AgentState, query: str, graph_result: d
                 "4. 如果正文分析到某个媒体，请在相关段落后单独保留一行 [[MEDIA:媒体reference]]，每个媒体最多出现一次\n"
                 "5. 已有媒体引用后不要再抄写同一个公式源码、图题、表格原文或 caption，前端会用媒体卡片展示\n"
                 "6. 不要机械套固定的“结论 -> 分析 -> 举例 -> 拓展 -> 依据”模板；按学生追问自然组织，可以是直接解释、换个例子、指出误区或给判断抓手\n"
-                "7. 最后一句自然收束：可以继续追问，也可以回到刚才主线继续"
+                "7. 不要输出裸数字引用、[KMxxx.summary]、'// 图...' 注释、手写的“相关公式与图表”区块或“依据”清单\n"
+                "8. 不要引入图谱结果中没有出现的节点编号、资料编号或引用；如果需要引用媒体，只能使用上方媒体列表里的 exact reference\n"
+                "9. 最后一句自然收束：可以继续追问，也可以回到刚才主线继续"
             )
         ),
     ]
@@ -181,7 +223,7 @@ def build_interruption_node(tutor_llm, runtime: RuntimeContext):
             )
         )
 
-        search_query = f"{state.get('current_topic', '')} {query}".strip()
+        search_query = _build_search_query(state, query)
         graph_result = None
         full_response = ""
         response_kind = "interruption"
@@ -207,6 +249,28 @@ def build_interruption_node(tutor_llm, runtime: RuntimeContext):
             ).strip()
             graph_context = str(graph_result.get("context_text") or "").strip()
             graph_used_llm = _graph_rag_used_llm(graph_result)
+
+            # ── 教学推理透明：解释临时问题分析 ──
+            if state.get("thinking_mode", False):
+                media_count = len(graph_result.get("media_items") or [])
+                evidence_count = len(graph_result.get("evidence") or [])
+                search_info = f"检索到 {evidence_count} 条证据" if evidence_count > 0 else "未找到直接证据，使用图谱上下文回答"
+                media_info = f"、{media_count} 个图表/公式" if media_count > 0 else ""
+                event_sink.emit(
+                    make_event(
+                        "thinking.step",
+                        "interruption_tutor",
+                        message=f"临时问题分析：「{query[:30]}{'...' if len(query) > 30 else ''}」→ {search_info}{media_info}",
+                        data={
+                            "category": "interruption_analysis",
+                            "query": query,
+                            "evidence_count": evidence_count,
+                            "media_count": media_count,
+                            "used_graph_rag": graph_used_llm is not None,
+                        },
+                    )
+                )
+
             if graph_used_llm:
                 full_response = _build_graph_rag_answer_html(graph_result).strip()
                 response_kind = "graph_rag_answer"
@@ -345,6 +409,18 @@ def build_interruption_node(tutor_llm, runtime: RuntimeContext):
         history.append({"role": "assistant", "kind": response_kind, "content": full_response, "data": response_data})
         message_history = list(state.get("message_history", []))
         message_history.append({"role": "assistant", "kind": response_kind, "content": full_response, "data": response_data})
+        student_id = str(state.get("student_id") or "default_student").strip() or "default_student"
+        evidence_node_id, evidence_node_title = _resolve_temporary_question_node(state, graph_result)
+        student_state_snapshot = record_student_temporary_question(
+            getattr(runtime, "student_state_store", None),
+            student_id=student_id,
+            node_id=evidence_node_id,
+            title=evidence_node_title,
+            question=query,
+            answer_kind=response_kind,
+            references=_extract_temporary_question_refs(graph_result),
+        )
+        student_snapshot_patch = {"student_state_snapshot": student_state_snapshot} if student_state_snapshot else {}
 
         if from_post_lesson:
             # 临时问题来自讲解后选择，直接回到 post_lesson_choice，不显示中断确认卡片
@@ -377,6 +453,7 @@ def build_interruption_node(tutor_llm, runtime: RuntimeContext):
                 "message_history": trim_message_history(message_history),
                 "llm_stream_disabled": llm_stream_disabled,
                 "llm_stream_failures": llm_stream_failures,
+                **student_snapshot_patch,
             }
 
         # 有 tester 待恢复或其他场景：显示中断确认卡片
@@ -416,6 +493,7 @@ def build_interruption_node(tutor_llm, runtime: RuntimeContext):
             "message_history": trim_message_history(message_history),
             "llm_stream_disabled": llm_stream_disabled,
             "llm_stream_failures": llm_stream_failures,
+            **student_snapshot_patch,
         }
 
     return node

@@ -1,0 +1,136 @@
+{
+  "version": "v1",
+  "graph_id": "auto_control_knowledge_map_v2",
+  "abilities": {
+    "A": "数学基础",
+    "B": "控制系统基本概念",
+    "C": "系统建模能力",
+    "D": "稳定性分析能力",
+    "E": "时域性能分析能力",
+    "F": "稳态误差分析能力",
+    "G": "根轨迹分析能力",
+    "H": "频域分析与校正能力"
+  },
+  "ability_descriptions": {
+    "A": "复数、拉普拉斯变换、微分方程、极点零点的熟悉程度",
+    "B": "开环、闭环、反馈、误差、控制器、被控对象等基本概念",
+    "C": "由微分方程、方块图或信号流图求传递函数的能力",
+    "D": "根据特征方程、极点或劳斯判据判断系统稳定性的能力",
+    "E": "计算一阶/二阶系统超调量、峰值时间、调节时间等性能指标",
+    "F": "判断系统型别并计算稳态误差",
+    "G": "根据开环零极点画根轨迹并判断参数稳定范围",
+    "H": "画 Bode 图、计算稳定裕度并选择校正方法"
+  },
+  "nodes": {
+    "KM001": {"ability_weights": {"A": 0.2, "B": 0.8}, "primary_ability": "B", "difficulty": 1, "estimated_time_min": 20, "importance": "core"},
+    "KM002": {"ability_weights": {"A": 0.2, "B": 0.8}, "primary_ability": "B", "difficulty": 1, "estimated_time_min": 20, "importance": "core"},
+    "KM003": {"ability_weights": {"B": 1.0},            "primary_ability": "B", "difficulty": 1, "estimated_time_min": 15, "importance": "core"},
+    "KM004": {"ability_weights": {"B": 1.0},            "primary_ability": "B", "difficulty": 1, "estimated_time_min": 15, "importance": "core"},
+    "KM005": {"ability_weights": {"B": 1.0},            "primary_ability": "B", "difficulty": 1, "estimated_time_min": 15, "importance": "core"},
+    "KM006": {"ability_weights": {"B": 1.0},            "primary_ability": "B", "difficulty": 2, "estimated_time_min": 20, "importance": "core"},
+
+    "KM007": {"ability_weights": {"A": 0.3, "C": 0.7}, "primary_ability": "C", "difficulty": 3, "estimated_time_min": 35, "importance": "core"},
+    "KM008": {"ability_weights": {"A": 0.5, "C": 0.5}, "primary_ability": "C", "difficulty": 3, "estimated_time_min": 35, "importance": "core"},
+    "KM009": {"ability_weights": {"A": 0.5, "C": 0.5}, "primary_ability": "C", "difficulty": 3, "estimated_time_min": 35, "importance": "core"},
+    "KM010": {"ability_weights": {"A": 0.3, "C": 0.7}, "primary_ability": "C", "difficulty": 3, "estimated_time_min": 30, "importance": "core"},
+    "KM011": {"ability_weights": {"C": 1.0},            "primary_ability": "C", "difficulty": 2, "estimated_time_min": 30, "importance": "supporting"},
+
+    "KM012": {"ability_weights": {"E": 1.0},            "primary_ability": "E", "difficulty": 3, "estimated_time_min": 35, "importance": "core"},
+    "KM013": {"ability_weights": {"E": 1.0},            "primary_ability": "E", "difficulty": 2, "estimated_time_min": 25, "importance": "core"},
+    "KM014": {"ability_weights": {"E": 1.0},            "primary_ability": "E", "difficulty": 2, "estimated_time_min": 30, "importance": "core"},
+    "KM015": {"ability_weights": {"E": 1.0},            "primary_ability": "E", "difficulty": 3, "estimated_time_min": 40, "importance": "core"},
+    "KM016": {"ability_weights": {"E": 1.0},            "primary_ability": "E", "difficulty": 4, "estimated_time_min": 40, "importance": "supporting"},
+    "KM017": {"ability_weights": {"D": 1.0},            "primary_ability": "D", "difficulty": 3, "estimated_time_min": 40, "importance": "core"},
+    "KM018": {"ability_weights": {"F": 1.0},            "primary_ability": "F", "difficulty": 3, "estimated_time_min": 35, "importance": "core"},
+    "KM019": {"ability_weights": {"E": 1.0},            "primary_ability": "E", "difficulty": 4, "estimated_time_min": 45, "importance": "supporting"},
+
+    "KM020": {"ability_weights": {"G": 1.0},            "primary_ability": "G", "difficulty": 3, "estimated_time_min": 35, "importance": "core"},
+    "KM021": {"ability_weights": {"G": 1.0},            "primary_ability": "G", "difficulty": 2, "estimated_time_min": 25, "importance": "core"},
+    "KM022": {"ability_weights": {"G": 1.0},            "primary_ability": "G", "difficulty": 3, "estimated_time_min": 35, "importance": "core"},
+    "KM023": {"ability_weights": {"G": 1.0},            "primary_ability": "G", "difficulty": 4, "estimated_time_min": 40, "importance": "supporting"},
+    "KM024": {"ability_weights": {"G": 0.6, "E": 0.4}, "primary_ability": "G", "difficulty": 3, "estimated_time_min": 30, "importance": "core"},
+    "KM025": {"ability_weights": {"G": 1.0},            "primary_ability": "G", "difficulty": 4, "estimated_time_min": 45, "importance": "supporting"},
+
+    "KM026": {"ability_weights": {"H": 1.0},            "primary_ability": "H", "difficulty": 3, "estimated_time_min": 35, "importance": "core"},
+    "KM027": {"ability_weights": {"H": 1.0},            "primary_ability": "H", "difficulty": 2, "estimated_time_min": 25, "importance": "core"},
+    "KM028": {"ability_weights": {"H": 1.0},            "primary_ability": "H", "difficulty": 3, "estimated_time_min": 35, "importance": "core"},
+    "KM029": {"ability_weights": {"H": 0.6, "D": 0.4}, "primary_ability": "H", "difficulty": 4, "estimated_time_min": 40, "importance": "core"},
+    "KM030": {"ability_weights": {"H": 1.0},            "primary_ability": "H", "difficulty": 3, "estimated_time_min": 35, "importance": "core"},
+    "KM031": {"ability_weights": {"H": 1.0},            "primary_ability": "H", "difficulty": 3, "estimated_time_min": 35, "importance": "supporting"},
+    "KM032": {"ability_weights": {"H": 1.0},            "primary_ability": "H", "difficulty": 4, "estimated_time_min": 45, "importance": "core"},
+    "KM033": {"ability_weights": {"H": 1.0},            "primary_ability": "H", "difficulty": 4, "estimated_time_min": 40, "importance": "supporting"},
+    "KM034": {"ability_weights": {"H": 1.0},            "primary_ability": "H", "difficulty": 4, "estimated_time_min": 40, "importance": "supporting"},
+
+    "KM035": {"ability_weights": {"H": 1.0},            "primary_ability": "H", "difficulty": 4, "estimated_time_min": 45, "importance": "optional"},
+    "KM036": {"ability_weights": {"B": 0.3, "H": 0.7}, "primary_ability": "H", "difficulty": 3, "estimated_time_min": 30, "importance": "optional"},
+    "KM037": {"ability_weights": {"A": 0.5, "H": 0.5}, "primary_ability": "H", "difficulty": 4, "estimated_time_min": 40, "importance": "optional"},
+
+    "KM038": {"ability_weights": {"C": 1.0},            "primary_ability": "C", "difficulty": 4, "estimated_time_min": 45, "importance": "optional"},
+    "KM039": {"ability_weights": {"C": 1.0},            "primary_ability": "C", "difficulty": 3, "estimated_time_min": 35, "importance": "optional"},
+    "KM040": {"ability_weights": {"D": 0.4, "C": 0.6}, "primary_ability": "C", "difficulty": 4, "estimated_time_min": 45, "importance": "optional"},
+    "KM041": {"ability_weights": {"H": 1.0},            "primary_ability": "H", "difficulty": 5, "estimated_time_min": 50, "importance": "optional"},
+    "KM042": {"ability_weights": {"H": 1.0},            "primary_ability": "H", "difficulty": 5, "estimated_time_min": 50, "importance": "optional"}
+  },
+  "step_templates": {
+    "step1_basic": {
+      "step_name": "建立自动控制基础认知",
+      "step_ability": "B",
+      "node_ids": ["KM001", "KM002", "KM003", "KM004", "KM005", "KM006"],
+      "expected_time_min": 105
+    },
+    "step2_modeling": {
+      "step_name": "建立数学建模能力",
+      "step_ability": "C",
+      "node_ids": ["KM007", "KM008", "KM009", "KM010", "KM011"],
+      "expected_time_min": 165
+    },
+    "step3_time_domain": {
+      "step_name": "掌握时域分析与稳定性",
+      "step_ability": "E",
+      "node_ids": ["KM012", "KM013", "KM014", "KM015", "KM016", "KM017", "KM018", "KM019"],
+      "expected_time_min": 290
+    },
+    "step4_root_locus": {
+      "step_name": "掌握根轨迹分析法",
+      "step_ability": "G",
+      "node_ids": ["KM020", "KM021", "KM022", "KM023", "KM024", "KM025"],
+      "expected_time_min": 210
+    },
+    "step5_frequency": {
+      "step_name": "掌握频域分析与校正",
+      "step_ability": "H",
+      "node_ids": ["KM026", "KM027", "KM028", "KM029", "KM030", "KM031", "KM032", "KM033", "KM034"],
+      "expected_time_min": 330
+    },
+    "step6_advanced": {
+      "step_name": "进入离散系统与综合",
+      "step_ability": "H",
+      "node_ids": ["KM035", "KM036", "KM037", "KM038", "KM039", "KM040", "KM041", "KM042"],
+      "expected_time_min": 340
+    }
+  },
+  "self_assessment": {
+    "scale": {
+      "1": "完全不会",
+      "2": "听过但不会做题",
+      "3": "能看懂简单例题",
+      "4": "能独立完成常见题",
+      "5": "能解释原理并解决综合题"
+    },
+    "questions": [
+      {"ability": "A", "prompt": "你对复数、拉普拉斯变换、微分方程、极点零点的熟悉程度？"},
+      {"ability": "B", "prompt": "你能否解释开环、闭环、反馈、误差、控制器、被控对象？"},
+      {"ability": "C", "prompt": "你能否由微分方程、方块图或信号流图求传递函数？"},
+      {"ability": "D", "prompt": "你能否根据特征方程、极点或劳斯判据判断系统稳定性？"},
+      {"ability": "E", "prompt": "你能否计算二阶系统的超调量、峰值时间、调节时间？"},
+      {"ability": "F", "prompt": "你能否判断系统型别并计算稳态误差？"},
+      {"ability": "G", "prompt": "你能否根据开环零极点画根轨迹并判断参数稳定范围？"},
+      {"ability": "H", "prompt": "你能否画 Bode 图、计算稳定裕度并选择校正方法？"}
+    ],
+    "default_scores_when_skipped": {
+      "A": 2, "B": 2, "C": 1, "D": 1, "E": 1, "F": 1, "G": 1, "H": 1
+    },
+    "confidence_after_self_assessment": 0.3,
+    "confidence_default": 0.2
+  }
+}

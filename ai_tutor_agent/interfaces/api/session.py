@@ -1,7 +1,7 @@
 import queue
 import threading
 import time
-from typing import Dict, Optional
+from typing import Any, Dict, Optional
 
 from fastapi import APIRouter, HTTPException, Request
 from fastapi.responses import StreamingResponse
@@ -30,6 +30,7 @@ PENDING_INTERACTION_FLOW_STATUSES = {
     "awaiting_temporary_question",
     "awaiting_objective_answers",
     "awaiting_variant_answers",
+    "awaiting_remediation_decision",
     "awaiting_continue_or_homework_choice",
     "awaiting_consolidation_choice",
     "awaiting_homework_review_choice",
@@ -44,6 +45,11 @@ class ChatRequest(BaseModel):
 
 class CreateSessionRequest(BaseModel):
     thread_id: str
+
+
+class LearningDirectionRequest(BaseModel):
+    track: str
+    label: Optional[str] = ""
 
 
 class AnswerRequest(BaseModel):
@@ -66,6 +72,11 @@ class AssessmentAnswerRequest(BaseModel):
     answer: str  # A/B/C/D
 
 
+class V2SelfAssessmentRequest(BaseModel):
+    thread_id: str
+    scores: Dict[str, int]  # {"A": 3, "B": 4, ...}
+
+
 class TopicConfirmRequest(BaseModel):
     thread_id: str
     confirmed: bool
@@ -78,8 +89,84 @@ class InterruptConfirmRequest(BaseModel):
     confirmed: bool
 
 
+class ThinkingModeRequest(BaseModel):
+    thread_id: str
+    thinking_mode: bool
+
+
 def _thread_config(thread_id: str) -> dict:
     return {"configurable": {"thread_id": thread_id}}
+
+
+LEARNING_DIRECTIONS = {
+    "control_theory": {
+        "track": "control_theory",
+        "label": "自动控制原理",
+        "topic": "自动控制原理",
+    },
+    "artificial_intelligence": {
+        "track": "artificial_intelligence",
+        "label": "人工智能",
+        "topic": "人工智能学习路径",
+    },
+}
+
+LEARNING_DIRECTION_ALIASES = {
+    "control": "control_theory",
+    "auto_control": "control_theory",
+    "control_theory": "control_theory",
+    "a2-control-theory": "control_theory",
+    "自动控制": "control_theory",
+    "自动控制原理": "control_theory",
+    "ai": "artificial_intelligence",
+    "artificial_intelligence": "artificial_intelligence",
+    "artificial-intelligence": "artificial_intelligence",
+    "人工智能": "artificial_intelligence",
+}
+
+
+def _normalize_learning_direction(track: str) -> dict:
+    normalized = str(track or "").strip().lower()
+    normalized = LEARNING_DIRECTION_ALIASES.get(normalized, normalized)
+    if normalized not in LEARNING_DIRECTIONS:
+        raise HTTPException(status_code=400, detail=f"Unsupported learning direction: {track}")
+    return LEARNING_DIRECTIONS[normalized]
+
+
+def _append_learning_direction_history(history: list, direction: dict) -> list:
+    track = direction["track"]
+    label = direction["label"]
+    filtered = [
+        item
+        for item in list(history or [])
+        if not (
+            isinstance(item, dict)
+            and str(item.get("kind") or "").strip() in {"course_choice_card", "course_choice_selection"}
+        )
+    ]
+    return filtered + [
+        {
+            "role": "assistant",
+            "kind": "course_choice_card",
+            "content": "请选择本次学习方向",
+            "data": {
+                "selected_track": track,
+                "selected_label": label,
+                "locked": True,
+                "statusText": f"已选择：{label}",
+                "options": [
+                    {"track": "control_theory", "label": "自动控制原理"},
+                    {"track": "artificial_intelligence", "label": "人工智能"},
+                ],
+            },
+        },
+        {
+            "role": "user",
+            "kind": "course_choice_selection",
+            "content": label,
+            "data": {"track": track, "label": label},
+        },
+    ]
 
 
 def _checkpoint_state_patch(thread_id: str, runtime, patch: dict) -> None:
@@ -108,7 +195,11 @@ def _checkpoint_exists(thread_id: str, runtime) -> bool:
 def _ensure_thread_checkpoint(thread_id: str, runtime) -> bool:
     if _checkpoint_exists(thread_id, runtime):
         return False
-    _checkpoint_state_patch(thread_id, runtime, build_initial_state(""))
+    safe_id = "".join(ch if ch.isalnum() or ch in {"_", "-"} else "_" for ch in thread_id[:24])
+    per_thread_student = f"student_{safe_id}" if safe_id else "default_student"
+    initial = build_initial_state("")
+    initial["student_id"] = per_thread_student
+    _checkpoint_state_patch(thread_id, runtime, initial)
     return True
 
 
@@ -190,6 +281,23 @@ def _run_graph_session(
                     "options": values.get("pending_interaction_options", []),
                     "recommended": values.get("pending_interaction_recommended", ""),
                 }
+                if pending_kind == "remediation_decision":
+                    rem_state = values.get("node_remediation_state") or {}
+                    wrong_explanations = values.get("wrong_question_explanations") or []
+                    end_data["data"] = {
+                        "score": rem_state.get("original_score", values.get("node_quiz_score", 0)),
+                        "pass_score": 80,
+                        "tier": "pass" if (rem_state.get("original_score", values.get("node_quiz_score", 0))) >= 80
+                                else "partial" if (rem_state.get("original_score", values.get("node_quiz_score", 0))) >= 60
+                                else "low",
+                        "wrong_count": len(wrong_explanations) or len(values.get("node_quiz_wrong_items") or []),
+                        "variant_rounds": rem_state.get("variant_rounds", 0),
+                        "max_variant_rounds": 2,
+                        "extra_remediation_question_count": rem_state.get("extra_remediation_question_count", 0),
+                        "max_extra_questions": 10,
+                        "same_objective_failures": rem_state.get("same_objective_failures", {}),
+                        "paused": False,
+                    }
         except Exception:
             end_data = {}
         runtime_context.event_sink.emit(make_event("session.end", "api", message="这一轮处理完成。", data=end_data))
@@ -205,7 +313,8 @@ def _graph_worker(thread_id: str, topic: str, runtime, event_q: queue.Queue, inp
         _store = getattr(runtime, "student_state_store", None)
         if _store is not None and current_state and current_state.values:
             try:
-                _snap = _store.load(thread_id)
+                student_id = str(current_state.values.get("student_id") or thread_id).strip() or thread_id
+                _snap = _store.load(student_id)
                 if _snap is not None:
                     graph_app.update_state(
                         thread_config,
@@ -249,6 +358,55 @@ def _resume_assessment_worker(
                 "session.info",
                 "api",
                 message="📝 已收到学前测评答案，正在校准起点，随后直接进入讲解…",
+            )
+        )
+        graph_app.invoke(None, config=thread_config)
+
+    _run_graph_session(thread_id, runtime, event_q, input_q, runner)
+
+
+def _resume_v2_self_assessment_worker(
+    thread_id: str,
+    scores: dict[str, int],
+    runtime,
+    event_q: queue.Queue,
+    input_q: queue.Queue,
+):
+    def runner(graph_app, runtime_context, thread_config):
+        graph_app.update_state(
+            thread_config,
+            {
+                "self_assessment_scores": scores,
+                "skip_self_assessment": False,
+                "is_assessed": True,
+                "flow_status": "profiling",
+                "learning_phase": "profile_complete",
+                "learning_resume_target": "user_profiler",
+                "learning_resume_reason": "v2_self_assessment_done",
+                # 强制 learning_plan_generator 重新生成路径（不自评旧 plan）
+                "learning_plan_v2": {},
+                "learning_plan": [],
+                "learning_plan_source": "",
+            },
+        )
+        # 同步清掉 StudentState 里的旧 plan
+        store = getattr(runtime, "student_state_store", None)
+        if store:
+            safe_id = "".join(ch if ch.isalnum() or ch in {"_", "-"} else "_" for ch in thread_id[:24])
+            sid = f"student_{safe_id}" if safe_id else "default_student"
+            from ...core.learning_support import mutate_student_state_snapshot
+            def _clear_plan(ss):
+                ss.learning_plan_v2 = {}
+                ss.learning_plan = []
+            try:
+                mutate_student_state_snapshot(store, sid, _clear_plan)
+            except Exception:
+                pass
+        runtime_context.event_sink.emit(
+            make_event(
+                "session.info",
+                "api",
+                message="已收到自评结果，正在生成学习路径…",
             )
         )
         graph_app.invoke(None, config=thread_config)
@@ -361,7 +519,7 @@ def _resume_topic_confirmation_worker(
                         "proposed_topic": "",
                         "flow_status": "assessment_pending" if requested_mode == "assessment" else "normal",
                         "learning_phase": "pre_assessment" if requested_mode == "assessment" else "node_selection",
-                        "learning_resume_target": "assessment_generator" if requested_mode == "assessment" else "initial_node_selector",
+                        "learning_resume_target": "assessment_generator" if requested_mode == "assessment" else "learning_plan_generator",
                         "learning_resume_reason": "topic_confirmed",
                         "teaching_strategy": "analogy" if requested_mode == "analogy_tutor" else "explain",
                         "topic_focus": topic_focus,
@@ -572,6 +730,50 @@ async def start_session(req: ChatRequest, request: Request):
     return {"status": "running", "thread_id": req.thread_id}
 
 
+def _reset_in_progress_learning_state(runtime, student_id: str = "default_student") -> None:
+    """新对话 / 全新会话：清掉学生态里的"进行中"字段，让新一轮从学习路径起点开始。
+
+    保留：
+    - knowledge_graph（长期掌握度记录）
+    - learning_history / wrong_question_book / question_help_records
+    - homework_assignments / homework_history（已布置/已完成的作业）
+
+    清空：
+    - current_node_id（避免被旧 in-progress 节点续讲）
+    - learning_plan / learning_plan_v2 / learning_plan_current_step
+      （强制 learning_plan_generator 重新生成新计划）
+    - learning_plan_source
+    - visited_nodes（本轮进度清零；长期掌握度由 knowledge_graph 记录）
+    - last_question / last_learning_at / session_index 等短期状态
+    """
+    store = getattr(runtime, "student_state_store", None)
+    if store is None:
+        return
+
+    def _mutator(ss: Any) -> None:
+        ss.current_node_id = ""
+        ss.last_question = ""
+        ss.learning_plan = []
+        ss.learning_plan_v2 = {}
+        ss.learning_plan_current_step = 0
+        ss.learning_plan_generated_at = ""
+        ss.learning_plan_source = ""
+        ss.visited_nodes = []
+        # 关键:重置 session_index,让新对话生成"第 1 号路径"而不是接着旧的编号
+        # 否则用户开新对话,系统会说"已生成本次第 N 号路径"(N 接着累计),违背预期
+        ss.session_index = 0
+        # 保留 wrong_nodes / recommended_queue / notes（这些是跨会话的诊断信号）
+        # 保留 knowledge_graph（已掌握节点的稳定记录）
+        # 保留 homework_* （已布置/已完成的作业）
+        # 保留 concept_mastery / self_assessment_scores（画像数据）
+
+    try:
+        store.update(student_id, _mutator)
+    except Exception:
+        # 复位失败不应该阻塞新会话创建
+        pass
+
+
 @router.post("/sessions")
 async def create_session(req: CreateSessionRequest, request: Request):
     runtime = get_runtime(request)
@@ -579,8 +781,78 @@ async def create_session(req: CreateSessionRequest, request: Request):
     if not thread_id:
         raise HTTPException(status_code=400, detail="thread_id is required")
     created = _ensure_thread_checkpoint(thread_id, runtime)
+    if created:
+        # 全新会话：每个 thread 有自己的 student_id，状态独立
+        safe_id = "".join(ch if ch.isalnum() or ch in {"_", "-"} else "_" for ch in thread_id[:24])
+        student_id = f"student_{safe_id}" if safe_id else "default_student"
+        _reset_in_progress_learning_state(runtime, student_id=student_id)
     runtime.session_manager.get_or_create(thread_id)
     return {"status": "created" if created else "exists", "thread_id": thread_id}
+
+
+@router.post("/sessions/{thread_id}/learning-direction")
+async def set_learning_direction(thread_id: str, req: LearningDirectionRequest, request: Request):
+    runtime = get_runtime(request)
+    thread_id = thread_id.strip()
+    if not thread_id:
+        raise HTTPException(status_code=400, detail="thread_id is required")
+
+    direction = dict(_normalize_learning_direction(req.track))
+    if req.label and req.label.strip():
+        direction["label"] = req.label.strip()
+
+    _ensure_thread_checkpoint(thread_id, runtime)
+    runtime.session_manager.get_or_create(thread_id)
+
+    runtime_context = RuntimeContext(
+        knowledge_provider=runtime.knowledge_provider,
+        settings=runtime.settings,
+        graph_rag_pipeline=runtime.graph_rag_pipeline,
+        student_state_store=runtime.student_state_store,
+        question_bank_provider=getattr(runtime, "question_bank_provider", None),
+    )
+    graph_app, conn = runtime.workflow_factory(runtime.settings, runtime=runtime_context)
+    try:
+        thread_config = _thread_config(thread_id)
+        state = graph_app.get_state(thread_config).values or {}
+        existing_flow_status = str(state.get("flow_status") or "greeting").strip() or "greeting"
+        flow_status = (
+            "ai_path_active"
+            if direction["track"] == "artificial_intelligence"
+            and existing_flow_status in {"greeting", "topic_intake", "meta_qa", "smalltalk"}
+            else existing_flow_status
+        )
+        topic = str(state.get("current_topic") or "").strip()
+        if not topic:
+            topic = direction["topic"]
+
+        graph_app.update_state(
+            thread_config,
+            {
+                "learning_track": direction["track"],
+                "learning_track_label": direction["label"],
+                "learning_track_locked": True,
+                "current_topic": topic,
+                "current_user_goal": state.get("current_user_goal") or topic,
+                "session_goal": state.get("session_goal") or topic,
+                "turn_goal": state.get("turn_goal") or topic,
+                "flow_status": flow_status,
+                "message_history": _append_learning_direction_history(
+                    state.get("message_history") or [],
+                    direction,
+                ),
+            },
+        )
+    finally:
+        conn.close()
+
+    return {
+        "status": "success",
+        "thread_id": thread_id,
+        "learning_track": direction["track"],
+        "learning_track_label": direction["label"],
+        "locked": True,
+    }
 
 
 @router.post("/sessions/{thread_id}/resume")
@@ -666,6 +938,20 @@ async def save_assessment_draft(req: AssessmentDraftRequest, request: Request):
     return {"status": "ok", "message": "Assessment draft saved."}
 
 
+@router.post("/v2_self_assessment")
+async def v2_self_assessment(req: V2SelfAssessmentRequest, request: Request):
+    """V2 自评问卷：8 维能力 1-5 分，一次性提交。"""
+    runtime = get_runtime(request)
+    _schedule_resume_worker(
+        req.thread_id,
+        runtime,
+        _resume_v2_self_assessment_worker,
+        req.thread_id,
+        req.scores,
+    )
+    return {"status": "ok", "message": "Self-assessment received, generating learning plan."}
+
+
 @router.post("/assessment_answer")
 async def assessment_answer(req: AssessmentAnswerRequest, request: Request):
     """对话式测评：用户逐题作答，每次提交一道题的答案。"""
@@ -711,6 +997,22 @@ async def confirm_interrupt(req: InterruptConfirmRequest, request: Request):
         req.confirmed,
     )
     return {"status": "ok", "message": "Interrupt confirmation received."}
+
+
+@router.post("/sessions/{thread_id}/thinking-mode")
+async def set_thinking_mode(thread_id: str, req: ThinkingModeRequest, request: Request):
+    """Toggle teaching reasoning transparency mode on/off."""
+    runtime = get_runtime(request)
+    _checkpoint_state_patch(
+        thread_id,
+        runtime,
+        {"thinking_mode": req.thinking_mode},
+    )
+    return {
+        "status": "ok",
+        "thinking_mode": req.thinking_mode,
+        "message": "已切换到思考模式" if req.thinking_mode else "已切换到标准模式",
+    }
 
 
 @router.get("/students/{student_id}/knowledge-graph")

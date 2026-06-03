@@ -84,9 +84,9 @@ class FakeGraphApp:
 
         if state.get("flow_status") == "profiling":
             radar = {
-                "dimensions": ["基础概念", "规则理解", "逻辑推理", "场景应用", "细节辨析", "综合应用"],
-                "self_scores": [60, 55, 50, 45, 40, 35],
-                "objective_scores": [65, 60, 55, 50, 45, 40],
+                "dimensions": ["数学基础", "控制系统基本概念", "系统建模能力", "稳定性分析能力", "时域性能分析能力", "稳态误差分析能力", "根轨迹分析能力", "频域分析与校正能力"],
+                "self_scores": [60, 65, 50, 55, 45, 40, 35, 30],
+                "objective_scores": [65, 70, 55, 60, 50, 45, 40, 35],
             }
             state.update(
                 {
@@ -114,7 +114,7 @@ class FakeGraphApp:
             {
                 "id": 1,
                 "type": "self_eval",
-                "dimension": "基础概念",
+                "dimension": "控制系统基本概念",
                 "question": "你对控制系统稳定性的理解程度如何？",
                 "options": ["A. 完全不懂", "B. 听说过", "C. 基本理解", "D. 熟练掌握"],
                 "correct_answer": "",
@@ -373,6 +373,22 @@ class TopicConfirmWorkflowFactory:
                         )
                     )
                     return
+                if state.get("learning_resume_target") == "learning_plan_generator":
+                    state["learning_plan"] = [
+                        {"step_index": 0, "step_name": "基础概念", "node_ids": ["KM001"], "node_names": ["自动控制的一般概念"], "status": "in_progress"},
+                    ]
+                    state["learning_plan_current_step"] = 0
+                    state["learning_plan_source"] = "profile_based"
+                    state["learning_resume_target"] = "initial_node_selector"
+                    self.checkpoint_store.save(thread_id, state, source="loop", step=3)
+                    self.runtime_context.event_sink.emit(
+                        make_event(
+                            "learning_plan.generated",
+                            "learning_plan_generator",
+                            message="已生成学习路径",
+                            data={"plan": state["learning_plan"], "total_steps": 1, "total_nodes": 1},
+                        )
+                    )
                 if state.get("learning_resume_target") == "initial_node_selector":
                     state["flow_status"] = "normal"
                     state["tutor_content"] = "开始直接讲解。"
@@ -635,7 +651,7 @@ def test_pre_assessment_pause_submit_and_restore_flow(tmp_path):
         assert history_after.status_code == 200
         after_payload = history_after.json()
         assert after_payload["state"]["is_assessed"] is True
-        assert after_payload["state"]["assessment_radar"]["dimensions"][0] == "基础概念"
+        assert after_payload["state"]["assessment_radar"]["dimensions"][0] == "数学基础"
         assert after_payload["state"]["tutor_content"] == "开始进行 Tutor 讲解。"
 
 
@@ -1419,8 +1435,8 @@ def test_profile_radar_stream_event_contract_includes_scores(tmp_path):
         assert 'event: profile.radar_data' in stream.text
         assert '"type": "profile.radar_data"' in stream.text
         assert '"source": "user_profiler"' in stream.text
-        assert '"dimensions": ["基础概念", "规则理解", "逻辑推理", "场景应用", "细节辨析", "综合应用"]' in stream.text
-        assert '"objective_scores": [65, 60, 55, 50, 45, 40]' in stream.text
+        assert '"dimensions": ["数学基础", "控制系统基本概念", "系统建模能力", "稳定性分析能力", "时域性能分析能力", "稳态误差分析能力", "根轨迹分析能力", "频域分析与校正能力"]' in stream.text
+        assert '"objective_scores": [65, 70, 55, 60, 50, 45, 40, 35]' in stream.text
 
 
 def test_session_manager_reset_queues_reuses_existing_queue_instances():
@@ -1485,6 +1501,8 @@ def test_local_config_round_trip(monkeypatch, tmp_path):
         "MINIMAX_API_KEY",
         "GLM_API_KEY",
         "MODEL_NAME",
+        "QUESTION_HELP_MODEL_NAME",
+        "QUESTION_HELP_OPENAI_API_BASE",
         "LLM_PROVIDER",
     ]:
         monkeypatch.delenv(key, raising=False)
@@ -1527,6 +1545,7 @@ def test_local_config_round_trip(monkeypatch, tmp_path):
         assert current.json()["has_gemini_api_key"] is True
         assert current.json()["paddleocr_api_url"] == "https://ocr.example.com/jobs"
         assert current.json()["paddleocr_model"] == "PaddleOCR-VL-1.5"
+        assert current.json()["question_help_model_name"] == "qwen-vl-max-latest"
 
         updated = client.post(
             "/api/config/local",
@@ -1542,6 +1561,7 @@ def test_local_config_round_trip(monkeypatch, tmp_path):
                 "openai_api_key": "",
                 "openai_api_base": "",
                 "model_name": "qwen-plus",
+                "question_help_model_name": "qwen-vl-plus-latest",
                 "embedding_provider": "local",
                 "embedding_model_name": "sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2",
                 "pdf_parse_backend": "auto",
@@ -1567,6 +1587,7 @@ def test_local_config_round_trip(monkeypatch, tmp_path):
         assert payload["config"]["model_name"] == "qwen-plus"
         assert payload["local"]["qwen_api_key"] == "****-new"
         assert payload["local"]["has_qwen_api_key"] is True
+        assert payload["local"]["question_help_model_name"] == "qwen-vl-plus-latest"
         assert payload["local"]["knowledge_top_k"] == 5
         assert payload["local"]["vector_store_dir"] == "data/chroma_db"
         assert payload["local"]["proxy_port"] == "7892"
@@ -1591,6 +1612,7 @@ def test_local_config_round_trip(monkeypatch, tmp_path):
                 "openai_api_key": "",
                 "openai_api_base": "",
                 "model_name": "glm-5",
+                "question_help_model_name": "qwen-vl-plus-latest",
                 "embedding_provider": "local",
                 "embedding_model_name": "sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2",
                 "pdf_parse_backend": "local",
@@ -1620,6 +1642,7 @@ def test_local_config_round_trip(monkeypatch, tmp_path):
         assert "CHAT_PROFILE=glm" in content
         assert "QWEN_API_KEY=qwen-key-new" in content
         assert "GLM_API_KEY=glm-key-new" in content
+        assert "QUESTION_HELP_MODEL_NAME=qwen-vl-plus-latest" in content
         assert "VECTOR_STORE_DIR=data/chroma_db" in content
         assert "CHROMA_DIR=data/chroma_db" in content
         assert "PROXY_PORT=7892" in content
