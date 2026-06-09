@@ -74,6 +74,68 @@ class MatlabExperimentService:
             "environment": environment,
         }
 
+    @property
+    def records_index_path(self) -> Path:
+        return self.workspace_dir / "matlab_records.json"
+
+    def list_records(self) -> dict[str, Any]:
+        records = self._read_records_index()
+        indexed_ids = {str(item.get("record_id")) for item in records}
+        for run_summary in sorted(
+            self.workspace_dir.glob("matlab_agent_*/run_summary.json"),
+            key=lambda path: path.stat().st_mtime,
+            reverse=True,
+        ):
+            try:
+                payload = json.loads(run_summary.read_text(encoding="utf-8"))
+            except Exception:
+                continue
+            record_id = str(payload.get("record_id") or f"run:{payload.get('run_id') or run_summary.parent.name}")
+            if record_id in indexed_ids:
+                continue
+            indexed_ids.add(record_id)
+            records.append(self._record_from_run_payload(payload, run_summary.parent))
+        records.sort(key=lambda item: str(item.get("updated_at") or item.get("created_at") or ""), reverse=True)
+        return {"status": "success", "records": records}
+
+    def create_record(self, *, title: str = "", user_prompt: str = "") -> dict[str, Any]:
+        records = self._read_records_index()
+        now = time.strftime("%Y-%m-%dT%H:%M:%S")
+        record_id = f"matlab_record_{time.strftime('%Y%m%d_%H%M%S')}_{uuid.uuid4().hex[:8]}"
+        prompt = str(user_prompt or "").strip()
+        record = {
+            "record_id": record_id,
+            "title": str(title or "").strip() or self._title_from_prompt(prompt) or "新仿真",
+            "created_at": now,
+            "updated_at": now,
+            "user_prompt": prompt,
+            "runs": [],
+            "status": "draft",
+        }
+        records.insert(0, record)
+        self._write_records_index(records)
+        return {"status": "success", "record": record}
+
+    def get_record(self, record_id: str) -> dict[str, Any]:
+        record_id = str(record_id or "").strip()
+        if not record_id:
+            raise ValueError("record_id is required.")
+        record = self._find_record(record_id)
+        if record is None and record_id.startswith("run:"):
+            run_id = record_id.split(":", 1)[1]
+            payload = self._load_run_summary(run_id)
+            if payload:
+                record = self._record_from_run_payload(payload, self.workspace_dir / run_id)
+        if record is None:
+            raise FileNotFoundError(record_id)
+        runs = []
+        for run_id in record.get("runs") or []:
+            payload = self._load_run_summary(str(run_id))
+            if payload:
+                runs.append(payload)
+        latest = runs[-1] if runs else None
+        return {"status": "success", "record": record, "runs": runs, "latest": latest}
+
     def probe_environment(self, *, timeout_seconds: int = 90, force: bool = False) -> dict[str, Any]:
         if self._environment_cache is not None and not force:
             return self._environment_cache
@@ -241,6 +303,7 @@ class MatlabExperimentService:
         self,
         *,
         user_prompt: str,
+        record_id: str = "",
         settings: Any | None = None,
         max_iterations: int = 3,
         timeout_seconds: int = 300,
@@ -259,6 +322,10 @@ class MatlabExperimentService:
         run_dir.mkdir(parents=True, exist_ok=True)
         result_path = run_dir / "result.json"
         plot_path = run_dir / "result_plot.png"
+        record_id = str(record_id or "").strip()
+        if not record_id:
+            record_id = str(self.create_record(user_prompt=prompt)["record"]["record_id"])
+        continuation_context = self._build_continuation_context(record_id)
 
         attempts: list[dict[str, Any]] = []
         trace: list[dict[str, Any]] = []
@@ -303,15 +370,19 @@ class MatlabExperimentService:
         for attempt_index in range(1, max(1, int(max_iterations)) + 1):
             if cancel_event is not None and cancel_event.is_set():
                 emit("cancelled", "用户已中断 MATLAB Agent 流程。")
-                return {
+                payload = {
                     "status": "cancelled",
                     "run_id": run_id,
+                    "record_id": record_id,
                     "mode": "agent",
                     "user_prompt": prompt,
                     "message": "MATLAB agent cancelled by user.",
                     "attempts": attempts,
                     "trace": trace,
                 }
+                self._write_json(run_dir / "run_summary.json", payload)
+                self._append_run_to_record(record_id, payload)
+                return payload
             emit("generate_code", f"第 {attempt_index} 轮：正在生成 MATLAB 仿真代码。", attempt=attempt_index)
             code_payload = self._generate_agent_matlab_code(
                 user_prompt=prompt,
@@ -323,6 +394,7 @@ class MatlabExperimentService:
                 previous_error=previous_error,
                 attempt_index=attempt_index,
                 environment=environment,
+                continuation_context=continuation_context,
             )
             code = code_payload["code"]
             generated_notes = code_payload.get("notes", "")
@@ -365,15 +437,19 @@ class MatlabExperimentService:
                         "policy_warning": policy_error,
                     },
                 )
-                return {
+                payload = {
                     "status": "cancelled",
                     "run_id": run_id,
+                    "record_id": record_id,
                     "mode": "agent",
                     "user_prompt": prompt,
                     "message": "MATLAB agent cancelled by user.",
                     "attempts": attempts,
                     "trace": trace,
                 }
+                self._write_json(run_dir / "run_summary.json", payload)
+                self._append_run_to_record(record_id, payload)
+                return payload
             if policy_error:
                 emit(
                     "policy_warning",
@@ -402,15 +478,19 @@ class MatlabExperimentService:
                         "execution": execution,
                     },
                 )
-                return {
+                payload = {
                     "status": "cancelled",
                     "run_id": run_id,
+                    "record_id": record_id,
                     "mode": "agent",
                     "user_prompt": prompt,
                     "message": execution.get("message", "MATLAB agent cancelled by user."),
                     "attempts": attempts,
                     "trace": trace,
                 }
+                self._write_json(run_dir / "run_summary.json", payload)
+                self._append_run_to_record(record_id, payload)
+                return payload
             png_paths = sorted(run_dir.glob("*.png"))
             has_result = result_path.exists()
             success = execution["status"] == "success" and has_result and bool(png_paths)
@@ -463,6 +543,7 @@ class MatlabExperimentService:
                 payload = {
                     "status": "success",
                     "run_id": run_id,
+                    "record_id": record_id,
                     "mode": "agent",
                     "user_prompt": prompt,
                     "attempts": attempts,
@@ -477,6 +558,7 @@ class MatlabExperimentService:
                     },
                 }
                 self._write_json(run_dir / "run_summary.json", payload)
+                self._append_run_to_record(record_id, payload)
                 return payload
 
             # Distinguish startup crashes from script-level errors.
@@ -518,6 +600,7 @@ class MatlabExperimentService:
         payload = {
             "status": "error",
             "run_id": run_id,
+            "record_id": record_id,
             "mode": "agent",
             "user_prompt": prompt,
             "message": "MATLAB agent could not produce a successful simulation within the retry budget.",
@@ -525,6 +608,7 @@ class MatlabExperimentService:
             "trace": trace,
         }
         self._write_json(run_dir / "run_summary.json", payload)
+        self._append_run_to_record(record_id, payload)
         return payload
 
     def resolve_asset_path(self, run_id: str, filename: str) -> Path:
@@ -541,6 +625,164 @@ class MatlabExperimentService:
     @staticmethod
     def _write_json(path: Path, payload: Any) -> None:
         path.write_text(json.dumps(payload, ensure_ascii=False, indent=2, default=str), encoding="utf-8")
+
+    def _read_records_index(self) -> list[dict[str, Any]]:
+        if not self.records_index_path.exists():
+            return []
+        try:
+            payload = json.loads(self.records_index_path.read_text(encoding="utf-8"))
+        except Exception:
+            return []
+        records = payload if isinstance(payload, list) else payload.get("records", [])
+        return [item for item in records if isinstance(item, dict)]
+
+    def _write_records_index(self, records: list[dict[str, Any]]) -> None:
+        self.workspace_dir.mkdir(parents=True, exist_ok=True)
+        self._write_json(self.records_index_path, {"records": records})
+
+    @staticmethod
+    def _title_from_prompt(prompt: str) -> str:
+        text = re.sub(r"\s+", " ", str(prompt or "")).strip()
+        if not text:
+            return ""
+        return text[:34] + ("..." if len(text) > 34 else "")
+
+    def _find_record(self, record_id: str) -> dict[str, Any] | None:
+        for record in self._read_records_index():
+            if str(record.get("record_id") or "") == record_id:
+                return record
+        return None
+
+    def _load_run_summary(self, run_id: str) -> dict[str, Any] | None:
+        safe_run_id = Path(str(run_id or "")).name
+        if not safe_run_id:
+            return None
+        summary_path = self.workspace_dir / safe_run_id / "run_summary.json"
+        if not summary_path.exists():
+            return None
+        try:
+            payload = json.loads(summary_path.read_text(encoding="utf-8"))
+        except Exception:
+            return None
+        if isinstance(payload, dict):
+            payload.setdefault("run_id", safe_run_id)
+            return payload
+        return None
+
+    def _record_from_run_payload(self, payload: dict[str, Any], run_dir: Path) -> dict[str, Any]:
+        run_id = str(payload.get("run_id") or run_dir.name)
+        record_id = str(payload.get("record_id") or f"run:{run_id}")
+        updated_at = time.strftime("%Y-%m-%dT%H:%M:%S", time.localtime(run_dir.stat().st_mtime))
+        prompt = str(payload.get("user_prompt") or "")
+        return {
+            "record_id": record_id,
+            "title": self._title_from_prompt(prompt) or run_id,
+            "created_at": updated_at,
+            "updated_at": updated_at,
+            "user_prompt": prompt,
+            "runs": [run_id],
+            "status": payload.get("status") or "unknown",
+        }
+
+    @staticmethod
+    def _truncate_text(value: Any, limit: int) -> str:
+        text = str(value or "")
+        return text[-limit:] if len(text) > limit else text
+
+    def _build_continuation_context(self, record_id: str) -> dict[str, Any]:
+        if not record_id:
+            return {}
+        try:
+            detail = self.get_record(record_id)
+        except Exception:
+            return {}
+        runs = detail.get("runs") or []
+        if not runs:
+            return {}
+        compact_runs: list[dict[str, Any]] = []
+        for run in runs[-3:]:
+            attempts = run.get("attempts") or []
+            compact_attempts = []
+            for attempt in attempts[-3:]:
+                compact_attempts.append(
+                    {
+                        "attempt": attempt.get("attempt"),
+                        "status": attempt.get("status"),
+                        "message": self._truncate_text(attempt.get("message", ""), 1200),
+                        "stderr": self._truncate_text(attempt.get("stderr", ""), 2000),
+                        "notes": self._truncate_text(attempt.get("notes", ""), 1200),
+                    }
+                )
+            latest_code = ""
+            if attempts:
+                latest_code = self._truncate_text(attempts[-1].get("code", ""), 12000)
+            compact_runs.append(
+                {
+                    "run_id": run.get("run_id"),
+                    "status": run.get("status"),
+                    "user_prompt": run.get("user_prompt"),
+                    "metrics": (run.get("result") or {}).get("metrics") or {},
+                    "analysis": self._truncate_text(run.get("analysis", ""), 4000),
+                    "attempts": compact_attempts,
+                    "latest_code": latest_code,
+                }
+            )
+        record = detail.get("record") or {}
+        return {
+            "record_id": record_id,
+            "title": record.get("title", ""),
+            "record_user_prompt": record.get("user_prompt", ""),
+            "prior_runs": compact_runs,
+            "instruction": (
+                "This is a continuation of an existing MATLAB simulation record. "
+                "Use the prior code, errors, metrics, and analysis as reference, "
+                "then write a complete new script for the current run."
+            ),
+        }
+
+    def _append_run_to_record(self, record_id: str, payload: dict[str, Any]) -> None:
+        run_id = str(payload.get("run_id") or "")
+        if not record_id or not run_id:
+            return
+        records = self._read_records_index()
+        record = None
+        for item in records:
+            if str(item.get("record_id") or "") == record_id:
+                record = item
+                break
+        if record is None:
+            seed_runs: list[str] = []
+            seed_payload: dict[str, Any] | None = None
+            if record_id.startswith("run:"):
+                seed_run_id = record_id.split(":", 1)[1]
+                seed_payload = self._load_run_summary(seed_run_id)
+                if seed_payload:
+                    seed_runs.append(seed_run_id)
+            record = {
+                "record_id": record_id,
+                "title": self._title_from_prompt(
+                    str(payload.get("user_prompt") or (seed_payload or {}).get("user_prompt") or "")
+                )
+                or run_id,
+                "created_at": time.strftime("%Y-%m-%dT%H:%M:%S"),
+                "updated_at": "",
+                "user_prompt": str(payload.get("user_prompt") or (seed_payload or {}).get("user_prompt") or ""),
+                "runs": seed_runs,
+                "status": "draft",
+            }
+            records.insert(0, record)
+        runs = [str(item) for item in record.get("runs") or []]
+        if run_id not in runs:
+            runs.append(run_id)
+        prompt = str(payload.get("user_prompt") or "")
+        record["runs"] = runs
+        record["user_prompt"] = prompt or record.get("user_prompt", "")
+        if not record.get("title") or record.get("title") == "New simulation":
+            record["title"] = self._title_from_prompt(prompt) or run_id
+        record["status"] = payload.get("status") or record.get("status") or "unknown"
+        record["updated_at"] = time.strftime("%Y-%m-%dT%H:%M:%S")
+        records.sort(key=lambda item: str(item.get("updated_at") or item.get("created_at") or ""), reverse=True)
+        self._write_records_index(records)
 
     # Maximum retries for MATLAB startup failures (fast crashes before script runs)
     _STARTUP_RETRY_LIMIT = 2
@@ -696,6 +938,7 @@ class MatlabExperimentService:
         previous_error: str,
         attempt_index: int,
         environment: dict[str, Any] | None = None,
+        continuation_context: dict[str, Any] | None = None,
     ) -> dict[str, str]:
         fallback = {
             "code": self._build_agent_fallback_script(
@@ -730,6 +973,15 @@ class MatlabExperimentService:
                     f"{previous_code[-8000:]}\n\nPrevious error/output:\n{previous_error[-6000:]}\n"
                     "Revise the code to fix the failure while preserving the user's intent.\n"
                 )
+            continuation_block = ""
+            if continuation_context:
+                continuation_block = (
+                    "\nExisting simulation record context:\n"
+                    f"{json.dumps(continuation_context, ensure_ascii=False)[:14000]}\n"
+                    "When the current user request modifies or extends that record, use this context as the baseline. "
+                    "Keep useful prior modeling choices, correct prior mistakes, and generate a complete new MATLAB script "
+                    "for the current run. Do not overwrite or depend on prior run directories.\n"
+                )
             human_msg = HumanMessage(
                 content=(
                     f"User simulation request:\n{user_prompt}\n\n"
@@ -751,6 +1003,7 @@ class MatlabExperimentService:
                     "- Always keep the script noninteractive and batch-safe: no open UI, no manual prompts, close figures, and write all artifacts under run_dir.\n"
                     "Required JSON fields inside result_json: model, parameters, metrics, series_preview or arrays. "
                     "Make the script robust: close figures, check file handles, and document which toolbox-backed functions are used in comments."
+                    f"{continuation_block}"
                     f"{repair_block}"
                 )
             )
@@ -802,13 +1055,16 @@ class MatlabExperimentService:
                     "type": "text",
                     "text": (
                         "请以自动控制/系统仿真的科研实验报告风格，用中文分析本次 MATLAB 仿真结果。\n"
-                        "写作要求：\n"
-                        "1. 输出应严谨、克制、可读，不使用 emoji，不输出寒暄语，不写“以下是”。\n"
-                        "2. 使用清晰小标题：实验目的、模型与参数、图像判读、关键指标、结论与局限。\n"
-                        "3. 指标必须带单位或物理含义说明；必要公式用简洁行内表达，不堆砌 LaTeX。\n"
-                        "4. 图像判读必须基于传入图片，例如曲线形态、峰值、振荡、稳定区间、频域特征或采样特征。\n"
-                        "5. 如果结构化指标与图像不一致、命名不规范或计算可能有误，直接指出并给出修正建议。\n"
-                        "6. 不编造未给出的实验条件；无法从图片或 JSON 判断的内容要明确说明。\n\n"
+                        "输出格式必须是可直接放入实验报告的纯文本，不使用 Markdown 或富文本标记。\n"
+                        "格式要求：\n"
+                        "1. 禁止输出 #、##、**、__、```、$$、\\[、\\]、项目符号 emoji 等排版符号。\n"
+                        "2. 小标题使用普通中文编号，例如“一、实验目的”“二、模型与参数”“三、图像判读”“四、关键指标”“五、结论与局限”。\n"
+                        "3. 每个小标题后写 1 到 3 个完整自然段；不要使用 Markdown 列表。若必须列举，用“第一，第二，第三”写成句子。\n"
+                        "4. 公式使用行内纯文本表达，例如 T(s)=10/(s^2+2s+15)，不要使用 LaTeX 环境、美元符号或反斜杠命令。\n"
+                        "5. 指标必须说明单位或物理含义；图像判读必须基于传入图片中的曲线形态、峰值、振荡、稳定区间、频域特征或采样特征。\n"
+                        "6. 如果结构化指标与图像不一致、命名不规范或计算可能有误，直接指出并给出修正建议。\n"
+                        "7. 不编造未给出的实验条件；无法从图片或 JSON 判断的内容要明确说明。\n"
+                        "8. 语言应严谨、克制、客观，不输出寒暄语，不写“以下是”。\n\n"
                         f"用户仿真需求：{user_prompt}\n"
                         f"结构化结果 JSON 摘要：{json.dumps(result, ensure_ascii=False)[:10000]}"
                     ),
@@ -830,6 +1086,8 @@ class MatlabExperimentService:
                         "content": (
                             "You are an independent MATLAB simulation result analyst for research workflows. "
                             "Use the provided plots and JSON data to write precise Chinese analysis. "
+                            "Return plain report text only. Do not use Markdown headings, bold markers, code fences, "
+                            "display-math delimiters, or raw LaTeX wrapper syntax. "
                             "This client is dedicated to MATLAB result analysis and must not affect other tutor prompts."
                         ),
                     },
@@ -837,9 +1095,36 @@ class MatlabExperimentService:
                 ],
             )
             text = self._extract_openai_message_text(response).strip()
-            return text or fallback
+            return self._normalize_agent_analysis_text(text) or fallback
         except Exception as exc:
             return f"{fallback}\n\nQwen-VL 视觉分析暂不可用：{exc}"
+
+    @staticmethod
+    def _normalize_agent_analysis_text(text: str) -> str:
+        """Remove presentation markup that is unsuitable for the plain report panel."""
+        clean = str(text or "").strip()
+        if not clean:
+            return ""
+        replacements = {
+            "```": "",
+            "$$": "",
+            "\\[": "",
+            "\\]": "",
+            "**": "",
+            "__": "",
+        }
+        for old, new in replacements.items():
+            clean = clean.replace(old, new)
+        lines: list[str] = []
+        for raw_line in clean.splitlines():
+            line = raw_line.strip()
+            line = re.sub(r"^#{1,6}\s*", "", line)
+            line = re.sub(r"^\s*[-*]\s+", "", line)
+            line = re.sub(r"^\s*>\s*", "", line)
+            lines.append(line)
+        clean = "\n".join(lines)
+        clean = re.sub(r"\n{3,}", "\n\n", clean)
+        return clean.strip()
 
     @staticmethod
     def _extract_openai_message_text(response: Any) -> str:

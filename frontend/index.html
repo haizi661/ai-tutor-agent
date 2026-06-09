@@ -1288,6 +1288,15 @@
                 <section class="matlab-experiment-body">
                     <form class="matlab-experiment-form" onsubmit="event.preventDefault(); runMatlabExperiment();">
                         <div class="matlab-experiment-status" id="matlab-experiment-status">等待检测 MATLAB 环境</div>
+                        <section class="matlab-records-panel" aria-label="MATLAB 仿真历史记录">
+                            <div class="matlab-records-header">
+                                <span>历史仿真</span>
+                                <button type="button" class="library-upload-btn library-upload-btn--ghost" id="matlab-new-record-btn" onclick="createMatlabRecord()">开始新仿真</button>
+                            </div>
+                            <div class="matlab-record-list" id="matlab-record-list">
+                                <div class="matlab-record-empty">正在加载历史记录...</div>
+                            </div>
+                        </section>
                         <label>
                             <span>自然语言仿真需求</span>
                             <textarea id="matlab-agent-prompt-input" rows="6">生成一个单位负反馈二阶系统的阶跃响应仿真，阻尼比 0.4，自然频率 3 rad/s，画出响应曲线并计算超调量、峰值时间、调节时间。</textarea>
@@ -1315,7 +1324,7 @@
     <script defer src="/assets/js/history.js"></script>
     <script defer src="/assets/js/knowledge.js"></script>
     <script defer src="/assets/js/error_correction.js?v=20260525-integrated"></script>
-    <script defer src="/assets/js/matlab_experiment.js?v=20260521-matlab-trace-panel-1"></script>
+    <script defer src="/assets/js/matlab_experiment.js?v=20260521-matlab-trace-panel-1-records-20260609"></script>
     <script defer src="/assets/js/session.js"></script>
     <script defer src="/assets/js/wrong-book.js?v=20260521-wb-filter"></script>
     <script defer src="/assets/js/question-help.js"></script>

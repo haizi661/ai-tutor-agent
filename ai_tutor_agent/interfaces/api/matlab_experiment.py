@@ -30,6 +30,38 @@ async def get_matlab_experiment_status():
     return get_matlab_experiment_service().status()
 
 
+@router.get("/records")
+async def list_matlab_experiment_records():
+    try:
+        return get_matlab_experiment_service().list_records()
+    except Exception as exc:
+        return _error_response(str(exc), status_code=500)
+
+
+@router.post("/records")
+async def create_matlab_experiment_record(request: Request):
+    payload = await request.json() if request.headers.get("content-type", "").startswith("application/json") else {}
+    try:
+        return get_matlab_experiment_service().create_record(
+            title=str(payload.get("title") or ""),
+            user_prompt=str(payload.get("user_prompt") or ""),
+        )
+    except Exception as exc:
+        return _error_response(str(exc), status_code=500)
+
+
+@router.get("/records/{record_id}")
+async def get_matlab_experiment_record(record_id: str):
+    try:
+        return get_matlab_experiment_service().get_record(record_id)
+    except FileNotFoundError:
+        return _error_response("MATLAB experiment record not found.", status_code=404)
+    except ValueError as exc:
+        return _error_response(str(exc))
+    except Exception as exc:
+        return _error_response(str(exc), status_code=500)
+
+
 @router.post("/run")
 async def run_matlab_experiment(request: Request):
     payload = await request.json() if request.headers.get("content-type", "").startswith("application/json") else {}
@@ -65,6 +97,7 @@ async def run_matlab_agent_experiment(request: Request):
     try:
         return get_matlab_experiment_service().run_agent_experiment(
             user_prompt=user_prompt,
+            record_id=str(payload.get("record_id") or ""),
             settings=runtime.settings,
             max_iterations=int(payload.get("max_iterations", 3)),
             timeout_seconds=int(payload.get("timeout_seconds", 300)),
@@ -86,6 +119,7 @@ async def start_matlab_agent_job(request: Request):
     user_prompt = str(payload.get("user_prompt") or "").strip()
     if not user_prompt:
         return _error_response("user_prompt is required.")
+    record_id = str(payload.get("record_id") or "").strip()
 
     job_id = f"matlab_job_{time.strftime('%Y%m%d_%H%M%S')}_{uuid.uuid4().hex[:8]}"
     with _jobs_lock:
@@ -95,6 +129,7 @@ async def start_matlab_agent_job(request: Request):
             "trace": [],
             "result": None,
             "error": "",
+            "record_id": record_id,
             "cancel_event": threading.Event(),
             "created_at": time.strftime("%Y-%m-%dT%H:%M:%S"),
         }
@@ -114,6 +149,7 @@ async def start_matlab_agent_job(request: Request):
                 cancel_event = _jobs[job_id]["cancel_event"]
             result = get_matlab_experiment_service().run_agent_experiment(
                 user_prompt=user_prompt,
+                record_id=record_id,
                 settings=runtime.settings,
                 max_iterations=int(payload.get("max_iterations", 3)),
                 timeout_seconds=int(payload.get("timeout_seconds", 300)),
