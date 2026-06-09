@@ -1788,6 +1788,23 @@ def _render_answer_line(
     )
 
 
+def _convert_markdown_inline(text: str) -> str:
+    """Convert Markdown inline formatting in already-HTML-escaped text.
+
+    Runs after html.escape and citation processing, so input may contain
+    <sup> citation markers.  Only safe inline patterns are converted:
+    **bold**, *italic*, `inline code`.  These are pure text markers that
+    html.escape leaves untouched (``*`` / `` ` `` are not special HTML chars).
+    """
+    # **bold** — must precede *italic* to avoid eating the ** as * pairs
+    text = re.sub(r"\*\*(.+?)\*\*", r"<strong>\1</strong>", text)
+    # *italic* — single * that is not adjacent to another *
+    text = re.sub(r"(?<!\*)\*(?!\*)(.+?)(?<!\*)\*(?!\*)", r"<em>\1</em>", text)
+    # `inline code`
+    text = re.sub(r"`([^`]+)`", r"<code>\1</code>", text)
+    return text
+
+
 def _render_learning_citations(
     line: str,
     citations_by_ref: dict[str, dict[str, str]],
@@ -1799,7 +1816,7 @@ def _render_learning_citations(
     allow_fallback_citations: bool = True,
 ) -> str:
     if not KM_INLINE_CITATION_RE.search(line):
-        return html.escape(line)
+        return _convert_markdown_inline(html.escape(line))
     parts: list[str] = []
     cursor = 0
     for match in KM_INLINE_CITATION_RE.finditer(line):
@@ -1824,7 +1841,7 @@ def _render_learning_citations(
             )
         cursor = match.end()
     parts.append(html.escape(line[cursor:]))
-    return "".join(parts)
+    return _convert_markdown_inline("".join(parts))
 
 
 def _citation_references_from_match(match: re.Match[str]) -> list[str]:
@@ -1847,7 +1864,12 @@ def _strip_stray_brackets(line: str) -> str:
 
 
 def _is_section_line(line: str) -> bool:
-    return any(line.startswith(prefix) for prefix in ["结论：", "分析：", "举例：", "拓展：", "依据："])
+    if any(line.startswith(prefix) for prefix in ["结论：", "分析：", "举例：", "拓展：", "依据："]):
+        return True
+    # **N.** 或 **N、** 格式的加粗序号标题
+    if re.match(r"\*\*\d+[.、]", line):
+        return True
+    return False
 
 
 def _is_learning_evidence_only_line(line: str) -> bool:

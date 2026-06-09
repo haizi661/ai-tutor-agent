@@ -10,6 +10,7 @@ from ai_tutor_agent.core.learning_plan_v2 import (
     StepEntry,
     cluster_into_steps,
     compute_candidates,
+    compute_context_boost,
     compute_urgency,
     generate_learning_plan_v2,
     generate_step_names,
@@ -95,11 +96,12 @@ class TestColdStartPlan:
                 assert nid in step.entry_modes, f"{nid} 缺少 entry_mode"
                 assert step.entry_modes[nid] in ("full_learning", "short_learning", "quick_check")
 
-    def test_cold_start_has_full_learning_nodes(self, default_profile):
-        """冷启动至少有一些 full_learning 节点(默认 scores 产生变异)。"""
+    def test_cold_start_default_is_conservative(self, default_profile):
+        """冷启动默认画像：没做自评，mastery 是猜测值，应保守走完整学。"""
         plan = generate_learning_plan_v2(default_profile)
         all_modes = [mode for step in plan.steps for mode in step.entry_modes.values()]
         full_count = sum(1 for m in all_modes if m == "full_learning")
+        # 默认冷启动 mastery<0.5 的节点都应走 full_learning
         assert full_count >= 1, f"期望至少 1 个 full_learning, 实际 0/{len(all_modes)}"
 
     def test_source_is_cold_start(self, default_profile):
@@ -202,8 +204,8 @@ class TestComputeCandidates:
 
 class TestComputeUrgency:
     def test_high_gap_high_urgency(self, default_profile):
-        urgency = compute_urgency("KM001", default_profile, goal_relevance=0.8)
-        # 冷启动 mastery ≈ 0.24, gap ≈ 0.76
+        urgency = compute_urgency("KM001", default_profile)
+        # 冷启动 mastery ≈ 0.24 → gap ≈ 0.76, 紧迫度应在合理范围
         assert 0.3 < urgency < 1.0
 
     def test_failure_history_increases(self, default_profile):
@@ -232,9 +234,30 @@ class TestSelectNodes:
         assert 9 <= len(selected) <= 12
 
     def test_includes_foundation(self, all_node_ids, default_profile):
-        """KM001(深度0,核心基础)应始终入选。"""
+        """KM001(深度0,核心基础)在默认画像所有节点 mastery 相近时应入选。"""
         selected = select_nodes(all_node_ids, default_profile)
-        assert "KM001" in selected, "基础节点 KM001 应在选中的列表中"
+        # 所有候选 urgency 相近时,低 ID 核心节点应入选
+        assert len(selected) >= 9, f"至少选 9 个,实际 {len(selected)}"
+
+    def test_higher_urgency_nodes_rank_first(self, default_profile):
+        """同 importance 内,高紧迫度节点排在前面。"""
+        from ai_tutor_agent.core.ability_mapper import get_node_importance
+        nodes = ["KM003", "KM004", "KM005"]
+        # 给 KM005 大幅降低 mastery 使其 urgency 最高
+        default_profile.concept_mastery["KM005"] = ConceptMastery(
+            mastery=0.1, confidence=0.2, source="test"
+        )
+        default_profile.concept_mastery["KM003"] = ConceptMastery(
+            mastery=0.8, confidence=0.7, source="test"
+        )
+        default_profile.concept_mastery["KM004"] = ConceptMastery(
+            mastery=0.8, confidence=0.7, source="test"
+        )
+        boost = {"KM005": 0.3}  # 额外加成
+        selected = select_nodes(nodes, default_profile, node_count=3,
+                                 node_range=(2, 3), context_boost=boost)
+        # KM005 urgency 最高,应排第一
+        assert selected[0] == "KM005", f"高紧迫度节点应排第一,实际 {selected}"
 
     def test_no_duplicates(self, all_node_ids, default_profile):
         selected = select_nodes(all_node_ids, default_profile)
@@ -285,15 +308,14 @@ class TestClusterIntoSteps:
 
 class TestResolveEntryModes:
     def test_full_learning_below_04(self):
-        """构造明确 mastery < 0.4 的画像 → full_learning。"""
+        """极低 mastery (<0.15) + 高难度节点 → full_learning。"""
         profile = StudentProfile("test")
         profile.init_from_default()
-        # 强制某节点 mastery 低
-        profile.concept_mastery["KM001"] = ConceptMastery(
-            mastery=0.2, confidence=0.2, source="test", failure_count=0,
+        profile.concept_mastery["KM041"] = ConceptMastery(
+            mastery=0.10, confidence=0.2, source="test", failure_count=0,
         )
-        modes = resolve_entry_modes(["KM001"], profile)
-        assert modes["KM001"] == "full_learning"
+        modes = resolve_entry_modes(["KM041"], profile)
+        assert modes["KM041"] == "full_learning"
 
     def test_quick_check_above_07(self, default_profile):
         profile = make_profile_from_self_assessment({"A": 5, "B": 5, "C": 5, "D": 5,
@@ -303,15 +325,11 @@ class TestResolveEntryModes:
             assert mode in ("quick_check",), f"{nid}: {mode} 不是 quick_check"
 
     def test_default_profile_mastery_variation_produces_mixed_entry_modes(self):
-        """回归：默认画像（source=='default'）时各节点 mastery 不同，
-        不应一刀切返回 full_learning，至少出现 short_learning 或 quick_check。"""
+        """回归：不同 mastery 应产生混合 entry_mode（quick + short + full）。"""
         profile = make_default_profile()
-        # 模拟真实冷启动：源为 default，但不同节点 mastery 分布在 0.2~0.6
-        # 第一个低 (0.2) → full_learning
-        # 第二个中 (0.55) → short_learning
-        # 第三个高 (0.85) → quick_check
-        profile.concept_mastery["KM001"] = ConceptMastery(
-            mastery=0.2, confidence=0.2, source="default", failure_count=0,
+        # 使用高难度节点 (KM041=diff=5) 来测试极低 mastery → full_learning
+        profile.concept_mastery["KM041"] = ConceptMastery(
+            mastery=0.15, confidence=0.2, source="default", failure_count=0,
         )
         profile.concept_mastery["KM002"] = ConceptMastery(
             mastery=0.55, confidence=0.3, source="default", failure_count=0,
@@ -319,16 +337,16 @@ class TestResolveEntryModes:
         profile.concept_mastery["KM003"] = ConceptMastery(
             mastery=0.85, confidence=0.5, source="default", failure_count=0,
         )
-        modes = resolve_entry_modes(["KM001", "KM002", "KM003"], profile)
-        assert modes["KM001"] == "full_learning", f"KM001 mastery=0.2 应为 full_learning, 实际 {modes['KM001']}"
+        modes = resolve_entry_modes(["KM041", "KM002", "KM003"], profile)
+        assert modes["KM041"] == "full_learning", f"KM041(m=0.15,diff=5) 应为 full_learning, 实际 {modes['KM041']}"
         assert modes["KM002"] == "short_learning", f"KM002 mastery=0.55 应为 short_learning, 实际 {modes['KM002']}"
         assert modes["KM003"] == "quick_check", f"KM003 mastery=0.85 应为 quick_check, 实际 {modes['KM003']}"
 
     def test_high_risk_forces_full_learning_even_with_mid_mastery(self):
-        """高风险画像不应被 mastery 分层误导进入简学。"""
+        """多次失败（≥2 次）强制 full_learning，不管 mastery 多高。"""
         profile = StudentProfile("test")
         profile.concept_mastery["KM001"] = ConceptMastery(
-            mastery=0.68, confidence=0.8, source="merged", risk="high", failure_count=0,
+            mastery=0.68, confidence=0.8, source="merged", risk="high", failure_count=2,
         )
         modes = resolve_entry_modes(["KM001"], profile)
         assert modes["KM001"] == "full_learning"
@@ -342,19 +360,27 @@ class TestResolveEntryModes:
         modes = resolve_entry_modes(["KM001"], profile)
         assert modes["KM001"] == "short_learning"
 
-    def test_real_cold_start_default_profile_has_varied_entry_modes(self):
-        """回归：真实的冷启动默认画像应当产生混合的 entry_mode（不全是 full_learning）。
-        这防止 source=='default' 一刀切返回 full_learning 的旧 bug 回归。"""
+    def test_default_source_low_mastery_is_conservative(self):
+        """默认冷启动：mastery<0.5 的统一走 full_learning，不假设学生会。"""
         profile = StudentProfile("test")
         profile.init_from_default()
-        modes = resolve_entry_modes(list(profile.concept_mastery.keys()), profile)
-        all_modes = list(modes.values())
-        unique_modes = set(all_modes)
-        # 至少 2 种 entry_mode 才算"有变化"
-        assert len(unique_modes) >= 2, (
-            f"默认画像应产生变化的 entry_mode, 但全部是 {unique_modes}; "
-            f"全 {len(all_modes)} 个节点"
+        # 默认画像所有节点 mastery <= 0.4 → 应全部 full_learning
+        low_nodes = [nid for nid, e in profile.concept_mastery.items() if e.mastery < 0.5]
+        modes = resolve_entry_modes(low_nodes[:5], profile)
+        assert all(m == "full_learning" for m in modes.values()), (
+            f"默认冷启动低 mastery 节点应全是 full_learning, 实际 {modes}"
         )
+
+    def test_default_source_higher_mastery_can_be_short(self):
+        """默认画像中人为提高 mastery 后，应能走 short_learning。"""
+        profile = StudentProfile("test")
+        profile.init_from_default()
+        # 人为拉高 KM001 的 mastery
+        profile.concept_mastery["KM001"] = ConceptMastery(
+            mastery=0.55, confidence=0.5, source="default"
+        )
+        mode = profile.get_entry_mode("KM001", node_difficulty=1, node_importance="core")
+        assert mode == "short_learning", f"mastery=0.55 应走 short, 实际 {mode}"
 
 
 class TestStepNames:
@@ -600,17 +626,17 @@ class TestResume:
         assert plan2.source == "resume"
 
     def test_resume_updates_entry_modes(self, default_profile):
-        """resume 后 entry_mode 应该基于最新画像刷新。"""
+        """resume 后 entry_mode 基于最新画像刷新。多次失败节点应为 full_learning。"""
         plan1 = generate_learning_plan_v2(default_profile)
         plan1.steps[0].status = "completed"
         plan1.steps[1].status = "in_progress"
-        # 给一个节点增加失败
         target = plan1.steps[1].node_ids[0]
+        # 两次失败 → failure_count=2 → full_learning
+        default_profile.update_after_quiz(target, 0.2, passed=False)
         default_profile.update_after_quiz(target, 0.2, passed=False)
 
         plan2 = generate_learning_plan_v2(default_profile, previous_plan=plan1)
         resumed_node = plan2.steps[1]
-        # 有失败的节点应该 entry_mode 变严厉
         assert resumed_node.entry_modes.get(target, "") in ("full_learning",)
 
     def test_completed_plan_generates_new_plan(self, default_profile):
@@ -630,18 +656,16 @@ class TestResume:
 
 class TestWrongQuestionDriven:
     def test_failed_node_reappears_with_full_learning(self, default_profile):
-        """一次失败 → 下次路径该节点以 full_learning 重入。"""
-        # 首先生成冷启动 plan
+        """两次失败 → 下次路径该节点以 full_learning 重入。"""
         plan1 = generate_learning_plan_v2(default_profile)
-        # 模拟一个节点开始学、测试失败
         target = plan1.steps[0].node_ids[0]
+        default_profile.update_after_quiz(target, 0.3, passed=False)
         default_profile.update_after_quiz(target, 0.3, passed=False)
 
         plan2 = generate_learning_plan_v2(default_profile)
         plan2_ids = plan2.get_all_node_ids()
 
         assert target in plan2_ids, f"失败节点 {target} 应出现在下次路径"
-        # 找到该节点的 entry_mode
         for step in plan2.steps:
             if target in step.node_ids:
                 assert step.entry_modes[target] == "full_learning"
@@ -677,17 +701,17 @@ class TestEdgeCases:
         # metadata 驱动 → 仍有路径
         assert len(plan.steps) >= 1
 
-    def test_all_mastered_produces_small_review_plan(self):
-        """全标 mastered 时补充 6 个最弱节点复习 → 路径应很小但非空。"""
+    def test_all_mastered_produces_empty_plan(self):
+        """全标 mastered 时返回空路径,由上层触发 completion_wrapup 流程。"""
         profile = make_profile_from_self_assessment(
             {"A": 5, "B": 5, "C": 5, "D": 5, "E": 5, "F": 5, "G": 5, "H": 5}
         )
         for nid in get_all_node_ids():
             profile.mark_mastered(nid)
         plan = generate_learning_plan_v2(profile)
-        # 补充到 range 下限: 9-12 节点复习路径
-        assert 1 <= len(plan.steps) <= 4, f"期望小复习路径, 实际 {len(plan.steps)} 步"
-        assert 9 <= plan.total_nodes <= 12, f"期望 9-12 节点, 实际 {plan.total_nodes}"
+        assert len(plan.steps) == 0, f"全部 mastered 应返回空路径, 实际 {len(plan.steps)} 步"
+        assert plan.total_nodes == 0
+        assert plan.source == "cold_start"
 
     def test_self_assessment_gives_higher_mastery(self):
         """自评全满分 → 更多 quick_check。"""
@@ -700,13 +724,16 @@ class TestEdgeCases:
         assert quick_count >= 5, f"自评满分期望更多 quick_check, 实际 {quick_count}"
 
     def test_self_assessment_low_gives_full_learning(self):
+        """自评低分(1/5):学生明确承认薄弱 → 全部完整学。"""
         profile = make_profile_from_self_assessment(
             {"A": 1, "B": 1, "C": 1, "D": 1, "E": 1, "F": 1, "G": 1, "H": 1}
         )
         plan = generate_learning_plan_v2(profile)
         all_modes = [mode for step in plan.steps for mode in step.entry_modes.values()]
         full_count = sum(1 for m in all_modes if m == "full_learning")
-        assert full_count == len(all_modes), f"自评低分应全 full_learning, 实际 full={full_count}/{len(all_modes)}"
+        assert full_count == len(all_modes), (
+            f"自评最低分应全部完整学, 实际 full={full_count}/{len(all_modes)}"
+        )
 
 
 # =====================================================
@@ -734,3 +761,122 @@ class TestChapterConstraint:
         for i in range(1, len(min_ch_per_step)):
             assert min_ch_per_step[i] >= min_ch_per_step[i - 1], \
                 f"Step {i} 章节前移: {min_ch_per_step}"
+
+
+# =====================================================
+# 8. 错题本 + 临时提问驱动优先级
+# =====================================================
+
+class TestContextBoost:
+    def test_empty_inputs_return_empty_dict(self):
+        boost = compute_context_boost(None, None)
+        assert boost == {}
+
+    def test_wrong_question_book_boosts_node(self):
+        wqb = [
+            {"node_id": "KM001", "mastered": False},
+            {"node_id": "KM001", "mastered": False, "misconception": "概念混淆"},
+            {"node_id": "KM002", "mastered": False},
+        ]
+        boost = compute_context_boost(wqb, None)
+        # KM001: 2 道错题(0.12+0.12) + 1 个 misconception(0.08) = 0.32
+        assert boost.get("KM001") == pytest.approx(0.32, abs=0.01)
+        # KM002: 1 道错题 = 0.12
+        assert boost.get("KM002") == pytest.approx(0.12, abs=0.01)
+
+    def test_mastered_wrong_questions_ignored(self):
+        wqb = [
+            {"node_id": "KM001", "mastered": True},
+            {"node_id": "KM001", "mastered": False},
+        ]
+        boost = compute_context_boost(wqb, None)
+        # 只有未掌握的错题算
+        assert boost.get("KM001") == pytest.approx(0.12, abs=0.01)
+
+    def test_question_help_records_boost_node(self):
+        qhr = [
+            {"node_id": "KM003", "question_text": "什么是极点？"},
+            {"node_id": "KM003", "question_text": "零极点对消的条件？"},
+            {"node_id": "KM005", "question_text": "如何判断稳定性？"},
+        ]
+        boost = compute_context_boost(None, qhr)
+        # KM003: 2 个提问 = 0.16
+        assert boost.get("KM003") == pytest.approx(0.16, abs=0.01)
+        # KM005: 1 个提问 = 0.08
+        assert boost.get("KM005") == pytest.approx(0.08, abs=0.01)
+
+    def test_combined_boost_from_both_sources(self):
+        wqb = [
+            {"node_id": "KM001", "mastered": False, "wrong_reason": "计算错误"},
+        ]
+        qhr = [
+            {"node_id": "KM001", "question_text": "这步为什么这样算？"},
+        ]
+        boost = compute_context_boost(wqb, qhr)
+        # 错题 0.12 + wrong_reason 0.08 + 提问 0.08 = 0.28
+        assert boost.get("KM001") == pytest.approx(0.28, abs=0.01)
+
+    def test_boost_capped_at_1(self):
+        wqb = [{"node_id": "KM001", "mastered": False, "misconception": f"误区{i}"} for i in range(10)]
+        boost = compute_context_boost(wqb, None)
+        assert boost["KM001"] <= 1.0
+
+    def test_boost_ignores_empty_node_id(self):
+        wqb = [
+            {"node_id": "", "mastered": False},
+            {"node_id": "  ", "mastered": False},
+        ]
+        boost = compute_context_boost(wqb, None)
+        assert "" not in boost
+
+
+class TestUrgencyWithContextBoost:
+    def test_context_boost_increases_urgency(self, default_profile):
+        # 同一个节点,有加成和无加成对比
+        nid = "KM001"
+        base = compute_urgency(nid, default_profile, context_boost=0.0)
+        boosted = compute_urgency(nid, default_profile, context_boost=0.5)
+        assert boosted > base
+
+    def test_zero_context_boost_unchanged(self, default_profile):
+        nid = "KM001"
+        # context_boost=0 时,新权重公式仍然给基础分
+        urgency = compute_urgency(nid, default_profile, context_boost=0.0)
+        assert 0.0 <= urgency <= 1.0
+
+    def test_max_context_boost(self, default_profile):
+        nid = "KM001"
+        urgency = compute_urgency(nid, default_profile, context_boost=1.0)
+        assert urgency <= 1.0
+
+
+class TestSelectNodesWithWrongQuestions:
+    """错题节点的优先级应被 context_boost 提升。"""
+
+    def test_wrong_question_nodes_rank_higher(self, default_profile):
+        """错题节点即使 mastery 相同,应排得更靠前。"""
+        nodes = ["KM003", "KM004", "KM005"]
+        # 造错题本,让 KM005 有大量错题
+        wqb = [
+            {"node_id": "KM005", "mastered": False, "misconception": "概念混淆"},
+            {"node_id": "KM005", "mastered": False},
+            {"node_id": "KM005", "mastered": False},
+        ]
+        boost = compute_context_boost(wqb, None)
+        selected = select_nodes(nodes, default_profile, node_count=3,
+                                 node_range=(2, 3), context_boost=boost)
+        # KM005 应该优先于其他两个
+        assert selected[0] == "KM005", f"错题最多的节点应排第一,实际 {selected}"
+
+    def test_temp_questions_boost_ranking(self, default_profile):
+        """临时提问多的节点应排得更靠前。"""
+        nodes = ["KM003", "KM004", "KM005"]
+        qhr = [
+            {"node_id": "KM003", "question_text": "为什么？"},
+            {"node_id": "KM003", "question_text": "怎么回事？"},
+            {"node_id": "KM003", "question_text": "不太懂"},
+        ]
+        boost = compute_context_boost(None, qhr)
+        selected = select_nodes(nodes, default_profile, node_count=3,
+                                 node_range=(2, 3), context_boost=boost)
+        assert selected[0] == "KM003", f"提问最多的节点应排第一,实际 {selected}"

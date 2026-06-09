@@ -7,6 +7,7 @@ const TeachingInsights = {
     _modalEl: null,
     _bodyEl: null,
     _loadingEl: null,
+    _lastData: null,
 
     init() {
         this._modalEl = document.getElementById('teaching-insights-modal');
@@ -17,15 +18,18 @@ const TeachingInsights = {
     },
 
     _bindEvents() {
-        // Delegate clicks inside the modal body
         if (!this._bodyEl) return;
         this._bodyEl.addEventListener('click', (event) => {
             const btn = event.target && typeof event.target.closest === 'function'
                 ? event.target.closest('button')
                 : null;
             if (!btn) return;
-            // Node detail expand/collapse handled via CSS; no custom handlers needed.
         });
+        // 日期筛选：change 时自动刷新
+        const startEl = document.getElementById('ti-date-start');
+        const endEl = document.getElementById('ti-date-end');
+        if (startEl) startEl.addEventListener('change', () => this.load());
+        if (endEl) endEl.addEventListener('change', () => this.load());
     },
 
     _studentId() {
@@ -39,10 +43,16 @@ const TeachingInsights = {
         this._loadingEl.hidden = false;
 
         const studentId = this._studentId();
+        const params = new URLSearchParams();
+        const start = document.getElementById('ti-date-start')?.value;
+        const end = document.getElementById('ti-date-end')?.value;
+        if (start) params.set('start', start);
+        if (end) params.set('end', end);
+        const qs = params.toString();
         let data;
         try {
             const resp = await fetch(
-                '/api/students/' + encodeURIComponent(studentId) + '/teaching-insights'
+                '/api/students/' + encodeURIComponent(studentId) + '/teaching-insights' + (qs ? '?' + qs : '')
             );
             if (!resp.ok) throw new Error('HTTP ' + resp.status);
             data = await resp.json();
@@ -60,6 +70,7 @@ const TeachingInsights = {
     },
 
     _render(data) {
+        this._lastData = data;
         const summary = data.summary || {};
         const nodeDetails = data.node_details || [];
         const recent = data.recent_episodes || [];
@@ -232,6 +243,52 @@ const TeachingInsights = {
         }
     },
 
+    _exportCSV() {
+        if (!this._lastData) {
+            (window.AITutorApp || {}).setStatusBanner?.('暂无数据可导出', 'warning');
+            return;
+        }
+        const episodes = this._lastData.recent_episodes || [];
+        const header = ['节点ID', '节点名称', '策略', '情绪', '入口模式', '尝试轮次', '时间'];
+        const rows = episodes.map(function (ep) {
+            return [
+                ep.node_id || '',
+                ep.node_title || '',
+                ep.strategy || '',
+                ep.affect || '',
+                ep.entry_mode || '',
+                String(ep.attempt_count || 0),
+                ep.created_at || '',
+            ];
+        });
+        const csvContent = [header].concat(rows)
+            .map(function (row) { return row.map(function (cell) { return '"' + String(cell).replace(/"/g, '""') + '"'; }).join(','); })
+            .join('\n');
+        var BOM = '﻿';
+        var blob = new Blob([BOM + csvContent], { type: 'text/csv;charset=utf-8;' });
+        var url = URL.createObjectURL(blob);
+        var a = document.createElement('a');
+        a.href = url;
+        a.download = 'teaching-insights-' + new Date().toISOString().slice(0, 10) + '.csv';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+        (window.AITutorApp || {}).setStatusBanner?.('CSV 报告已下载', 'success');
+    },
+
+    _exportJSON() {
+        if (!this._lastData) {
+            (window.AITutorApp || {}).setStatusBanner?.('暂无数据可导出', 'warning');
+            return;
+        }
+        var json = JSON.stringify(this._lastData, null, 2);
+        navigator.clipboard.writeText(json).then(
+            function () { (window.AITutorApp || {}).setStatusBanner?.('已复制 JSON 到剪贴板', 'success'); },
+            function () { (window.AITutorApp || {}).setStatusBanner?.('复制失败，请重试', 'warning'); }
+        );
+    },
+
     _escapeHtml(str) {
         if (typeof str !== 'string') return String(str || '');
         const div = document.createElement('div');
@@ -245,8 +302,19 @@ const TeachingInsights = {
 function openTeachingInsightsModal() {
     const modal = document.getElementById('teaching-insights-modal');
     if (!modal) return;
+    modal.classList.add('open');
     modal.setAttribute('aria-hidden', 'false');
     document.body.classList.add('modal-open');
+
+    // 默认日期范围：最近 30 天
+    const today = new Date();
+    const monthAgo = new Date(today.getTime() - 30 * 24 * 3600 * 1000);
+    const fmt = function (d) { return d.toISOString().slice(0, 10); };
+    const startEl = document.getElementById('ti-date-start');
+    const endEl = document.getElementById('ti-date-end');
+    if (startEl && !startEl.value) startEl.value = fmt(monthAgo);
+    if (endEl && !endEl.value) endEl.value = fmt(today);
+
     TeachingInsights.init();
     TeachingInsights.load();
 }
@@ -255,6 +323,7 @@ function closeTeachingInsightsModal(event) {
     const modal = document.getElementById('teaching-insights-modal');
     if (!modal) return;
     if (event && event.target !== modal) return; // only close when clicking overlay
+    modal.classList.remove('open');
     modal.setAttribute('aria-hidden', 'true');
     document.body.classList.remove('modal-open');
 }

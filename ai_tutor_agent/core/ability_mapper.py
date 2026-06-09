@@ -118,6 +118,27 @@ def _load_v2_node_names(path_str: str = "") -> dict[str, str]:
     return {n["node_id"]: n.get("name", n["node_id"]) for n in nodes if isinstance(n, dict)}
 
 
+@lru_cache(maxsize=2)
+def _load_v2_node_chapters(path_str: str = "") -> dict[str, str]:
+    DEFAULT_V2_PATH = (
+        Path(__file__).resolve().parents[2]
+        / "data"
+        / "knowledge_map_outputs"
+        / "auto_control_knowledge_map_v2.json"
+    )
+    path = Path(path_str) if path_str else DEFAULT_V2_PATH
+    if not path.exists():
+        return {}
+    payload = json.loads(path.read_text(encoding="utf-8"))
+    nodes = payload.get("nodes", [])
+    return {n["node_id"]: str(n.get("chapter", "") or "") for n in nodes if isinstance(n, dict)}
+
+
+def get_node_chapter_map() -> dict[str, str]:
+    """返回 node_id → chapter 映射(从 V2 JSON 动态加载)。"""
+    return dict(_load_v2_node_chapters())
+
+
 # ── 6 步模板 ─────────────────────────────────────────
 
 def get_step_templates() -> dict[str, dict[str, Any]]:

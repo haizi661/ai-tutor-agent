@@ -298,43 +298,79 @@ class StudentProfile:
     def get_failed_concept_ids(self) -> set[str]:
         return {nid for nid, entry in self.concept_mastery.items() if entry.failure_count >= 1}
 
-    def get_entry_mode(self, concept_id: str) -> str:
+    def get_entry_mode(
+        self,
+        concept_id: str,
+        node_difficulty: int = 3,
+        node_importance: str = "core",
+    ) -> str:
         """决定一个节点的 entry_mode。
 
-        规则:
-        - mastery 或 entry 不存在(冷启动) → full_learning
-        - risk == "high" → full_learning(风险优先于 mastery)
-        - failure_count >= 2 → full_learning(多次失败,完整重学)
-        - source == "self_assessment" 且 mastery < 0.7(自评不够高)
-          → full_learning(仅凭自评,未经过真实学习,不可跳过完整讲解)
-        - mastery < 0.4 → full_learning
-        - 非自评来源 confidence < 0.35 且 mastery >= 0.7 → short_learning
-          (掌握度估计偏高但证据不足,先简学确认,不直接快测)
-        - mastery < 0.7 → short_learning
-        - mastery >= 0.7 → quick_check
+        规则（按优先级）:
+        1. 不存在 / 高风险 / 多次失败 → full_learning
+        2. 已掌握 (mastery≥0.8, confidence≥0.5) → quick_check
+        3. 掌握度偏高但证据不足 → quick_check（实测验证）
+        4. 中等掌握 (mastery≥0.5) → short_learning
+        5. self_assessment 且 mastery≥0.5 → short_learning
+           （不再一刀切 <0.7 返回 full_learning）
+        6. 低 mastery 区 (<0.5): 按节点属性差异化
+           - 辅助/简单节点 → short_learning
+           - mastery 极低 (<0.25) → full_learning
+           - 核心/难节点 → full_learning
+           - 其余 → short_learning
 
-        注：source == "default" 不再一刀切返回 full_learning。
-        默认画像（未自评）时不同节点仍有不同 mastery 值（来自 ability_mapper
-        的 8 维默认分数），让 mastery 决定 entry_mode 即可。
-        首节点保护由 initial_node_selector 负责（强制 full_learning），
-        避免首个节点被 short_learning / quick_check 跳过完整讲解。
+        首节点保护由 initial_node_selector 负责（强制 full_learning）。
         """
         entry = self.concept_mastery.get(concept_id)
         if not entry:
             return "full_learning"
-        if entry.risk == "high":
-            return "full_learning"
         if entry.failure_count >= 2:
             return "full_learning"
-        if entry.source == "self_assessment" and entry.mastery < 0.7:
-            return "full_learning"
-        if entry.mastery < 0.4:
-            return "full_learning"
-        if entry.source != "self_assessment" and entry.mastery >= 0.7 and entry.confidence < 0.35:
+
+        # ── 已掌握 → 快速检测 ──
+        if entry.mastery >= 0.8 and entry.confidence >= 0.5:
+            return "quick_check"
+        # 掌握度偏高（即使置信度仅来自自评）→ 快速检测验证
+        if entry.mastery >= 0.7 and entry.confidence >= 0.3:
+            return "quick_check"
+
+        # ── 中等掌握 → 精简学（高难度节点例外）──
+        if entry.mastery >= 0.5:
+            if node_difficulty >= 4 and node_importance == "core":
+                return "full_learning"
             return "short_learning"
-        if entry.mastery < 0.7:
-            return "short_learning"
-        return "quick_check"
+
+        # ── 自评来源 + mastery 偏低（<0.5）→ 完整学 ──
+        # 学生自己打低分说明明确承认薄弱，应完整学而非精简
+        if entry.source == "self_assessment":
+            return "full_learning"
+
+        # ── mastery < 0.5 且非自评来源: 按节点属性差异化 ──
+        is_core = node_importance == "core"
+        is_hard = node_difficulty >= 4
+        is_easy = node_difficulty <= 2
+        is_default = entry.source == "default"
+
+        # 默认冷启动（未做自评）：mastery 是猜测值，不足信，保守走完整学
+        if is_default and entry.mastery < 0.5:
+            return "full_learning"
+
+        # 简单节点：只有掌握度 >= 0.35 才走精简学，否则仍需完整学
+        if is_easy:
+            if entry.mastery >= 0.35:
+                return "short_learning"
+            return "full_learning"
+
+        if is_hard and entry.mastery < 0.35:
+            return "full_learning"
+
+        if is_core and node_difficulty >= 3 and entry.mastery < 0.3:
+            return "full_learning"
+
+        if entry.mastery < 0.25:
+            return "full_learning"
+
+        return "short_learning"
 
     # ── 序列化 ─────────────────────────────────────
 

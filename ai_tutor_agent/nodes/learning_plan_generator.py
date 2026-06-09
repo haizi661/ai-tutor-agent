@@ -12,6 +12,7 @@ from __future__ import annotations
 from datetime import datetime, timezone
 from typing import Any
 
+from ..core.ability_mapper import get_all_node_ids
 from ..core.events import make_event
 from ..core.learning_support import (
     load_student_state_snapshot,
@@ -19,6 +20,8 @@ from ..core.learning_support import (
 )
 from ..core.learning_plan_v2 import (
     LearningPlan,
+    compute_context_boost,
+    compute_freshness_boost,
     generate_learning_plan_v2,
     _refresh_previous_plan,
 )
@@ -191,15 +194,59 @@ def build_learning_plan_generator_node(llm: Any, runtime: RuntimeContext):
         # ── Step 3: Determine session index ───────────────────────
         session_index = int(state_snapshot.get("session_index", 0))
 
+        # ── Step 3.5: Compute context boost (错题本+临时提问) ─────
+        wrong_question_book = state_snapshot.get("wrong_question_book") or []
+        question_help_records = state_snapshot.get("question_help_records") or []
+        ctx_boost = compute_context_boost(wrong_question_book, question_help_records)
+        if ctx_boost:
+            event_sink.emit(
+                make_event(
+                    "learning_plan.context_boost",
+                    "learning_plan_generator",
+                    message=f"错题/提问加成：{len(ctx_boost)} 个节点获得优先级提升。",
+                    data={"boosted_nodes": list(ctx_boost.keys())[:10]},
+                )
+            )
+
+        # ── 新鲜度加成：从未被规划过的节点获得优先级提升 ──
+        previously_planned: set[str] = set()
+        # 从历史 plan 中收集
+        old_plan = state_snapshot.get("learning_plan_v2") or {}
+        for step in old_plan.get("steps", []):
+            for nid in step.get("node_ids", []):
+                previously_planned.add(str(nid))
+        # concept_mastery 中有记录的也视为已被规划过
+        for nid in (concept_mastery_raw or {}):
+            previously_planned.add(str(nid))
+        fresh_boost = compute_freshness_boost(
+            list(get_all_node_ids()), previously_planned,
+            session_index=session_index,
+        )
+        if fresh_boost:
+            event_sink.emit(
+                make_event(
+                    "learning_plan.freshness_boost",
+                    "learning_plan_generator",
+                    message=f"新鲜度加成：{len(fresh_boost)} 个从未规划的节点获得优先级提升。",
+                    data={"fresh_nodes": list(fresh_boost.keys())[:10]},
+                )
+            )
+
         # ── Step 4: Generate learning plan ────────────────────────
         # 把 llm 传进去,新生成路径时用它给 step 取更自然的中文主题名
         # (续上路径时不调 LLM,见 _refresh_previous_plan)
+        is_consolidation = state.get("continue_or_homework_choice") == "consolidate_weak"
+        is_full_round = state.get("continue_or_homework_choice") == "start_full_round"
         plan = generate_learning_plan_v2(
             profile=profile,
             edges=edges,
             previous_plan=None,
             session_index=session_index,
             llm=llm,
+            context_boost=ctx_boost,
+            freshness_boost=fresh_boost,
+            force_review=is_consolidation,
+            include_all=is_full_round,
         )
 
         steps_as_dicts = [s.to_dict() for s in plan.steps]

@@ -538,10 +538,24 @@
                     <span id="teaching-insights-subtitle" class="unified-dialog-subtitle">教学策略分布与效果追踪</span>
                 </div>
                 <div class="unified-dialog-actions">
+                    <button type="button" class="unified-action-btn" onclick="TeachingInsights._exportCSV()" title="下载 CSV 报告">
+                        <svg width="13" height="13" viewBox="0 0 13 13" fill="none"><path d="M2 9v2h9V9M6.5 2v7M4 6.5L6.5 9 9 6.5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                        下载 CSV
+                    </button>
+                    <button type="button" class="unified-action-btn" onclick="TeachingInsights._exportJSON()" title="复制 JSON 到剪贴板">
+                        <svg width="13" height="13" viewBox="0 0 13 13" fill="none"><rect x="3" y="3" width="7" height="7" rx="1" stroke="currentColor" stroke-width="1.2"/><path d="M2 9V2h7" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
+                        复制 JSON
+                    </button>
                     <button type="button" class="unified-close-btn" onclick="closeTeachingInsightsModal()" aria-label="关闭">
                         <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2 2L12 12M12 2L2 12" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
                     </button>
                 </div>
+            </div>
+            <div class="ti-filter-bar">
+                <label class="ti-filter-label">时间范围：</label>
+                <input type="date" id="ti-date-start" class="ti-date-input" title="开始日期">
+                <span class="ti-filter-sep">至</span>
+                <input type="date" id="ti-date-end" class="ti-date-input" title="结束日期">
             </div>
             <div id="teaching-insights-body" class="teaching-insights-body">
                 <div id="teaching-insights-loading" class="teaching-insights-loading">加载教学洞察数据…</div>
@@ -1305,7 +1319,7 @@
     <script defer src="/assets/js/session.js"></script>
     <script defer src="/assets/js/wrong-book.js?v=20260521-wb-filter"></script>
     <script defer src="/assets/js/question-help.js"></script>
-    <script defer src="/assets/js/teaching-insights.js?v=20260602-ti"></script>
+    <script defer src="/assets/js/teaching-insights.js?v=20260609-ti"></script>
     <script defer src="/assets/app.js"></script>
     <script defer src="/assets/js/ai_path.js?v=20260525-ai-path-progress"></script>
 </body>

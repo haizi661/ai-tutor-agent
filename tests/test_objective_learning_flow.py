@@ -201,102 +201,61 @@ def test_objective_test_generator_uses_ai_to_create_objective_questions_without_
     assert result["pending_interaction_kind"] == "objective_test_answers"
 
 
-def test_objective_test_generator_falls_back_when_no_bank_and_ai_fails():
+def test_objective_test_generator_raises_when_no_bank_and_ai_fails():
+    """题库和 AI 都失败时应抛出 RuntimeError，不再用硬编码兜底。"""
     sink = BufferedEventSink()
     llm = FakeLLM("not json")
     runtime = RuntimeContext(event_sink=sink)
     node = build_objective_test_generator_node(runtime, llm=llm)
 
-    result = node({"current_node_id": "KM001", "current_node_name": "稳定性"})
+    import pytest
+    with pytest.raises(RuntimeError, match="出题失败"):
+        node({"current_node_id": "KM001", "current_node_name": "稳定性"})
 
     assert len(llm.calls) == 1
-    assert len(result["node_quiz_items"]) == 10
-    assert result["node_quiz_items"][0]["source"] == "contextual_fallback"
-    assert result["node_quiz_items"][0]["assessment_focus"] in {"概念辨析", "判断依据", "常见误区", "应用迁移"}
-    assert result["node_quiz_items"][0]["target_objective"]
-    assert result["node_quiz_items"][0]["misconception"]
-    assert isinstance(result["node_quiz_items"][0]["wrong_option_analysis"], dict)
-    visible_lines = []
-    for q in result["node_quiz_items"]:
-        visible_lines.extend([q["stem"], *(q["options"].values())])
-    visible_text = "\n".join(visible_lines)
-    assert "这是判断" not in visible_text
-    assert "符合本节点" not in visible_text
-    assert "把目标任务说成" not in visible_text
-    assert "当作唯一依据" not in visible_text
-    assert "具有一定功能的各种基本元件" not in visible_text
-    assert result["flow_status"] == "awaiting_objective_answers"
 
 
-def test_fallback_objective_questions_do_not_repeat_stems_when_generating_ten_items():
+def test_fallback_removed_raises_error_for_ten_questions():
+    """题库和 AI 都失败时抛出 RuntimeError。"""
     sink = BufferedEventSink()
     llm = FakeLLM("not json")
     runtime = RuntimeContext(event_sink=sink)
     node = build_objective_test_generator_node(runtime, llm=llm, count=10)
 
-    result = node({"current_node_id": "KM001", "current_node_name": "自动控制系统示例"})
-
-    stems = [item["stem"] for item in result["node_quiz_items"]]
-    assert len(stems) == 10
-    assert len(set(stems)) == 10
+    import pytest
+    with pytest.raises(RuntimeError, match="出题失败"):
+        node({"current_node_id": "KM001", "current_node_name": "自动控制系统示例"})
 
 
-def test_fallback_objective_questions_keep_metadata_concise_when_node_fields_are_long():
+def test_fallback_removed_raises_error_for_long_node_fields():
+    """题库和 AI 都失败时抛出 RuntimeError。"""
     sink = BufferedEventSink()
     llm = FakeLLM("not json")
     runtime = RuntimeContext(event_sink=sink)
     node = build_objective_test_generator_node(runtime, llm=llm, count=2)
-    long_objective = (
-        "反馈控制系统是由各种结构不同的元部件组成的。从完成自动控制这一功能来看，"
-        "一个系统必然包含被控对象和控制装置两大部分，而控制装置又由具有一定功能的"
-        "各种基本元件组成；图1-5典型反馈控制系统方框图还包含有用输入和扰动。"
-    )
 
-    result = node(
-        {
+    import pytest
+    with pytest.raises(RuntimeError, match="出题失败"):
+        node({
             "current_node_id": "KM-LONG",
             "current_node_name": "自动控制系统示例",
-            "graph_learning_objectives": [long_objective],
-        }
-    )
-
-    for item in result["node_quiz_items"]:
-        assert len(item["target_objective"]) <= 82
-        assert len(item["explanation"]) <= 150
-        assert all(len(text) <= 95 for text in item["options"].values())
-        metadata_text = "\n".join(
-            [
-                item.get("target_objective", ""),
-                item.get("misconception", ""),
-                item.get("explanation", ""),
-                *list((item.get("wrong_option_analysis") or {}).values()),
-            ]
-        )
-        assert "反馈控制系统是由各种结构不同的元部件组成" not in metadata_text
-        assert "从完成自动控制这一功能来看" not in metadata_text
-        assert "具有一定功能的各种基本元件" not in metadata_text
-        assert "图1-5" not in metadata_text
+            "graph_learning_objectives": ["长文本目标"],
+        })
 
 
-def test_fallback_objective_explanations_are_actionable_not_generic_templates():
+def test_fallback_removed_raises_error_instead_of_generic_templates():
+    """题库和 AI 都失败时抛出 RuntimeError。"""
     runtime = RuntimeContext(event_sink=BufferedEventSink())
     node = build_objective_test_generator_node(runtime, llm=FakeLLM("not json"), count=3)
 
-    result = node(
-        {
+    import pytest
+    with pytest.raises(RuntimeError, match="出题失败"):
+        node({
             "current_node_id": "KM003",
             "current_node_name": "自动控制系统示例",
             "graph_must_know": ["测量输出并送回输入端参与比较"],
             "graph_common_errors": ["只看到执行机构而忽略测量反馈"],
-        }
-    )
-
-    for item in result["node_quiz_items"]:
-        explanation = item.get("explanation", "")
-        analysis_text = "\n".join((item.get("wrong_option_analysis") or {}).values())
-        assert "正确项体现了" not in explanation
-        assert "该项没有准确体现" not in analysis_text
-        assert "判断依据" in explanation
+        })
         assert "正确理解" in explanation
         assert "易错点" in explanation
         assert item.get("target_objective")
@@ -543,36 +502,25 @@ def test_ai_question_generator_includes_structured_current_node_fields_in_prompt
     assert "禁止生成“第 1 个核心判断”这类占位题" in prompt_content
 
 
-def test_fallback_objective_questions_are_contextualized_by_current_node_fields():
-    """LLM 失败时也不应退回截图里的泛化占位题，应至少用节点字段生成可用的临时题。"""
+def test_fallback_removed_raises_error_with_node_context():
+    """LLM 失败时抛出 RuntimeError，不再用节点字段拼凑兆底题。"""
     sink = BufferedEventSink()
     llm = FakeLLM("not json")
     runtime = RuntimeContext(event_sink=sink)
     node = build_objective_test_generator_node(runtime, llm=llm, count=3)
 
-    result = node({
-        "current_node_id": "KM-AUTO-SYS-EXAMPLE",
-        "current_node_name": "自动控制系统示例",
-        "graph_learning_objectives": ["能识别水箱液位控制中的反馈闭环"],
-        "graph_must_know": ["给定值与测量值比较形成偏差", "控制器依据偏差产生控制作用"],
-        "graph_common_errors": ["只看到执行机构而忽略测量反馈"],
-        "node_content_context": "水箱液位自动控制中，液位传感器测量实际液位，与给定液位比较得到偏差。",
-    })
-
-    stems = [item["stem"] for item in result["node_quiz_items"]]
-    options_text = "\n".join("\n".join(item["options"].values()) for item in result["node_quiz_items"])
-    analysis_text = "\n".join("\n".join((item.get("wrong_option_analysis") or {}).values()) for item in result["node_quiz_items"])
-    assert all("第 " not in stem or "核心判断" not in stem for stem in stems)
-    assert "关键在于" not in options_text
-    assert "典型误区是" not in options_text
-    assert "一般概念" not in options_text
-    assert "反馈控制系统" not in options_text
-    assert "给定值与测量值比较形成偏差" in analysis_text or result["node_quiz_items"][0]["target_objective"]
-    assert "只看到执行机构而忽略测量反馈" in analysis_text
-    assert {item["source"] for item in result["node_quiz_items"]} == {"contextual_fallback"}
+    import pytest
+    with pytest.raises(RuntimeError, match="出题失败"):
+        node({
+            "current_node_id": "KM-AUTO-SYS-EXAMPLE",
+            "current_node_name": "自动控制系统示例",
+            "graph_learning_objectives": ["能识别水箱液位控制中的反馈闭环"],
+            "graph_must_know": ["给定值与测量值比较形成偏差"],
+            "graph_common_errors": ["只看到执行机构而忽略测量反馈"],
+        })
 
 
-def test_objective_generator_rejects_low_quality_ai_questions_and_uses_stronger_contextual_fallback():
+def test_objective_generator_rejects_low_quality_ai_questions_and_raises():
     low_quality_json = """
     {
       "questions": [
@@ -608,44 +556,31 @@ def test_objective_generator_rejects_low_quality_ai_questions_and_uses_stronger_
     runtime = RuntimeContext(event_sink=sink)
     node = build_objective_test_generator_node(runtime, llm=llm, count=2)
 
-    result = node({
-        "current_node_id": "KM-AUTO-SYS-EXAMPLE",
-        "current_node_name": "自动控制系统示例",
-        "graph_learning_objectives": ["能根据函数记录仪方框图判断自动控制系统的闭环组成"],
-        "graph_must_know": [
-            "比较元件把输入量与测量反馈量比较并形成偏差信号",
-            "前向通路与主反馈通路共同构成主回路",
-        ],
-        "graph_common_errors": [
-            "只看到输出记录动作，忽略测量元件把输出量反馈到输入端",
-            "把扰动当成有用输入，未区分二者对被控量的作用",
-        ],
-        "node_content_context": "一个典型反馈控制系统中，比较元件将输入量与测量元件检测到的被控量比较；负号表示负反馈；信号从输入端到输出端的通路称前向通路，输出经测量元件反馈到输入端的通路称主反馈通路。",
-    })
+    import pytest
+    with pytest.raises(RuntimeError, match="出题失败"):
+        node({
+            "current_node_id": "KM-AUTO-SYS-EXAMPLE",
+            "current_node_name": "自动控制系统示例",
+            "graph_learning_objectives": ["能根据函数记录仪方框图判断自动控制系统的闭环组成"],
+            "graph_must_know": ["比较元件把输入量与测量反馈量比较并形成偏差信号"],
+            "graph_common_errors": ["只看到输出记录动作，忽略测量元件把输出量反馈到输入端"],
+        })
 
-    assert [item["source"] for item in result["node_quiz_items"]] == ["contextual_fallback", "contextual_fallback"]
-    for item in result["node_quiz_items"]:
-        option_values = list(item["options"].values())
-        assert all("符合本节点" not in option for option in option_values)
-        assert all("围绕“" not in option for option in option_values)
-        assert all("结论方向和节点要点相反" not in option for option in option_values)
-        assert all("关键在于" not in option for option in option_values)
-        assert all("典型误区是" not in option for option in option_values)
-        assert all("一般概念" not in option for option in option_values)
-        assert all("反馈控制系统" not in option for option in option_values)
-        assert all(len(option) <= 95 for option in option_values)
-        assert len(set(option_values)) == 4
-        assert item["answer_key"] in item["options"]
-    all_text = "\n".join(item["stem"] + "\n" + "\n".join(item["options"].values()) for item in result["node_quiz_items"])
-    analysis_text = "\n".join("\n".join((item.get("wrong_option_analysis") or {}).values()) for item in result["node_quiz_items"])
-    metadata_text = "\n".join(
-        "\n".join([item.get("target_objective", ""), item.get("misconception", "")])
-        for item in result["node_quiz_items"]
-    )
-    assert "比较元件" in metadata_text or "比较元件" in analysis_text or "比较元件" in all_text
-    assert "主反馈通路" in metadata_text or "主反馈通路" in analysis_text
-    assert "只看到输出记录动作" in metadata_text or "只看到输出记录动作" in analysis_text
-
+def test_first_attempt_always_uses_full_count_not_reduced():
+    """首次测验（非 node_retest）统一使用 count=10，不复用 2/5 缩减。"""
+    sink = BufferedEventSink()
+    runtime = RuntimeContext(event_sink=sink)
+    from unittest.mock import MagicMock
+    provider = MagicMock()
+    provider.get_objective_questions.return_value = [
+        {"stem": f"Q{i}", "options": {"A":"a","B":"b","C":"c","D":"d"}, "answer_key": "A"}
+        for i in range(10)
+    ]
+    runtime.question_bank_provider = provider
+    node = build_objective_test_generator_node(runtime, count=10)
+    # quick_check 首次也应是 10 题
+    result = node({"current_node_id": "KM001", "current_node_name": "测试", "node_quiz_kind": "quick_check"})
+    assert len(result["node_quiz_items"]) == 10, f"quick_check 首次也应是 10 题, 实际 {len(result['node_quiz_items'])}"
 
 def test_objective_generator_repairs_missing_ai_questions_before_fallback():
     first_response = """
@@ -757,7 +692,31 @@ def test_objective_generator_prompt_contains_blueprint_and_balanced_answer_keys(
 
 
 def test_objective_generator_uses_node_teaching_contract_for_coverage_plan():
-    llm = FakeLLM("not json")
+    """教学契约的 assessment_targets 驱动出题蓝图和 AI prompt。"""
+    valid_json = """
+    {
+      "questions": [
+        {
+          "question_id": "Q1", "stem": "稳定性定义题",
+          "options": {"A":"a","B":"b","C":"c","D":"d"}, "answer_key": "A",
+          "target_objective": "稳定性的定义", "assessment_focus": "概念辨析",
+          "misconception": "把振荡都当成不稳定", "explanation": "解析"
+        },
+        {
+          "question_id": "Q2", "stem": "有界输入输出题",
+          "options": {"A":"a","B":"b","C":"c","D":"d"}, "answer_key": "B",
+          "target_objective": "有界输入有界输出", "assessment_focus": "应用迁移",
+          "misconception": "只看瞬时振荡", "explanation": "解析"
+        },
+        {
+          "question_id": "Q3", "stem": "综合题",
+          "options": {"A":"a","B":"b","C":"c","D":"d"}, "answer_key": "C",
+          "explanation": "解析"
+        }
+      ]
+    }
+    """
+    llm = FakeLLM(valid_json)
     runtime = RuntimeContext(event_sink=BufferedEventSink())
     node = build_objective_test_generator_node(runtime, llm=llm, count=3)
 
@@ -790,7 +749,7 @@ def test_objective_generator_uses_node_teaching_contract_for_coverage_plan():
         }
     )
 
-    targets = [item["target_objective"] for item in result["node_quiz_items"]]
+    targets = [item.get("target_objective", "") for item in result["node_quiz_items"]]
     assert targets[:2] == ["稳定性的定义", "有界输入有界输出"]
     assert result["node_quiz_coverage_plan"][0]["target_objective"] == "稳定性的定义"
     assert result["node_quiz_coverage_plan"][0]["required"] is True

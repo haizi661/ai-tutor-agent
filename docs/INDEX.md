@@ -1,6 +1,6 @@
 # AI Tutor Agent 文档索引
 
-更新时间：2026-06-01
+更新时间：2026-06-03
 
 ## 权威入口（当前状态与下一步）
 
@@ -26,7 +26,7 @@
 | `docs/plans/2026-05-28-learning-plan-design.md` | 学习路径与节点学习分离设计（v1） |
 | `docs/plans/2026-05-29-learning-path-algorithm-v2.md` | 学习路径 v2 算法设计（ZPD 驱动 + 拓扑约束） |
 | `docs/plans/2026-05-29-learning-path-v2-implementation-plan.md` | 学习路径 v2 实施计划 |
-| `docs/plans/2026-05-29-teaching-optimization-plan.md` | 教学能力优化计划（待审核） |
+| `docs/plans/2026-05-29-teaching-optimization-plan.md` | 教学能力优化计划（部分已实施） |
 
 ## 历史计划（已归档）
 
@@ -42,6 +42,8 @@
 |------|------|
 | `docs/reports/2026-04-28-langgraph-mainflow-completion-report.md` | 2026-04-28 主流程完成报告 |
 | `docs/reports/2026-04-28-langgraph-final-closure-report.md` | 2026-04-28 最终闭合报告（88 项聚焦回归） |
+| `docs/reports/2026-06-01-5-25-vs-head-comparison.md` | 2026-06-01 5/25 vs HEAD 差异汇报 |
+| `docs/reports/2026-06-01-work-summary-product-view.md` | 2026-06-01 产品视角工作总结 |
 
 ## 其他
 

@@ -1,7 +1,7 @@
 """教学洞察 API — 聚合 teaching_episodes 数据，展示教学策略效果。"""
 
 from collections import Counter, defaultdict
-from typing import Any
+from typing import Any, Optional
 
 from fastapi import APIRouter, Request
 from fastapi.responses import JSONResponse
@@ -102,8 +102,13 @@ def _aggregate_episodes(episodes: list[dict[str, Any]]) -> dict[str, Any]:
 
 
 @router.get("/students/{student_id}/teaching-insights")
-async def get_teaching_insights(student_id: str, request: Request):
-    """返回某个学习者的教学洞察聚合数据。"""
+async def get_teaching_insights(
+    student_id: str,
+    request: Request,
+    start: Optional[str] = None,
+    end: Optional[str] = None,
+):
+    """返回某个学习者的教学洞察聚合数据，可按日期范围筛选 (ISO 8601)。"""
     store = _load_store(request)
     try:
         state = store.load(student_id)
@@ -114,6 +119,14 @@ async def get_teaching_insights(student_id: str, request: Request):
         )
 
     episodes: list[dict[str, Any]] = list(getattr(state, "teaching_episodes", []) or [])
+
+    # 日期范围过滤（ISO 8601 字符串字典序可直接比较）
+    if start:
+        episodes = [e for e in episodes if (e.get("created_at") or "") >= start]
+    if end:
+        end_iso = end if "T" in end else end + "T23:59:59"
+        episodes = [e for e in episodes if (e.get("created_at") or "") <= end_iso]
+
     result = _aggregate_episodes(episodes)
 
     # Attach snapshot info for frontend display

@@ -1,6 +1,6 @@
 # AI Tutor Agent Guide
 
-Last synced: 2026-05-29
+Last synced: 2026-06-03
 
 This is a Web-first adaptive tutor for automatic control theory. The active product loop is graph-node mastery learning, not the older generic `Tutor -> Tester -> Evaluator` chat flow.
 
@@ -26,7 +26,7 @@ This is a Web-first adaptive tutor for automatic control theory. The active prod
 - `main.py` dispatches to `ai_tutor_agent/interfaces/api/app.py`; FastAPI mounts API routers and static `frontend/` at `/`.
 - LangGraph wiring is in `ai_tutor_agent/orchestration/workflow.py`; add new teaching steps in `ai_tutor_agent/nodes/` first, then wire them there.
 - Core boundaries: `core/` state/events/ports, `application/` session coordination, `infrastructure/` LLM/RAG/storage/adapters, `interfaces/api/` Web API, `frontend/` chat/cards/history/settings.
-- Current main flow: topic confirmation → assessment → initial graph node selection → node content loading → tutor lesson → post-lesson pause → temporary question or objective test → remediation or next node planning → continue next node or homework → later homework/session restore.
+- Current main flow: topic confirmation → assessment → learning plan generation → initial graph node selection → node content loading → tutor lesson (or quick_check choice) → post-lesson pause → temporary question or objective test → remediation or next node planning → continue next node / consolidate weak / view report / homework → completion wrapup when all nodes mastered → later homework/session restore.
 - Legacy nodes such as `tester`, `evaluator`, `coach`, `next_step_selector`, and `post_eval_selector` still exist for compatibility; do not make them the target path for new graph-node learning work.
 
 ## Runtime assets and local state
@@ -59,7 +59,8 @@ This is a Web-first adaptive tutor for automatic control theory. The active prod
 - Question-help UI is a side modal for ad hoc text/image problems, supports `quick` / `deep` / `vision` modes, and stores records separately from the wrong-question book. It should not auto-add records to wrong questions unless a dedicated product rule is added.
 - Objective-test review cards should keep options as stable full-width rows and explanations structured around 判断依据、所选项问题、常见误区、下一步.
 - `post_lesson_choice` is a natural pause: users may type a free-form stuck point directly, choose `temporary_question` via “继续追问”, or choose `start_test` via “我懂了，进入小测”. Do not make it a rigid two-button-only gate.
-- Active pending interaction kinds include `post_lesson_choice`, `temporary_question`, `objective_test_answers`, `variant_test_answers`, `continue_or_homework_choice`, `homework_review_choice`, `homework_answers`, and `consolidation_choice`.
+- Active pending interaction kinds include `post_lesson_choice`, `temporary_question`, `objective_test_answers`, `variant_test_answers`, `continue_or_homework_choice`, `homework_review_choice`, `homework_answers`, `consolidation_choice`, and `quick_check_choice`.
+- Teaching insights panel (`frontend/assets/js/teaching-insights.js`, `api/teaching_insights.py`) shows teaching strategy transparency per node; the tutor can surface the current strategy, detected student state, and why a particular approach was chosen.
 - Historical cards must lock once answered/submitted/skipped/reviewed; only the current unresolved interaction may remain pending.
 
 ## Session/history gotchas

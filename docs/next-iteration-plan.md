@@ -1,6 +1,6 @@
 # AI Tutor Agent 下一步迭代计划
 
-更新时间：2026-06-01
+更新时间：2026-06-03
 项目根目录：本文所有命令与路径均以本仓库根目录为基准，统一使用项目内相对路径。
 
 ## 1. 计划目标
@@ -40,6 +40,7 @@
 - 2026-05-29 客观题复盘与公式渲染：客观题选项改为整行布局，复盘解释结构化为判断依据、所选项问题、常见误区、下一步；前端加载本地 `marked`/`katex`，题目答疑和复盘解释复用 Markdown/LaTeX 渲染与 sanitizer。
 - 2026-05-29 错题本/题目答疑/客观题复盘相关聚焦回归：128 passed, 5 warnings。
 - 2026-06-01 学习路径面板宽度稳定：CSS 固定 `width: 360px` + `max-width: 100%; overflow: hidden` 防护，展开节点时宽度不再变化；浏览器 E2E 验收前端渲染、课程方向、主题确认、摸底触发链路全部正常；全量测试 630 passed, 5 skipped, 5 warnings。
+- 2026-06-03 结业总结（completion_wrapup）：全部节点 mastered 后生成 LLM 学习总结报告（学习概览、能力评估、下一步建议）+ 附带复习作业；quick_check 入口模式改为先询问用户再执行；teaching insights 教学洞察面板接入；continue_or_homework_selector 新增 consolidate_weak / view_report / start_full_round 三个分支；节点标识头从 `##` 改为 `**bold**` 兼容两种渲染路径；全量测试 722 passed, 5 skipped, 5 warnings。
 
 当前主要风险：
 

@@ -1105,8 +1105,8 @@ def build_objective_test_generator_node(runtime: RuntimeContext, llm: Any | None
         node_id = str(state.get("current_node_id") or state.get("graph_anchor_id") or "").strip()
         node_name = str(state.get("current_node_name") or state.get("graph_anchor_title") or "").strip()
         quiz_kind = str(state.get("node_quiz_kind") or "").strip()
-        # 短复测只出 5 题
-        effective_count = 2 if quiz_kind == "quick_check" else (5 if quiz_kind == "node_retest" else count)
+        # 首次测验统一 10 题；复测（node_retest）5 题
+        effective_count = 5 if quiz_kind == "node_retest" else count
         coverage_plan = _build_question_blueprints(state, node_id, node_name, effective_count)
         provider = getattr(runtime, "question_bank_provider", None)
         questions: list[dict[str, Any]] = []
@@ -1115,7 +1115,18 @@ def build_objective_test_generator_node(runtime: RuntimeContext, llm: Any | None
         if not questions:
             questions = _generate_ai_questions(llm, state, node_id, node_name, effective_count)
         if not questions:
-            questions = _fallback_questions(node_id, node_name, effective_count, state)
+            event_sink.emit(
+                make_event(
+                    "node.error",
+                    "objective_test_generator",
+                    message=f"节点【{node_name or node_id}】出题失败：题库和 AI 生成均未产出题目。",
+                    data={"node_id": node_id, "node_name": node_name, "quiz_kind": quiz_kind},
+                )
+            )
+            raise RuntimeError(
+                f"节点【{node_name or node_id}】出题失败：题库无此题且 AI 生成返回空。"
+                f"请检查题库配置或 LLM 服务状态。"
+            )
         questions = [
             _enrich_question_metadata(dict(item), state=state, index=index, node_id=node_id, node_name=node_name)
             for index, item in enumerate(questions[:effective_count], start=1)

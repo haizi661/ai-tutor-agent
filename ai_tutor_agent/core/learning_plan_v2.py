@@ -29,11 +29,13 @@ from typing import Any, Callable
 
 from .ability_mapper import (
     get_all_node_ids,
+    get_node_chapter_map,
     get_node_difficulty,
     get_node_estimated_time,
     get_node_importance,
     get_node_name_map,
     get_node_primary_ability,
+    get_ability_names,
 )
 from .student_profile import StudentProfile
 
@@ -153,78 +155,44 @@ class LearningPlan:
         return sum(1 for nid in self.get_all_node_ids() if profile.is_mastered(nid))
 
 
-# ── Step 模板(供快速生成用) ─────────────────────────
-
-# 自动控制原理 6 步模板(基于章节 + ability)
-_STEP_TEMPLATE = [
-    {
-        "step_name": "建立自动控制基础认知",
-        "step_ability": "B",
-        "node_ids": ["KM001", "KM002", "KM003", "KM004", "KM005", "KM006"],
-        "chapter": "第一章",
-    },
-    {
-        "step_name": "建立数学建模能力",
-        "step_ability": "C",
-        "node_ids": ["KM007", "KM008", "KM009", "KM010", "KM011"],
-        "chapter": "第二章",
-    },
-    {
-        "step_name": "掌握时域分析与稳定性",
-        "step_ability": "E",
-        "node_ids": ["KM012", "KM013", "KM014", "KM015", "KM016", "KM017", "KM018", "KM019"],
-        "chapter": "第三章",
-    },
-    {
-        "step_name": "掌握根轨迹分析法",
-        "step_ability": "G",
-        "node_ids": ["KM020", "KM021", "KM022", "KM023", "KM024", "KM025"],
-        "chapter": "第四章",
-    },
-    {
-        "step_name": "掌握频域分析与校正",
-        "step_ability": "H",
-        "node_ids": ["KM026", "KM027", "KM028", "KM029", "KM030", "KM031", "KM032", "KM033", "KM034"],
-        "chapter": "第五、六章",
-    },
-    {
-        "step_name": "进入离散系统与综合",
-        "step_ability": "H",
-        "node_ids": ["KM035", "KM036", "KM037", "KM038", "KM039", "KM040", "KM041", "KM042"],
-        "chapter": "第七~十章",
-    },
-]
-
-# 节点 → 章节映射(快速查找)
-_NODE_CHAPTER: dict[str, str] = {
-    "KM001": "第一章", "KM002": "第一章", "KM003": "第一章", "KM004": "第一章",
-    "KM005": "第一章", "KM006": "第一章",
-    "KM007": "第二章", "KM008": "第二章", "KM009": "第二章", "KM010": "第二章",
-    "KM011": "第二章",
-    "KM012": "第三章", "KM013": "第三章", "KM014": "第三章", "KM015": "第三章",
-    "KM016": "第三章", "KM017": "第三章", "KM018": "第三章", "KM019": "第三章",
-    "KM020": "第四章", "KM021": "第四章", "KM022": "第四章", "KM023": "第四章",
-    "KM024": "第四章", "KM025": "第四章",
-    "KM026": "第五章", "KM027": "第五章", "KM028": "第五章", "KM029": "第五章",
-    "KM030": "第六章", "KM031": "第六章", "KM032": "第六章", "KM033": "第六章",
-    "KM034": "第六章",
-    "KM035": "第七章", "KM036": "第七章", "KM037": "第七章",
-    "KM038": "第八章", "KM039": "第八章", "KM040": "第八章",
-    "KM041": "第九章",
-    "KM042": "第十章",
-}
-
-# 章节顺序索引(跨章排序用)
-_CHAPTER_ORDER: dict[str, int] = {
-    "第一章": 1, "第二章": 2, "第三章": 3, "第四章": 4,
-    "第五章": 5, "第六章": 6, "第七章": 7, "第八章": 8,
-    "第九章": 9, "第十章": 10,
-}
-
 _DUMMY_EDGES: list[dict] = []
 
 # 节点重要性排序权重(core 优先于 supporting)
 _IMPORTANCE_ORDER: dict[str, int] = {"core": 0, "supporting": 1, "other": 2}
+
+# ── 章节映射(从 V2 JSON 动态加载,不再硬编码) ──
+_NODE_CHAPTER: dict[str, str] = {}
+_CHAPTER_ORDER: dict[str, int] = {}
+
+
+_CN_NUM = "一二三四五六七八九十"
+
+def _chapter_sort_key(chapter: str) -> int:
+    """从章节名中提取数值序号(如 '第三章' → 3, '第五、六章' → 5)。"""
+    for idx, ch in enumerate(chapter, start=1):
+        if ch in _CN_NUM:
+            return _CN_NUM.index(ch) + 1
+    return 999
+
+
+def _ensure_chapter_loaded() -> None:
+    global _NODE_CHAPTER, _CHAPTER_ORDER
+    if _NODE_CHAPTER:
+        return
+    _NODE_CHAPTER = get_node_chapter_map()
+    chapters = sorted(set(c for c in _NODE_CHAPTER.values() if c), key=_chapter_sort_key)
+    _CHAPTER_ORDER = {c: idx for idx, c in enumerate(chapters)}
+
+
+def _get_node_chapter(node_id: str) -> str:
+    _ensure_chapter_loaded()
+    return _NODE_CHAPTER.get(node_id, "其他")
+
+
+def _get_chapter_order(node_id: str) -> int:
+    _ensure_chapter_loaded()
+    ch = _NODE_CHAPTER.get(node_id, "其他")
+    return _CHAPTER_ORDER.get(ch, 999)
 
 
 # ── 工具函数 ───────────────────────────────────────
@@ -237,15 +205,6 @@ def _clamp(x: float, lo: float = 0.0, hi: float = 1.0) -> float:
     return max(lo, min(hi, float(x)))
 
 
-def _get_node_chapter(node_id: str) -> str:
-    return _NODE_CHAPTER.get(node_id, "其他")
-
-
-def _get_chapter_order(node_id: str) -> int:
-    ch = _get_node_chapter(node_id)
-    return _CHAPTER_ORDER.get(ch, 999)
-
-
 # ── 算法 7 步 ──────────────────────────────────────
 
 # ── Step 1: 候选集 ────────────────────────────
@@ -253,50 +212,117 @@ def _get_chapter_order(node_id: str) -> int:
 def compute_candidates(
     all_node_ids: list[str] | None = None,
     mastered_set: set[str] | None = None,
+    include_all: bool = False,
 ) -> list[str]:
     """候选集 = 全图谱 - 已 mastered
 
     已 mastered 的定义:
     - mastery >= 0.85 AND confidence >= 0.7(即 profile.is_mastered)
+
+    include_all=True 时忽略 mastered 状态，返回全部节点（用于完整轮次复习）。
     """
     if all_node_ids is None:
         all_node_ids = get_all_node_ids()
+    if include_all:
+        return list(all_node_ids)
     mastered = mastered_set or set()
     return [nid for nid in all_node_ids if nid not in mastered]
 
 
 # ── Step 2: 紧迫度计算 ─────────────────────────
 
+def compute_context_boost(
+    wrong_question_book: list[dict[str, Any]] | None = None,
+    question_help_records: list[dict[str, Any]] | None = None,
+) -> dict[str, float]:
+    """从错题本和临时提问中计算每节点的上下文紧迫加成。
+
+    - 错题本: 每道未掌握的错题 +0.12，有 misconception/wrong_reason 的额外 +0.08
+    - 临时提问: 每个围绕该节点的提问 +0.08（反映用户主动关注）
+    - 每节点上限 1.0
+    """
+    from collections import defaultdict
+
+    boost: dict[str, float] = defaultdict(float)
+    # 错题本
+    for entry in (wrong_question_book or []):
+        nid = str(entry.get("node_id", "")).strip()
+        if not nid:
+            continue
+        if entry.get("mastered"):
+            continue
+        boost[nid] += 0.12
+        if entry.get("misconception") or entry.get("wrong_reason"):
+            boost[nid] += 0.08
+
+    # 临时提问：用户在某个节点上主动求助，说明关注/困惑
+    for record in (question_help_records or []):
+        nid = str(record.get("node_id", "")).strip()
+        if not nid:
+            continue
+        boost[nid] += 0.08
+
+    return {nid: min(1.0, v) for nid, v in boost.items()}
+
+
+def compute_freshness_boost(
+    candidates: list[str],
+    previously_planned: set[str] | None = None,
+    session_index: int = 0,
+) -> dict[str, float]:
+    """为从未被任何学习路径选中的节点提供新鲜度加成。
+
+    防止尾部节点因确定性排序被反复跳过的覆盖缺口。
+    加成值随 session 递增，确保不同 importance 层级的节点最终都能被覆盖：
+    - session 0-1: 0.25（同 importance 内优先）
+    - session 2-3: 0.40（跨 supporting 壁垒）
+    - session 4+:  0.55（跨 optional 壁垒）
+
+    经 context_boost 20% 权重折算后分别为 0.05/0.08/0.11 urgency。
+    """
+    if not previously_planned:
+        return {}
+    if session_index <= 1:
+        value = 0.25
+    elif session_index <= 3:
+        value = 0.40
+    else:
+        value = 0.55
+    return {nid: value for nid in candidates if nid not in previously_planned}
+
+
 def compute_urgency(
     node_id: str,
     profile: StudentProfile,
-    goal_relevance: float = 0.5,
-    prereq_importance: float = 0.3,
+    context_boost: float = 0.0,
 ) -> float:
     """紧迫度公式:值越大越应该优先选。
 
     Priority(v) =
-      0.30 × GoalRelevance(v) +
-      0.25 × PrerequisiteImportance(v) +
-      0.20 × KnowledgeGap(v) +
+      0.35 × KnowledgeGap(v) +
       0.15 × Uncertainty(v) +
-      0.10 × FailureHistory(v)
+      0.30 × FailureHistory(v) +
+      0.20 × ContextBoost(v)
+
+    Gap = 1 - mastery, Uncertainty = 1 - confidence。
+    FailureHistory: 失败 1 次=0.3, 2 次=0.6, 3+=1.0。
+    ContextBoost: 来自错题本和临时提问的预计算加成（0-1）。
+
+    权重设计原因: failure_hist 权重高于 uncertainty,因为确凿的失败
+    证据比"未测试所以不确定"更应该驱动优先级。
     """
     mastery = profile.get_mastery(node_id)
     confidence = profile.get_confidence(node_id)
     failure_count = profile.get_failure_count(node_id)
-    gap = 1.0 - mastery  # 知识缺口
-    uncertainty = 1.0 - confidence  # 不确定性(默认 0.8)
-
-    # FailureHistory: 失败 1 次 = 0.3, 2 次 = 0.6, 3+ = 1.0
+    gap = 1.0 - mastery
+    uncertainty = 1.0 - confidence
     failure_hist = _clamp(float(failure_count) * 0.3)
 
     priority = (
-        0.30 * goal_relevance +
-        0.25 * prereq_importance +
-        0.20 * gap +
+        0.35 * gap +
         0.15 * uncertainty +
-        0.10 * failure_hist
+        0.30 * failure_hist +
+        0.20 * _clamp(context_boost)
     )
     return _clamp(priority)
 
@@ -381,13 +407,14 @@ def select_nodes(
     node_count: int = 10,
     node_range: tuple[int, int] = (9, 12),
     edges: list[dict[str, str]] | None = None,
+    context_boost: dict[str, float] | None = None,
 ) -> list[str]:
     """从候选集中选 9-12 个节点。
 
     选择策略(知识图谱驱动,非章节):
     1. importance (core → supporting → other)
     2. 拓扑深度(浅在先;能力缺口拉取:同深度内薄弱能力优先)
-    3. 紧迫度(越高越先)
+    3. 紧迫度(越高越先;含错题本+临时提问加成)
     4. 难度(低在先)
     5. ID 数字升序
     """
@@ -395,9 +422,10 @@ def select_nodes(
         return []
     total = len(sorted_candidates)
 
+    boost_map = context_boost or {}
     # 计算紧迫度
     urgency_scores = {
-        nid: compute_urgency(nid, profile)
+        nid: compute_urgency(nid, profile, boost_map.get(nid, 0.0))
         for nid in sorted_candidates[:max(node_count * 2, total)]
     }
 
@@ -441,14 +469,14 @@ def select_nodes(
             # 真实知识图谱: importance > 深度 > 紧迫度 > 难度 > ID
             scored.append((imp, adj_depth, -urgency, diff, id_num, nid))
         else:
-            # 无图(测试环境 fallback): importance > 难度 > ID
-            scored.append((imp, diff, id_num, nid))
+            # 无图(测试环境 fallback): importance > 紧迫度 > 难度 > ID
+            scored.append((imp, -urgency, diff, id_num, nid))
 
     scored.sort()
     if has_real_edges:
         selected = [nid for _, _, _, _, _, nid in scored]
     else:
-        selected = [nid for _, _, _, nid in scored]
+        selected = [nid for _, _, _, _, nid in scored]
 
     # 弹性控制范围
     if len(selected) < node_range[0]:
@@ -458,7 +486,43 @@ def select_nodes(
     elif len(selected) > node_range[1]:
         selected = selected[:node_range[1]]
 
+    # ── 新鲜度保留：确保从未被规划过的节点至少占 1-2 个名额 ──
+    fresh_set = {nid for nid, boost in boost_map.items() if boost >= 0.40}
+    fresh_unselected = [nid for nid in fresh_set if nid in sorted_candidates and nid not in selected]
+    if fresh_unselected and len(selected) >= node_range[0]:
+        # 按 urgency 排序 fresh 候选
+        fresh_unselected.sort(key=lambda nid: -urgency_scores.get(nid, 0.0))
+        reserve_count = min(2, len(fresh_unselected))
+        # 从 selected 末尾替换（去掉 urgency 最低且非 fresh 的节点）
+        for i in range(reserve_count):
+            # 找一个可替换的非 fresh 节点（从后往前找）
+            swap_idx = -1
+            for j in range(len(selected) - 1, -1, -1):
+                if selected[j] not in fresh_set:
+                    swap_idx = j
+                    break
+            if swap_idx >= 0 and i < len(fresh_unselected):
+                selected[swap_idx] = fresh_unselected[i]
+
     return selected
+
+
+def _sort_step_nodes(
+    node_ids: list[str],
+    edges: list[dict[str, str]] | None = None,
+) -> list[str]:
+    """对 step 内节点排序：拓扑深度(前置先学) → 难度(易先) → ID。
+
+    确保教学顺序合理：先学前置知识，同深度内从简单到难。
+    """
+    if len(node_ids) <= 1:
+        return list(node_ids)
+    topo_depth = _compute_topo_order(node_ids, edges)
+    return sorted(node_ids, key=lambda nid: (
+        topo_depth.get(nid, 0),
+        get_node_difficulty(nid),
+        int("".join(c for c in nid if c.isdigit()) or 0),
+    ))
 
 
 # ── Step 5: 聚类成 4 step ──────────────────────
@@ -467,13 +531,14 @@ def cluster_into_steps(
     selected: list[str],
     n_steps: int = 4,
     per_step_range: tuple[int, int] = (2, 4),
+    edges: list[dict[str, str]] | None = None,
 ) -> list[list[str]]:
     """将选中的节点聚类成 4 step。
 
     规则（V2 能力驱动聚类）:
     1. 按 primary_ability 分组——同能力维度的节点尽量在一起
     2. 跨章节自然允许——同一能力可能跨越多个章节
-    3. 组内按章序 + ID 保持拓扑序（不打破前置依赖）
+    3. step 内按拓扑深度(前置先学) → 难度(易→难) → ID 排序
     4. 每 step 节点数 ∈ [2, 4]
     5. 最终 step 数 = n_steps(有弹性)
     """
@@ -562,6 +627,9 @@ def cluster_into_steps(
         else:
             break
 
+    # ── step 内排序：拓扑深度 → 难度 → ID ──
+    raw_steps = [_sort_step_nodes(step, edges) for step in raw_steps]
+
     return raw_steps
 
 
@@ -570,12 +638,34 @@ def cluster_into_steps(
 def resolve_entry_modes(
     node_ids: list[str],
     profile: StudentProfile,
+    force_review: bool = False,
 ) -> dict[str, str]:
-    """决策一个 step 中每节点的 entry_mode。"""
-    return {
-        nid: profile.get_entry_mode(nid)
+    """决策一个 step 中每节点的 entry_mode。
+
+    传入节点元数据（difficulty / importance），让 entry_mode
+    能按节点属性差异化——辅助/简单节点可以精简学，核心/难节点必须完整学。
+
+    force_review=True 时（全部 mastered 后的巩固复习），将掌握度最低的
+    节点从 quick_check 升级为 short_learning，确保有实际复习内容而非仅 2 道检测题。
+    """
+    modes = {
+        nid: profile.get_entry_mode(
+            nid,
+            node_difficulty=get_node_difficulty(nid),
+            node_importance=get_node_importance(nid),
+        )
         for nid in node_ids
     }
+    if force_review:
+        # 找出所有 quick_check 节点，按 mastery 升序，最低的一半升级为 short_learning
+        qc_nodes = sorted(
+            [nid for nid, m in modes.items() if m == "quick_check"],
+            key=lambda nid: profile.get_mastery(nid),
+        )
+        upgrade_count = max(1, len(qc_nodes) // 2)  # 至少升级 1 个
+        for nid in qc_nodes[:upgrade_count]:
+            modes[nid] = "short_learning"
+    return modes
 
 
 # ── Step 7: step 命名 ──────────────────────────
@@ -813,6 +903,10 @@ def generate_learning_plan_v2(
     node_range: tuple[int, int] = (9, 12),
     session_index: int = 0,
     llm: Any | None = None,
+    context_boost: dict[str, float] | None = None,
+    freshness_boost: dict[str, float] | None = None,
+    force_review: bool = False,
+    include_all: bool = False,
 ) -> LearningPlan:
     """主入口:根据学生画像 + 图谱 + 历史路径,生成一次学习路径。
 
@@ -831,6 +925,10 @@ def generate_learning_plan_v2(
         node_range: 允许的节点数范围
         session_index: 第几次 session
         llm: 可选 AnswerProvider,用于 LLM 生成 step 名字
+        context_boost: node_id → 上下文紧迫加成(错题本+临时提问)
+        freshness_boost: node_id → 新鲜度加成(从未被规划过的节点)
+        force_review: 全部 mastered 后仍强制从薄弱节点生成复习路径
+        include_all: 候选集包含全部节点（不排除已 mastered），用于完整轮次复习
 
     Returns:
         LearningPlan
@@ -847,23 +945,31 @@ def generate_learning_plan_v2(
     mastered = profile.get_mastered_concept_ids()
 
     # Step 1: 候选集
-    candidates = compute_candidates(all_node_ids, mastered)
+    candidates = compute_candidates(all_node_ids, mastered, include_all=include_all)
 
     # 如果候选不足 → 从已 mastered 补充 weakest 填到 range 下限
-    if len(candidates) < node_range[0]:
-        needed = node_range[0] - len(candidates)
-        mastered_list = list(mastered)
-        mastered_list.sort(key=lambda nid: profile.get_mastery(nid))
-        candidates.extend(mastered_list[:needed])
+    # 候选为 0 时：若是强制复习模式（consolidate_weak）则补充，否则交由上层触发 completion
+    # include_all 模式下候选集已包含全部节点，不需要补充
+    if not include_all and len(candidates) < node_range[0]:
+        if len(candidates) > 0 or force_review:
+            needed = node_range[0] - len(candidates)
+            mastered_list = list(mastered)
+            mastered_list.sort(key=lambda nid: profile.get_mastery(nid))
+            candidates.extend(mastered_list[:needed])
 
     # Step 2-3: 排序
     sorted_candidates = sort_candidates(candidates, edges)
 
-    # Step 4: 选 9-12 节点(知识图谱驱动,传递 edges 推导深度)
-    selected = select_nodes(sorted_candidates, profile, node_count_target, node_range, edges=edges)
+    # 合并 context_boost + freshness_boost
+    merged_boost = dict(context_boost or {})
+    for nid, v in (freshness_boost or {}).items():
+        merged_boost[nid] = min(1.0, merged_boost.get(nid, 0.0) + v)
 
-    # Step 5: 聚类成 step
-    raw_steps = cluster_into_steps(selected, n_steps=n_steps)
+    # Step 4: 选 9-12 节点(知识图谱驱动,传递 edges 推导深度+错题/提问/新鲜度加成)
+    selected = select_nodes(sorted_candidates, profile, node_count_target, node_range, edges=edges, context_boost=merged_boost)
+
+    # Step 5: 聚类成 step（step 内按拓扑深度+难度排序）
+    raw_steps = cluster_into_steps(selected, n_steps=n_steps, edges=edges)
 
     # Step 6: entry_mode
     steps: list[StepEntry] = []
@@ -879,21 +985,49 @@ def generate_learning_plan_v2(
                      key=lambda c: _CHAPTER_ORDER.get(c, 999))
         chapter = chs[0] if chs else ""
 
-        # 计算 reason
-        low_mastery = sum(1 for nid in node_ids if profile.get_mastery(nid) < 0.4)
-        failed = sum(1 for nid in node_ids if profile.get_failure_count(nid) >= 1)
-        if failed >= 2:
-            reason = f"含 {failed} 个需要重学的节点,基于错题驱动"
-        elif low_mastery >= 2:
-            reason = f"含 {low_mastery} 个薄弱节点,需要完整学习"
-        else:
-            reason = "基于当前画像与递进逻辑的推荐"
-        if step_ability:
-            ability_map = {"A": "数学基础", "B": "基本概念", "C": "建模", "D": "稳定性",
-                           "E": "时域", "F": "稳态误差", "G": "根轨迹", "H": "频域校正"}
-            step_goal = f"掌握{ability_map.get(step_ability, step_ability)}核心能力"
+        # 先解析 entry_modes（reason 需要用到）
+        entry_modes = resolve_entry_modes(node_ids, profile, force_review=force_review)
 
-        entry_modes = resolve_entry_modes(node_ids, profile)
+        if step_ability:
+            ability_names = get_ability_names()
+            step_goal = f"掌握{ability_names.get(step_ability, step_ability)}"
+        else:
+            step_goal = ""
+
+        # 计算 reason
+        failed = sum(1 for nid in node_ids if profile.get_failure_count(nid) >= 1)
+        new_nodes = sum(1 for nid in node_ids if profile.get_confidence(nid) < 0.3)
+        quick_count = sum(1 for m in entry_modes.values() if m == "quick_check")
+        short_count = sum(1 for m in entry_modes.values() if m == "short_learning")
+        full_count = sum(1 for m in entry_modes.values() if m == "full_learning")
+
+        parts: list[str] = []
+        if session_index > 0:
+            parts.append(f"第{session_index + 1}轮路径")
+        if failed >= 2:
+            parts.append(f"{failed}个节点需要重学")
+        elif failed == 1:
+            parts.append("含1个待重学节点")
+        if new_nodes >= len(node_ids) * 0.7 and session_index > 0:
+            parts.append("进入新章节")
+        # 教学模式分布
+        mode_parts = []
+        if full_count:
+            mode_parts.append(f"{full_count}个完整学")
+        if short_count:
+            mode_parts.append(f"{short_count}个精简学")
+        if quick_count:
+            mode_parts.append(f"{quick_count}个快速测")
+        if mode_parts:
+            parts.append("，".join(mode_parts))
+        if step_ability:
+            ability_names = get_ability_names()
+            ab_label = ability_names.get(step_ability, step_ability)
+            parts.append(f"主攻{ab_label}")
+        if chapter and chapter != "其他":
+            parts.append(f"章节：{chapter}")
+
+        reason = "；".join(parts) if parts else "基于当前画像与递进逻辑的推荐"
         step = StepEntry(
             step_index=idx,
             step_name=step_names[idx] if idx < len(step_names) else f"第{idx + 1}步",

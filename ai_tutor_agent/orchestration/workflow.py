@@ -47,6 +47,7 @@ from ..nodes.topic_confirm import build_topic_confirm_node
 from ..nodes.coach import build_coach_node
 from ..nodes.next_step import build_next_step_node
 from ..nodes.post_eval import build_post_eval_selector_node, build_post_eval_wrapup_node
+from ..nodes.completion_wrapup import build_completion_wrapup_node
 from .routing import build_route_logic
 
 
@@ -80,6 +81,8 @@ def get_entry_node(state: AgentState) -> str:
         return "topic_confirmer"
     if state.get("flow_status") == "awaiting_next_step_selector":
         return "next_step_selector"
+    if state.get("flow_status") == "awaiting_quick_check_choice":
+        return "tutor"
     if state.get("flow_status") == "awaiting_post_lesson_choice":
         return "post_lesson_choice"
     if state.get("flow_status") == "awaiting_temporary_question":
@@ -110,10 +113,14 @@ def get_entry_node(state: AgentState) -> str:
         return "remediation_decision"
     if state.get("learning_resume_target") == "continue_or_homework_selector":
         return "continue_or_homework_selector"
+    if state.get("learning_resume_target") == "completion_wrapup":
+        return "completion_wrapup"
     if state.get("flow_status") == "awaiting_post_eval_selector":
         return "post_eval_selector"
 
     if state.get("flow_status") == "direct_tutor":
+        if state.get("current_node_id"):
+            return "node_content_loader"
         return "tutor"
 
     if state.get("flow_status") == "assessment_dialog":
@@ -131,7 +138,7 @@ def get_entry_node(state: AgentState) -> str:
     if state.get("post_eval_choice") == "same_type_practice":
         return "tester"
     if state.get("post_eval_choice") == "continue_advance":
-        return "tutor"
+        return "node_content_loader"
     if state.get("post_eval_choice") == "summarize_wrapup":
         return "post_eval_wrapup"
 
@@ -143,7 +150,9 @@ def get_entry_node(state: AgentState) -> str:
             # 定位到 post_lesson_choice 等待用户选择下一步。
             if state.get("tutor_content"):
                 return "post_lesson_choice"
-            return "tutor"
+            if state.get("current_node_id"):
+                return "node_content_loader"
+            return "initial_node_selector"
         return "learning_plan_generator"
     
     # 兜底：有教学内容但 is_assessed 未置位（旧 session / 异常状态）
@@ -196,6 +205,8 @@ def route_after_topic_confirmer(state: AgentState) -> str:
     if normalize_resume_target(state.get("learning_resume_target", "")) == "initial_node_selector":
         return "initial_node_selector"
     if state.get("flow_status") == "direct_tutor":
+        if state.get("current_node_id"):
+            return "node_content_loader"
         return "tutor"
     return "assessment_generator"
 
@@ -325,6 +336,12 @@ def route_after_continue_or_homework_selector(state: AgentState) -> str:
     if state.get("continue_or_homework_choice") == "stop_today":
         return "homework_generator"
     if state.get("continue_or_homework_choice") == "start_next_round":
+        return "learning_plan_generator"
+    if state.get("continue_or_homework_choice") == "start_full_round":
+        return "learning_plan_generator"
+    if state.get("continue_or_homework_choice") == "view_report":
+        return "completion_wrapup"
+    if state.get("continue_or_homework_choice") == "consolidate_weak":
         return "learning_plan_generator"
     return "pause"
 
@@ -487,6 +504,10 @@ def build_workflow(
     workflow.add_node(
         "post_eval_wrapup",
         build_post_eval_wrapup_node(tutor_llm, runtime),
+    )
+    workflow.add_node(
+        "completion_wrapup",
+        build_completion_wrapup_node(tutor_llm, runtime),
     )
 
     # 学前测评节点：注入图谱节点供 LLM 选概念，注入题库优先从题库出题
@@ -663,6 +684,8 @@ def build_workflow(
             "pause": END,
             "node_content_loader": "node_content_loader",
             "homework_generator": "homework_generator",
+            "learning_plan_generator": "learning_plan_generator",
+            "completion_wrapup": "completion_wrapup",
         },
     )
     workflow.add_edge("homework_generator", END)
@@ -728,6 +751,7 @@ def build_workflow(
         },
     )
     workflow.add_edge("post_eval_wrapup", END)
+    workflow.add_edge("completion_wrapup", END)
     workflow.add_conditional_edges(
         "tester",
         route_after_tester,

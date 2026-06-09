@@ -1,6 +1,6 @@
 # AI Tutor Agent 当前完成情况与使用说明
 
-更新时间：2026-06-01
+更新时间：2026-06-03
 项目根目录：本文所有命令默认都在本仓库根目录执行，路径统一使用项目内相对路径。
 
 ## 1. 当前一句话结论
@@ -21,7 +21,8 @@
 → 节点后客观题批量测试
 → 未通过：错题讲解 + 变式题
 → 通过：下一节点规划（按当前 Step 内找 → Step 完了推进下一步 → 全部完成进作业）
-→ 继续下一节点 / 结束本轮学习生成作业
+→ 继续下一节点 / 巩固薄弱点 / 查看学习报告 / 结束本轮学习生成作业
+→ 全部节点掌握后进入结业总结（completion_wrapup）
 → 二次登录恢复作业或继续学习（从持久化路径恢复）
 ```
 
@@ -33,7 +34,7 @@
 
 ### 2.1 LangGraph 主流程节点
 
-当前 `ai_tutor_agent/orchestration/workflow.py` 已注册 28 个节点，其中与严格节点制学习主线直接相关的是：
+当前 `ai_tutor_agent/orchestration/workflow.py` 已注册 29 个节点，其中与严格节点制学习主线直接相关的是：
 
 - `intake_router`
 - `greeter`
@@ -61,6 +62,7 @@
 - `homework_answer_dialog`
 - `homework_scorer`
 - `homework_explainer`
+- `completion_wrapup`
 
 旧流程节点 `tester/evaluator/coach/next_step_selector/post_eval_selector` 仍注册在 workflow.py 中作为兼容路径存在（连接到旧路由分支），但已不作为目标主线的核心路径。
 
@@ -197,7 +199,7 @@ python -m ai_tutor_agent.knowledge_map.runtime_assets --media-index data/media_e
 
 ```bash
 PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 pytest -q
-# 630 passed, 5 skipped, 5 warnings
+# 743 passed, 5 skipped, 5 warnings
 ```
 
 warnings 为既有 SWIG DeprecationWarning，不是本轮主流程逻辑失败。
@@ -212,6 +214,7 @@ warnings 为既有 SWIG DeprecationWarning，不是本轮主流程逻辑失败�
 | 2026-05-28 | 学习路径 v1 实现（拓扑排序+分步聚合） | 606 |
 | 2026-05-29 | 学习路径 v2 简化（纯拓扑 BFS）、错题本、题目答疑、公式渲染 | 630 |
 | 2026-06-01 | 学习路径面板宽度稳定、CSS 防护加固、E2E 浏览器验收 | 630 |
+| 2026-06-03 | completion_wrapup 结业总结、quick_check 选择入口、teaching insights 面板 | 722 |
 
 聚焦回归说明：
 

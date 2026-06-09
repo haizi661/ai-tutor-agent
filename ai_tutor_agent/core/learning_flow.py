@@ -75,6 +75,7 @@ RESUME_TARGETS = {
     "tester",
     "post_eval_selector",
     "post_eval_wrapup",
+    "completion_wrapup",
 }
 
 

@@ -32,6 +32,10 @@ def _normalize_choice(text: str) -> str:
         "新一轮": "start_next_round",
         "继续下一轮": "start_next_round",
         "start_next_round": "start_next_round",
+        "start_full_round": "start_full_round",
+        "开始新一轮完整": "start_full_round",
+        "完整学习": "start_full_round",
+        "新一轮完整学习": "start_full_round",
     }
     return mapping.get(lowered, lowered)
 
@@ -45,9 +49,23 @@ def build_continue_or_homework_selector_node(runtime: RuntimeContext):
         candidate_id = str(state.get("next_node_candidate_id") or "").strip()
         candidate_name = str(state.get("next_node_candidate_name") or "").strip()
         is_plan_completed = state.get("learning_plan_source") == "plan_completed"
+        is_all_mastered = state.get("learning_plan_source") == "all_mastered"
 
         # ── Build options & prompt based on context ──
-        if is_plan_completed:
+        if is_all_mastered:
+            options = [
+                {"value": "start_full_round", "label": "开始新一轮完整学习"},
+                {"value": "consolidate_weak", "label": "只巩固薄弱点"},
+                {"value": "view_report", "label": "查看学习报告"},
+                {"value": "stop_today", "label": "今天就到这里"},
+            ]
+            recommended = "start_full_round"
+            prompt = (
+                "太棒了！你已完成知识图谱全部节点的学习。"
+                "接下来你想：开始新一轮完整学习（全部节点重过一遍，错过的重点讲）、"
+                "只巩固薄弱点、查看学习报告，还是今天就到这里？"
+            )
+        elif is_plan_completed:
             session_index = str(state.get("student_state_snapshot", {}).get("session_index", "") or "")
             index_tag = f"（第{session_index}次）" if session_index else ""
             options = [
@@ -63,7 +81,7 @@ def build_continue_or_homework_selector_node(runtime: RuntimeContext):
             recommended = "continue_next_node" if candidate_id else "stop_today"
 
         if not awaiting_choice:
-            if not is_plan_completed:
+            if not is_plan_completed and not is_all_mastered:
                 next_label = candidate_name or candidate_id or "暂无可继续的新节点"
                 prompt = (
                     f"当前节点已经通过。下一候选节点：{next_label}。"
@@ -102,11 +120,101 @@ def build_continue_or_homework_selector_node(runtime: RuntimeContext):
                 },
             ).strip()
         normalized_choice = _normalize_choice(choice) or recommended
-        valid_choices = {"continue_next_node", "stop_today", "start_next_round"}
+        valid_choices = {"continue_next_node", "stop_today", "start_next_round", "view_report", "consolidate_weak", "start_full_round"}
         if normalized_choice not in valid_choices:
             normalized_choice = recommended
         if normalized_choice == "continue_next_node" and not candidate_id:
             normalized_choice = "stop_today"
+
+        if normalized_choice == "view_report":
+            event_sink.emit(
+                make_event(
+                    "node.complete",
+                    "continue_or_homework_selector",
+                    message="好，我来为你生成一份学习总结报告。",
+                )
+            )
+            return {
+                "continue_or_homework_choice": "view_report",
+                "flow_status": "normal",
+                "learning_phase": "daily_wrapup",
+                "learning_resume_target": "completion_wrapup",
+                "learning_resume_reason": "view_report_selected",
+                "pending_interaction_kind": "",
+                "pending_interaction_prompt": "",
+                "pending_interaction_options": [],
+                "pending_interaction_recommended": "",
+                "pending_interaction_answer": "",
+                "message_history": list(state.get("message_history", []))
+                + [
+                    {
+                        "role": "user",
+                        "kind": "continue_or_homework_choice",
+                        "content": choice or normalized_choice,
+                        "data": {"selected_value": normalized_choice},
+                    }
+                ],
+            }
+
+        if normalized_choice == "consolidate_weak":
+            event_sink.emit(
+                make_event(
+                    "node.complete",
+                    "continue_or_homework_selector",
+                    message="好，我们针对薄弱点再巩固一轮。",
+                )
+            )
+            return {
+                "continue_or_homework_choice": "consolidate_weak",
+                "flow_status": "normal",
+                "learning_phase": "next_round_requested",
+                "learning_resume_target": "learning_plan_generator",
+                "learning_resume_reason": "consolidate_weak_selected",
+                "pending_interaction_kind": "",
+                "pending_interaction_prompt": "",
+                "pending_interaction_options": [],
+                "pending_interaction_recommended": "",
+                "pending_interaction_answer": "",
+                "message_history": list(state.get("message_history", []))
+                + [
+                    {
+                        "role": "user",
+                        "kind": "continue_or_homework_choice",
+                        "content": choice or normalized_choice,
+                        "data": {"selected_value": normalized_choice},
+                    }
+                ],
+            }
+
+        if normalized_choice == "start_full_round":
+            event_sink.emit(
+                make_event(
+                    "node.complete",
+                    "continue_or_homework_selector",
+                    message="好，我们开始新一轮完整学习，错过的重点讲，掌握好的快速过。",
+                )
+            )
+            return {
+                "continue_or_homework_choice": "start_full_round",
+                "flow_status": "normal",
+                "learning_phase": "next_round_requested",
+                "learning_resume_target": "learning_plan_generator",
+                "learning_resume_reason": "start_full_round_selected",
+                "pending_interaction_kind": "",
+                "pending_interaction_prompt": "",
+                "pending_interaction_options": [],
+                "pending_interaction_recommended": "",
+                "pending_interaction_answer": "",
+                "message_history": list(state.get("message_history", []))
+                + [
+                    {
+                        "role": "user",
+                        "kind": "continue_or_homework_choice",
+                        "content": choice or normalized_choice,
+                        "data": {"selected_value": normalized_choice},
+                    }
+                ],
+            }
 
         if normalized_choice == "start_next_round":
             event_sink.emit(

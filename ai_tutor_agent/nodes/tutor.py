@@ -16,6 +16,7 @@ from ..core.learning_support import (
     build_graph_guidance_from_result,
     mark_student_node_started,
     normalize_graph_answer,
+    record_teaching_episode,
 )
 from ..core.output_format import (
     collapse_blank_lines,
@@ -906,6 +907,20 @@ def _is_too_brief_node_lesson(text: str, state: dict) -> bool:
 
 
 def _build_contract_lesson_fallback(state: dict, raw_text: str = "") -> str:
+    # ── 优先使用 node_content_context 中的 explanation_teacher_style ──
+    node_content = str(state.get("node_content_context") or "").strip()
+    if node_content:
+        match = re.search(
+            r"## explanation_teacher_style[^\n]*\n(.*?)(?=\n## |\Z)",
+            node_content,
+            re.DOTALL,
+        )
+        if match:
+            teacher_style = match.group(1).strip()
+            if len(teacher_style) >= 80:
+                prior = str(raw_text or "").strip()
+                return f"{prior}\n\n{teacher_style}" if prior else teacher_style
+
     contract = dict(state.get("node_teaching_contract") or {})
     node_name = str(
         contract.get("node_name")
@@ -1117,11 +1132,9 @@ def _structure_instruction(mode: str) -> str:
 def _build_node_identity_header(state: dict) -> str:
     """构建教学内容的节点标识头，包含节点名和教学侧重点。
 
-    格式:
-    ## 教学：{节点名}
-    > {教学侧重点描述}
-
-    ---
+    使用 **bold** 和 *italic* 格式，兼容两种渲染路径：
+    - Path 2a: _render_answer_html → _convert_markdown_inline
+    - Path 2b: 前端 parseMarkdown
     """
     node_name = str(
         state.get("current_node_name")
@@ -1135,10 +1148,8 @@ def _build_node_identity_header(state: dict) -> str:
         "quick_check": "快速检测——验证掌握程度",
     }.get(entry_mode, "教学讲解")
     lines = [
-        f"## 教学：{node_name}",
-        f"> {mode_label}",
-        "",
-        "---",
+        f"**教学：{node_name}**",
+        f"*{mode_label}*",
         "",
     ]
     return "\n".join(lines)
@@ -1214,7 +1225,7 @@ def build_tutor_node(tutor_llm, runtime: RuntimeContext):
             if m.get("role") == "user":
                 last_user_msg = str(m.get("content") or "")
                 break
-        affect_signals = detect_affect(last_user_msg)
+        affect_signals = detect_affect(last_user_msg, llm=tutor_llm)
         affect_label = primary_affect(affect_signals)
         if affect_signals:
             event_sink.emit(
@@ -1229,35 +1240,81 @@ def build_tutor_node(tutor_llm, runtime: RuntimeContext):
         # ── Entry mode: 读取学习路径的入口模式 ──
         current_entry_mode = str(state.get("current_entry_mode") or "").strip()
 
-        # ── quick_check 模式：跳过讲解，直接进入快速检测 ──
+        # ── quick_check 模式：询问用户是直接测还是先简学 ──
         if current_entry_mode == "quick_check":
             node_name = str(state.get("current_node_name") or "").strip()
-            event_sink.emit(
-                make_event(
-                    "node.stream",
-                    "tutor",
-                    data={"text": f"**⚡ 快速检测**：正在验证你对【{node_name or topic}】的掌握程度。\n\n"},
+            qc_choice = str(state.get("pending_interaction_answer") or "").strip()
+
+            # 用户已做选择 → 按选择执行
+            if state.get("flow_status") == "awaiting_quick_check_choice" and qc_choice:
+                _go_test = qc_choice in (
+                    "start_test", "直接检测", "开始测试", "进入小测", "检测", "测试",
                 )
-            )
-            event_sink.emit(
-                make_event(
-                    "node.complete",
-                    "tutor",
-                    message="快速检测已就位。",
-                    data={"entry_mode": "quick_check", "node_name": node_name},
+                if _go_test:
+                    event_sink.emit(
+                        make_event(
+                            "node.stream", "tutor",
+                            data={"text": f"**⚡ 快速检测**：正在验证你对【{node_name or topic}】的掌握程度。\n\n"},
+                        )
+                    )
+                    return {
+                        "tutor_content": "",
+                        "flow_status": "normal",
+                        "current_node_status": "quick_check_pending",
+                        "node_quiz_kind": "quick_check",
+                        "learning_phase": "quick_check_ready",
+                        "learning_resume_target": "objective_test_generator",
+                        "learning_resume_reason": "quick_check_ready",
+                        "current_entry_mode": current_entry_mode,
+                        "pending_interaction_kind": "",
+                        "pending_interaction_answer": "",
+                        "user_knowledge_graph": state.get("user_knowledge_graph", {}),
+                        "student_state_snapshot": state.get("student_state_snapshot", {}),
+                    }
+                # "先简学一遍" → 降级为 short_learning,继续正常教学流程
+                current_entry_mode = "short_learning"
+                state["current_entry_mode"] = "short_learning"
+                # 清除 pending 状态
+                state["flow_status"] = "normal"
+                state["pending_interaction_kind"] = ""
+                state["pending_interaction_answer"] = ""
+                # 继续往下走正常 tutor 流程
+
+            else:
+                # 首次进入 → 询问用户
+                event_sink.emit(
+                    make_event(
+                        "node.start", "tutor",
+                        message=f"你对【{node_name or topic}】看起来已经掌握了。要直接检测还是先快速回顾一遍？",
+                        data={
+                            "options": [
+                                {"value": "start_test", "label": "直接检测（2 道题）"},
+                                {"value": "short_review", "label": "先简学一遍"},
+                            ],
+                            "recommended": "start_test",
+                            "requires_input": True,
+                        },
+                    )
                 )
-            )
-            return {
-                "tutor_content": "",
-                "current_node_status": "quick_check_pending",
-                "node_quiz_kind": "quick_check",
-                "learning_phase": "quick_check_ready",
-                "learning_resume_target": "objective_test_generator",
-                "learning_resume_reason": "quick_check_ready",
-                "current_entry_mode": current_entry_mode,
-                "user_knowledge_graph": state.get("user_knowledge_graph", {}),
-                "student_state_snapshot": state.get("student_state_snapshot", {}),
-            }
+                return {
+                    "tutor_content": "",
+                    "flow_status": "awaiting_quick_check_choice",
+                    "current_node_status": "taught",
+                    "learning_phase": "quick_check_choice",
+                    "learning_resume_target": "tutor",
+                    "learning_resume_reason": "quick_check_choice_required",
+                    "current_entry_mode": current_entry_mode,
+                    "pending_interaction_kind": "quick_check_choice",
+                    "pending_interaction_prompt": f"你对【{node_name or topic}】看起来已经掌握了。",
+                    "pending_interaction_options": [
+                        {"value": "start_test", "label": "直接检测（2 道题）"},
+                        {"value": "short_review", "label": "先简学一遍"},
+                    ],
+                    "pending_interaction_recommended": "start_test",
+                    "pending_interaction_answer": "",
+                    "user_knowledge_graph": state.get("user_knowledge_graph", {}),
+                    "student_state_snapshot": state.get("student_state_snapshot", {}),
+                }
 
         # ── 教学推理透明：向学生解释当前教学决策 ──
         thinking_mode = bool(state.get("thinking_mode", False))
@@ -1535,11 +1592,11 @@ def build_tutor_node(tutor_llm, runtime: RuntimeContext):
         # 教学契约、情绪调整、前置关联
         teaching_contract_prompt = _build_node_teaching_contract_prompt(state)
         affect_block = ""
-        if affect_label in ("困惑", "confused"):
+        if affect_label == "confused":
             affect_block = "\n- 【情绪调整】学生当前感到困惑，降低一档难度，增加一个具体例子"
-        elif affect_label in ("焦虑", "anxious", "受挫"):
+        elif affect_label == "anxious":
             affect_block = "\n- 【情绪调整】学生有些受挫，简化表述，先肯定已有理解，再小步推进"
-        elif affect_label in ("自信", "confident"):
+        elif affect_label == "confident":
             affect_block = "\n- 【情绪调整】学生状态自信，减少铺垫，直接给进阶问题"
         prereq_block = ""
         prerequisites = _string_list(active_graph_context.get("prerequisites") or [])
@@ -1629,19 +1686,20 @@ def build_tutor_node(tutor_llm, runtime: RuntimeContext):
 - 如果素材包中有图表线索或图谱媒体结果，必须在"图表说明"小节讲到该图/表，并输出 [[MEDIA:媒体reference]]
 - 不要写"好的""当然""总结一下""希望这有帮助"""
 
+        teaching_markers: list[dict[str, str]] = []
+
         if graph_result is not None and not has_node_content_context:
             graph_answer_text = normalize_graph_answer(
                 str(graph_result.get("answer") or ""),
                 list(graph_result.get("media_items") or []),
             )
+            # ── 提取教学标记（在 HTML 渲染之前，避免标记泄露到前端）──
+            if graph_answer_text:
+                graph_answer_text, teaching_markers = _extract_teaching_markers(graph_answer_text)
             if graph_answer_text:
                 graph_payload = dict(graph_result)
                 graph_payload["answer"] = graph_answer_text
                 full_response = build_learning_answer_html(graph_payload).strip()
-                # build_learning_answer_html emits <div class="learning-…"> markup
-                # that the frontend sanitizer only keeps when the event is
-                # tagged as graph_rag_answer (otherwise the learning classes are
-                # stripped and the lesson renders blank).
                 stream_text_chunks(event_sink, "tutor", full_response, kind="graph_rag_answer")
             else:
                 full_response = _build_evidence_backed_fallback(topic, citation_plan)
@@ -1658,6 +1716,9 @@ def build_tutor_node(tutor_llm, runtime: RuntimeContext):
             if stream_failed:
                 llm_stream_disabled = True
                 llm_stream_failures += 1
+
+            # ── 提取教学标记（在任何文本处理/渲染/流式发送之前，避免标记泄露到前端）──
+            raw_response, teaching_markers = _extract_teaching_markers(raw_response)
 
             if citation_plan and not has_node_content_context:
                 full_response = _filter_cited_lines(raw_response, len(citation_plan))
@@ -1676,7 +1737,7 @@ def build_tutor_node(tutor_llm, runtime: RuntimeContext):
 
             if has_node_content_context:
                 graph_payload = dict(graph_result or {})
-                graph_payload["answer"] = full_response
+                graph_payload["answer"] = _build_node_identity_header(state) + full_response
                 graph_payload.setdefault("question", updated_goal or learning_target or topic)
                 graph_payload.setdefault("media_items", list((graph_result or {}).get("media_items", []) or []))
                 graph_payload.setdefault("evidence_items", list((graph_result or {}).get("evidence_items", []) or []))
@@ -1693,12 +1754,8 @@ def build_tutor_node(tutor_llm, runtime: RuntimeContext):
                 else:
                     stream_text_chunks(event_sink, "tutor", full_response)
             else:
-                # ── 注入节点标识头（节点名 + 教学侧重点）──
                 full_response = _build_node_identity_header(state) + full_response
                 stream_text_chunks(event_sink, "tutor", full_response)
-
-        # ── 提取并处理教学标记（掌握度更新、节点跳转）──
-        full_response, teaching_markers = _extract_teaching_markers(full_response)
         returned_graph_context = dict(active_graph_context)
         next_graph_title = ""
         next_graph_query = ""
@@ -1770,6 +1827,17 @@ def build_tutor_node(tutor_llm, runtime: RuntimeContext):
                 message="这一步先讲到这里，接下来你可以自己决定是继续讲、换例子、先总结，还是来一道题。",
                 data={"content_length": len(full_response), "strategy": strategy, "evidence": citation_plan},
             )
+        )
+        # 记录教学 episode 供教学洞察面板分析
+        record_teaching_episode(
+            student_state_store,
+            student_id=student_id,
+            node_id=str(state.get("current_node_id") or ""),
+            node_title=str(state.get("current_node_name") or ""),
+            strategy=strategy,
+            attempt_count=attempt_count,
+            affect=affect_label if affect_signals else "",
+            entry_mode=current_entry_mode,
         )
         return {
             "tutor_content": full_response,

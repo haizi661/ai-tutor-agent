@@ -106,7 +106,7 @@ def test_tutor_fallback_keeps_plain_text_teacher_reply():
     )
 
     content = result["tutor_content"]
-    assert "## 教学：" in content, "应包含节点头部"
+    assert "**教学：" in content, "应包含节点头部"
     assert "稳定性先看最终会不会回到平衡点" in content
     assert "比如温控系统扰动后还能回到设定温度附近" in content
 

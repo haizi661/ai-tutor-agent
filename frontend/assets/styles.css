@@ -19200,3 +19200,32 @@ body.ui-reduce-motion-pref *::after {
         text-align: left;
     }
 }
+
+/* 教学洞察 - 日期筛选栏 */
+.ti-filter-bar {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 24px;
+    border-bottom: 1px solid #f0ebe7;
+    flex-shrink: 0;
+}
+.ti-filter-label {
+    font-size: 12px;
+    color: var(--text-secondary, #888);
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+.ti-date-input {
+    padding: 4px 8px;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    font-size: 12px;
+    color: #333;
+    background: #fff;
+}
+.ti-filter-sep {
+    color: #999;
+    font-size: 12px;
+}

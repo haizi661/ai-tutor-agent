@@ -375,6 +375,7 @@ class StudentStateStore:
             session_index=int(raw.get("session_index") or 0),
             self_assessment_scores=raw.get("self_assessment_scores", {}) or {},
             skip_self_assessment=bool(raw.get("skip_self_assessment", True)),
+            teaching_episodes=raw.get("teaching_episodes", []) or [],
         )
 
         # 向后兼容：如果旧数据里只有 mastery_scores，没有 node_learning_records
