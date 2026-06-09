@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import html
 import os
 import re
 import subprocess
@@ -622,6 +623,142 @@ class MatlabExperimentService:
             raise FileNotFoundError(safe_filename)
         return path
 
+    def build_run_report_html(self, run_id: str) -> str:
+        safe_run_id = Path(str(run_id or "")).name
+        if not safe_run_id:
+            raise ValueError("run_id is required.")
+        run_dir = (self.workspace_dir / safe_run_id).resolve()
+        root = self.workspace_dir.resolve()
+        if root not in run_dir.parents and run_dir != root:
+            raise ValueError("Invalid MATLAB experiment run path.")
+        summary = self._load_run_summary(safe_run_id)
+        if not summary:
+            raise FileNotFoundError(safe_run_id)
+
+        def esc(value: Any) -> str:
+            return html.escape(str(value if value is not None else ""), quote=True)
+
+        def pretty_json(value: Any) -> str:
+            return esc(json.dumps(value, ensure_ascii=False, indent=2, default=str))
+
+        result = summary.get("result") or {}
+        metrics = result.get("metrics") or {}
+        trace = summary.get("trace") or []
+        attempts = summary.get("attempts") or []
+        artifacts = summary.get("artifacts") or {}
+        plot_names: list[str] = []
+        for href in [artifacts.get("plot_png"), *(artifacts.get("plots") or [])]:
+            if href:
+                plot_names.append(Path(str(href)).name)
+        if not plot_names:
+            plot_names = [path.name for path in sorted(run_dir.glob("*.png"))]
+        plot_html = []
+        for name in dict.fromkeys(plot_names):
+            path = run_dir / name
+            if not path.exists():
+                continue
+            try:
+                src = self._image_to_data_uri(path)
+            except Exception:
+                continue
+            plot_html.append(
+                f'<figure><img src="{esc(src)}" alt="{esc(name)}"><figcaption>{esc(name)}</figcaption></figure>'
+            )
+
+        metric_rows = "".join(
+            f"<tr><th>{esc(key)}</th><td>{esc(value)}</td></tr>"
+            for key, value in metrics.items()
+        ) or '<tr><td colspan="2">未提供关键指标。</td></tr>'
+        trace_rows = "".join(
+            "<tr>"
+            f"<td>{esc(item.get('ts', ''))}</td>"
+            f"<td>{esc(item.get('phase', ''))}</td>"
+            f"<td>{esc(item.get('message', ''))}"
+            + (f"<pre>{esc(item.get('error_summary'))}</pre>" if item.get("error_summary") else "")
+            + "</td></tr>"
+            for item in trace
+            if isinstance(item, dict)
+        ) or '<tr><td colspan="3">未记录执行过程。</td></tr>'
+        attempt_blocks = []
+        for item in attempts:
+            if not isinstance(item, dict):
+                continue
+            log = "\n".join(
+                str(part)
+                for part in [
+                    item.get("policy_warning", ""),
+                    item.get("message", ""),
+                    item.get("stderr", ""),
+                    item.get("stdout", ""),
+                ]
+                if part
+            )
+            attempt_blocks.append(
+                "<section class=\"attempt\">"
+                f"<h3>第 {esc(item.get('attempt', '-'))} 次：{esc(item.get('status', 'unknown'))}</h3>"
+                + (f"<pre>{esc(log)}</pre>" if log else "")
+                + f"<pre>{esc(item.get('code') or '本次未返回代码内容。')}</pre>"
+                "</section>"
+            )
+        attempts_html = "".join(attempt_blocks) or "<p>未记录代码尝试。</p>"
+
+        raw_result_path = run_dir / "result.json"
+        raw_result = ""
+        if raw_result_path.exists():
+            try:
+                raw_result = raw_result_path.read_text(encoding="utf-8")
+            except Exception:
+                raw_result = ""
+
+        return f"""<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<title>MATLAB 仿真报告 - {esc(safe_run_id)}</title>
+<style>
+body {{ font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Microsoft YaHei", sans-serif; margin: 32px; color: #20212a; line-height: 1.65; }}
+h1 {{ font-size: 24px; margin-bottom: 4px; }}
+h2 {{ font-size: 18px; margin-top: 28px; border-bottom: 1px solid #d8d6e3; padding-bottom: 6px; }}
+h3 {{ font-size: 15px; margin-top: 18px; }}
+.meta {{ color: #666879; margin-bottom: 22px; }}
+table {{ width: 100%; border-collapse: collapse; margin: 12px 0; }}
+th, td {{ border: 1px solid #d8d6e3; padding: 8px 10px; vertical-align: top; text-align: left; }}
+th {{ width: 220px; background: #f4f2f8; }}
+pre {{ white-space: pre-wrap; word-break: break-word; background: #f7f6fa; border: 1px solid #d8d6e3; border-radius: 6px; padding: 12px; font-size: 12px; line-height: 1.5; }}
+figure {{ margin: 14px 0 24px; border: 1px solid #d8d6e3; border-radius: 8px; padding: 10px; }}
+img {{ max-width: 100%; height: auto; display: block; margin: 0 auto; }}
+figcaption {{ margin-top: 8px; color: #666879; font-size: 13px; text-align: center; }}
+.analysis {{ white-space: pre-wrap; background: #f4f2ff; border: 1px solid #c9c2ec; border-radius: 8px; padding: 14px; }}
+</style>
+</head>
+<body>
+<h1>MATLAB 仿真报告</h1>
+<div class="meta">运行编号：{esc(safe_run_id)} · 状态：{esc(summary.get('status', 'unknown'))}</div>
+
+<h2>一、仿真需求</h2>
+<p>{esc(summary.get('user_prompt', '')) or '未记录仿真需求。'}</p>
+
+<h2>二、执行过程</h2>
+<table><thead><tr><th>时间</th><th>阶段</th><th>说明</th></tr></thead><tbody>{trace_rows}</tbody></table>
+
+<h2>三、图表结果</h2>
+{''.join(plot_html) or '<p>未生成图像文件。</p>'}
+
+<h2>四、关键指标</h2>
+<table><tbody>{metric_rows}</tbody></table>
+
+<h2>五、结果分析</h2>
+<div class="analysis">{esc(summary.get('analysis', '未记录分析。'))}</div>
+
+<h2>六、MATLAB 代码与执行输出</h2>
+{attempts_html}
+
+<h2>七、原始 result.json</h2>
+<pre>{esc(raw_result) if raw_result else pretty_json(result)}</pre>
+</body>
+</html>
+"""
+
     @staticmethod
     def _write_json(path: Path, payload: Any) -> None:
         path.write_text(json.dumps(payload, ensure_ascii=False, indent=2, default=str), encoding="utf-8")
@@ -772,12 +909,18 @@ class MatlabExperimentService:
             }
             records.insert(0, record)
         runs = [str(item) for item in record.get("runs") or []]
+        had_runs = bool(runs)
         if run_id not in runs:
             runs.append(run_id)
         prompt = str(payload.get("user_prompt") or "")
         record["runs"] = runs
         record["user_prompt"] = prompt or record.get("user_prompt", "")
-        if not record.get("title") or record.get("title") == "New simulation":
+        default_titles = {"New simulation", "新仿真"}
+        if (
+            not record.get("title")
+            or str(record.get("title")) in default_titles
+            or (not had_runs and record.get("status") == "draft")
+        ):
             record["title"] = self._title_from_prompt(prompt) or run_id
         record["status"] = payload.get("status") or record.get("status") or "unknown"
         record["updated_at"] = time.strftime("%Y-%m-%dT%H:%M:%S")

@@ -6,7 +6,7 @@ import time
 import uuid
 
 from fastapi import APIRouter, Request
-from fastapi.responses import FileResponse, JSONResponse
+from fastapi.responses import FileResponse, JSONResponse, Response
 
 from ...infrastructure.matlab_experiment import MatlabExperimentService
 
@@ -216,6 +216,23 @@ async def cancel_matlab_agent_job(job_id: str):
         safe_job = dict(job)
         safe_job.pop("cancel_event", None)
     return {"status": "success", **safe_job}
+
+
+@router.get("/runs/{run_id}/report")
+async def download_matlab_experiment_report(run_id: str):
+    service = get_matlab_experiment_service()
+    try:
+        html = service.build_run_report_html(run_id)
+    except ValueError as exc:
+        return _error_response(str(exc))
+    except FileNotFoundError:
+        return _error_response("MATLAB experiment report not found.", status_code=404)
+    safe_run_id = "".join(ch if ch.isalnum() or ch in "-_" else "_" for ch in run_id)
+    return Response(
+        content=html,
+        media_type="text/html; charset=utf-8",
+        headers={"Content-Disposition": f'attachment; filename="{safe_run_id}_report.html"'},
+    )
 
 
 @router.get("/runs/{run_id}/assets/{filename:path}")

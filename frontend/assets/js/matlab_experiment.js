@@ -163,6 +163,13 @@
         titleRow.appendChild(createEl('div', 'panel-kicker', payload.run_id || 'MATLAB run'));
         const links = createEl('div', 'matlab-experiment-links');
         const artifacts = payload.artifacts || {};
+        if (payload.run_id) {
+            const reportLink = document.createElement('a');
+            reportLink.href = `/api/matlab-experiment/runs/${encodeURIComponent(payload.run_id)}/report`;
+            reportLink.download = `${payload.run_id}_report.html`;
+            reportLink.textContent = '点击下载报告';
+            links.appendChild(reportLink);
+        }
         [
             ['脚本', artifacts.active_script || artifacts.script],
             ['JSON', artifacts.result_json],
@@ -315,13 +322,12 @@
     }
 
     async function createMatlabRecord() {
-        const prompt = String(qs('matlab-agent-prompt-input')?.value || '').trim();
         setBusy(true);
         try {
             const data = await requestJson('/api/matlab-experiment/records', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ user_prompt: prompt }),
+                body: JSON.stringify({}),
             });
             activeRecordId = data.record.record_id;
             await refreshRecords();

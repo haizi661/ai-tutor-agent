@@ -16734,6 +16734,11 @@ body.ui-reduce-motion-pref *::after {
     justify-content: center;
 }
 
+.matlab-experiment-actions:not(.matlab-experiment-actions--primary) .library-upload-btn {
+    width: 100%;
+    justify-content: center;
+}
+
 .matlab-experiment-results {
     min-height: 0;
     overflow: auto;
