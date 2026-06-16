@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>A2 控制理论知识图谱查看器</title>
+    <link rel="stylesheet" href="./style.css" />
+    <script>
+      window.MathJax = {
+        tex: {
+          inlineMath: [["$", "$"], ["\\(", "\\)"]],
+          displayMath: [["$$", "$$"], ["\\[", "\\]"]],
+        },
+        svg: {
+          fontCache: "global",
+        },
+      };
+    </script>
+  </head>
+  <body>
+    <div class="app-shell">
+      <aside class="sidebar">
+        <div class="sidebar-block">
+          <p class="eyebrow">Atlas / A2</p>
+          <h1>A2 控制理论知识图谱</h1>
+          <p class="muted">图谱浏览</p>
+        </div>
+
+        <div class="sidebar-block">
+          <div class="stats-grid" id="stats-grid"></div>
+        </div>
+
+        <div class="sidebar-block">
+          <label class="field-label" for="search-input">搜索</label>
+          <input id="search-input" class="search-input" type="search" placeholder="输入关键词" />
+          <div id="search-results" class="search-results"></div>
+        </div>
+
+        <div class="sidebar-block">
+          <div class="section-head">
+            <h2>分类</h2>
+            <button id="reset-filters" class="ghost-button" type="button">重置</button>
+          </div>
+          <div id="legend" class="legend"></div>
+        </div>
+
+        <div class="sidebar-block">
+          <div class="section-head">
+            <h2>主线</h2>
+          </div>
+          <div id="root-notes" class="root-notes"></div>
+        </div>
+      </aside>
+
+      <main class="main-panel">
+        <header class="toolbar">
+          <div>
+            <strong>图谱</strong>
+            <p id="graph-status" class="toolbar-meta"></p>
+          </div>
+          <div class="toolbar-actions">
+            <button id="toggle-subgraph" class="ghost-button" type="button">当前节点</button>
+            <button id="fit-graph" class="primary-button" type="button">适配视图</button>
+          </div>
+        </header>
+
+        <section class="graph-card">
+          <div id="graph" class="graph-canvas"></div>
+        </section>
+      </main>
+
+      <aside class="detail-panel">
+        <div id="detail-content" class="detail-content">
+          <p class="eyebrow">Detail</p>
+          <h2>选择知识点</h2>
+          <p class="muted">点击节点或搜索。</p>
+        </div>
+      </aside>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/force-graph@1.49.4/dist/force-graph.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
+    <script src="./data.js"></script>
+    <script src="./app.js"></script>
+  </body>
+</html>
