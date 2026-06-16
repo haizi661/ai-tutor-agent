@@ -1060,10 +1060,22 @@ def _entry_mode_instruction(mode: str) -> str:
 
 def _structure_instruction(mode: str) -> str:
     """Return a fixed teaching template that MUST be followed.
-    
+
     For short_learning: merge sections 3+4 into one concise block, keep only 1 example in section 5.
+    For remediation_review: only 3 sections — 错因分析 + 正解思路 + 同类题提示.
     For full_learning: all 7 sections in full detail.
     """
+    if mode == "remediation_review":
+        return """错题靶向复习——只讲错题，不重复完整节点内容。格式如下：
+
+**1. 错因分析**
+逐一分析每道错题：你做错了什么？为什么会选那个选项？背后的概念盲点是什么？
+
+**2. 正解思路**
+逐题给出正确解法：关键公式/判据是什么？从题干中如何找到线索？正确选项为什么对？
+
+**3. 防错提醒**
+总结这次错题暴露的共同薄弱点，给出 1-2 句实用的防错口诀，确保下次遇到类似题不再错。"""
     if mode == "short_learning":
         merge_note = (
             "\n（精简模式：第 3 节与第 4 节合并为「关键公式与图表」一个小节，"
@@ -1146,6 +1158,7 @@ def _build_node_identity_header(state: dict) -> str:
         "full_learning": "完整教学——系统讲解核心概念、公式、图表与典型应用",
         "short_learning": "精简教学——聚焦核心概念与关键方法",
         "quick_check": "快速检测——验证掌握程度",
+        "remediation_review": "错题靶向复习——针对你的错题逐题分析错因，不重复完整讲解",
     }.get(entry_mode, "教学讲解")
     lines = [
         f"**教学：{node_name}**",
@@ -1648,12 +1661,16 @@ def build_tutor_node(tutor_llm, runtime: RuntimeContext):
             recent = wrong_explanations[-2:]
             parts = []
             for w in recent:
-                q = str(w.get("question") or w.get("stem") or "")[:60]
-                a = str(w.get("analysis") or w.get("explanation") or "")[:100]
+                q = str(w.get("question") or w.get("stem") or "")[:80]
+                a = str(w.get("analysis") or w.get("explanation") or "")[:120]
                 if q or a:
                     parts.append(f"- 题目：{q}；错因：{a}")
             if parts:
-                wrong_feedback_block = f"【学生近期错题】请在讲解中针对性重讲错因：\n{chr(10).join(parts)}\n\n"
+                wrong_feedback_block = (
+                    f"【学生错题 请针对性讲解错因 不要重复完整教学内容】\n{chr(10).join(parts)}\n\n"
+                    if current_entry_mode == "remediation_review"
+                    else f"【学生近期错题】请在讲解中针对性重讲错因：\n{chr(10).join(parts)}\n\n"
+                )
 
         if citation_plan and not has_node_content_context:
             human_content = f"""请讲解主题：【{topic}】

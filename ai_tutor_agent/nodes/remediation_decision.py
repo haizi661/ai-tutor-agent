@@ -266,14 +266,15 @@ def build_remediation_decision_node(event_sink: EventSink, answer_provider: Answ
         if normalized == "review_node":
             remediation_state["status"] = "review_node"
             event_sink.emit(make_event("node.complete", "remediation_decision",
-                                       message="好，回到本节点讲解重新学习。"))
+                                       message="好，针对你的错题进行精准复习。"))
             return {
                 "flow_status": "normal",
                 "remediation_decision": normalized,
                 "node_remediation_state": remediation_state,
-                "learning_phase": "node_teaching",
+                "learning_phase": "node_remediation_review",
                 "learning_resume_target": "node_content_loader",
                 "learning_resume_reason": "remediation_review_node",
+                "current_entry_mode": "remediation_review",  # 精准错题复习，非完整重讲
                 "pending_interaction_kind": "",
                 "pending_interaction_prompt": "",
                 "pending_interaction_options": [],
