@@ -281,7 +281,11 @@ def build_node_content_loader_node(runtime: RuntimeContext):
     def node(state: AgentState) -> dict:
         graph_pipeline = getattr(runtime, "graph_rag_pipeline", None)
         node_map = dict(getattr(graph_pipeline, "node_map", {}) or {})
-        node_id = str(state.get("current_node_id") or state.get("graph_anchor_id") or "").strip()
+        node_id = str(
+            state.get("current_node_id")
+            or state.get("next_node_candidate_id")   # 来自 next_node_planner 推荐的新节点
+            or state.get("graph_anchor_id") or ""
+        ).strip()
         node = node_map.get(node_id) or {}
         node_name = _node_name(node, node_id) or str(state.get("current_node_name") or state.get("graph_anchor_title") or node_id).strip()
         topic = str(state.get("current_topic") or state.get("current_user_goal") or "").strip()
