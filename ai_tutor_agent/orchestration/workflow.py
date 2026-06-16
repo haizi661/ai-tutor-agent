@@ -87,6 +87,8 @@ def get_entry_node(state: AgentState) -> str:
         return "post_lesson_choice"
     if state.get("flow_status") == "awaiting_temporary_question":
         return "temporary_question_collector"
+    if state.get("flow_status") == "awaiting_learning_mode_choice":
+        return "user_profiler"
     if state.get("flow_status") == "awaiting_objective_answers":
         return "objective_test_scorer"
     if state.get("flow_status") == "awaiting_variant_answers":
@@ -231,6 +233,8 @@ def route_after_assessment_dialog(state: AgentState) -> str:
 
 
 def route_after_user_profiler(state: AgentState) -> str:
+    if state.get("flow_status") == "awaiting_learning_mode_choice":
+        return "pause"
     return "learning_plan_generator"
 
 

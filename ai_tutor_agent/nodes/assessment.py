@@ -842,6 +842,18 @@ def build_user_profiler_node(llm, event_sink: EventSink, graph_pipeline=None):
         return ""
 
     def node(state: AgentState) -> dict:
+        # ── 学习模式选择恢复 ──
+        if state.get("flow_status") == "awaiting_learning_mode_choice":
+            answer = str(state.get("pending_interaction_answer") or "").strip().lower()
+            if answer in ("adaptive", "自适应", "自适应（尊重画像）"):
+                return {"learning_mode": "adaptive", "flow_status": "normal",
+                        "pending_interaction_kind": "",
+                        "learning_resume_target": "learning_plan_generator"}
+            # thorough or default
+            return {"learning_mode": "thorough", "flow_status": "normal",
+                    "pending_interaction_kind": "",
+                    "learning_resume_target": "learning_plan_generator"}
+
         topic = state["current_topic"]
         questions = state.get("assessment_questions", [])
         answers = state.get("assessment_answers", {})
@@ -943,20 +955,34 @@ def build_user_profiler_node(llm, event_sink: EventSink, graph_pipeline=None):
             make_event(
                 "node.complete",
                 "user_profiler",
-                message="学前摸底完成，我们直接进入正式教学。",
+                message="学前摸底完成！请选择学习模式后进入正式教学。",
             )
         )
 
+        # ── 画像完成后让用户选择学习模式 ──
+        mode_prompt = (
+            f"测评完成！你的难度等级: Lv.{difficulty_level}，教学策略: {teaching_strategy}。"
+            "请选择学习模式：\n"
+            "• 完整教学 — 每轮首节点完整讲解，适合稳扎稳打\n"
+            "• 自适应 — 尊重画像，已掌握节点快速检测，适合高效推进"
+        )
         return {
             "assessment_radar": radar_data,
             "assessment_result": full_report,
             "assessment_concept_gaps": concept_gaps,
             "user_knowledge_graph": user_knowledge_graph,
             "is_assessed": True,
-            "flow_status": "normal",
-            "learning_phase": "profiled",
-            "learning_resume_target": "initial_node_selector",
-            "learning_resume_reason": "profiling_complete_select_course_root",
+            "flow_status": "awaiting_learning_mode_choice",
+            "learning_phase": "learning_mode_choice",
+            "learning_resume_target": "learning_plan_generator",
+            "learning_resume_reason": "profiling_complete",
+            "pending_interaction_kind": "learning_mode_choice",
+            "pending_interaction_prompt": mode_prompt,
+            "pending_interaction_options": [
+                {"value": "thorough", "label": "完整教学"},
+                {"value": "adaptive", "label": "自适应（尊重画像）"},
+            ],
+            "pending_interaction_recommended": "thorough",
             "difficulty_level": difficulty_level,
             "teaching_strategy": teaching_strategy,
             "attempt_count": 0,
