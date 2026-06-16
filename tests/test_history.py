@@ -665,3 +665,244 @@ def test_reconstruct_messages_locks_synthetic_assessment_form_after_skip():
     assert assessment_item["data"]["answers"] == {"1": "B"}
     assert assessment_item["data"]["locked"] is True
     assert assessment_item["data"]["statusText"] == "已跳过学前测评，答案已固定"
+
+
+def test_serialize_state_new_fields_default():
+    """验证所有新增序列化字段在默认值下的契约——前端依赖这些字段存在。"""
+    serialized = _serialize_state({})
+
+    # Learning plan v2
+    assert "learning_plan_v2" in serialized
+    assert serialized["learning_plan_v2"] == {}
+    assert "learning_plan_current_step" in serialized
+    assert serialized["learning_plan_current_step"] == 0
+    assert "learning_plan_generated_at" in serialized
+    assert serialized["learning_plan_generated_at"] == ""
+    assert "learning_plan_source" in serialized
+    assert serialized["learning_plan_source"] == ""
+
+    # Remediation
+    assert "node_remediation_state" in serialized
+    assert serialized["node_remediation_state"] == {}
+    assert "remediation_decision" in serialized
+    assert serialized["remediation_decision"] == ""
+
+    # Variant / wrong-answer support
+    assert "variant_questions" in serialized
+    assert serialized["variant_questions"] == []
+    assert "wrong_question_explanations" in serialized
+    assert serialized["wrong_question_explanations"] == []
+
+    # Affect & thinking
+    assert "affect_signals" in serialized
+    assert serialized["affect_signals"] == {}
+    assert "thinking_mode" in serialized
+    assert serialized["thinking_mode"] is False
+
+    # Node quizzes
+    assert "node_quiz_items" in serialized
+    assert serialized["node_quiz_items"] == []
+    assert "node_quiz_answers" in serialized
+    assert serialized["node_quiz_answers"] == {}
+    assert "node_quiz_wrong_items" in serialized
+    assert serialized["node_quiz_wrong_items"] == []
+    assert "node_quiz_score" in serialized
+    assert serialized["node_quiz_score"] == 0
+
+    # Next-node candidate
+    assert "next_node_candidate_id" in serialized
+    assert serialized["next_node_candidate_id"] == ""
+    assert "next_node_candidate_name" in serialized
+    assert serialized["next_node_candidate_name"] == ""
+    assert "next_node_candidate_reason" in serialized
+    assert serialized["next_node_candidate_reason"] == ""
+
+    # Teaching contract & context
+    assert "node_content_context" in serialized
+    assert serialized["node_content_context"] == ""
+    assert "node_teaching_contract" in serialized
+    assert serialized["node_teaching_contract"] == {}
+    assert "node_quiz_coverage_plan" in serialized
+    assert serialized["node_quiz_coverage_plan"] == []
+
+    # Homework & choice
+    assert "homework_assignment_id" in serialized
+    assert serialized["homework_assignment_id"] == ""
+    assert "next_step_choice" in serialized
+    assert serialized["next_step_choice"] == ""
+
+    # LLM streaming
+    assert "llm_stream_disabled" in serialized
+    assert serialized["llm_stream_disabled"] is False
+    assert "llm_stream_failures" in serialized
+    assert serialized["llm_stream_failures"] == 0
+
+    # Learning direction lock
+    assert "learning_track" in serialized
+    assert serialized["learning_track"] == ""
+    assert "learning_track_label" in serialized
+    assert serialized["learning_track_label"] == ""
+    assert "learning_track_locked" in serialized
+    assert serialized["learning_track_locked"] is False
+
+
+def test_serialize_state_new_fields_populated():
+    """验证新增字段在填充值后能正确传递到序列化结果——前端展示契约。"""
+    serialized = _serialize_state(
+        {
+            "learning_plan_v2": {
+                "total_nodes": 42,
+                "plan_steps": [{"step_index": 0, "node_ids": ["KM001", "KM002"], "status": "pending"}],
+            },
+            "learning_plan_current_step": 2,
+            "learning_plan_generated_at": "2026-06-16T10:30:00Z",
+            "learning_plan_source": "profile_based",
+            "node_remediation_state": {
+                "original_score": 60,
+                "variant_rounds": 2,
+                "status": "completed_variant",
+            },
+            "remediation_decision": "do_later",
+            "variant_questions": [
+                {"question_id": "VQ-KM001", "prompt": "变式题：极点位置与稳定性"},
+            ],
+            "wrong_question_explanations": [
+                {"question_id": "Q-KM001", "explanation": "错因分析"},
+            ],
+            "affect_signals": {"frustrated": 0.8, "curious": 0.4},
+            "thinking_mode": True,
+            "node_quiz_items": [
+                {"question_id": "Q-KM001", "prompt": "根轨迹起点指什么？", "options": ["A", "B", "C", "D"]},
+            ],
+            "node_quiz_answers": {"Q-KM001": "C"},
+            "node_quiz_wrong_items": ["Q-KM001"],
+            "node_quiz_score": 0,
+            "next_node_candidate_id": "KM021",
+            "next_node_candidate_name": "根轨迹法的基本概念",
+            "next_node_candidate_reason": "当前节点通过，下一节点为拓扑后继",
+            "node_content_context": "## 根轨迹法概述\n根轨迹法是控制系统复域分析的核心方法...",
+            "node_teaching_contract": {
+                "goal": "理解根轨迹基本概念",
+                "must_know": ["根轨迹定义", "幅值条件"],
+            },
+            "node_quiz_coverage_plan": [
+                {"target": "根轨迹定义", "question_count": 2},
+            ],
+            "homework_assignment_id": "HW-20260616-001",
+            "next_step_choice": "continue_next_node",
+            "llm_stream_disabled": True,
+            "llm_stream_failures": 3,
+            "learning_track": "control_theory",
+            "learning_track_label": "控制理论",
+            "learning_track_locked": True,
+        }
+    )
+
+    # Learning plan v2
+    assert serialized["learning_plan_v2"]["total_nodes"] == 42
+    assert len(serialized["learning_plan_v2"]["plan_steps"]) == 1
+    assert serialized["learning_plan_current_step"] == 2
+    assert serialized["learning_plan_generated_at"] == "2026-06-16T10:30:00Z"
+    assert serialized["learning_plan_source"] == "profile_based"
+
+    # Remediation
+    assert serialized["node_remediation_state"]["original_score"] == 60
+    assert serialized["node_remediation_state"]["variant_rounds"] == 2
+    assert serialized["node_remediation_state"]["status"] == "completed_variant"
+    assert serialized["remediation_decision"] == "do_later"
+
+    # Variant / wrong-answer
+    assert len(serialized["variant_questions"]) == 1
+    assert serialized["variant_questions"][0]["question_id"] == "VQ-KM001"
+    assert len(serialized["wrong_question_explanations"]) == 1
+    assert serialized["wrong_question_explanations"][0]["question_id"] == "Q-KM001"
+
+    # Affect & thinking
+    assert serialized["affect_signals"]["frustrated"] == 0.8
+    assert serialized["affect_signals"]["curious"] == 0.4
+    assert serialized["thinking_mode"] is True
+
+    # Node quizzes
+    assert len(serialized["node_quiz_items"]) == 1
+    assert serialized["node_quiz_items"][0]["question_id"] == "Q-KM001"
+    assert serialized["node_quiz_answers"]["Q-KM001"] == "C"
+    assert serialized["node_quiz_wrong_items"] == ["Q-KM001"]
+    assert serialized["node_quiz_score"] == 0
+
+    # Next-node candidate
+    assert serialized["next_node_candidate_id"] == "KM021"
+    assert serialized["next_node_candidate_name"] == "根轨迹法的基本概念"
+    assert serialized["next_node_candidate_reason"] == "当前节点通过，下一节点为拓扑后继"
+
+    # Teaching context
+    assert "根轨迹法概述" in serialized["node_content_context"]
+    assert serialized["node_teaching_contract"]["goal"] == "理解根轨迹基本概念"
+    assert len(serialized["node_teaching_contract"]["must_know"]) == 2
+    assert serialized["node_quiz_coverage_plan"][0]["target"] == "根轨迹定义"
+
+    # Homework & choice
+    assert serialized["homework_assignment_id"] == "HW-20260616-001"
+    assert serialized["next_step_choice"] == "continue_next_node"
+
+    # LLM streaming
+    assert serialized["llm_stream_disabled"] is True
+    assert serialized["llm_stream_failures"] == 3
+
+    # Learning direction
+    assert serialized["learning_track"] == "control_theory"
+    assert serialized["learning_track_label"] == "控制理论"
+    assert serialized["learning_track_locked"] is True
+
+
+def test_serialize_state_structure_counts():
+    """验证 _serialize_state 总字段数——检测意外增删。"""
+    serialized = _serialize_state({})
+    expected_count = len(_get_expected_keys())
+    actual_count = len(serialized)
+    assert actual_count == expected_count, (
+        f"Serialized state has {actual_count} fields, expected {expected_count}. "
+        f"Extra: {set(serialized) - set(_get_expected_keys())}, "
+        f"Missing: {set(_get_expected_keys()) - set(serialized)}"
+    )
+
+
+def _get_expected_keys() -> set:
+    """_serialize_state 预期输出的全部字段名集合。"""
+    return {
+        "student_id", "learning_phase", "learning_resume_target", "learning_resume_reason",
+        "current_topic", "current_user_goal", "session_goal", "turn_goal",
+        "proposed_topic", "topic_focus", "topic_background", "topic_detail_summary",
+        "topic_starter_options", "topic_clarify_rounds",
+        "tutor_content", "tester_question", "tester_question_type", "tester_question_template",
+        "user_answer", "score", "logic_score", "concept_score", "feedback", "rubric_feedback",
+        "model_answer", "misconceptions", "next_review_points",
+        "is_correct_direction", "needs_hint", "difficulty_level", "teaching_strategy",
+        "attempt_count", "score_history", "post_eval_choice", "practice_generation_mode",
+        "pending_interaction_kind", "pending_interaction_prompt",
+        "pending_interaction_options", "pending_interaction_recommended",
+        "pending_interaction_answer", "coach_content",
+        "tutor_citations", "tutor_evidence",
+        "graph_anchor_id", "graph_anchor_title", "graph_anchor_filename",
+        "current_node_id", "current_node_name", "current_node_status",
+        "next_node_candidate_id", "next_node_candidate_name", "next_node_candidate_reason",
+        "node_content_context", "node_teaching_contract", "node_quiz_coverage_plan",
+        "graph_prerequisites", "graph_neighbors",
+        "graph_learning_objectives", "graph_must_know", "graph_common_errors",
+        "graph_target_mastery_level", "graph_difficulty", "graph_next_steps",
+        "skip_reason", "interrupt_query", "resume_tester",
+        "conversation_history", "message_history",
+        "assessment_questions", "assessment_answers", "assessment_radar",
+        "assessment_result", "assessment_concept_gaps", "assessment_state",
+        "user_knowledge_graph", "student_state_snapshot",
+        "homework_items", "homework_answers", "homework_results",
+        "homework_score", "homework_status", "homework_assignment_id",
+        "node_quiz_items", "node_quiz_answers", "node_quiz_wrong_items", "node_quiz_score",
+        "post_lesson_choice", "continue_or_homework_choice", "next_step_choice",
+        "variant_questions", "wrong_question_explanations",
+        "affect_signals", "llm_stream_disabled", "llm_stream_failures", "thinking_mode",
+        "node_remediation_state", "remediation_decision",
+        "learning_track", "learning_track_label", "learning_track_locked",
+        "is_assessed", "flow_status",
+        "learning_plan", "learning_plan_current_step",
+        "learning_plan_generated_at", "learning_plan_source", "learning_plan_v2",
+    }

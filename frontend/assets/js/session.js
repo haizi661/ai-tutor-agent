@@ -682,11 +682,19 @@
             const data = safelyParseEventData(e.data);
             const message = data.message || '先确认主题。';
             state.graphTopicHint = data.data?.proposed_topic || state.graphTopicHint;
+            state.proposedTopic = data.data?.proposed_topic || '';
             app.updateLearningProgress?.({ step: 1, label: '学习进度 1/5' });
+            // 课程方向点击 → 自动确认，直接进入测评
+            if (state.autoConfirmTopic) {
+                state.autoConfirmTopic = false;
+                app.setStatusBanner('已确认主题，正在生成摸底题…', 'processing');
+                app.submitTopicConfirmation(true, 'assessment');
+                return;
+            }
             consumeAwaitingTurn(message, '等你确认这次要学的主题', {
                 role: 'topic_confirmation',
                 showInChat: false,
-                render: () => app.renderTopicConfirmation(data.data?.proposed_topic || '', data.data || {}),
+                render: () => app.renderTopicConfirmation(state.proposedTopic || data.data?.proposed_topic || '', data.data || {}),
             });
         });
 

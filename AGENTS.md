@@ -1,12 +1,12 @@
 # AI Tutor Agent Guide
 
-Last synced: 2026-06-03
+Last synced: 2026-06-16 (phase recording scripts + e2e verification + 754 passed)
 
 This is a Web-first adaptive tutor for automatic control theory. The active product loop is graph-node mastery learning, not the older generic `Tutor -> Tester -> Evaluator` chat flow.
 
 ## Highest-value sources
 
-- Start with `README.md`, then `docs/current-status-and-usage.md`, `docs/next-iteration-plan.md`, `docs/knowledge-map-runtime-assets.md`, and `docs/plans/2026-04-30-interaction-artifact-validation-contract.md`.
+- Start with `README.md`, then `docs/learning-path-complete-flow.md`, `docs/current-status-and-usage.md`, `docs/next-iteration-plan.md`, `docs/knowledge-map-runtime-assets.md`, and `docs/plans/2026-04-30-interaction-artifact-validation-contract.md`.
 - Treat `docs/reports/`, `docs/plans/2026-04-27-*`, and `docs/plans/2026-04-28-*` as historical unless a current doc points to them.
 - `CLAUDE.md` intentionally delegates project guidance back to this file.
 
@@ -20,6 +20,7 @@ This is a Web-first adaptive tutor for automatic control theory. The active prod
 - For API smoke tests, prefer `tests/asgi_test_client.py` over Starlette `TestClient`; the latter has caused blocking-portal hangs in the Python 3.9 environment.
 - Frontend has no bundler pipeline; `package.json` pins `marked` and `katex`, with local vendor files under `frontend/assets/vendor/marked/` and `frontend/assets/vendor/katex/`. Browser code is served directly from `frontend/`.
 - Retrieval regression command lives in README: `python scripts/evaluate_retrieval.py --eval-file data/retrieval_eval/sample_eval.jsonl --k-values 1,3,5 --recall-k 12 --output data/retrieval_eval/latest_report.json`.
+- Demo recording: `python scripts/record_demo_flow.py` (headless Chromium, requires Playwright; verified 9-node complete flow + new plan generation). Phase-by-phase recording: `python scripts/record_phases_v2.py` (single session, timestamp-based 8-phase split). Output: `scripts/phase_recordings/` (7 videos + `PHASE_VIDEOS.md` mapping). API E2E: `python scripts/real_e2e_verify.py`. Question bank generation: `python scripts/gen_objective_bank.py` and `python scripts/gen_variant_bank.py`.
 
 ## Architecture that matters
 
@@ -36,7 +37,7 @@ This is a Web-first adaptive tutor for automatic control theory. The active prod
 - If graph/media assets are missing, use `scripts/sync_knowledge_map_runtime_assets.sh`, then check `python -m ai_tutor_agent.knowledge_map.runtime_assets --media-index data/media_evidence_index` and `PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 pytest -q tests/test_graph_integrity.py`.
 - Keep paths repo-relative (`data/...`, `docs/...`, `frontend/...`); do not add machine-specific absolute paths.
 - Do not commit `.env`, `.codex`, `.hermes/`, `data/chroma_db/**`, `data/student_states/*.json`, `data/tutor_memory.db`, vector DBs, local caches, or uploaded/private learner data.
-- `data/question_bank/a2-control-theory/assessment_questions.jsonl` is the only minimal local question-bank asset currently present; objective/variant/homework question-bank coverage is still incomplete.
+- `data/question_bank/a2-control-theory/` contains 640 total questions: 10 assessment, 420 objective (42×10), 210 variant (42×5), and 3 homework. Objective and variant banks are complete; homework bank is still minimal.
 
 ## Learner state and mastery rules
 
@@ -59,9 +60,12 @@ This is a Web-first adaptive tutor for automatic control theory. The active prod
 - Question-help UI is a side modal for ad hoc text/image problems, supports `quick` / `deep` / `vision` modes, and stores records separately from the wrong-question book. It should not auto-add records to wrong questions unless a dedicated product rule is added.
 - Objective-test review cards should keep options as stable full-width rows and explanations structured around 判断依据、所选项问题、常见误区、下一步.
 - `post_lesson_choice` is a natural pause: users may type a free-form stuck point directly, choose `temporary_question` via “继续追问”, or choose `start_test` via “我懂了，进入小测”. Do not make it a rigid two-button-only gate.
-- Active pending interaction kinds include `post_lesson_choice`, `temporary_question`, `objective_test_answers`, `variant_test_answers`, `continue_or_homework_choice`, `homework_review_choice`, `homework_answers`, `consolidation_choice`, and `quick_check_choice`.
+- Active pending interaction kinds include `post_lesson_choice`, `temporary_question`, `objective_test_answers`, `variant_test_answers`, `continue_or_homework_choice`, `homework_review_choice`, `homework_answers`, `consolidation_choice`, `quick_check_choice`, and `remediation_decision`.
+- Learning plan v2: `select_nodes()` uses weighted composite scoring (urgency 60% + importance 15% + depth 5% + difficulty 5% + id 15%) — different user profiles produce meaningfully different node selections. `difficulty_level` drives `n_steps` and `per_step_range`. `assessment_concept_gaps` calibrated scores merge into the StudentProfile before plan generation.
 - Teaching insights panel (`frontend/assets/js/teaching-insights.js`, `api/teaching_insights.py`) shows teaching strategy transparency per node; the tutor can surface the current strategy, detected student state, and why a particular approach was chosen.
 - Historical cards must lock once answered/submitted/skipped/reviewed; only the current unresolved interaction may remain pending.
+- Landing chip click auto-confirms topic and goes directly to assessment (`state.autoConfirmTopic` flag in `app.js` → `session.js` `topic.confirmation_needed` handler). No manual topic input needed.
+- `session.end` SSE event has a `_time.sleep(0.3)` flush delay before `conn.close()` to prevent race condition where the EventSource drops the final event before rendering the pending interaction card.
 
 ## Session/history gotchas
 

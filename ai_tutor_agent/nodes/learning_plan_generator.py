@@ -59,6 +59,116 @@ def _get_edges(graph_pipeline: Any) -> list[dict[str, Any]]:
     return list(getattr(graph_pipeline, "edges", []) or [])
 
 
+def _find_node_id_by_concept_name(
+    concept_name: str,
+    node_map: dict[str, dict],
+) -> str:
+    """通过概念名称在 node_map 中查找节点 ID（模糊匹配）。"""
+    target = str(concept_name or "").strip()
+    if not target:
+        return ""
+    for node_id, node in node_map.items():
+        node_name = str(node.get("name") or node.get("title") or "").strip()
+        if target == node_name:
+            return str(node_id).strip()
+    for node_id, node in node_map.items():
+        node_name = str(node.get("name") or node.get("title") or "").strip()
+        if target and node_name and (target in node_name or node_name in target):
+            return str(node_id).strip()
+    for node_id, node in node_map.items():
+        node_concepts = str(node.get("concept") or node.get("concept_id") or node.get("tags") or "").strip()
+        if target and target in node_concepts:
+            return str(node_id).strip()
+    return ""
+
+
+def _merge_assessment_gaps(
+    profile: StudentProfile,
+    assessment_gaps: dict[str, dict],
+    node_map: dict[str, dict] | None = None,
+) -> int:
+    """将 assessment 产出的 calibrated concept_gaps 合并入 profile。
+
+    匹配策略（按优先级）:
+    1. node_id 字段直接匹配 → 用 calibrated 更新 mastery
+    2. concept_id 直接匹配 node_id
+    3. concept_name 在 node_map 中名称匹配
+    4. dimension 匹配 ability code → 提升该 ability 下所有节点的 confidence
+
+    返回合并的节点数。
+    """
+    from ..core.ability_mapper import (
+        get_all_node_ids,
+        get_node_primary_ability,
+    )
+
+    all_node_ids = set(get_all_node_ids())
+    node_map = dict(node_map or {})
+    merged_count = 0
+    now = datetime.now(timezone.utc).isoformat()
+
+    def _apply_mastery(target_id: str, cal: float) -> None:
+        nonlocal merged_count
+        cal_norm = max(0.0, min(1.0, cal / 100.0))
+        old = profile.concept_mastery.get(target_id)
+        if old:
+            new_mastery = max(0.0, min(1.0, 0.7 * cal_norm + 0.3 * old.mastery))
+            new_confidence = min(1.0, max(old.confidence, 0.7))
+        else:
+            new_mastery = cal_norm
+            new_confidence = 0.7
+        profile.concept_mastery[target_id] = ConceptMastery(
+            mastery=round(new_mastery, 4),
+            confidence=round(new_confidence, 4),
+            source="merged",
+            risk="low" if new_mastery >= 0.6 else "medium",
+            failure_count=old.failure_count if old else 0,
+            last_updated=now,
+        )
+        merged_count += 1
+
+    for concept_name, gap_info in assessment_gaps.items():
+        if not isinstance(gap_info, dict):
+            continue
+        concept_id = str(gap_info.get("concept_id", "")).strip()
+        dimension = str(gap_info.get("dimension", "")).strip()
+        calibrated = float(gap_info.get("calibrated", 50))
+        node_id_from_gap = str(gap_info.get("node_id", "")).strip()
+
+        # Strategy 1a: node_id 字段直接匹配
+        if node_id_from_gap and node_id_from_gap in all_node_ids:
+            _apply_mastery(node_id_from_gap, calibrated)
+            continue
+
+        # Strategy 1b: concept_id 直接匹配 node_id
+        if concept_id and concept_id in all_node_ids:
+            _apply_mastery(concept_id, calibrated)
+            continue
+
+        # Strategy 1c: concept_name 在 node_map 中名称匹配
+        if node_map and concept_name:
+            found = _find_node_id_by_concept_name(concept_name, node_map)
+            if found and found in all_node_ids:
+                _apply_mastery(found, calibrated)
+                continue
+
+        # Strategy 2: dimension → ability → boost confidence
+        if dimension:
+            for nid in all_node_ids:
+                ab = get_node_primary_ability(nid)
+                if ab == dimension:
+                    entry = profile.concept_mastery.get(nid)
+                    if entry and entry.confidence < 0.5:
+                        cal_norm = max(0.0, min(1.0, calibrated / 100.0))
+                        entry.mastery = round(max(0.0, min(1.0, 0.5 * cal_norm + 0.5 * entry.mastery)), 4)
+                        entry.confidence = min(1.0, max(entry.confidence, 0.5))
+                        entry.source = "merged"
+                        entry.last_updated = now
+                        merged_count += 1
+
+    return merged_count
+
+
 def build_learning_plan_generator_node(llm: Any, runtime: RuntimeContext):
     event_sink = runtime.event_sink
     graph_pipeline = getattr(runtime, "graph_rag_pipeline", None)
@@ -72,9 +182,11 @@ def build_learning_plan_generator_node(llm: Any, runtime: RuntimeContext):
         _, loaded_snapshot = load_student_state_snapshot(
             student_state_store, student_id
         )
-        state_snapshot = loaded_snapshot or dict(
-            state.get("student_state_snapshot") or {}
-        )
+        # 优先使用 AgentState 中的 student_state_snapshot（含 update_state 注入的字段），
+        # 若无则从持久化存储加载。允许 AgentState 注入空 learning_plan_v2 触发重新生成。
+        state_snapshot = dict(state.get("student_state_snapshot") or {})
+        if not state_snapshot and loaded_snapshot:
+            state_snapshot = loaded_snapshot
 
         edges = _get_edges(graph_pipeline)
 
@@ -229,6 +341,23 @@ def build_learning_plan_generator_node(llm: Any, runtime: RuntimeContext):
                     "learning_plan_generator",
                     message=f"新鲜度加成：{len(fresh_boost)} 个从未规划的节点获得优先级提升。",
                     data={"fresh_nodes": list(fresh_boost.keys())[:10]},
+                )
+            )
+
+        # ── Step 3.6: Feed assessment results into profile ──────
+        # 将 assessment 产出的 calibrated concept_gaps 合并入 profile,
+        # 让画像携带实测校准分而非仅靠自评/默认值。
+        pipeline = getattr(runtime, "graph_rag_pipeline", None)
+        node_map = dict(getattr(pipeline, "node_map", {}) or {})
+        assessment_gaps = state.get("assessment_concept_gaps") or {}
+        if assessment_gaps:
+            n_merged = _merge_assessment_gaps(profile, assessment_gaps, node_map=node_map)
+            event_sink.emit(
+                make_event(
+                    "learning_plan.assessment_merged",
+                    "learning_plan_generator",
+                    message=f"已将测评校准分合并入画像（{n_merged}/{len(assessment_gaps)} 个概念）。",
+                    data={"n_merged": n_merged, "total_gaps": len(assessment_gaps)},
                 )
             )
 

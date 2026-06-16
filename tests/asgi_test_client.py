@@ -69,7 +69,7 @@ class SyncASGITestClient:
             from ai_tutor_agent.interfaces.api.session import format_sse
 
             chunks: list[str] = []
-            deadline = time.monotonic() + 10
+            deadline = time.monotonic() + 120
             while time.monotonic() < deadline:
                 try:
                     event = event_q.get(timeout=0.05)

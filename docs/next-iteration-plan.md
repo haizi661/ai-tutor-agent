@@ -1,6 +1,6 @@
 # AI Tutor Agent 下一步迭代计划
 
-更新时间：2026-06-03
+更新时间：2026-06-16
 项目根目录：本文所有命令与路径均以本仓库根目录为基准，统一使用项目内相对路径。
 
 ## 1. 计划目标
@@ -41,11 +41,12 @@
 - 2026-05-29 错题本/题目答疑/客观题复盘相关聚焦回归：128 passed, 5 warnings。
 - 2026-06-01 学习路径面板宽度稳定：CSS 固定 `width: 360px` + `max-width: 100%; overflow: hidden` 防护，展开节点时宽度不再变化；浏览器 E2E 验收前端渲染、课程方向、主题确认、摸底触发链路全部正常；全量测试 630 passed, 5 skipped, 5 warnings。
 - 2026-06-03 结业总结（completion_wrapup）：全部节点 mastered 后生成 LLM 学习总结报告（学习概览、能力评估、下一步建议）+ 附带复习作业；quick_check 入口模式改为先询问用户再执行；teaching insights 教学洞察面板接入；continue_or_homework_selector 新增 consolidate_weak / view_report / start_full_round 三个分支；节点标识头从 `##` 改为 `**bold**` 兼容两种渲染路径；全量测试 722 passed, 5 skipped, 5 warnings。
+- 2026-06-16 题库完成：420 道客观题 (42×10) + 210 道变式题 (42×5) = 630 道节点题，覆盖全部 42 个知识图谱节点；9 节点完整演示录制验证 (`scripts/record_demo_flow.py`)：测评 → 学习计划 → 9 节点轮转 → 新学习计划生成全流程通过；`do_later` → `next_node_planner` 路由修复验证；_serialize_state 白名单补全 21 个缺失字段；SSE 测试客户端超时从 10s → 120s；AgentState TypedDict 补全 learning_plan_v2；概念模糊匹配优化 (评估概念 → 图谱节点映射准确率提升)；新增 _serialize_state 前端契约测试 3 个；全量测试 754 passed, 5 skipped, 5 warnings。
 
 当前主要风险：
 
 - 真实浏览器/API 端到端验收仍不足；2026-05-01 已验证一个恢复历史布局样例，但还需要覆盖从新主题到作业恢复的完整用户路径。
-- 题库接入机制已就绪，但节点客观题、变式题、作业题内容仍不完整。
+- 题库接入机制已就绪，客观题 (420) 和变式题 (210) 已完成；作业题库 (3 题) 仍不完整。
 - 用户画像已经由学前诊断、`StudentStateStore` 和 `knowledge_graph`（节点级 evidence）共同支撑；掌握分尺度已统一为 0-100，测验/作业 evidence 已沉淀为节点级事件。仍需升级为完整长期学习者模型：confidence、next_review、教学策略信号。
 - 前端已支持新 `pending_interaction_kind` 的结构渲染与恢复，`post_lesson_choice` 已从僵硬二选一改为自由追问/进入小测；但还需要真实浏览器/API 验证 locked/pending 生命周期和真实 LLM 输出体验。
 - 学习路径后端已简化为纯拓扑 BFS + 分支优先级（评估只用于入口和同层排序）。v2 过度工程化代码已删除。
@@ -299,7 +300,7 @@ assessment_questions.jsonl
 }
 ```
 
-剩余工作：补齐节点客观题、变式题和作业题内容；provider 缺题时仍应 fallback 到 AI 生成或内置 fallback。
+剩余工作：客观题库 (420 题) 和变式题库 (210 题) 已完成；作业题库 (3 题) 仍待扩充；provider 缺题时仍应 fallback 到 AI 生成或内置 fallback。
 
 ### Task 9：已完成 — QuestionBankProvider 已接入 ApiRuntime
 

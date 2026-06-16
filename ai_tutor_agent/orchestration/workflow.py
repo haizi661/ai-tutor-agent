@@ -559,6 +559,7 @@ def build_workflow(
             "pause": END,
             "greeter": "greeter",
             "tutor": "tutor",
+            "node_content_loader": "node_content_loader",
             "learning_plan_generator": "learning_plan_generator",
             "initial_node_selector": "initial_node_selector",
             "assessment_generator": "assessment_generator",
@@ -606,6 +607,7 @@ def build_workflow(
         route_after_tutor,
         {
             "interruption": "interruption_tutor",
+            "objective_test_generator": "objective_test_generator",
             "post_lesson_choice": "post_lesson_choice",
         },
     )
@@ -657,7 +659,7 @@ def build_workflow(
             "pause": END,
             "variant_question_generator": "variant_question_generator",
             "node_content_loader": "node_content_loader",
-            "continue_or_homework_selector": "continue_or_homework_selector",
+            "next_node_planner": "next_node_planner",
         },
     )
     workflow.add_conditional_edges(
@@ -702,6 +704,13 @@ def build_workflow(
             "remediation_decision": "remediation_decision",
             "variant_question_generator": "variant_question_generator",
             "variant_test_answer_dialog": "variant_test_answer_dialog",
+            "learning_plan_generator": "learning_plan_generator",
+            "initial_node_selector": "initial_node_selector",
+            "continue_or_homework_selector": "continue_or_homework_selector",
+            "node_content_loader": "node_content_loader",
+            "next_node_planner": "next_node_planner",
+            "tutor": "tutor",
+            "post_lesson_choice": "post_lesson_choice",
         },
     )
     workflow.add_conditional_edges(

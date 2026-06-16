@@ -303,16 +303,16 @@ def build_remediation_decision_node(event_sink: EventSink, answer_provider: Answ
                 "message_history": message_history,
             }
 
-        # do_later → 进入 homework/continue 选择
+        # do_later → 先经过 next_node_planner 推进到下一节点，再进入 continue/homework 选择
         remediation_state["status"] = "deferred"
         event_sink.emit(make_event("node.complete", "remediation_decision",
-                                   message="好，把当前节点加入待复习。"))
+                                   message="好，把当前节点加入待复习，推进到下一节点。"))
         return {
             "flow_status": "normal",
             "remediation_decision": normalized,
             "node_remediation_state": remediation_state,
             "learning_phase": "remediation_deferred",
-            "learning_resume_target": "continue_or_homework_selector",
+            "learning_resume_target": "next_node_planner",
             "learning_resume_reason": "remediation_deferred",
             "pending_interaction_kind": "",
             "pending_interaction_prompt": "",
@@ -335,6 +335,6 @@ def route_after_remediation_decision(state: AgentState) -> str:
     if normalized == "review_node":
         return "node_content_loader"
     if normalized == "do_later":
-        return "continue_or_homework_selector"
+        return "next_node_planner"
     # fallback: pause and wait
     return "pause"

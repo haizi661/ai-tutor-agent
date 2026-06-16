@@ -1,6 +1,6 @@
 # AI Tutor Agent 当前完成情况与使用说明
 
-更新时间：2026-06-03
+更新时间：2026-06-16
 项目根目录：本文所有命令默认都在本仓库根目录执行，路径统一使用项目内相对路径。
 
 ## 1. 当前一句话结论
@@ -199,7 +199,7 @@ python -m ai_tutor_agent.knowledge_map.runtime_assets --media-index data/media_e
 
 ```bash
 PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 pytest -q
-# 743 passed, 5 skipped, 5 warnings
+# 754 passed, 5 skipped, 5 warnings
 ```
 
 warnings 为既有 SWIG DeprecationWarning，不是本轮主流程逻辑失败。
@@ -215,6 +215,7 @@ warnings 为既有 SWIG DeprecationWarning，不是本轮主流程逻辑失败�
 | 2026-05-29 | 学习路径 v2 简化（纯拓扑 BFS）、错题本、题目答疑、公式渲染 | 630 |
 | 2026-06-01 | 学习路径面板宽度稳定、CSS 防护加固、E2E 浏览器验收 | 630 |
 | 2026-06-03 | completion_wrapup 结业总结、quick_check 选择入口、teaching insights 面板 | 722 |
+| 2026-06-16 | 题库完成 (420 客观题 + 210 变式题)、9 节点完整演示录制验证、_serialize_state 白名单补全、SSE 测试超时修复、概念模糊匹配优化、前端契约测试扩展 | 754 |
 
 聚焦回归说明：
 
@@ -229,6 +230,13 @@ warnings 为既有 SWIG DeprecationWarning，不是本轮主流程逻辑失败�
 - 点击方向 → 新会话创建 → 用户消息发送 → 主题确认卡片渲染 → 点击摸底：流程推进正确。
 - 学习路径面板宽度稳定（360px 固定），点击展开节点时宽度不变。
 - CSS 防护已加固：`width/min-width/max-width: 360px` + 所有下级容器 `max-width: 100%; overflow: hidden`。
+
+2026-06-16 完整多节点演示录制（Playwright headless）：
+
+- 完整 9 节点学习流程验证通过：首页 → 测评 → 学习计划 → 教学 → 9 节点轮转 (讲解 → 小测 → LLM 评分 → 补救决策) → 新学习计划生成。
+- `do_later` → `next_node_planner` 路由修复验证通过（节点 5 和 7）。
+- demo 视频：`scripts/demo_full_flow.webm` (83.6MB, ~34 分钟)。
+- 16 张阶段截图：`scripts/01_home.png` 至 `scripts/16_final.png`。
 
 结果：
 
@@ -384,7 +392,7 @@ PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 pytest -q \
 - 题库文件支持 `assessment_questions.jsonl`、`objective_questions.jsonl`、`variant_questions.jsonl`、`homework_questions.jsonl`；
 - provider 不可用或题目不足时，节点仍 fallback 到 AI 生成或内置 fallback，避免流程中断。
 
-当前仓库中只保留最小 `assessment_questions.jsonl` 资产；节点客观题、变式题、作业题仍需继续补内容质量。因此现阶段不能称为“正式题库完成”，只能称为“题库接入机制已就绪，题库内容待扩充”。
+当前仓库中已包含完整客观题库 (420 题，42 节点 × 10) 和完整变式题库 (210 题，42 节点 × 5)；测评题 (10 题) 和作业题 (3 题) 仍为最小可用。因此现阶段可称为”客观题与变式题库已完成，测评题与作业题库待扩充”。
 
 ### P1：错题本基础可用，但复习闭环还不完整
 

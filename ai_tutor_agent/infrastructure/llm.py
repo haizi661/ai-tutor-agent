@@ -33,7 +33,7 @@ def _proxy_reachable(proxy_url: str, timeout: float = 1.5) -> bool:
 def _build_http_client(settings: Settings):
     proxy_url = settings.http_proxy or settings.https_proxy
     if not proxy_url:
-        return None
+        return httpx.Client(trust_env=False, follow_redirects=True)
     if not _needs_proxy(settings.openai_api_base):
         # Domestic API — return an explicit no-proxy client so that the
         # OpenAI SDK ignores HTTP_PROXY / HTTPS_PROXY env vars.
@@ -42,7 +42,7 @@ def _build_http_client(settings: Settings):
         )
     if not _proxy_reachable(proxy_url):
         print(f"⚠️ 代理 {proxy_url} 不可达，LLM 将直连（不走代理）。")
-        return None
+        return httpx.Client(trust_env=False, follow_redirects=True)
     return httpx.Client(proxy=proxy_url, trust_env=False)
 
 

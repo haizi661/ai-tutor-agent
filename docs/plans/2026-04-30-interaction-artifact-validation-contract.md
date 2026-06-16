@@ -1,6 +1,6 @@
 # Interaction Artifact Validation Contract
 
-Last synced: 2026-05-01
+Last synced: 2026-06-09
 
 This document is the commit-tracked version of the interaction-card validation rules. It replaces references to the ignored `.hermes/` plan path for project handoff and GitHub-visible documentation.
 
@@ -138,3 +138,4 @@ curl http://127.0.0.1:8000/api/health
 - Page-level horizontal overflow was absent; wide table overflow stayed inside `learning-table-viewport`.
 - Restored legacy GraphRAG related overview had 3 cards and 0 duplicate media keys.
 - Full regression at that point: `424 passed, 5 warnings`.
+- 2026-06-09 current full suite: `743 passed, 5 skipped, 5 warnings`.

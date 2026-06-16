@@ -857,6 +857,24 @@ def build_user_profiler_node(llm, event_sink: EventSink, graph_pipeline=None):
 
         # ── Step 1: 概念差距分析（核心逻辑）──
         concept_gaps = _compute_concept_gaps(questions, answers)
+        # ── Step 1a: 在 gap 条目中注入 node_id（如果能在图中找到匹配）──
+        node_map = dict(getattr(graph_pipeline, "node_map", {}) or {})
+        for concept_name, gap in concept_gaps.items():
+            if not isinstance(gap, dict):
+                continue
+            # 如果已有 node_id 字段且是有效节点 ID，跳过
+            existing_nid = str(gap.get("node_id") or "").strip()
+            if existing_nid and existing_nid in node_map:
+                continue
+            cid = str(gap.get("concept_id") or "").strip()
+            # 尝试通过概念名称 -> 节点名称匹配找出 node_id
+            matched = (
+                _find_node_id_by_name(node_map, concept_name)
+                or _find_node_id_by_name(node_map, cid)
+                or ""
+            )
+            if matched:
+                gap["node_id"] = matched
         radar_data = _generate_radar_data(event_sink, topic, questions, answers)
         difficulty_level, teaching_strategy = _decide_teaching_start(concept_gaps)
         start_label = _resolve_course_start_label(graph_pipeline, topic)
@@ -895,7 +913,7 @@ def build_user_profiler_node(llm, event_sink: EventSink, graph_pipeline=None):
         # ── Step 4: 初始化用户知识图谱（测评完成即有初始状态）──
         # 所有被测概念设为 not_started，携带校准分供 UI 展示
         # 使用节点 ID 作为 key，以便图谱界面正确匹配
-        node_map = dict(getattr(graph_pipeline, "node_map", {}) or {})
+        # node_map 已在 Step 1a 中创建，直接复用
         user_knowledge_graph = {}
         for concept, v in concept_gaps.items():
             concept_id = str(v.get("concept_id") or "").strip()

@@ -78,6 +78,18 @@ RESUME_TARGETS = {
     "completion_wrapup",
 }
 
+# ── 路由返回值全集 ──
+# ROUTE_TARGETS 包含所有可能的 route_after_*() 返回值。
+# 它 = RESUME_TARGETS（节点名） + 以下特殊目标（非节点名，在边 dict 中映射到其他节点）。
+# route_after_*() 的返回值以及 add_conditional_edges 的 dict key 都应来自这个集合。
+ROUTE_PAUSE = "pause"
+ROUTE_INTERRUPTION = "interruption"
+ROUTE_COACH = "coach"
+ROUTE_FAIL = "fail"
+ROUTE_SPECIAL_TARGETS = {ROUTE_PAUSE, ROUTE_INTERRUPTION, ROUTE_COACH, ROUTE_FAIL}
+# evaluator 是 route_after_tester 的返回值，但不是有效恢复目标（不在 RESUME_TARGETS 中）
+ROUTE_TARGETS: frozenset[str] = frozenset(RESUME_TARGETS | ROUTE_SPECIAL_TARGETS | {"evaluator"})
+
 
 def normalize_learning_phase(value: Any) -> str:
     phase = str(value or "").strip()

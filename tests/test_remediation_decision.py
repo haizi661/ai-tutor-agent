@@ -236,8 +236,8 @@ def test_choice_review_node_routes_to_node_content_loader():
     assert result["current_node_status"] == "selected"
 
 
-def test_choice_do_later_routes_to_continue_or_homework():
-    """do_later → continue_or_homework_selector。"""
+def test_choice_do_later_routes_to_next_node_planner():
+    """do_later → next_node_planner（先推进节点，再 continue/homework）。"""
     sink = BufferedEventSink()
     node = build_remediation_decision_node(sink, _FakeAnswerProvider("do_later"))
     result = node({
@@ -255,7 +255,7 @@ def test_choice_do_later_routes_to_continue_or_homework():
 
     assert result["flow_status"] == "normal"
     assert result["remediation_decision"] == "do_later"
-    assert result["learning_resume_target"] == "continue_or_homework_selector"
+    assert result["learning_resume_target"] == "next_node_planner"
     assert result["node_remediation_state"]["status"] == "deferred"
 
 
@@ -269,7 +269,7 @@ def test_route_after_remediation_decision():
     assert route_after_remediation_decision({"remediation_decision": "continue_variant"}) == "variant_question_generator"
     assert route_after_remediation_decision({"remediation_decision": "still_do_variant"}) == "variant_question_generator"
     assert route_after_remediation_decision({"remediation_decision": "review_node"}) == "node_content_loader"
-    assert route_after_remediation_decision({"remediation_decision": "do_later"}) == "continue_or_homework_selector"
+    assert route_after_remediation_decision({"remediation_decision": "do_later"}) == "next_node_planner"
     assert route_after_remediation_decision({"remediation_decision": ""}) == "pause"
 
 

@@ -115,6 +115,7 @@ class AgentState(TypedDict):
     learning_plan_current_step: int    # 当前在学习路径的第几步
     learning_plan_generated_at: str    # 路径生成时间 ISO
     learning_plan_source: str          # 生成来源: "profile_based" | "resume_reuse" | "manual"
+    learning_plan_v2: dict             # 学习计划 v2 完整数据 (LearningPlan.to_dict()，由 next_node_planner 从 StudentState 回填)
 
 
 def build_initial_state(topic: str = "") -> AgentState:
@@ -227,4 +228,5 @@ def build_initial_state(topic: str = "") -> AgentState:
         "learning_plan_current_step": 0,
         "learning_plan_generated_at": "",
         "learning_plan_source": "",
+        "learning_plan_v2": {},
     }

@@ -411,12 +411,17 @@ def select_nodes(
 ) -> list[str]:
     """从候选集中选 9-12 个节点。
 
-    选择策略(知识图谱驱动,非章节):
-    1. importance (core → supporting → other)
-    2. 拓扑深度(浅在先;能力缺口拉取:同深度内薄弱能力优先)
-    3. 紧迫度(越高越先;含错题本+临时提问加成)
-    4. 难度(低在先)
-    5. ID 数字升序
+    选择策略(画像驱动加权评分):
+    使用加权复合评分代替严格层级排序,让画像差异能真正影响节点选择。
+    权重设计:
+    - urgency(60%): 画像驱动的紧迫度,含 mastery gap + confidence + 错题/提问加成
+    - importance(15%): core > supporting > other
+    - depth(5%): 拓扑深度,浅层优先
+    - difficulty(5%): 难度,简单优先
+    - id tiebreaker(15%): 稳定 ID 排序
+
+    关键改进: urgency 权重从三级键提升到主导因子,
+    不同画像下相同 importance/depth 的节点会产生不同的选择结果。
     """
     if not sorted_candidates:
         return []
@@ -431,52 +436,38 @@ def select_nodes(
 
     # 从知识图谱前置边推导拓扑深度
     topo_depth = _compute_topo_order(sorted_candidates, edges or _DUMMY_EDGES)
-    has_real_edges = bool(edges)
 
-    # 评分排序(不再按章节分组)
-    if has_real_edges:
-        # 计算每能力的平均缺口(用于同深度内排序)
-        ability_gaps: dict[str, float] = {}
-        for nid2 in sorted_candidates:
-            ab2 = get_node_primary_ability(nid2)
-            if ab2 and ab2 not in ability_gaps:
-                ab_nodes2 = [x for x in sorted_candidates if get_node_primary_ability(x) == ab2]
-                if ab_nodes2:
-                    g2 = [1.0 - profile.get_mastery(x) for x in ab_nodes2]
-                    ability_gaps[ab2] = sum(g2) / len(g2) if g2 else 0.5
-                else:
-                    ability_gaps[ab2] = 0.5
+    # ── 加权复合评分(画像驱动) ──
+    _IMP_SCORE: dict[str, float] = {"core": 1.0, "supporting": 0.55, "other": 0.1}
 
     scored: list[tuple] = []
     for nid in sorted_candidates[:max(node_count * 2, total)]:
-        imp = _IMPORTANCE_ORDER.get(get_node_importance(nid), 2)
+        importance = get_node_importance(nid)
+        imp_base = _IMP_SCORE.get(importance, 0.1)
         d = float(topo_depth.get(nid, 0))
         urgency = urgency_scores.get(nid, 0.5)
         diff = get_node_difficulty(nid)
         id_num = int("".join(c for c in nid if c.isdigit()) or 0)
 
-        if has_real_edges:
-            # 能力缺口拉取:同深度内薄弱能力优先
-            ab = get_node_primary_ability(nid)
-            gap = ability_gaps.get(ab, 0.5)
-            pull = 0.0
-            if gap > 0.7:
-                pull = 0.5
-            elif gap > 0.5:
-                pull = 0.25
-            adj_depth = max(0.0, d - pull)
+        # depth_score: shallower → higher score (0→1.0, 5+→0.0)
+        depth_score = max(0.0, 1.0 - d / 5.0)
+        # diff_score: easier → higher score (1→1.0, 5→0.0)
+        diff_score = 1.0 - (diff - 1) / 4.0
+        # id_score: tiny tiebreaker
+        id_score = 1.0 / (id_num + 20)
 
-            # 真实知识图谱: importance > 深度 > 紧迫度 > 难度 > ID
-            scored.append((imp, adj_depth, -urgency, diff, id_num, nid))
-        else:
-            # 无图(测试环境 fallback): importance > 紧迫度 > 难度 > ID
-            scored.append((imp, -urgency, diff, id_num, nid))
+        composite = (
+            0.15 * imp_base +
+            0.05 * depth_score +
+            0.60 * urgency +
+            0.05 * diff_score +
+            0.15 * id_score
+        )
+        # 负数使高 composite 排前面
+        scored.append((-composite, id_num, nid))
 
     scored.sort()
-    if has_real_edges:
-        selected = [nid for _, _, _, _, _, nid in scored]
-    else:
-        selected = [nid for _, _, _, _, nid in scored]
+    selected = [nid for _, _, nid in scored]
 
     # 弹性控制范围
     if len(selected) < node_range[0]:
@@ -901,6 +892,7 @@ def generate_learning_plan_v2(
     n_steps: int = 4,
     node_count_target: int = 10,
     node_range: tuple[int, int] = (9, 12),
+    per_step_range: tuple[int, int] = (2, 4),
     session_index: int = 0,
     llm: Any | None = None,
     context_boost: dict[str, float] | None = None,
@@ -969,7 +961,7 @@ def generate_learning_plan_v2(
     selected = select_nodes(sorted_candidates, profile, node_count_target, node_range, edges=edges, context_boost=merged_boost)
 
     # Step 5: 聚类成 step（step 内按拓扑深度+难度排序）
-    raw_steps = cluster_into_steps(selected, n_steps=n_steps, edges=edges)
+    raw_steps = cluster_into_steps(selected, n_steps=n_steps, per_step_range=per_step_range, edges=edges)
 
     # Step 6: entry_mode
     steps: list[StepEntry] = []

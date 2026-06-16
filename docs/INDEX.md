@@ -1,60 +1,34 @@
 # AI Tutor Agent 文档索引
 
-更新时间：2026-06-03
+> **唯一说明书**: `docs/AI-TUTOR-AGENT-说明书.md` — 系统概述、启动、完整流程、算法、架构、视频、验证命令的单一入口。
 
-## 权威入口（当前状态与下一步）
+## 当前文档
 
 | 文档 | 用途 | 何时读 |
 |------|------|--------|
-| `docs/current-status-and-usage.md` | 当前完成情况、使用方式、自检命令；包含错题本、题目答疑、客观题复盘的现状与边界 | 首次了解项目、汇报当前状态 |
-| `docs/next-iteration-plan.md` | 下一步迭代计划、任务清单 | 制定工作计划、验收标准 |
-| `docs/plans/2026-04-30-interaction-artifact-validation-contract.md` | 交互卡片/历史恢复三层验收契约 | 做前端验收、浏览器测试时 |
+| `docs/AI-TUTOR-AGENT-说明书.md` | **完整说明书**（系统概述→启动→14步流程→算法→架构→视频→验证） | 首次了解、汇报、新人上手 |
+| `docs/next-iteration-plan.md` | 下一步迭代计划、任务清单、优先级 | 制定工作计划 |
+| `docs/knowledge-map-runtime-assets.md` | 图谱 B 运行资产同步、检查命令 | 迁移环境、资产异常排查 |
+| `docs/question-bank-mainflow-homework-integration.md` | 题库加工并入主流程的技术细节 | 修改题库 Provider 或作业生成 |
+| `docs/learning-path-complete-flow.md` | 完整流程详细描述 + 学习路径生成算法 | 深入理解路径算法 |
+| `docs/current-status-and-usage.md` | 详细完成情况、使用方式、自检命令 | 查看历史完成记录 |
 
-## 功能说明文档
-
-| 文档 | 用途 |
-|------|------|
-| `docs/question-bank-mainflow-homework-integration.md` | 题库加工并入主流程与作业题调用 |
-| `docs/knowledge-map-runtime-assets.md` | 运行资产同步、图谱 B 说明 |
-| `docs/ai-tutor-summary.md` | 已完成改进详细说明（知识图谱、向量库、教学改进） |
-| `docs/agent-capability-structure.md` | 智能体能力结构草案（独立草案，未接入生产） |
-
-## 当前设计文档
+## 设计文档
 
 | 文档 | 内容 |
 |------|------|
-| `docs/plans/2026-05-28-learning-plan-design.md` | 学习路径与节点学习分离设计（v1） |
-| `docs/plans/2026-05-29-learning-path-algorithm-v2.md` | 学习路径 v2 算法设计（ZPD 驱动 + 拓扑约束） |
-| `docs/plans/2026-05-29-learning-path-v2-implementation-plan.md` | 学习路径 v2 实施计划 |
+| `docs/plans/2026-04-30-interaction-artifact-validation-contract.md` | 交互卡片/历史恢复三层验收契约 |
 | `docs/plans/2026-05-29-teaching-optimization-plan.md` | 教学能力优化计划（部分已实施） |
 
-## 历史计划（已归档）
-
-| 文档 | 内容 |
-|------|------|
-| `docs/graph-mainflow-task-plan.md` | 图谱 2.2 与主流程重构任务计划（已被 current-status 取代） |
-| `docs/plans/2026-04-28-strict-kg-mastery-mainflow-plan.md` | 严格主流程设计长计划 |
-| `docs/plans/2026-04-27-main-learning-flow-redesign.md` | 主学习流程重设计 |
-
-## 历史报告（已归档）
-
-| 文档 | 内容 |
-|------|------|
-| `docs/reports/2026-04-28-langgraph-mainflow-completion-report.md` | 2026-04-28 主流程完成报告 |
-| `docs/reports/2026-04-28-langgraph-final-closure-report.md` | 2026-04-28 最终闭合报告（88 项聚焦回归） |
-| `docs/reports/2026-06-01-5-25-vs-head-comparison.md` | 2026-06-01 5/25 vs HEAD 差异汇报 |
-| `docs/reports/2026-06-01-work-summary-product-view.md` | 2026-06-01 产品视角工作总结 |
-
-## 其他
+## 演示视频
 
 | 文件 | 说明 |
 |------|------|
-| `docs/GEMINI_CONTEXT.md` | Gemini 上下文（已 gitignore，本地生成） |
+| `scripts/phase_recordings/PHASE_VIDEOS.md` | 分阶段演示视频映射（8 阶段 + 完整视频） |
+| `scripts/record_phases_v2.py` | 分阶段录制脚本 |
+| `scripts/record_demo_flow.py` | 全流程录制脚本 (9 节点轮转) |
+| `scripts/real_e2e_verify.py` | 真实 LLM API E2E 验证 |
 
-## 阅读顺序建议
+## 历史文档（仅溯源）
 
-1. `README.md` — 项目概述
-2. `docs/current-status-and-usage.md` — 当前状态
-3. `docs/next-iteration-plan.md` — 下一步计划
-4. 按需阅读功能说明文档
-5. 历史计划/报告仅作溯源参考
+`docs/reports/` 和 `docs/plans/` 下的旧计划/报告仅作历史参考，当前权威口径以说明书为准。

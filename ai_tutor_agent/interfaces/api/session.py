@@ -301,8 +301,10 @@ def _run_graph_session(
         except Exception:
             end_data = {}
         runtime_context.event_sink.emit(make_event("session.end", "api", message="这一轮处理完成。", data=end_data))
-        conn.close()
         runtime.session_manager.mark_finished(thread_id)
+        # 给 SSE generator 一点时间把 session.end 事件刷新到客户端再关闭连接
+        time.sleep(0.2)
+        conn.close()
 
 
 def _graph_worker(thread_id: str, topic: str, runtime, event_q: queue.Queue, input_q: queue.Queue):
@@ -351,6 +353,16 @@ def _resume_assessment_worker(
                 "learning_phase": "profile_complete",
                 "learning_resume_target": "user_profiler",
                 "learning_resume_reason": "assessment_submitted",
+                # 清旧 plan 让 learning_plan_generator 重新生成
+                "learning_plan_v2": {},
+                "learning_plan": [],
+                "learning_plan_source": "",
+                # 同时注掉 student_state_snapshot 中的旧 plan
+                "student_state_snapshot": {
+                    "learning_plan_v2": {},
+                    "learning_plan": [],
+                    "learning_plan_source": "",
+                },
             },
         )
         runtime_context.event_sink.emit(

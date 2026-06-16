@@ -1302,6 +1302,8 @@
 
         document.querySelectorAll('[data-starter-prompt]').forEach(button => {
             button.addEventListener('click', () => {
+                // 点击课程方向 → 标记自动确认，跳过主题输入和确认步骤
+                state.autoConfirmTopic = true;
                 applyStarterPrompt(button.dataset.starterPrompt || '');
             });
         });

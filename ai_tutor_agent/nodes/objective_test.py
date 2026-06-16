@@ -1112,8 +1112,12 @@ def build_objective_test_generator_node(runtime: RuntimeContext, llm: Any | None
         questions: list[dict[str, Any]] = []
         if provider is not None and hasattr(provider, "get_objective_questions"):
             questions = list(provider.get_objective_questions(node_id, k=effective_count) or [])
-        if not questions:
-            questions = _generate_ai_questions(llm, state, node_id, node_name, effective_count)
+        # 题库不足时 LLM 补齐差额（而非题库有 1 题就完全不调 LLM）
+        if len(questions) < effective_count:
+            shortage = effective_count - len(questions)
+            llm_questions = _generate_ai_questions(llm, state, node_id, node_name, shortage)
+            if llm_questions:
+                questions.extend(llm_questions[:shortage])
         if not questions:
             event_sink.emit(
                 make_event(

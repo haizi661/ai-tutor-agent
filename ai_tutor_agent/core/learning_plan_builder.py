@@ -23,6 +23,95 @@ from collections import defaultdict, deque
 from typing import Any
 
 
+def _fuzzy_match_node(concept_title: str, node_map: dict[str, dict[str, Any]],
+                      min_score: float = 0.35) -> str | None:
+    """将概念标题模糊匹配到 node_map 中的节点 ID。统一打分机制，选最高分。
+
+    打分维度（每项 0-1，加权求和）：
+    - 精确名称匹配: 1.0 (weight=1.0)
+    - 标签匹配: 0.8 (概念标题命中节点 tags)
+    - 子串包含: 0.6 (互含)
+    - 字符 bigram Jaccard: 0-1 (weight=0.7)
+    - 字符 containment ratio: 0-1 (weight=0.5)
+    """
+    if not concept_title or not node_map:
+        return None
+    target = concept_title.strip()
+
+    best_nid, best_total = None, 0.0
+    target_len = len(target)
+    target_chars = set(target)  # pre-compute for tag fuzzy matching
+    target_bigrams = {target[i:i + 2] for i in range(len(target) - 1)}
+    for nid, node in node_map.items():
+        name = str(node.get("name") or "").strip()
+        name_len = len(name)
+        len_ratio = target_len / max(name_len, 1)  # how dominant target is in name
+        total = 0.0
+
+        # 1. Exact name match
+        if name == target:
+            total += 1.0
+
+        # 2. Substring containment (scaled by length ratio so suffix matches don't dominate)
+        has_substring = target in name or name in target
+        if has_substring:
+            total += 0.6 * len_ratio
+
+        # 3. Tags match
+        tags = node.get("tags") or ""
+        tag_list = []
+        if isinstance(tags, list):
+            tag_list = [str(t).strip("[]'\" ") for t in tags]
+        elif isinstance(tags, str):
+            try:
+                import ast
+                parsed = ast.literal_eval(tags)
+                if isinstance(parsed, list):
+                    tag_list = [str(t).strip("[]'\" ") for t in parsed]
+            except (ValueError, SyntaxError):
+                tag_list = [t.strip() for t in tags.replace("[", "").replace("]", "").replace("'", "").split(",")]
+        has_exact_tag = False
+        for tag in tag_list:
+            if tag:
+                if tag == target:
+                    total += 1.5  # exact tag match — very strong signal
+                    has_exact_tag = True
+                    break
+                elif target in tag or tag in target:
+                    total += 0.7
+                    break
+                tag_chars = set(tag)
+                if target_chars and tag_chars:
+                    tag_containment = len(target_chars & tag_chars) / len(target_chars)
+                    if tag_containment >= 0.6:
+                        total += 0.4
+                        break
+
+        # 4. Character bigram Jaccard
+        name_bigrams = {name[i:i + 2] for i in range(len(name) - 1)}
+        if target_bigrams and name_bigrams:
+            bi_inter = len(target_bigrams & name_bigrams)
+            bi_union = len(target_bigrams | name_bigrams)
+            total += 0.7 * (bi_inter / bi_union)
+
+        # 5. Unigram containment ratio (scaled by length ratio)
+        name_chars = set(name)
+        if target_chars:
+            containment = len(target_chars & name_chars) / len(target_chars)
+            total += 0.5 * containment * len_ratio
+
+        # 6. Pure tag bonus: exact tag match WITHOUT substring overlap is a stronger
+        #    semantic signal than tag+substring coincidence (e.g. "基本概念" tag on
+        #    KM001 vs "基本概念" appearing as suffix in KM021's name)
+        if has_exact_tag and not has_substring:
+            total += 0.6
+
+        if total > best_total:
+            best_total, best_nid = total, nid
+
+    return best_nid if best_total >= min_score else None
+
+
 def _string_list(values: Any) -> list[str]:
     if isinstance(values, list):
         return [str(item).strip() for item in values if str(item).strip()]
@@ -139,14 +228,20 @@ def _compute_gap_priority(
         gap = dict(raw_gap or {}) if isinstance(raw_gap, dict) else {}
         node_id = str(gap.get("concept_id") or gap.get("node_id") or "").strip()
         if not node_id or node_id not in node_map:
-            # Try matching by title
+            # Try matching by concept_title
             target = str(gap.get("concept_title") or concept_title or "").strip()
             if target:
+                # Exact match first
                 for nid, node in node_map.items():
                     name = str(node.get("name") or "").strip()
                     if name == target:
                         node_id = nid
                         break
+                # Fuzzy fallback
+                if not node_id or node_id not in node_map:
+                    fuzzy_id = _fuzzy_match_node(target, node_map)
+                    if fuzzy_id:
+                        node_id = fuzzy_id
         if not node_id or node_id not in node_map:
             continue
         calibrated = gap.get("calibrated")
@@ -254,14 +349,20 @@ def _determine_mastered_from_assessment(
         if node_id and node_id in node_map:
             mastered.add(node_id)
             continue
-        # Fallback: match by concept name
+        # Fallback: match by concept name (exact → fuzzy)
         concept_title = str(gap.get("concept_title") or _title or "").strip()
         if concept_title:
+            matched = False
             for nid, node in node_map.items():
                 name = str(node.get("name") or "").strip()
                 if name == concept_title:
                     mastered.add(nid)
+                    matched = True
                     break
+            if not matched:
+                fuzzy_id = _fuzzy_match_node(concept_title, node_map)
+                if fuzzy_id:
+                    mastered.add(fuzzy_id)
 
     return mastered
 
