@@ -233,6 +233,231 @@ def test_matlab_agent_repairs_after_execution_error():
         shutil.rmtree(workspace, ignore_errors=True)
 
 
+def test_matlab_agent_records_history_and_passes_continuation_context():
+    workspace = _make_test_workspace()
+    root = workspace / "MATLAB" / "R2024b"
+    executable = root / "bin" / "matlab.exe"
+    executable.parent.mkdir(parents=True)
+    executable.write_text("", encoding="utf-8")
+    captured_contexts: list[dict] = []
+
+    class RecordService(MatlabExperimentService):
+        def probe_environment(self, *, timeout_seconds=90, force=False):
+            return {"available": True, "toolboxes": ["Control System Toolbox"], "unavailable_functions": []}
+
+        def _generate_agent_matlab_code(self, **kwargs):
+            captured_contexts.append(kwargs.get("continuation_context") or {})
+            code = "disp('first run code')" if len(captured_contexts) == 1 else "disp('second run code')"
+            return {"code": code, "notes": "record-test"}
+
+    def fake_runner(command, cwd, text, capture_output, timeout):
+        del command, text, capture_output, timeout
+        run_dir = Path(cwd)
+        code = (run_dir / "run_generated_simulation.m").read_text(encoding="utf-8")
+        (run_dir / "result.json").write_text(
+            json.dumps(
+                {
+                    "metrics": {"final_value": 1.0, "run_code_length": len(code)},
+                    "series_preview": {"time": [0], "output": [1]},
+                    "model": {"name": "record test"},
+                }
+            ),
+            encoding="utf-8",
+        )
+        (run_dir / "result_plot.png").write_bytes(b"png")
+        return subprocess.CompletedProcess("matlab", 0, stdout="", stderr="")
+
+    try:
+        service = RecordService(workspace_dir=workspace / "runs", matlab_root=root, runner=fake_runner)
+        record = service.create_record(user_prompt="first requirement")["record"]
+
+        first = service.run_agent_experiment(
+            user_prompt="first requirement",
+            record_id=record["record_id"],
+            settings=None,
+        )
+        second = service.run_agent_experiment(
+            user_prompt="extend requirement",
+            record_id=record["record_id"],
+            settings=None,
+        )
+
+        assert first["status"] == "success"
+        assert second["status"] == "success"
+        assert first["record_id"] == record["record_id"]
+        assert second["record_id"] == record["record_id"]
+        detail = service.get_record(record["record_id"])
+        assert [run["run_id"] for run in detail["runs"]] == [first["run_id"], second["run_id"]]
+        assert detail["record"]["runs"] == [first["run_id"], second["run_id"]]
+        assert (workspace / "runs" / "matlab_records.json").exists()
+        assert captured_contexts[0] == {}
+        assert captured_contexts[1]["record_id"] == record["record_id"]
+        assert captured_contexts[1]["prior_runs"][0]["run_id"] == first["run_id"]
+        assert "first run code" in captured_contexts[1]["prior_runs"][0]["latest_code"]
+    finally:
+        shutil.rmtree(workspace, ignore_errors=True)
+
+
+def test_matlab_agent_blank_record_gets_title_after_first_run():
+    workspace = _make_test_workspace()
+    root = workspace / "MATLAB" / "R2024b"
+    executable = root / "bin" / "matlab.exe"
+    executable.parent.mkdir(parents=True)
+    executable.write_text("", encoding="utf-8")
+
+    class DraftRecordService(MatlabExperimentService):
+        def probe_environment(self, *, timeout_seconds=90, force=False):
+            return {"available": True, "toolboxes": [], "unavailable_functions": []}
+
+        def _generate_agent_matlab_code(self, **kwargs):
+            return {"code": "disp('draft title')", "notes": "draft-title"}
+
+    def fake_runner(command, cwd, text, capture_output, timeout):
+        del command, text, capture_output, timeout
+        run_dir = Path(cwd)
+        (run_dir / "result.json").write_text(
+            json.dumps({"metrics": {"final_value": 1}, "series_preview": {}, "model": {}}),
+            encoding="utf-8",
+        )
+        (run_dir / "result_plot.png").write_bytes(b"png")
+        return subprocess.CompletedProcess("matlab", 0, stdout="", stderr="")
+
+    try:
+        service = DraftRecordService(workspace_dir=workspace / "runs", matlab_root=root, runner=fake_runner)
+        record = service.create_record()["record"]
+
+        assert record["title"] == "新仿真"
+        payload = service.run_agent_experiment(
+            user_prompt="first real simulation requirement",
+            record_id=record["record_id"],
+            settings=None,
+        )
+        detail = service.get_record(record["record_id"])
+
+        assert payload["status"] == "success"
+        assert detail["record"]["title"] == "first real simulation requirement"
+    finally:
+        shutil.rmtree(workspace, ignore_errors=True)
+
+
+def test_matlab_agent_continues_legacy_run_record_without_losing_original_run():
+    workspace = _make_test_workspace()
+    root = workspace / "MATLAB" / "R2024b"
+    executable = root / "bin" / "matlab.exe"
+    executable.parent.mkdir(parents=True)
+    executable.write_text("", encoding="utf-8")
+    legacy_run_dir = workspace / "runs" / "matlab_agent_legacy"
+    legacy_run_dir.mkdir(parents=True)
+    (legacy_run_dir / "run_summary.json").write_text(
+        json.dumps(
+            {
+                "status": "success",
+                "run_id": "matlab_agent_legacy",
+                "mode": "agent",
+                "user_prompt": "legacy requirement",
+                "attempts": [{"attempt": 1, "status": "success", "code": "disp('legacy')"}],
+                "result": {"metrics": {"final_value": 1}},
+                "trace": [],
+            }
+        ),
+        encoding="utf-8",
+    )
+
+    class LegacyRecordService(MatlabExperimentService):
+        def probe_environment(self, *, timeout_seconds=90, force=False):
+            return {"available": True, "toolboxes": [], "unavailable_functions": []}
+
+        def _generate_agent_matlab_code(self, **kwargs):
+            assert kwargs["continuation_context"]["prior_runs"][0]["run_id"] == "matlab_agent_legacy"
+            return {"code": "disp('new')", "notes": "new"}
+
+    def fake_runner(command, cwd, text, capture_output, timeout):
+        del command, text, capture_output, timeout
+        run_dir = Path(cwd)
+        (run_dir / "result.json").write_text(
+            json.dumps({"metrics": {"final_value": 2}, "series_preview": {}, "model": {}}),
+            encoding="utf-8",
+        )
+        (run_dir / "result_plot.png").write_bytes(b"png")
+        return subprocess.CompletedProcess("matlab", 0, stdout="", stderr="")
+
+    try:
+        service = LegacyRecordService(workspace_dir=workspace / "runs", matlab_root=root, runner=fake_runner)
+        record_id = "run:matlab_agent_legacy"
+
+        payload = service.run_agent_experiment(
+            user_prompt="extend legacy",
+            record_id=record_id,
+            settings=None,
+        )
+
+        detail = service.get_record(record_id)
+        assert payload["status"] == "success"
+        assert detail["record"]["runs"] == ["matlab_agent_legacy", payload["run_id"]]
+        assert [run["run_id"] for run in detail["runs"]] == ["matlab_agent_legacy", payload["run_id"]]
+    finally:
+        shutil.rmtree(workspace, ignore_errors=True)
+
+
+def test_matlab_agent_analysis_text_normalizer_removes_report_markup():
+    raw = (
+        "## **实验目的**\n"
+        "$$\n"
+        "T(s)=\\frac{10}{s^2+2s+15}\n"
+        "$$\n"
+        "- 曲线存在超调。\n"
+    )
+
+    clean = MatlabExperimentService._normalize_agent_analysis_text(raw)
+
+    assert "##" not in clean
+    assert "**" not in clean
+    assert "$$" not in clean
+    assert "\\[" not in clean
+    assert "实验目的" in clean
+    assert "曲线存在超调。" in clean
+
+
+def test_matlab_agent_builds_downloadable_html_report():
+    workspace = _make_test_workspace()
+    run_dir = workspace / "runs" / "matlab_agent_report"
+    run_dir.mkdir(parents=True)
+    (run_dir / "result_plot.png").write_bytes(b"png")
+    (run_dir / "result.json").write_text(
+        json.dumps({"metrics": {"overshoot_percent": 12.5}, "model": {"name": "report model"}}),
+        encoding="utf-8",
+    )
+    (run_dir / "run_summary.json").write_text(
+        json.dumps(
+            {
+                "status": "success",
+                "run_id": "matlab_agent_report",
+                "mode": "agent",
+                "user_prompt": "report requirement",
+                "trace": [{"ts": "2026-06-09T21:00:00", "phase": "done", "message": "complete"}],
+                "result": {"metrics": {"overshoot_percent": 12.5}},
+                "analysis": "一、结论\n系统存在超调。",
+                "attempts": [{"attempt": 1, "status": "success", "code": "disp('report code')"}],
+                "artifacts": {"plots": ["/api/matlab-experiment/runs/matlab_agent_report/assets/result_plot.png"]},
+            }
+        ),
+        encoding="utf-8",
+    )
+    try:
+        service = MatlabExperimentService(workspace_dir=workspace / "runs", matlab_root=workspace / "MATLAB")
+
+        html = service.build_run_report_html("matlab_agent_report")
+
+        assert "<!doctype html>" in html
+        assert "MATLAB 仿真报告" in html
+        assert "report requirement" in html
+        assert "overshoot_percent" in html
+        assert "disp(&#x27;report code&#x27;)" in html
+        assert "data:image/png;base64," in html
+    finally:
+        shutil.rmtree(workspace, ignore_errors=True)
+
+
 def test_matlab_agent_static_policy_warning_does_not_block_execution():
     workspace = _make_test_workspace()
     root = workspace / "MATLAB" / "R2024b"
@@ -410,6 +635,70 @@ def test_matlab_experiment_api_status_and_validation(monkeypatch):
         shutil.rmtree(workspace, ignore_errors=True)
 
 
+def test_matlab_experiment_api_records(monkeypatch):
+    import ai_tutor_agent.interfaces.api.matlab_experiment as matlab_api
+
+    workspace = _make_test_workspace()
+    root = workspace / "missing-matlab"
+    try:
+        service = MatlabExperimentService(workspace_dir=workspace / "runs", matlab_root=root)
+        monkeypatch.setattr(matlab_api, "_service", service)
+
+        with TestClient(create_api_app()) as client:
+            created = client.post(
+                "/api/matlab-experiment/records",
+                json={"user_prompt": "simulate a closed-loop system"},
+            )
+            assert created.status_code == 200
+            record = created.json()["record"]
+
+            listed = client.get("/api/matlab-experiment/records")
+            assert listed.status_code == 200
+            assert listed.json()["records"][0]["record_id"] == record["record_id"]
+
+            detail = client.get(f"/api/matlab-experiment/records/{record['record_id']}")
+            assert detail.status_code == 200
+            assert detail.json()["record"]["record_id"] == record["record_id"]
+            assert detail.json()["runs"] == []
+    finally:
+        shutil.rmtree(workspace, ignore_errors=True)
+
+
+def test_matlab_experiment_api_download_report(monkeypatch):
+    import ai_tutor_agent.interfaces.api.matlab_experiment as matlab_api
+
+    workspace = _make_test_workspace()
+    run_dir = workspace / "runs" / "matlab_agent_report_api"
+    run_dir.mkdir(parents=True)
+    (run_dir / "result.json").write_text(json.dumps({"metrics": {"final_value": 1}}), encoding="utf-8")
+    (run_dir / "run_summary.json").write_text(
+        json.dumps(
+            {
+                "status": "success",
+                "run_id": "matlab_agent_report_api",
+                "mode": "agent",
+                "user_prompt": "api report",
+                "trace": [],
+                "result": {"metrics": {"final_value": 1}},
+                "attempts": [],
+            }
+        ),
+        encoding="utf-8",
+    )
+    try:
+        service = MatlabExperimentService(workspace_dir=workspace / "runs", matlab_root=workspace / "MATLAB")
+        monkeypatch.setattr(matlab_api, "_service", service)
+
+        with TestClient(create_api_app()) as client:
+            response = client.get("/api/matlab-experiment/runs/matlab_agent_report_api/report")
+            assert response.status_code == 200
+            assert "text/html" in response.headers["content-type"]
+            assert "attachment" in response.headers["content-disposition"]
+            assert "MATLAB 仿真报告" in response.text
+    finally:
+        shutil.rmtree(workspace, ignore_errors=True)
+
+
 def test_frontend_exposes_matlab_experiment_workbench():
     html = Path("frontend/index.html").read_text(encoding="utf-8")
     script = Path("frontend/assets/js/matlab_experiment.js").read_text(encoding="utf-8")
@@ -420,18 +709,28 @@ def test_frontend_exposes_matlab_experiment_workbench():
     assert 'id="matlab-experiment-overlay"' in html
     assert "/assets/js/matlab_experiment.js" in html
     assert "/api/matlab-experiment/status" in script
+    assert "/api/matlab-experiment/records" in script
     assert "/api/matlab-experiment/run" in script
     assert "/api/matlab-experiment/agent-jobs" in script
+    assert "/api/matlab-experiment/runs/" in script
+    assert "/report" in script
+    assert "点击下载报告" in script
     assert "/cancel" in script
     assert "app.runMatlabExperiment = runExperiment;" in script
     assert "app.runMatlabPresetExperiment = runPresetExperiment;" in script
     assert "app.cancelMatlabExperiment = cancelExperiment;" in script
+    assert "app.createMatlabRecord = createMatlabRecord;" in script
+    assert "app.selectMatlabRecord = selectMatlabRecord;" in script
     assert "renderTrace" in script
     assert "buildTracePanel" in script
     assert "lastAgentTrace" in script
     assert "执行过程（未返回）" in script
     assert "matlab-experiment-code" in script
     assert 'id="matlab-cancel-btn"' in html
+    assert 'id="matlab-record-list"' in html
+    assert 'id="matlab-new-record-btn"' in html
+    assert "开始新仿真" in html
+    assert "历史仿真" in html
     assert "MATLAB 仿真 Agent" in html
     assert "根据自然语言需求生成 MATLAB 代码" in html
     assert "matlab-trace-panel-1" in html

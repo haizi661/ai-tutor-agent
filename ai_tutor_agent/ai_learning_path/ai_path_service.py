@@ -5,9 +5,13 @@ import os
 import re
 from collections import defaultdict, deque
 from datetime import datetime
-from typing import Any, Dict, List, Set, Tuple
+from typing import Any, Dict, List, Optional, Set, Tuple
 
 import requests
+
+from ai_tutor_agent.course_assets import get_course_assets
+from ai_tutor_agent.knowledge_map.builders.graph_media_enricher import GraphMediaEnricher
+from ai_tutor_agent.knowledge_map.debug_graph_rag import build_learning_answer_html
 
 from .config import (
     AI_NODES_CSV,
@@ -346,7 +350,18 @@ class AILearningPathService:
         self.prereq_in: Dict[str, List[str]] = defaultdict(list)
         self.prereq_out: Dict[str, List[str]] = defaultdict(list)
         self.related: Dict[str, List[str]] = defaultdict(list)
+        self.media_enricher = self._create_media_enricher()
         self.reload()
+
+    def _create_media_enricher(self):
+        try:
+            assets = get_course_assets("artificial_intelligence")
+            return GraphMediaEnricher(
+                mineru_cache_root=assets.mineru_cache_root,
+                annotated_assets_path=assets.media_evidence_index_dir,
+            )
+        except Exception:
+            return None
 
     def reload(self) -> None:
         self.nodes = _read_csv(AI_NODES_CSV)
@@ -485,6 +500,7 @@ class AILearningPathService:
             "formulas": _safe_list(n.get("formulas", "")),
             "examples": _safe_list(n.get("examples", "")),
             "figures_refs": _safe_list(n.get("figures_refs", "")),
+            "page_refs": _safe_list(n.get("page_refs", "")),
             "definition_candidates": _safe_list(n.get("definition_candidates", "")),
             "key_point_candidates": _safe_list(n.get("key_point_candidates", "")),
             "formula_candidates": _safe_list(n.get("formula_candidates", "")),
@@ -549,6 +565,190 @@ class AILearningPathService:
 """
 
         return _call_deepseek_json_with_system(system_prompt, user_prompt)
+
+    def _reference_section(self, node: Dict[str, Any]) -> str:
+        groups = [
+            ("页码", node.get("page_refs", [])),
+            ("图表", node.get("figures_refs", [])),
+            ("公式", node.get("formulas", [])),
+        ]
+        lines = []
+        for label, values in groups:
+            cleaned = [
+                str(item).strip()
+                for item in (values or [])
+                if str(item).strip() and str(item).strip() not in {"无", "none", "None", "null", "[]"}
+            ]
+            if cleaned:
+                lines.append(f"- {label}: {'；'.join(cleaned[:8])}")
+        if not lines:
+            return ""
+        return "\n\n#### 参考资料\n" + "\n".join(lines)
+
+    def _with_reference_section(self, content: str, node: Dict[str, Any]) -> str:
+        text = (content or "").strip()
+        refs = self._reference_section(node)
+        if not refs:
+            return text
+        if "参考资料" in text:
+            return text
+        return text + refs
+
+    def _formatted_node_map(self) -> Dict[str, Dict[str, Any]]:
+        return {
+            node_id: self._format_node(node_id)
+            for node_id in self.node_by_id
+        }
+
+    def _collect_node_media_items(
+        self,
+        node: Dict[str, Any],
+        *,
+        question: str = "",
+    ) -> List[Dict[str, Any]]:
+        if not self.media_enricher:
+            return []
+
+        node_id = str(node.get("node_id", "") or "").strip()
+        if not node_id:
+            return []
+
+        traversed = [{
+            "node_id": node_id,
+            "name": node.get("name", ""),
+            "node_role": "primary",
+            "hop": 0,
+            "score": 1.0,
+        }]
+        try:
+            media_items = self.media_enricher.collect_for_nodes(
+                traversed_nodes=traversed,
+                node_map=self._formatted_node_map(),
+                question=question or str(node.get("name", "")),
+            )
+            source_doc = str(
+                (node.get("extra") or {}).get("retrieval_source_pdf", "") or ""
+            ).strip()
+            same_doc_items = [
+                item for item in media_items
+                if source_doc and str(item.get("source_doc_id", "") or "") == source_doc
+            ]
+            return same_doc_items or media_items
+        except Exception:
+            return []
+
+    def _with_primary_media_markers(
+        self,
+        content: str,
+        media_items: List[Dict[str, Any]],
+    ) -> str:
+        text = (content or "").strip()
+        if not text or "[[MEDIA:" in text:
+            return text
+
+        figures = [
+            item for item in media_items
+            if item.get("asset_type") == "figure" and item.get("is_primary")
+        ] or [
+            item for item in media_items
+            if item.get("asset_type") == "figure"
+        ]
+        refs = [
+            str(item.get("reference", "") or "").strip()
+            for item in figures[:2]
+            if str(item.get("reference", "") or "").strip()
+        ]
+        if not refs:
+            return text
+
+        markers = "\n".join(f"[[MEDIA:{ref}]]" for ref in refs)
+        cue_re = re.compile(
+            r"(\u56fe|\u56fe\u8868|\u793a\u610f|\u53d1\u5c55\u53f2|\u793a\u4f8b)"
+        )
+        lines = text.splitlines()
+        for index, line in enumerate(lines):
+            stripped = line.strip()
+            if stripped and not stripped.startswith("#") and cue_re.search(stripped):
+                lines.insert(index + 1, markers)
+                return "\n".join(lines)
+
+        return f"{text}\n\n{markers}"
+
+    def _render_learning_message(
+        self,
+        *,
+        content: str,
+        node: Dict[str, Any],
+        question: str = "",
+    ) -> str:
+        text = (content or "").strip()
+        media_items = self._collect_node_media_items(node, question=question)
+        if media_items:
+            answer = self._with_primary_media_markers(text, media_items)
+            html = build_learning_answer_html({
+                "question": question or node.get("name", ""),
+                "answer": answer,
+                "media_items": media_items,
+                "evidence_items": [],
+            }).strip()
+            if html:
+                return html
+
+        return self._with_reference_section(text, node)
+
+    def _polish_learning_output(
+        self,
+        *,
+        node: Dict[str, Any],
+        draft: str,
+        output_type: str,
+        question: str = "",
+    ) -> str:
+        draft = (draft or "").strip()
+        if not draft:
+            return ""
+
+        payload = {
+            "node_id": node.get("node_id", ""),
+            "name": node.get("name", ""),
+            "summary": node.get("summary", ""),
+            "key_points": node.get("key_points", []),
+            "formulas": node.get("formulas", []),
+            "examples": node.get("examples", []),
+            "figures_refs": node.get("figures_refs", []),
+            "page_refs": node.get("page_refs", []),
+            "question": question,
+            "draft": draft,
+        }
+
+        system_prompt = (
+            "你是人工智能课程伴学老师，负责把已经生成的节点讲解做最后一遍自然化润色。"
+            "你可以调整表达顺序、加入过渡句、换一个例子角度，让同一节点每次讲解不完全一样。"
+            "不要编造节点数据中没有的页码、图表、公式和来源。"
+            "只输出合法 JSON，不要输出 Markdown 代码块。"
+        )
+        user_prompt = f"""
+请对下面的人工智能课程{output_type}做最终润色。
+
+节点与草稿(JSON):
+{json.dumps(payload, ensure_ascii=False)}
+
+输出格式:
+{{
+  "content_markdown": ""
+}}
+
+要求:
+1. 使用中文 Markdown。
+2. 保留草稿中的核心知识，不要删掉关键定义、关键步骤、公式名和例子。
+3. 语气像老师现场讲解，少一点模板感，多一点自然过渡。
+4. 如果是追问回答，要直接回应学生问题，不要重新完整讲一遍节点。
+5. 不要在正文里编造“来自第几页”“见图几”等不存在的来源。
+6. 不要输出“参考资料”小节；参考资料会由系统根据节点字段追加。
+"""
+        result = _call_deepseek_json_with_system(system_prompt, user_prompt)
+        polished = str(result.get("content_markdown") or "").strip() if result else ""
+        return polished or draft
 
     def _normalize_query(self, text: str) -> str:
         text = (text or "").strip().lower()
@@ -1001,6 +1201,52 @@ class AILearningPathService:
 
         _save_student_state(student)
 
+    def _dialogue_path_ids(self, dialogue: Dict[str, Any], student: Dict[str, Any]) -> List[str]:
+        path = dialogue.get("current_path")
+        if not isinstance(path, list) or not path:
+            path = student.get("current_path", [])
+        return [str(node_id) for node_id in path if str(node_id) in self.node_by_id]
+
+    def _dialogue_current_node(self, dialogue: Dict[str, Any], student: Dict[str, Any]) -> str:
+        current = str(dialogue.get("current_node") or "").strip()
+        path = self._dialogue_path_ids(dialogue, student)
+        if not current:
+            current = str(student.get("current_node") or "").strip()
+        if current not in self.node_by_id:
+            current = path[0] if path else ""
+        return current
+
+    def _format_path_for_dialogue(
+        self,
+        path: List[str],
+        current_node: str = "",
+        learned: Optional[Dict[str, Any]] = None,
+        mastery_scores: Optional[Dict[str, float]] = None,
+    ) -> List[Dict[str, Any]]:
+        learned = learned or {}
+        mastery_scores = mastery_scores or {}
+        formatted = []
+        for node_id in path:
+            if node_id not in self.node_by_id:
+                continue
+            threshold = float(self.node_by_id.get(node_id, {}).get("mastery_threshold") or 0.75)
+            progress = _node_progress_from_student(
+                {"learned_nodes": learned, "mastery_scores": mastery_scores},
+                node_id,
+                threshold=threshold,
+            )
+            if node_id == current_node:
+                status = "current"
+                reason = "当前正在学习的节点"
+            elif node_id in learned or progress["mastered"]:
+                status = "mastered"
+                reason = "已经完成学习"
+            else:
+                status = "not_started"
+                reason = "后续待学习节点"
+            formatted.append(self._format_node(node_id, progress["mastery"], status, reason))
+        return formatted
+
     def chat(
         self,
         thread_id: str,
@@ -1076,6 +1322,23 @@ class AILearningPathService:
                 )
                 dialogue["stage"] = "planned"
                 dialogue["latest_plan"] = plan.get("summary", {})
+                dialogue["latest_path"] = plan.get("path", [])
+                dialogue["current_path"] = [
+                    node.get("node_id")
+                    for node in plan.get("path", [])
+                    if isinstance(node, dict) and node.get("node_id")
+                ]
+                dialogue["current_node"] = (
+                    next(
+                        (
+                            node.get("node_id")
+                            for node in plan.get("path", [])
+                            if isinstance(node, dict) and node.get("status") == "current"
+                        ),
+                        "",
+                    )
+                    or (dialogue["current_path"][0] if dialogue["current_path"] else "")
+                )
                 dialogue["replan_keep_progress"] = False
                 self._save_dialogue(thread_id, dialogue)
 
@@ -1203,8 +1466,8 @@ class AILearningPathService:
         dialogue["stage"] = "learning"
         self._save_dialogue(thread_id, dialogue)
 
-        path = student.get("current_path", [])
-        current_node_id = student.get("current_node") or (path[0] if path else "")
+        path = self._dialogue_path_ids(dialogue, student)
+        current_node_id = self._dialogue_current_node(dialogue, student)
 
         if not current_node_id or current_node_id not in self.node_by_id:
             return {
@@ -1238,10 +1501,28 @@ class AILearningPathService:
     {examples_text}
     """
 
+        content = self._polish_learning_output(
+            node=node,
+            draft=content,
+            output_type="节点讲解",
+        )
+        content = self._render_learning_message(
+            content=content,
+            node=node,
+            question=str(node.get("name", "")),
+        )
+
         return {
             "status": "success",
             "type": "lesson",
             "node": node,
+            "current_node": current_node_id,
+            "path": self._format_path_for_dialogue(
+                path,
+                current_node_id,
+                student.get("learned_nodes", {}) or {},
+                student.get("mastery_scores", {}) or {},
+            ),
             "message": content,
             "options": [
                 *((llm_result or {}).get("options") or [
@@ -1252,11 +1533,12 @@ class AILearningPathService:
                 ])
             ],
         }
-
+    
     def answer_current_node_question(self, thread_id: str, question: str) -> Dict[str, Any]:
         student = _load_student_state()
-        path = student.get("current_path", [])
-        current_node_id = student.get("current_node") or (path[0] if path else "")
+        dialogue = self._get_dialogue(thread_id)
+        path = self._dialogue_path_ids(dialogue, student)
+        current_node_id = self._dialogue_current_node(dialogue, student)
 
         if not current_node_id or current_node_id not in self.node_by_id:
             return {
@@ -1309,10 +1591,21 @@ options 给 3 到 4 个下一步按钮，例如：
 """)
 
         if result and result.get("answer"):
+            answer = self._polish_learning_output(
+                node=node,
+                draft=str(result.get("answer", "")),
+                output_type="追问回答",
+                question=question,
+            )
+            answer = self._render_learning_message(
+                content=answer,
+                node=node,
+                question=question,
+            )
             return {
                 "status": "success",
                 "type": "lesson_qa",
-                "message": result.get("answer", ""),
+                "message": answer,
                 "options": result.get("options") or [
                     "我懂了，进入下一个节点",
                     "再讲简单一点",
@@ -1321,10 +1614,26 @@ options 给 3 到 4 个下一步按钮，例如：
                 ],
             }
 
+        fallback_answer = (
+            f"围绕“{node['name']}”来看，你这个问题可以从它的定义、作用和应用场景三方面理解。"
+            f"{node.get('explanation_teacher_style', '')}"
+        )
+        fallback_answer = self._polish_learning_output(
+            node=node,
+            draft=fallback_answer,
+            output_type="追问回答",
+            question=question,
+        )
+        fallback_answer = self._render_learning_message(
+            content=fallback_answer,
+            node=node,
+            question=question,
+        )
+
         return {
             "status": "success",
             "type": "lesson_qa",
-            "message": f"围绕“{node['name']}”来看，你这个问题可以从它的定义、作用和应用场景三方面理解。{node.get('explanation_teacher_style', '')}",
+            "message": fallback_answer,
             "options": [
                 "我懂了，进入下一个节点",
                 "再讲简单一点",
@@ -1336,8 +1645,9 @@ options 给 3 到 4 个下一步按钮，例如：
     def advance_to_next_node(self, thread_id: str) -> Dict[str, Any]:
         student = _load_student_state()
 
-        path = student.get("current_path", [])
-        current = student.get("current_node") or (path[0] if path else "")
+        dialogue = self._get_dialogue(thread_id)
+        path = self._dialogue_path_ids(dialogue, student)
+        current = self._dialogue_current_node(dialogue, student)
 
         if not path or current not in path:
             return {
@@ -1382,7 +1692,15 @@ options 给 3 到 4 个下一步按钮，例如：
 
         if next_idx >= len(path):
             student["current_node"] = ""
+            dialogue["current_node"] = ""
+            dialogue["latest_path"] = self._format_path_for_dialogue(
+                path,
+                "",
+                learned,
+                mastery_scores,
+            )
             _save_student_state(student)
+            self._save_dialogue(thread_id, dialogue)
 
             return {
                 "status": "success",
@@ -1398,7 +1716,10 @@ options 给 3 到 4 个下一步按钮，例如：
 
         next_node = path[next_idx]
         student["current_node"] = next_node
+        dialogue["current_node"] = next_node
+        dialogue["current_path"] = path
         _save_student_state(student)
+        self._save_dialogue(thread_id, dialogue)
 
         lesson = self.teach_current_node(thread_id)
 
@@ -1428,6 +1749,8 @@ options 给 3 到 4 个下一步按钮，例如：
             )
 
         lesson["current_node"] = next_node
+        dialogue["latest_path"] = lesson["path"]
+        self._save_dialogue(thread_id, dialogue)
         lesson["skipped"] = auto_skipped
         return lesson
 

@@ -5,12 +5,16 @@ import time
 import argparse
 from typing import Dict, List, Any
 
+from ai_tutor_agent.course_assets import get_course_assets
+from ai_tutor_agent.knowledge_map.builders.node_retrieval_builder import NodeRetrievalBuilder
+
 import requests
 
 from .config import (
     AI_CONCEPTS_20,
     AI_CONCEPTS_200,
     AI_NODES_CSV,
+    AI_NODE_CHAPTER_MAP,
     DEEPSEEK_API_URL,
     DEEPSEEK_MODEL,
 )
@@ -154,11 +158,23 @@ def call_deepseek(prompt: str, max_retries: int = 3) -> Dict[str, Any]:
     raise RuntimeError(f"DeepSeek 调用失败: {last_error}")
 
 
-def build_node_prompt(node_id: str, name: str, all_concepts: List[str]) -> str:
+def build_node_prompt(
+    node_id: str,
+    name: str,
+    all_concepts: List[str],
+    retrieval_payload: Dict[str, Any] | None = None,
+) -> str:
     concept_text = "、".join(all_concepts[:260])
+    retrieval_payload = retrieval_payload or {}
+    retrieval_text = json.dumps(retrieval_payload, ensure_ascii=False)
 
     return f"""
 请为人工智能学习路径知识图谱中的知识点“{name}”生成一个高质量节点。
+
+已提供该知识点在教材中的检索证据，请结合这些内容进行扩展、衔接和总结。
+
+检索证据(JSON)：
+{retrieval_text}
 
 该图谱用于“根据学生状态和知识图谱自动规划定制化学习路径”，结构要参考自动控制原理知识图谱，但本次人工智能方向不按固定章节组织，因此 chapter 留空。
 
@@ -185,8 +201,8 @@ def build_node_prompt(node_id: str, name: str, all_concepts: List[str]) -> str:
   "key_points": "",
   "formulas": "",
   "examples": "",
-  "figures_refs": "",
-  "page_refs": "",
+    "figures_refs": [],
+    "page_refs": [],
   "definition_candidates": "",
   "key_point_candidates": "",
   "formula_candidates": "",
@@ -216,8 +232,8 @@ def build_node_prompt(node_id: str, name: str, all_concepts: List[str]) -> str:
 11. key_points：写 5 到 8 个学习要点，用中文分号分隔。
 12. formulas：有公式就写 1 到 10 个公式或公式名称；没有公式写“无”。
 13. examples：写 2 到 4 个具体例子，尽量贴近机器学习、强化学习、自动驾驶、机器人、智能制造、数据分析。
-14. figures_refs：固定为空字符串。
-15. page_refs：固定为空字符串。
+14. figures_refs：优先使用检索证据中的 figures_refs，格式为字符串列表；没有就留空列表。
+15. page_refs：优先使用检索证据中的 page_refs，格式为页码整数列表；没有就留空列表。
 16. definition_candidates：写 3 到 8 条可用于生成定义讲解的候选支撑句，用“ || ”分隔。
 17. key_point_candidates：写 3 到 8 条可用于提炼重点的候选支撑句，用“ || ”分隔。
 18. formula_candidates：写 0 到 5 条公式或公式解释候选；如果没有，写“无”。
@@ -279,6 +295,142 @@ def normalize_node(raw: Dict[str, Any], node_id: str, name: str) -> Dict[str, An
     return node
 
 
+def _merge_extra(existing: str, updates: Dict[str, Any]) -> str:
+    merged: Dict[str, Any] = {}
+    if existing:
+        try:
+            parsed = json.loads(existing)
+            if isinstance(parsed, dict):
+                merged.update(parsed)
+        except Exception:
+            merged = {}
+    merged.update(updates)
+    return json.dumps(merged, ensure_ascii=False)
+
+
+def _load_node_chapter_map() -> Dict[str, List[str]]:
+    if not AI_NODE_CHAPTER_MAP.exists():
+        return {}
+    try:
+        payload = json.loads(AI_NODE_CHAPTER_MAP.read_text(encoding="utf-8"))
+    except Exception:
+        return {}
+    if isinstance(payload, dict) and isinstance(payload.get("nodes"), dict):
+        return {
+            str(name): [str(x) for x in (chapter_ids or []) if str(x)]
+            for name, chapter_ids in payload["nodes"].items()
+        }
+    return {}
+
+
+def _filter_docs_by_chapter_ids(
+    docs: List[Dict[str, Any]],
+    chapter_ids: List[str],
+) -> List[Dict[str, Any]]:
+    if not chapter_ids:
+        return []
+    filtered: List[Dict[str, Any]] = []
+    for doc in docs:
+        pdf_name = str(doc.get("pdf_name", ""))
+        cache_dir = str(doc.get("cache_dir", ""))
+        if any(chapter_id in pdf_name or chapter_id in cache_dir for chapter_id in chapter_ids):
+            filtered.append(doc)
+    return filtered
+
+
+def _build_retrieval_payload(
+    name: str,
+    builder: NodeRetrievalBuilder,
+    docs: List[Dict[str, Any]],
+    chapter_ids: List[str] | None = None,
+) -> Dict[str, Any]:
+    if not docs:
+        return {}
+
+    chapter_ids = chapter_ids or []
+    target_docs = _filter_docs_by_chapter_ids(docs, chapter_ids)
+    if not target_docs:
+        return {}
+
+    node_stub = {
+        "name": name,
+        "tags": [],
+        "extra": {
+            "retrieval_keywords": [name],
+        },
+    }
+
+    best_doc = None
+    best_blocks = []
+    best_scored = []
+    best_score = -1
+
+    for doc in target_docs:
+        blocks = builder._split_md_into_blocks(doc["full_md"])
+        scored = builder._score_blocks_for_node(node_stub, blocks)
+        score = int(scored[0]["score"]) if scored else 0
+        if score > best_score:
+            best_score = score
+            best_doc = doc
+            best_blocks = blocks
+            best_scored = scored
+
+    if best_doc is None:
+        return {}
+
+    evidence_blocks = builder._select_evidence_blocks(node_stub, best_blocks, best_scored)
+    evidence_text = "\n\n".join(str(block.get("content", "")) for block in evidence_blocks)
+    if not evidence_text.strip():
+        evidence_text = best_doc["full_md"]
+
+    text_lines = builder._collect_text_lines(evidence_text)
+    all_text_lines = builder._collect_text_lines(best_doc["full_md"])
+    formula_lines = builder._collect_formula_lines(evidence_text)
+    all_formula_lines = builder._collect_formula_lines(best_doc["full_md"])
+    figure_lines = builder._collect_figure_related_lines(evidence_text)
+
+    candidate_sentences = builder._collect_candidate_sentences(node_stub, text_lines, strict=True)
+    if len(candidate_sentences) < 4:
+        fallback = builder._collect_candidate_sentences(node_stub, all_text_lines, strict=False)
+        candidate_sentences = builder._merge_unique(candidate_sentences, fallback, max_items=24)
+
+    definition_candidates = builder._select_definition_candidates(candidate_sentences)
+    key_point_candidates = builder._select_key_point_candidates(candidate_sentences)
+    formula_candidates = builder._select_formula_candidates(
+        node_stub,
+        formula_lines,
+        candidate_sentences,
+    )
+    if len(formula_candidates) < 2:
+        formula_candidates = builder._merge_unique(
+            formula_candidates,
+            builder._select_formula_candidates(
+                node_stub,
+                all_formula_lines,
+                candidate_sentences,
+            ),
+            max_items=4,
+        )
+
+    example_candidates = builder._select_example_candidates(candidate_sentences, figure_lines)
+    figure_refs = builder._select_figure_refs(figure_lines)
+    page_refs = list(range(int(best_doc["start_page"]), int(best_doc["end_page"]) + 1))
+
+    return {
+        "definition_candidates": definition_candidates[:4],
+        "key_point_candidates": key_point_candidates[:6],
+        "formula_candidates": formula_candidates[:4],
+        "example_candidates": example_candidates[:4],
+        "figures_refs": figure_refs[:6],
+        "page_refs": page_refs,
+        "evidence_sentences": candidate_sentences[:16],
+        "evidence_formulas": formula_lines[:6],
+        "source_pdf": best_doc.get("pdf_name", ""),
+        "matched_block_title": best_scored[0]["title"] if best_scored else "",
+        "matched_block_score": best_score,
+    }
+
+
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--size", choices=["20", "200"], default="20")
@@ -290,6 +442,11 @@ def main():
     if args.overwrite and AI_NODES_CSV.exists():
         AI_NODES_CSV.unlink()
         print(f"已删除旧文件: {AI_NODES_CSV}")
+
+    assets = get_course_assets("artificial_intelligence")
+    retrieval_builder = NodeRetrievalBuilder(mineru_cache_root=assets.mineru_cache_root)
+    retrieval_docs = retrieval_builder._load_mineru_chapter_docs()
+    node_chapter_map = _load_node_chapter_map()
 
     concepts = read_concepts(input_path)
     existing_nodes = load_existing_nodes(AI_NODES_CSV)
@@ -308,9 +465,63 @@ def main():
 
         print(f"[{idx}/{len(concepts)}] 生成节点: {node_id} {name}")
 
-        prompt = build_node_prompt(node_id, name, concepts)
+        chapter_ids = node_chapter_map.get(name, [])
+        retrieval_payload = _build_retrieval_payload(
+            name,
+            retrieval_builder,
+            retrieval_docs,
+            chapter_ids=chapter_ids,
+        )
+        prompt = build_node_prompt(node_id, name, concepts, retrieval_payload)
         raw = call_deepseek(prompt)
         node = normalize_node(raw, node_id, name)
+
+        if retrieval_payload:
+            if retrieval_payload.get("figures_refs") and not node["figures_refs"].strip():
+                node["figures_refs"] = json.dumps(retrieval_payload["figures_refs"], ensure_ascii=False)
+            if retrieval_payload.get("page_refs") and not node["page_refs"].strip():
+                node["page_refs"] = json.dumps(retrieval_payload["page_refs"], ensure_ascii=False)
+            if retrieval_payload.get("definition_candidates") and not node["definition_candidates"].strip():
+                node["definition_candidates"] = json.dumps(
+                    retrieval_payload["definition_candidates"],
+                    ensure_ascii=False,
+                )
+            if retrieval_payload.get("key_point_candidates") and not node["key_point_candidates"].strip():
+                node["key_point_candidates"] = json.dumps(
+                    retrieval_payload["key_point_candidates"],
+                    ensure_ascii=False,
+                )
+            if retrieval_payload.get("formula_candidates") and not node["formula_candidates"].strip():
+                node["formula_candidates"] = json.dumps(
+                    retrieval_payload["formula_candidates"],
+                    ensure_ascii=False,
+                )
+            if retrieval_payload.get("example_candidates") and not node["example_candidates"].strip():
+                node["example_candidates"] = json.dumps(
+                    retrieval_payload["example_candidates"],
+                    ensure_ascii=False,
+                )
+
+            node["extra"] = _merge_extra(
+                node.get("extra", ""),
+                {
+                    "retrieval_status": "ok",
+                    "retrieval_source_pdf": retrieval_payload.get("source_pdf", ""),
+                    "retrieval_matched_block_title": retrieval_payload.get("matched_block_title", ""),
+                    "retrieval_matched_block_score": retrieval_payload.get("matched_block_score", 0),
+                    "retrieval_candidate_sentence_count": len(retrieval_payload.get("evidence_sentences", [])),
+                    "retrieval_formula_line_count": len(retrieval_payload.get("evidence_formulas", [])),
+                    "retrieval_figure_line_count": len(retrieval_payload.get("figures_refs", [])),
+                },
+            )
+        else:
+            status = "no_chapter_match" if not chapter_ids else "mineru_cache_missing"
+            node["extra"] = _merge_extra(
+                node.get("extra", ""),
+                {
+                    "retrieval_status": status,
+                },
+            )
 
         append_node(AI_NODES_CSV, node)
 

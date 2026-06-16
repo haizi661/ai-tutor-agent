@@ -1,0 +1,471 @@
+{
+  "version": 3,
+  "generated_at": "2026-05-25T20:44:07",
+  "source": "e:\\ai_code\\ai-tutor-agent\\data\\ai_knowledge_seed\\ai_concepts200.txt",
+  "chapters_source": "manual_toc_with_sections",
+  "nodes": {
+    "人工智能概述": [
+      "nn_dl_chapter_01"
+    ],
+    "人工智能发展历史": [
+      "nn_dl_chapter_01"
+    ],
+    "人工智能分类": [
+      "nn_dl_chapter_01",
+      "leedl_chapter_03"
+    ],
+    "弱人工智能": [
+      "nn_dl_chapter_01"
+    ],
+    "强人工智能": [
+      "nn_dl_chapter_01"
+    ],
+    "通用人工智能": [
+      "nn_dl_chapter_01"
+    ],
+    "机器学习": [
+      "nn_dl_chapter_02",
+      "leedl_chapter_18",
+      "leedl_chapter_01",
+      "leedl_chapter_15",
+      "nn_dl_chapter_04"
+    ],
+    "深度学习": [
+      "nn_dl_chapter_01",
+      "leedl_chapter_03",
+      "nn_dl_chapter_02",
+      "nn_dl_chapter_11"
+    ],
+    "强化学习": [
+      "nn_dl_chapter_14",
+      "leedl_chapter_14",
+      "leedl_chapter_07",
+      "nn_dl_chapter_11"
+    ],
+    "监督学习": [
+      "nn_dl_chapter_13",
+      "nn_dl_chapter_09",
+      "leedl_chapter_10",
+      "nn_dl_chapter_11"
+    ],
+    "无监督学习": [
+      "nn_dl_chapter_09",
+      "nn_dl_chapter_11"
+    ],
+    "半监督学习": [
+      "nn_dl_chapter_11"
+    ],
+    "自监督学习": [
+      "leedl_chapter_10",
+      "nn_dl_chapter_11"
+    ],
+    "迁移学习": [
+      "nn_dl_chapter_10",
+      "leedl_chapter_13",
+      "nn_dl_chapter_11"
+    ],
+    "联邦学习": [
+      "nn_dl_chapter_11"
+    ],
+    "在线学习": [
+      "nn_dl_chapter_11"
+    ],
+    "增量学习": [
+      "nn_dl_chapter_11"
+    ],
+    "元学习": [
+      "leedl_chapter_15",
+      "nn_dl_chapter_10",
+      "nn_dl_chapter_11"
+    ],
+    "表示学习": [
+      "nn_dl_chapter_01",
+      "nn_dl_chapter_11"
+    ],
+    "特征工程": [],
+    "特征选择": [],
+    "特征提取": [],
+    "数据预处理": [
+      "nn_dl_chapter_07"
+    ],
+    "数据清洗": [],
+    "数据增强": [
+      "nn_dl_chapter_07"
+    ],
+    "训练集": [
+      "nn_dl_chapter_13"
+    ],
+    "验证集": [],
+    "测试集": [],
+    "过拟合": [
+      "leedl_chapter_02"
+    ],
+    "欠拟合": [],
+    "正则化": [
+      "nn_dl_chapter_07"
+    ],
+    "L1正则化": [],
+    "L2正则化": [],
+    "Dropout": [],
+    "Batch Normalization": [],
+    "模型评估": [
+      "nn_dl_chapter_02"
+    ],
+    "交叉验证": [
+      "leedl_chapter_02"
+    ],
+    "混淆矩阵": [],
+    "准确率": [],
+    "精确率": [],
+    "召回率": [],
+    "F1-score": [],
+    "ROC曲线": [],
+    "AUC": [],
+    "损失函数": [
+      "nn_dl_chapter_03"
+    ],
+    "均方误差": [],
+    "交叉熵损失": [],
+    "梯度下降": [
+      "leedl_chapter_03",
+      "nn_dl_chapter_07"
+    ],
+    "随机梯度下降": [],
+    "小批量梯度下降": [
+      "nn_dl_chapter_07"
+    ],
+    "Adam优化器": [
+      "leedl_chapter_03"
+    ],
+    "动量优化": [],
+    "学习率": [
+      "leedl_chapter_03",
+      "nn_dl_chapter_07",
+      "nn_dl_chapter_11"
+    ],
+    "学习率衰减": [
+      "nn_dl_chapter_11"
+    ],
+    "激活函数": [],
+    "Sigmoid函数": [],
+    "Tanh函数": [],
+    "ReLU函数": [
+      "nn_dl_chapter_04"
+    ],
+    "Softmax函数": [],
+    "线性回归": [
+      "nn_dl_chapter_02"
+    ],
+    "多项式回归": [],
+    "逻辑回归": [],
+    "决策树": [
+      "leedl_chapter_18"
+    ],
+    "随机森林": [],
+    "GBDT": [],
+    "XGBoost": [],
+    "LightGBM": [],
+    "CatBoost": [],
+    "支持向量机": [
+      "nn_dl_chapter_03"
+    ],
+    "核函数": [
+      "nn_dl_chapter_03"
+    ],
+    "K近邻算法": [],
+    "朴素贝叶斯": [],
+    "贝叶斯定理": [],
+    "聚类": [],
+    "K-means": [],
+    "DBSCAN": [],
+    "层次聚类": [],
+    "降维": [],
+    "主成分分析": [
+      "nn_dl_chapter_09"
+    ],
+    "PCA": [],
+    "t-SNE": [],
+    "神经网络": [
+      "nn_dl_chapter_06",
+      "nn_dl_chapter_05",
+      "leedl_chapter_06",
+      "nn_dl_chapter_01",
+      "leedl_chapter_04"
+    ],
+    "前馈神经网络": [
+      "nn_dl_chapter_04",
+      "nn_dl_chapter_01"
+    ],
+    "反向传播": [
+      "nn_dl_chapter_05",
+      "nn_dl_chapter_06",
+      "nn_dl_chapter_04"
+    ],
+    "感知机": [],
+    "多层感知机": [],
+    "卷积神经网络": [
+      "nn_dl_chapter_05",
+      "leedl_chapter_04",
+      "leedl_chapter_06",
+      "nn_dl_chapter_01"
+    ],
+    "卷积层": [
+      "nn_dl_chapter_05"
+    ],
+    "池化层": [],
+    "全连接层": [],
+    "循环神经网络": [
+      "nn_dl_chapter_06",
+      "nn_dl_chapter_15",
+      "leedl_chapter_05",
+      "leedl_chapter_06",
+      "nn_dl_chapter_01"
+    ],
+    "LSTM": [
+      "leedl_chapter_05",
+      "nn_dl_chapter_06"
+    ],
+    "GRU": [],
+    "Seq2Seq": [],
+    "注意力机制": [
+      "nn_dl_chapter_08",
+      "leedl_chapter_06"
+    ],
+    "Transformer": [
+      "leedl_chapter_07",
+      "leedl_chapter_10"
+    ],
+    "位置编码": [
+      "leedl_chapter_06"
+    ],
+    "自注意力机制": [
+      "leedl_chapter_06",
+      "nn_dl_chapter_08"
+    ],
+    "多头注意力": [
+      "leedl_chapter_06"
+    ],
+    "BERT": [
+      "leedl_chapter_10"
+    ],
+    "GPT": [
+      "leedl_chapter_19",
+      "leedl_chapter_10"
+    ],
+    "词向量": [],
+    "Word2Vec": [],
+    "GloVe": [],
+    "自然语言处理": [],
+    "文本分类": [
+      "leedl_chapter_03"
+    ],
+    "情感分析": [],
+    "命名实体识别": [],
+    "机器翻译": [
+      "leedl_chapter_07"
+    ],
+    "问答系统": [],
+    "对话系统": [],
+    "提示词工程": [],
+    "大语言模型": [
+      "nn_dl_chapter_02"
+    ],
+    "多模态模型": [
+      "nn_dl_chapter_02"
+    ],
+    "RAG": [],
+    "知识蒸馏": [
+      "leedl_chapter_17"
+    ],
+    "模型量化": [
+      "nn_dl_chapter_02"
+    ],
+    "模型剪枝": [
+      "nn_dl_chapter_02"
+    ],
+    "微调": [],
+    "LoRA": [],
+    "计算机视觉": [],
+    "图像分类": [
+      "leedl_chapter_03"
+    ],
+    "目标检测": [],
+    "单阶段目标检测": [],
+    "双阶段目标检测": [],
+    "YOLO": [],
+    "YOLOv5": [],
+    "YOLOv8": [],
+    "Faster R-CNN": [],
+    "SSD": [],
+    "语义分割": [],
+    "实例分割": [],
+    "Mask R-CNN": [],
+    "图像生成": [],
+    "GAN": [
+      "leedl_chapter_08",
+      "nn_dl_chapter_13"
+    ],
+    "生成对抗网络": [
+      "nn_dl_chapter_13",
+      "leedl_chapter_08"
+    ],
+    "扩散模型": [
+      "leedl_chapter_09",
+      "nn_dl_chapter_02"
+    ],
+    "Stable Diffusion": [],
+    "图像超分辨率": [],
+    "目标跟踪": [],
+    "光流法": [],
+    "姿态估计": [],
+    "关键点检测": [],
+    "OCR": [],
+    "自动驾驶视觉感知": [],
+    "多目标跟踪": [],
+    "三维视觉": [],
+    "点云": [],
+    "点云分割": [],
+    "点云检测": [],
+    "激光雷达": [],
+    "多传感器融合": [],
+    "SLAM": [],
+    "视觉SLAM": [],
+    "机器人视觉": [],
+    "强化学习概述": [
+      "leedl_chapter_14",
+      "nn_dl_chapter_11"
+    ],
+    "智能体": [],
+    "环境": [],
+    "状态": [],
+    "动作": [
+      "leedl_chapter_14"
+    ],
+    "奖励": [
+      "leedl_chapter_14"
+    ],
+    "策略": [
+      "nn_dl_chapter_14"
+    ],
+    "价值函数": [
+      "nn_dl_chapter_14"
+    ],
+    "状态价值函数": [
+      "nn_dl_chapter_14"
+    ],
+    "动作价值函数": [
+      "nn_dl_chapter_14"
+    ],
+    "贝尔曼方程": [],
+    "马尔可夫决策过程": [
+      "nn_dl_chapter_14"
+    ],
+    "MDP": [],
+    "动态规划": [
+      "nn_dl_chapter_14"
+    ],
+    "策略迭代": [],
+    "价值迭代": [],
+    "蒙特卡洛方法": [],
+    "时序差分学习": [
+      "nn_dl_chapter_14",
+      "nn_dl_chapter_11"
+    ],
+    "Q-learning": [],
+    "SARSA": [],
+    "Deep Q Network": [],
+    "DQN": [],
+    "Double DQN": [],
+    "Dueling DQN": [],
+    "经验回放": [],
+    "目标网络": [],
+    "策略梯度": [],
+    "REINFORCE": [
+      "nn_dl_chapter_14"
+    ],
+    "Actor-Critic": [
+      "leedl_chapter_14"
+    ],
+    "A2C": [],
+    "A3C": [],
+    "DDPG": [],
+    "TD3": [],
+    "PPO": [],
+    "SAC": [],
+    "探索与利用": [],
+    "epsilon-greedy": [],
+    "奖励塑形": [],
+    "模仿学习": [
+      "nn_dl_chapter_11"
+    ],
+    "逆强化学习": [
+      "leedl_chapter_14",
+      "nn_dl_chapter_11"
+    ],
+    "层次强化学习": [
+      "leedl_chapter_14",
+      "nn_dl_chapter_11"
+    ],
+    "多智能体强化学习": [
+      "leedl_chapter_14",
+      "nn_dl_chapter_11"
+    ],
+    "强化学习在机器人中的应用": [
+      "leedl_chapter_14",
+      "nn_dl_chapter_11"
+    ],
+    "强化学习在自动驾驶中的应用": [
+      "leedl_chapter_14",
+      "nn_dl_chapter_11"
+    ],
+    "强化学习在游戏中的应用": [
+      "leedl_chapter_14",
+      "nn_dl_chapter_11"
+    ],
+    "强化学习在推荐系统中的应用": [
+      "leedl_chapter_14",
+      "nn_dl_chapter_11"
+    ],
+    "强化学习在机械臂控制中的应用": [
+      "leedl_chapter_14",
+      "nn_dl_chapter_11"
+    ],
+    "自动驾驶": [],
+    "路径规划": [],
+    "轨迹规划": [],
+    "行为决策": [],
+    "机器人学": [],
+    "机械臂控制": [],
+    "人机交互": [],
+    "推荐系统": [],
+    "协同过滤": [],
+    "知识图谱": [],
+    "图神经网络": [
+      "nn_dl_chapter_06",
+      "nn_dl_chapter_01"
+    ],
+    "GNN": [],
+    "图卷积网络": [
+      "nn_dl_chapter_05"
+    ],
+    "时序预测": [],
+    "异常检测": [],
+    "工业人工智能": [
+      "nn_dl_chapter_01"
+    ],
+    "智能制造": [],
+    "边缘计算": [],
+    "云计算": [],
+    "AI安全": [],
+    "可解释人工智能": [
+      "nn_dl_chapter_01"
+    ],
+    "AI伦理": [],
+    "因果推断": [
+      "nn_dl_chapter_11"
+    ],
+    "数字孪生": [],
+    "智能体系统": [],
+    "多智能体协同": []
+  }
+}
