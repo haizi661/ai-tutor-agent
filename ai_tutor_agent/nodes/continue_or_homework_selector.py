@@ -10,6 +10,11 @@ CONTINUE_OR_HOMEWORK_OPTIONS = [
     {"value": "stop_today", "label": "今天不学了，生成作业"},
 ]
 
+LEARNING_MODE_OPTIONS = [
+    {"value": "thorough", "label": "完整教学（每轮首节点完整讲解）"},
+    {"value": "adaptive", "label": "自适应（尊重画像，已掌握快速检测）"},
+]
+
 
 def _normalize_choice(text: str) -> str:
     lowered = str(text or "").strip().lower()
@@ -36,6 +41,14 @@ def _normalize_choice(text: str) -> str:
         "开始新一轮完整": "start_full_round",
         "完整学习": "start_full_round",
         "新一轮完整学习": "start_full_round",
+        "切换自适应": "switch_adaptive",
+        "切换自适应模式": "switch_adaptive",
+        "自适应模式": "switch_adaptive",
+        "adaptive": "switch_adaptive",
+        "切换完整模式": "switch_thorough",
+        "切换完整教学": "switch_thorough",
+        "完整教学": "switch_thorough",
+        "thorough": "switch_thorough",
     }
     return mapping.get(lowered, lowered)
 
@@ -81,11 +94,15 @@ def build_continue_or_homework_selector_node(runtime: RuntimeContext):
             recommended = "continue_next_node" if candidate_id else "stop_today"
 
         if not awaiting_choice:
+            current_mode = state.get("learning_mode", "thorough")
+            mode_tag = "完整教学" if current_mode == "thorough" else "自适应"
             if not is_plan_completed and not is_all_mastered:
                 next_label = candidate_name or candidate_id or "暂无可继续的新节点"
                 prompt = (
                     f"当前节点已经通过。下一候选节点：{next_label}。"
+                    f"[模式: {mode_tag}] "
                     "你现在只需要做一个选择：开始下一个节点，或今天不学了并生成作业。"
+                    "（随时输入「切换自适应模式」或「切换完整模式」来改变学习方式）"
                 )
             event_sink.emit(
                 make_event(
@@ -120,6 +137,21 @@ def build_continue_or_homework_selector_node(runtime: RuntimeContext):
                 },
             ).strip()
         normalized_choice = _normalize_choice(choice) or recommended
+
+        # ── 学习模式切换 ──
+        if normalized_choice == "switch_adaptive":
+            return {
+                "learning_mode": "adaptive",
+                "flow_status": "normal",  # re-enter node to show updated prompt
+                "pending_interaction_kind": "",
+            }
+        if normalized_choice == "switch_thorough":
+            return {
+                "learning_mode": "thorough",
+                "flow_status": "normal",
+                "pending_interaction_kind": "",
+            }
+
         valid_choices = {"continue_next_node", "stop_today", "start_next_round", "view_report", "consolidate_weak", "start_full_round"}
         if normalized_choice not in valid_choices:
             normalized_choice = recommended
