@@ -12,6 +12,16 @@
 | `docs/question-bank-mainflow-homework-integration.md` | 题库加工并入主流程的技术细节 | 修改题库 Provider 或作业生成 |
 | `docs/learning-path-complete-flow.md` | 完整流程详细描述 + 学习路径生成算法 | 深入理解路径算法 |
 | `docs/current-status-and-usage.md` | 详细完成情况、使用方式、自检命令 | 查看历史完成记录 |
+| `docs/RUNBOOK_ZH.md` | 运维排障手册（代理配置、常见报错处理） | 启动失败、网络问题排查 |
+| `CONTRIBUTING.md` | 贡献指南（分支命名、本地设置） | 首次参与开发 |
+
+## 项目规范
+
+| 文件 | 说明 |
+|------|------|
+| `CONTRIBUTING.md` | 分支命名规范、本地设置、PR 清单 |
+| `requirements-dev.txt` | 开发依赖（pytest, ruff） |
+| `ai_tutor_agent/interfaces/api/README.md` | API 接口说明与约束 |
 
 ## 设计文档
 
