@@ -867,6 +867,52 @@ async def set_learning_direction(thread_id: str, req: LearningDirectionRequest, 
     }
 
 
+@router.post("/sessions/{thread_id}/learning-mode")
+async def set_learning_mode(thread_id: str, request: Request):
+    """切换学习模式: thorough(完整教学) / adaptive(自适应，尊重画像)。"""
+    import json as _json
+
+    runtime = get_runtime(request)
+    thread_id = thread_id.strip()
+    if not thread_id:
+        raise HTTPException(status_code=400, detail="thread_id is required")
+
+    body = await request.body()
+    try:
+        payload = _json.loads(body) if body else {}
+    except _json.JSONDecodeError:
+        payload = {}
+    mode = str(payload.get("mode", "")).strip()
+
+    valid_modes = {"thorough", "adaptive"}
+    if mode not in valid_modes:
+        raise HTTPException(
+            status_code=400,
+            detail=f"无效模式。可选: {', '.join(sorted(valid_modes))}",
+        )
+
+    _ensure_thread_checkpoint(thread_id, runtime)
+    runtime.session_manager.get_or_create(thread_id)
+    runtime_context = RuntimeContext(
+        knowledge_provider=runtime.knowledge_provider,
+        settings=runtime.settings,
+        graph_rag_pipeline=runtime.graph_rag_pipeline,
+        student_state_store=runtime.student_state_store,
+        question_bank_provider=getattr(runtime, "question_bank_provider", None),
+    )
+    graph_app, conn = runtime.workflow_factory(runtime.settings, runtime=runtime_context)
+    try:
+        thread_config = _thread_config(thread_id)
+        current = graph_app.get_state(thread_config).values or {}
+        graph_app.update_state(thread_config, {"learning_mode": mode})
+        label = "完整教学" if mode == "thorough" else "自适应（尊重画像）"
+    finally:
+        conn.close()
+
+    return {"status": "success", "learning_mode": mode, "label": label}
+
+
+
 @router.post("/sessions/{thread_id}/resume")
 async def resume_session(thread_id: str, request: Request):
     runtime = get_runtime(request)

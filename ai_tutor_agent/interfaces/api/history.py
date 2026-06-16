@@ -284,6 +284,7 @@ def _serialize_state(values: dict[str, Any]) -> dict[str, Any]:
         "llm_stream_disabled": values.get("llm_stream_disabled", False),
         "llm_stream_failures": values.get("llm_stream_failures", 0),
         "thinking_mode": values.get("thinking_mode", False),
+        "learning_mode": values.get("learning_mode", "thorough"),
         "node_remediation_state": values.get("node_remediation_state", {}),
         "remediation_decision": values.get("remediation_decision", ""),
         "learning_track": values.get("learning_track", ""),
