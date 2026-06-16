@@ -584,7 +584,7 @@ def build_workflow(
     workflow.add_conditional_edges(
         "user_profiler",
         route_after_user_profiler,
-        {"learning_plan_generator": "learning_plan_generator"},
+        {"learning_plan_generator": "learning_plan_generator", "pause": END},
     )
     workflow.add_conditional_edges(
         "learning_plan_generator",
