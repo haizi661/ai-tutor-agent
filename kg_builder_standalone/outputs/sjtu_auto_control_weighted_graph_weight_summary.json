@@ -1,0 +1,10 @@
+{
+  "outline_pdf": "data/knowledge/自动控制原理课程大纲-上海交通大学.pdf",
+  "total_nodes": 95,
+  "boosted_nodes": 2,
+  "mentioned_nodes": 2,
+  "unchanged_nodes": 93,
+  "avg_weight": 0.1105,
+  "avg_bonus": 0.0036,
+  "base_weight_col": "confidence"
+}

@@ -13,6 +13,7 @@ class LocalQuestionBankProvider:
         self.variant_questions = self._load_items("variant_questions.jsonl")
         self.homework_questions = self._load_items("homework_questions.jsonl")
         self.assessment_questions_pool = self._load_items("assessment_questions.jsonl")
+        self.runtime_question_bank_path = Path("data/error_correction_runtime/question_bank/questions.json")
 
     def get_objective_questions(self, node_id: str, k: int = 10) -> list[dict[str, Any]]:
         return self._take_for_nodes(self.objective_questions, [node_id], k)
@@ -88,4 +89,44 @@ class LocalQuestionBankProvider:
             normalized["prompt"] = prompt
         normalized["node_id"] = str(normalized.get("node_id") or "").strip()
         normalized["source"] = str(normalized.get("source") or "local_question_bank").strip()
+        return normalized
+
+    # ── 运行时题库 (来自 origin/524yang) ──
+
+    def list_runtime_question_bank_items(self) -> list[dict[str, Any]]:
+        """读取 error_correction_runtime 题库 (含 OCR 图片题)。"""
+        if not self.runtime_question_bank_path.exists():
+            return []
+        try:
+            payload = json.loads(self.runtime_question_bank_path.read_text(encoding="utf-8"))
+        except (OSError, json.JSONDecodeError):
+            return []
+        if not isinstance(payload, list):
+            return []
+        return [self._normalize_runtime_question(item) for item in payload if isinstance(item, dict)]
+
+    def _normalize_runtime_asset(self, value: Any) -> str:
+        raw = str(value or "").strip()
+        if not raw:
+            return ""
+        if raw.startswith("http://") or raw.startswith("https://") or raw.startswith("/api/error-correction/assets/"):
+            return raw
+        normalized = raw.replace("\\", "/").lstrip("/")
+        return f"/api/error-correction/assets/{normalized}"
+
+    def _normalize_runtime_question(self, item: dict[str, Any]) -> dict[str, Any]:
+        normalized = dict(item)
+        blocks = []
+        for block in list(normalized.get("content_blocks") or []):
+            payload = dict(block or {})
+            if str(payload.get("block_type") or "") == "image":
+                payload["content"] = self._normalize_runtime_asset(payload.get("content"))
+            blocks.append(payload)
+        normalized["content_blocks"] = blocks
+        option_images = normalized.get("option_images")
+        if isinstance(option_images, list):
+            normalized["option_images"] = [self._normalize_runtime_asset(i) if i else "" for i in option_images]
+        image_refs = normalized.get("image_refs")
+        if isinstance(image_refs, list):
+            normalized["image_refs"] = [self._normalize_runtime_asset(i) if i else "" for i in image_refs]
         return normalized
