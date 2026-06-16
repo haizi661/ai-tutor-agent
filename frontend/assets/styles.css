@@ -19229,3 +19229,182 @@ body.ui-reduce-motion-pref *::after {
     color: #999;
     font-size: 12px;
 }
+
+/* ── 课程选择 / 欢迎页 (来自 origin/524yang) ── */
+.course-tool-hidden {
+    display: none !important;
+}
+
+body.course-choice-mode .composer-shell,
+body.course-choice-mode .composer-disclaimer {
+    display: none !important;
+}
+
+body.course-choice-mode {
+    min-height: 100vh;
+    background:
+        radial-gradient(circle at 80% 18%, rgba(73, 134, 255, 0.22), transparent 30rem),
+        radial-gradient(circle at 16% 86%, rgba(119, 178, 255, 0.24), transparent 32rem),
+        linear-gradient(180deg, #fbfdff 0%, #eff6ff 56%, #dcecff 100%);
+}
+
+body.course-choice-mode .page-shell,
+body.course-choice-mode .container,
+body.course-choice-mode .chat-main {
+    min-height: 100vh;
+}
+
+body.course-choice-mode .container {
+    display: block;
+}
+
+body.course-choice-mode .sidebar,
+body.course-choice-mode .chat-header,
+body.course-choice-mode .landing-stage {
+    display: none !important;
+}
+
+body.course-choice-mode .messages {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 8vh 1.5rem;
+    overflow: auto;
+}
+
+.course-choice-card {
+    position: relative;
+    width: min(calc(100% - 2rem), 70rem);
+    min-height: min(42rem, calc(100vh - 7rem));
+    display: grid;
+    align-content: center;
+    justify-items: center;
+    text-align: center;
+    padding: 4.5rem 2rem 3.25rem;
+    border: 0;
+    background: transparent;
+}
+
+.course-choice-card::before {
+    content: "";
+    position: absolute;
+    inset: auto 4% -12% 4%;
+    height: 16rem;
+    border-radius: 50%;
+    background: linear-gradient(90deg, rgba(88, 145, 255, 0.20), rgba(255, 255, 255, 0));
+    filter: blur(28px);
+    pointer-events: none;
+}
+
+.course-choice-brand {
+    position: fixed;
+    top: 1.5rem;
+    left: 1.6rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.55rem;
+    font-size: 1.18rem;
+    font-weight: 760;
+    color: #2f6ff6;
+}
+
+.course-choice-mark {
+    display: inline-grid;
+    place-items: center;
+    width: 2.15rem;
+    height: 2.15rem;
+    border-radius: 50%;
+    color: #fff;
+    font-size: 0.82rem;
+    letter-spacing: 0;
+    background: linear-gradient(135deg, #3386ff, #5e68ff);
+    box-shadow: 0 0.8rem 1.8rem rgba(66, 121, 255, 0.26);
+}
+
+    font-size: 0.86rem;
+    letter-spacing: 0.08em;
+    color: #7b8fad;
+    margin-bottom: 1.15rem;
+.course-choice-card h1 {
+    margin: 0;
+    font-size: clamp(3.2rem, 8vw, 6.8rem);
+    line-height: 0.98;
+    font-weight: 820;
+    color: #2878f7;
+    width: min(100%, 47rem);
+    margin: 1.5rem auto 0;
+    color: #61718a;
+    font-size: 1.08rem;
+    line-height: 1.8;
+    width: min(100%, 54rem);
+    margin-top: 4.2rem;
+    gap: 1.35rem;
+    min-height: 10rem;
+    grid-template-columns: auto 1fr;
+    grid-template-areas:
+        "icon title"
+        "icon copy";
+    column-gap: 1rem;
+    row-gap: 0.3rem;
+    padding: 1.55rem 1.65rem;
+    border-radius: 1.35rem;
+    border: 1px solid rgba(120, 155, 205, 0.24);
+    background: rgba(255, 255, 255, 0.76);
+    box-shadow: 0 1.25rem 3rem rgba(61, 104, 168, 0.13);
+    color: #263b59;
+    backdrop-filter: blur(14px);
+    transform: translateY(-3px);
+    background: rgba(255, 255, 255, 0.92);
+    box-shadow: 0 1.7rem 3.4rem rgba(61, 104, 168, 0.18);
+}
+
+.course-choice-icon {
+    grid-area: icon;
+    display: inline-grid;
+    place-items: center;
+    width: 3rem;
+    height: 3rem;
+    border-radius: 0.95rem;
+    background: rgba(47, 111, 246, 0.10);
+    color: #2f6ff6;
+    font-weight: 800;
+    letter-spacing: 0;
+    grid-area: title;
+    font-size: 1.35rem;
+    grid-area: copy;
+    font-size: 0.96rem;
+    color: #667891;
+    line-height: 1.65;
+}
+
+.course-choice-actions .course-choice-icon {
+    grid-area: icon;
+    font-size: 0.9rem;
+    line-height: 1;
+    color: #2f6ff6;
+}
+
+@media (max-width: 720px) {
+    .course-choice-card {
+        min-height: min(44rem, calc(100vh - 3rem));
+        padding: 5.5rem 0.5rem 2rem;
+    }
+
+    .course-choice-brand {
+        top: 1rem;
+        left: 1rem;
+    }
+
+    .course-choice-card h1 {
+        font-size: clamp(2.6rem, 14vw, 4rem);
+    }
+
+    .course-choice-card p {
+        font-size: 0.98rem;
+    }
+
+    .course-choice-actions {
+        grid-template-columns: 1fr;
+        margin-top: 2.4rem;
+    }

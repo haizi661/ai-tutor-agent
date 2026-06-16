@@ -1,9 +1,14 @@
 (() => {
     const app = window.AITutorApp || {};
     const state = app.state || {};
+    const COURSE_MODE_STORAGE_KEY = 'ai_tutor_course_mode';
+    const COURSE_MODE_AUTO = 'auto_control';
+    const COURSE_MODE_AI = 'artificial_intelligence';
 
     const originalStartNewSession = app.startNewSession?.bind(app);
     const originalHandleSend = app.handleSend?.bind(app);
+    const originalRestoreSessionState = app.restoreSessionState?.bind(app);
+    const originalRestoreMessageTimeline = app.restoreMessageTimeline?.bind(app);
 
     function escapeHtml(text) {
         return String(text || '')
@@ -32,15 +37,17 @@
 
     function clearMessages() {
         const messages = document.getElementById('messages');
-        if (messages) {
-            messages.innerHTML = '';
-            app.refreshChatSurfaceState?.();
-        }
+        if (messages) messages.innerHTML = '';
     }
 
     function appendAgent(text) {
+        const rawText = String(text || '');
+        const allowLearningHtml = rawText.includes('learning-answer-content');
         if (app.appendMessage) {
-            app.appendMessage('agent', text);
+            app.appendMessage('agent', text, {
+                allowLearningHtml,
+                kind: allowLearningHtml ? 'graph_rag_answer' : undefined,
+            });
         } else {
             appendFallbackMessage('agent', text);
         }
@@ -64,89 +71,106 @@
 
         messages.appendChild(row);
         messages.scrollTop = messages.scrollHeight;
-        app.refreshChatSurfaceState?.();
     }
 
     function makeThreadId() {
         return app.makeThreadId ? app.makeThreadId() : `ai_path_${Date.now()}`;
     }
 
-    const COURSE_DIRECTIONS = {
-        control_theory: {
-            track: 'control_theory',
-            label: '自动控制原理',
-            description: '沿用原来的知识图谱伴学流程',
-            topic: '自动控制原理',
-        },
-        artificial_intelligence: {
-            track: 'artificial_intelligence',
-            label: '人工智能',
-            description: '通过多轮问答生成定制化学习路径',
-            topic: '人工智能学习路径',
-        },
-    };
+    function syncCourseUrl(mode) {
+        if (!window.history?.replaceState) return;
 
-    function normalizeLearningTrack(track) {
-        const raw = String(track || '').trim().toLowerCase();
-        if (['ai', 'artificial_intelligence', 'artificial-intelligence', '人工智能'].includes(raw)) {
-            return 'artificial_intelligence';
+        const url = new URL(window.location.href);
+        if (mode === COURSE_MODE_AI) {
+            url.searchParams.set('mode', 'ai_path');
+            url.hash = '';
+        } else if (mode === COURSE_MODE_AUTO) {
+            url.searchParams.set('mode', 'auto_control');
+            url.hash = '';
+        } else {
+            url.searchParams.delete('mode');
+            if (url.hash === '#ai-path') url.hash = '';
         }
-        if (['control', 'auto_control', 'control_theory', 'a2-control-theory', '自动控制', '自动控制原理'].includes(raw)) {
-            return 'control_theory';
-        }
-        return raw && COURSE_DIRECTIONS[raw] ? raw : '';
+
+        window.history.replaceState(window.history.state, '', url);
     }
 
-    function inferLearningTrackFromText(text) {
-        const value = String(text || '').trim().toLowerCase();
-        if (!value) return 'control_theory';
-        if (/(人工智能|机器学习|深度学习|神经网络|大模型|llm|rag|yolo|目标检测|强化学习|ai\b)/i.test(value)) {
-            return 'artificial_intelligence';
-        }
-        return 'control_theory';
+    function clearResumeFlag() {
+        if (!window.history?.replaceState) return;
+        const url = new URL(window.location.href);
+        if (!url.searchParams.has('resume')) return;
+        url.searchParams.delete('resume');
+        window.history.replaceState(window.history.state, '', url);
     }
 
-    async function ensureCurrentThread() {
-        if (!state.currentThreadId) {
-            state.currentThreadId = makeThreadId();
-            window.localStorage?.setItem?.('ai_tutor_last_thread_id', state.currentThreadId);
+    function applyCourseChrome(mode) {
+        const subtitle = document.querySelector('.sb-brand-subtitle');
+        if (subtitle) {
+            if (mode === COURSE_MODE_AI) subtitle.textContent = '人工智能路径规划';
+            else if (mode === COURSE_MODE_AUTO) subtitle.textContent = '控制理论陪练';
+            else subtitle.textContent = '课程选择';
         }
-        try {
-            await postJson('/api/sessions', { thread_id: state.currentThreadId });
-        } catch (_error) {
-            // 方向选择本身仍可在前端固定；后续发送时 /api/start 会再次创建检查点。
+
+        const title = document.getElementById('header-thread-title');
+        if (title && mode === COURSE_MODE_AI) {
+            title.textContent = '人工智能学习路径';
         }
-        return state.currentThreadId;
     }
 
-    function patchLearningDirection(track) {
-        const normalized = normalizeLearningTrack(track);
-        const direction = COURSE_DIRECTIONS[normalized] || COURSE_DIRECTIONS.control_theory;
-        app.patchState?.({
-            learningTrack: direction.track,
-            learningTrackLabel: direction.label,
-            learningTrackLocked: true,
-            currentTopic: state.currentTopic || direction.topic,
-            graphTopicHint: state.graphTopicHint || direction.topic,
-        }, 'learning-direction');
-        return direction;
-    }
-
-    async function persistLearningDirection(track) {
-        const direction = patchLearningDirection(track);
-        const threadId = await ensureCurrentThread();
-        const data = await postJson(`/api/sessions/${encodeURIComponent(threadId)}/learning-direction`, {
-            track: direction.track,
-            label: direction.label,
+    function setElementsHidden(selectors, hidden) {
+        selectors.forEach(selector => {
+            document.querySelectorAll(selector).forEach(el => {
+                el.hidden = hidden;
+                el.classList.toggle('course-tool-hidden', hidden);
+            });
         });
-        app.fetchHistory?.();
-        return data;
     }
 
-    function setAiMode(active) {
-        state.aiPathMode = Boolean(active);
-        document.body.classList.toggle('ai-path-chat-mode', Boolean(active));
-        app.patchState?.({ aiPathMode: Boolean(active) }, 'ai-path-mode');
+    function applyCourseToolVisibility(mode) {
+        const hideAutoOnlyTools = mode !== COURSE_MODE_AUTO;
+        setElementsHidden([
+            '.sb-primary-nav button[onclick="openLibraryPanel()"]',
+            '.sb-primary-nav button[onclick="openErrorCorrectionPanel()"]',
+            '.sb-primary-nav button[onclick="openMatlabExperimentPanel()"]',
+            '#open-graph-modal-btn',
+            '#open-radar-modal-btn',
+            '#open-wrong-book-btn',
+            '#open-question-help-btn',
+            '#open-teaching-insights-btn',
+        ], hideAutoOnlyTools);
+    }
+
+    function setCourseMode(mode, options = {}) {
+        const nextMode = mode || '';
+        const aiActive = nextMode === COURSE_MODE_AI;
+
+        state.activeCourse = nextMode;
+        state.aiPathMode = aiActive;
+        document.body.classList.toggle('ai-path-chat-mode', aiActive);
+        document.body.classList.toggle('course-auto-control-mode', nextMode === COURSE_MODE_AUTO);
+        document.body.classList.toggle('course-ai-mode', aiActive);
+        document.body.classList.toggle('course-choice-mode', !nextMode);
+        applyCourseChrome(nextMode);
+        applyCourseToolVisibility(nextMode);
+        app.patchState?.({ activeCourse: nextMode, aiPathMode: aiActive }, 'course-mode');
+
+        try {
+            if (nextMode) {
+                localStorage.setItem(COURSE_MODE_STORAGE_KEY, nextMode);
+            } else {
+                localStorage.removeItem(COURSE_MODE_STORAGE_KEY);
+            }
+        } catch (_) {
+            // Storage can be unavailable in private browsing or locked-down webviews.
+        }
+
+        if (options.updateUrl !== false) {
+            syncCourseUrl(nextMode);
+        }
+    }
+
+    function setAiMode(active, options = {}) {
+        setCourseMode(active ? COURSE_MODE_AI : COURSE_MODE_AUTO, options);
 
         const panel = document.getElementById('ai-path-side-panel');
         if (panel) {
@@ -158,6 +182,31 @@
     let aiPathProgressRow = null;
     let aiPathProgressSteps = [];
     let aiPathProgressIndex = 0;
+
+    function resetAiPathRuntimeUi() {
+        if (aiPathProgressTimer) {
+            clearInterval(aiPathProgressTimer);
+            aiPathProgressTimer = null;
+        }
+
+        if (aiPathProgressRow) {
+            aiPathProgressRow.remove();
+            aiPathProgressRow = null;
+        }
+
+        aiPathProgressSteps = [];
+        aiPathProgressIndex = 0;
+
+        const progress = document.getElementById('ai-path-progress');
+        if (progress) {
+            progress.textContent = '';
+        }
+
+        const panel = document.getElementById('ai-path-side-panel');
+        if (panel) {
+            panel.style.display = 'none';
+        }
+    }
 
     function createAiPathProgressRow(text) {
         const messages = document.getElementById('messages');
@@ -172,7 +221,6 @@
 
         messages.appendChild(row);
         messages.scrollTop = messages.scrollHeight;
-        app.refreshChatSurfaceState?.();
         return row;
     }
 
@@ -221,6 +269,96 @@
         aiPathProgressRow.classList.add(status === 'error' ? 'is-error' : 'is-done');
     }
 
+    function courseModeFromLocation() {
+        const url = new URL(window.location.href);
+        const mode = url.searchParams.get('mode');
+        if (mode === 'ai_path' || url.hash === '#ai-path') return COURSE_MODE_AI;
+        if (mode === 'auto_control') return COURSE_MODE_AUTO;
+        return '';
+    }
+
+    function isAiHistoryItem(item) {
+        const threadId = String(item?.thread_id || '');
+        const titleText = `${item?.display_title || ''} ${item?.current_topic || ''} ${item?.learning_track_label || ''}`;
+        return Boolean(
+            threadId.startsWith('ai_path_')
+            || item?.ai_path_mode
+            || item?.active_course === COURSE_MODE_AI
+            || item?.learning_track === COURSE_MODE_AI
+            || item?.flow_status === 'ai_path'
+            || item?.flow_status === 'ai_path_active'
+            || titleText.includes('人工智能')
+            || titleText.toLowerCase().includes('ai path')
+        );
+    }
+
+    function updatedTime(item) {
+        const value = item?.updated_at || item?.updatedAt || item?.created_at || '';
+        const time = value ? new Date(value).getTime() : 0;
+        return Number.isFinite(time) ? time : 0;
+    }
+
+    function findLatestThreadForCourse(mode, items) {
+        const list = Array.isArray(items) ? items.slice() : [];
+        list.sort((a, b) => updatedTime(b) - updatedTime(a));
+        if (mode === COURSE_MODE_AI) {
+            return list.find(isAiHistoryItem);
+        }
+        if (mode === COURSE_MODE_AUTO) {
+            return list.find(item => !isAiHistoryItem(item));
+        }
+        return null;
+    }
+
+    function historyEntryMatchesCourse(item, mode) {
+        if (!mode) return true;
+        if (mode === COURSE_MODE_AI) return isAiHistoryItem(item);
+        if (mode === COURSE_MODE_AUTO) return !isAiHistoryItem(item);
+        return true;
+    }
+
+    function openCourseWorkspace(mode) {
+        const url = new URL(window.location.href);
+        url.search = '';
+        url.hash = '';
+        url.searchParams.set('mode', mode === COURSE_MODE_AI ? 'ai_path' : 'auto_control');
+        url.searchParams.set('resume', '1');
+        const opened = window.open(url.toString(), '_blank');
+        if (!opened && app.setStatusBanner) {
+            app.setStatusBanner('浏览器阻止了新标签页，请允许弹窗后再试', 'warning');
+        }
+    }
+
+    async function restoreLatestCourseThread(mode) {
+        if (!mode) {
+            renderCourseChoice();
+            return;
+        }
+
+        setCourseMode(mode, { updateUrl: true });
+        if (mode === COURSE_MODE_AI) {
+            ensureAiPathSidePanel();
+        } else {
+            resetAiPathRuntimeUi();
+        }
+
+        await app.fetchHistory?.();
+        const latest = findLatestThreadForCourse(mode, window._chatSearchHistoryCache || []);
+        if (latest?.thread_id && app.loadSession) {
+            await app.loadSession(latest.thread_id);
+            clearResumeFlag();
+            return;
+        }
+
+        if (mode === COURSE_MODE_AI) {
+            await startAiPathDialogue();
+        } else if (originalStartNewSession) {
+            await originalStartNewSession();
+            setAiMode(false, { updateUrl: true });
+        }
+        clearResumeFlag();
+    }
+
     async function submitAiPathReplan(goalText) {
         const text = String(goalText || '').trim();
         if (!text) return;
@@ -235,13 +373,17 @@
         ]);
 
         try {
+            if (!state.currentThreadId) {
+                state.currentThreadId = makeThreadId();
+            }
             const data = await postJson('/api/ai-path/chat', {
-                thread_id: state.currentThreadId || makeThreadId(),
+                thread_id: state.currentThreadId,
                 message: text,
                 choice: 'restart_keep_progress',
             });
 
             renderAiAgentTurn(data);
+            app.fetchHistory?.();
             app.setStatusBanner?.('已收到新的学习方向', 'awaiting');
             finishAiPathProgress('组织输出完成');
         } catch (error) {
@@ -253,39 +395,41 @@
         app.applyPrimaryActionState?.();
     }
 
-    function renderCourseChoiceCard({
-        locked = false,
-        selectedTrack = state.learningTrack,
-        selectedLabel = state.learningTrackLabel,
-        statusText = '',
-        append = true,
-    } = {}) {
-        setAiMode(false);
+    function courseChoiceTemplate() {
+        return `
+            <div class="course-choice-brand">
+                <span class="course-choice-mark">AI</span>
+                <span>AI Tutor</span>
+            </div>
+            <div class="course-choice-kicker">COURSE GATEWAY</div>
+            <h1>选择你的学习空间</h1>
+            <p>这里是课程分流入口。选择课程后会打开新的学习标签页，当前欢迎页会保持不变，方便你随时回到这里切换方向。</p>
+            <div class="course-choice-actions">
+                <button type="button" id="course-choice-auto">
+                    <span class="course-choice-icon">AC</span>
+                    <strong>自动控制原理</strong>
+                    <span>恢复最近的自控学习页，继续图谱伴学流程。</span>
+                </button>
+                <button type="button" id="course-choice-ai">
+                    <span class="course-choice-icon">AI</span>
+                    <strong>人工智能</strong>
+                    <span>恢复最近的 AI 路径规划对话，继续当前学习路径。</span>
+                </button>
+            </div>
+        `;
+    }
+
+    function renderCourseChoice() {
+        resetAiPathRuntimeUi();
+        setCourseMode('', { updateUrl: true });
+        state.currentThreadId = '';
+        clearMessages();
 
         const messages = document.getElementById('messages');
-        if (!messages) return null;
+        if (!messages) return;
 
-        const direction = COURSE_DIRECTIONS[normalizeLearningTrack(selectedTrack)] || null;
-        const label = selectedLabel || direction?.label || '';
         const card = document.createElement('section');
-        card.className = `course-choice-card ${locked ? 'is-locked' : ''}`.trim();
-
-        if (locked && label) {
-            card.innerHTML = `
-                <div class="course-choice-kicker">LEARNING SESSION</div>
-                <h2>学习方向已固定</h2>
-                <p>本聊天后续会按已选择方向推进；刷新或从历史恢复时也会保留这个方向。</p>
-                <div class="course-choice-locked">
-                    <strong>${escapeHtml(label)}</strong>
-                    <span>${escapeHtml(statusText || `已选择：${label}`)}</span>
-                </div>
-            `;
-            if (append) messages.appendChild(card);
-            messages.scrollTop = messages.scrollHeight;
-            app.refreshChatSurfaceState?.();
-            return card;
-        }
-
+        card.className = 'course-choice-card';
         card.innerHTML = `
             <div class="course-choice-kicker">NEW LEARNING SESSION</div>
             <h2>请选择本次学习方向</h2>
@@ -302,79 +446,28 @@
             </div>
         `;
 
-        if (append) messages.appendChild(card);
+        card.innerHTML = courseChoiceTemplate();
+        messages.appendChild(card);
 
         document.getElementById('course-choice-auto')?.addEventListener('click', () => {
-            selectLearningDirection('control_theory');
+            resetAiPathRuntimeUi();
+            openCourseWorkspace(COURSE_MODE_AUTO);
+            app.setStatusBanner?.('已选择自动控制原理', 'success');
         });
 
         document.getElementById('course-choice-ai')?.addEventListener('click', () => {
-            selectLearningDirection('artificial_intelligence');
+            openCourseWorkspace(COURSE_MODE_AI);
         });
 
         app.setStatusBanner?.('请选择学习方向', 'awaiting');
-        messages.scrollTop = messages.scrollHeight;
-        app.refreshChatSurfaceState?.();
-        return card;
     }
 
-    function renderCourseChoice() {
-        setAiMode(false);
+    async function startAiPathDialogue() {
+        setAiMode(true, { updateUrl: true });
         clearMessages();
-        renderCourseChoiceCard();
-    }
-
-    function lockVisibleCourseChoiceCard(direction) {
-        const existing = document.querySelector('.course-choice-card:not(.is-locked)');
-        const lockedCard = renderCourseChoiceCard({
-            locked: true,
-            selectedTrack: direction.track,
-            selectedLabel: direction.label,
-            statusText: `已选择：${direction.label}`,
-            append: false,
-        });
-        if (!lockedCard) return;
-        if (existing) {
-            existing.replaceWith(lockedCard);
-        } else {
-            document.getElementById('messages')?.appendChild(lockedCard);
-        }
-    }
-
-    async function selectLearningDirection(track) {
-        const direction = patchLearningDirection(track);
-        lockVisibleCourseChoiceCard(direction);
-        app.setStatusBanner?.(`已选择${direction.label}`, 'success');
-        try {
-            await persistLearningDirection(direction.track);
-        } catch (error) {
-            app.setStatusBanner?.(`方向已固定，但保存失败：${error.message}`, 'warning');
-        }
-        if (direction.track === 'artificial_intelligence') {
-            await startAiPathDialogue({ preserveMessages: true, reuseThread: true });
-            return;
-        }
-        setAiMode(false);
-        app.setChatInputPlaceholder?.('输入你想学的自动控制原理内容，例如：二阶系统时域分析');
-        app.applyPrimaryActionState?.();
-    }
-
-    async function startAiPathDialogue({ preserveMessages = false, reuseThread = true } = {}) {
-        const shouldPersistDirection = state.learningTrack !== 'artificial_intelligence' || !state.learningTrackLocked;
-        patchLearningDirection('artificial_intelligence');
-        setAiMode(true);
-        if (!preserveMessages) clearMessages();
         ensureAiPathSidePanel();
 
-        if (!reuseThread || !state.currentThreadId) {
-            state.currentThreadId = makeThreadId();
-        }
-        await ensureCurrentThread();
-        if (shouldPersistDirection) {
-            try {
-                await persistLearningDirection('artificial_intelligence');
-            } catch (_error) {}
-        }
+        state.currentThreadId = makeThreadId();
         state.currentTopic = '人工智能学习路径';
         state.graphTopicHint = '人工智能学习路径';
         state.currentGraphNode = '';
@@ -398,6 +491,7 @@
 
             renderAiAgentTurn(data);
             finishAiPathProgress('对话已就绪');
+            app.fetchHistory?.();
         } catch (error) {
             appendAgent(`AI路径规划启动失败：${error.message}`);
             app.setStatusBanner?.('AI路径规划启动失败', 'danger');
@@ -414,25 +508,25 @@
             '下一个节点已定位',
             '正在组织输出',
         ]);
-
+    
         try {
             const data = await postJson('/api/ai-path/next', {
                 thread_id: state.currentThreadId,
             });
-
+    
             appendAgent(data.message || '已进入下一个节点。');
             renderOptions(data.options || []);
-
+    
             if (data.path?.length) {
                 updateAiPathSidePanel(data.path);
             }
-
+    
             if (data.current_node) {
                 app.patchState?.({
                     currentGraphNodeId: data.current_node,
                 }, 'ai-path-next');
             }
-
+    
             if (data.type === 'complete') {
                 app.setStatusBanner?.('AI学习路径已完成', 'success');
                 finishAiPathProgress('路径已完成');
@@ -440,6 +534,7 @@
                 app.setStatusBanner?.('已进入下一个节点', 'success');
                 finishAiPathProgress('组织输出完成');
             }
+            app.fetchHistory?.();
         } catch (error) {
             appendAgent(`进入下一个节点失败：${error.message}`);
             app.setStatusBanner?.('进入下一个节点失败', 'danger');
@@ -462,7 +557,6 @@
 
         messages.appendChild(row);
         messages.scrollTop = messages.scrollHeight;
-        app.refreshChatSurfaceState?.();
 
         row.querySelectorAll('[data-ai-choice]').forEach(btn => {
             btn.addEventListener('click', () => {
@@ -494,10 +588,10 @@
     function renderCandidateMiniList(candidates) {
         const messages = document.getElementById('messages');
         if (!messages) return;
-
+    
         const card = document.createElement('section');
         card.className = 'ai-candidate-mini-card';
-
+    
         card.innerHTML = `
             <div class="ai-card-title">当前候选目标节点</div>
             <div class="ai-mini-list">
@@ -509,11 +603,10 @@
                 `).join('')}
             </div>
         `;
-
+    
         messages.appendChild(card);
         messages.scrollTop = messages.scrollHeight;
-        app.refreshChatSurfaceState?.();
-
+    
         card.querySelectorAll('[data-ai-choice]').forEach(btn => {
             btn.addEventListener('click', () => {
                 submitAiPathMessage(btn.dataset.aiChoice || '', true);
@@ -536,7 +629,6 @@
                 <p>暂时没有生成可用路径。</p>
             `;
             messages.appendChild(card);
-            app.refreshChatSurfaceState?.();
             return;
         }
 
@@ -574,7 +666,6 @@
 
         messages.appendChild(card);
         messages.scrollTop = messages.scrollHeight;
-        app.refreshChatSurfaceState?.();
 
         card.querySelectorAll('[data-node-id]').forEach(btn => {
             btn.addEventListener('click', () => {
@@ -606,7 +697,6 @@
 
         messages.appendChild(card);
         messages.scrollTop = messages.scrollHeight;
-        app.refreshChatSurfaceState?.();
 
         const input = card.querySelector('.ai-path-replan-input');
         const submit = card.querySelector('.ai-path-replan-submit');
@@ -637,16 +727,17 @@
             '当前节点重点知识检索完成',
             '正在组织输出',
         ]);
-
+    
         try {
             const data = await postJson('/api/ai-path/teach', {
                 thread_id: state.currentThreadId,
             });
-
+    
             appendAgent(data.message || '已进入当前节点学习。');
             renderOptions(data.options || []);
             app.setStatusBanner?.('正在学习当前节点', 'success');
             finishAiPathProgress('组织输出完成');
+            app.fetchHistory?.();
         } catch (error) {
             appendAgent(`当前节点讲解失败：${error.message}`);
             app.setStatusBanner?.('当前节点讲解失败', 'danger');
@@ -657,7 +748,7 @@
         const path = data.path || [];
         const first = path[0];
         const targetNames = data.summary?.target_names || [];
-
+    
         app.patchState?.({
             currentTopic: targetNames.length ? targetNames.join('、') : '人工智能学习路径',
             graphTopicHint: targetNames.length ? targetNames.join('、') : '人工智能学习路径',
@@ -665,9 +756,9 @@
             currentGraphNodeId: first?.node_id || '',
             userKnowledgeGraph: data.userKnowledgeGraph || {},
         }, 'ai-path-plan');
-
+    
         app.updateSidebarState?.();
-
+    
         // 注意：
         // 这里不要调用 app.renderKnowledgeGraphVisualCard()
         // 也不要调用 app.syncKnowledgeGraphVisualState()
@@ -677,7 +768,7 @@
     function ensureAiPathSidePanel() {
         let panel = document.getElementById('ai-path-side-panel');
         if (panel) return panel;
-
+    
         panel = document.createElement('aside');
         panel.id = 'ai-path-side-panel';
         panel.className = 'ai-path-side-panel';
@@ -704,7 +795,7 @@
         } else {
             document.body.appendChild(panel);
         }
-
+    
         document.getElementById('ai-path-side-close')?.addEventListener('click', () => {
             panel.classList.toggle('is-collapsed');
             const btn = document.getElementById('ai-path-side-close');
@@ -715,20 +806,20 @@
         replanBtn?.addEventListener('click', () => {
             renderAiPathReplanCard();
         });
-
+    
         return panel;
     }
-
+    
     function updateAiPathSidePanel(path = []) {
         const panel = ensureAiPathSidePanel();
         const body = document.getElementById('ai-path-side-body');
         if (!body) return;
-
+    
         if (!path.length) {
             body.innerHTML = `<div class="ai-muted">生成路径后这里会显示当前 AI 学习主线。</div>`;
             return;
         }
-
+    
         body.innerHTML = `
             <div class="ai-path-side-list">
                 ${path.map((node, index) => `
@@ -751,13 +842,13 @@
                 `).join('')}
             </div>
         `;
-
+    
         body.querySelectorAll('[data-node-id]').forEach(btn => {
             btn.addEventListener('click', () => {
                 loadNodeDetail(btn.dataset.nodeId);
             });
         });
-
+    
         panel.classList.add('is-visible');
     }
 
@@ -811,7 +902,6 @@
         const message = String(text || input?.value || '').trim();
 
         if (!message) return;
-        await ensureCurrentThread();
 
         if (input && !fromChoice) {
             input.value = '';
@@ -827,8 +917,11 @@
         ]);
 
         try {
+            if (!state.currentThreadId) {
+                state.currentThreadId = makeThreadId();
+            }
             const data = await postJson('/api/ai-path/chat', {
-                thread_id: state.currentThreadId || makeThreadId(),
+                thread_id: state.currentThreadId,
                 message,
                 choice: fromChoice ? message : '',
             });
@@ -845,6 +938,7 @@
                 data.type === 'plan' ? 'AI学习路径已生成' : '等待你继续补充',
                 data.type === 'plan' ? 'success' : 'awaiting'
             );
+            app.fetchHistory?.();
         } catch (error) {
             appendAgent(`AI路径规划失败：${error.message}`);
             app.setStatusBanner?.('AI路径规划失败', 'danger');
@@ -854,46 +948,91 @@
         app.applyPrimaryActionState?.();
     }
 
-    app.startNewSession = function patchedStartNewSession() {
-        const renderAfterReset = () => renderCourseChoice();
-        if (originalStartNewSession) {
-            const result = originalStartNewSession();
-            if (result && typeof result.then === 'function') {
-                return result.then(renderAfterReset);
-            }
+    function latestPathFromTimeline(items) {
+        if (!Array.isArray(items)) return [];
+        for (let i = items.length - 1; i >= 0; i -= 1) {
+            const item = items[i] || {};
+            const path = item.data?.path || item.path;
+            if (Array.isArray(path) && path.length) return path;
         }
-        renderAfterReset();
-    };
+        return [];
+    }
 
-    app.handleSend = async function patchedHandleSend() {
-        if (state.aiPathMode) {
-            await submitAiPathMessage();
+    function restoreAiPathVisualState(stateSnapshot, items = []) {
+        const path = Array.isArray(stateSnapshot?.ai_path_path) && stateSnapshot.ai_path_path.length
+            ? stateSnapshot.ai_path_path
+            : latestPathFromTimeline(items);
+        ensureAiPathSidePanel();
+        updateAiPathSidePanel(path);
+        state.currentGraphNodeId = stateSnapshot?.ai_path_current_node || stateSnapshot?.current_node_id || '';
+        state.currentGraphNode = stateSnapshot?.current_node_name || state.currentGraphNode || '';
+        state.currentTopic = stateSnapshot?.current_topic || state.currentTopic || '人工智能学习路径';
+        state.graphTopicHint = state.currentTopic;
+        app.updateSidebarState?.();
+    }
+
+    function snapshotIsAiPath(stateSnapshot) {
+        return Boolean(
+            stateSnapshot?.ai_path_mode
+            || stateSnapshot?.active_course === COURSE_MODE_AI
+            || stateSnapshot?.learning_track === COURSE_MODE_AI
+            || stateSnapshot?.flow_status === 'ai_path'
+            || stateSnapshot?.flow_status === 'ai_path_active'
+        );
+    }
+
+    if (originalRestoreSessionState) {
+        app.restoreSessionState = function patchedRestoreSessionState(stateSnapshot) {
+            originalRestoreSessionState(stateSnapshot);
+            if (snapshotIsAiPath(stateSnapshot)) {
+                setAiMode(true, { updateUrl: true });
+                restoreAiPathVisualState(stateSnapshot);
+            } else {
+                setAiMode(false, { updateUrl: true });
+            }
+        };
+    }
+
+    if (originalRestoreMessageTimeline) {
+        app.restoreMessageTimeline = function patchedRestoreMessageTimeline(items, stateSnapshot) {
+            originalRestoreMessageTimeline(items, stateSnapshot);
+            if (snapshotIsAiPath(stateSnapshot)) {
+                setAiMode(true, { updateUrl: true });
+                restoreAiPathVisualState(stateSnapshot, items);
+            } else {
+                setAiMode(false, { updateUrl: true });
+            }
+        };
+    }
+
+    app.startNewSession = async function patchedStartNewSession() {
+        const mode = state.aiPathMode
+            ? COURSE_MODE_AI
+            : (state.activeCourse || courseModeFromLocation());
+
+        if (mode === COURSE_MODE_AI) {
+            await startAiPathDialogue();
             return;
         }
 
-        if (!state.learningTrackLocked) {
-            const input = document.getElementById('chat-input');
-            const message = String(input?.value || '').trim();
-            if (!message) return;
-            const inferredTrack = inferLearningTrackFromText(message);
-            const direction = patchLearningDirection(inferredTrack);
-            lockVisibleCourseChoiceCard(direction);
-            try {
-                await persistLearningDirection(direction.track);
-            } catch (error) {
-                app.setStatusBanner?.(`方向已固定，但保存失败：${error.message}`, 'warning');
-            }
-            if (direction.track === 'artificial_intelligence') {
-                setAiMode(true);
-                ensureAiPathSidePanel();
-                await submitAiPathMessage();
-                return;
-            }
+        if (mode === COURSE_MODE_AUTO && originalStartNewSession) {
+            resetAiPathRuntimeUi();
+            await originalStartNewSession();
+            setAiMode(false, { updateUrl: true });
+            return;
         }
 
-        if (state.learningTrack === 'artificial_intelligence') {
-            setAiMode(true);
-            ensureAiPathSidePanel();
+        renderCourseChoice();
+    };
+
+    app.handleSend = async function patchedHandleSend() {
+        if (!state.activeCourse) {
+            renderCourseChoice();
+            app.setStatusBanner?.('璇峰厛閫夋嫨瀛︿範鏂瑰悜', 'awaiting');
+            return;
+        }
+
+        if (state.aiPathMode) {
             await submitAiPathMessage();
             return;
         }
@@ -905,37 +1044,36 @@
 
     app.openAiPathMode = startAiPathDialogue;
     app.renderCourseChoice = renderCourseChoice;
-    app.renderCourseChoiceCard = renderCourseChoiceCard;
-    app.applyLearningDirectionFromState = function applyLearningDirectionFromState(snapshot = {}) {
-        const track = normalizeLearningTrack(snapshot.learning_track || snapshot.learningTrack || state.learningTrack);
-        if (!track) {
-            setAiMode(false);
+    app.restoreLatestCourseThread = restoreLatestCourseThread;
+    app.historyEntryMatchesCourse = historyEntryMatchesCourse;
+    app.restoreLastSessionIfAny = async function restoreLastCourseSessionIfAny() {
+        const mode = courseModeFromLocation();
+        if (!mode) {
+            renderCourseChoice();
             return;
         }
-        app.patchState?.({
-            learningTrack: track,
-            learningTrackLabel: snapshot.learning_track_label || snapshot.learningTrackLabel || COURSE_DIRECTIONS[track]?.label || '',
-            learningTrackLocked: Boolean(snapshot.learning_track_locked || snapshot.learningTrackLocked || state.learningTrackLocked),
-        }, 'learning-direction-restore');
-        if (track === 'artificial_intelligence') {
-            setAiMode(true);
-            ensureAiPathSidePanel();
-            updateAiPathProgressText('已恢复 AI 学习路径会话');
-            app.setChatInputPlaceholder?.('继续补充 AI 学习方向，或直接追问当前节点');
+        const shouldResume = new URL(window.location.href).searchParams.get('resume') === '1';
+        if (shouldResume) {
+            await restoreLatestCourseThread(mode);
             return;
         }
-        setAiMode(false);
-        app.setChatInputPlaceholder?.('输入自动控制原理学习内容，或继续当前主线');
+
+        setCourseMode(mode, { updateUrl: true });
+        await app.fetchHistory?.();
+        if (mode === COURSE_MODE_AI) {
+            await startAiPathDialogue();
+        } else if (originalStartNewSession) {
+            await originalStartNewSession();
+            setAiMode(false, { updateUrl: true });
+        }
     };
 
     window.startNewSession = () => app.startNewSession();
     window.handleSend = () => app.handleSend();
 
     document.addEventListener('DOMContentLoaded', () => {
-        const url = new URL(window.location.href);
-
-        if (url.searchParams.get('mode') === 'ai_path' || url.hash === '#ai-path') {
-            startAiPathDialogue();
-        }
+        const mode = courseModeFromLocation();
+        setCourseMode(mode, { updateUrl: false });
+        if (!mode) renderCourseChoice();
     });
 })();
