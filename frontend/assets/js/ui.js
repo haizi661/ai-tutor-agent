@@ -3197,7 +3197,13 @@
                     optContainer.querySelectorAll('.obj-test-opt').forEach(o => o.classList.remove('selected'));
                     btn.classList.add('selected');
                     answerMap[qid] = key;
-                    submitBtn.disabled = Object.keys(answerMap).length < normalizedQs.length;
+                    const allAnswered = Object.keys(answerMap).length >= normalizedQs.length;
+                    if (submitBtn) {
+                        submitBtn.disabled = !allAnswered;
+                    }
+                    if (allAnswered) {
+                        document.querySelectorAll('.obj-test-submit').forEach(b => b.disabled = false);
+                    }
                 };
                 optContainer.appendChild(btn);
             });
@@ -3205,6 +3211,19 @@
         });
 
         submitBtn.onclick = () => {
+            // 兜底：如果按钮仍 disabled，检查是否所有题已答完，强制启用
+            if (submitBtn.disabled) {
+                const answeredCount = Object.keys(answerMap).length;
+                if (answeredCount >= normalizedQs.length) {
+                    submitBtn.disabled = false;
+                }
+            }
+            if (submitBtn.disabled) {
+                const missing = normalizedQs.length - Object.keys(answerMap).length;
+                submitBtn.textContent = `还有 ${missing} 道题未作答`;
+                setTimeout(() => { submitBtn.textContent = '提交全部答案'; }, 2000);
+                return;
+            }
             const answerPayload = JSON.stringify(answerMap);
             submitBtn.disabled = true;
             submitBtn.textContent = '已提交，等待批改…';
