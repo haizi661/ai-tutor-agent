@@ -14,6 +14,15 @@
 | `docs/current-status-and-usage.md` | 详细完成情况、使用方式、自检命令 | 查看历史完成记录 |
 | `docs/RUNBOOK_ZH.md` | 运维排障手册（代理配置、常见报错处理） | 启动失败、网络问题排查 |
 | `CONTRIBUTING.md` | 贡献指南（分支命名、本地设置） | 首次参与开发 |
+| `docs/archive/a2-control-theory/source-notes/` | 自动控制原理课程源笔记 (85篇) | 教学内容参考 |
+
+## 子项目
+
+| 目录 | 说明 |
+|------|------|
+| `backend/` | **智能体后端** — Flask + LangChain (error_correction/note/solve/teach 4个Agent) + SQLAlchemy DB + PaddleOCR |
+| `kg_builder_standalone/` | **知识图谱构建管线** — 独立 KG builder + 9 版 demo graph 演进历史 |
+| `ai_tutor_agent/ai_learning_path/` | **AI 学习路径模块** — 双课程模式 (自动控制+人工智能) + 欢迎页分流 |
 
 ## 项目规范
 
