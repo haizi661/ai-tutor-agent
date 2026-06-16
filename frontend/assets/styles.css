@@ -19408,3 +19408,112 @@ body.course-choice-mode .messages {
         grid-template-columns: 1fr;
         margin-top: 2.4rem;
     }
+
+/* ── MATLAB 仿真历史 (来自 origin/pan0609) ── */
+.matlab-records-panel {
+    display: grid;
+    gap: 0.55rem;
+    padding: 0.7rem;
+    border: 1px solid var(--line-soft);
+    border-radius: 0.5rem;
+    background: var(--paper-muted);
+}
+
+.matlab-records-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.6rem;
+    color: var(--ink-strong);
+    font-size: 0.86rem;
+    font-weight: 650;
+}
+
+.matlab-records-header .library-upload-btn {
+    min-height: 2rem;
+    padding: 0.35rem 0.55rem;
+    font-size: 0.78rem;
+}
+
+.matlab-record-list {
+    display: grid;
+    gap: 0.4rem;
+    max-height: 12rem;
+    overflow: auto;
+}
+
+.matlab-record-item {
+    display: grid;
+    gap: 0.25rem;
+    width: 100%;
+    padding: 0.55rem 0.65rem;
+    border: 1px solid var(--line-soft);
+    border-radius: 0.45rem;
+    background: var(--paper);
+    color: var(--ink);
+    text-align: left;
+    cursor: pointer;
+}
+
+.matlab-record-item:hover,
+.matlab-record-item.active {
+    border-color: var(--accent-moss);
+    background: color-mix(in oklab, var(--accent-moss) 8%, var(--paper));
+}
+
+.matlab-record-item strong {
+    color: var(--ink-strong);
+    font-size: 0.82rem;
+    line-height: 1.35;
+}
+
+.matlab-record-item span,
+.matlab-record-empty {
+    color: var(--ink-muted);
+    font-size: 0.76rem;
+}
+
+.matlab-record-detail-heading {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+    margin-bottom: 0.8rem;
+    padding: 0.7rem 0.8rem;
+    border: 1px solid var(--line-soft);
+    border-radius: 0.5rem;
+    background: var(--paper-muted);
+}
+
+.matlab-record-detail-heading strong {
+    color: var(--ink-strong);
+}
+
+.matlab-record-detail-heading span {
+    color: var(--ink-muted);
+    font-size: 0.8rem;
+}
+
+.matlab-record-run {
+    margin-bottom: 0.8rem;
+    border: 1px solid var(--line-soft);
+    border-radius: 0.5rem;
+    background: var(--paper);
+}
+
+.matlab-record-run > summary {
+    cursor: pointer;
+    padding: 0.75rem 0.85rem;
+    color: var(--ink-strong);
+    font-weight: 650;
+}
+
+.matlab-record-run-body {
+    padding: 0 0.85rem 0.85rem;
+}
+
+.matlab-experiment-actions:not(.matlab-experiment-actions--primary) .library-upload-btn {
+    width: 100%;
+    justify-content: center;
+}
+
