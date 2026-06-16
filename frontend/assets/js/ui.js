@@ -3198,12 +3198,8 @@
                     btn.classList.add('selected');
                     answerMap[qid] = key;
                     const allAnswered = Object.keys(answerMap).length >= normalizedQs.length;
-                    if (submitBtn) {
-                        submitBtn.disabled = !allAnswered;
-                    }
-                    if (allAnswered) {
-                        document.querySelectorAll('.obj-test-submit').forEach(b => b.disabled = false);
-                    }
+                    if (!submitBtn) return;
+                    submitBtn.disabled = !allAnswered;
                 };
                 optContainer.appendChild(btn);
             });
