@@ -3535,10 +3535,23 @@
         }
 
         // ── 恢复学习路径面板 ──
-        const snapshotPlan = stateSnapshot.learning_plan || stateSnapshot.learningPlan;
+        // 优先用顶层 learning_plan，但 checkpoint 中可能缺失，此时从
+        // student_state_snapshot.learning_plan_v2 或 student_state_snapshot.learning_plan 恢复
+        function _v2plan_to_v1list(v2) {
+            if (!v2 || !Array.isArray(v2.steps)) return null;
+            return v2.steps;
+        }
+        const ss = stateSnapshot.student_state_snapshot || {};
+        const snapshotPlan = stateSnapshot.learning_plan
+            || stateSnapshot.learningPlan
+            || ss.learning_plan
+            || _v2plan_to_v1list(stateSnapshot.learning_plan_v2 || ss.learning_plan_v2);
         if (Array.isArray(snapshotPlan) && snapshotPlan.length > 0) {
             state.learningPlan = snapshotPlan;
-            state.learningPlanCurrentStep = stateSnapshot.learning_plan_current_step || stateSnapshot.learningPlanCurrentStep || 0;
+            state.learningPlanCurrentStep = stateSnapshot.learning_plan_current_step
+                || stateSnapshot.learningPlanCurrentStep
+                || ss.learning_plan_current_step
+                || 0;
             app.showLearningPathPanel?.();
             app.renderLearningPlanPanel?.(state.learningPlan, state.currentGraphNodeId, state.userKnowledgeGraph);
         }
