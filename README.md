@@ -289,6 +289,13 @@ PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 pytest -q
 # 754 passed, 5 skipped, 5 warnings
 ```
 
+2026-06-16 变式题 ID 去重 + assessment pending_interaction_kind 修复后回归：
+
+```bash
+PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 pytest -q
+# 765 passed, 5 skipped, 5 warnings
+```
+
 ## 离线检索评测（Recall@k / MRR / nDCG）
 
 用于做 RAG 检索回归对比：

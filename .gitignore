@@ -89,3 +89,7 @@ ppt/
 *.docx
 *.doc
 ~$*
+
+# Demo recordings
+*.webm
+scripts/phase_recordings/

@@ -825,6 +825,8 @@ def build_workflow(
             "assessment_generator": "assessment_generator",
             "assessment_dialog": "assessment_dialog",
             "user_profiler": "user_profiler",
+            "learning_plan_generator": "learning_plan_generator",
+            "completion_wrapup": "completion_wrapup",
         },
     )
 
