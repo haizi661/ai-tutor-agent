@@ -91,7 +91,7 @@ def _fallback_variant(wrong: dict[str, Any], index: int, node_id: str, state: Ag
     }
     variant_options[answer_key] = f"根据反馈量与给定量的比较结果调整执行环节，使偏差逐步减小：{concept}"
     return {
-        "question_id": f"VAR-{qid}",
+        "question_id": f"VAR-{qid}-{index}",
         "node_id": wrong.get("node_id") or node_id,
         "source_question_id": qid,
         "stem": f"某恒温箱把目标温度作为给定量，并用传感器持续测量箱内温度。若测得温度高于目标值，控制器应如何利用反馈信号调节加热功率？",
@@ -208,14 +208,14 @@ def _normalize_llm_variant_batch(
                 {
                     "index": index,
                     "source_question_id": source_question_id,
-                    "question_id": f"V-{source_question_id}",
+                    "question_id": f"V-{source_question_id}-{index}",
                     "errors": ["invalid_schema"],
                 }
             )
             continue
         options = _normalize_options(item.get("options"))
         question = {
-            "question_id": str(item.get("question_id") or f"V-{source_question_id}").strip(),
+            "question_id": str(item.get("question_id") or f"V-{source_question_id}-{index}").strip(),
             "node_id": item.get("node_id") or node_id,
             "source_question_id": str(item.get("source_question_id") or source_question_id).strip(),
             "stem": str(item.get("stem") or item.get("question") or "").strip(),
@@ -487,14 +487,27 @@ def build_variant_question_generator_node(runtime: RuntimeContext, llm: Any | No
         provider = getattr(runtime, "question_bank_provider", None)
         variant_questions: list[dict[str, Any]] = []
         if provider is not None and hasattr(provider, "get_variant_question"):
+            seen_ids: set[str] = set()
             for wrong in wrong_items:
                 variant = provider.get_variant_question(wrong)
                 if variant:
-                    variant_questions.append(dict(variant))
+                    qid = str(variant.get("question_id") or "").strip()
+                    if qid and qid not in seen_ids:
+                        seen_ids.add(qid)
+                        variant_questions.append(dict(variant))
         if not variant_questions:
             variant_questions = _generate_llm_variants(llm, wrong_items, state, node_id)
         if not variant_questions:
             variant_questions = [_fallback_variant(wrong, index, node_id, state) for index, wrong in enumerate(wrong_items, start=1)]
+        # 如果 provider 返回的题目不够（如只有 1 道但需要 3 道），用 fallback 补齐
+        if variant_questions and len(variant_questions) < len(wrong_items):
+            existing_ids = {str(q.get("question_id") or "").strip() for q in variant_questions}
+            for index, wrong in enumerate(wrong_items, start=1):
+                if len(variant_questions) >= len(wrong_items):
+                    break
+                qid = _question_id(wrong, index)
+                if f"VAR-{qid}-{index}" not in existing_ids:
+                    variant_questions.append(_fallback_variant(wrong, index, node_id, state))
 
         prompt = "请完成错题对应的变式验证题。"
         event_sink.emit(

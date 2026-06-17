@@ -293,13 +293,10 @@ class SessionManager:
     def reset_queues(self, thread_id: str) -> dict[str, object]:
         with self._lock:
             session = self.get_or_create(thread_id)
-            for queue_name in ("event_q", "input_q"):
-                session_queue = session[queue_name]
-                while True:
-                    try:
-                        session_queue.get_nowait()
-                    except queue.Empty:
-                        break
+            # 替换为新队列，使旧 SSE 连接持有的旧队列引用失效
+            # 避免新 worker 的事件被旧连接抢先消费
+            session["event_q"] = queue.Queue()
+            session["input_q"] = queue.Queue()
             session["awaiting_input"] = False
             session["awaiting_input_state"] = None
             return session

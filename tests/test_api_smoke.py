@@ -125,6 +125,7 @@ class FakeGraphApp:
                 "current_topic": state.get("current_topic", "控制理论"),
                 "assessment_questions": questions,
                 "flow_status": "awaiting_assessment",
+                "pending_interaction_kind": "objective_test_answers",
             }
         )
         self.checkpoint_store.save(thread_id, state, source="loop", step=1)
@@ -1436,7 +1437,7 @@ def test_profile_radar_stream_event_contract_includes_scores(tmp_path):
         assert '"objective_scores": [65, 70, 55, 60, 50, 45, 40, 35]' in stream.text
 
 
-def test_session_manager_reset_queues_reuses_existing_queue_instances():
+def test_session_manager_reset_queues_replaces_queue_instances():
     from ai_tutor_agent.interfaces.api.runtime import SessionManager
 
     manager = SessionManager()
@@ -1448,13 +1449,15 @@ def test_session_manager_reset_queues_reuses_existing_queue_instances():
 
     reset = manager.reset_queues("thread-queue")
 
-    assert reset["event_q"] is event_q
-    assert reset["input_q"] is input_q
+    # reset_queues 现在替换为新队列实例，使旧 SSE 引用失效
+    assert reset["event_q"] is not event_q
+    assert reset["input_q"] is not input_q
     assert reset["awaiting_input"] is False
+    # 新队列应该是空的
     with pytest.raises(queue.Empty):
-        event_q.get_nowait()
+        reset["event_q"].get_nowait()
     with pytest.raises(queue.Empty):
-        input_q.get_nowait()
+        reset["input_q"].get_nowait()
 
 
 def test_session_manager_prepare_worker_start_prevents_double_start():
@@ -1540,7 +1543,7 @@ def test_local_config_round_trip(monkeypatch, tmp_path):
         assert any(vendor["id"] == "glm" for vendor in current.json()["vendors"])
         assert current.json()["gemini_api_key"] == "****-key"
         assert current.json()["has_gemini_api_key"] is True
-        assert current.json()["question_help_model_name"] == "qwen-vl-max-latest"
+        assert current.json()["question_help_model_name"] == "qwen-vl-max"
 
         updated = client.post(
             "/api/config/local",

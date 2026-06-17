@@ -37,6 +37,7 @@
         state.eventSource.close();
         state.eventSource = null;
     }
+    app.closeEventSource = closeEventSource;
 
     function appendMeta(kind, text, tone = 'info', { createIfStreaming = true, fallbackToSystem = true } = {}) {
         if (!text) return false;
@@ -216,6 +217,8 @@
         document.querySelector('.interrupt-confirm-card')?.remove();
         app.collapseSubmittedObjectiveTestCard?.();
         if (visibleText) app.appendMessage('user', visibleText);
+        // 先关旧 SSE，避免服务端 worker 事件被旧连接抢走
+        closeEventSource();
         startStreamingTurn('已收到');
         try {
             await postJson(
@@ -891,6 +894,17 @@
                     showInChat: false,
                     render: () => app.renderPostLessonChoice?.(endPayload.options || []),
                     placeholder: '比如：为什么这里要看符号？/ 能不能换个例子？',
+                });
+                app.fetchHistory();
+                return;
+            }
+            if (endKind === 'learning_mode_choice') {
+                consumeAwaitingTurn(endPayload.prompt || message, '等你选择学习模式', {
+                    role: 'prompt',
+                    awaitingInput: true,
+                    showInChat: false,
+                    render: () => app.renderLearningModeChoice?.(endPayload.options || []),
+                    placeholder: '完整教学 / 自适应',
                 });
                 app.fetchHistory();
                 return;

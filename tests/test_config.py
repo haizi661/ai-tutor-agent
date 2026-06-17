@@ -77,7 +77,7 @@ def test_settings_default_question_help_to_qwen_multimodal(monkeypatch):
 
     settings = get_settings()
 
-    assert settings.question_help_model_name == "qwen-vl-max-latest"
+    assert settings.question_help_model_name == "qwen-vl-max"
     assert settings.question_help_openai_api_base == "https://dashscope.aliyuncs.com/compatible-mode/v1"
     get_settings.cache_clear()
 

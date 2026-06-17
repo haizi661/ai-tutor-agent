@@ -182,7 +182,8 @@ def test_user_profiler_continues_to_initial_node_selector_when_llm_balance_is_in
     )
 
     assert result["is_assessed"] is True
-    assert result["learning_resume_target"] == "learning_plan_generator"
+    # learning_resume_target 不应在画像生成阶段设置（避免 get_entry_node 跳过模式选择）
+    assert not result.get("learning_resume_target")
     assert result["flow_status"] == "awaiting_learning_mode_choice"
     assert result["pending_interaction_kind"] == "learning_mode_choice"
 
@@ -214,7 +215,8 @@ def test_user_profiler_hands_off_to_initial_node_selector_instead_of_preselectin
         }
     )
 
-    assert result["learning_resume_target"] == "learning_plan_generator"
+    # learning_resume_target 不应在画像生成阶段设置（避免 get_entry_node 跳过模式选择）
+    assert not result.get("learning_resume_target")
     assert result["learning_phase"] == "learning_mode_choice"
     assert result["current_node_id"] == ""
     assert result["graph_anchor_title"] == ""

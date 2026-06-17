@@ -408,6 +408,7 @@ def select_nodes(
     node_range: tuple[int, int] = (9, 12),
     edges: list[dict[str, str]] | None = None,
     context_boost: dict[str, float] | None = None,
+    assessment_node_ids: set[str] | None = None,
 ) -> list[str]:
     """从候选集中选 9-12 个节点。
 
@@ -422,6 +423,9 @@ def select_nodes(
 
     关键改进: urgency 权重从三级键提升到主导因子,
     不同画像下相同 importance/depth 的节点会产生不同的选择结果。
+
+    assessment_node_ids: 经测评校准匹配到的节点 ID 集,这些节点获得
+    额外复合分加成以确保它们进入学习路径(以 quick_check/short_learning 模式)。
     """
     if not sorted_candidates:
         return []
@@ -456,12 +460,17 @@ def select_nodes(
         # id_score: tiny tiebreaker
         id_score = 1.0 / (id_num + 20)
 
+        # assessment 测评校准节点获得额外加成，确保这些自评已掌握
+        # 但可能需要验证的知识点进入学习路径（以 quick_check 模式呈现）
+        assessment_bonus = 0.25 if (assessment_node_ids and nid in assessment_node_ids) else 0.0
+
         composite = (
             0.15 * imp_base +
             0.05 * depth_score +
             0.60 * urgency +
             0.05 * diff_score +
-            0.15 * id_score
+            0.15 * id_score +
+            assessment_bonus
         )
         # 负数使高 composite 排前面
         scored.append((-composite, id_num, nid))
@@ -899,6 +908,7 @@ def generate_learning_plan_v2(
     freshness_boost: dict[str, float] | None = None,
     force_review: bool = False,
     include_all: bool = False,
+    assessment_node_ids: set[str] | None = None,
 ) -> LearningPlan:
     """主入口:根据学生画像 + 图谱 + 历史路径,生成一次学习路径。
 
@@ -958,7 +968,7 @@ def generate_learning_plan_v2(
         merged_boost[nid] = min(1.0, merged_boost.get(nid, 0.0) + v)
 
     # Step 4: 选 9-12 节点(知识图谱驱动,传递 edges 推导深度+错题/提问/新鲜度加成)
-    selected = select_nodes(sorted_candidates, profile, node_count_target, node_range, edges=edges, context_boost=merged_boost)
+    selected = select_nodes(sorted_candidates, profile, node_count_target, node_range, edges=edges, context_boost=merged_boost, assessment_node_ids=assessment_node_ids)
 
     # Step 5: 聚类成 step（step 内按拓扑深度+难度排序）
     raw_steps = cluster_into_steps(selected, n_steps=n_steps, per_step_range=per_step_range, edges=edges)

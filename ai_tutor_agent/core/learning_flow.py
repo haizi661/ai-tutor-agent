@@ -15,6 +15,7 @@ LEARNING_PHASES = {
     "pre_assessment",
     "node_selection",
     "profile_complete",
+    "learning_mode_choice",
     "profiled",
     "plan_generated",
     "node_selected",
@@ -116,6 +117,9 @@ def infer_learning_phase(state: Mapping[str, Any] | None) -> str:
     if flow_status == "profiling":
         return "profile_complete"
 
+    if flow_status == "awaiting_learning_mode_choice":
+        return "learning_mode_choice"
+
     if values.get("interrupt_query") or flow_status == "awaiting_interrupt_confirmation":
         return "node_temp_qna"
     if flow_status == "awaiting_post_lesson_choice":
@@ -199,6 +203,12 @@ def infer_resume_target(state: Mapping[str, Any] | None) -> str:
         return "session_resume_router"
     if flow_status == "awaiting_homework_answers":
         return "homework_answer_dialog"
+    if flow_status == "awaiting_remediation_decision":
+        return "remediation_decision"
+    if flow_status == "awaiting_learning_mode_choice":
+        return "user_profiler"
+    if flow_status == "awaiting_assessment":
+        return "assessment_generator"
     if flow_status == "awaiting_post_eval_selector":
         return "post_eval_selector"
 

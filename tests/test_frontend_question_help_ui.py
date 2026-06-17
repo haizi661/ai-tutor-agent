@@ -21,7 +21,7 @@ def test_question_help_sidebar_button_modal_and_script_contract():
     assert 'id="question-help-images"' in html
     assert 'id="question-help-records"' in html
     assert 'id="question-help-model-select"' in html
-    assert 'qwen-vl-max-latest' in html
+    assert 'qwen-vl-max' in html
     assert '/assets/js/question-help.js' in html
 
 

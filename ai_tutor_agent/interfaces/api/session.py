@@ -24,6 +24,8 @@ RESUME_POLL_INTERVAL_SECONDS = 0.05
 RESUME_POLL_TIMEOUT_SECONDS = 3
 
 PENDING_INTERACTION_FLOW_STATUSES = {
+    "awaiting_assessment",
+    "awaiting_learning_mode_choice",
     "awaiting_next_step_selector",
     "awaiting_post_eval_selector",
     "awaiting_post_lesson_choice",
@@ -268,6 +270,7 @@ def _run_graph_session(
         )
     finally:
         end_data = {}
+        pending_kind = ""
         try:
             final_state = graph_app.get_state(thread_config)
             values = dict(getattr(final_state, "values", {}) or {})
@@ -300,6 +303,7 @@ def _run_graph_session(
                     }
         except Exception:
             end_data = {}
+        print(f"[session:{thread_id}] session.end pending_kind={pending_kind} end_data_keys={list(end_data.keys())} options_count={len(end_data.get('options', []))}", flush=True)
         runtime_context.event_sink.emit(make_event("session.end", "api", message="这一轮处理完成。", data=end_data))
         runtime.session_manager.mark_finished(thread_id)
         # 给 SSE generator 一点时间把 session.end 事件刷新到客户端再关闭连接
@@ -357,12 +361,6 @@ def _resume_assessment_worker(
                 "learning_plan_v2": {},
                 "learning_plan": [],
                 "learning_plan_source": "",
-                # 同时注掉 student_state_snapshot 中的旧 plan
-                "student_state_snapshot": {
-                    "learning_plan_v2": {},
-                    "learning_plan": [],
-                    "learning_plan_source": "",
-                },
             },
         )
         runtime_context.event_sink.emit(
@@ -372,7 +370,7 @@ def _resume_assessment_worker(
                 message="📝 已收到学前测评答案，正在校准起点，随后直接进入讲解…",
             )
         )
-        graph_app.invoke(None, config=thread_config)
+        graph_app.invoke({}, config=thread_config)
 
     _run_graph_session(thread_id, runtime, event_q, input_q, runner)
 
@@ -421,7 +419,7 @@ def _resume_v2_self_assessment_worker(
                 message="已收到自评结果，正在生成学习路径…",
             )
         )
-        graph_app.invoke(None, config=thread_config)
+        graph_app.invoke({}, config=thread_config)
 
     _run_graph_session(thread_id, runtime, event_q, input_q, runner)
 
@@ -444,7 +442,7 @@ def _resume_assessment_dialog_worker(
                 "learning_resume_reason": "assessment_dialog_answer",
             },
         )
-        graph_app.invoke(None, config=thread_config)
+        graph_app.invoke({}, config=thread_config)
 
     _run_graph_session(thread_id, runtime, event_q, input_q, runner)
 
@@ -591,7 +589,7 @@ def _resume_topic_confirmation_worker(
                 )
             )
 
-        graph_app.invoke(None, config=thread_config)
+        graph_app.invoke({}, config=thread_config)
 
     _run_graph_session(thread_id, runtime, event_q, input_q, runner)
 
@@ -629,7 +627,7 @@ def _resume_interrupt_confirmation_worker(
                     message="✅ 已确认回到主线，继续教学与测评。",
                 )
             )
-            graph_app.invoke(None, config=thread_config)
+            graph_app.invoke({}, config=thread_config)
         else:
             graph_app.update_state(
                 thread_config,

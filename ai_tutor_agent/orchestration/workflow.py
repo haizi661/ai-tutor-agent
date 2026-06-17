@@ -105,18 +105,8 @@ def get_entry_node(state: AgentState) -> str:
         return "homework_review"
     if state.get("flow_status") == "awaiting_homework_answers":
         return "homework_answer_dialog"
-    if state.get("learning_resume_target") == "homework_generator":
-        return "homework_generator"
-    if state.get("learning_resume_target") == "node_content_loader":
-        return "node_content_loader"
-    if state.get("learning_resume_target") == "next_node_planner":
-        return "next_node_planner"
-    if state.get("learning_resume_target") == "remediation_decision":
-        return "remediation_decision"
-    if state.get("learning_resume_target") == "continue_or_homework_selector":
-        return "continue_or_homework_selector"
-    if state.get("learning_resume_target") == "completion_wrapup":
-        return "completion_wrapup"
+    if state.get("flow_status") == "awaiting_assessment":
+        return "assessment_generator"
     if state.get("flow_status") == "awaiting_post_eval_selector":
         return "post_eval_selector"
 

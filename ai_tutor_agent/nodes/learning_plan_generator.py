@@ -86,7 +86,7 @@ def _merge_assessment_gaps(
     profile: StudentProfile,
     assessment_gaps: dict[str, dict],
     node_map: dict[str, dict] | None = None,
-) -> int:
+) -> tuple[int, list[str]]:
     """将 assessment 产出的 calibrated concept_gaps 合并入 profile。
 
     匹配策略（按优先级）:
@@ -95,7 +95,7 @@ def _merge_assessment_gaps(
     3. concept_name 在 node_map 中名称匹配
     4. dimension 匹配 ability code → 提升该 ability 下所有节点的 confidence
 
-    返回合并的节点数。
+    返回 (合并的节点数, 被合并的节点 ID 列表)。
     """
     from ..core.ability_mapper import (
         get_all_node_ids,
@@ -105,10 +105,11 @@ def _merge_assessment_gaps(
     all_node_ids = set(get_all_node_ids())
     node_map = dict(node_map or {})
     merged_count = 0
+    merged_ids: list[str] = []
     now = datetime.now(timezone.utc).isoformat()
 
     def _apply_mastery(target_id: str, cal: float) -> None:
-        nonlocal merged_count
+        nonlocal merged_count, merged_ids
         cal_norm = max(0.0, min(1.0, cal / 100.0))
         old = profile.concept_mastery.get(target_id)
         if old:
@@ -126,6 +127,8 @@ def _merge_assessment_gaps(
             last_updated=now,
         )
         merged_count += 1
+        if target_id not in merged_ids:
+            merged_ids.append(target_id)
 
     for concept_name, gap_info in assessment_gaps.items():
         if not isinstance(gap_info, dict):
@@ -165,8 +168,10 @@ def _merge_assessment_gaps(
                         entry.source = "merged"
                         entry.last_updated = now
                         merged_count += 1
+                        if nid not in merged_ids:
+                            merged_ids.append(nid)
 
-    return merged_count
+    return merged_count, merged_ids
 
 
 def build_learning_plan_generator_node(llm: Any, runtime: RuntimeContext):
@@ -350,8 +355,10 @@ def build_learning_plan_generator_node(llm: Any, runtime: RuntimeContext):
         pipeline = getattr(runtime, "graph_rag_pipeline", None)
         node_map = dict(getattr(pipeline, "node_map", {}) or {})
         assessment_gaps = state.get("assessment_concept_gaps") or {}
+        assessment_node_ids: list[str] = []
         if assessment_gaps:
-            n_merged = _merge_assessment_gaps(profile, assessment_gaps, node_map=node_map)
+            n_merged, merged_ids = _merge_assessment_gaps(profile, assessment_gaps, node_map=node_map)
+            assessment_node_ids = merged_ids
             event_sink.emit(
                 make_event(
                     "learning_plan.assessment_merged",
@@ -376,6 +383,7 @@ def build_learning_plan_generator_node(llm: Any, runtime: RuntimeContext):
             freshness_boost=fresh_boost,
             force_review=is_consolidation,
             include_all=is_full_round,
+            assessment_node_ids=set(assessment_node_ids),
         )
 
         steps_as_dicts = [s.to_dict() for s in plan.steps]

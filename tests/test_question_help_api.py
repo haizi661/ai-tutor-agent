@@ -200,11 +200,11 @@ def test_question_help_requires_text_or_image(tmp_path):
 
 
 def test_question_help_defaults_to_qwen_multimodal_model_independent_from_main_chat(tmp_path, monkeypatch):
-    captured = {}
+    captured = []
 
     def fake_build_llms(settings):
-        captured["settings"] = settings
-        fake_llm = FakeLLM("Qwen 多模态答疑结果")
+        captured.append(settings)
+        fake_llm = FakeLLM("题材答疑回答")
         return fake_llm, fake_llm, fake_llm
 
     monkeypatch.setattr(question_help_module, "build_llms", fake_build_llms)
@@ -223,10 +223,9 @@ def test_question_help_defaults_to_qwen_multimodal_model_independent_from_main_c
         )
 
     assert response.status_code == 200
-    assert response.json()["record"]["answer"] == "Qwen 多模态答疑结果"
-    settings = captured["settings"]
-    assert settings.chat_profile == "qwen"
-    assert settings.llm_provider == "openai"
-    assert settings.openai_api_key == "qwen-key"
-    assert settings.openai_api_base == "https://dashscope.aliyuncs.com/compatible-mode/v1"
-    assert settings.model_name == "qwen-vl-max-latest"
+    assert response.json()["record"]["answer"] == "题材答疑回答"
+    # 纯文本题优先走主聊天模型（非 Qwen）
+    main_settings = captured[0]
+    assert main_settings.chat_profile == "deepseek"
+    assert main_settings.llm_provider == "openai"
+    assert main_settings.openai_api_key == "deepseek-key"

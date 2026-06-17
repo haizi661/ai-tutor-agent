@@ -1221,7 +1221,7 @@ figcaption {{ margin-top: 8px; color: #666879; font-size: 13px; text-align: cent
                     }
                 )
             response = client.chat.completions.create(
-                model=os.getenv("MATLAB_AGENT_VISION_MODEL", "qwen-vl-max-latest"),
+                model=os.getenv("MATLAB_AGENT_VISION_MODEL", "qwen-vl-max"),
                 temperature=0.2,
                 messages=[
                     {

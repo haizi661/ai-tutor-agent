@@ -198,7 +198,8 @@ def test_find_next_node_in_step():
 def test_find_next_node_in_step_skips_current():
     step = {"node_ids": ["KM001", "KM002", "KM003"]}
     visited = set()
-    assert find_next_node_in_step(step, visited, "KM002") == "KM001"
+    # 只向后查找：当前为 KM002 时应找 KM003，而不是 KM001
+    assert find_next_node_in_step(step, visited, "KM002") == "KM003"
 
 
 def test_find_next_node_in_step_returns_empty_when_all_visited():

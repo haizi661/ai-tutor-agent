@@ -10,6 +10,7 @@ class AgentState(TypedDict):
     current_node_id: str               # 当前正在学习的图谱节点 ID
     current_node_name: str             # 当前正在学习的图谱节点名称
     current_node_status: str           # 当前节点状态: selected/teaching/quizzing/passed
+    current_entry_mode: str            # 当前入口模式: full_learning/short_learning/quick_check/remediation_review
     next_node_candidate_id: str        # 候选下一节点 ID
     next_node_candidate_name: str      # 候选下一节点名称
     node_quiz_items: list              # 节点客观题批量题目
@@ -127,6 +128,7 @@ def build_initial_state(topic: str = "") -> AgentState:
         "current_node_id": "",
         "current_node_name": "",
         "current_node_status": "",
+        "current_entry_mode": "",
         "next_node_candidate_id": "",
         "next_node_candidate_name": "",
         "node_quiz_items": [],

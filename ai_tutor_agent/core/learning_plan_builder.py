@@ -568,10 +568,23 @@ def find_next_node_in_step(
     visited_nodes: set[str],
     current_node_id: str = "",
 ) -> str:
-    """Find the first unvisited node in a step (excluding current)."""
-    for node_id in step.get("node_ids", []):
-        if node_id == current_node_id:
-            continue
+    """Find the first unvisited node AFTER the current node in a step.
+
+    Only considers nodes that appear AFTER current_node_id in the step's
+    node_ids list. This prevents backward jumps within a round — if a user
+    fails node KM001 and chooses 'do_later', the same KM001 won't be
+    re-picked as the next node once the system has moved on to KM002.
+    """
+    node_ids = step.get("node_ids", [])
+    if not node_ids:
+        return ""
+
+    if current_node_id and current_node_id in node_ids:
+        start = node_ids.index(current_node_id) + 1
+    else:
+        start = 0
+
+    for node_id in node_ids[start:]:
         if node_id not in visited_nodes:
             return node_id
     return ""

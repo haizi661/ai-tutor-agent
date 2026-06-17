@@ -2307,6 +2307,8 @@
             submitBtn.disabled = true;
             submitBtn.textContent = '正在分析…';
             app.setStatusBanner('正在分析你的起点…', 'processing');
+            // 先关旧 SSE，避免服务端 worker 事件被旧连接抢走
+            app.closeEventSource?.();
             try {
                 const response = await fetch('/api/submit_assessment', {
                     method: 'POST',
@@ -2910,6 +2912,46 @@
             : [
                 { value: 'temporary_question', label: '继续追问' },
                 { value: 'start_test', label: '我懂了，进入小测' },
+            ];
+        normalized.forEach(option => {
+            const button = document.createElement('button');
+            button.type = 'button';
+            button.className = 'chip topic-confirm-chip selector-chip';
+            button.textContent = option.label || option.value;
+            button.dataset.choiceValue = option.value;
+            button.dataset.choiceLabel = option.label || option.value;
+            button.onclick = () => app.submitAwaitingChoice?.(option.value, option.label || option.value);
+            actions.appendChild(button);
+        });
+        if (renderOptions.locked) {
+            app.lockChoiceCard(card, renderOptions.selectedValue || '', renderOptions.selectedLabel || renderOptions.statusText || '');
+        }
+        row.body.appendChild(card);
+        container.appendChild(row.wrap);
+        app.scrollMessagesToBottom({ force: true });
+    };
+
+    app.renderLearningModeChoice = function renderLearningModeChoice(options = [], renderOptions = {}) {
+        document.querySelector('.learning-mode-card')?.remove();
+        const container = document.getElementById('messages');
+        const row = createAssistantCardRow('topic-confirm-card learning-mode-card');
+        const card = document.createElement('div');
+        card.className = 'topic-confirm-card learning-mode-card prompt-flow-card';
+        card.dataset.cardKind = 'learning_mode_choice';
+        card.innerHTML = `
+            <div class="prompt-card prompt-flow-shell">
+                <div class="prompt-label">学习模式</div>
+                <div class="prompt-title">请选择学习模式</div>
+                <div class="prompt-copy">测评完成！请选择你偏好进入教学的方式。</div>
+            </div>
+            <div class="suggestion-row topic-confirm-chip-list selector-chip-list learning-mode-actions"></div>
+        `;
+        const actions = card.querySelector('.learning-mode-actions');
+        const normalized = Array.isArray(options) && options.length
+            ? options
+            : [
+                { value: 'thorough', label: '完整教学' },
+                { value: 'adaptive', label: '自适应（尊重画像）' },
             ];
         normalized.forEach(option => {
             const button = document.createElement('button');

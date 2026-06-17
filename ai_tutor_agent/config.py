@@ -11,7 +11,7 @@ from .platform_paths import project_root
 
 PROJECT_ROOT = str(project_root())
 QWEN_OPENAI_COMPATIBLE_BASE = "https://dashscope.aliyuncs.com/compatible-mode/v1"
-DEFAULT_QUESTION_HELP_MODEL = "qwen-vl-max-latest"
+DEFAULT_QUESTION_HELP_MODEL = "qwen-vl-max"
 
 SMART_PROXY_DIRECT_HOSTS = (
     "127.0.0.1",

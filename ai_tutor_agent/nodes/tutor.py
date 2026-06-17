@@ -1046,6 +1046,11 @@ def _collect_llm_text_with_fallback(
 
 def _entry_mode_instruction(mode: str) -> str:
     """Return a system-prompt instruction snippet for the given entry mode."""
+    if mode == "remediation_review":
+        return (
+            "\n- 【错题靶向复习模式】只针对学生错题分析错因，不重复完整节点内容。"
+            "不要输出完整的7段教学结构，严格按照下方模板组织。"
+        )
     if mode == "short_learning":
         return (
             "\n- 【精简模式】请给出精简讲解（约正常篇幅的 50%），重点覆盖核心概念、关键方法，"

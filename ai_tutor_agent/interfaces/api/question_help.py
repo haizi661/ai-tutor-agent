@@ -120,8 +120,17 @@ def _build_question_help_messages(
     ]
 
 
+def _build_main_chat_llm(settings: Any):
+    """使用当前主聊天配置构建 LLM（纯文本题目优先用）。"""
+    tutor_llm, _, _ = build_llms(settings)
+    return tutor_llm
+
+
 def _invoke_question_help_llm(runtime: Any, messages: list[object]) -> str:
-    """优先使用主 tutor_llm（文本题），有多模态需要时用 Qwen。"""
+    """优先使用主聊天模型（文本题），有多模态需要时用 Qwen。"""
+    errors: list[str] = []
+
+    # 1. 已缓存的专有 question_help_llm
     llm = getattr(runtime, "question_help_llm", None)
     if llm is not None:
         try:
@@ -129,31 +138,40 @@ def _invoke_question_help_llm(runtime: Any, messages: list[object]) -> str:
             answer = content_to_text(getattr(response, "content", response)).strip()
             if answer:
                 return answer
-        except Exception:
-            pass
+        except Exception as e:
+            errors.append(f"question_help_llm: {e}")
 
-    # 尝试用 tutor_llm（仅适合纯文本）N
-    tutor_llm = getattr(runtime, "tutor_llm", None)
-    if tutor_llm is not None and not _has_image_content(messages):
+    # 2. 纯文本题走主聊天模型（非多模态，通常更稳定/有权限）
+    if not _has_image_content(messages):
         try:
-            response = tutor_llm.invoke(messages)
+            llm = _build_main_chat_llm(runtime.settings)
+            response = llm.invoke(messages)
             answer = content_to_text(getattr(response, "content", response)).strip()
             if answer:
                 return answer
-        except Exception:
-            pass
+        except Exception as e:
+            errors.append(f"chat LLM: {e}")
 
-    # fallback：单独构建 Qwen
+    # 3. 图片题或主模型失败 → fallback Qwen 多模态
     try:
         llm = _build_question_help_llm(runtime.settings)
         response = llm.invoke(messages)
         answer = content_to_text(getattr(response, "content", response)).strip()
         if answer:
             return answer
-    except Exception:
-        pass
+    except Exception as e:
+        errors.append(f"Qwen 多模态模型: {e}")
 
-    return "这道题暂时没有生成有效解答，请补充题干条件后重试。"
+    error_detail = "；".join(errors)
+    return (
+        f"抱歉，题目答疑生成失败，所有模型均无法返回有效解答。\n\n"
+        f"错误详情：{error_detail}\n\n"
+        f"常见解决方法：\n"
+        f"1. 检查 API Key 是否有效（QWEN_API_KEY / OPENAI_API_KEY）\n"
+        f"2. 检查模型名是否正确（如 qwen-vl-max）\n"
+        f"3. 检查网络连接是否正常\n"
+        f"4. 更换提问方式或稍后重试"
+    )
 
 
 def _has_image_content(messages: list[object]) -> bool:

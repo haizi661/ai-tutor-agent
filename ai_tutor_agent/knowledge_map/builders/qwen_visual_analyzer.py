@@ -13,7 +13,7 @@ class QwenVisualAnalyzer:
         *,
         api_key: str,
         base_url: str = "https://dashscope.aliyuncs.com/compatible-mode/v1",
-        model: str = "qwen-vl-max-latest",
+        model: str = "qwen-vl-max",
         timeout: float = 20.0,
     ) -> None:
         self.model = model

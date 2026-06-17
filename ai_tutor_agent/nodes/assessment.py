@@ -20,7 +20,7 @@
 
 import json
 import re
-from typing import Optional
+from typing import Any, Optional
 
 from langchain_core.messages import HumanMessage, SystemMessage
 
@@ -101,8 +101,28 @@ def build_assessment_generator_node(llm, event_sink: EventSink, *, graph_nodes: 
     def node(state: AgentState) -> dict:
         topic = state["current_topic"]
 
-        # ── 幂等保护：题目已存在时直接重发（刷新场景）──
+        # ── 回传处理：用户已提交批量自评答案 ──
+        pending = state.get("pending_interaction_answer")
         existing = state.get("assessment_questions", [])
+        if existing and pending and state.get("flow_status") == "awaiting_assessment":
+            answers = _parse_batch_assessment_answers(pending, existing)
+            if answers:
+                event_sink.emit(
+                    make_event(
+                        "node.complete",
+                        "assessment_generator",
+                        message=f"学前自评完成，共收到 {len(answers)} 道答案。",
+                        data={"answer_count": len(answers)},
+                    )
+                )
+                return {
+                    "assessment_questions": existing,
+                    "assessment_answers": answers,
+                    "flow_status": "profiling",
+                    "pending_interaction_answer": "",
+                }
+
+        # ── 幂等保护：题目已存在时直接重发（刷新场景）──
         if existing:
             event_sink.emit(
                 make_event(
@@ -114,6 +134,7 @@ def build_assessment_generator_node(llm, event_sink: EventSink, *, graph_nodes: 
             )
             return {
                 "flow_status": "awaiting_assessment",
+                "pending_interaction_kind": "objective_test_answers",
                 "assessment_questions": existing,
             }
 
@@ -197,6 +218,7 @@ def build_assessment_generator_node(llm, event_sink: EventSink, *, graph_nodes: 
         return {
             "assessment_questions": questions,
             "flow_status": "awaiting_assessment",
+            "pending_interaction_kind": "objective_test_answers",
             "message_history": list(state.get("message_history", []))
             + [
                 {
@@ -826,19 +848,48 @@ def _resolve_course_start_label(graph_pipeline: Optional[object], topic: str) ->
 
 def build_user_profiler_node(llm, event_sink: EventSink, graph_pipeline=None):
     def _find_node_id_by_name(node_map: dict, name: str) -> str:
-        """通过节点名称查找节点 ID（模糊匹配）。"""
+        """通过节点名称查找节点 ID（模糊匹配）。
+
+        匹配优先级：
+        0. 概念别名映射（硬编码，用于题库名≠图节点名的场景）
+        1. 节点名称精确匹配
+        2. tag 精确匹配
+        3. 名称子串匹配
+        4. tag 子串匹配
+        """
         target = str(name or "").strip()
         if not target:
             return ""
-        # 精确匹配
+        # 0. 概念别名映射（与 learning_plan_generator 保持一致）
+        _alias_map = {
+            "时间常数": "一阶系统的时域分析",
+            "方框图": "控制系统的结构图与信号流图",
+            "PID控制": "常用校正装置及其特性",
+        }
+        alias_node_name = _alias_map.get(target)
+        if alias_node_name:
+            for node_id, node in node_map.items():
+                if str(node.get("name") or "").strip() == alias_node_name:
+                    return str(node_id).strip()
+        # 1. 节点名称精确匹配
         for node_id, node in node_map.items():
             if target == str(node.get("name") or "").strip():
                 return str(node_id).strip()
-        # 包含匹配
+        # 2. tag 精确匹配
+        for node_id, node in node_map.items():
+            for tag in (node.get("tags") or []):
+                if isinstance(tag, str) and tag.strip() == target:
+                    return str(node_id).strip()
+        # 3. 名称子串匹配
         for node_id, node in node_map.items():
             node_name = str(node.get("name") or "").strip()
             if target in node_name or node_name in target:
                 return str(node_id).strip()
+        # 4. tag 子串匹配
+        for node_id, node in node_map.items():
+            for tag in (node.get("tags") or []):
+                if isinstance(tag, str) and (target in tag or tag in target):
+                    return str(node_id).strip()
         return ""
 
     def node(state: AgentState) -> dict:
@@ -974,7 +1025,6 @@ def build_user_profiler_node(llm, event_sink: EventSink, graph_pipeline=None):
             "is_assessed": True,
             "flow_status": "awaiting_learning_mode_choice",
             "learning_phase": "learning_mode_choice",
-            "learning_resume_target": "learning_plan_generator",
             "learning_resume_reason": "profiling_complete",
             "pending_interaction_kind": "learning_mode_choice",
             "pending_interaction_prompt": mode_prompt,
@@ -1009,6 +1059,35 @@ def build_user_profiler_node(llm, event_sink: EventSink, graph_pipeline=None):
 def _normalize_answer(value: str) -> str:
     cleaned = (value or "").strip().upper()
     return cleaned[:1] if cleaned else ""
+
+
+def _parse_batch_assessment_answers(pending: Any, questions: list) -> dict[str, str]:
+    """解析前端批量提交的自评答案。
+
+    前端可能发送:
+    - JSON 字符串: '{"1":"D","2":"D",...}'
+    - 已解析的 dict: {"1": "D", "2": "D", ...}
+
+    返回 {question_id_str: answer_letter} 格式。
+    """
+    if isinstance(pending, dict):
+        raw = pending
+    elif isinstance(pending, str):
+        try:
+            raw = json.loads(pending.strip())
+        except (json.JSONDecodeError, ValueError):
+            return {}
+    else:
+        return {}
+    if not isinstance(raw, dict):
+        return {}
+    result: dict[str, str] = {}
+    for key, value in raw.items():
+        qid = str(key).strip()
+        ans = _normalize_answer(str(value))
+        if qid and ans:
+            result[qid] = ans
+    return result
 
 
 def _question_concept_title(question: dict) -> str:
