@@ -3525,6 +3525,19 @@
         } else if (stateSnapshot.userKnowledgeGraph && typeof stateSnapshot.userKnowledgeGraph === 'object') {
             state.userKnowledgeGraph = { ...stateSnapshot.userKnowledgeGraph };
         }
+        // 如果 user_knowledge_graph 仍为空（跳过测评时不会初始化），从
+        // student_state_snapshot.knowledge_graph 重建进度数据
+        if (Object.keys(state.userKnowledgeGraph || {}).length === 0) {
+            const ssKg = (stateSnapshot.student_state_snapshot || {}).knowledge_graph;
+            if (ssKg && typeof ssKg === 'object') {
+                const rebuilt = {};
+                for (const [nodeId, entry] of Object.entries(ssKg)) {
+                    const title = entry.title || nodeId;
+                    rebuilt[title] = { id: nodeId, ...entry };
+                }
+                state.userKnowledgeGraph = rebuilt;
+            }
+        }
         app.updateLearningProgress(stateSnapshot || {});
         state.currentGraphNodeId = stateSnapshot.graph_anchor_id || stateSnapshot.current_node_id || '';
         if (stateSnapshot.assessment_radar && stateSnapshot.assessment_radar.dimensions) {

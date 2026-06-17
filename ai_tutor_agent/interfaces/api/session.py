@@ -311,24 +311,64 @@ def _run_graph_session(
         conn.close()
 
 
+def _sync_user_kg_from_snapshot(
+    state_values: dict,
+    snapshot_kg: Optional[dict[str, Any]],
+    graph_pipeline: Any,
+) -> dict[str, Any]:
+    """Build user_knowledge_graph from student_state_snapshot.knowledge_graph.
+
+    StudentState.knowledge_graph keyed by node_id with status; frontend
+    renderLearningPlanPanel indexes by node_name → {id, status, …}.
+    """
+    if not snapshot_kg:
+        return {}
+    existing_ukg = state_values.get("user_knowledge_graph") or {}
+    if existing_ukg and len(existing_ukg) > 0:
+        return {}  # already populated, no need to sync
+
+    node_map = dict(getattr(graph_pipeline, "node_map", {}) or {})
+    rebuilt: dict[str, Any] = {}
+    for node_id, entry in snapshot_kg.items():
+        if not isinstance(entry, dict):
+            continue
+        title = str(entry.get("title") or "").strip()
+        if not title and node_map:
+            title = str((node_map.get(node_id) or {}).get("name") or node_id).strip()
+        if not title:
+            title = node_id
+        rebuilt[title] = {"id": node_id, **entry}
+    return rebuilt
+
+
 def _graph_worker(thread_id: str, topic: str, runtime, event_q: queue.Queue, input_q: queue.Queue):
     def runner(graph_app, runtime_context, thread_config):
         current_state = graph_app.get_state(thread_config)
         # Refresh student_state_snapshot from JSON to recover from server restarts
         # where the JSON file may be newer than the last checkpoint save.
         _store = getattr(runtime, "student_state_store", None)
+        patch: dict[str, Any] = {}
         if _store is not None and current_state and current_state.values:
             try:
                 student_id = str(current_state.values.get("student_id") or thread_id).strip() or thread_id
                 _snap = _store.load(student_id)
                 if _snap is not None:
-                    graph_app.update_state(
-                        thread_config,
-                        {"student_state_snapshot": _snap.to_dict()},
+                    patch["student_state_snapshot"] = _snap.to_dict()
+                    # Sync user_knowledge_graph from snapshot so cross-session
+                    # node progress survives checkpoint boundaries.
+                    graph_pipeline = getattr(runtime_context, "graph_rag_pipeline", None)
+                    ukg_patch = _sync_user_kg_from_snapshot(
+                        current_state.values,
+                        _snap.knowledge_graph,
+                        graph_pipeline,
                     )
-                    current_state = graph_app.get_state(thread_config)
+                    if ukg_patch:
+                        patch["user_knowledge_graph"] = ukg_patch
             except Exception:
                 pass  # best-effort; fall back to checkpoint snapshot
+        if patch:
+            graph_app.update_state(thread_config, patch)
+            current_state = graph_app.get_state(thread_config)
         run_learning_session(
             graph_app,
             runtime_context.event_sink,
