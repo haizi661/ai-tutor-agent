@@ -77,7 +77,13 @@ Thumbs.db
 # AI Agent Context
 .codex
 .hermes/
+.claude/
+.agents/
 docs/GEMINI_CONTEXT.md
+
+# Backend runtime directories
+data/error_correction_runtime/
+data/matlab_experiment_test_runtime/
 
 # Editor / IDE
 .idea/

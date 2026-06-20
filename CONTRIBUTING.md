@@ -63,8 +63,8 @@ PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 python -m pytest -q
    - rollback notes if the change is risky
 3. If changing graph state or event schema, update:
    - `README.md`
-   - `docs/ARCHITECTURE.md`
-   - `docs/PROJECT_GUIDE_ZH.md`
+   - `docs/AI-TUTOR-AGENT-说明书.md`
+   - `docs/learning-path-complete-flow.md`
 
 ## Commit Message Style
 

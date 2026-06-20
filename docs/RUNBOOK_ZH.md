@@ -2,7 +2,7 @@
 
 # 运行与排障手册（中文）
 
-最后更新：2026-03-06
+最后更新：2026-06-21
 
 这份文档只回答四类问题：
 
@@ -20,7 +20,7 @@
 推荐方式：
 
 ```bash
-cd /home/haizi/ai-tutor-agent
+cd <项目根目录>
 python -m pip install -e .
 ```
 
@@ -40,19 +40,17 @@ CLI 调试入口：
 python main.py --cli
 ```
 
-如果你需要自定义端口，请使用当前环境的 Python 启动 uvicorn，不要直接裸跑系统 `uvicorn`：
+Web UI 端口固定为 `8000`；如果已被旧进程占用会直接报错，不会自动换端口。`AI_TUTOR_HOST` 只控制绑定地址。
+
+如果直接使用 uvicorn：
 
 ```bash
 python -m uvicorn ai_tutor_agent.interfaces.api.app:app --host 127.0.0.1 --port 8000
 ```
 
-不要优先使用：
+不要使用系统 `uvicorn`，因为它可能走错 Python 环境，导致 `ModuleNotFoundError: fastapi`。
 
-```bash
-uvicorn ai_tutor_agent.interfaces.api.app:app --host 127.0.0.1 --port 8000
-```
-
-原因：系统 `uvicorn` 可能走错 Python 环境，导致 `ModuleNotFoundError: fastapi` 之类的问题。
+前端没有打包流水线，浏览器直接加载 `frontend/` 下的静态文件。
 
 ## 2. 最小可运行配置
 
@@ -67,18 +65,20 @@ cp .env.example .env
 推荐最小配置：
 
 ```env
-CHAT_PROFILE=qwen
-QWEN_API_KEY=your_qwen_api_key_here
+CHAT_PROFILE=deepseek
+DEEPSEEK_API_KEY=your_key_here
 
 EMBEDDING_PROVIDER=local
 EMBEDDING_MODEL_NAME=sentence-transformers/all-MiniLM-L6-v2
 
+HF_ENDPOINT_FALLBACK_ENABLED=true
 LOCAL_CONFIG_ENABLED=true
 ```
 
 你也可以使用：
 
-- `GEMINI_API_KEY`
+- `GOOGLE_API_KEY`
+- `QWEN_API_KEY`
 - `DEEPSEEK_API_KEY`
 - `OPENAI_API_KEY`
 - `MINIMAX_API_KEY`
@@ -105,19 +105,24 @@ LOCAL_CONFIG_ENABLED=true
 
 ### 3.3 项目支持的代理环境变量
 
-在 `.env` 里可设置：
+在 `.env` 里可设置（推荐方式）：
+
+```env
+PROXY_HOST=127.0.0.1
+PROXY_PORT=7897
+PROXY_SCHEME=http
+```
+
+系统会自动将国外 API 地址加入代理，国内模型端点和镜像域名合并进 `NO_PROXY` 直接连接。
+
+也兼容传统 `HTTP_PROXY` / `HTTPS_PROXY` 环境变量：
 
 ```env
 HTTP_PROXY=http://127.0.0.1:7897
 HTTPS_PROXY=http://127.0.0.1:7897
 ```
 
-当前项目代码直接读取这两个变量：
-
-- `HTTP_PROXY`
-- `HTTPS_PROXY`
-
-建议优先使用 `http://127.0.0.1:7897` 这类 HTTP 代理地址。  
+建议优先使用 `PROXY_HOST` / `PROXY_PORT`，因为系统会自动处理国内直连域名白名单。  
 如果你本机用的是其他端口或代理程序，改成你自己的即可。
 
 ### 3.4 对代理的准确理解
@@ -158,6 +163,8 @@ EMBEDDING_MODEL_NAME=sentence-transformers/all-MiniLM-L6-v2
 
 - RAG 失败不一定导致整个项目启动失败
 - 但会失去知识库增强能力
+
+项目当前已内置 HuggingFace 镜像回退机制：如果默认源不可达，会自动改用 `HF_MIRROR_ENDPOINT`（默认 `https://hf-mirror.com`）。这个行为由 `HF_ENDPOINT_FALLBACK_ENABLED=true` 控制，可在 `.env` 中关闭。
 
 ## 5. 启动成功后应看到什么
 
@@ -242,7 +249,7 @@ EMBEDDING_PROVIDER=openai
 
 前提是你已配置相应 key，并且对应 API 可访问。
 
-### 6.4 浏览器打开只有 `{\"detail\":\"Not Found\"}`
+### 6.4 浏览器打开只有 `{"detail":"Not Found"}`
 
 这通常说明：
 
@@ -252,8 +259,8 @@ EMBEDDING_PROVIDER=openai
 处理：
 
 ```bash
-pkill -f \"python main.py\"
-cd /home/haizi/ai-tutor-agent
+pkill -f "python main.py"
+cd <项目根目录>
 python main.py
 ```
 
@@ -292,6 +299,5 @@ python main.py
 如果你想确认当前项目代码状态是否健康，先执行：
 
 ```bash
-python -m py_compile $(rg --files -g '*.py')
-PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 python -m pytest -q
+PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 pytest -q
 ```
