@@ -28,7 +28,7 @@ This is a Web-first adaptive tutor for automatic control theory. The active prod
 - LangGraph wiring is in `ai_tutor_agent/orchestration/workflow.py`; add new teaching steps in `ai_tutor_agent/nodes/` first, then wire them there.
 - Core boundaries: `core/` state/events/ports, `application/` session coordination, `infrastructure/` LLM/RAG/storage/adapters, `interfaces/api/` Web API, `frontend/` chat/cards/history/settings.
 - **New co-existing modules** (from branch integration 2026-06-16):
-  - `backend/` — Flask API + LangChain agents (error_correction, note, solve, teach) + SQLAlchemy DB + PaddleOCR + benchmark. Separate service, not wired into main LangGraph workflow.
+  - `backend/` — Flask API + LangChain agents (error_correction, note, solve, teach) + SQLAlchemy DB + PaddleOCR + benchmark. Separate service, not wired into main LangGraph workflow. Entry: `backend/web_app.py`.
   - `ai_tutor_agent/ai_learning_path/` — AI course learning path module (routes, service, course asset builder). Supports dual-course mode: auto_control / artificial_intelligence.
   - `kg_builder_standalone/` — Standalone knowledge graph construction pipeline with demo outputs (v1-v9 evolution).
   - `ai_tutor_agent/interfaces/api/auth.py` — Account registration/login (PBKDF2 password hashing, token auth).

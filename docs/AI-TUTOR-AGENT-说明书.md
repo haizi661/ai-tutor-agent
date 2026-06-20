@@ -233,7 +233,7 @@ scripts/             — 录制、验证、题库生成脚本
 **技术栈**: Flask + LangChain Agents + SQLAlchemy + PaddleOCR  
 **功能**: 四个独立 Agent（error_correction、note、solve、teach）  
 **状态**: 独立服务，**未接入**主 LangGraph 流程  
-**启动**: `cd backend && python app.py`（需额外安装 backend/requirements.txt）
+**启动**: `cd backend && python web_app.py`（需额外安装 backend/requirements.txt）
 
 ### 7.2 知识图谱构建管线 (`kg_builder_standalone/`)
 **功能**: 独立的知识图谱构建工具，从原始教材/讲义自动构建知识图谱  
