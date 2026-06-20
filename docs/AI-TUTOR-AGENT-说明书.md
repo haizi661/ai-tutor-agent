@@ -1,6 +1,6 @@
 # AI Tutor Agent 完整说明书
 
-> 版本: 2026-06-16 | 模型: deepseek-v4-flash | 图谱: 42 节点, 95 边 | 题库: 630 题
+> 版本: 2026-06-21 | 模型: deepseek-v4-flash | 图谱: 42 节点, 95 边 | 题库: 630 题
 
 ## 一、系统概述
 
@@ -193,17 +193,20 @@ min_score = 0.35，低于此阈值返回 None（概念与所有节点匹配度�
 ### 目录结构
 ```
 ai_tutor_agent/
-  core/           — 状态 (AgentState)、事件、学习路径算法
-  nodes/          — 29 个 LangGraph 教学节点
-  orchestration/  — workflow.py (节点注册 + 路由)
-  infrastructure/ — LLM、RAG、向量库、题库 Provider
-  interfaces/api/ — FastAPI 路由 + SSE 流式
+  core/              — 状态 (AgentState)、事件、学习路径算法
+  nodes/             — 29 个 LangGraph 教学节点
+  orchestration/     — workflow.py (节点注册 + 路由)
+  infrastructure/    — LLM、RAG、向量库、题库 Provider
+  interfaces/api/    — FastAPI 路由 + SSE 流式 + 账户认证 (auth.py)
+  ai_learning_path/  — AI 课程学习路径模块 (双课程模式)
 frontend/
-  assets/js/      — 前端逻辑 (session, ui, history, state)
-  assets/vendor/  — marked, katex (本地渲染)
-data/             — 图谱、题库、学生状态、向量库
-tests/            — 754 个测试 (pytest)
-scripts/          — 录制、验证、题库生成脚本
+  assets/js/         — 前端逻辑 (session, ui, history, state)
+  assets/vendor/     — marked, katex (本地渲染)
+backend/             — [独立服务] Flask + LangChain Agents + SQLAlchemy + PaddleOCR
+kg_builder_standalone/ — [独立工具] 知识图谱构建管线
+data/                — 图谱、题库、学生状态、向量库
+tests/               — 754 个测试 (pytest)
+scripts/             — 录制、验证、题库生成脚本
 ```
 
 ### 关键路由 (workflow.py)
@@ -222,7 +225,33 @@ scripts/          — 录制、验证、题库生成脚本
 
 ---
 
-## 七、前端交互卡片
+## 七、子模块说明
+
+主仓库除核心 LangGraph 教学流程外，还包含以下可独立运行/引用的模块：
+
+### 7.1 智能体后端 (`backend/`)
+**技术栈**: Flask + LangChain Agents + SQLAlchemy + PaddleOCR  
+**功能**: 四个独立 Agent（error_correction、note、solve、teach）  
+**状态**: 独立服务，**未接入**主 LangGraph 流程  
+**启动**: `cd backend && python app.py`（需额外安装 backend/requirements.txt）
+
+### 7.2 知识图谱构建管线 (`kg_builder_standalone/`)
+**功能**: 独立的知识图谱构建工具，从原始教材/讲义自动构建知识图谱  
+**产出**: 9 版 demo graph 演进记录（v1-v9）  
+**状态**: 独立工具，主教学图谱 B 已预置在 `data/knowledge_map_outputs/`
+
+### 7.3 AI 学习路径模块 (`ai_tutor_agent/ai_learning_path/`)
+**功能**: 双课程模式支持（auto_control / artificial_intelligence）  
+**包含**: 路由、服务层、课程资产构建器  
+**状态**: 已集成到主 LangGraph 流程，欢迎页根据课程方向分流
+
+### 7.4 其他集成
+- **账户认证**: `ai_tutor_agent/interfaces/api/auth.py` — PBKDF2 密码哈希 + token 认证
+- **MATLAB 仿真**: `ai_tutor_agent/infrastructure/matlab_experiment.py` — 自然语言 → MATLAB 代码 → 执行 → 结果分析
+
+---
+
+## 八、前端交互卡片
 
 支持的 `pending_interaction_kind`:
 
@@ -239,7 +268,7 @@ scripts/          — 录制、验证、题库生成脚本
 
 ---
 
-## 八、演示视频
+## 九、演示视频
 
 完整流程分阶段录制在 `scripts/phase_recordings/`：
 
@@ -259,7 +288,7 @@ scripts/          — 录制、验证、题库生成脚本
 
 ---
 
-## 九、验证命令
+## 十、验证命令
 
 ```bash
 # 全量测试
@@ -299,7 +328,7 @@ curl http://127.0.0.1:8000/api/health
 
 ---
 
-## 十、当前状态与下一步
+## 十一、当前状态与下一步
 
 ### 已完成
 - 14 步主流程完整闭合 (29 个 LangGraph 节点)

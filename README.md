@@ -223,9 +223,13 @@ HF_MIRROR_ENDPOINT=https://hf-mirror.com
 - `ai_tutor_agent/core/`：状态、事件、协议
 - `ai_tutor_agent/nodes/`：教学节点实现
 - `ai_tutor_agent/orchestration/`：LangGraph 编排和路由
-- `ai_tutor_agent/infrastructure/`：模型、RAG、存储、外部集成
-- `ai_tutor_agent/interfaces/`：Web API / CLI 入口适配
+- `ai_tutor_agent/infrastructure/`：模型、RAG、存储、外部集成 (含 MATLAB 仿真)
+- `ai_tutor_agent/interfaces/`：Web API / CLI 入口适配 (含账户认证)
+- `ai_tutor_agent/ai_learning_path/`：AI 课程学习路径 (双课程模式)
+- `backend/`：[独立服务] Flask + LangChain Agents + SQLAlchemy + PaddleOCR
+- `kg_builder_standalone/`：[独立工具] 知识图谱构建管线
 - `frontend/`：前端页面与交互
+- `data/`：图谱运行资产、题库、学生状态
 - `tests/`：回归测试
 
 ## 扩展约定

@@ -1,6 +1,6 @@
 # AI Tutor Agent Guide
 
-Last synced: 2026-06-16 (7-branch integration: backend agents + AI learning path + MATLAB + auth + KG builder)
+Last synced: 2026-06-21 (全面项目整理 + 子模块文档补齐)
 
 This is a Web-first adaptive tutor for automatic control theory. The active product loop is graph-node mastery learning, not the older generic `Tutor -> Tester -> Evaluator` chat flow.
 
